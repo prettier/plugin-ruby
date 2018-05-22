@@ -1,3 +1,1 @@
-class User < S
-  attr_accessor :name
-end
+%w[a b c]

@@ -23,13 +23,25 @@ const nodes = {
 
     return group(concat(parts));
   },
-  array: (path, print) => group(concat([
-    "[",
-    softline,
-    indent(concat([join(concat([",", line]), path.map(print, "body", 0))])),
-    softline,
-    "]"
-  ])),
+  array: (path, print) => {
+    if (path.getValue().body[0].every(({ type }) => type === "@tstring_content")) {
+      return group(concat([
+        "%w[",
+        softline,
+        indent(join(line, path.map(print, "body", 0))),
+        softline,
+        "]"
+      ]))
+    }
+
+    return group(concat([
+      "[",
+      softline,
+      indent(concat([join(concat([",", line]), path.map(print, "body", 0))])),
+      softline,
+      "]"
+    ]));
+  },
   assign: (path, print) => join(" = ", path.map(print, "body")),
   begin: (path, print) => group(concat([
     "begin",
@@ -208,6 +220,15 @@ const nodes = {
   ),
   program: (path, print) => markAsRoot(concat([join(literalline, path.map(print, "body", 0)), literalline])),
   redo: (path, print) => "redo",
+  regexp_literal: (path, print) => {
+    const delim = path.call(print, "body", 1);
+
+    return group(concat([
+      delim,
+      group(concat(path.map(print, "body", 0))),
+      delim
+    ]));
+  },
   rescue: (path, print) => group(concat([
     "rescue",
     indent(concat([hardline, concat(path.map(print, "body", 2))

@@ -55,7 +55,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] qwords_add
 - [ ] qwords_new
 - [ ] regexp_add
-- [ ] regexp_literal
 - [ ] regexp_new
 - [ ] rescue_mod
 - [ ] rest_param
@@ -118,6 +117,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] paren
 - [x] program
 - [x] redo
+- [x] regexp_literal
 - [x] rescue
 - [x] retry
 - [x] return
