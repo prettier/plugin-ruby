@@ -69,11 +69,9 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] top_const_field
 - [ ] top_const_ref
 - [ ] unless_mod
-- [ ] until
 - [ ] until_mod
 - [ ] var_alias
 - [ ] when
-- [ ] while
 - [ ] while_mod
 - [ ] word_add
 - [ ] word_new
@@ -136,10 +134,12 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] unary
 - [x] undef
 - [x] unless
+- [x] until
 - [x] var_field
 - [x] var_ref
 - [x] vcall
 - [x] void_stmt
+- [x] while
 - [x] yield
 - [x] yield0
 - [x] zsuper

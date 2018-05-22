@@ -238,10 +238,20 @@ const nodes = {
     indent(concat([hardline, concat(path.map(print, "body", 1))])),
     group(concat([hardline, "end"]))
   ]),
+  until: (path, print) => group(concat([
+    group(concat(["until ", path.call(print, "body", 0)])),
+    indent(concat([hardline, concat(path.map(print, "body", 1))])),
+    group(concat([hardline, "end"]))
+  ])),
   var_field: concatBody,
   var_ref: (path, print) => path.call(print, "body", 0),
   vcall: concatBody,
   void_stmt: (path, print) => "",
+  while: (path, print) => group(concat([
+    group(concat(["while ", path.call(print, "body", 0)])),
+    indent(concat([hardline, concat(path.map(print, "body", 1))])),
+    group(concat([hardline, "end"]))
+  ])),
   yield: (path, print) => concat(["yield ", concat(path.map(print, "body"))]),
   yield0: (path, print) => "yield",
   zsuper: (path, print) => concat(["super", concat(path.map(print, "body"))])
