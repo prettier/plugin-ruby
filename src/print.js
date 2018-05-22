@@ -2,14 +2,17 @@ const {
   align, concat, dedent, group, hardline, indent, join, line, markAsRoot
 } = require("prettier").doc.builders;
 
+const concatBody = (path, print) => concat(path.map(print, "body"));
+const literalBody = (path, print) => path.getValue().body;
+
 const nodes = {
-  "@const": (path, print) => path.getValue().body,
-  "@ident": (path, print) => path.getValue().body,
-  "@ivar": (path, print) => path.getValue().body,
-  "@tstring_content": (path, print) => concat(["'", path.getValue().body, "'"]),
+  "@const": literalBody,
+  "@ident": literalBody,
+  "@ivar": literalBody,
+  "@tstring_content": literalBody,
   args_add_block: (path, print) => {
     const [_, block] = path.getValue().body;
-    const parts = path.map(print, "body", 0);
+    const parts = [join(", ", path.map(print, "body", 0))];
 
     if (block) {
       parts.push(path.map(print, "body", 1));
@@ -49,12 +52,17 @@ const nodes = {
   ),
   paren: (path, print) => concat(['(', ...path.map(print, "body"), ')']),
   program: (path, print) => markAsRoot(join(hardline, path.map(print, "body", 0))),
-  string_content: (path, print) => concat(path.map(print, "body")),
-  string_literal: (path, print) => concat(path.map(print, "body")),
+  string_content: (path, print) => {
+    const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";
+    return concat([delim, ...path.map(print, "body"), delim]);
+  },
+  string_embexpr: (path, print) => concat(["#{", ...path.map(print, "body", 0), "}"]),
+  string_literal: concatBody,
   symbol: (path, print) => concat([":", ...path.map(print, "body")]),
-  symbol_literal: (path, print) => concat(path.map(print, "body")),
-  var_field: (path, print) => concat(path.map(print, "body")),
+  symbol_literal: concatBody,
+  var_field: concatBody,
   var_ref: (path, print) => path.call(print, "body", 0),
+  vcall: concatBody,
   void_stmt: (path, print) => ""
 };
 
