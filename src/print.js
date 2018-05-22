@@ -129,6 +129,7 @@ const nodes = {
   ),
   program: (path, print) => markAsRoot(concat([join(literalline, path.map(print, "body", 0)), literalline])),
   return: (path, print) => group(concat(["return ", ...path.map(print, "body")])),
+  return0: (path, print) => "return",
   sclass: (path, print) => group(concat([
     group(concat([hardline, "class << ", path.call(print, "body", 0)])),
     indent(path.call(print, "body", 1)),

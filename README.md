@@ -97,7 +97,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] rest_param
 - [ ] retry
 - [x] return
-- [ ] return0
+- [x] return0
 - [x] sclass
 - [ ] stmts_add
 - [ ] stmts_new
