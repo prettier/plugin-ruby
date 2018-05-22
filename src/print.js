@@ -36,7 +36,14 @@ const nodes = {
     path.call(print, "body", 0),
     path.call(print, "body", 2)
   ]),
+  block_var: (path, print) => concat(["|", path.call(print, "body", 0), "| "]),
   bodystmt: (path, print) => join(line, path.map(print, "body", 0)),
+  brace_block: (path, print) => concat([
+    "{ ",
+    path.call(print, "body", 0),
+    ...path.map(print, "body", 1),
+    " }"
+  ]),
   call: (path, print) => join(path.getValue().body[1], [
     path.call(print, "body", 0),
     path.call(print, "body", 2)
@@ -69,6 +76,7 @@ const nodes = {
     path.call(print, "body", 1)
   ]),
   method_add_arg: concatBody,
+  method_add_block: (path, print) => join(" ", path.map(print, "body")),
   module: (path, print) => concat([
     group(concat([literalline, "module ", path.call(print, "body", 0)])),
     indent(path.call(print, "body", 1)),

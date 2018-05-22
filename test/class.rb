@@ -21,4 +21,4 @@ users = [
   Prettier::User.new('Diana', 'Prince')
 ]
 
-puts users.map(&:name)
+puts users.map { |user| user.name }
