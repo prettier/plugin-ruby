@@ -1,1 +1,5 @@
-%w[a b c]
+begin
+  foo
+rescue StandardError => e
+  bar
+end

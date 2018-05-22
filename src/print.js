@@ -229,10 +229,22 @@ const nodes = {
       delim
     ]));
   },
-  rescue: (path, print) => group(concat([
-    "rescue",
-    indent(concat([hardline, concat(path.map(print, "body", 2))
-  ]))])),
+  rescue: (path, print) => {
+    const [exception, variable, _statements, _2] = path.getValue().body;
+    const parts = ["rescue"];
+
+    if (exception) {
+      parts.push(group(concat([" ", join(", ", path.map(print, "body", 0))])));
+    }
+
+    if (variable) {
+      parts.push(group(concat([" => ", path.call(print, "body", 1)])));
+    }
+
+    parts.push(indent(concat([hardline, concat(path.map(print, "body", 2))])));
+
+    return group(concat(parts));
+  },
   retry: (path, print) => "retry",
   return: (path, print) => group(concat(["return ", concat(path.map(print, "body"))])),
   return0: (path, print) => "return",
