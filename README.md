@@ -135,6 +135,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] xstring_add
 - [ ] xstring_literal
 - [ ] xstring_new
-- [ ] yield
-- [ ] yield0
+- [x] yield
+- [x] yield0
 - [x] zsuper
