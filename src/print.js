@@ -40,19 +40,20 @@ const nodes = {
       parts.push(" < ", path.call(print, "body", 1));
     }
 
-    parts.push(indent(path.call(print, "body", 2)), hardline, "end", hardline);
-
-    return group(concat(parts));
+    return concat([
+      group(concat(parts)),
+      indent(path.call(print, "body", 2)),
+      group(concat([hardline, "end"])),
+      hardline
+    ]);
   },
   command: (path, print) => join(" ", path.map(print, "body")),
   const_ref: (path, print) => path.call(print, "body", 0),
-  def: (path, print) => group(concat([
-    concat(["def ", path.call(print, "body", 0)]),
-    path.call(print, "body", 1),
+  def: (path, print) => concat([
+    group(concat([hardline, "def ", path.call(print, "body", 0), path.call(print, "body", 1)])),
     indent(concat([hardline, path.call(print, "body", 2)])),
-    hardline,
-    "end"
-  ])),
+    group(concat([hardline, "end"]))
+  ]),
   params: (path, print) => {
     const [req, opt, ...rest] = path.getValue().body;
     let parts = [];
