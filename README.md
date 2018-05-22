@@ -115,7 +115,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] top_const_field
 - [ ] top_const_ref
 - [x] unary
-- [ ] undef
+- [x] undef
 - [x] unless
 - [ ] unless_mod
 - [ ] until
