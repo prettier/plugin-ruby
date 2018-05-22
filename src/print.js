@@ -31,12 +31,26 @@ const nodes = {
     "]"
   ])),
   assign: (path, print) => join(" = ", path.map(print, "body")),
+  begin: (path, print) => group(concat([
+    "begin",
+    indent(concat([hardline, concat(path.map(print, "body"))])),
+    group(concat([hardline, "end"]))
+  ])),
   binary: (path, print) => join(` ${path.getValue().body[1]} `, [
     path.call(print, "body", 0),
     path.call(print, "body", 2)
   ]),
   block_var: (path, print) => concat(["|", path.call(print, "body", 0), "| "]),
-  bodystmt: (path, print) => join(line, path.map(print, "body", 0)),
+  bodystmt: (path, print) => {
+    const [statements, rescue, ...rest] = path.getValue().body;
+    const parts = [join(hardline, path.map(print, "body", 0))];
+
+    if (rescue) {
+      parts.push(dedent(concat([hardline, path.call(print, "body", 1)])));
+    }
+
+    return group(concat(parts));
+  },
   brace_block: (path, print) => concat([
     "{ ",
     path.call(print, "body", 0),
@@ -146,6 +160,8 @@ const nodes = {
     }, [])), ")"])
   ),
   program: (path, print) => markAsRoot(concat([join(literalline, path.map(print, "body", 0)), literalline])),
+  rescue: (path, print) => group(concat(["rescue", indent(concat([hardline, concat(path.map(print, "body", 2))]))])),
+  retry: (path, print) => "retry",
   return: (path, print) => group(concat(["return ", concat(path.map(print, "body"))])),
   return0: (path, print) => "return",
   sclass: (path, print) => group(concat([

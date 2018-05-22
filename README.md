@@ -25,7 +25,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] assoc_splat
 - [ ] assoclist_from_args
 - [ ] bare_assoc_hash
-- [ ] begin
+- [x] begin
 - [x] binary
 - [x] block_var
 - [ ] blockarg
@@ -92,10 +92,10 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] regexp_add
 - [ ] regexp_literal
 - [ ] regexp_new
-- [ ] rescue
+- [x] rescue
 - [ ] rescue_mod
 - [ ] rest_param
-- [ ] retry
+- [x] retry
 - [x] return
 - [x] return0
 - [x] sclass
