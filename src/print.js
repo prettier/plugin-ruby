@@ -10,6 +10,7 @@ const nodes = {
   "@ident": literalBody,
   "@int": literalBody,
   "@ivar": literalBody,
+  "@kw": literalBody,
   "@tstring_content": literalBody,
   alias: (path, print) => concat(["alias ", join(" ", path.map(print, "body"))]),
   args_add_block: (path, print) => {
@@ -52,14 +53,26 @@ const nodes = {
     hardline,
     "end"
   ])),
-  params: (path, print) => (
-    join(", ", path.getValue().body.reduce((parts, paramType, index) => {
-      if (paramType) {
-        return parts.concat(path.map(print, "body", index));
-      }
-      return parts;
-    }, []))
-  ),
+  params: (path, print) => {
+    const [req, opt, ...rest] = path.getValue().body;
+    let parts = [];
+
+    if (req) {
+      parts = parts.concat(path.map(print, "body", 0));
+    }
+
+    if (opt) {
+      parts.push(...opt.map((name, index) => {
+        return concat([
+          path.call(print, "body", 1, index, 0),
+          " = ",
+          path.call(print, "body", 1, index, 1)
+        ]);
+      }));
+    }
+
+    return join(", ", parts);
+  },
   paren: (path, print) => (
     concat(["(", ...path.getValue().body.reduce((parts, part, index) => {
       if (Array.isArray(part)) {
