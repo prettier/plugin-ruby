@@ -31,7 +31,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] blockarg
 - [x] bodystmt
 - [x] brace_block
-- [ ] break
+- [x] break
 - [x] call
 - [ ] case
 - [x] class
@@ -44,7 +44,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] def
 - [ ] defined
 - [ ] defs
-- [ ] do_block
+- [x] do_block
 - [x] dot2
 - [x] dot3
 - [ ] dyna_symbol

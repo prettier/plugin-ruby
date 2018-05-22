@@ -1,17 +1,5 @@
-module Prettier
-  class User
-    attr_reader :first_name, :last_name
+numbers = [1, 2, 3, 4]
 
-    def initialize(first_name, last_name)
-      @first_name = first_name
-      @last_name = last_name
-    end
-
-    def full_name
-      yield "#{first_name} #{last_name}"
-    end
-
-    alias name full_name
-    undef full_name
-  end
+numbers.each do |num|
+  break 1
 end

@@ -50,6 +50,7 @@ const nodes = {
     concat(path.map(print, "body", 1)),
     " }"
   ]),
+  break: (path, print) => concat(["break ", path.call(print, "body", 0)]),
   call: (path, print) => join(path.getValue().body[1], [
     path.call(print, "body", 0),
     path.call(print, "body", 2)
@@ -74,6 +75,12 @@ const nodes = {
   def: (path, print) => concat([
     group(concat([hardline, "def ", path.call(print, "body", 0), path.call(print, "body", 1)])),
     indent(concat([hardline, path.call(print, "body", 2)])),
+    group(concat([hardline, "end"]))
+  ]),
+  do_block: (path, print) => concat([
+    "do ",
+    path.call(print, "body", 0),
+    indent(concat([hardline, path.call(print, "body", 1)])),
     group(concat([hardline, "end"]))
   ]),
   dot2: (path, print) => concat([
