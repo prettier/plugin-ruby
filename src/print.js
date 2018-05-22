@@ -88,6 +88,7 @@ const nodes = {
     }, []), ")"])
   ),
   program: (path, print) => markAsRoot(join(hardline, path.map(print, "body", 0))),
+  return: (path, print) => group(concat(["return ", ...path.map(print, "body")])),
   string_content: (path, print) => {
     const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";
     return concat([delim, ...path.map(print, "body"), delim]);
@@ -96,6 +97,11 @@ const nodes = {
   string_literal: concatBody,
   symbol: (path, print) => concat([":", ...path.map(print, "body")]),
   symbol_literal: concatBody,
+  unless: (path, print) => concat([
+    group(concat(["unless ", path.call(print, "body", 0)])),
+    indent(concat([hardline, ...path.map(print, "body", 1)])),
+    group(concat([hardline, "end"]))
+  ]),
   var_field: concatBody,
   var_ref: (path, print) => path.call(print, "body", 0),
   vcall: concatBody,

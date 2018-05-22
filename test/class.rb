@@ -16,7 +16,11 @@ module Prettier
     end
 
     def age
-      birthday && ((Date.today - birthdate) / 365).to_i
+      unless birthday
+        return nil
+      end
+
+      ((Date.today - birthdate) / 365).to_i
     end
   end
 end
