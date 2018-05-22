@@ -1,3 +1,7 @@
-'this is a super long line hi there how are you my name is Kevin' \
-  'this is a super long line hi there how are you my name is Kevin' \
-  'this is a super long line hi there how are you my name is Kevin' \
+if false
+  1
+elsif false
+  2
+else
+  3
+end

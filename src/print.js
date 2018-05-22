@@ -121,6 +121,19 @@ const nodes = {
     "else",
     indent(concat([hardline, concat(path.map(print, "body", 0))]))
   ])),
+  elsif: (path, print) => {
+    const [_predicate, _statements, addition] = path.getValue().body;
+    const parts = [
+      group(concat(["elsif ", path.call(print, "body", 0)])),
+      indent(concat([hardline, concat(path.map(print, "body", 1))]))
+    ];
+
+    if (addition) {
+      parts.push(group(concat([hardline, path.call(print, "body", 2)])));
+    }
+
+    return group(concat(parts));
+  },
   ensure: (path, print) => group(concat([
     "ensure",
     indent(concat([hardline, concat(path.map(print, "body", 0))
