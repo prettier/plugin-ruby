@@ -26,7 +26,12 @@ module Prettier
 
   class Employee < User
     def age
-      super(1)
+      super
+    end
+
+    def names
+      first_name, last_name = full_name.split(' ')
+      [first_name, last_name]
     end
   end
 end

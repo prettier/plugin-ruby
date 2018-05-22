@@ -24,6 +24,11 @@ const nodes = {
 
     return group(concat(parts));
   },
+  array: (path, print) => group(concat([
+    "[",
+    indent(concat([join(concat([",", line]), path.map(print, "body", 0))])),
+    "]"
+  ])),
   assign: (path, print) => join(" = ", path.map(print, "body")),
   binary: (path, print) => join(` ${path.getValue().body[1]} `, [
     path.call(print, "body", 0),
@@ -55,6 +60,12 @@ const nodes = {
     indent(concat([hardline, path.call(print, "body", 2)])),
     group(concat([hardline, "end"]))
   ]),
+  massign: (path, print) => concat([
+    group(join(concat([",", line]), path.map(print, "body", 0))),
+    " = ",
+    path.call(print, "body", 1)
+  ]),
+  method_add_arg: concatBody,
   module: (path, print) => concat([
     group(concat([literalline, "module ", path.call(print, "body", 0)])),
     indent(path.call(print, "body", 1)),
@@ -96,7 +107,7 @@ const nodes = {
   },
   string_embexpr: (path, print) => concat(["#{", ...path.map(print, "body", 0), "}"]),
   string_literal: concatBody,
-  super: (path, print) => group(concat(["super", ...path.map(print, "body")])),
+  super: concatBody,
   symbol: (path, print) => concat([":", ...path.map(print, "body")]),
   symbol_literal: concatBody,
   unless: (path, print) => concat([
@@ -108,7 +119,7 @@ const nodes = {
   var_ref: (path, print) => path.call(print, "body", 0),
   vcall: concatBody,
   void_stmt: (path, print) => "",
-  zsuper: concatBody
+  zsuper: (path, print) => concat(["super", ...path.map(print, "body")])
 };
 
 const debugNode = (path, print) => {
