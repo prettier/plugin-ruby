@@ -82,6 +82,13 @@ const nodes = {
     indent(concat([hardline, path.call(print, "body", 2)])),
     group(concat([hardline, "end"]))
   ]),
+  defined: (path, print) => group(concat([
+    "defined?(",
+    softline,
+    indent(concat(path.map(print, "body"))),
+    softline,
+    ")"
+  ])),
   do_block: (path, print) => concat([
     "do ",
     path.call(print, "body", 0),
