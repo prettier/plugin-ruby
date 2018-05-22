@@ -8,6 +8,7 @@ const literalBody = (path, print) => path.getValue().body;
 const nodes = {
   "@const": literalBody,
   "@ident": literalBody,
+  "@int": literalBody,
   "@ivar": literalBody,
   "@tstring_content": literalBody,
   args_add_block: (path, print) => {
@@ -21,7 +22,15 @@ const nodes = {
     return group(concat(parts));
   },
   assign: (path, print) => join(" = ", path.map(print, "body")),
+  binary: (path, print) => join(` ${path.getValue().body[1]} `, [
+    path.call(print, "body", 0),
+    path.call(print, "body", 2)
+  ]),
   bodystmt: (path, print) => join(line, path.map(print, "body", 0)),
+  call: (path, print) => join(path.getValue().body[1], [
+    path.call(print, "body", 0),
+    path.call(print, "body", 2)
+  ]),
   class: (path, print) => {
     const parts = ["class ", path.call(print, "body", 0)];
 
@@ -50,7 +59,14 @@ const nodes = {
       return parts;
     }, []))
   ),
-  paren: (path, print) => concat(['(', ...path.map(print, "body"), ')']),
+  paren: (path, print) => (
+    concat(["(", ...path.getValue().body.reduce((parts, part, index) => {
+      if (Array.isArray(part)) {
+        return parts.concat(path.map(print, "body", index));
+      }
+      return [...parts, path.call(print, "body", index)];
+    }, []), ")"])
+  ),
   program: (path, print) => markAsRoot(join(hardline, path.map(print, "body", 0))),
   string_content: (path, print) => {
     const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";
