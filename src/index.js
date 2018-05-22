@@ -1,4 +1,4 @@
-const { parse, locStart, locEnd } = require("./parse");
+const parse = require("./parse");
 const print = require("./print");
 
 module.exports = {
@@ -9,9 +9,7 @@ module.exports = {
   parsers: {
     ruby: {
       parse,
-      astFormat: "ruby",
-      locStart,
-      locEnd
+      astFormat: "ruby"
     }
   },
   printers: {
