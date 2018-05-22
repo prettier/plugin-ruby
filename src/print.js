@@ -86,6 +86,7 @@ const nodes = {
     "...",
     path.call(print, "body", 1)
   ]),
+  fcall: concatBody,
   massign: (path, print) => concat([
     group(join(concat([",", line]), path.map(print, "body", 0))),
     " = ",
@@ -128,6 +129,11 @@ const nodes = {
   ),
   program: (path, print) => markAsRoot(concat([join(literalline, path.map(print, "body", 0)), literalline])),
   return: (path, print) => group(concat(["return ", ...path.map(print, "body")])),
+  sclass: (path, print) => group(concat([
+    group(concat([hardline, "class << ", path.call(print, "body", 0)])),
+    indent(path.call(print, "body", 1)),
+    concat([hardline, "end"])
+  ])),
   string_content: (path, print) => {
     const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";
     return concat([delim, ...path.map(print, "body"), delim]);

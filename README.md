@@ -52,7 +52,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] elsif
 - [ ] ensure
 - [ ] excessed_comma
-- [ ] fcall
+- [x] fcall
 - [ ] field
 - [ ] for
 - [ ] hash
@@ -98,7 +98,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] retry
 - [x] return
 - [ ] return0
-- [ ] sclass
+- [x] sclass
 - [ ] stmts_add
 - [ ] stmts_new
 - [ ] string_add
