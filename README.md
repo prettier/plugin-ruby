@@ -88,7 +88,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] qsymbols_new
 - [ ] qwords_add
 - [ ] qwords_new
-- [ ] redo
+- [x] redo
 - [ ] regexp_add
 - [ ] regexp_literal
 - [ ] regexp_new

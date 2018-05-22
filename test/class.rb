@@ -6,7 +6,7 @@ numbers.each do |num|
   rescue
     retry
   else
-    puts 'hi'
+    redo
   ensure
     puts 'what'
   end

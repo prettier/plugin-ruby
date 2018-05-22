@@ -173,6 +173,7 @@ const nodes = {
     }, [])), ")"])
   ),
   program: (path, print) => markAsRoot(concat([join(literalline, path.map(print, "body", 0)), literalline])),
+  redo: (path, print) => "redo",
   rescue: (path, print) => group(concat([
     "rescue",
     indent(concat([hardline, concat(path.map(print, "body", 2))
