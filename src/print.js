@@ -78,18 +78,19 @@ const nodes = {
     group(concat([hardline, "end"]))
   ])),
   class: (path, print) => {
+    const [_constant, superclass, _statements] = path.getValue().body;
     const parts = ["class ", path.call(print, "body", 0)];
 
-    if (path.getValue().body[1]) {
+    if (superclass) {
       parts.push(" < ", path.call(print, "body", 1));
     }
 
-    return concat([
+    return group(concat([
       group(concat(parts)),
-      indent(path.call(print, "body", 2)),
+      indent(concat([hardline, path.call(print, "body", 2)])),
       group(concat([hardline, "end"])),
       literalline
-    ]);
+    ]));
   },
   command: (path, print) => join(" ", path.map(print, "body")),
   const_path_ref: (path, print) => join("::", path.map(print, "body")),
