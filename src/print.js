@@ -5,7 +5,19 @@ const {
 const nodes = {
   "@const": (path, print) => path.getValue().body,
   "@ident": (path, print) => path.getValue().body,
+  "@ivar": (path, print) => path.getValue().body,
   "@tstring_content": (path, print) => concat(["'", path.getValue().body, "'"]),
+  args_add_block: (path, print) => {
+    const [_, block] = path.getValue().body;
+    const parts = path.map(print, "body", 0);
+
+    if (block) {
+      parts.push(path.map(print, "body", 1));
+    }
+
+    return group(concat(parts));
+  },
+  assign: (path, print) => join(" = ", path.map(print, "body")),
   bodystmt: (path, print) => join(line, path.map(print, "body", 0)),
   class: (path, print) => {
     const parts = ["class ", path.call(print, "body", 0)];
@@ -18,6 +30,7 @@ const nodes = {
 
     return group(concat(parts));
   },
+  command: (path, print) => join(" ", path.map(print, "body")),
   const_ref: (path, print) => path.call(print, "body", 0),
   def: (path, print) => group(concat([
     concat(["def ", path.call(print, "body", 0)]),
@@ -29,14 +42,18 @@ const nodes = {
   params: (path, print) => (
     join(", ", path.getValue().body.reduce((parts, paramType, index) => {
       if (paramType) {
-        parts.push(path.call(print, "body", index));
+        return parts.concat(path.map(print, "body", index));
       }
       return parts;
     }, []))
   ),
+  paren: (path, print) => concat(['(', ...path.map(print, "body"), ')']),
   program: (path, print) => markAsRoot(join(hardline, path.map(print, "body", 0))),
   string_content: (path, print) => concat(path.map(print, "body")),
   string_literal: (path, print) => concat(path.map(print, "body")),
+  symbol: (path, print) => concat([":", ...path.map(print, "body")]),
+  symbol_literal: (path, print) => concat(path.map(print, "body")),
+  var_field: (path, print) => concat(path.map(print, "body")),
   var_ref: (path, print) => path.call(print, "body", 0),
   void_stmt: (path, print) => ""
 };
