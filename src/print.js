@@ -11,6 +11,7 @@ const nodes = {
   "@int": literalBody,
   "@ivar": literalBody,
   "@tstring_content": literalBody,
+  alias: (path, print) => concat(["alias ", join(" ", path.map(print, "body"))]),
   args_add_block: (path, print) => {
     const [_, block] = path.getValue().body;
     const parts = [join(", ", path.map(print, "body", 0))];

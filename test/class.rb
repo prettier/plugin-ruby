@@ -2,6 +2,7 @@ require 'date'
 
 class User
   attr_reader :first_name, :last_name, :birthdate
+  alias full_name name
 
   def initialize(first_name, last_name, birthdate)
     @first_name = first_name
