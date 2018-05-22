@@ -1,0 +1,24 @@
+{
+  "name": "@prettier/plugin-ruby",
+  "version": "0.0.1",
+  "description": "prettier plugin for the Ruby programming language",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest",
+    "attempt": "prettier --plugin=. --parser=ruby"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kddeisz/prettier-ruby.git"
+  },
+  "author": "Kevin Deisz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kddeisz/prettier-ruby/issues"
+  },
+  "homepage": "https://github.com/kddeisz/prettier-ruby#readme",
+  "dependencies": {
+    "prettier": "^1.12.1",
+    "ripperjs": "^0.0.2"
+  }
+}
