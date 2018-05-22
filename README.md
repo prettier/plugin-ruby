@@ -1,0 +1,140 @@
+# prettier-ruby
+
+This is a work in progress plugin for prettier that supports the Ruby programming language. Under the hood it uses the [`ripperjs`](https://github.com/kddeisz/ripperjs) package (which in turn uses Ruby's own `ripper` library) which allows this package to maintain parity with the existing Ruby parser.
+
+## Status
+
+There are a lot of node types to support still, as well as tests to write for each. Below is the list of types and their current status.
+
+- [ ] BEGIN
+- [ ] END
+- [x] alias
+- [ ] alias_error
+- [ ] aref
+- [ ] aref_field
+- [ ] arg_ambiguous
+- [x] arg_paren
+- [ ] args_add
+- [x] args_add_block
+- [ ] args_add_star
+- [ ] args_new
+- [x] array
+- [x] assign
+- [ ] assign_error
+- [ ] assoc_new
+- [ ] assoc_splat
+- [ ] assoclist_from_args
+- [ ] bare_assoc_hash
+- [ ] begin
+- [x] binary
+- [x] block_var
+- [ ] blockarg
+- [x] bodystmt
+- [x] brace_block
+- [ ] break
+- [x] call
+- [ ] case
+- [x] class
+- [ ] class_name_error
+- [x] command
+- [ ] command_call
+- [ ] const_path_field
+- [x] const_path_ref
+- [x] const_ref
+- [x] def
+- [ ] defined
+- [ ] defs
+- [ ] do_block
+- [ ] dot2
+- [ ] dot3
+- [ ] dyna_symbol
+- [ ] else
+- [ ] elsif
+- [ ] ensure
+- [ ] excessed_comma
+- [ ] fcall
+- [ ] field
+- [ ] for
+- [ ] hash
+- [ ] heredoc_dedent
+- [ ] if
+- [ ] if_mod
+- [ ] ifop
+- [ ] kwrest_param
+- [ ] lambda
+- [ ] magic_comment
+- [x] massign
+- [x] method_add_arg
+- [x] method_add_block
+- [ ] mlhs_add
+- [ ] mlhs_add_post
+- [ ] mlhs_add_star
+- [ ] mlhs_new
+- [ ] mlhs_paren
+- [x] module
+- [ ] mrhs_add
+- [ ] mrhs_add_star
+- [ ] mrhs_new
+- [ ] mrhs_new_from_args
+- [ ] next
+- [ ] opassign
+- [ ] operator_ambiguous
+- [ ] param_error
+- [x] params
+- [x] paren
+- [ ] parse_error
+- [x] program
+- [ ] qsymbols_add
+- [ ] qsymbols_new
+- [ ] qwords_add
+- [ ] qwords_new
+- [ ] redo
+- [ ] regexp_add
+- [ ] regexp_literal
+- [ ] regexp_new
+- [ ] rescue
+- [ ] rescue_mod
+- [ ] rest_param
+- [ ] retry
+- [x] return
+- [ ] return0
+- [ ] sclass
+- [ ] stmts_add
+- [ ] stmts_new
+- [ ] string_add
+- [ ] string_concat
+- [x] string_content
+- [ ] string_dvar
+- [x] string_embexpr
+- [x] string_literal
+- [x] super
+- [x] symbol
+- [x] symbol_literal
+- [ ] symbols_add
+- [ ] symbols_new
+- [ ] top_const_field
+- [ ] top_const_ref
+- [ ] unary
+- [ ] undef
+- [x] unless
+- [ ] unless_mod
+- [ ] until
+- [ ] until_mod
+- [ ] var_alias
+- [x] var_field
+- [x] var_ref
+- [x] vcall
+- [x] void_stmt
+- [ ] when
+- [ ] while
+- [ ] while_mod
+- [ ] word_add
+- [ ] word_new
+- [ ] words_add
+- [ ] words_new
+- [ ] xstring_add
+- [ ] xstring_literal
+- [ ] xstring_new
+- [ ] yield
+- [ ] yield0
+- [x] zsuper
