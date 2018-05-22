@@ -3,15 +3,8 @@ const {
 } = require("prettier").doc.builders;
 
 const concatBody = (path, print) => concat(path.map(print, "body"));
-const literalBody = (path, print) => path.getValue().body;
 
 const nodes = {
-  "@const": literalBody,
-  "@ident": literalBody,
-  "@int": literalBody,
-  "@ivar": literalBody,
-  "@kw": literalBody,
-  "@tstring_content": literalBody,
   alias: (path, print) => concat(["alias ", join(" ", path.map(print, "body"))]),
   aref: (path, print) => concat([
     path.call(print, "body", 0),
@@ -197,6 +190,11 @@ const debugNode = (path, print) => {
 
 const genericPrint = (path, options, print) => {
   const { type } = path.getValue();
+
+  if (type[0] === "@") {
+    return path.getValue().body;
+  }
+
   return (nodes[type] || debugNode)(path, print);
 };
 
