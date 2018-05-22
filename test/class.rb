@@ -23,4 +23,10 @@ module Prettier
       ((Date.today - birthdate) / 365).to_i
     end
   end
+
+  class Employee < User
+    def age
+      super(1)
+    end
+  end
 end

@@ -13,6 +13,7 @@ const nodes = {
   "@kw": literalBody,
   "@tstring_content": literalBody,
   alias: (path, print) => concat(["alias ", join(" ", path.map(print, "body"))]),
+  arg_paren: (path, print) => group(concat(["(", ...path.map(print, "body"), ")"])),
   args_add_block: (path, print) => {
     const [_, block] = path.getValue().body;
     const parts = [join(", ", path.map(print, "body", 0))];
@@ -95,6 +96,7 @@ const nodes = {
   },
   string_embexpr: (path, print) => concat(["#{", ...path.map(print, "body", 0), "}"]),
   string_literal: concatBody,
+  super: (path, print) => group(concat(["super", ...path.map(print, "body")])),
   symbol: (path, print) => concat([":", ...path.map(print, "body")]),
   symbol_literal: concatBody,
   unless: (path, print) => concat([
@@ -105,7 +107,8 @@ const nodes = {
   var_field: concatBody,
   var_ref: (path, print) => path.call(print, "body", 0),
   vcall: concatBody,
-  void_stmt: (path, print) => ""
+  void_stmt: (path, print) => "",
+  zsuper: concatBody
 };
 
 const debugNode = (path, print) => {
