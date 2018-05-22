@@ -12,17 +12,5 @@ module Prettier
     def full_name
       "#{first_name} #{last_name}"
     end
-
-    class << self
-      def build
-        [
-          new('Clark', 'Kent'),
-          new('Bruce', 'Wayne'),
-          new('Diana', 'Prince')
-        ]
-      end
-    end
   end
 end
-
-puts Prettier::User.build[0...2]
