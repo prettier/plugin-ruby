@@ -1,5 +1,5 @@
 const {
-  concat, dedent, group, hardline, indent, join, line, markAsRoot
+  align, concat, dedent, group, hardline, indent, join, line, markAsRoot
 } = require("prettier").doc.builders;
 
 const nodes = {
@@ -14,40 +14,43 @@ const nodes = {
       parts.push(" < ", path.call(print, "body", 1));
     }
 
-    parts.push(hardline, indent(path.call(print, "body", 2)), hardline, "end", hardline);
+    parts.push(indent(path.call(print, "body", 2)), hardline, "end", hardline);
 
     return group(concat(parts));
   },
   const_ref: (path, print) => path.call(print, "body", 0),
   def: (path, print) => group(concat([
-    "def ",
-    path.call(print, "body", 0),
-    // path.call(print, "body", 1),
-    hardline,
-    path.call(print, "body", 2),
+    concat(["def ", path.call(print, "body", 0)]),
+    path.call(print, "body", 1),
+    indent(concat([hardline, path.call(print, "body", 2)])),
     hardline,
     "end"
   ])),
-  params: (path, print) => concat(path.map(print, "body")),
+  params: (path, print) => (
+    join(", ", path.getValue().body.reduce((parts, paramType, index) => {
+      if (paramType) {
+        parts.push(path.call(print, "body", index));
+      }
+      return parts;
+    }, []))
+  ),
   program: (path, print) => markAsRoot(join(hardline, path.map(print, "body", 0))),
   string_content: (path, print) => concat(path.map(print, "body")),
   string_literal: (path, print) => concat(path.map(print, "body")),
-  var_ref: (path, print) => path.call(print, "body", 0)
+  var_ref: (path, print) => path.call(print, "body", 0),
+  void_stmt: (path, print) => ""
 };
 
-const defaultNode = (path, print) => {
+const debugNode = (path, print) => {
+  console.log("=== UNSUPPORTED NODE ===");
   console.log(path.getValue());
+  console.log("========================");
   return "";
 };
 
 const genericPrint = (path, options, print) => {
-  const node = path.getValue();
-
-  if (node === null) {
-    return null;
-  }
-
-  return (nodes[node.type] || defaultNode)(path, print);
+  const { type } = path.getValue();
+  return (nodes[type] || debugNode)(path, print);
 };
 
 module.exports = genericPrint;

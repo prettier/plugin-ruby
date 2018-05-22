@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "jest",
-    "attempt": "prettier --plugin=. --parser=ruby"
+    "print": "prettier --plugin=. --parser=ruby"
   },
   "repository": {
     "type": "git",
