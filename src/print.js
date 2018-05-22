@@ -143,6 +143,10 @@ const nodes = {
   super: concatBody,
   symbol: (path, print) => concat([":", ...path.map(print, "body")]),
   symbol_literal: concatBody,
+  unary: (path, print) => concat([
+    path.getValue().body[0][0],
+    path.call(print, "body", 1)
+  ]),
   unless: (path, print) => concat([
     group(concat(["unless ", path.call(print, "body", 0)])),
     indent(concat([hardline, ...path.map(print, "body", 1)])),

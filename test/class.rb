@@ -14,3 +14,5 @@ module Prettier
     end
   end
 end
+
+FOO = -'bar'
