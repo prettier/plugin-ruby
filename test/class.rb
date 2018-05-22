@@ -1,5 +1,1 @@
-begin
-  foo
-rescue StandardError => e
-  bar
-end
+:"a#{foo + 1}b"

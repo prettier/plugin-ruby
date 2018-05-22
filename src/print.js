@@ -135,6 +135,11 @@ const nodes = {
     "...",
     path.call(print, "body", 1)
   ]),
+  dyna_symbol: (path, print) => concat([
+    ":\"",
+    concat(path.map(print, "body", 0)),
+    "\""
+  ]),
   else: (path, print) => group(concat([
     "else",
     indent(concat([hardline, concat(path.map(print, "body", 0))]))

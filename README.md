@@ -26,7 +26,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] command_call
 - [ ] const_path_field
 - [ ] defs
-- [ ] dyna_symbol
 - [ ] excessed_comma
 - [ ] field
 - [ ] for
@@ -103,6 +102,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] do_block
 - [x] dot2
 - [x] dot3
+- [x] dyna_symbol
 - [x] else
 - [x] elsif
 - [x] ensure
