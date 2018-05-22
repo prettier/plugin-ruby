@@ -119,13 +119,28 @@ const nodes = {
   ]),
   else: (path, print) => group(concat([
     "else",
-    indent(concat([hardline, concat(path.map(print, "body", 0))
-  ]))])),
+    indent(concat([hardline, concat(path.map(print, "body", 0))]))
+  ])),
   ensure: (path, print) => group(concat([
     "ensure",
     indent(concat([hardline, concat(path.map(print, "body", 0))
   ]))])),
   fcall: concatBody,
+  if: (path, print) => {
+    const [_predicate, _statements, addition] = path.getValue().body;
+    const parts = [
+      group(concat(["if ", path.call(print, "body", 0)])),
+      indent(concat([hardline, concat(path.map(print, "body", 1))])),
+      hardline
+    ];
+
+    if (addition) {
+      parts.push(group(concat([path.call(print, "body", 2), hardline])));
+    }
+
+    parts.push("end");
+    return group(concat(parts));
+  },
   massign: (path, print) => concat([
     group(join(concat([",", line]), path.map(print, "body", 0))),
     " = ",

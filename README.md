@@ -34,7 +34,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] for
 - [ ] hash
 - [ ] heredoc_dedent
-- [ ] if
 - [ ] if_mod
 - [ ] ifop
 - [ ] kwrest_param
@@ -113,6 +112,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] else
 - [x] ensure
 - [x] fcall
+- [x] if
 - [x] massign
 - [x] method_add_arg
 - [x] method_add_block
