@@ -22,7 +22,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] assoclist_from_args
 - [ ] bare_assoc_hash
 - [ ] blockarg
-- [ ] case
 - [ ] class_name_error
 - [ ] command_call
 - [ ] const_path_field
@@ -71,7 +70,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] unless_mod
 - [ ] until_mod
 - [ ] var_alias
-- [ ] when
 - [ ] while_mod
 - [ ] word_add
 - [ ] word_new
@@ -96,6 +94,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] brace_block
 - [x] break
 - [x] call
+- [x] case
 - [x] class
 - [x] command
 - [x] const_path_ref
@@ -139,6 +138,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] var_ref
 - [x] vcall
 - [x] void_stmt
+- [x] when
 - [x] while
 - [x] yield
 - [x] yield0

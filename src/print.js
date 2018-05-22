@@ -72,6 +72,11 @@ const nodes = {
     path.call(print, "body", 0),
     path.call(print, "body", 2)
   ]),
+  case: (path, print) => group(concat([
+    group(concat(["case ", path.call(print, "body", 0)])),
+    group(concat([hardline, path.call(print, "body", 1)])),
+    group(concat([hardline, "end"]))
+  ])),
   class: (path, print) => {
     const parts = ["class ", path.call(print, "body", 0)];
 
@@ -247,6 +252,19 @@ const nodes = {
   var_ref: (path, print) => path.call(print, "body", 0),
   vcall: concatBody,
   void_stmt: (path, print) => "",
+  when: (path, print) => {
+    const [_predicates, _statements, addition] = path.getValue().body;
+    const parts = [
+      group(concat(["when ", join(", ", path.map(print, "body", 0))])),
+      indent(concat([hardline, concat(path.map(print, "body", 1))]))
+    ];
+
+    if (addition) {
+      parts.push(concat([hardline, path.call(print, "body", 2)]));
+    }
+
+    return group(concat(parts));
+  },
   while: (path, print) => group(concat([
     group(concat(["while ", path.call(print, "body", 0)])),
     indent(concat([hardline, concat(path.map(print, "body", 1))])),
