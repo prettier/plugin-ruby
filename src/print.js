@@ -1,5 +1,5 @@
 const {
-  align, concat, dedent, group, hardline, indent, join, line, markAsRoot
+  align, concat, dedent, group, hardline, indent, join, line, literalline, markAsRoot
 } = require("prettier").doc.builders;
 
 const concatBody = (path, print) => concat(path.map(print, "body"));
@@ -44,7 +44,7 @@ const nodes = {
       group(concat(parts)),
       indent(path.call(print, "body", 2)),
       group(concat([hardline, "end"])),
-      hardline
+      literalline
     ]);
   },
   command: (path, print) => join(" ", path.map(print, "body")),
@@ -53,6 +53,11 @@ const nodes = {
     group(concat([hardline, "def ", path.call(print, "body", 0), path.call(print, "body", 1)])),
     indent(concat([hardline, path.call(print, "body", 2)])),
     group(concat([hardline, "end"]))
+  ]),
+  module: (path, print) => concat([
+    group(concat([literalline, "module ", path.call(print, "body", 0)])),
+    indent(path.call(print, "body", 1)),
+    dedent(concat(["end", literalline]))
   ]),
   params: (path, print) => {
     const [req, opt, ...rest] = path.getValue().body;
