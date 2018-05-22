@@ -201,6 +201,11 @@ const nodes = {
     indent(path.call(print, "body", 1)),
     concat([hardline, "end"])
   ])),
+  string_concat: (path, print) => group(concat([
+    path.call(print, "body", 0),
+    " \\",
+    indent(concat([line, path.call(print, "body", 1)]))
+  ])),
   string_content: (path, print) => {
     const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";
     return concat([delim, concat(path.map(print, "body")), delim]);

@@ -64,7 +64,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] stmts_add
 - [ ] stmts_new
 - [ ] string_add
-- [ ] string_concat
 - [ ] string_dvar
 - [ ] symbols_add
 - [ ] symbols_new
@@ -127,6 +126,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] return
 - [x] return0
 - [x] sclass
+- [x] string_concat
 - [x] string_content
 - [x] string_embexpr
 - [x] string_literal
