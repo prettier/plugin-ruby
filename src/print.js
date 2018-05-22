@@ -78,7 +78,7 @@ const nodes = {
   method_add_arg: concatBody,
   method_add_block: (path, print) => join(" ", path.map(print, "body")),
   module: (path, print) => concat([
-    group(concat([literalline, "module ", path.call(print, "body", 0)])),
+    group(concat(["module ", path.call(print, "body", 0)])),
     indent(path.call(print, "body", 1)),
     dedent(concat(["end", literalline]))
   ]),
