@@ -13,6 +13,12 @@ const nodes = {
   "@kw": literalBody,
   "@tstring_content": literalBody,
   alias: (path, print) => concat(["alias ", join(" ", path.map(print, "body"))]),
+  aref: (path, print) => concat([
+    path.call(print, "body", 0),
+    "[",
+    path.call(print, "body", 1),
+    "]"
+  ]),
   arg_paren: (path, print) => group(concat(["(", ...path.map(print, "body"), ")"])),
   args_add_block: (path, print) => {
     const [_, block] = path.getValue().body;
@@ -69,6 +75,16 @@ const nodes = {
     group(concat([hardline, "def ", path.call(print, "body", 0), path.call(print, "body", 1)])),
     indent(concat([hardline, path.call(print, "body", 2)])),
     group(concat([hardline, "end"]))
+  ]),
+  dot2: (path, print) => concat([
+    path.call(print, "body", 0),
+    "..",
+    path.call(print, "body", 1)
+  ]),
+  dot3: (path, print) => concat([
+    path.call(print, "body", 0),
+    "...",
+    path.call(print, "body", 1)
   ]),
   massign: (path, print) => concat([
     group(join(concat([",", line]), path.map(print, "body", 0))),

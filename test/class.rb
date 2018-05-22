@@ -12,13 +12,17 @@ module Prettier
     def full_name
       "#{first_name} #{last_name}"
     end
+
+    class << self
+      def build
+        [
+          new('Clark', 'Kent'),
+          new('Bruce', 'Wayne'),
+          new('Diana', 'Prince')
+        ]
+      end
+    end
   end
 end
 
-users = [
-  Prettier::User.new('Clark', 'Kent'),
-  Prettier::User.new('Bruce', 'Wayne'),
-  Prettier::User.new('Diana', 'Prince')
-]
-
-puts users.map { |user| user.name }
+puts Prettier::User.build[0...2]

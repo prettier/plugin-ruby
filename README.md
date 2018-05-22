@@ -10,7 +10,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] END
 - [x] alias
 - [ ] alias_error
-- [ ] aref
+- [x] aref
 - [ ] aref_field
 - [ ] arg_ambiguous
 - [x] arg_paren
@@ -45,8 +45,8 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] defined
 - [ ] defs
 - [ ] do_block
-- [ ] dot2
-- [ ] dot3
+- [x] dot2
+- [x] dot3
 - [ ] dyna_symbol
 - [ ] else
 - [ ] elsif
