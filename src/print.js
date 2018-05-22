@@ -50,7 +50,12 @@ const nodes = {
     concat(path.map(print, "body", 1)),
     " }"
   ]),
-  break: (path, print) => concat(["break ", path.call(print, "body", 0)]),
+  break: (path, print) => {
+    if (path.getValue().body[0].length > 0) {
+      return concat(["break ", path.call(print, "body", 0)]);
+    }
+    return "break";
+  },
   call: (path, print) => join(path.getValue().body[1], [
     path.call(print, "body", 0),
     path.call(print, "body", 2)
@@ -106,6 +111,12 @@ const nodes = {
     indent(path.call(print, "body", 1)),
     dedent(concat(["end", literalline]))
   ]),
+  next: (path, print) => {
+    if (path.getValue().body.length > 0) {
+      return concat(["next ", path.call(print, "body", 0)]);
+    }
+    return "next";
+  },
   params: (path, print) => {
     const [req, opt, ...rest] = path.getValue().body;
     let parts = [];

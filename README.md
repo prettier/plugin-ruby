@@ -76,7 +76,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] mrhs_add_star
 - [ ] mrhs_new
 - [ ] mrhs_new_from_args
-- [ ] next
+- [x] next
 - [ ] opassign
 - [ ] operator_ambiguous
 - [ ] param_error
