@@ -1,5 +1,5 @@
 const {
-  align, concat, dedent, group, hardline, indent, join, line, literalline, markAsRoot
+  align, concat, dedent, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, softline
 } = require("prettier").doc.builders;
 
 const concatBody = (path, print) => concat(path.map(print, "body"));
@@ -19,14 +19,16 @@ const nodes = {
     const parts = [join(", ", path.map(print, "body", 0))];
 
     if (block) {
-      parts.push(path.map(print, "body", 1));
+      parts.push("&", path.call(print, "body", 1));
     }
 
     return group(concat(parts));
   },
   array: (path, print) => group(concat([
     "[",
+    softline,
     indent(concat([join(concat([",", line]), path.map(print, "body", 0))])),
+    softline,
     "]"
   ])),
   assign: (path, print) => join(" = ", path.map(print, "body")),
@@ -54,6 +56,7 @@ const nodes = {
     ]);
   },
   command: (path, print) => join(" ", path.map(print, "body")),
+  const_path_ref: (path, print) => join("::", path.map(print, "body")),
   const_ref: (path, print) => path.call(print, "body", 0),
   def: (path, print) => concat([
     group(concat([hardline, "def ", path.call(print, "body", 0), path.call(print, "body", 1)])),
@@ -99,7 +102,7 @@ const nodes = {
       return [...parts, path.call(print, "body", index)];
     }, []), ")"])
   ),
-  program: (path, print) => markAsRoot(join(hardline, path.map(print, "body", 0))),
+  program: (path, print) => markAsRoot(concat([join(literalline, path.map(print, "body", 0)), literalline])),
   return: (path, print) => group(concat(["return ", ...path.map(print, "body")])),
   string_content: (path, print) => {
     const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";

@@ -1,11 +1,9 @@
-require 'date'
-
 module Prettier
   class User
-    attr_reader :first_name, :last_name, :birthdate
+    attr_reader :first_name, :last_name
     alias full_name name
 
-    def initialize(first_name, last_name, birthdate = nil)
+    def initialize(first_name, last_name)
       @first_name = first_name
       @last_name = last_name
       @birthdate = birthdate
@@ -14,24 +12,13 @@ module Prettier
     def full_name
       "#{first_name} #{last_name}"
     end
-
-    def age
-      unless birthday
-        return nil
-      end
-
-      ((Date.today - birthdate) / 365).to_i
-    end
-  end
-
-  class Employee < User
-    def age
-      super
-    end
-
-    def names
-      first_name, last_name = full_name.split(' ')
-      [first_name, last_name]
-    end
   end
 end
+
+users = [
+  Prettier::User.new('Clark', 'Kent'),
+  Prettier::User.new('Bruce', 'Wayne'),
+  Prettier::User.new('Diana', 'Prince')
+]
+
+puts users.map(&:name)
