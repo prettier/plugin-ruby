@@ -218,7 +218,10 @@ const nodes = {
       return [...parts, path.call(print, "body", index)];
     }, [])), ")"])
   ),
-  program: (path, print) => markAsRoot(concat([join(literalline, path.map(print, "body", 0)), literalline])),
+  program: (path, print) => markAsRoot(concat([
+    join(literalline, path.map(print, "body", 0)),
+    literalline
+  ])),
   redo: (path, print) => "redo",
   regexp_literal: (path, print) => {
     const delim = path.call(print, "body", 1);
@@ -304,9 +307,15 @@ const nodes = {
     indent(concat([hardline, concat(path.map(print, "body", 1))])),
     group(concat([hardline, "end"]))
   ])),
-  yield: (path, print) => concat(["yield ", concat(path.map(print, "body"))]),
+  yield: (path, print) => concat([
+    "yield ",
+    concat(path.map(print, "body"))
+  ]),
   yield0: (path, print) => "yield",
-  zsuper: (path, print) => concat(["super", concat(path.map(print, "body"))])
+  zsuper: (path, print) => concat([
+    "super",
+    concat(path.map(print, "body"))
+  ])
 };
 
 const debugNode = (path, print) => {
