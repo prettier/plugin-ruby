@@ -5,5 +5,9 @@ numbers.each do |num|
     num
   rescue
     retry
+  else
+    puts 'hi'
+  ensure
+    puts 'what'
   end
 end

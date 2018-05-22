@@ -48,9 +48,9 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] dot2
 - [x] dot3
 - [ ] dyna_symbol
-- [ ] else
+- [x] else
 - [ ] elsif
-- [ ] ensure
+- [x] ensure
 - [ ] excessed_comma
 - [x] fcall
 - [ ] field
