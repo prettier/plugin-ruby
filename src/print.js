@@ -248,12 +248,45 @@ const nodes = {
       path.call(print, "body", 1)
     ]);
   },
+  mlhs_add_post: (path, print) => group(concat([
+    path.call(print, "body", 0),
+    ",",
+    group(concat([line, path.call(print, "body", 1)]))
+  ])),
+  mlhs_add_star: (path, print) => group(concat([
+    path.call(print, "body", 0),
+    ",",
+    group(concat([line, "*", path.call(print, "body", 1)]))
+  ])),
+  mrhs_add_star: (path, print) => group(concat([
+    "*",
+    concat(path.map(print, "body"))
+  ])),
+  mlhs_paren: (path, print) => group(concat([
+    "(",
+    indent(concat([softline, path.call(print, "body", 0)])),
+    concat([softline, ")"])
+  ])),
   mlhs_new: (path, print) => "",
+  mrhs_new_from_args: (path, print) => concat(path.call(print, "body", 0).slice(1)),
   module: (path, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
     indent(concat([hardline, path.call(print, "body", 1)])),
     dedent(concat([hardline, "end", hardline]))
   ])),
+  mrhs_add: (path, print) => {
+    if (path.getValue().body[0].type === "mrhs_new") {
+      return path.call(print, "body", 1);
+    }
+
+    return concat([
+      path.call(print, "body", 0),
+      ",",
+      line,
+      path.call(print, "body", 1)
+    ]);
+  },
+  mrhs_new: (path, print) => "",
   next: (path, print) => {
     if (path.getValue().body.length > 0) {
       return concat(["next ", path.call(print, "body", 0)]);

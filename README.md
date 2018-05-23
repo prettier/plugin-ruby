@@ -31,15 +31,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] kwrest_param
 - [ ] lambda
 - [ ] magic_comment
-- [x] mlhs_add
-- [ ] mlhs_add_post
-- [ ] mlhs_add_star
-- [x] mlhs_new
-- [ ] mlhs_paren
-- [ ] mrhs_add
-- [ ] mrhs_add_star
-- [ ] mrhs_new
-- [ ] mrhs_new_from_args
 - [ ] opassign
 - [ ] operator_ambiguous
 - [ ] param_error
@@ -93,7 +84,16 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] massign
 - [x] method_add_arg
 - [x] method_add_block
+- [x] mlhs_add
+- [x] mlhs_add_post
+- [x] mlhs_add_star
+- [x] mlhs_new
+- [x] mlhs_paren
 - [x] module
+- [x] mrhs_add
+- [x] mrhs_add_star
+- [x] mrhs_new
+- [x] mrhs_new_from_args
 - [x] next
 - [x] params
 - [x] paren
