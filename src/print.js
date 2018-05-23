@@ -174,7 +174,7 @@ const nodes = {
   const_path_field: (path, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, print) => join("::", path.map(print, "body")),
   const_ref: (path, print) => path.call(print, "body", 0),
-  def: (path, print) => concat([
+  def: (path, print) => group(concat([
     group(concat([
       "def ",
       path.call(print, "body", 0),
@@ -182,7 +182,18 @@ const nodes = {
     ])),
     indent(concat([hardline, path.call(print, "body", 2)])),
     group(concat([hardline, "end"]))
-  ]),
+  ])),
+  defs: (path, print) => group(concat([
+    group(concat([
+      "def ",
+      path.call(print, "body", 0),
+      path.call(print, "body", 1),
+      path.call(print, "body", 2),
+      path.call(print, "body", 3)
+    ])),
+    indent(concat([hardline, path.call(print, "body", 4)])),
+    group(concat([hardline, "end"]))
+  ])),
   defined: (path, print) => group(concat([
     "defined?(",
     softline,

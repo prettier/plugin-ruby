@@ -16,7 +16,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] assign_error
 - [ ] class_name_error
 - [ ] command_call
-- [ ] defs
 - [ ] excessed_comma
 - [ ] field
 - [ ] heredoc_dedent
@@ -58,6 +57,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] const_path_ref
 - [x] const_ref
 - [x] def
+- [x] defs
 - [x] defined
 - [x] do_block
 - [x] dot2

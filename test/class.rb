@@ -24,3 +24,7 @@ module Prettier
 end
 
 ::Prettier::Vehicle.new(3)
+
+def Vehicle.drive
+  'vroom'
+end
