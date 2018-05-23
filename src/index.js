@@ -1,4 +1,4 @@
-const parse = require("./parse");
+const { sexp } = require("ripperjs");
 const print = require("./print");
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
   }],
   parsers: {
     ruby: {
-      parse,
+      parse: (text, parsers, options) => sexp(text),
       astFormat: "ruby"
     }
   },
