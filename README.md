@@ -31,10 +31,10 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] kwrest_param
 - [ ] lambda
 - [ ] magic_comment
-- [ ] mlhs_add
+- [x] mlhs_add
 - [ ] mlhs_add_post
 - [ ] mlhs_add_star
-- [ ] mlhs_new
+- [x] mlhs_new
 - [ ] mlhs_paren
 - [ ] mrhs_add
 - [ ] mrhs_add_star

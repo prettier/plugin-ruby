@@ -74,7 +74,11 @@ const nodes = {
     join(concat([",", line]),
     path.map(print, "body", 0))
   ),
-  assign: (path, print) => join(" = ", path.map(print, "body")),
+  assign: (path, print) => group(concat([
+    path.call(print, "body", 0),
+    " =",
+    indent(concat([line, path.call(print, "body", 1)]))
+  ])),
   begin: (path, print) => group(concat([
     "begin",
     indent(concat([hardline, concat(path.map(print, "body"))])),
@@ -225,13 +229,26 @@ const nodes = {
     parts.push(group(concat(["end", hardline])));
     return group(concat(parts));
   },
-  massign: (path, print) => concat([
-    group(join(concat([",", line]), path.map(print, "body", 0))),
-    " = ",
-    path.call(print, "body", 1)
-  ]),
+  massign: (path, print) => group(concat([
+    path.call(print, "body", 0),
+    " =",
+    indent(concat([line, path.call(print, "body", 1)]))
+  ])),
   method_add_arg: concatBody,
   method_add_block: (path, print) => join(" ", path.map(print, "body")),
+  mlhs_add: (path, print) => {
+    if (path.getValue().body[0].type === "mlhs_new") {
+      return path.call(print, "body", 1);
+    }
+
+    return concat([
+      path.call(print, "body", 0),
+      ",",
+      line,
+      path.call(print, "body", 1)
+    ]);
+  },
+  mlhs_new: (path, print) => "",
   module: (path, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
     indent(concat([hardline, path.call(print, "body", 1)])),
