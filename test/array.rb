@@ -9,3 +9,5 @@ d = %i[a b c]
 e = %W[a#{a}a b#{b}a c#{c}c]
 
 f = %I[a#{a}a b#{b}b c#{c}c]
+
+g = [1, 2, *[3, 4], 5, 6]

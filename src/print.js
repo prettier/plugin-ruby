@@ -31,6 +31,7 @@ const nodes = {
     if (path.getValue().body[0].type === "args_new") {
       return path.map(print, "body");
     }
+
     return [...path.call(print, "body", 0), ",", line, path.call(print, "body", 1)];
   },
   args_add_block: (path, print) => {
@@ -43,6 +44,12 @@ const nodes = {
 
     return group(concat(parts));
   },
+  args_add_star: (path, print) => path.call(print, "body", 0).concat([
+    ",",
+    line,
+    "*",
+    path.call(print, "body", 1)
+  ]),
   args_new: (path, print) => group(concat(["[", softline])),
   array: (path, print) => {
     const elements = path.call(print, "body", 0);
