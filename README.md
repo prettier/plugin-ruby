@@ -31,7 +31,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] parse_error
 - [ ] string_dvar
 - [ ] top_const_field
-- [ ] top_const_ref
 - [ ] var_alias
 
 ### Complete:
@@ -120,6 +119,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] symbol_literal
 - [x] symbols_add
 - [x] symbols_new
+- [x] top_const_ref
 - [x] unary
 - [x] undef
 - [x] unless

@@ -448,6 +448,10 @@ const nodes = {
     return [...path.call(print, "body", 0), line, path.call(print, "body", 1)];
   },
   symbols_new: (path, print) => group(concat(["%I[", softline])),
+  top_const_ref: (path, print) => group(concat([
+    "::",
+    path.call(print, "body", 0)
+  ])),
   unary: (path, print) => concat([
     path.getValue().body[0][0],
     path.call(print, "body", 1)

@@ -11,8 +11,10 @@ module Prettier
   end
 
   class Car < Vehicle
+    WHEELS = 4
+
     def initialize
-      super(4)
+      super(WHEELS)
     end
 
     def drive
@@ -21,4 +23,4 @@ module Prettier
   end
 end
 
-Prettier::Vehicle.new(3)
+::Prettier::Vehicle.new(3)
