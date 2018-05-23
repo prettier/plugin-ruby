@@ -2,6 +2,22 @@ while true
   1
 end
 
+1 while true
+
+while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+1 while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+
 until true
   1
 end
+
+1 until true
+
+until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+1 until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long

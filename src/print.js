@@ -34,8 +34,23 @@ const printConditional = keyword => (path, print) => {
 };
 
 const printIf = printConditional("if");
-
 const printUnless = printConditional("unless");
+
+const printLoop = keyword => (path, print) => group(ifBreak(
+  concat([
+    concat([`${keyword} `, path.call(print, "body", 0)]),
+    indent(concat([softline, path.call(print, "body", 1)])),
+    concat([softline, "end"])
+  ]),
+  concat([
+    path.call(print, "body", 1),
+    ` ${keyword} `,
+    path.call(print, "body", 0)
+  ])
+));
+
+const printWhile = printLoop("while");
+const printUntil = printLoop("until");
 
 const nodes = {
   alias: (path, print) => concat([
@@ -505,11 +520,8 @@ const nodes = {
   undef: (path, print) => concat(["undef ", concat(path.map(print, "body", 0))]),
   unless: printUnless,
   unless_mod: printUnless,
-  until: (path, print) => group(concat([
-    group(concat(["until ", path.call(print, "body", 0)])),
-    indent(concat([hardline, path.call(print, "body", 1)])),
-    group(concat([hardline, "end"]))
-  ])),
+  until: printUntil,
+  until_mod: printUntil,
   var_field: concatBody,
   var_ref: (path, print) => path.call(print, "body", 0),
   vcall: concatBody,
@@ -527,11 +539,8 @@ const nodes = {
 
     return group(concat(parts));
   },
-  while: (path, print) => group(concat([
-    group(concat(["while ", path.call(print, "body", 0)])),
-    indent(concat([hardline, path.call(print, "body", 1)])),
-    group(concat([hardline, "end"]))
-  ])),
+  while: printWhile,
+  while_mod: printWhile,
   word_add: concatBody,
   word_new: (path, print) => "",
   words_add: (path, print) => {

@@ -35,9 +35,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] string_dvar
 - [ ] top_const_field
 - [ ] top_const_ref
-- [ ] until_mod
 - [ ] var_alias
-- [ ] while_mod
 
 ### Complete:
 
@@ -127,12 +125,14 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] unless
 - [x] unless_mod
 - [x] until
+- [x] until_mod
 - [x] var_field
 - [x] var_ref
 - [x] vcall
 - [x] void_stmt
 - [x] when
 - [x] while
+- [x] while_mod
 - [x] word_add
 - [x] word_new
 - [x] words_add
