@@ -171,6 +171,7 @@ const nodes = {
     return group(concat(parts));
   },
   command: (path, print) => group(join(" ", path.map(print, "body"))),
+  const_path_field: (path, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, print) => join("::", path.map(print, "body")),
   const_ref: (path, print) => path.call(print, "body", 0),
   def: (path, print) => concat([
@@ -448,6 +449,10 @@ const nodes = {
     return [...path.call(print, "body", 0), line, path.call(print, "body", 1)];
   },
   symbols_new: (path, print) => group(concat(["%I[", softline])),
+  top_const_field: (path, print) => group(concat([
+    "::",
+    path.call(print, "body", 0)
+  ])),
   top_const_ref: (path, print) => group(concat([
     "::",
     path.call(print, "body", 0)

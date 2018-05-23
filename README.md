@@ -16,7 +16,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] assign_error
 - [ ] class_name_error
 - [ ] command_call
-- [ ] const_path_field
 - [ ] defs
 - [ ] excessed_comma
 - [ ] field
@@ -30,7 +29,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] param_error
 - [ ] parse_error
 - [ ] string_dvar
-- [ ] top_const_field
 - [ ] var_alias
 
 ### Complete:
@@ -59,6 +57,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] case
 - [x] class
 - [x] command
+- [x] const_path_field
 - [x] const_path_ref
 - [x] const_ref
 - [x] def
@@ -119,6 +118,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] symbol_literal
 - [x] symbols_add
 - [x] symbols_new
+- [x] top_const_field
 - [x] top_const_ref
 - [x] unary
 - [x] undef
