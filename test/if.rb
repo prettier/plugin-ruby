@@ -53,3 +53,7 @@ unless a
 else
   2
 end
+
+a ? 1 : 2
+a ? super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  : super_super_super_super_super_super_super_super_super_super_super_super_super_super_long

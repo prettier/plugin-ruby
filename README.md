@@ -21,7 +21,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] field
 - [ ] for
 - [ ] heredoc_dedent
-- [ ] ifop
 - [ ] kwrest_param
 - [ ] magic_comment
 - [ ] opassign
@@ -73,6 +72,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] hash
 - [x] if
 - [x] if_mod
+- [x] ifop
 - [x] lambda
 - [x] massign
 - [x] method_add_arg

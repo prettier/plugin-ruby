@@ -3,7 +3,7 @@ const {
   literalline, markAsRoot, softline
 } = require("prettier").doc.builders;
 
-const { printIf, printUnless } = require("./conditionals");
+const { printIf, printUnless, printTernary } = require("./conditionals");
 const { printWhile, printUntil } = require("./loops");
 const { printKwargRestParam, printRestParam, printParams } = require("./params");
 
@@ -247,6 +247,7 @@ const nodes = {
     concat([line, "}"])
   ])),
   if: printIf,
+  ifop: printTernary,
   if_mod: printIf,
   lambda: (path, print) => {
     const args = path.call(print, "body", 0);

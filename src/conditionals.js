@@ -8,23 +8,44 @@ const printWithAddition = (keyword, path, print) => concat([
   concat([softline, "end"])
 ]);
 
+const printTernaryConditions = (keyword, truthyValue, falsyValue) => {
+  const parts = [truthyValue, " : ", falsyValue];
+  return keyword === "if" ? parts : parts.reverse();
+};
+
 const printConditional = keyword => (path, print) => {
   const [_predicate, _statements, addition] = path.getValue().body;
+
+  // If the addition is not an elsif or an else, then it's the second half of a
+  // ternary expression
+  if (addition && addition.type !== "elsif" && addition.type !== "else") {
+    const parts = [path.call(print, "body", 0), " ? "];
+    const truthyValue = path.call(print, "body", 1);
+    const falsyValue = path.call(print, "body", 2);
+
+    return group(ifBreak(
+      concat([
+        `${keyword} `,
+        path.call(print, "body", 0),
+        indent(concat([softline, path.call(print, "body", 1)])),
+        concat([softline, "else"]),
+        indent(concat([softline, path.call(print, "body", 2)])),
+        concat([softline, "end"])
+      ]),
+      concat(parts.concat(printTernaryConditions(keyword, truthyValue, falsyValue)))
+    ));
+  }
 
   // If there is an else and only an else, attempt to shorten to a ternary
   if (addition && addition.type === "else") {
     const parts = [path.call(print, "body", 0), " ? "];
-
     const truthyValue = path.call(print, "body", 1);
     const falsyValue = path.call(print, "body", 2, "body", 0);
 
-    if (keyword === "if") {
-      parts.push(truthyValue, " : ", falsyValue);
-    } else {
-      parts.push(falsyValue, " : ", truthyValue);
-    }
-
-    return group(ifBreak(printWithAddition(keyword, path, print), concat(parts)));
+    return group(ifBreak(
+      printWithAddition(keyword, path, print),
+      concat(parts.concat(printTernaryConditions(keyword, truthyValue, falsyValue)))
+    ));
   }
 
   // If there's an additional clause, we know we can't go for the inline option
@@ -50,5 +71,6 @@ const printConditional = keyword => (path, print) => {
 
 module.exports = {
   printIf: printConditional("if"),
-  printUnless: printConditional("unless")
+  printUnless: printConditional("unless"),
+  printTernary: printConditional("if")
 };
