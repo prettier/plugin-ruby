@@ -1,5 +1,5 @@
 if a
-  1
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
 if a
@@ -9,9 +9,9 @@ elsif b
 end
 
 if a
-  1
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 else
-  2
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
 if a
@@ -25,13 +25,13 @@ else
 end
 
 unless a
-  1
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
 unless a
-  1
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 else
-  2
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
 1 if a
@@ -41,3 +41,15 @@ end
 1 unless a
 
 1 unless super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+
+if a
+  1
+else
+  2
+end
+
+unless a
+  1
+else
+  2
+end

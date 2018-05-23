@@ -219,10 +219,10 @@ const nodes = {
     concat(path.map(print, "body")),
     "\""
   ]),
-  else: (path, print) => group(concat([
+  else: (path, print) => concat([
     "else",
-    indent(concat([hardline, path.call(print, "body", 0)]))
-  ])),
+    indent(concat([softline, path.call(print, "body", 0)]))
+  ]),
   elsif: (path, print) => {
     const [_predicate, _statements, addition] = path.getValue().body;
     const parts = [
