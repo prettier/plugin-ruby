@@ -14,7 +14,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] aref_field
 - [ ] arg_ambiguous
 - [ ] assign_error
-- [ ] blockarg
 - [ ] class_name_error
 - [ ] command_call
 - [ ] const_path_field
@@ -54,6 +53,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] begin
 - [x] binary
 - [x] block_var
+- [x] blockarg
 - [x] bodystmt
 - [x] brace_block
 - [x] break

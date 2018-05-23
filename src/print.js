@@ -113,6 +113,7 @@ const nodes = {
     path.call(print, "body", 2)
   ]),
   block_var: (path, print) => concat(["|", path.call(print, "body", 0), "| "]),
+  blockarg: (path, print) => concat(["&", path.call(print, "body", 0)]),
   bodystmt: (path, print) => {
     const [statements, ...additions] = path.getValue().body;
     const parts = [path.call(print, "body", 0)];
@@ -172,7 +173,6 @@ const nodes = {
   const_ref: (path, print) => path.call(print, "body", 0),
   def: (path, print) => concat([
     group(concat([
-      hardline,
       "def ",
       path.call(print, "body", 0),
       path.call(print, "body", 1)
@@ -334,7 +334,7 @@ const nodes = {
     return "next";
   },
   params: (path, print) => {
-    const [reqs, opts, _1, _2, kwargs, _3, _4] = path.getValue().body;
+    const [reqs, opts, _1, _2, kwargs, _3, block] = path.getValue().body;
     let parts = [];
 
     if (reqs) {
@@ -356,6 +356,10 @@ const nodes = {
         }
         return group(join(" ", path.map(print, "body", 4, index)));
       }));
+    }
+
+    if (block) {
+      parts.push(path.call(print, "body", 6));
     }
 
     return join(", ", parts);
