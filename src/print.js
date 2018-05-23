@@ -371,7 +371,7 @@ const nodes = {
     concat([softline, ")"])
   ])),
   mlhs_new: (path, print) => "",
-  mrhs_new_from_args: (path, print) => concat(path.call(print, "body", 0).slice(1)),
+  mrhs_new_from_args: (path, print) => path.call(print, "body", 0),
   module: (path, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
     indent(path.call(print, "body", 1)),
@@ -382,12 +382,12 @@ const nodes = {
       return path.call(print, "body", 1);
     }
 
-    return concat([
+    return group(concat([
       path.call(print, "body", 0),
       ",",
       line,
       path.call(print, "body", 1)
-    ]);
+    ]));
   },
   mrhs_new: (path, print) => "",
   next: (path, print) => {
@@ -448,7 +448,8 @@ const nodes = {
     const parts = ["rescue"];
 
     if (exception) {
-      parts.push(group(concat([" ", join(", ", path.map(print, "body", 0))])));
+      parts.push(" ");
+      parts.push(Array.isArray(exception) ? path.call(print, "body", 0, 0) : path.call(print, "body", 0));
     }
 
     if (variable) {
