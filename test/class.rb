@@ -3,10 +3,11 @@ module Prettier
     attr_accessor :wheels
 
     def initialize(wheels)
-      @wheels = wheels
+      self.wheels = wheels
     end
 
     def drive
+      @wheels
     end
   end
 

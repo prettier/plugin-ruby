@@ -252,6 +252,11 @@ const nodes = {
     indent(concat([hardline, concat(path.map(print, "body"))]))
   ])),
   fcall: concatBody,
+  field: (path, print) => group(concat([
+    path.call(print, "body", 0),
+    path.getValue().body[1],
+    path.call(print, "body", 2)
+  ])),
   for: printFor,
   hash: (path, print) => group(concat([
     "{",
