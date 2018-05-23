@@ -80,11 +80,13 @@ const nodes = {
       return '[]';
     }
 
-    const elements = path.call(print, "body", 0);
+    const firstTypeOf = element => element.parts ? findStart(element.parts[0]) : element.type;
+    const initial = firstTypeOf(path.getValue().body[0]) === "args_add" ? "[" : "";
 
     return group(concat([
-      elements[0],
-      indent(concat(elements.slice(1))),
+      initial,
+      softline,
+      indent(path.call(print, "body", 0)),
       softline,
       "]"
     ]));
@@ -413,19 +415,17 @@ const nodes = {
     join(literalline, path.map(print, "body")),
     literalline
   ])),
-  qsymbols_add: (path, print) => {
-    if (path.getValue().body[0].type === "qsymbols_new") {
-      return path.map(print, "body");
-    }
-    return [...path.call(print, "body", 0), line, path.call(print, "body", 1)];
-  },
+  qsymbols_add: (path, print) => concat([
+    path.call(print, "body", 0),
+    path.getValue().body[0].type === "qsymbols_new" ? "" : line,
+    path.call(print, "body", 1)
+  ]),
   qsymbols_new: (path, print) => group(concat(["%i[", softline])),
-  qwords_add: (path, print) => {
-    if (path.getValue().body[0].type === "qwords_new") {
-      return path.map(print, "body");
-    }
-    return [...path.call(print, "body", 0), line, path.call(print, "body", 1)];
-  },
+  qwords_add: (path, print) => concat([
+    path.call(print, "body", 0),
+    path.getValue().body[0].type === "qwords_new" ? "" : line,
+    path.call(print, "body", 1)
+  ]),
   qwords_new: (path, print) => group(concat(["%w[", softline])),
   redo: (path, print) => "redo",
   regexp_add: concatBody,
@@ -513,12 +513,11 @@ const nodes = {
     concat(path.map(print, "body"))
   ]),
   symbol_literal: concatBody,
-  symbols_add: (path, print) => {
-    if (path.getValue().body[0].type === "symbols_new") {
-      return path.map(print, "body");
-    }
-    return [...path.call(print, "body", 0), line, path.call(print, "body", 1)];
-  },
+  symbols_add: (path, print) => concat([
+    path.call(print, "body", 0),
+    path.getValue().body[0].type === "symbols_new" ? "" : line,
+    path.call(print, "body", 1)
+  ]),
   symbols_new: (path, print) => group(concat(["%I[", softline])),
   top_const_field: (path, print) => group(concat([
     "::",
@@ -544,7 +543,7 @@ const nodes = {
   when: (path, print) => {
     const [_predicates, _statements, addition] = path.getValue().body;
     const parts = [
-      group(concat(["when ", concat(path.call(print, "body", 0).slice(1))])),
+      group(concat(["when ", path.call(print, "body", 0)])),
       indent(concat([hardline, path.call(print, "body", 1)]))
     ];
 
@@ -558,12 +557,11 @@ const nodes = {
   while_mod: printWhile,
   word_add: concatBody,
   word_new: (path, print) => "",
-  words_add: (path, print) => {
-    if (path.getValue().body[0].type === "words_new") {
-      return path.map(print, "body");
-    }
-    return [...path.call(print, "body", 0), line, path.call(print, "body", 1)];
-  },
+  words_add: (path, print) => concat([
+    path.call(print, "body", 0),
+    path.getValue().body[0].type === "words_new" ? "" : line,
+    path.call(print, "body", 1)
+  ]),
   words_new: (path, print) => group(concat(["%W[", softline])),
   xstring_add: concatBody,
   xstring_literal: (path, print) => group(concat([
