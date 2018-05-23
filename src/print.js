@@ -257,15 +257,21 @@ const nodes = {
   },
   qwords_new: (path, print) => group(concat(["%w[", softline])),
   redo: (path, print) => "redo",
+  regexp_add: concatBody,
   regexp_literal: (path, print) => {
     const delim = path.call(print, "body", 1);
 
+    const delimPairs = { "]": "[", "}": "{", ")": "(" };
+    const startDelim = delim[0] === "/" ? "/" : `%r${delimPairs[delim[0]]}`;
+
     return group(concat([
-      delim,
-      group(concat(path.map(print, "body", 0))),
+      startDelim,
+      indent(concat([softline, path.call(print, "body", 0)])),
+      softline,
       delim
     ]));
   },
+  regexp_new: (path, print) => "",
   rescue: (path, print) => {
     const [exception, variable, _statements, addition] = path.getValue().body;
     const parts = ["rescue"];
@@ -321,6 +327,13 @@ const nodes = {
     concat(path.map(print, "body"))
   ]),
   symbol_literal: concatBody,
+  symbols_add: (path, print) => {
+    if (path.getValue().body[0].type === "symbols_new") {
+      return path.map(print, "body");
+    }
+    return [...path.call(print, "body", 0), line, path.call(print, "body", 1)];
+  },
+  symbols_new: (path, print) => group(concat(["%I[", softline])),
   unary: (path, print) => concat([
     path.getValue().body[0][0],
     path.call(print, "body", 1)
@@ -368,6 +381,13 @@ const nodes = {
   },
   words_new: (path, print) => group(concat(["%W[", softline])),
   xstring_add: concatBody,
+  xstring_literal: (path, print) => group(concat([
+    "%x[",
+    softline,
+    indent(concat(path.map(print, "body"))),
+    softline,
+    "]"
+  ])),
   xstring_new: (path, print) => "",
   yield: (path, print) => concat([
     "yield ",

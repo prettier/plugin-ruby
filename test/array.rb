@@ -7,3 +7,5 @@ c = %w[a b c]
 d = %i[a b c]
 
 e = %W[a#{a}a b#{b}a c#{c}c]
+
+f = %I[a#{a}a b#{b}b c#{c}c]

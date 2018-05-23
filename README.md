@@ -47,20 +47,15 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] operator_ambiguous
 - [ ] param_error
 - [ ] parse_error
-- [ ] regexp_add
-- [ ] regexp_new
 - [ ] rescue_mod
 - [ ] rest_param
 - [ ] string_dvar
-- [ ] symbols_add
-- [ ] symbols_new
 - [ ] top_const_field
 - [ ] top_const_ref
 - [ ] unless_mod
 - [ ] until_mod
 - [ ] var_alias
 - [ ] while_mod
-- [ ] xstring_literal
 
 ### Complete:
 
@@ -108,7 +103,9 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] qwords_add
 - [x] qwords_new
 - [x] redo
+- [x] regexp_add
 - [x] regexp_literal
+- [x] regexp_new
 - [x] rescue
 - [x] retry
 - [x] return
@@ -124,6 +121,8 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] super
 - [x] symbol
 - [x] symbol_literal
+- [x] symbols_add
+- [x] symbols_new
 - [x] unary
 - [x] undef
 - [x] unless
@@ -139,6 +138,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] words_add
 - [x] words_new
 - [x] xstring_add
+- [x] xstring_literal
 - [x] xstring_new
 - [x] yield
 - [x] yield0
