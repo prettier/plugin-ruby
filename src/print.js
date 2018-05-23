@@ -56,6 +56,10 @@ const nodes = {
   ]),
   args_new: (path, print) => group(concat(["[", softline])),
   array: (path, print) => {
+    if (path.getValue().body[0] === null) {
+      return '[]';
+    }
+
     const elements = path.call(print, "body", 0);
 
     return group(concat([
@@ -258,11 +262,17 @@ const nodes = {
     path.call(print, "body", 2)
   ])),
   for: printFor,
-  hash: (path, print) => group(concat([
-    "{",
-    indent(concat([line, concat(path.map(print, "body"))])),
-    concat([line, "}"])
-  ])),
+  hash: (path, print) => {
+    if (path.getValue().body[0] === null) {
+      return '{}';
+    }
+
+    return group(concat([
+      "{",
+      indent(concat([line, concat(path.map(print, "body"))])),
+      concat([line, "}"])
+    ]));
+  },
   if: printIf,
   ifop: printTernary,
   if_mod: printIf,
