@@ -26,7 +26,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] if_mod
 - [ ] ifop
 - [ ] kwrest_param
-- [ ] lambda
 - [ ] magic_comment
 - [ ] opassign
 - [ ] operator_ambiguous
@@ -81,6 +80,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] fcall
 - [x] hash
 - [x] if
+- [x] lambda
 - [x] massign
 - [x] method_add_arg
 - [x] method_add_block

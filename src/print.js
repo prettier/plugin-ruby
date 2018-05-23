@@ -125,12 +125,16 @@ const nodes = {
 
     return group(concat(parts));
   },
-  brace_block: (path, print) => concat([
-    "{ ",
-    path.call(print, "body", 0),
-    concat(path.map(print, "body", 1)),
-    " }"
-  ]),
+  brace_block: (path, print) => {
+    const parts = ["{ "];
+
+    if (path.getValue().body[0]) {
+      parts.push(path.call(print, "body", 0));
+    }
+    parts.push(path.call(print, "body", 1), " }");
+
+    return group(concat(parts));
+  },
   break: (path, print) => {
     if (path.getValue().body[0].length > 0) {
       return concat(["break ", path.call(print, "body", 0)]);
@@ -250,6 +254,25 @@ const nodes = {
 
     parts.push("end");
     return group(concat(parts));
+  },
+  lambda: (path, print) => {
+    const args = path.call(print, "body", 0);
+
+    return group(ifBreak(
+      concat([
+        "lambda do",
+        args.parts[0] === "(" ? concat([" |", args.parts[1], "|"]) : args,
+        indent(concat([softline, path.call(print, "body", 1)])),
+        concat([softline, "end"])
+      ]),
+      concat([
+        "->",
+        args,
+        " { ",
+        path.call(print, "body", 1),
+        " }"
+      ])
+    ));
   },
   massign: (path, print) => group(concat([
     path.call(print, "body", 0),

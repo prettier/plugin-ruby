@@ -1,3 +1,5 @@
+loop { 1 }
+
 loop do
   1
 end
