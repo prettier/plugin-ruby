@@ -16,11 +16,17 @@ const nodes = {
     path.call(print, "body", 1),
     "]"
   ]),
-  arg_paren: (path, print) => group(concat([
-    "(",
-    concat(path.map(print, "body")),
-    ")"
-  ])),
+  arg_paren: (path, print) => {
+    if (path.getValue().body === null) {
+      return "";
+    }
+
+    return group(concat([
+      "(",
+      concat(path.map(print, "body")),
+      ")"
+    ]))
+  },
   args_add: (path, print) => {
     if (path.getValue().body[0].type === "args_new") {
       return path.map(print, "body");
@@ -172,12 +178,20 @@ const nodes = {
     softline,
     ")"
   ])),
-  do_block: (path, print) => concat([
-    "do ",
-    path.call(print, "body", 0),
-    indent(concat([hardline, path.call(print, "body", 1)])),
-    group(concat([hardline, "end"]))
-  ]),
+  do_block: (path, print) => {
+    const parts = ["do"];
+
+    if (path.getValue().body[0]) {
+      parts.push(" ", path.call(print, "body", 0));
+    }
+
+    parts.push(
+      indent(concat([hardline, path.call(print, "body", 1)])),
+      group(concat([hardline, "end"]))
+    );
+
+    return group(concat(parts));
+  },
   dot2: (path, print) => concat([
     path.call(print, "body", 0),
     "..",
@@ -240,7 +254,12 @@ const nodes = {
     " =",
     indent(concat([line, path.call(print, "body", 1)]))
   ])),
-  method_add_arg: concatBody,
+  method_add_arg: (path, print) => {
+    if (path.getValue().body[1].type === "args_new") {
+      return path.call(print, "body", 0);
+    }
+    return group(concat(path.map(print, "body")));
+  },
   method_add_block: (path, print) => join(" ", path.map(print, "body")),
   mlhs_add: (path, print) => {
     if (path.getValue().body[0].type === "mlhs_new") {
