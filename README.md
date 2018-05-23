@@ -18,7 +18,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] excessed_comma
 - [ ] heredoc_dedent
 - [ ] magic_comment
-- [ ] opassign
 - [ ] operator_ambiguous
 - [ ] param_error
 - [ ] parse_error
@@ -88,6 +87,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] mrhs_new
 - [x] mrhs_new_from_args
 - [x] next
+- [x] opassign
 - [x] params
 - [x] paren
 - [x] program

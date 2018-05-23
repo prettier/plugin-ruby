@@ -18,3 +18,7 @@ l, *m, n, o = 1, 2, 3
 q = *[1, 2, 3]
 
 (r, s), t = [1, 2], 3
+
+u ||= 1
+
+v ||= super_super_super_super_super_super_super_super_super_super_super_super_super_super_long

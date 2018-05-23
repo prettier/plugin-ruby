@@ -371,6 +371,12 @@ const nodes = {
     }
     return "next";
   },
+  opassign: (path, print) => group(concat([
+    path.call(print, "body", 0),
+    " ",
+    path.call(print, "body", 1),
+    indent(concat([line, path.call(print, "body", 2)]))
+  ])),
   params: printParams,
   paren: (path, print) => (
     concat(["(", concat(path.getValue().body.reduce((parts, part, index) => {
