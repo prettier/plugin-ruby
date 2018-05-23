@@ -358,6 +358,15 @@ const nodes = {
     indent(concat([hardline, concat(path.map(print, "body", 1))])),
     group(concat([hardline, "end"]))
   ])),
+  word_add: concatBody,
+  word_new: (path, print) => "",
+  words_add: (path, print) => {
+    if (path.getValue().body[0].type === "words_new") {
+      return path.map(print, "body");
+    }
+    return [...path.call(print, "body", 0), line, path.call(print, "body", 1)];
+  },
+  words_new: (path, print) => group(concat(["%W[", softline])),
   xstring_add: concatBody,
   xstring_new: (path, print) => "",
   yield: (path, print) => concat([

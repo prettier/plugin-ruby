@@ -60,10 +60,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] until_mod
 - [ ] var_alias
 - [ ] while_mod
-- [ ] word_add
-- [ ] word_new
-- [ ] words_add
-- [ ] words_new
 - [ ] xstring_literal
 
 ### Complete:
@@ -138,6 +134,10 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] void_stmt
 - [x] when
 - [x] while
+- [x] word_add
+- [x] word_new
+- [x] words_add
+- [x] words_new
 - [x] xstring_add
 - [x] xstring_new
 - [x] yield
