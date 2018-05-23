@@ -1,5 +1,6 @@
 const {
-  align, concat, dedent, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, softline
+  align, concat, dedent, group, hardline, ifBreak, indent, join, line,
+  literalline, markAsRoot, softline
 } = require("prettier").doc.builders;
 
 const concatBody = (path, print) => concat(path.map(print, "body"));
@@ -20,10 +21,15 @@ const nodes = {
     concat(path.map(print, "body")),
     ")"
   ])),
-  args_add: (path, print) => group(join(", ", path.map(print, "body").slice(1))),
+  args_add: (path, print) => {
+    if (path.getValue().body[0].type === "args_new") {
+      return path.map(print, "body");
+    }
+    return [...path.call(print, "body", 0), ",", line, path.call(print, "body", 1)];
+  },
   args_add_block: (path, print) => {
     const [_, block] = path.getValue().body;
-    const parts = [path.call(print, "body", 0)];
+    const parts = path.call(print, "body", 0).slice(1);
 
     if (block) {
       parts.push(concat(["&", path.call(print, "body", 1)]));
@@ -31,22 +37,13 @@ const nodes = {
 
     return group(concat(parts));
   },
-  args_new: (path, print) => "",
+  args_new: (path, print) => group(concat(["[", softline])),
   array: (path, print) => {
-    if (path.getValue().body[0].every(({ type }) => type === "@tstring_content")) {
-      return group(concat([
-        "%w[",
-        softline,
-        indent(join(line, path.map(print, "body", 0))),
-        softline,
-        "]"
-      ]))
-    }
+    const elements = path.call(print, "body", 0);
 
     return group(concat([
-      "[",
-      softline,
-      indent(concat([join(concat([",", line]), path.map(print, "body", 0))])),
+      elements[0],
+      indent(concat(elements.slice(1))),
       softline,
       "]"
     ]));
@@ -245,6 +242,20 @@ const nodes = {
     join(literalline, path.map(print, "body")),
     literalline
   ])),
+  qsymbols_add: (path, print) => {
+    if (path.getValue().body[0].type === "qsymbols_new") {
+      return path.map(print, "body");
+    }
+    return [...path.call(print, "body", 0), line, path.call(print, "body", 1)];
+  },
+  qsymbols_new: (path, print) => group(concat(["%i[", softline])),
+  qwords_add: (path, print) => {
+    if (path.getValue().body[0].type === "qwords_new") {
+      return path.map(print, "body");
+    }
+    return [...path.call(print, "body", 0), line, path.call(print, "body", 1)];
+  },
+  qwords_new: (path, print) => group(concat(["%w[", softline])),
   redo: (path, print) => "redo",
   regexp_literal: (path, print) => {
     const delim = path.call(print, "body", 1);
@@ -285,12 +296,17 @@ const nodes = {
   ])),
   stmts_add: concatBody,
   stmts_new: (path, print) => "",
+  string_add: (path, print) => {
+    const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";
+    return concat([delim, concat(path.map(print, "body")), delim]);
+  },
   string_concat: (path, print) => group(concat([
     path.call(print, "body", 0),
     " \\",
     indent(concat([line, path.call(print, "body", 1)]))
   ])),
-  string_content: (path, print) => {
+  string_content: (path, print) => "",
+  string_add: (path, print) => {
     const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";
     return concat([delim, concat(path.map(print, "body")), delim]);
   },

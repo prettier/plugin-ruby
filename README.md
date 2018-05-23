@@ -47,15 +47,10 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] operator_ambiguous
 - [ ] param_error
 - [ ] parse_error
-- [ ] qsymbols_add
-- [ ] qsymbols_new
-- [ ] qwords_add
-- [ ] qwords_new
 - [ ] regexp_add
 - [ ] regexp_new
 - [ ] rescue_mod
 - [ ] rest_param
-- [ ] string_add
 - [ ] string_dvar
 - [ ] symbols_add
 - [ ] symbols_new
@@ -112,6 +107,10 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] params
 - [x] paren
 - [x] program
+- [x] qsymbols_add
+- [x] qsymbols_new
+- [x] qwords_add
+- [x] qwords_new
 - [x] redo
 - [x] regexp_literal
 - [x] rescue
@@ -121,6 +120,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] sclass
 - [x] stmts_add
 - [x] stmts_new
+- [x] string_add
 - [x] string_concat
 - [x] string_content
 - [x] string_embexpr
