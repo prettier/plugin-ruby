@@ -27,8 +27,8 @@ const nodes = {
 
     return group(concat([
       "(",
-      concat(path.map(print, "body")),
-      ")"
+      indent(concat([softline, path.call(print, "body", 0)])),
+      concat([softline, ")"])
     ]))
   },
   args_add: (path, print) => {
