@@ -45,8 +45,8 @@ const nodes = {
     return [...path.call(print, "body", 0), ",", line, path.call(print, "body", 1)];
   },
   args_add_block: (path, print) => {
-    const [_, block] = path.getValue().body;
-    const parts = path.call(print, "body", 0).slice(1);
+    const [args, block] = path.getValue().body;
+    const parts = args.type === "args_new" ? [] : path.call(print, "body", 0).slice(1);
 
     if (block) {
       parts.push(concat(["&", path.call(print, "body", 1)]));
