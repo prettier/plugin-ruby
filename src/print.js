@@ -436,6 +436,10 @@ const nodes = {
   ]),
   string_literal: (path, print) => {
     const parts = path.call(print, "body", 0);
+    if (parts === '') {
+      return "''";
+    }
+
     const delim = parts.some(part => part.parts && part.parts[0] === "#{") ? "\"" : "\'";
     return concat([delim, ...parts, delim]);
   },
