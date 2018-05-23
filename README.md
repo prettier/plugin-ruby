@@ -13,9 +13,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] alias_error
 - [ ] aref_field
 - [ ] arg_ambiguous
-- [ ] args_add
 - [ ] args_add_star
-- [ ] args_new
 - [ ] assign_error
 - [ ] assoc_new
 - [ ] assoc_splat
@@ -57,8 +55,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] regexp_new
 - [ ] rescue_mod
 - [ ] rest_param
-- [ ] stmts_add
-- [ ] stmts_new
 - [ ] string_add
 - [ ] string_dvar
 - [ ] symbols_add
@@ -73,16 +69,16 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] word_new
 - [ ] words_add
 - [ ] words_new
-- [ ] xstring_add
 - [ ] xstring_literal
-- [ ] xstring_new
 
 ### Complete:
 
 - [x] alias
 - [x] aref
 - [x] arg_paren
+- [x] args_add
 - [x] args_add_block
+- [x] args_new
 - [x] array
 - [x] assign
 - [x] begin
@@ -123,6 +119,8 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] return
 - [x] return0
 - [x] sclass
+- [x] stmts_add
+- [x] stmts_new
 - [x] string_concat
 - [x] string_content
 - [x] string_embexpr
@@ -140,6 +138,8 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] void_stmt
 - [x] when
 - [x] while
+- [x] xstring_add
+- [x] xstring_new
 - [x] yield
 - [x] yield0
 - [x] zsuper
