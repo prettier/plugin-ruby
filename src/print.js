@@ -248,7 +248,7 @@ const nodes = {
       parts.push(group(concat([path.call(print, "body", 2), hardline])));
     }
 
-    parts.push(group(concat(["end", hardline])));
+    parts.push("end");
     return group(concat(parts));
   },
   massign: (path, print) => group(concat([
@@ -468,7 +468,7 @@ const nodes = {
   ]),
   until: (path, print) => group(concat([
     group(concat(["until ", path.call(print, "body", 0)])),
-    indent(concat([hardline, concat(path.map(print, "body", 1))])),
+    indent(concat([hardline, path.call(print, "body", 1)])),
     group(concat([hardline, "end"]))
   ])),
   var_field: concatBody,
@@ -490,7 +490,7 @@ const nodes = {
   },
   while: (path, print) => group(concat([
     group(concat(["while ", path.call(print, "body", 0)])),
-    indent(concat([hardline, concat(path.map(print, "body", 1))])),
+    indent(concat([hardline, path.call(print, "body", 1)])),
     group(concat([hardline, "end"]))
   ])),
   word_add: concatBody,
