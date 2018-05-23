@@ -19,7 +19,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] defs
 - [ ] excessed_comma
 - [ ] field
-- [ ] for
 - [ ] heredoc_dedent
 - [ ] magic_comment
 - [ ] opassign
@@ -68,6 +67,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] elsif
 - [x] ensure
 - [x] fcall
+- [x] for
 - [x] hash
 - [x] if
 - [x] if_mod

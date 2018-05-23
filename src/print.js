@@ -4,7 +4,7 @@ const {
 } = require("prettier").doc.builders;
 
 const { printIf, printUnless, printTernary } = require("./conditionals");
-const { printWhile, printUntil } = require("./loops");
+const { printWhile, printUntil, printFor } = require("./loops");
 const { printKwargRestParam, printRestParam, printParams } = require("./params");
 
 const concatBody = (path, print) => concat(path.map(print, "body"));
@@ -241,6 +241,7 @@ const nodes = {
     indent(concat([hardline, concat(path.map(print, "body"))]))
   ])),
   fcall: concatBody,
+  for: printFor,
   hash: (path, print) => group(concat([
     "{",
     indent(concat([line, concat(path.map(print, "body"))])),

@@ -1,4 +1,4 @@
-const { concat, group, ifBreak, indent, softline } = require("prettier").doc.builders;
+const { concat, group, hardline, ifBreak, indent, softline } = require("prettier").doc.builders;
 
 const printLoop = keyword => (path, print) => group(ifBreak(
   concat([
@@ -13,7 +13,17 @@ const printLoop = keyword => (path, print) => group(ifBreak(
   ])
 ));
 
+const printFor = (path, print) => group(concat([
+  path.call(print, "body", 1),
+  ".each do |",
+  path.call(print, "body", 0),
+  "|",
+  indent(concat([hardline, path.call(print, "body", 2)])),
+  concat([hardline, "end"])
+]));
+
 module.exports = {
   printWhile: printLoop("while"),
-  printUntil: printLoop("until")
+  printUntil: printLoop("until"),
+  printFor
 };
