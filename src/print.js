@@ -48,6 +48,32 @@ const nodes = {
       "]"
     ]));
   },
+  assoc_new: (path, print) => {
+    const parts = [];
+
+    switch (path.getValue().body[0].type) {
+      case "@label":
+        parts.push(path.call(print, "body", 0));
+        break;
+      case "symbol_literal":
+        parts.push(concat([
+          path.call(print, "body", 0).parts[0].parts[1],
+          ":"
+        ]));
+        break;
+      default:
+        parts.push(path.call(print, "body", 0), " =>")
+        break;
+    }
+
+    parts.push(line, indent(path.call(print, "body", 1)));
+
+    return group(concat(parts));
+  },
+  assoclist_from_args: (path, print) => group(
+    join(concat([",", line]),
+    path.map(print, "body", 0))
+  ),
   assign: (path, print) => join(" = ", path.map(print, "body")),
   begin: (path, print) => group(concat([
     "begin",
@@ -177,6 +203,13 @@ const nodes = {
     indent(concat([hardline, concat(path.map(print, "body"))]))
   ])),
   fcall: concatBody,
+  hash: (path, print) => group(concat([
+    "{",
+    line,
+    indent(concat(path.map(print, "body"))),
+    line,
+    "}"
+  ])),
   if: (path, print) => {
     const [_predicate, _statements, addition] = path.getValue().body;
     const parts = [

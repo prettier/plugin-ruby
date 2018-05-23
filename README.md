@@ -15,9 +15,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] arg_ambiguous
 - [ ] args_add_star
 - [ ] assign_error
-- [ ] assoc_new
 - [ ] assoc_splat
-- [ ] assoclist_from_args
 - [ ] bare_assoc_hash
 - [ ] blockarg
 - [ ] class_name_error
@@ -27,7 +25,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] excessed_comma
 - [ ] field
 - [ ] for
-- [ ] hash
 - [ ] heredoc_dedent
 - [ ] if_mod
 - [ ] ifop
@@ -67,6 +64,8 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] args_new
 - [x] array
 - [x] assign
+- [x] assoc_new
+- [x] assoclist_from_args
 - [x] begin
 - [x] binary
 - [x] block_var
@@ -89,6 +88,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] elsif
 - [x] ensure
 - [x] fcall
+- [x] hash
 - [x] if
 - [x] massign
 - [x] method_add_arg
