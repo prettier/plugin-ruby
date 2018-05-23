@@ -15,8 +15,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] arg_ambiguous
 - [ ] args_add_star
 - [ ] assign_error
-- [ ] assoc_splat
-- [ ] bare_assoc_hash
 - [ ] blockarg
 - [ ] class_name_error
 - [ ] command_call
@@ -56,7 +54,9 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] array
 - [x] assign
 - [x] assoc_new
+- [x] assoc_splat
 - [x] assoclist_from_args
+- [x] bare_assoc_hash
 - [x] begin
 - [x] binary
 - [x] block_var

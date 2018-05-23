@@ -70,6 +70,10 @@ const nodes = {
 
     return group(concat(parts));
   },
+  assoc_splat: (path, print) => group(concat([
+    "**",
+    path.call(print, "body", 0)
+  ])),
   assoclist_from_args: (path, print) => group(
     join(concat([",", line]),
     path.map(print, "body", 0))
@@ -79,6 +83,10 @@ const nodes = {
     " =",
     indent(concat([line, path.call(print, "body", 1)]))
   ])),
+  bare_assoc_hash: (path, print) => group(
+    join(concat([",", line]),
+    path.map(print, "body", 0)
+  )),
   begin: (path, print) => group(concat([
     "begin",
     indent(concat([hardline, concat(path.map(print, "body"))])),
@@ -209,10 +217,8 @@ const nodes = {
   fcall: concatBody,
   hash: (path, print) => group(concat([
     "{",
-    line,
-    indent(concat(path.map(print, "body"))),
-    line,
-    "}"
+    indent(concat([line, concat(path.map(print, "body"))])),
+    concat([line, "}"])
   ])),
   if: (path, print) => {
     const [_predicate, _statements, addition] = path.getValue().body;
@@ -294,20 +300,27 @@ const nodes = {
     return "next";
   },
   params: (path, print) => {
-    const [req, opt, ...rest] = path.getValue().body;
+    const [reqs, opts, _1, _2, kwargs, _3, _4] = path.getValue().body;
     let parts = [];
 
-    if (req) {
+    if (reqs) {
       parts = parts.concat(path.map(print, "body", 0));
     }
 
-    if (opt) {
-      parts = parts.concat(opt.map((name, index) => {
-        return concat([
-          path.call(print, "body", 1, index, 0),
-          " = ",
-          path.call(print, "body", 1, index, 1)
-        ]);
+    if (opts) {
+      parts = parts.concat(opts.map((_, index) => concat([
+        path.call(print, "body", 1, index, 0),
+        " = ",
+        path.call(print, "body", 1, index, 1)
+      ])));
+    }
+
+    if (kwargs) {
+      parts = parts.concat(kwargs.map(([kwarg, value], index) => {
+        if (!value) {
+          return path.call(print, "body", 4, index, 0);
+        }
+        return group(join(" ", path.map(print, "body", 4, index)));
       }));
     }
 
