@@ -422,6 +422,7 @@ const nodes = {
 
     return group(concat(parts));
   },
+  rescue_mod: (path, print) => group(join(" rescue ", path.map(print, "body"))),
   retry: (path, print) => "retry",
   return: (path, print) => group(concat(["return ", concat(path.map(print, "body"))])),
   return0: (path, print) => "return",

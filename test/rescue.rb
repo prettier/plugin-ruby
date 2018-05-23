@@ -11,3 +11,5 @@ else
 ensure
   4
 end
+
+a rescue nil
