@@ -39,27 +39,41 @@ const nodes = {
   },
   args_add: (path, print) => {
     if (path.getValue().body[0].type === "args_new") {
-      return path.map(print, "body");
+      return path.call(print, "body", 1);
     }
 
-    return [...path.call(print, "body", 0), ",", line, path.call(print, "body", 1)];
+    return concat([
+      path.call(print, "body", 0),
+      ",",
+      line,
+      path.call(print, "body", 1)
+    ]);
   },
   args_add_block: (path, print) => {
     const [args, block] = path.getValue().body;
-    const parts = args.type === "args_new" ? [] : path.call(print, "body", 0).slice(1);
+    const parts = args.type === "args_new" ? [] : [path.call(print, "body", 0)];
 
     if (block) {
+      if (parts.length > 0) {
+        parts.push(",", line);
+      }
       parts.push(concat(["&", path.call(print, "body", 1)]));
     }
 
     return group(concat(parts));
   },
-  args_add_star: (path, print) => path.call(print, "body", 0).concat([
-    ",",
-    line,
-    "*",
-    path.call(print, "body", 1)
-  ]),
+  args_add_star: (path, print) => {
+    if (path.getValue().body[0].type === "args_new") {
+      return concat(["*", path.call(print, "body", 1)]);
+    }
+
+    return concat([
+      path.call(print, "body", 0),
+      ",",
+      line,
+      concat(["*", path.call(print, "body", 1)])
+    ]);
+  },
   args_new: (path, print) => group(concat(["[", softline])),
   array: (path, print) => {
     if (path.getValue().body[0] === null) {
