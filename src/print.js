@@ -156,15 +156,11 @@ const nodes = {
 
     return group(concat([
       group(concat(parts)),
-      indent(concat([hardline, path.call(print, "body", 2)])),
-      group(concat([hardline, "end"])),
-      softline
+      indent(path.call(print, "body", 2)),
+      group(concat([hardline, "end"]))
     ]));
   },
-  command: (path, print) => group(concat([
-    join(" ", path.map(print, "body")),
-    hardline
-  ])),
+  command: (path, print) => group(join(" ", path.map(print, "body"))),
   const_path_ref: (path, print) => join("::", path.map(print, "body")),
   const_ref: (path, print) => path.call(print, "body", 0),
   def: (path, print) => concat([
@@ -175,8 +171,7 @@ const nodes = {
       path.call(print, "body", 1)
     ])),
     indent(concat([hardline, path.call(print, "body", 2)])),
-    group(concat([hardline, "end"])),
-    softline
+    group(concat([hardline, "end"]))
   ]),
   defined: (path, print) => group(concat([
     "defined?(",
@@ -303,8 +298,8 @@ const nodes = {
   mrhs_new_from_args: (path, print) => concat(path.call(print, "body", 0).slice(1)),
   module: (path, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
-    indent(concat([hardline, path.call(print, "body", 1)])),
-    dedent(concat([hardline, "end", hardline]))
+    indent(path.call(print, "body", 1)),
+    dedent(concat([hardline, "end"]))
   ])),
   mrhs_add: (path, print) => {
     if (path.getValue().body[0].type === "mrhs_new") {
@@ -422,7 +417,12 @@ const nodes = {
     indent(path.call(print, "body", 1)),
     concat([hardline, "end"])
   ])),
-  stmts_add: concatBody,
+  stmts_add: (path, print) => {
+    if (path.getValue().body[0].type === "stmts_new") {
+      return path.call(print, "body", 1);
+    }
+    return group(join(hardline, path.map(print, "body")));
+  },
   stmts_new: (path, print) => "",
   string_add: (path, print) => {
     const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";
