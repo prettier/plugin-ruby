@@ -157,17 +157,18 @@ const nodes = {
   ])),
   class: (path, print) => {
     const [_constant, superclass, _statements] = path.getValue().body;
-    const parts = ["class ", path.call(print, "body", 0)];
+    const parts = [concat(["class ", path.call(print, "body", 0)])];
 
     if (superclass) {
-      parts.push(" < ", path.call(print, "body", 1));
+      parts.push(concat([" < ", path.call(print, "body", 1)]));
+      parts.push(indent(concat([hardline, path.call(print, "body", 2)])));
+    } else {
+      parts.push(indent(path.call(print, "body", 2)));
     }
 
-    return group(concat([
-      group(concat(parts)),
-      indent(path.call(print, "body", 2)),
-      group(concat([hardline, "end"]))
-    ]));
+    parts.push(concat([hardline, "end"]));
+
+    return group(concat(parts));
   },
   command: (path, print) => group(join(" ", path.map(print, "body"))),
   const_path_ref: (path, print) => join("::", path.map(print, "body")),
