@@ -5,6 +5,38 @@ const {
 
 const concatBody = (path, print) => concat(path.map(print, "body"));
 
+const printConditional = keyword => (path, print) => {
+  const [_predicate, _statements, addition] = path.getValue().body;
+
+  if (addition) {
+    return group(concat([
+      `${keyword} `,
+      path.call(print, "body", 0),
+      indent(concat([hardline, path.call(print, "body", 1)])),
+      concat([hardline, path.call(print, "body", 2)]),
+      concat([hardline, "end"])
+    ]));
+  }
+
+  return group(ifBreak(
+    concat([
+      `${keyword} `,
+      path.call(print, "body", 0),
+      indent(concat([softline, path.call(print, "body", 1)])),
+      concat([softline, "end"])
+    ]),
+    concat([
+      path.call(print, "body", 1),
+      ` ${keyword} `,
+      path.call(print, "body", 0)
+    ]),
+  ));
+};
+
+const printIf = printConditional("if");
+
+const printUnless = printConditional("unless");
+
 const nodes = {
   alias: (path, print) => concat([
     "alias ",
@@ -240,21 +272,8 @@ const nodes = {
     indent(concat([line, concat(path.map(print, "body"))])),
     concat([line, "}"])
   ])),
-  if: (path, print) => {
-    const [_predicate, _statements, addition] = path.getValue().body;
-    const parts = [
-      group(concat(["if ", path.call(print, "body", 0)])),
-      indent(concat([hardline, path.call(print, "body", 1)])),
-      hardline,
-    ];
-
-    if (addition) {
-      parts.push(group(concat([path.call(print, "body", 2), hardline])));
-    }
-
-    parts.push("end");
-    return group(concat(parts));
-  },
+  if: printIf,
+  if_mod: printIf,
   lambda: (path, print) => {
     const args = path.call(print, "body", 0);
 
@@ -484,11 +503,8 @@ const nodes = {
     path.call(print, "body", 1)
   ]),
   undef: (path, print) => concat(["undef ", concat(path.map(print, "body", 0))]),
-  unless: (path, print) => concat([
-    group(concat(["unless ", path.call(print, "body", 0)])),
-    indent(concat([hardline, concat(path.map(print, "body", 1))])),
-    group(concat([hardline, "end"]))
-  ]),
+  unless: printUnless,
+  unless_mod: printUnless,
   until: (path, print) => group(concat([
     group(concat(["until ", path.call(print, "body", 0)])),
     indent(concat([hardline, path.call(print, "body", 1)])),

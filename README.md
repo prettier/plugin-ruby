@@ -23,7 +23,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] field
 - [ ] for
 - [ ] heredoc_dedent
-- [ ] if_mod
 - [ ] ifop
 - [ ] kwrest_param
 - [ ] magic_comment
@@ -36,7 +35,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] string_dvar
 - [ ] top_const_field
 - [ ] top_const_ref
-- [ ] unless_mod
 - [ ] until_mod
 - [ ] var_alias
 - [ ] while_mod
@@ -80,6 +78,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] fcall
 - [x] hash
 - [x] if
+- [x] if_mod
 - [x] lambda
 - [x] massign
 - [x] method_add_arg
@@ -126,6 +125,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] unary
 - [x] undef
 - [x] unless
+- [x] unless_mod
 - [x] until
 - [x] var_field
 - [x] var_ref
