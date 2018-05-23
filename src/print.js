@@ -14,12 +14,18 @@ const nodes = {
     "alias ",
     join(" ", path.map(print, "body"))
   ]),
-  aref: (path, print) => concat([
+  aref: (path, print) => group(concat([
     path.call(print, "body", 0),
     "[",
-    path.call(print, "body", 1),
-    "]"
-  ]),
+    indent(concat([softline, path.call(print, "body", 1)])),
+    concat([softline, "]"])
+  ])),
+  aref_field: (path, print) => group(concat([
+    path.call(print, "body", 0),
+    "[",
+    indent(concat([softline, path.call(print, "body", 1)])),
+    concat([softline, "]"])
+  ])),
   arg_paren: (path, print) => {
     if (path.getValue().body === null) {
       return "";

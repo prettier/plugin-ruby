@@ -11,7 +11,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] BEGIN
 - [ ] END
 - [ ] alias_error
-- [ ] aref_field
 - [ ] arg_ambiguous
 - [ ] assign_error
 - [ ] class_name_error
@@ -30,6 +29,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 
 - [x] alias
 - [x] aref
+- [x] aref_field
 - [x] arg_paren
 - [x] args_add
 - [x] args_add_block
