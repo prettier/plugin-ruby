@@ -177,8 +177,8 @@ const nodes = {
   },
   ensure: (path, print) => group(concat([
     "ensure",
-    indent(concat([hardline, concat(path.map(print, "body", 0))
-  ]))])),
+    indent(concat([hardline, concat(path.map(print, "body"))]))
+  ])),
   fcall: concatBody,
   if: (path, print) => {
     const [_predicate, _statements, addition] = path.getValue().body;
@@ -256,7 +256,7 @@ const nodes = {
     ]));
   },
   rescue: (path, print) => {
-    const [exception, variable, _statements, _2] = path.getValue().body;
+    const [exception, variable, _statements, addition] = path.getValue().body;
     const parts = ["rescue"];
 
     if (exception) {
@@ -267,7 +267,11 @@ const nodes = {
       parts.push(group(concat([" => ", path.call(print, "body", 1)])));
     }
 
-    parts.push(indent(concat([hardline, concat(path.map(print, "body", 2))])));
+    parts.push(indent(concat([hardline, path.call(print, "body", 2)])));
+
+    if (addition) {
+      parts.push(concat([hardline, path.call(print, "body", 3)]));
+    }
 
     return group(concat(parts));
   },
