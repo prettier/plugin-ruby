@@ -16,7 +16,7 @@ const nodes = {
     "]"
   ]),
   arg_paren: (path, print) => group(concat([
-    "(", 
+    "(",
     concat(path.map(print, "body")),
     ")"
   ])),
@@ -110,15 +110,17 @@ const nodes = {
       group(concat(parts)),
       indent(concat([hardline, path.call(print, "body", 2)])),
       group(concat([hardline, "end"])),
-      literalline
+      hardline
     ]));
   },
-  command: (path, print) => join(" ", path.map(print, "body")),
+  command: (path, print) => group(concat([
+    join(" ", path.map(print, "body")),
+    hardline
+  ])),
   const_path_ref: (path, print) => join("::", path.map(print, "body")),
   const_ref: (path, print) => path.call(print, "body", 0),
   def: (path, print) => concat([
     group(concat([
-      hardline,
       hardline,
       "def ",
       path.call(print, "body", 0),
@@ -199,11 +201,11 @@ const nodes = {
   ]),
   method_add_arg: concatBody,
   method_add_block: (path, print) => join(" ", path.map(print, "body")),
-  module: (path, print) => concat([
+  module: (path, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
-    indent(path.call(print, "body", 1)),
-    dedent(concat(["end", literalline]))
-  ]),
+    indent(concat([hardline, path.call(print, "body", 1)])),
+    dedent(concat([hardline, "end", hardline]))
+  ])),
   next: (path, print) => {
     if (path.getValue().body.length > 0) {
       return concat(["next ", path.call(print, "body", 0)]);
@@ -289,7 +291,10 @@ const nodes = {
   },
   string_embexpr: (path, print) => concat(["#{", concat(path.map(print, "body")), "}"]),
   string_literal: concatBody,
-  super: concatBody,
+  super: (path, print) => group(concat([
+    "super",
+    concat(path.map(print, "body"))
+  ])),
   symbol: (path, print) => concat([
     ":",
     concat(path.map(print, "body"))
@@ -339,10 +344,7 @@ const nodes = {
     concat(path.map(print, "body"))
   ]),
   yield0: (path, print) => "yield",
-  zsuper: (path, print) => concat([
-    "super",
-    concat(path.map(print, "body"))
-  ])
+  zsuper: (path, print) => "super"
 };
 
 const debugNode = (path, print) => {
