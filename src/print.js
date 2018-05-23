@@ -419,22 +419,26 @@ const nodes = {
     return group(join(hardline, path.map(print, "body")));
   },
   stmts_new: (path, print) => "",
-  string_add: (path, print) => {
-    const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";
-    return concat([delim, concat(path.map(print, "body")), delim]);
-  },
   string_concat: (path, print) => group(concat([
     path.call(print, "body", 0),
     " \\",
-    indent(concat([line, path.call(print, "body", 1)]))
+    indent(concat([hardline, path.call(print, "body", 1)]))
   ])),
   string_content: (path, print) => "",
-  string_add: (path, print) => {
-    const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";
-    return concat([delim, concat(path.map(print, "body")), delim]);
+  string_add: (path, print) => [
+    ...path.call(print, "body", 0),
+    path.call(print, "body", 1)
+  ],
+  string_embexpr: (path, print) => concat([
+    "#{",
+    path.call(print, "body", 0),
+    "}"
+  ]),
+  string_literal: (path, print) => {
+    const parts = path.call(print, "body", 0);
+    const delim = parts.some(part => part.parts && part.parts[0] === "#{") ? "\"" : "\'";
+    return concat([delim, ...parts, delim]);
   },
-  string_embexpr: (path, print) => concat(["#{", concat(path.map(print, "body")), "}"]),
-  string_literal: concatBody,
   super: (path, print) => group(concat([
     "super",
     concat(path.map(print, "body"))
