@@ -110,7 +110,7 @@ const nodes = {
       group(concat(parts)),
       indent(concat([hardline, path.call(print, "body", 2)])),
       group(concat([hardline, "end"])),
-      hardline
+      softline
     ]));
   },
   command: (path, print) => group(concat([
@@ -127,7 +127,8 @@ const nodes = {
       path.call(print, "body", 1)
     ])),
     indent(concat([hardline, path.call(print, "body", 2)])),
-    group(concat([hardline, "end"]))
+    group(concat([hardline, "end"])),
+    softline
   ]),
   defined: (path, print) => group(concat([
     "defined?(",
