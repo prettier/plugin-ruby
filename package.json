@@ -19,6 +19,6 @@
   "homepage": "https://github.com/kddeisz/prettier-ruby#readme",
   "dependencies": {
     "prettier": "^1.12.1",
-    "ripperjs": "^0.0.2"
+    "ripperjs": "^0.1.0"
   }
 }

@@ -5,24 +5,33 @@ const {
 const concatBody = (path, print) => concat(path.map(print, "body"));
 
 const nodes = {
-  alias: (path, print) => concat(["alias ", join(" ", path.map(print, "body"))]),
+  alias: (path, print) => concat([
+    "alias ",
+    join(" ", path.map(print, "body"))
+  ]),
   aref: (path, print) => concat([
     path.call(print, "body", 0),
     "[",
     path.call(print, "body", 1),
     "]"
   ]),
-  arg_paren: (path, print) => group(concat(["(", concat(path.map(print, "body")), ")"])),
+  arg_paren: (path, print) => group(concat([
+    "(", 
+    concat(path.map(print, "body")),
+    ")"
+  ])),
+  args_add: (path, print) => group(join(", ", path.map(print, "body").slice(1))),
   args_add_block: (path, print) => {
     const [_, block] = path.getValue().body;
-    const parts = [join(", ", path.map(print, "body", 0))];
+    const parts = [path.call(print, "body", 0)];
 
     if (block) {
-      parts.push("&", path.call(print, "body", 1));
+      parts.push(concat(["&", path.call(print, "body", 1)]));
     }
 
     return group(concat(parts));
   },
+  args_new: (path, print) => "",
   array: (path, print) => {
     if (path.getValue().body[0].every(({ type }) => type === "@tstring_content")) {
       return group(concat([
@@ -55,7 +64,7 @@ const nodes = {
   block_var: (path, print) => concat(["|", path.call(print, "body", 0), "| "]),
   bodystmt: (path, print) => {
     const [statements, ...additions] = path.getValue().body;
-    const parts = [join(hardline, path.map(print, "body", 0))];
+    const parts = [path.call(print, "body", 0)];
 
     additions.forEach((addition, index) => {
       if (addition) {
@@ -108,7 +117,13 @@ const nodes = {
   const_path_ref: (path, print) => join("::", path.map(print, "body")),
   const_ref: (path, print) => path.call(print, "body", 0),
   def: (path, print) => concat([
-    group(concat([hardline, "def ", path.call(print, "body", 0), path.call(print, "body", 1)])),
+    group(concat([
+      hardline,
+      hardline,
+      "def ",
+      path.call(print, "body", 0),
+      path.call(print, "body", 1)
+    ])),
     indent(concat([hardline, path.call(print, "body", 2)])),
     group(concat([hardline, "end"]))
   ]),
@@ -137,7 +152,7 @@ const nodes = {
   ]),
   dyna_symbol: (path, print) => concat([
     ":\"",
-    concat(path.map(print, "body", 0)),
+    concat(path.map(print, "body")),
     "\""
   ]),
   else: (path, print) => group(concat([
@@ -224,7 +239,7 @@ const nodes = {
     }, [])), ")"])
   ),
   program: (path, print) => markAsRoot(concat([
-    join(literalline, path.map(print, "body", 0)),
+    join(literalline, path.map(print, "body")),
     literalline
   ])),
   redo: (path, print) => "redo",
@@ -261,6 +276,8 @@ const nodes = {
     indent(path.call(print, "body", 1)),
     concat([hardline, "end"])
   ])),
+  stmts_add: concatBody,
+  stmts_new: (path, print) => "",
   string_concat: (path, print) => group(concat([
     path.call(print, "body", 0),
     " \\",
@@ -270,10 +287,13 @@ const nodes = {
     const delim = path.getValue().body.some(({ type }) => type === "string_embexpr") ? "\"" : "'";
     return concat([delim, concat(path.map(print, "body")), delim]);
   },
-  string_embexpr: (path, print) => concat(["#{", concat(path.map(print, "body", 0)), "}"]),
+  string_embexpr: (path, print) => concat(["#{", concat(path.map(print, "body")), "}"]),
   string_literal: concatBody,
   super: concatBody,
-  symbol: (path, print) => concat([":", concat(path.map(print, "body"))]),
+  symbol: (path, print) => concat([
+    ":",
+    concat(path.map(print, "body"))
+  ]),
   symbol_literal: concatBody,
   unary: (path, print) => concat([
     path.getValue().body[0][0],
@@ -312,6 +332,8 @@ const nodes = {
     indent(concat([hardline, concat(path.map(print, "body", 1))])),
     group(concat([hardline, "end"]))
   ])),
+  xstring_add: concatBody,
+  xstring_new: (path, print) => "",
   yield: (path, print) => concat([
     "yield ",
     concat(path.map(print, "body"))
@@ -325,16 +347,16 @@ const nodes = {
 
 const debugNode = (path, print) => {
   console.log("=== UNSUPPORTED NODE ===");
-  console.log(path.getValue());
+  console.log(JSON.stringify(path.getValue(), null, 2));
   console.log("========================");
   return "";
 };
 
 const genericPrint = (path, options, print) => {
-  const { type } = path.getValue();
+  const { type, body } = path.getValue();
 
   if (type[0] === "@") {
-    return path.getValue().body;
+    return body;
   }
 
   return (nodes[type] || debugNode)(path, print);

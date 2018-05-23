@@ -1,1 +1,7 @@
-:"a#{foo + 1}b"
+class Foo < S
+  attr_accessor :bar
+
+  def initialize(name, bar)
+    @hi = name
+  end
+end
