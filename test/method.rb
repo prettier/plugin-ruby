@@ -1,9 +1,3 @@
-def foo(a, b, c, d = 1, e = 2)
-  a + b + c + d + e
+def foo(a, b, c = 1, d = 2, *e, f, g, h:, i:, j: 1, k: 2, **l, &block)
+  'what'
 end
-
-def bar(&block)
-  block.call
-end
-
-foo(1, 2, 3, 4, 5)

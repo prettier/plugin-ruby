@@ -29,7 +29,6 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [ ] operator_ambiguous
 - [ ] param_error
 - [ ] parse_error
-- [ ] rest_param
 - [ ] string_dvar
 - [ ] top_const_field
 - [ ] top_const_ref
@@ -104,6 +103,7 @@ There are a lot of node types to support still, as well as tests to write for ea
 - [x] regexp_new
 - [x] rescue
 - [x] rescue_mod
+- [x] rest_param
 - [x] retry
 - [x] return
 - [x] return0

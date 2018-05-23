@@ -5,6 +5,7 @@ const {
 
 const { printIf, printUnless } = require("./conditionals");
 const { printWhile, printUntil } = require("./loops");
+const { printKwargRestParam, printRestParam, printParams } = require("./params");
 
 const concatBody = (path, print) => concat(path.map(print, "body"));
 
@@ -264,6 +265,7 @@ const nodes = {
       ])
     ));
   },
+  kwrest_param: printKwargRestParam,
   massign: (path, print) => group(concat([
     path.call(print, "body", 0),
     " =",
@@ -333,37 +335,7 @@ const nodes = {
     }
     return "next";
   },
-  params: (path, print) => {
-    const [reqs, opts, _1, _2, kwargs, _3, block] = path.getValue().body;
-    let parts = [];
-
-    if (reqs) {
-      parts = parts.concat(path.map(print, "body", 0));
-    }
-
-    if (opts) {
-      parts = parts.concat(opts.map((_, index) => concat([
-        path.call(print, "body", 1, index, 0),
-        " = ",
-        path.call(print, "body", 1, index, 1)
-      ])));
-    }
-
-    if (kwargs) {
-      parts = parts.concat(kwargs.map(([kwarg, value], index) => {
-        if (!value) {
-          return path.call(print, "body", 4, index, 0);
-        }
-        return group(join(" ", path.map(print, "body", 4, index)));
-      }));
-    }
-
-    if (block) {
-      parts.push(path.call(print, "body", 6));
-    }
-
-    return join(", ", parts);
-  },
+  params: printParams,
   paren: (path, print) => (
     concat(["(", concat(path.getValue().body.reduce((parts, part, index) => {
       if (Array.isArray(part)) {
@@ -427,6 +399,7 @@ const nodes = {
     return group(concat(parts));
   },
   rescue_mod: (path, print) => group(join(" rescue ", path.map(print, "body"))),
+  rest_param: printRestParam,
   retry: (path, print) => "retry",
   return: (path, print) => group(concat(["return ", concat(path.map(print, "body"))])),
   return0: (path, print) => "return",
