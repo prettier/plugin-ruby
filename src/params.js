@@ -1,14 +1,14 @@
 const { concat, group, join } = require("prettier").doc.builders;
 
-const printKwargRestParam = (path, print) => (
+const printKwargRestParam = (path, options, print) => (
   concat(["**", path.call(print, "body", 0)])
 );
 
-const printRestParam = (path, print) => (
+const printRestParam = (path, options, print) => (
   concat(["*", path.call(print, "body", 0)])
 );
 
-const printParams = (path, print) => {
+const printParams = (path, options, print) => {
   const [reqs, opts, rest, post, kwargs, kwarg_rest, block] = path.getValue().body;
   let parts = [];
 

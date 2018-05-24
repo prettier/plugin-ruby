@@ -8,26 +8,26 @@ const { printWhile, printUntil, printFor } = require("./loops");
 const { printKwargRestParam, printRestParam, printParams } = require("./params");
 const lineNoFrom = require("./layout");
 
-const concatBody = (path, print) => concat(path.map(print, "body"));
+const concatBody = (path, options, print) => concat(path.map(print, "body"));
 
 const nodes = {
-  alias: (path, print) => concat([
+  alias: (path, options, print) => concat([
     "alias ",
     join(" ", path.map(print, "body"))
   ]),
-  aref: (path, print) => group(concat([
+  aref: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     "[",
     indent(concat([softline, path.call(print, "body", 1)])),
     concat([softline, "]"])
   ])),
-  aref_field: (path, print) => group(concat([
+  aref_field: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     "[",
     indent(concat([softline, path.call(print, "body", 1)])),
     concat([softline, "]"])
   ])),
-  arg_paren: (path, print) => {
+  arg_paren: (path, options, print) => {
     if (path.getValue().body === null) {
       return "";
     }
@@ -38,7 +38,7 @@ const nodes = {
       concat([softline, ")"])
     ]))
   },
-  args_add: (path, print) => {
+  args_add: (path, options, print) => {
     if (path.getValue().body[0].type === "args_new") {
       return path.call(print, "body", 1);
     }
@@ -50,7 +50,7 @@ const nodes = {
       path.call(print, "body", 1)
     ]);
   },
-  args_add_block: (path, print) => {
+  args_add_block: (path, options, print) => {
     const [args, block] = path.getValue().body;
     const parts = args.type === "args_new" ? [] : [path.call(print, "body", 0)];
 
@@ -63,7 +63,7 @@ const nodes = {
 
     return group(concat(parts));
   },
-  args_add_star: (path, print) => {
+  args_add_star: (path, options, print) => {
     if (path.getValue().body[0].type === "args_new") {
       return concat(["*", path.call(print, "body", 1)]);
     }
@@ -75,8 +75,8 @@ const nodes = {
       concat(["*", path.call(print, "body", 1)])
     ]);
   },
-  args_new: (path, print) => group(concat(["[", softline])),
-  array: (path, print) => {
+  args_new: (path, options, print) => group(concat(["[", softline])),
+  array: (path, options, print) => {
     if (path.getValue().body[0] === null) {
       return '[]';
     }
@@ -92,7 +92,7 @@ const nodes = {
       "]"
     ]));
   },
-  assoc_new: (path, print) => {
+  assoc_new: (path, options, print) => {
     const parts = [];
 
     switch (path.getValue().body[0].type) {
@@ -114,35 +114,35 @@ const nodes = {
 
     return group(concat(parts));
   },
-  assoc_splat: (path, print) => group(concat([
+  assoc_splat: (path, options, print) => group(concat([
     "**",
     path.call(print, "body", 0)
   ])),
-  assoclist_from_args: (path, print) => group(
+  assoclist_from_args: (path, options, print) => group(
     join(concat([",", line]),
     path.map(print, "body", 0))
   ),
-  assign: (path, print) => group(concat([
+  assign: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     " =",
     indent(concat([line, path.call(print, "body", 1)]))
   ])),
-  bare_assoc_hash: (path, print) => group(
+  bare_assoc_hash: (path, options, print) => group(
     join(concat([",", line]),
     path.map(print, "body", 0)
   )),
-  begin: (path, print) => group(concat([
+  begin: (path, options, print) => group(concat([
     "begin",
     indent(concat([hardline, concat(path.map(print, "body"))])),
     group(concat([hardline, "end"]))
   ])),
-  binary: (path, print) => join(` ${path.getValue().body[1]} `, [
+  binary: (path, options, print) => join(` ${path.getValue().body[1]} `, [
     path.call(print, "body", 0),
     path.call(print, "body", 2)
   ]),
-  block_var: (path, print) => concat(["|", path.call(print, "body", 0), "| "]),
-  blockarg: (path, print) => concat(["&", path.call(print, "body", 0)]),
-  bodystmt: (path, print) => {
+  block_var: (path, options, print) => concat(["|", path.call(print, "body", 0), "| "]),
+  blockarg: (path, options, print) => concat(["&", path.call(print, "body", 0)]),
+  bodystmt: (path, options, print) => {
     const [statements, ...additions] = path.getValue().body;
     const parts = [path.call(print, "body", 0)];
 
@@ -157,7 +157,7 @@ const nodes = {
 
     return group(concat(parts));
   },
-  brace_block: (path, print) => {
+  brace_block: (path, options, print) => {
     const parts = ["{ "];
 
     if (path.getValue().body[0]) {
@@ -167,17 +167,17 @@ const nodes = {
 
     return group(concat(parts));
   },
-  break: (path, print) => {
+  break: (path, options, print) => {
     if (path.getValue().body[0].length > 0) {
       return concat(["break ", path.call(print, "body", 0)]);
     }
     return "break";
   },
-  call: (path, print) => join(path.getValue().body[1], [
+  call: (path, options, print) => join(path.getValue().body[1], [
     path.call(print, "body", 0),
     path.call(print, "body", 2)
   ]),
-  case: (path, print) => {
+  case: (path, options, print) => {
     const parts = ["case "];
 
     if (path.getValue().body[0]) {
@@ -191,7 +191,7 @@ const nodes = {
 
     return group(concat(parts));
   },
-  class: (path, print) => {
+  class: (path, options, print) => {
     const [_constant, superclass, _statements] = path.getValue().body;
     const parts = [concat(["class ", path.call(print, "body", 0)])];
 
@@ -206,11 +206,11 @@ const nodes = {
 
     return group(concat(parts));
   },
-  command: (path, print) => group(join(" ", path.map(print, "body"))),
-  const_path_field: (path, print) => join("::", path.map(print, "body")),
-  const_path_ref: (path, print) => join("::", path.map(print, "body")),
-  const_ref: (path, print) => path.call(print, "body", 0),
-  def: (path, print) => group(concat([
+  command: (path, options, print) => group(join(" ", path.map(print, "body"))),
+  const_path_field: (path, options, print) => join("::", path.map(print, "body")),
+  const_path_ref: (path, options, print) => join("::", path.map(print, "body")),
+  const_ref: (path, options, print) => path.call(print, "body", 0),
+  def: (path, options, print) => group(concat([
     group(concat([
       "def ",
       path.call(print, "body", 0),
@@ -219,7 +219,7 @@ const nodes = {
     indent(concat([hardline, path.call(print, "body", 2)])),
     group(concat([hardline, "end"]))
   ])),
-  defs: (path, print) => group(concat([
+  defs: (path, options, print) => group(concat([
     group(concat([
       "def ",
       path.call(print, "body", 0),
@@ -230,14 +230,14 @@ const nodes = {
     indent(concat([hardline, path.call(print, "body", 4)])),
     group(concat([hardline, "end"]))
   ])),
-  defined: (path, print) => group(concat([
+  defined: (path, options, print) => group(concat([
     "defined?(",
     softline,
     indent(concat(path.map(print, "body"))),
     softline,
     ")"
   ])),
-  do_block: (path, print) => {
+  do_block: (path, options, print) => {
     const parts = ["do"];
 
     if (path.getValue().body[0]) {
@@ -251,26 +251,26 @@ const nodes = {
 
     return group(concat(parts));
   },
-  dot2: (path, print) => concat([
+  dot2: (path, options, print) => concat([
     path.call(print, "body", 0),
     "..",
     path.call(print, "body", 1)
   ]),
-  dot3: (path, print) => concat([
+  dot3: (path, options, print) => concat([
     path.call(print, "body", 0),
     "...",
     path.call(print, "body", 1)
   ]),
-  dyna_symbol: (path, print) => concat([
+  dyna_symbol: (path, options, print) => concat([
     ":\"",
     concat(path.map(print, "body")),
     "\""
   ]),
-  else: (path, print) => concat([
+  else: (path, options, print) => concat([
     "else",
     indent(concat([softline, path.call(print, "body", 0)]))
   ]),
-  elsif: (path, print) => {
+  elsif: (path, options, print) => {
     const [_predicate, _statements, addition] = path.getValue().body;
     const parts = [
       group(concat(["elsif ", path.call(print, "body", 0)])),
@@ -283,18 +283,18 @@ const nodes = {
 
     return group(concat(parts));
   },
-  ensure: (path, print) => group(concat([
+  ensure: (path, options, print) => group(concat([
     "ensure",
     indent(concat([hardline, concat(path.map(print, "body"))]))
   ])),
   fcall: concatBody,
-  field: (path, print) => group(concat([
+  field: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     path.getValue().body[1],
     path.call(print, "body", 2)
   ])),
   for: printFor,
-  hash: (path, print) => {
+  hash: (path, options, print) => {
     if (path.getValue().body[0] === null) {
       return '{}';
     }
@@ -308,7 +308,7 @@ const nodes = {
   if: printIf,
   ifop: printTernary,
   if_mod: printIf,
-  lambda: (path, print) => {
+  lambda: (path, options, print) => {
     const args = path.call(print, "body", 0);
 
     return group(ifBreak(
@@ -328,19 +328,19 @@ const nodes = {
     ));
   },
   kwrest_param: printKwargRestParam,
-  massign: (path, print) => group(concat([
+  massign: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     " =",
     indent(concat([line, path.call(print, "body", 1)]))
   ])),
-  method_add_arg: (path, print) => {
+  method_add_arg: (path, options, print) => {
     if (path.getValue().body[1].type === "args_new") {
       return path.call(print, "body", 0);
     }
     return group(concat(path.map(print, "body")));
   },
-  method_add_block: (path, print) => join(" ", path.map(print, "body")),
-  mlhs_add: (path, print) => {
+  method_add_block: (path, options, print) => join(" ", path.map(print, "body")),
+  mlhs_add: (path, options, print) => {
     if (path.getValue().body[0].type === "mlhs_new") {
       return path.call(print, "body", 1);
     }
@@ -352,33 +352,33 @@ const nodes = {
       path.call(print, "body", 1)
     ]);
   },
-  mlhs_add_post: (path, print) => group(concat([
+  mlhs_add_post: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     ",",
     group(concat([line, path.call(print, "body", 1)]))
   ])),
-  mlhs_add_star: (path, print) => group(concat([
+  mlhs_add_star: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     ",",
     group(concat([line, "*", path.call(print, "body", 1)]))
   ])),
-  mrhs_add_star: (path, print) => group(concat([
+  mrhs_add_star: (path, options, print) => group(concat([
     "*",
     concat(path.map(print, "body"))
   ])),
-  mlhs_paren: (path, print) => group(concat([
+  mlhs_paren: (path, options, print) => group(concat([
     "(",
     indent(concat([softline, path.call(print, "body", 0)])),
     concat([softline, ")"])
   ])),
-  mlhs_new: (path, print) => "",
-  mrhs_new_from_args: (path, print) => path.call(print, "body", 0),
-  module: (path, print) => group(concat([
+  mlhs_new: (path, options, print) => "",
+  mrhs_new_from_args: (path, options, print) => path.call(print, "body", 0),
+  module: (path, options, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
     indent(path.call(print, "body", 1)),
     dedent(concat([hardline, "end"]))
   ])),
-  mrhs_add: (path, print) => {
+  mrhs_add: (path, options, print) => {
     if (path.getValue().body[0].type === "mrhs_new") {
       return path.call(print, "body", 1);
     }
@@ -390,21 +390,21 @@ const nodes = {
       path.call(print, "body", 1)
     ]));
   },
-  mrhs_new: (path, print) => "",
-  next: (path, print) => {
+  mrhs_new: (path, options, print) => "",
+  next: (path, options, print) => {
     if (path.getValue().body.length > 0) {
       return concat(["next ", path.call(print, "body", 0)]);
     }
     return "next";
   },
-  opassign: (path, print) => group(concat([
+  opassign: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     " ",
     path.call(print, "body", 1),
     indent(concat([line, path.call(print, "body", 2)]))
   ])),
   params: printParams,
-  paren: (path, print) => (
+  paren: (path, options, print) => (
     concat(["(", concat(path.getValue().body.reduce((parts, part, index) => {
       if (Array.isArray(part)) {
         return parts.concat(path.map(print, "body", index));
@@ -412,25 +412,25 @@ const nodes = {
       return [...parts, path.call(print, "body", index)];
     }, [])), ")"])
   ),
-  program: (path, print) => markAsRoot(concat([
+  program: (path, options, print) => markAsRoot(concat([
     join(literalline, path.map(print, "body")),
     literalline
   ])),
-  qsymbols_add: (path, print) => concat([
+  qsymbols_add: (path, options, print) => concat([
     path.call(print, "body", 0),
     path.getValue().body[0].type === "qsymbols_new" ? "" : line,
     path.call(print, "body", 1)
   ]),
-  qsymbols_new: (path, print) => group(concat(["%i[", softline])),
-  qwords_add: (path, print) => concat([
+  qsymbols_new: (path, options, print) => group(concat(["%i[", softline])),
+  qwords_add: (path, options, print) => concat([
     path.call(print, "body", 0),
     path.getValue().body[0].type === "qwords_new" ? "" : line,
     path.call(print, "body", 1)
   ]),
-  qwords_new: (path, print) => group(concat(["%w[", softline])),
-  redo: (path, print) => "redo",
+  qwords_new: (path, options, print) => group(concat(["%w[", softline])),
+  redo: (path, options, print) => "redo",
   regexp_add: concatBody,
-  regexp_literal: (path, print) => {
+  regexp_literal: (path, options, print) => {
     const delim = path.call(print, "body", 1);
 
     const delimPairs = { "]": "[", "}": "{", ")": "(" };
@@ -443,8 +443,8 @@ const nodes = {
       delim
     ]));
   },
-  regexp_new: (path, print) => "",
-  rescue: (path, print) => {
+  regexp_new: (path, options, print) => "",
+  rescue: (path, options, print) => {
     const [exception, variable, _statements, addition] = path.getValue().body;
     const parts = ["rescue"];
 
@@ -465,17 +465,17 @@ const nodes = {
 
     return group(concat(parts));
   },
-  rescue_mod: (path, print) => group(join(" rescue ", path.map(print, "body"))),
+  rescue_mod: (path, options, print) => group(join(" rescue ", path.map(print, "body"))),
   rest_param: printRestParam,
-  retry: (path, print) => "retry",
-  return: (path, print) => group(concat(["return ", concat(path.map(print, "body"))])),
-  return0: (path, print) => "return",
-  sclass: (path, print) => group(concat([
+  retry: (path, options, print) => "retry",
+  return: (path, options, print) => group(concat(["return ", concat(path.map(print, "body"))])),
+  return0: (path, options, print) => "return",
+  sclass: (path, options, print) => group(concat([
     group(concat([hardline, "class << ", path.call(print, "body", 0)])),
     indent(path.call(print, "body", 1)),
     concat([hardline, "end"])
   ])),
-  stmts_add: (path, print) => {
+  stmts_add: (path, options, print) => {
     const [leftLineNo, rightLineNo] = path.getValue().body.map(lineNoFrom);
     const buffer = (rightLineNo - leftLineNo) > 1 ? concat([hardline, hardline]) : hardline;
 
@@ -484,23 +484,23 @@ const nodes = {
     }
     return group(join(buffer, path.map(print, "body")));
   },
-  stmts_new: (path, print) => "",
-  string_concat: (path, print) => group(concat([
+  stmts_new: (path, options, print) => "",
+  string_concat: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     " \\",
     indent(concat([hardline, path.call(print, "body", 1)]))
   ])),
-  string_content: (path, print) => "",
-  string_add: (path, print) => [
+  string_content: (path, options, print) => "",
+  string_add: (path, options, print) => [
     ...path.call(print, "body", 0),
     path.call(print, "body", 1)
   ],
-  string_embexpr: (path, print) => concat([
+  string_embexpr: (path, options, print) => concat([
     "#{",
     path.call(print, "body", 0),
     "}"
   ]),
-  string_literal: (path, print) => {
+  string_literal: (path, options, print) => {
     const parts = path.call(print, "body", 0);
     if (parts === '') {
       return "''";
@@ -509,43 +509,43 @@ const nodes = {
     const delim = parts.some(part => part.parts && part.parts[0] === "#{") ? "\"" : "\'";
     return concat([delim, ...parts, delim]);
   },
-  super: (path, print) => group(concat([
+  super: (path, options, print) => group(concat([
     "super",
     concat(path.map(print, "body"))
   ])),
-  symbol: (path, print) => concat([
+  symbol: (path, options, print) => concat([
     ":",
     concat(path.map(print, "body"))
   ]),
   symbol_literal: concatBody,
-  symbols_add: (path, print) => concat([
+  symbols_add: (path, options, print) => concat([
     path.call(print, "body", 0),
     path.getValue().body[0].type === "symbols_new" ? "" : line,
     path.call(print, "body", 1)
   ]),
-  symbols_new: (path, print) => group(concat(["%I[", softline])),
-  top_const_field: (path, print) => group(concat([
+  symbols_new: (path, options, print) => group(concat(["%I[", softline])),
+  top_const_field: (path, options, print) => group(concat([
     "::",
     path.call(print, "body", 0)
   ])),
-  top_const_ref: (path, print) => group(concat([
+  top_const_ref: (path, options, print) => group(concat([
     "::",
     path.call(print, "body", 0)
   ])),
-  unary: (path, print) => concat([
+  unary: (path, options, print) => concat([
     path.getValue().body[0][0],
     path.call(print, "body", 1)
   ]),
-  undef: (path, print) => concat(["undef ", concat(path.map(print, "body", 0))]),
+  undef: (path, options, print) => concat(["undef ", concat(path.map(print, "body", 0))]),
   unless: printUnless,
   unless_mod: printUnless,
   until: printUntil,
   until_mod: printUntil,
   var_field: concatBody,
-  var_ref: (path, print) => path.call(print, "body", 0),
+  var_ref: (path, options, print) => path.call(print, "body", 0),
   vcall: concatBody,
-  void_stmt: (path, print) => "",
-  when: (path, print) => {
+  void_stmt: (path, options, print) => "",
+  when: (path, options, print) => {
     const [_predicates, _statements, addition] = path.getValue().body;
     const parts = [
       group(concat(["when ", path.call(print, "body", 0)])),
@@ -561,31 +561,31 @@ const nodes = {
   while: printWhile,
   while_mod: printWhile,
   word_add: concatBody,
-  word_new: (path, print) => "",
-  words_add: (path, print) => concat([
+  word_new: (path, options, print) => "",
+  words_add: (path, options, print) => concat([
     path.call(print, "body", 0),
     path.getValue().body[0].type === "words_new" ? "" : line,
     path.call(print, "body", 1)
   ]),
-  words_new: (path, print) => group(concat(["%W[", softline])),
+  words_new: (path, options, print) => group(concat(["%W[", softline])),
   xstring_add: concatBody,
-  xstring_literal: (path, print) => group(concat([
+  xstring_literal: (path, options, print) => group(concat([
     "%x[",
     softline,
     indent(concat(path.map(print, "body"))),
     softline,
     "]"
   ])),
-  xstring_new: (path, print) => "",
-  yield: (path, print) => concat([
+  xstring_new: (path, options, print) => "",
+  yield: (path, options, print) => concat([
     "yield ",
     concat(path.map(print, "body"))
   ]),
-  yield0: (path, print) => "yield",
-  zsuper: (path, print) => "super"
+  yield0: (path, options, print) => "yield",
+  zsuper: (path, options, print) => "super"
 };
 
-const debugNode = (path, print) => {
+const debugNode = (path, options, print) => {
   console.log("=== UNSUPPORTED NODE ===");
   console.log(JSON.stringify(path.getValue(), null, 2));
   console.log("========================");
@@ -599,7 +599,7 @@ const genericPrint = (path, options, print) => {
     return body;
   }
 
-  return (nodes[type] || debugNode)(path, print);
+  return (nodes[type] || debugNode)(path, options, print);
 };
 
 module.exports = genericPrint;
