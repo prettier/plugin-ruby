@@ -2,7 +2,6 @@
 
 exports[`array.rb matches expected output for inline.json 1`] = `
 "[]
-
 [1, 2, 3]
 
 ['a', 'b', 'c']
@@ -21,7 +20,6 @@ exports[`array.rb matches expected output for inline.json 1`] = `
 
 exports[`array.rb matches expected output for noinline.json 1`] = `
 "[]
-
 [1, 2, 3]
 
 [\\"a\\", \\"b\\", \\"c\\"]
@@ -196,9 +194,7 @@ end
 
 exports[`class.rb matches expected output for inline.json 1`] = `
 "module Prettier
-
   class Vehicle
-
     attr_accessor :wheels
 
     def initialize(wheels)
@@ -233,9 +229,7 @@ end
 
 exports[`class.rb matches expected output for noinline.json 1`] = `
 "module Prettier
-
   class Vehicle
-
     attr_accessor :wheels
 
     def initialize(wheels)
@@ -682,7 +676,6 @@ a rescue nil
 
 exports[`strings.rb matches expected output for inline.json 1`] = `
 "''
-
 'abc'
 
 'abc'
@@ -703,7 +696,6 @@ exports[`strings.rb matches expected output for inline.json 1`] = `
 
 exports[`strings.rb matches expected output for noinline.json 1`] = `
 "\\"\\"
-
 \\"abc\\"
 
 \\"abc\\"

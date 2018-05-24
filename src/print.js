@@ -476,8 +476,17 @@ const nodes = {
     concat([hardline, "end"])
   ])),
   stmts_add: (path, options, print) => {
-    const [leftLineNo, rightLineNo] = path.getValue().body.map(lineNoFrom);
-    const buffer = (rightLineNo - leftLineNo) > 1 ? concat([hardline, hardline]) : hardline;
+    const [leftStatement, rightStatement] = path.getValue().body;
+    const leftLineNo = lineNoFrom(leftStatement);
+
+    let buffer = hardline;
+    if (leftLineNo) {
+      const rightLineNo = lineNoFrom(rightStatement);
+
+      if ((rightLineNo - leftLineNo) > 1) {
+        buffer = concat([hardline, hardline]);
+      }
+    }
 
     if (path.getValue().body[0].type === "stmts_new") {
       return path.call(print, "body", 1);
