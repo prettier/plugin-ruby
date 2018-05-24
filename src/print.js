@@ -160,8 +160,29 @@ const nodes = {
     return group(concat(parts));
   },
   brace_block: (path, options, print) => {
-    const parts = ["{ "];
+    const [variables, statements] = path.getValue().body;
 
+    // This block here to handle the very special case of converting a block to
+    // use the simpler Symbol#to_proc method.
+    const params = variables && variables.body[0];
+
+    if (params && params.type === "params") {
+      const reqParams = params.body[0];
+
+      if (params.body.slice(1).every(varType => !varType) && reqParams.length === 1) {
+        const [stmts_new, call] = statements.body.map(({ type }) => type);
+
+        if (stmts_new === "stmts_new" && call === "call") {
+          const callBody = statements.body[1].body;
+
+          if (callBody[0].type === "var_ref" && callBody[0].body[0].body === reqParams[0].body && callBody[1] === ".") {
+            return `(&:${reqParams[0].body})`;
+          }
+        }
+      }
+    }
+
+    const parts = [" { "];
     if (path.getValue().body[0]) {
       parts.push(path.call(print, "body", 0));
     }
@@ -228,7 +249,7 @@ const nodes = {
     ")"
   ])),
   do_block: (path, options, print) => {
-    const parts = ["do"];
+    const parts = [" do"];
 
     if (path.getValue().body[0]) {
       parts.push(" ", path.call(print, "body", 0));
@@ -329,7 +350,7 @@ const nodes = {
     }
     return group(concat(path.map(print, "body")));
   },
-  method_add_block: (path, options, print) => join(" ", path.map(print, "body")),
+  method_add_block: (path, options, print) => concat(path.map(print, "body")),
   mlhs_add: (path, options, print) => {
     if (path.getValue().body[0].type === "mlhs_new") {
       return path.call(print, "body", 1);

@@ -1,3 +1,5 @@
+[1, 2, 3].each { |i| i.to_s }
+
 loop { 1 }
 
 loop do
