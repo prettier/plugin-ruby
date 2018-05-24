@@ -374,11 +374,16 @@ const nodes = {
     ",",
     group(concat([line, path.call(print, "body", 1)]))
   ])),
-  mlhs_add_star: (path, options, print) => group(concat([
-    path.call(print, "body", 0),
-    ",",
-    group(concat([line, "*", path.call(print, "body", 1)]))
-  ])),
+  mlhs_add_star: (path, options, print) => {
+    const star = path.getValue().body[1] ? concat(["*", path.call(print, "body", 1)]) : "*"
+
+    return group(concat([
+      path.call(print, "body", 0),
+      ",",
+      line,
+      star
+    ]));
+  },
   mrhs_add_star: (path, options, print) => group(concat([
     "*",
     concat(path.map(print, "body"))
