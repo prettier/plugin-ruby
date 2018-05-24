@@ -500,13 +500,17 @@ const nodes = {
     path.call(print, "body", 0),
     "}"
   ]),
-  string_literal: (path, options, print) => {
+  string_literal: (path, { preferSingleQuotes }, print) => {
     const parts = path.call(print, "body", 0);
     if (parts === '') {
-      return "''";
+      return preferSingleQuotes ? "''" : "\"\"";
     }
 
-    const delim = parts.some(part => part.parts && part.parts[0] === "#{") ? "\"" : "\'";
+    let delim = "\"";
+    if (preferSingleQuotes && parts.every(part => !part.parts || part.parts[0] !== "#{")) {
+      delim = "\'";
+    }
+
     return concat([delim, ...parts, delim]);
   },
   super: (path, options, print) => group(concat([

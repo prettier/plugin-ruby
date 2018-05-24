@@ -13,7 +13,7 @@ const printTernaryConditions = (keyword, truthyValue, falsyValue) => {
   return keyword === "if" ? parts : parts.reverse();
 };
 
-const printConditional = keyword => (path, options, print) => {
+const printConditional = keyword => (path, { inlineConditionals }, print) => {
   const [_predicate, _statements, addition] = path.getValue().body;
 
   // If the addition is not an elsif or an else, then it's the second half of a
@@ -62,7 +62,7 @@ const printConditional = keyword => (path, options, print) => {
       concat([softline, "end"])
     ]),
     concat([
-      options.inlineConditionals ? "" : breakParent,
+      inlineConditionals ? "" : breakParent,
       path.call(print, "body", 1),
       ` ${keyword} `,
       path.call(print, "body", 0)

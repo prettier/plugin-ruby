@@ -1,13 +1,13 @@
 const { breakParent, concat, group, hardline, ifBreak, indent, softline } = require("prettier").doc.builders;
 
-const printLoop = keyword => (path, options, print) => group(ifBreak(
+const printLoop = keyword => (path, { inlineLoops }, print) => group(ifBreak(
   concat([
     concat([`${keyword} `, path.call(print, "body", 0)]),
     indent(concat([softline, path.call(print, "body", 1)])),
     concat([softline, "end"])
   ]),
   concat([
-    options.inlineLoops ? "" : breakParent,
+    inlineLoops ? "" : breakParent,
     path.call(print, "body", 1),
     ` ${keyword} `,
     path.call(print, "body", 0)

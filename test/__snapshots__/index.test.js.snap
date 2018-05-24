@@ -24,7 +24,7 @@ exports[`array.rb matches expected output for noinline.json 1`] = `
 
 [1, 2, 3]
 
-['a', 'b', 'c']
+[\\"a\\", \\"b\\", \\"c\\"]
 
 %w[a b c]
 
@@ -263,7 +263,7 @@ end
 ::Prettier::Vehicle.new(3)
 
 def Vehicle.drive
-  'vroom'
+  \\"vroom\\"
 end
 "
 `;
@@ -278,8 +278,8 @@ exports[`hash.rb matches expected output for inline.json 1`] = `
 
 exports[`hash.rb matches expected output for noinline.json 1`] = `
 "{}
-{ a: 'a', b: 'b', c: 'c' }
-{ a: 'a', b: 'b', c: 'c' }
+{ a: \\"a\\", b: \\"b\\", c: \\"c\\" }
+{ a: \\"a\\", b: \\"b\\", c: \\"c\\" }
 { Foo => 1, Bar => 2 }
 "
 `;
@@ -503,7 +503,7 @@ exports[`layout.rb matches expected output for noinline.json 1`] = `
 def foobar
   :a
 
-  'b'
+  \\"b\\"
   1
   2
 
@@ -544,7 +544,7 @@ foo(h: 1, **bar, i: 2)
 
 exports[`method.rb matches expected output for noinline.json 1`] = `
 "def foo(a, b, c = 1, d = 2, *e, f, g, h:, i:, j: 1, k: 2, **l, &block)
-  'what'
+  \\"what\\"
 end
 
 foo(1)
@@ -702,22 +702,22 @@ exports[`strings.rb matches expected output for inline.json 1`] = `
 `;
 
 exports[`strings.rb matches expected output for noinline.json 1`] = `
-"''
+"\\"\\"
 
-'abc'
+\\"abc\\"
 
-'abc'
+\\"abc\\"
 
 \\"#{abc}\\"
 
 \\"abc #{de} fghi #{jkl} mno\\"
 
-'abc' \\\\
-  'def' \\\\
-  'ghi'
+\\"abc\\" \\\\
+  \\"def\\" \\\\
+  \\"ghi\\"
 
-\\"abc #{'abc'}\\"
-{ 'a' => 1 }
+\\"abc #{\\"abc\\"}\\"
+{ \\"a\\" => 1 }
 { \\"a #{a}\\" => 1 }
 "
 `;

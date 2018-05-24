@@ -29,6 +29,12 @@ module.exports = {
       category: "Global",
       default: true,
       description: "When it fits on one line, allow while and until statements to use the modifier form."
+    },
+    preferSingleQuotes: {
+      type: "boolean",
+      category: "Global",
+      default: true,
+      description: "When double quotes are not necessary for interpolation, prefer the use of single quotes for string literals."
     }
   },
   defaultOptions: {
