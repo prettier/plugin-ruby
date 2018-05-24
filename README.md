@@ -12,6 +12,7 @@ Below are the options (from [`src/index.js`](src/index.js)) that `prettier-ruby`
 
 * `inlineConditionals` - When it fits on one line, allow if and unless statements to use the modifier form.
 * `inlineLoops` - When it fits on one line, allow while and until statements to use the modifier form.
+* `preferHashLabels` - When possible, use the shortened hash key syntax, as opposed to hash rockets.
 * `preferSingleQuotes` - When double quotes are not necessary for interpolation, prefer the use of single quotes for string literals.
 
 ## Known limitations

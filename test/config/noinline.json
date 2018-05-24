@@ -1,5 +1,6 @@
 {
   "inlineConditionals": false,
   "inlineLoops": false,
+  "preferHashLabels": false,
   "preferSingleQuotes": false
 }

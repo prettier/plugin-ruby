@@ -91,16 +91,24 @@ const nodes = {
       concat([softline, "]"])
     ]));
   },
-  assoc_new: (path, options, print) => {
+  assoc_new: (path, { preferHashLabels }, print) => {
     const parts = [];
     const [printedLabel, printedValue] = path.map(print, "body");
 
     switch (path.getValue().body[0].type) {
       case "@label":
-        parts.push(printedLabel);
+        if (preferHashLabels) {
+          parts.push(printedLabel);
+        } else {
+          parts.push(`:${printedLabel.slice(0, printedLabel.length - 1)} =>`);
+        }
         break;
       case "symbol_literal":
-        parts.push(concat([printedLabel.parts[0].parts[1], ":"]));
+        if (preferHashLabels) {
+          parts.push(concat([printedLabel.parts[0].parts[1], ":"]));
+        } else {
+          parts.push(concat([printedLabel, " =>"]));
+        }
         break;
       default:
         parts.push(concat([printedLabel, " =>"]))
