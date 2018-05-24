@@ -519,6 +519,12 @@ end
 exports[`method.rb matches expected output for inline.json 1`] = `
 "def foo; end
 
+def foo(); end
+
+def foo a; end
+
+def foo(a); end
+
 def foo(super_super_super_super_super_super_super_super_super_super_super_super_super_super_long); end
 
 def foo(a, b, c, super_super_super_super_super_super_super_super_super_super_super_super_super_super_long)
@@ -550,6 +556,12 @@ foo(h: 1, **bar, i: 2)
 
 exports[`method.rb matches expected output for noinline.json 1`] = `
 "def foo; end
+
+def foo(); end
+
+def foo a; end
+
+def foo(a); end
 
 def foo(super_super_super_super_super_super_super_super_super_super_super_super_super_super_long); end
 
