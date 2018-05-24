@@ -3,10 +3,12 @@ const {
   literalline, markAsRoot, softline
 } = require("prettier").doc.builders;
 
+const { printBlock } = require("./blocks");
 const { printIf, printUnless, printTernary } = require("./conditionals");
 const { printWhile, printUntil, printFor } = require("./loops");
 const { printDef, printDefs } = require("./methods");
 const { printKwargRestParam, printRestParam, printParams } = require("./params");
+
 const lineNoFrom = require("./layout");
 
 const concatBody = (path, options, print) => concat(path.map(print, "body"));
@@ -159,37 +161,7 @@ const nodes = {
 
     return group(concat(parts));
   },
-  brace_block: (path, options, print) => {
-    const [variables, statements] = path.getValue().body;
-
-    // This block here to handle the very special case of converting a block to
-    // use the simpler Symbol#to_proc method.
-    const params = variables && variables.body[0];
-
-    if (params && params.type === "params") {
-      const reqParams = params.body[0];
-
-      if (params.body.slice(1).every(varType => !varType) && reqParams.length === 1) {
-        const [stmts_new, call] = statements.body.map(({ type }) => type);
-
-        if (stmts_new === "stmts_new" && call === "call") {
-          const callBody = statements.body[1].body;
-
-          if (callBody[0].type === "var_ref" && callBody[0].body[0].body === reqParams[0].body && callBody[1] === ".") {
-            return `(&:${reqParams[0].body})`;
-          }
-        }
-      }
-    }
-
-    const parts = [" { "];
-    if (path.getValue().body[0]) {
-      parts.push(path.call(print, "body", 0));
-    }
-    parts.push(path.call(print, "body", 1), " }");
-
-    return group(concat(parts));
-  },
+  brace_block: printBlock,
   break: (path, options, print) => {
     if (path.getValue().body[0].length > 0) {
       return concat(["break ", path.call(print, "body", 0)]);
@@ -248,20 +220,7 @@ const nodes = {
     softline,
     ")"
   ])),
-  do_block: (path, options, print) => {
-    const parts = [" do"];
-
-    if (path.getValue().body[0]) {
-      parts.push(" ", path.call(print, "body", 0));
-    }
-
-    parts.push(
-      indent(concat([hardline, path.call(print, "body", 1)])),
-      group(concat([hardline, "end"]))
-    );
-
-    return group(concat(parts));
-  },
+  do_block: printBlock,
   dot2: (path, options, print) => concat([
     path.call(print, "body", 0),
     "..",
