@@ -605,22 +605,19 @@ const nodes = {
   zsuper: (path, options, print) => "super"
 };
 
-const debugNode = (path, { filepath }, print) => {
-  console.log("=== UNSUPPORTED NODE ===");
-  console.log(filepath);
-  console.log(JSON.stringify(path.getValue(), null, 2));
-  console.log("========================");
-  return "";
-};
-
 const genericPrint = (path, options, print) => {
   const { type, body } = path.getValue();
+  const printer = nodes[type];
 
   if (type[0] === "@") {
     return body;
   }
 
-  return (nodes[type] || debugNode)(path, options, print);
+  if (!printer) {
+    throw new Error(`Unsupported node encountered in ${options.filepath}: ${type}`);
+  }
+
+  return printer(path, options, print);
 };
 
 module.exports = genericPrint;
