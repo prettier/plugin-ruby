@@ -43,7 +43,7 @@ const toProcTransform = (path, options, print) => {
 
   // If we have a call, then we can compare to ensure the variables are the
   // same.
-  if (callBody && callBody[0].type === "var_ref" && callBody[0].body[0].body === reqParams[0].body && callBody[1] === ".") {
+  if (callBody && callBody[0] && callBody[0].type === "var_ref" && callBody[0].body[0].body === reqParams[0].body && callBody[1] === ".") {
     return `(&:${reqParams[0].body})`;
   }
 };

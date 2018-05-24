@@ -961,3 +961,33 @@ until super_super_super_super_super_super_super_super_super_super_super_super_su
 end
 "
 `;
+
+exports[`yield.rb matches expected output for off.json 1`] = `
+"[1, 2, 3].each do |i|
+  yield
+  yield i
+
+  yield (i)
+
+  yield i, 2
+
+  yield (i, 2)
+  yield
+end
+"
+`;
+
+exports[`yield.rb matches expected output for on.json 1`] = `
+"[1, 2, 3].each do |i|
+  yield
+  yield i
+
+  yield (i)
+
+  yield i, 2
+
+  yield (i, 2)
+  yield
+end
+"
+`;
