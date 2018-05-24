@@ -93,6 +93,18 @@ x = {
   :c =>
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }
+
+y = [
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+].sort
+
+z = {
+  :a =>
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  :b =>
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+}.sort
 "
 `;
 
@@ -137,6 +149,18 @@ x = {
   c:
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }
+
+y = [
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+].sort
+
+z = {
+  a:
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  b:
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+}.sort
 "
 `;
 
@@ -677,6 +701,10 @@ def foo(a)
   1
 end
 
+def foo(*); end
+
+def foo(**); end
+
 foo(1)
 foo(1, 2)
 foo(1, 2, *abc)
@@ -726,6 +754,10 @@ end
 def foo(a)
   1
 end
+
+def foo(*); end
+
+def foo(**); end
 
 foo(1)
 foo(1, 2)

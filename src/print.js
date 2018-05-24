@@ -12,6 +12,11 @@ const { printStatementAdd, printStatementNew, printStatementVoid } = require("./
 
 const concatBody = (path, options, print) => concat(path.map(print, "body"));
 
+const shouldSkipAssignIndent = node => (
+  ["array", "hash"].includes(node.type) ||
+    (node.type === "call" && shouldSkipAssignIndent(node.body[0]))
+);
+
 const nodes = {
   alias: (path, options, print) => concat([
     "alias ",
@@ -47,7 +52,7 @@ const nodes = {
       return path.call(print, "body", 1);
     }
 
-    const buffer = ["array", "hash"].includes(rightArg.type) ? ", " : concat([",", line]);
+    const buffer = shouldSkipAssignIndent(rightArg) ? ", " : concat([",", line]);
     return join(buffer, path.map(print, "body"));
   },
   args_add_block: (path, options, print) => {
@@ -114,7 +119,7 @@ const nodes = {
         break;
     }
 
-    if (["array", "hash"].includes(path.getValue().body[1].type)) {
+    if (shouldSkipAssignIndent(path.getValue().body[1])) {
       parts.push(" ", printedValue);
     } else {
       parts.push(indent(concat([line, printedValue])));
@@ -133,7 +138,7 @@ const nodes = {
   assign: (path, options, print) => {
     const [printedTarget, printedValue] = path.map(print, "body");
 
-    if (["array", "hash"].includes(path.getValue().body[1].type)) {
+    if (shouldSkipAssignIndent(path.getValue().body[1])) {
       return group(concat([printedTarget, " = ", printedValue]));
     }
 
