@@ -1,46 +1,49 @@
 a = 1
 
-b =
+a =
   begin
     2
   end
 
-c, d, e = [1, 2, 3]
+a, b, c = [1, 2, 3]
 
-f = 1, 2, 3
+a = 1, 2, 3
 
-g, h, i = 1, 2, 3
+a, b, c = 1, 2, 3
 
-j, *k = 1, 2, 3
+a, *b = 1, 2, 3
 
-l, *m, n, o = 1, 2, 3
+a, *b, c, d = 1, 2, 3
 
-q = *[1, 2, 3]
+a = *[1, 2, 3]
 
-(r, s), t = [1, 2], 3
+(a, b), c = [1, 2], 3
 
-u ||= 1
+super_super_super_super_super_long, super_super_super_super_super_long, super_super_super_super_super_long =
+  super_super_super_super_super_long, super_super_super_super_super_long, super_super_super_super_super_long
 
-v ||= super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+a ||= 1
 
-w = [
+a ||= super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+
+a = [
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 ]
 
-x = {
+a = {
   a: super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   b: super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   c: super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }
 
-y = [
+a = [
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 ].sort
 
-z = {
+a = {
   a: super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   b: super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }.sort

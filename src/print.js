@@ -361,12 +361,7 @@ const nodes = {
       return path.call(print, "body", 1);
     }
 
-    return concat([
-      path.call(print, "body", 0),
-      ",",
-      line,
-      path.call(print, "body", 1)
-    ]);
+    return join(", ", path.map(print, "body"));
   },
   mlhs_add_post: (path, options, print) => group(concat([
     path.call(print, "body", 0),
