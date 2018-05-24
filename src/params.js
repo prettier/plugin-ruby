@@ -5,7 +5,7 @@ const printKwargRestParam = (path, options, print) => (
 );
 
 const printRestParam = (path, options, print) => (
-  concat(["*", path.call(print, "body", 0)])
+  path.getValue().body[0] ? concat(["*", path.call(print, "body", 0)]) : "*"
 );
 
 const printParams = (path, options, print) => {

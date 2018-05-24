@@ -207,6 +207,12 @@ const nodes = {
     return group(concat(parts));
   },
   command: (path, options, print) => group(join(" ", path.map(print, "body"))),
+  command_call: (path, options, print) => group(concat([
+    path.call(print, "body", 0),
+    path.getValue().body[1],
+    path.call(print, "body", 2),
+    path.call(print, "body", 3)
+  ])),
   const_path_field: (path, options, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, options, print) => join("::", path.map(print, "body")),
   const_ref: (path, options, print) => path.call(print, "body", 0),
@@ -598,8 +604,9 @@ const nodes = {
   zsuper: (path, options, print) => "super"
 };
 
-const debugNode = (path, options, print) => {
+const debugNode = (path, { filepath }, print) => {
   console.log("=== UNSUPPORTED NODE ===");
+  console.log(filepath);
   console.log(JSON.stringify(path.getValue(), null, 2));
   console.log("========================");
   return "";

@@ -24,7 +24,6 @@ There are still a couple of node types to support, listed below. Additionally, `
 - [ ] arg_ambiguous
 - [ ] assign_error
 - [ ] class_name_error
-- [ ] command_call
 - [ ] excessed_comma
 - [ ] heredoc_dedent
 - [ ] magic_comment
