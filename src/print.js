@@ -5,6 +5,7 @@ const {
 
 const { printBlock } = require("./blocks");
 const { printIf, printUnless, printTernary } = require("./conditionals");
+const { printBEGIN, printEND } = require("./hooks");
 const { printWhile, printUntil, printFor } = require("./loops");
 const { printDef, printDefs } = require("./methods");
 const { printKwargRestParam, printRestParam, printParams } = require("./params");
@@ -18,6 +19,8 @@ const shouldSkipAssignIndent = node => (
 );
 
 const nodes = {
+  BEGIN: printBEGIN,
+  END: printEND,
   alias: (path, options, print) => concat([
     "alias ",
     join(" ", path.map(print, "body"))
@@ -618,7 +621,10 @@ const genericPrint = (path, options, print) => {
   }
 
   if (!printer) {
-    throw new Error(`Unsupported node encountered in ${options.filepath}: ${type}`);
+    throw new Error(
+      `Unsupported node encountered: ${type}\n` +
+      JSON.stringify(body, null, 2)
+    );
   }
 
   return printer(path, options, print);

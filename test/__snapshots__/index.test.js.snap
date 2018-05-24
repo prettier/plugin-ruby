@@ -55,37 +55,42 @@ exports[`array.rb matches expected output for on.json 1`] = `
 exports[`assign.rb matches expected output for off.json 1`] = `
 "a = 1
 
-b =
+a =
   begin
     2
   end
 
-c, d, e = [1, 2, 3]
+a, b, c = [1, 2, 3]
 
-f = 1, 2, 3
+a = 1, 2, 3
 
-g, h, i = 1, 2, 3
+a, b, c = 1, 2, 3
 
-j, *k = 1, 2, 3
+a, *b = 1, 2, 3
 
-l, *m, n, o = 1, 2, 3
+a, *b, c, d = 1, 2, 3
 
-q = *[1, 2, 3]
+a = *[1, 2, 3]
 
-(r, s), t = [1, 2], 3
+(a, b), c = [1, 2], 3
 
-u ||= 1
+super_super_super_super_super_long, super_super_super_super_super_long, super_super_super_super_super_long =
+  super_super_super_super_super_long,
+  super_super_super_super_super_long,
+  super_super_super_super_super_long
 
-v ||=
+a ||= 1
+
+a ||=
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 
-w = [
+a = [
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 ]
 
-x = {
+a = {
   :a =>
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   :b =>
@@ -94,12 +99,12 @@ x = {
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }
 
-y = [
+a = [
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 ].sort
 
-z = {
+a = {
   :a =>
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   :b =>
@@ -111,37 +116,42 @@ z = {
 exports[`assign.rb matches expected output for on.json 1`] = `
 "a = 1
 
-b =
+a =
   begin
     2
   end
 
-c, d, e = [1, 2, 3]
+a, b, c = [1, 2, 3]
 
-f = 1, 2, 3
+a = 1, 2, 3
 
-g, h, i = 1, 2, 3
+a, b, c = 1, 2, 3
 
-j, *k = 1, 2, 3
+a, *b = 1, 2, 3
 
-l, *m, n, o = 1, 2, 3
+a, *b, c, d = 1, 2, 3
 
-q = *[1, 2, 3]
+a = *[1, 2, 3]
 
-(r, s), t = [1, 2], 3
+(a, b), c = [1, 2], 3
 
-u ||= 1
+super_super_super_super_super_long, super_super_super_super_super_long, super_super_super_super_super_long =
+  super_super_super_super_super_long,
+  super_super_super_super_super_long,
+  super_super_super_super_super_long
 
-v ||=
+a ||= 1
+
+a ||=
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 
-w = [
+a = [
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 ]
 
-x = {
+a = {
   a:
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   b:
@@ -150,12 +160,12 @@ x = {
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }
 
-y = [
+a = [
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 ].sort
 
-z = {
+a = {
   a:
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   b:
@@ -412,6 +422,36 @@ exports[`hash.rb matches expected output for on.json 1`] = `
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
       super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
   }
+}
+"
+`;
+
+exports[`hooks.rb matches expected output for off.json 1`] = `
+"BEGIN { p \\"begin\\"}
+
+BEGIN {
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+}
+
+END { p \\"end\\"}
+
+END {
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+}
+"
+`;
+
+exports[`hooks.rb matches expected output for on.json 1`] = `
+"BEGIN { p 'begin'}
+
+BEGIN {
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+}
+
+END { p 'end'}
+
+END {
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }
 "
 `;
