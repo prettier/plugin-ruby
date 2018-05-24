@@ -1,11 +1,7 @@
 const { concat, group, join } = require("prettier").doc.builders;
 
-const printKwargRestParam = (path, options, print) => (
-  concat(["**", path.call(print, "body", 0)])
-);
-
-const printRestParam = (path, options, print) => (
-  path.getValue().body[0] ? concat(["*", path.call(print, "body", 0)]) : "*"
+const printGenericRestParam = symbol => (path, options, print) => (
+  path.getValue().body[0] ? concat([symbol, path.call(print, "body", 0)]) : symbol
 );
 
 const printParams = (path, options, print) => {
@@ -53,7 +49,7 @@ const printParams = (path, options, print) => {
 };
 
 module.exports = {
-  printKwargRestParam,
-  printRestParam,
+  printKwargRestParam: printGenericRestParam("**"),
+  printRestParam: printGenericRestParam("*"),
   printParams
 };
