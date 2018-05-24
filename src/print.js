@@ -202,12 +202,17 @@ const nodes = {
     return group(concat(parts));
   },
   command: (path, options, print) => group(join(" ", path.map(print, "body"))),
-  command_call: (path, options, print) => group(concat([
-    path.call(print, "body", 0),
-    path.getValue().body[1],
-    path.call(print, "body", 2),
-    path.call(print, "body", 3)
-  ])),
+  command_call: (path, options, print) => {
+    const [_target, operator, _method, _args] = path.getValue().body;
+
+    return group(concat([
+      path.call(print, "body", 0),
+      operator,
+      path.call(print, "body", 2),
+      " ",
+      path.call(print, "body", 3)
+    ]));
+  },
   const_path_field: (path, options, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, options, print) => join("::", path.map(print, "body")),
   const_ref: (path, options, print) => path.call(print, "body", 0),

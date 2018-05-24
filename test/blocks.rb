@@ -31,3 +31,7 @@ end
 for i in [1, 2, 3] do
   p i
 end
+
+target.method object.map do |arg|
+  arg * 2
+end
