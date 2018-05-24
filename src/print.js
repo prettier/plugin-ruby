@@ -5,6 +5,7 @@ const {
 
 const { printIf, printUnless, printTernary } = require("./conditionals");
 const { printWhile, printUntil, printFor } = require("./loops");
+const { printDef, printDefs } = require("./methods");
 const { printKwargRestParam, printRestParam, printParams } = require("./params");
 const lineNoFrom = require("./layout");
 
@@ -216,44 +217,8 @@ const nodes = {
   const_path_field: (path, options, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, options, print) => join("::", path.map(print, "body")),
   const_ref: (path, options, print) => path.call(print, "body", 0),
-  def: (path, options, print) => {
-    const [identifier, params, body] = path.getValue().body;
-
-    const printedParams = path.call(print, "body", 1);
-    const buffer = params.type === "params" && printedParams.parts.length > 0 ? " " : "";
-
-    if (body.body[0].body[1].type === "void_stmt") {
-      return group(concat([
-        "def ",
-        path.call(print, "body", 0),
-        buffer,
-        printedParams,
-        "; end"
-      ]));
-    }
-
-    return group(concat([
-      group(concat([
-        "def ",
-        path.call(print, "body", 0),
-        buffer,
-        printedParams
-      ])),
-      indent(concat([hardline, path.call(print, "body", 2)])),
-      group(concat([hardline, "end"]))
-    ]));
-  },
-  defs: (path, options, print) => group(concat([
-    group(concat([
-      "def ",
-      path.call(print, "body", 0),
-      path.call(print, "body", 1),
-      path.call(print, "body", 2),
-      path.call(print, "body", 3)
-    ])),
-    indent(concat([hardline, path.call(print, "body", 4)])),
-    group(concat([hardline, "end"]))
-  ])),
+  def: printDef,
+  defs: printDefs,
   defined: (path, options, print) => group(concat([
     "defined?(",
     softline,
