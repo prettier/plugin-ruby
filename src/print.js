@@ -8,8 +8,7 @@ const { printIf, printUnless, printTernary } = require("./conditionals");
 const { printWhile, printUntil, printFor } = require("./loops");
 const { printDef, printDefs } = require("./methods");
 const { printKwargRestParam, printRestParam, printParams } = require("./params");
-
-const lineNoFrom = require("./layout");
+const { printStatementAdd, printStatementNew } = require("./statements");
 
 const concatBody = (path, options, print) => concat(path.map(print, "body"));
 
@@ -391,7 +390,7 @@ const nodes = {
   mrhs_new_from_args: (path, options, print) => path.call(print, "body", 0),
   module: (path, options, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
-    indent(path.call(print, "body", 1)),
+    indent(concat([hardline, path.call(print, "body", 1)])),
     concat([hardline, "end"])
   ])),
   mrhs_add: (path, options, print) => {
@@ -491,25 +490,8 @@ const nodes = {
     indent(path.call(print, "body", 1)),
     concat([hardline, "end"])
   ])),
-  stmts_add: (path, options, print) => {
-    const [leftStatement, rightStatement] = path.getValue().body;
-    const leftLineNo = lineNoFrom(leftStatement);
-
-    let buffer = hardline;
-    if (leftLineNo) {
-      const rightLineNo = lineNoFrom(rightStatement);
-
-      if ((rightLineNo - leftLineNo) > 1) {
-        buffer = concat([hardline, hardline]);
-      }
-    }
-
-    if (path.getValue().body[0].type === "stmts_new") {
-      return path.call(print, "body", 1);
-    }
-    return group(join(buffer, path.map(print, "body")));
-  },
-  stmts_new: (path, options, print) => "",
+  stmts_add: printStatementAdd,
+  stmts_new: printStatementNew,
   string_concat: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     " \\",
