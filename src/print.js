@@ -89,8 +89,7 @@ const nodes = {
 
     return group(concat([
       initial,
-      softline,
-      indent(path.call(print, "body", 0)),
+      indent(concat([softline, path.call(print, "body", 0)])),
       softline,
       "]"
     ]));
