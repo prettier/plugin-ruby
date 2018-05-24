@@ -1,37 +1,16 @@
 module Pret
   module Tier
-    class Base; end
+    class Object; end
 
-    class BaseVehicle
-      attr_accessor :wheels
-
-      def initialize(wheels)
-        self.wheels = wheels
-      end
-
-      def drive
-        @wheels
-      end
+    class Object
     end
 
-    class Vehicle < BaseVehicle; end
+    class Object < BasicObject; end
 
-    class Car < Vehicle
-      WHEELS = 4
-
-      def initialize
-        super(WHEELS)
-      end
-
-      def drive
-        super
-      end
+    class Object < BasicObject
     end
   end
 end
 
-::Prettier::Vehicle.new(3)
-
-def Vehicle.drive
-  'vroom'
-end
+Pret::Tier::Object
+::Pret::Tier::Object

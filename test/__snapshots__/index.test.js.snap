@@ -265,82 +265,36 @@ end
 exports[`class.rb matches expected output for inline.json 1`] = `
 "module Pret
   module Tier
-    class Base; end
+    class Object; end
 
-    class BaseVehicle
-      attr_accessor :wheels
+    class Object; end
 
-      def initialize(wheels)
-        self.wheels = wheels
-      end
+    class Object < BasicObject; end
 
-      def drive
-        @wheels
-      end
-    end
-
-    class Vehicle < BaseVehicle; end
-
-    class Car < Vehicle
-      WHEELS = 4
-
-      def initialize
-        super(WHEELS)
-      end
-
-      def drive
-        super
-      end
-    end
+    class Object < BasicObject; end
   end
 end
 
-::Prettier::Vehicle.new(3)
-
-def Vehicle.drive
-  'vroom'
-end
+Pret::Tier::Object
+::Pret::Tier::Object
 "
 `;
 
 exports[`class.rb matches expected output for noinline.json 1`] = `
 "module Pret
   module Tier
-    class Base; end
+    class Object; end
 
-    class BaseVehicle
-      attr_accessor :wheels
+    class Object; end
 
-      def initialize(wheels)
-        self.wheels = wheels
-      end
+    class Object < BasicObject; end
 
-      def drive
-        @wheels
-      end
-    end
-
-    class Vehicle < BaseVehicle; end
-
-    class Car < Vehicle
-      WHEELS = 4
-
-      def initialize
-        super(WHEELS)
-      end
-
-      def drive
-        super
-      end
-    end
+    class Object < BasicObject; end
   end
 end
 
-::Prettier::Vehicle.new(3)
-
-def Vehicle.drive
-  \\"vroom\\"
-end
+Pret::Tier::Object
+::Pret::Tier::Object
 "
 `;
 
@@ -837,6 +791,30 @@ exports[`strings.rb matches expected output for noinline.json 1`] = `
 \\"abc #{\\"abc\\"}\\"
 { \\"a\\" => 1 }
 { \\"a #{a}\\" => 1 }
+"
+`;
+
+exports[`super.rb matches expected output for inline.json 1`] = `
+"super
+super 1
+
+super(1)
+
+super 1, 2
+
+super(1, 2)
+"
+`;
+
+exports[`super.rb matches expected output for noinline.json 1`] = `
+"super
+super 1
+
+super(1)
+
+super 1, 2
+
+super(1, 2)
 "
 `;
 

@@ -507,10 +507,15 @@ const nodes = {
 
     return concat([delim, ...parts, delim]);
   },
-  super: (path, options, print) => group(concat([
-    "super",
-    path.call(print, "body", 0)
-  ])),
+  super: (path, options, print) => {
+    const buffer = path.getValue().body[0].type === "arg_paren" ? "": " ";
+
+    return group(concat([
+      "super",
+      buffer,
+      path.call(print, "body", 0)
+    ]))
+  },
   symbol: (path, options, print) => concat([
     ":",
     concat(path.map(print, "body"))
