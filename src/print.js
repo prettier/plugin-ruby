@@ -221,18 +221,19 @@ const nodes = {
     const emptyStatements = printedStatements.contents.parts[0] === "";
 
     const parts = ["class ", path.call(print, "body", 0)];
-    let statementPart = indent(printedStatements);
-
     if (superclass) {
       parts.push(" < ", path.call(print, "body", 1));
-      statementPart = indent(concat([hardline, printedStatements]));
     }
 
     if (printedStatements.contents.parts[0] === "") {
       return group(concat([concat(parts), ifBreak("", "; "), "end"]));
     }
 
-    return group(concat([concat(parts), statementPart, hardline, "end"]));
+    return group(concat([
+      concat(parts),
+      indent(concat([hardline, printedStatements])),
+      concat([hardline, "end"])
+    ]));
   },
   command: (path, options, print) => group(join(" ", path.map(print, "body"))),
   command_call: (path, options, print) => {

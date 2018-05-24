@@ -315,9 +315,17 @@ exports[`class.rb matches expected output for off.json 1`] = `
 
     class Object; end
 
+    class Object
+      attr_accessor :config
+    end
+
     class Object < BasicObject; end
 
     class Object < BasicObject; end
+
+    class Object < BasicObject
+      attr_accessor :config
+    end
   end
 end
 
@@ -333,9 +341,17 @@ exports[`class.rb matches expected output for on.json 1`] = `
 
     class Object; end
 
+    class Object
+      attr_accessor :config
+    end
+
     class Object < BasicObject; end
 
     class Object < BasicObject; end
+
+    class Object < BasicObject
+      attr_accessor :config
+    end
   end
 end
 

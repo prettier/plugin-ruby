@@ -5,9 +5,17 @@ module Pret
     class Object
     end
 
+    class Object
+      attr_accessor :config
+    end
+
     class Object < BasicObject; end
 
     class Object < BasicObject
+    end
+
+    class Object < BasicObject
+      attr_accessor :config
     end
   end
 end
