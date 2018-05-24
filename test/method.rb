@@ -1,5 +1,13 @@
 def foo; end
 
+def foo(); end
+
+def foo a
+end
+
+def foo(a)
+end
+
 def foo(super_super_super_super_super_super_super_super_super_super_super_super_super_super_long); end
 
 def foo(a, b, c, super_super_super_super_super_super_super_super_super_super_super_super_super_super_long)

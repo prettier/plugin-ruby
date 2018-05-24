@@ -217,11 +217,17 @@ const nodes = {
   const_path_ref: (path, options, print) => join("::", path.map(print, "body")),
   const_ref: (path, options, print) => path.call(print, "body", 0),
   def: (path, options, print) => {
-    if (path.getValue().body[2].body[0].body[1].type === "void_stmt") {
+    const [identifier, params, body] = path.getValue().body;
+
+    const printedParams = path.call(print, "body", 1);
+    const buffer = params.type === "params" && printedParams.parts.length > 0 ? " " : "";
+
+    if (body.body[0].body[1].type === "void_stmt") {
       return group(concat([
         "def ",
         path.call(print, "body", 0),
-        path.call(print, "body", 1),
+        buffer,
+        printedParams,
         "; end"
       ]));
     }
@@ -230,7 +236,8 @@ const nodes = {
       group(concat([
         "def ",
         path.call(print, "body", 0),
-        path.call(print, "body", 1)
+        buffer,
+        printedParams
       ])),
       indent(concat([hardline, path.call(print, "body", 2)])),
       group(concat([hardline, "end"]))
