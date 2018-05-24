@@ -1,32 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`array.rb matches expected output for inline.json 1`] = `
-"[]
-[1, 2, 3]
-
-['a', 'b', 'c']
-
-%w[a b c]
-
-%i[a b c]
-
-%W[a#{a}a b#{b}a c#{c}c]
-
-%I[a#{a}a b#{b}b c#{c}c]
-
-[1, 2, *[3, 4], 5, 6]
-
-[
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long, [
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  ]
-]
-"
-`;
-
-exports[`array.rb matches expected output for noinline.json 1`] = `
+exports[`array.rb matches expected output for off.json 1`] = `
 "[]
 [1, 2, 3]
 
@@ -52,51 +26,33 @@ exports[`array.rb matches expected output for noinline.json 1`] = `
 "
 `;
 
-exports[`assign.rb matches expected output for inline.json 1`] = `
-"a = 1
+exports[`array.rb matches expected output for on.json 1`] = `
+"[]
+[1, 2, 3]
 
-b =
-  begin
-    2
-  end
+['a', 'b', 'c']
 
-c, d, e = [1, 2, 3]
+%w[a b c]
 
-f = 1, 2, 3
+%i[a b c]
 
-g, h, i = 1, 2, 3
+%W[a#{a}a b#{b}a c#{c}c]
 
-j, *k = 1, 2, 3
+%I[a#{a}a b#{b}b c#{c}c]
 
-l, *m, n, o = 1, 2, 3
+[1, 2, *[3, 4], 5, 6]
 
-q = *[1, 2, 3]
-
-(r, s), t = [1, 2], 3
-
-u ||= 1
-
-v ||=
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-
-w = [
+[
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-]
-
-x = {
-  a:
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long, [
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  b:
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  c:
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-}
+  ]
+]
 "
 `;
 
-exports[`assign.rb matches expected output for noinline.json 1`] = `
+exports[`assign.rb matches expected output for off.json 1`] = `
 "a = 1
 
 b =
@@ -140,227 +96,255 @@ x = {
 "
 `;
 
-exports[`binary.rb matches expected output for inline.json 1`] = `
-"a && b && c && d
+exports[`assign.rb matches expected output for on.json 1`] = `
+"a = 1
 
-super_super_super_super_super_super_super_super_super_long &&
-  super_super_super_super_super_super_super_super_super_long &&
-  super_super_super_super_super_super_super_super_super_long
-"
-`;
-
-exports[`binary.rb matches expected output for noinline.json 1`] = `
-"a && b && c && d
-
-super_super_super_super_super_super_super_super_super_long &&
-  super_super_super_super_super_super_super_super_super_long &&
-  super_super_super_super_super_super_super_super_super_long
-"
-`;
-
-exports[`blocks.rb matches expected output for inline.json 1`] = `
-"loop { 1 }
-
-loop { 1 }
-
-loop do
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-loop do
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-loop { |i| 1 }
-
-loop { |i| i }
-
-loop do |i|
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-loop do |i|
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-loop(&:i)
-
-loop(&:i)
-
-[1, 2, 3].each do |i|
-  p i
-end
-
-target.method object.map { |arg| arg * 2 }
-"
-`;
-
-exports[`blocks.rb matches expected output for noinline.json 1`] = `
-"loop { 1 }
-
-loop { 1 }
-
-loop do
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-loop do
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-loop { |i| 1 }
-
-loop { |i| i }
-
-loop do |i|
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-loop do |i|
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-loop(&:i)
-
-loop(&:i)
-
-[1, 2, 3].each do |i|
-  p i
-end
-
-target.method object.map { |arg| arg * 2 }
-"
-`;
-
-exports[`case.rb matches expected output for inline.json 1`] = `
-"case
-when a
-  1
-end
-
-case a
-when b
-  1
-end
-
-case a
-when b, c
-  1
-end
-
-case a
-when b
-when c
-  1
-end
-
-case a
-when b
-  1
-when c
-  2
-end
-
-case a
-when b
-  1
-else
-  2
-end
-"
-`;
-
-exports[`case.rb matches expected output for noinline.json 1`] = `
-"case
-when a
-  1
-end
-
-case a
-when b
-  1
-end
-
-case a
-when b, c
-  1
-end
-
-case a
-when b
-when c
-  1
-end
-
-case a
-when b
-  1
-when c
-  2
-end
-
-case a
-when b
-  1
-else
-  2
-end
-"
-`;
-
-exports[`class.rb matches expected output for inline.json 1`] = `
-"module Pret
-  module Tier
-    class Object; end
-
-    class Object; end
-
-    class Object < BasicObject; end
-
-    class Object < BasicObject; end
+b =
+  begin
+    2
   end
-end
 
-Pret::Tier::Object
-::Pret::Tier::Object
-"
-`;
+c, d, e = [1, 2, 3]
 
-exports[`class.rb matches expected output for noinline.json 1`] = `
-"module Pret
-  module Tier
-    class Object; end
+f = 1, 2, 3
 
-    class Object; end
+g, h, i = 1, 2, 3
 
-    class Object < BasicObject; end
+j, *k = 1, 2, 3
 
-    class Object < BasicObject; end
-  end
-end
+l, *m, n, o = 1, 2, 3
 
-Pret::Tier::Object
-::Pret::Tier::Object
-"
-`;
+q = *[1, 2, 3]
 
-exports[`hash.rb matches expected output for inline.json 1`] = `
-"{}
-{ a: 'a', b: 'b', c: 'c' }
-{ a: 'a', b: 'b', c: 'c' }
-{ Foo => 1, Bar => 2 }
-{
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
+(r, s), t = [1, 2], 3
+
+u ||= 1
+
+v ||=
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+
+w = [
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+]
+
+x = {
+  a:
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long: {
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
-      super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  }
+  b:
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  c:
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }
 "
 `;
 
-exports[`hash.rb matches expected output for noinline.json 1`] = `
+exports[`binary.rb matches expected output for off.json 1`] = `
+"a && b && c && d
+
+super_super_super_super_super_super_super_super_super_long &&
+  super_super_super_super_super_super_super_super_super_long &&
+  super_super_super_super_super_super_super_super_super_long
+"
+`;
+
+exports[`binary.rb matches expected output for on.json 1`] = `
+"a && b && c && d
+
+super_super_super_super_super_super_super_super_super_long &&
+  super_super_super_super_super_super_super_super_super_long &&
+  super_super_super_super_super_super_super_super_super_long
+"
+`;
+
+exports[`blocks.rb matches expected output for off.json 1`] = `
+"loop { 1 }
+
+loop { 1 }
+
+loop do
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+loop do
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+loop { |i| 1 }
+
+loop { |i| i }
+
+loop do |i|
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+loop do |i|
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+loop(&:i)
+
+loop(&:i)
+
+[1, 2, 3].each do |i|
+  p i
+end
+
+target.method object.map { |arg| arg * 2 }
+"
+`;
+
+exports[`blocks.rb matches expected output for on.json 1`] = `
+"loop { 1 }
+
+loop { 1 }
+
+loop do
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+loop do
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+loop { |i| 1 }
+
+loop { |i| i }
+
+loop do |i|
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+loop do |i|
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+loop(&:i)
+
+loop(&:i)
+
+[1, 2, 3].each do |i|
+  p i
+end
+
+target.method object.map { |arg| arg * 2 }
+"
+`;
+
+exports[`case.rb matches expected output for off.json 1`] = `
+"case
+when a
+  1
+end
+
+case a
+when b
+  1
+end
+
+case a
+when b, c
+  1
+end
+
+case a
+when b
+when c
+  1
+end
+
+case a
+when b
+  1
+when c
+  2
+end
+
+case a
+when b
+  1
+else
+  2
+end
+"
+`;
+
+exports[`case.rb matches expected output for on.json 1`] = `
+"case
+when a
+  1
+end
+
+case a
+when b
+  1
+end
+
+case a
+when b, c
+  1
+end
+
+case a
+when b
+when c
+  1
+end
+
+case a
+when b
+  1
+when c
+  2
+end
+
+case a
+when b
+  1
+else
+  2
+end
+"
+`;
+
+exports[`class.rb matches expected output for off.json 1`] = `
+"module Pret
+  module Tier
+    class Object; end
+
+    class Object; end
+
+    class Object < BasicObject; end
+
+    class Object < BasicObject; end
+  end
+end
+
+Pret::Tier::Object
+::Pret::Tier::Object
+"
+`;
+
+exports[`class.rb matches expected output for on.json 1`] = `
+"module Pret
+  module Tier
+    class Object; end
+
+    class Object; end
+
+    class Object < BasicObject; end
+
+    class Object < BasicObject; end
+  end
+end
+
+Pret::Tier::Object
+::Pret::Tier::Object
+"
+`;
+
+exports[`hash.rb matches expected output for off.json 1`] = `
 "{}
 { :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
 { :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
@@ -376,7 +360,90 @@ exports[`hash.rb matches expected output for noinline.json 1`] = `
 "
 `;
 
-exports[`if.rb matches expected output for inline.json 1`] = `
+exports[`hash.rb matches expected output for on.json 1`] = `
+"{}
+{ a: 'a', b: 'b', c: 'c' }
+{ a: 'a', b: 'b', c: 'c' }
+{ Foo => 1, Bar => 2 }
+{
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long: {
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
+      super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  }
+}
+"
+`;
+
+exports[`if.rb matches expected output for off.json 1`] = `
+"if a
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+if a
+  1
+elsif b
+  2
+end
+
+if a
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+else
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+if a
+  1
+elsif b
+  2
+elsif c
+  3
+else
+  4
+end
+
+unless a
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+unless a
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+else
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+if a
+  1
+end
+
+if super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+unless a
+  1
+end
+
+unless super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+a ? 1 : 2
+
+a ? 2 : 1
+
+a ? 1 : 2
+
+if a
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+else
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+"
+`;
+
+exports[`if.rb matches expected output for on.json 1`] = `
 "if a
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 end
@@ -439,86 +506,7 @@ end
 "
 `;
 
-exports[`if.rb matches expected output for noinline.json 1`] = `
-"if a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-if a
-  1
-elsif b
-  2
-end
-
-if a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-else
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-if a
-  1
-elsif b
-  2
-elsif c
-  3
-else
-  4
-end
-
-unless a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-unless a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-else
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-if a
-  1
-end
-
-if super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  1
-end
-
-unless a
-  1
-end
-
-unless super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  1
-end
-
-a ? 1 : 2
-
-a ? 2 : 1
-
-a ? 1 : 2
-
-if a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-else
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-"
-`;
-
-exports[`kwargs.rb matches expected output for inline.json 1`] = `
-"def foo(a:, b:, c: 1, d: 2)
-  a + b + c + d
-end
-
-foo(a: 1, b: 2, c: 3, d: 4)
-
-hash = { a: 1, b: 2, c: 3 }
-foo(**hash, d: 4)
-"
-`;
-
-exports[`kwargs.rb matches expected output for noinline.json 1`] = `
+exports[`kwargs.rb matches expected output for off.json 1`] = `
 "def foo(a:, b:, c: 1, d: 2)
   a + b + c + d
 end
@@ -530,66 +518,57 @@ foo(**hash, :d => 4)
 "
 `;
 
-exports[`lambda.rb matches expected output for inline.json 1`] = `
-"-> { 1 }
-
-a = -> { 1 }
-
-b = ->(a, b, c) { a + b + c }
-
-c =
-  lambda do
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  end
-
-d =
-  lambda do |a, b, c|
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  end
-"
-`;
-
-exports[`lambda.rb matches expected output for noinline.json 1`] = `
-"-> { 1 }
-
-a = -> { 1 }
-
-b = ->(a, b, c) { a + b + c }
-
-c =
-  lambda do
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  end
-
-d =
-  lambda do |a, b, c|
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  end
-"
-`;
-
-exports[`layout.rb matches expected output for inline.json 1`] = `
-"1.0
-
-def foobar
-  :a
-
-  'b'
-  1
-  2
-
-  3
+exports[`kwargs.rb matches expected output for on.json 1`] = `
+"def foo(a:, b:, c: 1, d: 2)
+  a + b + c + d
 end
 
-2
-3
-4
+foo(a: 1, b: 2, c: 3, d: 4)
 
-5
+hash = { a: 1, b: 2, c: 3 }
+foo(**hash, d: 4)
 "
 `;
 
-exports[`layout.rb matches expected output for noinline.json 1`] = `
+exports[`lambda.rb matches expected output for off.json 1`] = `
+"-> { 1 }
+
+a = -> { 1 }
+
+b = ->(a, b, c) { a + b + c }
+
+c =
+  lambda do
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  end
+
+d =
+  lambda do |a, b, c|
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  end
+"
+`;
+
+exports[`lambda.rb matches expected output for on.json 1`] = `
+"-> { 1 }
+
+a = -> { 1 }
+
+b = ->(a, b, c) { a + b + c }
+
+c =
+  lambda do
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  end
+
+d =
+  lambda do |a, b, c|
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  end
+"
+`;
+
+exports[`layout.rb matches expected output for off.json 1`] = `
 "1.0
 
 def foobar
@@ -610,53 +589,28 @@ end
 "
 `;
 
-exports[`method.rb matches expected output for inline.json 1`] = `
-"def foo; end
+exports[`layout.rb matches expected output for on.json 1`] = `
+"1.0
 
-def foo(); end
+def foobar
+  :a
 
-def foo a; end
+  'b'
+  1
+  2
 
-def foo(a); end
-
-def self.foo; end
-
-def self.foo(); end
-
-def self.foo a; end
-
-def self.foo(a); end
-
-def foo(super_super_super_super_super_super_super_super_super_super_super_super_super_super_long); end
-
-def foo(a, b, c, super_super_super_super_super_super_super_super_super_super_super_super_super_super_long)
-  'what'
+  3
 end
 
-def foo(a, b, c = 1, d = 2, *e, f, g, h:, i:, j: 1, k: 2, **l, &block)
-  'what'
-end
+2
+3
+4
 
-foo(1)
-foo(1, 2)
-foo(1, 2, *abc)
-foo(1, 2, *abc, 3, 4)
-
-foo(*bar)
-foo(**baz)
-foo(&block)
-
-foo(*bar, &block)
-foo(**baz, &block)
-foo(*bar, **baz, &block)
-
-foo(h: 1, **bar)
-foo(**bar, h: 1)
-foo(h: 1, **bar, i: 2)
+5
 "
 `;
 
-exports[`method.rb matches expected output for noinline.json 1`] = `
+exports[`method.rb matches expected output for off.json 1`] = `
 "def foo; end
 
 def foo(); end
@@ -702,7 +656,53 @@ foo(:h => 1, **bar, :i => 2)
 "
 `;
 
-exports[`numbers.rb matches expected output for inline.json 1`] = `
+exports[`method.rb matches expected output for on.json 1`] = `
+"def foo; end
+
+def foo(); end
+
+def foo a; end
+
+def foo(a); end
+
+def self.foo; end
+
+def self.foo(); end
+
+def self.foo a; end
+
+def self.foo(a); end
+
+def foo(super_super_super_super_super_super_super_super_super_super_super_super_super_super_long); end
+
+def foo(a, b, c, super_super_super_super_super_super_super_super_super_super_super_super_super_super_long)
+  'what'
+end
+
+def foo(a, b, c = 1, d = 2, *e, f, g, h:, i:, j: 1, k: 2, **l, &block)
+  'what'
+end
+
+foo(1)
+foo(1, 2)
+foo(1, 2, *abc)
+foo(1, 2, *abc, 3, 4)
+
+foo(*bar)
+foo(**baz)
+foo(&block)
+
+foo(*bar, &block)
+foo(**baz, &block)
+foo(*bar, **baz, &block)
+
+foo(h: 1, **bar)
+foo(**bar, h: 1)
+foo(h: 1, **bar, i: 2)
+"
+`;
+
+exports[`numbers.rb matches expected output for off.json 1`] = `
 "123
 -123
 1_123
@@ -721,7 +721,7 @@ exports[`numbers.rb matches expected output for inline.json 1`] = `
 "
 `;
 
-exports[`numbers.rb matches expected output for noinline.json 1`] = `
+exports[`numbers.rb matches expected output for on.json 1`] = `
 "123
 -123
 1_123
@@ -740,7 +740,7 @@ exports[`numbers.rb matches expected output for noinline.json 1`] = `
 "
 `;
 
-exports[`regex.rb matches expected output for inline.json 1`] = `
+exports[`regex.rb matches expected output for off.json 1`] = `
 "a = /abc/
 
 b = %r{abc}
@@ -759,7 +759,7 @@ h = %r{abc}i
 "
 `;
 
-exports[`regex.rb matches expected output for noinline.json 1`] = `
+exports[`regex.rb matches expected output for on.json 1`] = `
 "a = /abc/
 
 b = %r{abc}
@@ -778,7 +778,7 @@ h = %r{abc}i
 "
 `;
 
-exports[`rescue.rb matches expected output for inline.json 1`] = `
+exports[`rescue.rb matches expected output for off.json 1`] = `
 "begin
   1
 rescue StandardError
@@ -797,7 +797,7 @@ a rescue nil
 "
 `;
 
-exports[`rescue.rb matches expected output for noinline.json 1`] = `
+exports[`rescue.rb matches expected output for on.json 1`] = `
 "begin
   1
 rescue StandardError
@@ -816,27 +816,7 @@ a rescue nil
 "
 `;
 
-exports[`strings.rb matches expected output for inline.json 1`] = `
-"''
-'abc'
-
-'abc'
-
-\\"#{abc}\\"
-
-\\"abc #{de} fghi #{jkl} mno\\"
-
-'abc' \\\\
-  'def' \\\\
-  'ghi'
-
-\\"abc #{'abc'}\\"
-{ 'a' => 1 }
-{ \\"a #{a}\\" => 1 }
-"
-`;
-
-exports[`strings.rb matches expected output for noinline.json 1`] = `
+exports[`strings.rb matches expected output for off.json 1`] = `
 "\\"\\"
 \\"abc\\"
 
@@ -856,7 +836,27 @@ exports[`strings.rb matches expected output for noinline.json 1`] = `
 "
 `;
 
-exports[`super.rb matches expected output for inline.json 1`] = `
+exports[`strings.rb matches expected output for on.json 1`] = `
+"''
+'abc'
+
+'abc'
+
+\\"#{abc}\\"
+
+\\"abc #{de} fghi #{jkl} mno\\"
+
+'abc' \\\\
+  'def' \\\\
+  'ghi'
+
+\\"abc #{'abc'}\\"
+{ 'a' => 1 }
+{ \\"a #{a}\\" => 1 }
+"
+`;
+
+exports[`super.rb matches expected output for off.json 1`] = `
 "super
 super 1
 
@@ -868,7 +868,7 @@ super(1, 2)
 "
 `;
 
-exports[`super.rb matches expected output for noinline.json 1`] = `
+exports[`super.rb matches expected output for on.json 1`] = `
 "super
 super 1
 
@@ -880,34 +880,7 @@ super(1, 2)
 "
 `;
 
-exports[`while.rb matches expected output for inline.json 1`] = `
-"1 while true
-
-1 while true
-
-while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  1
-end
-
-while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  1
-end
-
-1 until true
-
-1 until true
-
-until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  1
-end
-
-until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  1
-end
-"
-`;
-
-exports[`while.rb matches expected output for noinline.json 1`] = `
+exports[`while.rb matches expected output for off.json 1`] = `
 "while true
   1
 end
@@ -931,6 +904,33 @@ end
 until true
   1
 end
+
+until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+"
+`;
+
+exports[`while.rb matches expected output for on.json 1`] = `
+"1 while true
+
+1 while true
+
+while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+1 until true
+
+1 until true
 
 until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
   1
