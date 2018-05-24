@@ -259,10 +259,8 @@ const nodes = {
   defs: printDefs,
   defined: (path, options, print) => group(concat([
     "defined?(",
-    softline,
-    indent(concat(path.map(print, "body"))),
-    softline,
-    ")"
+    indent(concat([softline, path.call(print, "body", 0)])),
+    concat([softline, ")"])
   ])),
   do_block: printBlock,
   dot2: (path, options, print) => concat([

@@ -420,6 +420,44 @@ Pret::Tier::Object
 "
 `;
 
+exports[`defined.rb matches expected output for off.json 1`] = `
+"defined?(a)
+
+defined?(a)
+
+defined?(
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+)
+
+defined?(
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+)
+
+defined?(
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+)
+"
+`;
+
+exports[`defined.rb matches expected output for on.json 1`] = `
+"defined?(a)
+
+defined?(a)
+
+defined?(
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+)
+
+defined?(
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+)
+
+defined?(
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+)
+"
+`;
+
 exports[`hash.rb matches expected output for off.json 1`] = `
 "{}
 { :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
