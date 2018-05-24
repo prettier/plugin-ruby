@@ -1,15 +1,17 @@
-a = /abc/
+/abc/
 
-b = %r{abc}
+%r{abc}
 
-c = %r/abc/
+%r/abc/
 
-d = %r[abc]
+%r[abc]
 
-e = %r(abc)
+%r(abc)
 
-f = /a#{b}c/
+/a#{b}c/
 
-g = /abc/i
+/abc/i
 
-h = %r{abc}i
+%r{abc}i
+
+/#$&/

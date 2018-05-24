@@ -785,40 +785,44 @@ exports[`numbers.rb matches expected output for on.json 1`] = `
 `;
 
 exports[`regex.rb matches expected output for off.json 1`] = `
-"a = /abc/
+"/abc/
 
-b = %r{abc}
+%r{abc}
 
-c = /abc/
+/abc/
 
-d = %r[abc]
+%r[abc]
 
-e = %r(abc)
+%r(abc)
 
-f = /a#{b}c/
+/a#{b}c/
 
-g = /abc/i
+/abc/i
 
-h = %r{abc}i
+%r{abc}i
+
+/#$&/
 "
 `;
 
 exports[`regex.rb matches expected output for on.json 1`] = `
-"a = /abc/
+"/abc/
 
-b = %r{abc}
+%r{abc}
 
-c = /abc/
+/abc/
 
-d = %r[abc]
+%r[abc]
 
-e = %r(abc)
+%r(abc)
 
-f = /a#{b}c/
+/a#{b}c/
 
-g = /abc/i
+/abc/i
 
-h = %r{abc}i
+%r{abc}i
+
+/#$&/
 "
 `;
 

@@ -493,16 +493,20 @@ const nodes = {
   ])),
   stmts_add: printStatementAdd,
   stmts_new: printStatementNew,
+  string_add: (path, options, print) => [
+    ...path.call(print, "body", 0),
+    path.call(print, "body", 1)
+  ],
   string_concat: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     " \\",
     indent(concat([hardline, path.call(print, "body", 1)]))
   ])),
   string_content: (path, options, print) => "",
-  string_add: (path, options, print) => [
-    ...path.call(print, "body", 0),
-    path.call(print, "body", 1)
-  ],
+  string_dvar: (path, options, print) => concat([
+    "#",
+    path.call(print, "body", 0)
+  ]),
   string_embexpr: (path, options, print) => concat([
     "#{",
     path.call(print, "body", 0),

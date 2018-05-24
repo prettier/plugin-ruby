@@ -31,5 +31,4 @@ There are still a couple of node types to support, listed below. Additionally, `
 - [ ] operator_ambiguous
 - [ ] param_error
 - [ ] parse_error
-- [ ] string_dvar
 - [ ] var_alias
