@@ -2,6 +2,10 @@
 
 This is a work in progress plugin for prettier that supports the Ruby programming language. Under the hood it uses the [`ripperjs`](https://github.com/kddeisz/ripperjs) package (which in turn uses Ruby's own `ripper` library) which allows this package to maintain parity with the existing Ruby parser.
 
+## Getting started
+
+Install the dependencies by running `yarn` in the root of the repository. You can then pretty print a ruby source file by running `yarn print [PATH]`.
+
 ## Status
 
 There are a lot of node types to support still, as well as tests to write for each. Below is the list of types and their current status.
