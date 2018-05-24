@@ -128,7 +128,7 @@ const nodes = {
     const [printedTarget, printedValue] = path.map(print, "body");
 
     if (["array", "hash"].includes(path.getValue().body[1].type)) {
-      return group(concat([printedTarget, " = ", dedent(printedValue)]));
+      return group(concat([printedTarget, " = ", printedValue]));
     }
 
     return group(concat([
