@@ -28,7 +28,7 @@ const nodes = {
     concat([softline, "]"])
   ])),
   arg_paren: (path, options, print) => {
-    if (path.getValue().body === null) {
+    if (path.getValue().body[0] === null) {
       return "";
     }
 
@@ -546,7 +546,7 @@ const nodes = {
   },
   super: (path, options, print) => group(concat([
     "super",
-    concat(path.map(print, "body"))
+    path.call(print, "body", 0)
   ])),
   symbol: (path, options, print) => concat([
     ":",
