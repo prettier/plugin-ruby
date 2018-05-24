@@ -15,6 +15,14 @@ exports[`array.rb matches expected output for inline.json 1`] = `
 %I[a#{a}a b#{b}b c#{c}c]
 
 [1, 2, *[3, 4], 5, 6]
+
+[
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long, [
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  ]
+]
 "
 `;
 
@@ -33,6 +41,14 @@ exports[`array.rb matches expected output for noinline.json 1`] = `
 %I[a#{a}a b#{b}b c#{c}c]
 
 [1, 2, *[3, 4], 5, 6]
+
+[
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long, [
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  ]
+]
 "
 `;
 
@@ -114,11 +130,11 @@ w = [
 ]
 
 x = {
-  a:
+  :a =>
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  b:
+  :b =>
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  c:
+  :c =>
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }
 "
@@ -346,14 +362,14 @@ exports[`hash.rb matches expected output for inline.json 1`] = `
 
 exports[`hash.rb matches expected output for noinline.json 1`] = `
 "{}
-{ a: \\"a\\", b: \\"b\\", c: \\"c\\" }
-{ a: \\"a\\", b: \\"b\\", c: \\"c\\" }
+{ :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
+{ :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
 { Foo => 1, Bar => 2 }
 {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
+  :super_super_super_super_super_super_super_super_super_super_super_super_super_super_long =>
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long: {
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
+  :super_super_super_super_super_super_super_super_super_super_super_super_super_super_long => {
+    :super_super_super_super_super_super_super_super_super_super_super_super_super_super_long =>
       super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
   }
 }
@@ -507,10 +523,10 @@ exports[`kwargs.rb matches expected output for noinline.json 1`] = `
   a + b + c + d
 end
 
-foo(a: 1, b: 2, c: 3, d: 4)
+foo(:a => 1, :b => 2, :c => 3, :d => 4)
 
-hash = { a: 1, b: 2, c: 3 }
-foo(**hash, d: 4)
+hash = { :a => 1, :b => 2, :c => 3 }
+foo(**hash, :d => 4)
 "
 `;
 
@@ -680,9 +696,9 @@ foo(*bar, &block)
 foo(**baz, &block)
 foo(*bar, **baz, &block)
 
-foo(h: 1, **bar)
-foo(**bar, h: 1)
-foo(h: 1, **bar, i: 2)
+foo(:h => 1, **bar)
+foo(**bar, :h => 1)
+foo(:h => 1, **bar, :i => 2)
 "
 `;
 

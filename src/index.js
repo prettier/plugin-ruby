@@ -30,6 +30,12 @@ module.exports = {
       default: true,
       description: "When it fits on one line, allow while and until statements to use the modifier form."
     },
+    preferHashLabels: {
+      type: "boolean",
+      category: "Global",
+      default: true,
+      description: "When possible, use the shortened hash key syntax, as opposed to hash rockets."
+    },
     preferSingleQuotes: {
       type: "boolean",
       category: "Global",
