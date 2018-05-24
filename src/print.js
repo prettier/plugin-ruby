@@ -192,10 +192,7 @@ const nodes = {
   call: (path, options, print) => {
     let printedName = path.getValue().body[2];
 
-    // You can call lambdas with a special syntax that looks like:
-    //
-    //     func.(*args)
-    //
+    // You can call lambdas with a special syntax that looks like func.(*args).
     // In this case, "call" is returned for the 3rd child node.
     if (printedName === "call") {
       printedName = "";
