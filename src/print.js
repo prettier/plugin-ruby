@@ -6,6 +6,7 @@ const {
 const { printIf, printUnless, printTernary } = require("./conditionals");
 const { printWhile, printUntil, printFor } = require("./loops");
 const { printKwargRestParam, printRestParam, printParams } = require("./params");
+const lineNoFrom = require("./layout");
 
 const concatBody = (path, print) => concat(path.map(print, "body"));
 
@@ -475,10 +476,13 @@ const nodes = {
     concat([hardline, "end"])
   ])),
   stmts_add: (path, print) => {
+    const [leftLineNo, rightLineNo] = path.getValue().body.map(lineNoFrom);
+    const buffer = (rightLineNo - leftLineNo) > 1 ? concat([hardline, hardline]) : hardline;
+
     if (path.getValue().body[0].type === "stmts_new") {
       return path.call(print, "body", 1);
     }
-    return group(join(hardline, path.map(print, "body")));
+    return group(join(buffer, path.map(print, "body")));
   },
   stmts_new: (path, print) => "",
   string_concat: (path, print) => group(concat([
