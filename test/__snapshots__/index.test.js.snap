@@ -94,6 +94,24 @@ v ||=
 "
 `;
 
+exports[`binary.rb matches expected output for inline.json 1`] = `
+"a && b && c && d
+
+super_super_super_super_super_super_super_super_super_long &&
+  super_super_super_super_super_super_super_super_super_long &&
+  super_super_super_super_super_super_super_super_super_long
+"
+`;
+
+exports[`binary.rb matches expected output for noinline.json 1`] = `
+"a && b && c && d
+
+super_super_super_super_super_super_super_super_super_long &&
+  super_super_super_super_super_super_super_super_super_long &&
+  super_super_super_super_super_super_super_super_super_long
+"
+`;
+
 exports[`blocks.rb matches expected output for inline.json 1`] = `
 "loop { 1 }
 
