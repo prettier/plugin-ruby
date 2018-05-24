@@ -42,16 +42,14 @@ const nodes = {
     ]))
   },
   args_add: (path, options, print) => {
-    if (path.getValue().body[0].type === "args_new") {
+    const [leftArg, rightArg] = path.getValue().body;
+
+    if (leftArg.type === "args_new") {
       return path.call(print, "body", 1);
     }
 
-    return concat([
-      path.call(print, "body", 0),
-      ",",
-      line,
-      path.call(print, "body", 1)
-    ]);
+    const buffer = ["array", "hash"].includes(rightArg.type) ? ", " : concat([",", line]);
+    return join(buffer, path.map(print, "body"));
   },
   args_add_block: (path, options, print) => {
     const [args, block] = path.getValue().body;
@@ -90,29 +88,30 @@ const nodes = {
     return group(concat([
       initial,
       indent(concat([softline, path.call(print, "body", 0)])),
-      softline,
-      "]"
+      concat([softline, "]"])
     ]));
   },
   assoc_new: (path, options, print) => {
     const parts = [];
+    const [printedLabel, printedValue] = path.map(print, "body");
 
     switch (path.getValue().body[0].type) {
       case "@label":
-        parts.push(path.call(print, "body", 0));
+        parts.push(printedLabel);
         break;
       case "symbol_literal":
-        parts.push(concat([
-          path.call(print, "body", 0).parts[0].parts[1],
-          ":"
-        ]));
+        parts.push(concat([printedLabel.parts[0].parts[1], ":"]));
         break;
       default:
-        parts.push(path.call(print, "body", 0), " =>")
+        parts.push(concat([printedLabel, " =>"]))
         break;
     }
 
-    parts.push(indent(concat([line, path.call(print, "body", 1)])));
+    if (["array", "hash"].includes(path.getValue().body[1].type)) {
+      parts.push(" ", printedValue);
+    } else {
+      parts.push(indent(concat([line, printedValue])));
+    }
 
     return group(concat(parts));
   },

@@ -64,7 +64,7 @@ v ||=
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 
 w = [
-super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 ]
@@ -108,7 +108,7 @@ v ||=
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 
 w = [
-super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 ]
@@ -333,6 +333,14 @@ exports[`hash.rb matches expected output for inline.json 1`] = `
 { a: 'a', b: 'b', c: 'c' }
 { a: 'a', b: 'b', c: 'c' }
 { Foo => 1, Bar => 2 }
+{
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long: {
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
+      super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  }
+}
 "
 `;
 
@@ -341,6 +349,14 @@ exports[`hash.rb matches expected output for noinline.json 1`] = `
 { a: \\"a\\", b: \\"b\\", c: \\"c\\" }
 { a: \\"a\\", b: \\"b\\", c: \\"c\\" }
 { Foo => 1, Bar => 2 }
+{
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long: {
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
+      super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  }
+}
 "
 `;
 

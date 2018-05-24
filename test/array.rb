@@ -13,3 +13,11 @@
 %I[a#{a}a b#{b}b c#{c}c]
 
 [1, 2, *[3, 4], 5, 6]
+
+[
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long, [
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  ]
+]
