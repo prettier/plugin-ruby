@@ -216,15 +216,26 @@ const nodes = {
   const_path_field: (path, options, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, options, print) => join("::", path.map(print, "body")),
   const_ref: (path, options, print) => path.call(print, "body", 0),
-  def: (path, options, print) => group(concat([
-    group(concat([
-      "def ",
-      path.call(print, "body", 0),
-      path.call(print, "body", 1)
-    ])),
-    indent(concat([hardline, path.call(print, "body", 2)])),
-    group(concat([hardline, "end"]))
-  ])),
+  def: (path, options, print) => {
+    if (path.getValue().body[2].body[0].body[1].type === "void_stmt") {
+      return group(concat([
+        "def ",
+        path.call(print, "body", 0),
+        path.call(print, "body", 1),
+        "; end"
+      ]));
+    }
+
+    return group(concat([
+      group(concat([
+        "def ",
+        path.call(print, "body", 0),
+        path.call(print, "body", 1)
+      ])),
+      indent(concat([hardline, path.call(print, "body", 2)])),
+      group(concat([hardline, "end"]))
+    ]));
+  },
   defs: (path, options, print) => group(concat([
     group(concat([
       "def ",
