@@ -22,3 +22,15 @@ q = *[1, 2, 3]
 u ||= 1
 
 v ||= super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+
+w = [
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+]
+
+x = {
+  a: super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  b: super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  c: super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+}

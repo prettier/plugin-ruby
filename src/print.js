@@ -84,7 +84,7 @@ const nodes = {
       return '[]';
     }
 
-    const firstTypeOf = element => element.parts ? findStart(element.parts[0]) : element.type;
+    const firstTypeOf = element => element.parts ? firstTypeOf(element.parts[0]) : element.type;
     const initial = firstTypeOf(path.getValue().body[0]) === "args_add" ? "[" : "";
 
     return group(concat([
@@ -113,7 +113,7 @@ const nodes = {
         break;
     }
 
-    parts.push(line, indent(path.call(print, "body", 1)));
+    parts.push(indent(concat([line, path.call(print, "body", 1)])));
 
     return group(concat(parts));
   },
@@ -125,11 +125,19 @@ const nodes = {
     join(concat([",", line]),
     path.map(print, "body", 0))
   ),
-  assign: (path, options, print) => group(concat([
-    path.call(print, "body", 0),
-    " =",
-    indent(concat([line, path.call(print, "body", 1)]))
-  ])),
+  assign: (path, options, print) => {
+    const [printedTarget, printedValue] = path.map(print, "body");
+
+    if (["array", "hash"].includes(path.getValue().body[1].type)) {
+      return group(concat([printedTarget, " = ", dedent(printedValue)]));
+    }
+
+    return group(concat([
+      printedTarget,
+      " =",
+      indent(concat([line, printedValue]))
+    ]));
+  },
   bare_assoc_hash: (path, options, print) => group(
     join(concat([",", line]),
     path.map(print, "body", 0)
