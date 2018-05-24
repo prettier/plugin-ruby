@@ -1,25 +1,27 @@
-module Prettier
-  class Vehicle
-    attr_accessor :wheels
+module Pret
+  module Tier
+    class Vehicle
+      attr_accessor :wheels
 
-    def initialize(wheels)
-      self.wheels = wheels
+      def initialize(wheels)
+        self.wheels = wheels
+      end
+
+      def drive
+        @wheels
+      end
     end
 
-    def drive
-      @wheels
-    end
-  end
+    class Car < Vehicle
+      WHEELS = 4
 
-  class Car < Vehicle
-    WHEELS = 4
+      def initialize
+        super(WHEELS)
+      end
 
-    def initialize
-      super(WHEELS)
-    end
-
-    def drive
-      super
+      def drive
+        super
+      end
     end
   end
 end

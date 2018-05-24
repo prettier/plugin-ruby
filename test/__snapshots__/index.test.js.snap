@@ -193,28 +193,30 @@ end
 `;
 
 exports[`class.rb matches expected output for inline.json 1`] = `
-"module Prettier
-  class Vehicle
-    attr_accessor :wheels
+"module Pret
+  module Tier
+    class Vehicle
+      attr_accessor :wheels
 
-    def initialize(wheels)
-      self.wheels = wheels
+      def initialize(wheels)
+        self.wheels = wheels
+      end
+
+      def drive
+        @wheels
+      end
     end
 
-    def drive
-      @wheels
-    end
-  end
+    class Car < Vehicle
+      WHEELS = 4
 
-  class Car < Vehicle
-    WHEELS = 4
+      def initialize
+        super(WHEELS)
+      end
 
-    def initialize
-      super(WHEELS)
-    end
-
-    def drive
-      super
+      def drive
+        super
+      end
     end
   end
 end
@@ -228,28 +230,30 @@ end
 `;
 
 exports[`class.rb matches expected output for noinline.json 1`] = `
-"module Prettier
-  class Vehicle
-    attr_accessor :wheels
+"module Pret
+  module Tier
+    class Vehicle
+      attr_accessor :wheels
 
-    def initialize(wheels)
-      self.wheels = wheels
+      def initialize(wheels)
+        self.wheels = wheels
+      end
+
+      def drive
+        @wheels
+      end
     end
 
-    def drive
-      @wheels
-    end
-  end
+    class Car < Vehicle
+      WHEELS = 4
 
-  class Car < Vehicle
-    WHEELS = 4
+      def initialize
+        super(WHEELS)
+      end
 
-    def initialize
-      super(WHEELS)
-    end
-
-    def drive
-      super
+      def drive
+        super
+      end
     end
   end
 end
@@ -513,7 +517,15 @@ end
 `;
 
 exports[`method.rb matches expected output for inline.json 1`] = `
-"def foo(a, b, c = 1, d = 2, *e, f, g, h:, i:, j: 1, k: 2, **l, &block)
+"def foo; end
+
+def foo(super_super_super_super_super_super_super_super_super_super_super_super_super_super_long); end
+
+def foo(a, b, c, super_super_super_super_super_super_super_super_super_super_super_super_super_super_long)
+  'what'
+end
+
+def foo(a, b, c = 1, d = 2, *e, f, g, h:, i:, j: 1, k: 2, **l, &block)
   'what'
 end
 
@@ -537,7 +549,15 @@ foo(h: 1, **bar, i: 2)
 `;
 
 exports[`method.rb matches expected output for noinline.json 1`] = `
-"def foo(a, b, c = 1, d = 2, *e, f, g, h:, i:, j: 1, k: 2, **l, &block)
+"def foo; end
+
+def foo(super_super_super_super_super_super_super_super_super_super_super_super_super_super_long); end
+
+def foo(a, b, c, super_super_super_super_super_super_super_super_super_super_super_super_super_super_long)
+  \\"what\\"
+end
+
+def foo(a, b, c = 1, d = 2, *e, f, g, h:, i:, j: 1, k: 2, **l, &block)
   \\"what\\"
 end
 

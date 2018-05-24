@@ -398,7 +398,7 @@ const nodes = {
   module: (path, options, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
     indent(path.call(print, "body", 1)),
-    dedent(concat([hardline, "end"]))
+    concat([hardline, "end"])
   ])),
   mrhs_add: (path, options, print) => {
     if (path.getValue().body[0].type === "mrhs_new") {
