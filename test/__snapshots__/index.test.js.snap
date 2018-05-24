@@ -144,6 +144,8 @@ loop(&:i)
 [1, 2, 3].each do |i|
   p i
 end
+
+target.method object.map { |arg| arg * 2 }
 "
 `;
 
@@ -179,6 +181,8 @@ loop(&:i)
 [1, 2, 3].each do |i|
   p i
 end
+
+target.method object.map { |arg| arg * 2 }
 "
 `;
 
@@ -195,6 +199,12 @@ end
 
 case a
 when b, c
+  1
+end
+
+case a
+when b
+when c
   1
 end
 
@@ -227,6 +237,12 @@ end
 
 case a
 when b, c
+  1
+end
+
+case a
+when b
+when c
   1
 end
 

@@ -540,10 +540,13 @@ const nodes = {
   void_stmt: (path, options, print) => "",
   when: (path, options, print) => {
     const [_predicates, _statements, addition] = path.getValue().body;
-    const parts = [
-      group(concat(["when ", path.call(print, "body", 0)])),
-      indent(concat([hardline, path.call(print, "body", 1)]))
-    ];
+
+    const printedStatements = path.call(print, "body", 1);
+    const parts = [group(concat(["when ", path.call(print, "body", 0)]))];
+
+    if (printedStatements !== "") {
+      parts.push(indent(concat([hardline, printedStatements])));
+    }
 
     if (addition) {
       parts.push(concat([hardline, path.call(print, "body", 2)]));
