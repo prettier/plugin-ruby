@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`alias.rb matches expected output for off.json 1`] = `
+"alias foo bar
+
+alias :foo :bar
+
+alias $foo $bar
+"
+`;
+
+exports[`alias.rb matches expected output for on.json 1`] = `
+"alias foo bar
+
+alias :foo :bar
+
+alias $foo $bar
+"
+`;
+
 exports[`array.rb matches expected output for off.json 1`] = `
 "[]
 [1, 2, 3]
@@ -360,6 +378,10 @@ exports[`class.rb matches expected output for off.json 1`] = `
     class Object < BasicObject
       attr_accessor :config
     end
+
+    class << self
+      def method; end
+    end
   end
 end
 
@@ -385,6 +407,10 @@ exports[`class.rb matches expected output for on.json 1`] = `
 
     class Object < BasicObject
       attr_accessor :config
+    end
+
+    class << self
+      def method; end
     end
   end
 end

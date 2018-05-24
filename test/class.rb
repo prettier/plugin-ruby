@@ -17,6 +17,10 @@ module Pret
     class Object < BasicObject
       attr_accessor :config
     end
+
+    class << self
+      def method; end
+    end
   end
 end
 

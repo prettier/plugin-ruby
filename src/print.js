@@ -490,8 +490,8 @@ const nodes = {
   return: (path, options, print) => group(concat(["return ", concat(path.map(print, "body"))])),
   return0: (path, options, print) => "return",
   sclass: (path, options, print) => group(concat([
-    group(concat([hardline, "class << ", path.call(print, "body", 0)])),
-    indent(path.call(print, "body", 1)),
+    concat(["class << ", path.call(print, "body", 0)]),
+    indent(concat([hardline, path.call(print, "body", 1)])),
     concat([hardline, "end"])
   ])),
   stmts_add: printStatementAdd,
