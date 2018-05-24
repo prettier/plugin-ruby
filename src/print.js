@@ -8,7 +8,7 @@ const { printIf, printUnless, printTernary } = require("./conditionals");
 const { printWhile, printUntil, printFor } = require("./loops");
 const { printDef, printDefs } = require("./methods");
 const { printKwargRestParam, printRestParam, printParams } = require("./params");
-const { printStatementAdd, printStatementNew } = require("./statements");
+const { printStatementAdd, printStatementNew, printStatementVoid } = require("./statements");
 
 const concatBody = (path, options, print) => concat(path.map(print, "body"));
 
@@ -560,7 +560,7 @@ const nodes = {
   var_field: concatBody,
   var_ref: (path, options, print) => path.call(print, "body", 0),
   vcall: concatBody,
-  void_stmt: (path, options, print) => "",
+  void_stmt: printStatementVoid,
   when: (path, options, print) => {
     const [_predicates, _statements, addition] = path.getValue().body;
 

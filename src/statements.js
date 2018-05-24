@@ -52,7 +52,10 @@ const printStatementAdd = (path, options, print) => {
 
 const printStatementNew = (path, options, print) => "";
 
+const printStatementVoid = (path, options, print) => "";
+
 module.exports = {
   printStatementAdd,
-  printStatementNew
+  printStatementNew,
+  printStatementVoid
 };
