@@ -182,10 +182,25 @@ const nodes = {
     }
     return "break";
   },
-  call: (path, options, print) => join(path.getValue().body[1], [
-    path.call(print, "body", 0),
-    path.call(print, "body", 2)
-  ]),
+  call: (path, options, print) => {
+    let printedName = path.getValue().body[2];
+
+    // You can call lambdas with a special syntax that looks like:
+    //
+    //     func.(*args)
+    //
+    // In this case, "call" is returned for the 3rd child node.
+    if (printedName === "call") {
+      printedName = "";
+    } else {
+      printedName = path.call(print, "body", 2);
+    }
+
+    return join(path.getValue().body[1], [
+      path.call(print, "body", 0),
+      printedName
+    ]);
+  },
   case: (path, options, print) => {
     const parts = ["case "];
 
@@ -304,6 +319,7 @@ const nodes = {
   if_mod: printIf,
   lambda: (path, options, print) => {
     const args = path.call(print, "body", 0);
+    const buffer = path.getValue().body[0].type === "params" && args.parts.length > 0 ? " " : "";
 
     return group(ifBreak(
       concat([
@@ -314,6 +330,7 @@ const nodes = {
       ]),
       concat([
         "->",
+        buffer,
         args,
         " { ",
         path.call(print, "body", 1),

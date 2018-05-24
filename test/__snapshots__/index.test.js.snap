@@ -546,6 +546,16 @@ d =
   lambda do |a, b, c|
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
   end
+
+a.(1, 2, 3)
+
+a.call(1, 2, 3)
+
+a[1, 2, 3]
+
+-> a { 1 }
+
+->() { 1 }
 "
 `;
 
@@ -565,6 +575,16 @@ d =
   lambda do |a, b, c|
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
   end
+
+a.(1, 2, 3)
+
+a.call(1, 2, 3)
+
+a[1, 2, 3]
+
+-> a { 1 }
+
+->() { 1 }
 "
 `;
 
