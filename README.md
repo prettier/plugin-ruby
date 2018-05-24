@@ -17,15 +17,4 @@ Below are the options (from [`src/index.js`](src/index.js)) that `prettier-ruby`
 
 ## Known limitations
 
-There are still a couple of node types to support, listed below. Additionally, `prettier-ruby` is still dropping comments because the `ripperjs` package doesn't yet have support for them.
-
-- [ ] alias_error
-- [ ] arg_ambiguous
-- [ ] assign_error
-- [ ] class_name_error
-- [ ] excessed_comma
-- [ ] heredoc_dedent
-- [ ] magic_comment
-- [ ] operator_ambiguous
-- [ ] param_error
-- [ ] parse_error
+Currently, `prettier-ruby` is still dropping comments because the `ripperjs` package doesn't yet have support for them.
