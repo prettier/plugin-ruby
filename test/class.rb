@@ -1,6 +1,8 @@
 module Pret
   module Tier
-    class Vehicle
+    class Base; end
+
+    class BaseVehicle
       attr_accessor :wheels
 
       def initialize(wheels)
@@ -11,6 +13,8 @@ module Pret
         @wheels
       end
     end
+
+    class Vehicle < BaseVehicle; end
 
     class Car < Vehicle
       WHEELS = 4

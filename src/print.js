@@ -188,18 +188,23 @@ const nodes = {
   },
   class: (path, options, print) => {
     const [_constant, superclass, _statements] = path.getValue().body;
-    const parts = [concat(["class ", path.call(print, "body", 0)])];
+
+    const printedStatements = path.call(print, "body", 2);
+    const emptyStatements = printedStatements.contents.parts[0] === "";
+
+    const parts = ["class ", path.call(print, "body", 0)];
+    let statementPart = indent(printedStatements);
 
     if (superclass) {
-      parts.push(concat([" < ", path.call(print, "body", 1)]));
-      parts.push(indent(concat([hardline, path.call(print, "body", 2)])));
-    } else {
-      parts.push(indent(path.call(print, "body", 2)));
+      parts.push(" < ", path.call(print, "body", 1));
+      statementPart = indent(concat([hardline, printedStatements]));
     }
 
-    parts.push(concat([hardline, "end"]));
+    if (printedStatements.contents.parts[0] === "") {
+      return group(concat([concat(parts), ifBreak("", "; "), "end"]));
+    }
 
-    return group(concat(parts));
+    return group(concat([concat(parts), statementPart, hardline, "end"]));
   },
   command: (path, options, print) => group(join(" ", path.map(print, "body"))),
   command_call: (path, options, print) => {

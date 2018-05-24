@@ -265,7 +265,9 @@ end
 exports[`class.rb matches expected output for inline.json 1`] = `
 "module Pret
   module Tier
-    class Vehicle
+    class Base; end
+
+    class BaseVehicle
       attr_accessor :wheels
 
       def initialize(wheels)
@@ -276,6 +278,8 @@ exports[`class.rb matches expected output for inline.json 1`] = `
         @wheels
       end
     end
+
+    class Vehicle < BaseVehicle; end
 
     class Car < Vehicle
       WHEELS = 4
@@ -302,7 +306,9 @@ end
 exports[`class.rb matches expected output for noinline.json 1`] = `
 "module Pret
   module Tier
-    class Vehicle
+    class Base; end
+
+    class BaseVehicle
       attr_accessor :wheels
 
       def initialize(wheels)
@@ -313,6 +319,8 @@ exports[`class.rb matches expected output for noinline.json 1`] = `
         @wheels
       end
     end
+
+    class Vehicle < BaseVehicle; end
 
     class Car < Vehicle
       WHEELS = 4
