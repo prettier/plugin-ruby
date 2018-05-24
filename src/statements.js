@@ -39,23 +39,19 @@ const printStatementAdd = (path, options, print) => {
     return path.call(print, "body", 1);
   }
 
-  if (leftStatement.type === "stmts_add") {
-    const [nestedLeftType, nestedRightType] = leftStatement.body.map(({ type }) => type);
-
-    if (nestedLeftType === "stmts_new" && nestedRightType === "void_stmt") {
-      return path.call(print, "body", 1);
-    }
+  // This weird pattern is if there's a void statement at the beginning of the
+  // statement chain, it would otherwise cause an unnecessary newline.
+  const [nestedLeftType, nestedRightType] = leftStatement.body.map(({ type }) => type);
+  if (nestedLeftType === "stmts_new" && nestedRightType === "void_stmt") {
+    return path.call(print, "body", 1);
   }
 
   return group(join(buffer, path.map(print, "body")));
 };
 
-const printStatementNew = (path, options, print) => "";
-
 const printStatementVoid = (path, options, print) => "";
 
 module.exports = {
   printStatementAdd,
-  printStatementNew,
   printStatementVoid
 };

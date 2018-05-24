@@ -9,7 +9,7 @@ const { printBEGIN, printEND } = require("./hooks");
 const { printWhile, printUntil, printFor } = require("./loops");
 const { printDef, printDefs } = require("./methods");
 const { printKwargRestParam, printRestParam, printParams } = require("./params");
-const { printStatementAdd, printStatementNew, printStatementVoid } = require("./statements");
+const { printStatementAdd, printStatementVoid } = require("./statements");
 
 const concatBody = (path, options, print) => concat(path.map(print, "body"));
 
@@ -184,10 +184,18 @@ const nodes = {
   },
   brace_block: printBlock,
   break: (path, options, print) => {
-    if (path.getValue().body[0].length > 0) {
-      return concat(["break ", path.call(print, "body", 0)]);
+    const printed = path.call(print, "body", 0);
+    const { contents: { parts: [first] } } = printed;
+
+    if (first === "[") {
+      return "break";
     }
-    return "break";
+
+    if (first && !first.parts || (first.parts && first.parts[0] !== "(")) {
+      return concat(["break ", printed]);
+    }
+
+    return concat(["break", printed]);
   },
   call: (path, options, print) => {
     let printedName = path.getValue().body[2];
@@ -490,7 +498,6 @@ const nodes = {
     concat([hardline, "end"])
   ])),
   stmts_add: printStatementAdd,
-  stmts_new: printStatementNew,
   string_add: (path, options, print) => [
     ...path.call(print, "body", 0),
     path.call(print, "body", 1)

@@ -288,6 +288,26 @@ target.method object.map { |arg| arg * 2 }
 "
 `;
 
+exports[`break.rb matches expected output for off.json 1`] = `
+"break
+break 1
+
+break(1)
+
+break 1, 2
+"
+`;
+
+exports[`break.rb matches expected output for on.json 1`] = `
+"break
+break 1
+
+break(1)
+
+break 1, 2
+"
+`;
+
 exports[`case.rb matches expected output for off.json 1`] = `
 "case
 when a
