@@ -1,4 +1,5 @@
 {
   "inlineConditionals": true,
-  "inlineLoops": true
+  "inlineLoops": true,
+  "preferSingleQuotes": true
 }
