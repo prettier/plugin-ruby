@@ -1,0 +1,289 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`array.rb matches expected output 1`] = `
+"[]
+[1, 2, 3]
+['a', 'b', 'c']
+%w[a b c]
+%i[a b c]
+%W[a#{a}a b#{b}a c#{c}c]
+%I[a#{a}a b#{b}b c#{c}c]
+[1, 2, *[3, 4], 5, 6]
+"
+`;
+
+exports[`assign.rb matches expected output 1`] = `
+"a = 1
+b =
+  begin
+    2
+  end
+c, d, e = [1, 2, 3]
+f = 1, 2, 3
+g, h, i = 1, 2, 3
+j, *k = 1, 2, 3
+l, *m, n, o = 1, 2, 3
+q = *[1, 2, 3]
+(r, s), t = [1, 2], 3
+u ||= 1
+v ||=
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+"
+`;
+
+exports[`blocks.rb matches expected output 1`] = `
+"loop { 1 }
+loop do
+  1
+end
+[1, 2, 3].map do |i|
+  i * 2
+end
+[1, 2, 3].each do |i|
+  p i
+end
+"
+`;
+
+exports[`case.rb matches expected output 1`] = `
+"case
+when a
+  1
+end
+case a
+when b
+  1
+end
+case a
+when b, c
+  1
+end
+case a
+when b
+  1
+when c
+  2
+end
+case a
+when b
+  1
+else
+  2
+end
+"
+`;
+
+exports[`class.rb matches expected output 1`] = `
+"module Prettier
+  class Vehicle
+    attr_accessor :wheels
+    def initialize(wheels)
+      self.wheels = wheels
+    end
+    def drive
+      @wheels
+    end
+  end
+  class Car < Vehicle
+    WHEELS = 4
+    def initialize
+      super(WHEELS)
+    end
+    def drive
+      super
+    end
+  end
+end
+::Prettier::Vehicle.new(3)
+def Vehicle.drive
+  'vroom'
+end
+"
+`;
+
+exports[`hash.rb matches expected output 1`] = `
+"{}
+{ a: 'a', b: 'b', c: 'c' }
+{ a: 'a', b: 'b', c: 'c' }
+{ Foo => 1, Bar => 2 }
+"
+`;
+
+exports[`if.rb matches expected output 1`] = `
+"if a
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+if a
+  1
+elsif b
+  2
+end
+if a
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+else
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+if a
+  1
+elsif b
+  2
+elsif c
+  3
+else
+  4
+end
+unless a
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+unless a
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+else
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+1 if a
+if super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+1 unless a
+unless super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+a ? 1 : 2
+a ? 2 : 1
+a ? 1 : 2
+if a
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+else
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+"
+`;
+
+exports[`kwargs.rb matches expected output 1`] = `
+"def foo(a:, b:, c: 1, d: 2)
+  a + b + c + d
+end
+foo(a: 1, b: 2, c: 3, d: 4)
+hash = { a: 1, b: 2, c: 3 }
+foo(**hash, d: 4)
+"
+`;
+
+exports[`lambda.rb matches expected output 1`] = `
+"-> { 1 }
+a = -> { 1 }
+b = ->(a, b, c) { a + b + c }
+c =
+  lambda do
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  end
+d =
+  lambda do |a, b, c|
+    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  end
+"
+`;
+
+exports[`method.rb matches expected output 1`] = `
+"def foo(a, b, c = 1, d = 2, *e, f, g, h:, i:, j: 1, k: 2, **l, &block)
+  'what'
+end
+foo(1)
+foo(1, 2)
+foo(1, 2, *abc)
+foo(1, 2, *abc, 3, 4)
+foo(*bar)
+foo(**baz)
+foo(&block)
+foo(*bar, &block)
+foo(**baz, &block)
+foo(*bar, **baz, &block)
+foo(h: 1, **bar)
+foo(**bar, h: 1)
+foo(h: 1, **bar, i: 2)
+"
+`;
+
+exports[`numbers.rb matches expected output 1`] = `
+"123
+-123
+1_123
+-543
+123_456_789_123_456_789
+123.45
+1.2e-3
+0xaabb
+0377
+-0b1010
+0b001_001
+?a
+?\\\\C-a
+?\\\\M-a
+?\\\\M-\\\\C-a
+"
+`;
+
+exports[`regex.rb matches expected output 1`] = `
+"a = /abc/
+b = %r{abc}
+c = /abc/
+d = %r[abc]
+e = %r(abc)
+f = /a#{b}c/
+g = /abc/i
+h = %r{abc}i
+"
+`;
+
+exports[`rescue.rb matches expected output 1`] = `
+"begin
+  1
+rescue StandardError
+  retry
+rescue NoMethodError => exception
+  redo
+rescue
+  2
+else
+  3
+ensure
+  4
+end
+a rescue nil
+"
+`;
+
+exports[`strings.rb matches expected output 1`] = `
+"''
+'abc'
+'abc'
+\\"#{abc}\\"
+\\"abc #{de} fghi #{jkl} mno\\"
+'abc' \\\\
+  'def' \\\\
+  'ghi'
+\\"abc #{'abc'}\\"
+{ 'a' => 1 }
+{ \\"a #{a}\\" => 1 }
+"
+`;
+
+exports[`while.rb matches expected output 1`] = `
+"1 while true
+1 while true
+while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+1 until true
+1 until true
+until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+"
+`;
