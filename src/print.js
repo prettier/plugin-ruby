@@ -565,6 +565,10 @@ const nodes = {
   unless_mod: printUnless,
   until: printUntil,
   until_mod: printUntil,
+  var_alias: (path, options, print) => concat([
+    "alias ",
+    join(" ", path.map(print, "body"))
+  ]),
   var_field: concatBody,
   var_ref: (path, options, print) => path.call(print, "body", 0),
   vcall: concatBody,
