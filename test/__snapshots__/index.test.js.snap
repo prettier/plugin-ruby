@@ -41,6 +41,24 @@ exports[`array.rb matches expected output for off.json 1`] = `
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
   ]
 ]
+
+a[1]
+
+a[
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+]
+
+a[1] = 2
+
+a[
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+] =
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+
+a[1] = [
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+]
 "
 `;
 
@@ -66,6 +84,24 @@ exports[`array.rb matches expected output for on.json 1`] = `
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
   ]
+]
+
+a[1]
+
+a[
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+]
+
+a[1] = 2
+
+a[
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+] =
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+
+a[1] = [
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 ]
 "
 `;
@@ -411,7 +447,7 @@ exports[`class.rb matches expected output for off.json 1`] = `
 end
 
 Pret::Tier::Object
-Pret = \\"config\\"
+Pret::Tier = \\"config\\"
 
 ::Pret::Tier::Object
 ::Pret = \\"config\\"
@@ -445,7 +481,7 @@ exports[`class.rb matches expected output for on.json 1`] = `
 end
 
 Pret::Tier::Object
-Pret = 'config'
+Pret::Tier = 'config'
 
 ::Pret::Tier::Object
 ::Pret = 'config'
@@ -911,6 +947,22 @@ foo(*bar, **baz, &block)
 foo(h: 1, **bar)
 foo(**bar, h: 1)
 foo(h: 1, **bar, i: 2)
+"
+`;
+
+exports[`next.rb matches expected output for off.json 1`] = `
+"next
+next 1
+
+next (1)
+"
+`;
+
+exports[`next.rb matches expected output for on.json 1`] = `
+"next
+next 1
+
+next (1)
 "
 `;
 

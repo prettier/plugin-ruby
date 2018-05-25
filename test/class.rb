@@ -27,7 +27,7 @@ module Pret
 end
 
 Pret::Tier::Object
-Pret = 'config'
+Pret::Tier = 'config'
 
 ::Pret::Tier::Object
 ::Pret = 'config'

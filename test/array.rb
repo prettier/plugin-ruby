@@ -21,3 +21,17 @@
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
   ]
 ]
+
+a[1]
+
+a[super_super_super_super_super_super_super_super_super_super_super_super_super_super_long]
+
+a[1] = 2
+
+a[super_super_super_super_super_super_super_super_super_super_super_super_super_super_long] =
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+
+a[1] = [
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+]

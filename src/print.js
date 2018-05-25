@@ -414,7 +414,7 @@ const nodes = {
   },
   mrhs_new: (path, options, print) => "",
   next: (path, options, print) => {
-    if (path.getValue().body.length > 0) {
+    if (path.getValue().body[0].type !== "args_new") {
       return concat(["next ", path.call(print, "body", 0)]);
     }
     return "next";
