@@ -2,6 +2,7 @@
 
 const fs = require("fs");
 const prettier = require("prettier");
+const print = require("../src/print");
 
 fs.readdirSync("./test/config").forEach(configFilename => {
   const config = JSON.parse(fs.readFileSync(`./test/config/${configFilename}`, "utf8"));
@@ -26,4 +27,13 @@ fs.readdirSync("./test/config").forEach(configFilename => {
       });
     });
   });
+});
+
+test("when encountering an unsupported node type", () => {
+  const path = {
+    getValue: () => path.value,
+    value: { type: "unsupported", body: {} }
+  };
+
+  expect(() => print(path, null, null)).toThrow("Unsupported");
 });
