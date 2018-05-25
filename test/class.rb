@@ -20,6 +20,8 @@ module Pret
 
     class << self
       def method; end
+
+      undef method
     end
   end
 end

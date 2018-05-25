@@ -17,3 +17,9 @@
 { 'a' => 1 }
 
 { "a #{a}" => 1 }
+
+:"abc#{abc}abc"
+
+%x[abc]
+
+%x[super_super_super_super_super_super_super_super_super_super_super_super_super_super_long]

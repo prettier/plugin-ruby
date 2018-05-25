@@ -562,7 +562,10 @@ const nodes = {
     path.getValue().body[0][0],
     path.call(print, "body", 1)
   ]),
-  undef: (path, options, print) => concat(["undef ", concat(path.map(print, "body", 0))]),
+  undef: (path, options, print) => concat([
+    "undef ",
+    path.call(print, "body", 0, 0)
+  ]),
   unless: printUnless,
   unless_mod: printUnless,
   until: printUntil,
@@ -604,10 +607,8 @@ const nodes = {
   xstring_add: concatBody,
   xstring_literal: (path, options, print) => group(concat([
     "%x[",
-    softline,
-    indent(concat(path.map(print, "body"))),
-    softline,
-    "]"
+    indent(concat([softline, path.call(print, "body", 0)])),
+    concat([softline, "]"])
   ])),
   xstring_new: (path, options, print) => "",
   yield: (path, options, print) => concat([
