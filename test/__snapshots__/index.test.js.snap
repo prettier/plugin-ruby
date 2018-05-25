@@ -20,6 +20,7 @@ alias $foo $bar
 
 exports[`array.rb matches expected output for off.json 1`] = `
 "[]
+
 [1, 2, 3]
 
 [\\"a\\", \\"b\\", \\"c\\"]
@@ -64,6 +65,7 @@ a[1] = [
 
 exports[`array.rb matches expected output for on.json 1`] = `
 "[]
+
 [1, 2, 3]
 
 ['a', 'b', 'c']
@@ -360,6 +362,7 @@ target.method object.map { |arg| arg * 2 }
 
 exports[`break.rb matches expected output for off.json 1`] = `
 "break
+
 break 1
 
 break(1)
@@ -370,6 +373,7 @@ break 1, 2
 
 exports[`break.rb matches expected output for on.json 1`] = `
 "break
+
 break 1
 
 break(1)
@@ -475,6 +479,7 @@ exports[`class.rb matches expected output for off.json 1`] = `
 
     class << self
       def method; end
+
       undef method
     end
   end
@@ -509,6 +514,7 @@ exports[`class.rb matches expected output for on.json 1`] = `
 
     class << self
       def method; end
+
       undef method
     end
   end
@@ -562,9 +568,13 @@ defined?(
 
 exports[`hash.rb matches expected output for off.json 1`] = `
 "{}
+
 { :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
+
 { :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
+
 { Foo => 1, Bar => 2 }
+
 {
   :super_super_super_super_super_super_super_super_super_super_super_super_super_super_long =>
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
@@ -578,9 +588,13 @@ exports[`hash.rb matches expected output for off.json 1`] = `
 
 exports[`hash.rb matches expected output for on.json 1`] = `
 "{}
+
 { a: 'a', b: 'b', c: 'c' }
+
 { a: 'a', b: 'b', c: 'c' }
+
 { Foo => 1, Bar => 2 }
+
 {
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
@@ -998,6 +1012,7 @@ foo(h: 1, **bar, i: 2)
 
 exports[`next.rb matches expected output for off.json 1`] = `
 "next
+
 next 1
 
 next (1)
@@ -1006,6 +1021,7 @@ next (1)
 
 exports[`next.rb matches expected output for on.json 1`] = `
 "next
+
 next 1
 
 next (1)
@@ -1150,6 +1166,7 @@ a rescue nil
 
 exports[`return.rb matches expected output for off.json 1`] = `
 "return
+
 return 1
 
 return (1)
@@ -1158,6 +1175,7 @@ return (1)
 
 exports[`return.rb matches expected output for on.json 1`] = `
 "return
+
 return 1
 
 return (1)
@@ -1166,6 +1184,7 @@ return (1)
 
 exports[`strings.rb matches expected output for off.json 1`] = `
 "\\"\\"
+
 \\"abc\\"
 
 \\"abc\\"
@@ -1179,7 +1198,9 @@ exports[`strings.rb matches expected output for off.json 1`] = `
   \\"ghi\\"
 
 \\"abc #{\\"abc\\"}\\"
+
 { \\"a\\" => 1 }
+
 { \\"a #{a}\\" => 1 }
 
 :\\"abc#{abc}abc\\"
@@ -1194,6 +1215,7 @@ exports[`strings.rb matches expected output for off.json 1`] = `
 
 exports[`strings.rb matches expected output for on.json 1`] = `
 "''
+
 'abc'
 
 'abc'
@@ -1207,7 +1229,9 @@ exports[`strings.rb matches expected output for on.json 1`] = `
   'ghi'
 
 \\"abc #{'abc'}\\"
+
 { 'a' => 1 }
+
 { \\"a #{a}\\" => 1 }
 
 :\\"abc#{abc}abc\\"
@@ -1222,6 +1246,7 @@ exports[`strings.rb matches expected output for on.json 1`] = `
 
 exports[`super.rb matches expected output for off.json 1`] = `
 "super
+
 super 1
 
 super(1)
@@ -1234,6 +1259,7 @@ super(1, 2)
 
 exports[`super.rb matches expected output for on.json 1`] = `
 "super
+
 super 1
 
 super(1)
@@ -1309,6 +1335,7 @@ end
 exports[`yield.rb matches expected output for off.json 1`] = `
 "[1, 2, 3].each do |i|
   yield
+
   yield i
 
   yield (i)
@@ -1316,6 +1343,7 @@ exports[`yield.rb matches expected output for off.json 1`] = `
   yield i, 2
 
   yield (i, 2)
+
   yield
 end
 "
@@ -1324,6 +1352,7 @@ end
 exports[`yield.rb matches expected output for on.json 1`] = `
 "[1, 2, 3].each do |i|
   yield
+
   yield i
 
   yield (i)
@@ -1331,6 +1360,7 @@ exports[`yield.rb matches expected output for on.json 1`] = `
   yield i, 2
 
   yield (i, 2)
+
   yield
 end
 "
