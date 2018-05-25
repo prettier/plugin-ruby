@@ -378,43 +378,35 @@ const nodes = {
     group(concat([line, path.call(print, "body", 1)]))
   ])),
   mlhs_add_star: (path, options, print) => {
-    const star = path.getValue().body[1] ? concat(["*", path.call(print, "body", 1)]) : "*"
+    const [leftAssign, paramName] = path.getValue().body;
 
-    return group(concat([
-      path.call(print, "body", 0),
-      ",",
-      line,
-      star
-    ]));
+    const left = leftAssign.type !== "mlhs_new" ? concat([path.call(print, "body", 0), ",", line]) : "";
+    const star = paramName ? concat(["*", path.call(print, "body", 1)]) : "*"
+
+    return group(concat([left, star]));
   },
-  mrhs_add_star: (path, options, print) => group(concat([
-    "*",
-    concat(path.map(print, "body"))
-  ])),
   mlhs_paren: (path, options, print) => group(concat([
     "(",
     indent(concat([softline, path.call(print, "body", 0)])),
     concat([softline, ")"])
   ])),
+  mrhs_add: (path, options, print) => group(concat([
+    path.call(print, "body", 0),
+    ",",
+    line,
+    path.call(print, "body", 1)
+  ])),
+  mrhs_add_star: (path, options, print) => group(concat([
+    "*",
+    concat(path.map(print, "body"))
+  ])),
+  mrhs_new: (path, options, print) => "",
   mrhs_new_from_args: (path, options, print) => path.call(print, "body", 0),
   module: (path, options, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
     indent(concat([hardline, path.call(print, "body", 1)])),
     concat([hardline, "end"])
   ])),
-  mrhs_add: (path, options, print) => {
-    // if (path.getValue().body[0].type === "mrhs_new") {
-    //   return path.call(print, "body", 1);
-    // }
-
-    return group(concat([
-      path.call(print, "body", 0),
-      ",",
-      line,
-      path.call(print, "body", 1)
-    ]));
-  },
-  mrhs_new: (path, options, print) => "",
   next: (path, options, print) => {
     if (path.getValue().body[0].type !== "args_new") {
       return concat(["next ", path.call(print, "body", 0)]);

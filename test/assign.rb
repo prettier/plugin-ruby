@@ -21,6 +21,10 @@ a = *[1, 2, 3]
 
 (a, b), c = [1, 2], 3
 
+* = [1, 2, 3]
+
+*, a = [1, 2, 3]
+
 super_super_super_super_super_long, super_super_super_super_super_long, super_super_super_super_super_long =
   super_super_super_super_super_long, super_super_super_super_super_long, super_super_super_super_super_long
 
