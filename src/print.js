@@ -396,7 +396,6 @@ const nodes = {
     indent(concat([softline, path.call(print, "body", 0)])),
     concat([softline, ")"])
   ])),
-  mlhs_new: (path, options, print) => "",
   mrhs_new_from_args: (path, options, print) => path.call(print, "body", 0),
   module: (path, options, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
