@@ -89,11 +89,8 @@ const nodes = {
       return '[]';
     }
 
-    const firstTypeOf = element => element.parts ? firstTypeOf(element.parts[0]) : element.type;
-    const initial = firstTypeOf(path.getValue().body[0]) === "args_add" ? "[" : "";
-
     return group(concat([
-      initial,
+      path.getValue().body[0].type === "args_add" ? "[" : "",
       indent(concat([softline, path.call(print, "body", 0)])),
       concat([softline, "]"])
     ]));

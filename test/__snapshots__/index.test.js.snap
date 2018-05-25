@@ -124,6 +124,8 @@ a, *b = 1, 2, 3
 
 a, *b, c, d = 1, 2, 3
 
+a, * = 1, 2, 3
+
 a = *[1, 2, 3]
 
 (a, b), c = [1, 2], 3
@@ -189,6 +191,8 @@ a, b, c = 1, 2, 3
 a, *b = 1, 2, 3
 
 a, *b, c, d = 1, 2, 3
+
+a, * = 1, 2, 3
 
 a = *[1, 2, 3]
 
@@ -273,6 +277,12 @@ loop { |i| 1 }
 
 loop { |i| i }
 
+loop { |*| i }
+
+loop { |(a, b)| i }
+
+loop { |a, (b, c), d, *e| i }
+
 loop do |i|
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 end
@@ -311,6 +321,12 @@ end
 loop { |i| 1 }
 
 loop { |i| i }
+
+loop { |*| i }
+
+loop { |(a, b)| i }
+
+loop { |a, (b, c), d, *e| i }
 
 loop do |i|
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
