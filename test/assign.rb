@@ -47,3 +47,8 @@ a = {
   a: super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
   b: super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }.sort
+
+a.a = 1
+
+super_super_super_super_super_super_super_long.super_super_super_super_super_super_super_long =
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long

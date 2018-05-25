@@ -471,8 +471,11 @@ const nodes = {
     const parts = ["rescue"];
 
     if (exception) {
-      parts.push(" ");
-      parts.push(Array.isArray(exception) ? path.call(print, "body", 0, 0) : path.call(print, "body", 0));
+      if (Array.isArray(exception)) {
+        parts.push(" ", path.call(print, "body", 0, 0));
+      } else {
+        parts.push(" ", path.call(print, "body", 0));
+      }
     }
 
     if (variable) {

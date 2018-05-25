@@ -4,12 +4,14 @@ rescue StandardError
   retry
 rescue NoMethodError => exception
   redo
-rescue
+rescue StandardError, NoMethodError
   2
-else
+rescue
   3
-ensure
+else
   4
+ensure
+  5
 end
 
 a rescue nil

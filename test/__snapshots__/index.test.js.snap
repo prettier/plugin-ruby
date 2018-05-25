@@ -164,6 +164,11 @@ a = {
   :b =>
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }.sort
+
+a.a = 1
+
+super_super_super_super_super_super_super_long.super_super_super_super_super_super_super_long =
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 "
 `;
 
@@ -225,6 +230,11 @@ a = {
   b:
     super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 }.sort
+
+a.a = 1
+
+super_super_super_super_super_super_super_long.super_super_super_super_super_super_super_long =
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 "
 `;
 
@@ -1067,12 +1077,14 @@ rescue StandardError
   retry
 rescue NoMethodError => exception
   redo
-rescue
+rescue StandardError, NoMethodError
   2
-else
+rescue
   3
-ensure
+else
   4
+ensure
+  5
 end
 
 a rescue nil
@@ -1086,12 +1098,14 @@ rescue StandardError
   retry
 rescue NoMethodError => exception
   redo
-rescue
+rescue StandardError, NoMethodError
   2
-else
+rescue
   3
-ensure
+else
   4
+ensure
+  5
 end
 
 a rescue nil
