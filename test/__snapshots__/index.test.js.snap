@@ -405,12 +405,16 @@ exports[`class.rb matches expected output for off.json 1`] = `
 
     class << self
       def method; end
+      undef method
     end
   end
 end
 
 Pret::Tier::Object
+Pret = \\"config\\"
+
 ::Pret::Tier::Object
+::Pret = \\"config\\"
 "
 `;
 
@@ -435,12 +439,16 @@ exports[`class.rb matches expected output for on.json 1`] = `
 
     class << self
       def method; end
+      undef method
     end
   end
 end
 
 Pret::Tier::Object
+Pret = 'config'
+
 ::Pret::Tier::Object
+::Pret = 'config'
 "
 `;
 
