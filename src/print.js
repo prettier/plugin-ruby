@@ -25,12 +25,18 @@ const nodes = {
     "alias ",
     join(" ", path.map(print, "body"))
   ]),
-  aref: (path, options, print) => group(concat([
-    path.call(print, "body", 0),
-    "[",
-    indent(concat([softline, path.call(print, "body", 1)])),
-    concat([softline, "]"])
-  ])),
+  aref: (path, options, print) => {
+    if (!path.getValue().body[1]) {
+      return concat([path.call(print, "body", 0), "[]"]);
+    }
+
+    return group(concat([
+      path.call(print, "body", 0),
+      "[",
+      indent(concat([softline, path.call(print, "body", 1)])),
+      concat([softline, "]"])
+    ]));
+  },
   aref_field: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     "[",
@@ -423,14 +429,11 @@ const nodes = {
     indent(concat([line, path.call(print, "body", 2)]))
   ])),
   params: printParams,
-  paren: (path, options, print) => (
-    concat(["(", concat(path.getValue().body.reduce((parts, part, index) => {
-      if (Array.isArray(part)) {
-        return parts.concat(path.map(print, "body", index));
-      }
-      return [...parts, path.call(print, "body", index)];
-    }, [])), ")"])
-  ),
+  paren: (path, options, print) => concat([
+    "(",
+    concat(path.map(print, "body")),
+    ")"
+  ]),
   program: (path, options, print) => markAsRoot(concat([
     join(literalline, path.map(print, "body")),
     literalline

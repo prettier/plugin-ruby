@@ -12,6 +12,10 @@ a.(1, 2, 3)
 
 a.call(1, 2, 3)
 
+a[]
+
+super_super_super_super_super_super_super_super_super_super_super_super_super_super_long[]
+
 a[1, 2, 3]
 
 -> a { 1 }
