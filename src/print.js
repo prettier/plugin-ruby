@@ -403,9 +403,9 @@ const nodes = {
     concat([hardline, "end"])
   ])),
   mrhs_add: (path, options, print) => {
-    if (path.getValue().body[0].type === "mrhs_new") {
-      return path.call(print, "body", 1);
-    }
+    // if (path.getValue().body[0].type === "mrhs_new") {
+    //   return path.call(print, "body", 1);
+    // }
 
     return group(concat([
       path.call(print, "body", 0),
