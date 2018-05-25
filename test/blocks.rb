@@ -16,6 +16,12 @@ loop do |i|
   i
 end
 
+loop { |*| i }
+
+loop { |(a, b)| i }
+
+loop { |a, (b, c), d, *e| i }
+
 loop { |i| super_super_super_super_super_super_super_super_super_super_super_super_super_super_long }
 
 loop do |i|
