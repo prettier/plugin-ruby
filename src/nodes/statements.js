@@ -27,6 +27,6 @@ const printStatementAdd = (path, options, print) => {
 const printStatementVoid = (path, options, print) => "";
 
 module.exports = {
-  printStatementAdd,
-  printStatementVoid
+  stmts_add: printStatementAdd,
+  void_stmt: printStatementVoid
 };

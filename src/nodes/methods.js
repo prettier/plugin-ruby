@@ -32,6 +32,6 @@ const printMethod = offset => (path, options, print) => {
 };
 
 module.exports = {
-  printDef: printMethod(0),
-  printDefs: printMethod(2)
+  def: printMethod(0),
+  defs: printMethod(2)
 };

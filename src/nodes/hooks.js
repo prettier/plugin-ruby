@@ -7,6 +7,6 @@ const printHook = name => (path, options, print) => group(concat([
 ]));
 
 module.exports = {
-  printBEGIN: printHook("BEGIN"),
-  printEND: printHook("END")
+  BEGIN: printHook("BEGIN"),
+  END: printHook("END")
 };

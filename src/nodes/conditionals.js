@@ -71,7 +71,9 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
 };
 
 module.exports = {
-  printIf: printConditional("if"),
-  printUnless: printConditional("unless"),
-  printTernary: printConditional("if")
+  if: printConditional("if"),
+  ifop: printConditional("if"),
+  if_mod: printConditional("if"),
+  unless: printConditional("unless"),
+  unless_mod: printConditional("unless")
 };

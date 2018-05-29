@@ -49,7 +49,7 @@ const printParams = (path, options, print) => {
 };
 
 module.exports = {
-  printKwargRestParam: printGenericRestParam("**"),
-  printRestParam: printGenericRestParam("*"),
-  printParams
+  kwrest_param: printGenericRestParam("**"),
+  rest_param: printGenericRestParam("*"),
+  params: printParams
 };

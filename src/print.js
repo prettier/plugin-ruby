@@ -4,13 +4,13 @@ const {
 } = require("prettier").doc.builders;
 
 const alias = require("./nodes/alias");
-const { printBlock } = require("./blocks");
-const { printIf, printUnless, printTernary } = require("./conditionals");
-const { printBEGIN, printEND } = require("./hooks");
-const { printWhile, printUntil, printFor } = require("./loops");
-const { printDef, printDefs } = require("./methods");
-const { printKwargRestParam, printRestParam, printParams } = require("./params");
-const { printStatementAdd, printStatementVoid } = require("./statements");
+const blocks = require("./nodes/blocks");
+const conditionals = require("./nodes/conditionals");
+const hooks = require("./nodes/hooks");
+const loops = require("./nodes/loops");
+const methods = require("./nodes/methods");
+const params = require("./nodes/params");
+const statements = require("./nodes/statements");
 
 const concatBody = (path, options, print) => concat(path.map(print, "body"));
 
@@ -20,9 +20,14 @@ const shouldSkipAssignIndent = node => (
 );
 
 const nodes = {
-  BEGIN: printBEGIN,
-  END: printEND,
   ...alias,
+  ...blocks,
+  ...conditionals,
+  ...hooks,
+  ...loops,
+  ...methods,
+  ...params,
+  ...statements,
   aref: (path, options, print) => {
     if (!path.getValue().body[1]) {
       return concat([path.call(print, "body", 0), "[]"]);
@@ -183,7 +188,6 @@ const nodes = {
 
     return group(concat(parts));
   },
-  brace_block: printBlock,
   break: (path, options, print) => {
     const printed = path.call(print, "body", 0);
     const { contents: { parts: [first] } } = printed;
@@ -265,14 +269,11 @@ const nodes = {
   const_path_field: (path, options, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, options, print) => join("::", path.map(print, "body")),
   const_ref: (path, options, print) => path.call(print, "body", 0),
-  def: printDef,
-  defs: printDefs,
   defined: (path, options, print) => group(concat([
     "defined?(",
     indent(concat([softline, path.call(print, "body", 0)])),
     concat([softline, ")"])
   ])),
-  do_block: printBlock,
   dot2: (path, options, print) => concat([
     path.call(print, "body", 0),
     "..",
@@ -315,7 +316,6 @@ const nodes = {
     path.getValue().body[1],
     path.call(print, "body", 2)
   ])),
-  for: printFor,
   hash: (path, options, print) => {
     if (path.getValue().body[0] === null) {
       return '{}';
@@ -327,9 +327,6 @@ const nodes = {
       concat([line, "}"])
     ]));
   },
-  if: printIf,
-  ifop: printTernary,
-  if_mod: printIf,
   lambda: (path, options, print) => {
     const args = path.call(print, "body", 0);
     const buffer = path.getValue().body[0].type === "params" && args.parts.length > 0 ? " " : "";
@@ -351,7 +348,6 @@ const nodes = {
       ])
     ));
   },
-  kwrest_param: printKwargRestParam,
   massign: (path, options, print) => group(concat([
     path.call(print, "body", 0),
     " =",
@@ -418,7 +414,6 @@ const nodes = {
     path.call(print, "body", 1),
     indent(concat([line, path.call(print, "body", 2)]))
   ])),
-  params: printParams,
   paren: (path, options, print) => concat([
     "(",
     concat(path.map(print, "body")),
@@ -481,7 +476,6 @@ const nodes = {
     return group(concat(parts));
   },
   rescue_mod: (path, options, print) => group(join(" rescue ", path.map(print, "body"))),
-  rest_param: printRestParam,
   retry: (path, options, print) => "retry",
   return: (path, options, print) => group(concat(["return ", concat(path.map(print, "body"))])),
   return0: (path, options, print) => "return",
@@ -490,7 +484,6 @@ const nodes = {
     indent(concat([hardline, path.call(print, "body", 1)])),
     concat([hardline, "end"])
   ])),
-  stmts_add: printStatementAdd,
   string_add: (path, options, print) => [
     ...path.call(print, "body", 0),
     path.call(print, "body", 1)
@@ -559,10 +552,6 @@ const nodes = {
     "undef ",
     path.call(print, "body", 0, 0)
   ]),
-  unless: printUnless,
-  unless_mod: printUnless,
-  until: printUntil,
-  until_mod: printUntil,
   var_alias: (path, options, print) => concat([
     "alias ",
     join(" ", path.map(print, "body"))
@@ -570,7 +559,6 @@ const nodes = {
   var_field: concatBody,
   var_ref: (path, options, print) => path.call(print, "body", 0),
   vcall: concatBody,
-  void_stmt: printStatementVoid,
   when: (path, options, print) => {
     const [_predicates, _statements, addition] = path.getValue().body;
 
@@ -587,8 +575,6 @@ const nodes = {
 
     return group(concat(parts));
   },
-  while: printWhile,
-  while_mod: printWhile,
   word_add: concatBody,
   word_new: (path, options, print) => "",
   words_add: (path, options, print) => concat([

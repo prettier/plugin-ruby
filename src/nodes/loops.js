@@ -24,7 +24,9 @@ const printFor = (path, options, print) => group(concat([
 ]));
 
 module.exports = {
-  printWhile: printLoop("while"),
-  printUntil: printLoop("until"),
-  printFor
+  while: printLoop("while"),
+  while_mod: printLoop("while"),
+  until: printLoop("until"),
+  until_mod: printLoop("until"),
+  for: printFor
 };

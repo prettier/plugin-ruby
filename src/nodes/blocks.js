@@ -73,5 +73,6 @@ const printBlock = (path, options, print) => {
 };
 
 module.exports = {
-  printBlock
+  brace_block: printBlock,
+  do_block: printBlock
 };
