@@ -1,8 +1,9 @@
 const {
   align, concat, dedent, group, hardline, ifBreak, indent, join, line,
-  literalline, markAsRoot, softline
+  lineSuffix, literalline, markAsRoot, softline
 } = require("prettier").doc.builders;
 
+const alias = require("./nodes/alias");
 const { printBlock } = require("./blocks");
 const { printIf, printUnless, printTernary } = require("./conditionals");
 const { printBEGIN, printEND } = require("./hooks");
@@ -21,10 +22,7 @@ const shouldSkipAssignIndent = node => (
 const nodes = {
   BEGIN: printBEGIN,
   END: printEND,
-  alias: (path, options, print) => concat([
-    "alias ",
-    join(" ", path.map(print, "body"))
-  ]),
+  ...alias,
   aref: (path, options, print) => {
     if (!path.getValue().body[1]) {
       return concat([path.call(print, "body", 0), "[]"]);
@@ -263,6 +261,7 @@ const nodes = {
       path.call(print, "body", 3)
     ]));
   },
+  comment: (path, options, print) => concat([" ", path.getValue().body.trim()]),
   const_path_field: (path, options, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, options, print) => join("::", path.map(print, "body")),
   const_ref: (path, options, print) => path.call(print, "body", 0),

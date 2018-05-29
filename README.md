@@ -17,4 +17,4 @@ Below are the options (from [`src/index.js`](src/index.js)) that `prettier-ruby`
 
 ## Known limitations
 
-Currently, `prettier-ruby` drops comments because the `ripperjs` package doesn't yet have support for them.
+Currently, `prettier-ruby` drops a lot of comments.

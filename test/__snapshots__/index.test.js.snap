@@ -6,6 +6,8 @@ exports[`alias.rb matches expected output for off.json 1`] = `
 alias :foo :bar
 
 alias $foo $bar
+
+alias foo bar # comment
 "
 `;
 
@@ -15,6 +17,8 @@ exports[`alias.rb matches expected output for on.json 1`] = `
 alias :foo :bar
 
 alias $foo $bar
+
+alias foo bar # comment
 "
 `;
 
