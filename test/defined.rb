@@ -9,3 +9,5 @@ defined?(super_super_super_super_super_super_super_super_super_super_super_super
 defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 )
+
+defined?(a) # comment

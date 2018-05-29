@@ -548,6 +548,8 @@ defined?(
 defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 )
+
+defined?(a) # comment
 "
 `;
 
@@ -567,6 +569,8 @@ defined?(
 defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 )
+
+defined?(a) # comment
 "
 `;
 
