@@ -1,5 +1,7 @@
 # prettier-ruby
 
+[![Build Status](https://travis-ci.org/kddeisz/prettier-ruby.svg?branch=master)](https://travis-ci.org/kddeisz/prettier-ruby)
+
 This is a work in progress plugin for prettier that supports the Ruby programming language. Under the hood it uses Ruby's own `ripper` library which allows this package to maintain parity with the existing Ruby parser.
 
 ## Getting started
