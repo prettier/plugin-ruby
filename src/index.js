@@ -1,4 +1,4 @@
-const { sexp } = require("ripperjs");
+const { sexp } = require("./parser");
 const print = require("./print");
 
 module.exports = {

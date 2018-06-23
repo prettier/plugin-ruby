@@ -2546,10 +2546,6 @@ rimraf@^2.5.4, rimraf@^2.6.1:
   dependencies:
     glob "^7.0.5"
 
-ripperjs@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/ripperjs/-/ripperjs-0.3.0.tgz#631e87e8748a430bee97f4a2b7291f884bc5838f"
-
 rsvp@^3.3.3:
   version "3.6.2"
   resolved "https://registry.yarnpkg.com/rsvp/-/rsvp-3.6.2.tgz#2e96491599a96cde1b515d5674a8f7a91452926a"
