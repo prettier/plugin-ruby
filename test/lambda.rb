@@ -1,12 +1,12 @@
+# frozen_string_literal: true
+
 -> { 1 }
 
-a = -> { 1 }
+->(a, b, c) { a + b + c }
 
-b = ->(a, b, c) { a + b + c }
+-> { super_super_super_super_super_super_super_super_super_super_super_super_long }
 
-c = -> { super_super_super_super_super_super_super_super_super_super_super_super_super_super_long }
-
-d = ->(a, b, c) { super_super_super_super_super_super_super_super_super_super_super_super_super_super_long }
+->(a, b, c) { a + b + c + super_super_super_super_super_super_super_super_super_long }
 
 a.(1, 2, 3)
 
@@ -14,10 +14,8 @@ a.call(1, 2, 3)
 
 a[]
 
-super_super_super_super_super_super_super_super_super_super_super_super_super_super_long[]
-
 a[1, 2, 3]
 
--> a { 1 }
+-> a { a }
 
 -> () { 1 }

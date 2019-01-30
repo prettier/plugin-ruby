@@ -825,68 +825,60 @@ foo(**hash, d: 4)
 `;
 
 exports[`lambda.rb matches expected output for off.json 1`] = `
-"-> { 1 }
+"# frozen_string_literal: true
 
-a = -> { 1 }
+-> { 1 }
 
-b = ->(a, b, c) { a + b + c }
+->(a, b, c) { a + b + c }
 
-c =
-  lambda do
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  end
+lambda do
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+end
 
-d =
-  lambda do |a, b, c|
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  end
+lambda do |a, b, c|
+  a + b + c + super_super_super_super_super_super_super_super_super_long
+end
 
-a.(1, 2, 3)
+a.call(1, 2, 3)
 
 a.call(1, 2, 3)
 
 a[]
 
-super_super_super_super_super_super_super_super_super_super_super_super_super_super_long[]
-
 a[1, 2, 3]
 
--> a { 1 }
+->(a) { a }
 
-->() { 1 }
+-> { 1 }
 "
 `;
 
 exports[`lambda.rb matches expected output for on.json 1`] = `
-"-> { 1 }
+"# frozen_string_literal: true
 
-a = -> { 1 }
+-> { 1 }
 
-b = ->(a, b, c) { a + b + c }
+->(a, b, c) { a + b + c }
 
-c =
-  lambda do
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  end
+lambda do
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+end
 
-d =
-  lambda do |a, b, c|
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  end
+lambda do |a, b, c|
+  a + b + c + super_super_super_super_super_super_super_super_super_long
+end
 
-a.(1, 2, 3)
+a.call(1, 2, 3)
 
 a.call(1, 2, 3)
 
 a[]
 
-super_super_super_super_super_super_super_super_super_super_super_super_super_super_long[]
-
 a[1, 2, 3]
 
--> a { 1 }
+->(a) { a }
 
-->() { 1 }
+-> { 1 }
 "
 `;
 

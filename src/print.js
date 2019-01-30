@@ -216,20 +216,18 @@ const nodes = {
     return concat(["break", printed]);
   },
   call: (path, options, print) => {
-    let printedName = path.getValue().body[2];
+    let name = path.getValue().body[2];
 
     // You can call lambdas with a special syntax that looks like func.(*args).
     // In this case, "call" is returned for the 3rd child node.
-    if (printedName === "call") {
-      printedName = "";
-    } else {
-      printedName = path.call(print, "body", 2);
+    if (name !== "call") {
+      name = path.call(print, "body", 2);
     }
 
     return concat([
       path.call(print, "body", 0),
       path.call(print, "body", 1),
-      printedName
+      name
     ]);
   },
   case: (path, options, print) => {
@@ -338,20 +336,28 @@ const nodes = {
     ]));
   },
   lambda: (path, options, print) => {
-    const args = path.call(print, "body", 0);
-    const buffer = path.getValue().body[0].type === "params" && args.parts.length > 0 ? " " : "";
+    let params = path.getValue().body[0];
+    let paramsConcat = "";
+
+    if (params.type === "params") {
+      paramsConcat = path.call(print, "body", 0);
+    } else {
+      params = params.body[0];
+      paramsConcat = path.call(print, "body", 0, "body", 0);
+    }
+
+    const noParams = params.body.every(type => !type);
 
     return group(ifBreak(
       concat([
         "lambda do",
-        args.parts[0] === "(" ? concat([" |", args.parts[1], "|"]) : args,
+        noParams ? "" : concat([" |", paramsConcat, "|"]),
         indent(concat([softline, path.call(print, "body", 1)])),
         concat([softline, "end"])
       ]),
       concat([
         "->",
-        buffer,
-        args,
+        noParams ? "" : concat(["(", paramsConcat, ")"]),
         " { ",
         path.call(print, "body", 1),
         " }"
