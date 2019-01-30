@@ -65,4 +65,4 @@ class RipperJS < Ripper::SexpBuilder
   end
 end
 
-puts JSON.dump(RipperJS.sexp(*ARGV))
+puts JSON.dump(RipperJS.sexp(*ARGV)) if $0 == __FILE__

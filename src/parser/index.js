@@ -2,7 +2,7 @@ const { spawnSync } = require("child_process");
 const path = require("path");
 
 const sexp = text => {
-  const child = spawnSync("ruby", [path.join(__dirname, "./ripper"), text]);
+  const child = spawnSync("ruby", [path.join(__dirname, "./ripper.rb"), text]);
 
   const error = child.stderr.toString();
   if (error) {
