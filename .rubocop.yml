@@ -2,3 +2,6 @@ AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
   TargetRubyVersion: 2.6
+
+Style/Documentation:
+  Enabled: false

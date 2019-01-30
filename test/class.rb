@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Pret
   module Tier
     class Object; end
@@ -6,7 +8,7 @@ module Pret
     end
 
     class Object
-      attr_accessor :config
+      attr_accessor :foo
     end
 
     class Object < BasicObject; end
@@ -15,7 +17,7 @@ module Pret
     end
 
     class Object < BasicObject
-      attr_accessor :config
+      attr_accessor :bar
     end
 
     class << self
@@ -26,8 +28,8 @@ module Pret
   end
 end
 
-Pret::Tier::Object
-Pret::Tier = 'config'
+Pret::Tier::Object # rubocop:disable Lint/Void
+Pret::TIER = 'config'
 
-::Pret::Tier::Object
-::Pret = 'config'
+::Pret::Tier::Object # rubocop:disable Lint/Void
+::PRET = 'config'
