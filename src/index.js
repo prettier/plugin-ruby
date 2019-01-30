@@ -1,4 +1,4 @@
-const sexp = require("./parser");
+const sexp = require("./sexp");
 const print = require("./print");
 
 module.exports = {

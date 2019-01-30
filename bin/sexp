@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
 
-require File.expand_path(File.join('..', 'src', 'parser', 'ripper'), __dir__)
+require File.expand_path(File.join('..', 'src', 'ripper.rb'), __dir__)
 
 pp RipperJS.sexp(*ARGV)
