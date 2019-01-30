@@ -7,7 +7,9 @@ class RipperJS < Ripper::SexpBuilder
   def initialize(*args)
     super
 
-    @comment = nil
+    @beg_comment = []
+    @end_comment = nil
+
     @magic = []
     @stack = []
   end
@@ -38,15 +40,17 @@ class RipperJS < Ripper::SexpBuilder
   def build_sexp(type, body)
     sexp = { type: type, body: body, lineno: lineno, column: column }
 
-    if @beg_comment && type == :stmts_new
-      sexp = {
-        type: :stmts_add,
-        body: [sexp, @beg_comment],
-        lineno: @beg_comment[:lineno],
-        column: @beg_comment[:column]
-      }
+    if @beg_comment.any? && type == :stmts_new
+      @beg_comment.each do |beg_comment|
+        sexp = {
+          type: :stmts_add,
+          body: [sexp, beg_comment],
+          lineno: beg_comment[:lineno],
+          column: beg_comment[:column]
+        }
+      end
 
-      @beg_comment = nil
+      @beg_comment = []
     end
 
     if @end_comment
@@ -66,7 +70,7 @@ class RipperJS < Ripper::SexpBuilder
       right, left, prev = (-3..-1).map { |index| @stack[index] }
 
       if !prev || prev[:type] != :stmts_add # the first statement
-        @beg_comment = sexp
+        @beg_comment << sexp
       elsif left[:type] == :void_stmt # the only statement
         prev[:body][1] = sexp
       else # in the middle of a list of statements
