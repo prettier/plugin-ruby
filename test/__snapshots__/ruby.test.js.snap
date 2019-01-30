@@ -1113,58 +1113,84 @@ exports[`numbers.rb matches expected output for on.json 1`] = `
 `;
 
 exports[`ranges.rb matches expected output for off.json 1`] = `
-"1..5
+"# frozen_string_literal: true
 
-1...5
+# rubocop:disable Lint/UselessAssignment
+
+dot2 = 1..2 # dot2
+dot3 = 3...4 # dot3
+
+# rubocop:enable Lint/UselessAssignment
 "
 `;
 
 exports[`ranges.rb matches expected output for on.json 1`] = `
-"1..5
+"# frozen_string_literal: true
 
-1...5
+# rubocop:disable Lint/UselessAssignment
+
+dot2 = 1..2 # dot2
+dot3 = 3...4 # dot3
+
+# rubocop:enable Lint/UselessAssignment
 "
 `;
 
-exports[`regex.rb matches expected output for off.json 1`] = `
-"/abc/
+exports[`regexp.rb matches expected output for off.json 1`] = `
+"# frozen_string_literal: true
 
-%r{abc}
+# rubocop:disable Lint/Void
 
 /abc/
 
-%r[abc]
+%r{a/b/c}
 
-%r(abc)
+/abc/
+
+/abc/
+
+/abc/
+
+/abc/
 
 /a#{b}c/
 
-/abc/i
+/abc/
 
-%r{abc}i
+/abc/
 
-/#$&/
+/#{$&}/
+
+# rubocop:enable Lint/Void
 "
 `;
 
-exports[`regex.rb matches expected output for on.json 1`] = `
-"/abc/
+exports[`regexp.rb matches expected output for on.json 1`] = `
+"# frozen_string_literal: true
 
-%r{abc}
+# rubocop:disable Lint/Void
 
 /abc/
 
-%r[abc]
+%r{a/b/c}
 
-%r(abc)
+/abc/
+
+/abc/
+
+/abc/
+
+/abc/
 
 /a#{b}c/
 
-/abc/i
+/abc/
 
-%r{abc}i
+/abc/
 
-/#$&/
+/#{$&}/
+
+# rubocop:enable Lint/Void
 "
 `;
 

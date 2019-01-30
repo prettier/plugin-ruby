@@ -10,6 +10,7 @@ const hooks = require("./nodes/hooks");
 const loops = require("./nodes/loops");
 const methods = require("./nodes/methods");
 const params = require("./nodes/params");
+const regexp = require("./nodes/regexp");
 const statements = require("./nodes/statements");
 
 const concatBody = (path, options, print) => concat(path.map(print, "body"));
@@ -27,6 +28,7 @@ const nodes = {
   ...loops,
   ...methods,
   ...params,
+  ...regexp,
   ...statements,
   aref: (path, options, print) => {
     if (!path.getValue().body[1]) {
@@ -439,21 +441,6 @@ const nodes = {
   ]),
   qwords_new: (path, options, print) => group(concat(["%w[", softline])),
   redo: (path, options, print) => "redo",
-  regexp_add: concatBody,
-  regexp_literal: (path, options, print) => {
-    const delim = path.call(print, "body", 1);
-
-    const delimPairs = { "]": "[", "}": "{", ")": "(" };
-    const startDelim = delim[0] === "/" ? "/" : `%r${delimPairs[delim[0]]}`;
-
-    return group(concat([
-      startDelim,
-      indent(concat([softline, path.call(print, "body", 0)])),
-      softline,
-      delim
-    ]));
-  },
-  regexp_new: (path, options, print) => "",
   rescue: (path, options, print) => {
     const [exception, variable, _statements, addition] = path.getValue().body;
     const parts = ["rescue"];
@@ -498,8 +485,9 @@ const nodes = {
   ])),
   string_content: (path, options, print) => "",
   string_dvar: (path, options, print) => concat([
-    "#",
-    path.call(print, "body", 0)
+    "#{",
+    path.call(print, "body", 0),
+    "}"
   ]),
   string_embexpr: (path, options, print) => concat([
     "#{",
