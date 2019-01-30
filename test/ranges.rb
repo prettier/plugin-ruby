@@ -1,3 +1,8 @@
-1..5
+# frozen_string_literal: true
 
-1...5
+# rubocop:disable Lint/UselessAssignment
+
+dot2 = 1..2 # dot2
+dot3 = 3...4 # dot3
+
+# rubocop:enable Lint/UselessAssignment

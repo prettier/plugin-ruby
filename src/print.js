@@ -283,12 +283,12 @@ const nodes = {
   dot2: (path, options, print) => concat([
     path.call(print, "body", 0),
     "..",
-    path.call(print, "body", 1)
+    path.getValue().body[1] ? path.call(print, "body", 1) : ""
   ]),
   dot3: (path, options, print) => concat([
     path.call(print, "body", 0),
     "...",
-    path.call(print, "body", 1)
+    path.getValue().body[1] ? path.call(print, "body", 1) : ""
   ]),
   dyna_symbol: (path, options, print) => concat([
     ":\"",

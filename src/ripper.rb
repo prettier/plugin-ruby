@@ -111,9 +111,9 @@ class RipperJS < Ripper::SexpBuilder
 
   def on_comment(comment)
     sexp = { type: :@comment, body: comment.chomp, lineno: lineno, column: column }
+    lex_state = RipperJS.lex_state_name(state)
 
-    case RipperJS.lex_state_name(state)
-    when 'EXPR_BEG' # on it's own line
+    if lex_state == 'EXPR_BEG' # on it's own line
       if !@stack[-1] # the very first statement
         @start_comments.unshift(sexp)
       elsif @stack[-1][:type] != :stmts_add # the first statement of the block
@@ -135,7 +135,7 @@ class RipperJS < Ripper::SexpBuilder
           column: column
         )
       end
-    when 'EXPR_END'
+    elsif lex_state == 'EXPR_END' && @stack[-1]
       @stack[-1].merge!(comment: sexp.merge!(type: :comment))
     else
       @end_comment = sexp.merge!(type: :comment)
