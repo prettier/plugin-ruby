@@ -6,7 +6,6 @@ const {
 const alias = require("./nodes/alias");
 const blocks = require("./nodes/blocks");
 const conditionals = require("./nodes/conditionals");
-const defined = require("./nodes/defined");
 const hooks = require("./nodes/hooks");
 const loops = require("./nodes/loops");
 const methods = require("./nodes/methods");
@@ -24,7 +23,6 @@ const nodes = {
   ...alias,
   ...blocks,
   ...conditionals,
-  ...defined,
   ...hooks,
   ...loops,
   ...methods,
@@ -277,6 +275,11 @@ const nodes = {
   const_path_field: (path, options, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, options, print) => join("::", path.map(print, "body")),
   const_ref: (path, options, print) => path.call(print, "body", 0),
+  defined: (path, options, print) => group(concat([
+    "defined?(",
+    indent(concat([softline, path.call(print, "body", 0)])),
+    concat([softline, ")"])
+  ])),
   dot2: (path, options, print) => concat([
     path.call(print, "body", 0),
     "..",
