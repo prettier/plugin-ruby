@@ -590,7 +590,8 @@ const nodes = {
   ])),
   xstring_new: (path, options, print) => "",
   yield: (path, options, print) => concat([
-    "yield ",
+    "yield",
+    path.getValue().body[0].type === "paren" ? "" : " ",
     concat(path.map(print, "body"))
   ]),
   yield0: (path, options, print) => "yield",
