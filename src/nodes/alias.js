@@ -21,14 +21,7 @@ const aliasVars = (path, options, print) => {
 };
 
 const alias = (path, options, print) => {
-  const parts = ["alias ", aliasVars(path, options, print)];
-
-  const { comment } = path.getValue();
-  if (comment) {
-    parts.push(path.call(print, "comment"));
-  }
-
-  return concat(parts);
+  return concat(["alias ", aliasVars(path, options, print)]);
 };
 
 module.exports = {

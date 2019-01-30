@@ -606,7 +606,14 @@ const genericPrint = (path, options, print) => {
     throw new Error(`Unsupported node encountered: ${type}\n${JSON.stringify(body, null, 2)}`);
   }
 
-  return printer(path, options, print);
+  const printed = printer(path, options, print);
+
+  const { comment } = path.getValue();
+  if (comment) {
+    return concat([printed, path.call(print, "comment")]);
+  }
+
+  return printed;
 };
 
 module.exports = genericPrint;

@@ -54,22 +54,30 @@ const printBlock = (path, options, print) => {
     return toProcResponse;
   }
 
-  const [variables, _statements] = path.getValue().body;
+  const [variables, statements] = path.getValue().body;
 
-  return group(ifBreak(
-    concat([
-      " do",
-      variables ? concat([" ", path.call(print, "body", 0)]) : "",
-      indent(concat([softline, path.call(print, "body", 1)])),
-      concat([softline, "end"])
-    ]),
-    concat([
-      " { ",
-      variables ? path.call(print, "body", 0) : "",
-      path.call(print, "body", 1),
-      " }"
-    ])
-  ));
+  const doBlock = concat([
+    " do",
+    variables ? concat([" ", path.call(print, "body", 0)]) : "",
+    indent(concat([softline, path.call(print, "body", 1)])),
+    concat([softline, "end"])
+  ]);
+
+  // We can hit this next pattern if within the block the only statement is a
+  // comment.
+  const firstStatement = statements.body[0];
+  if (firstStatement.type === "stmts_add" && firstStatement.body[0].type === "stmts_add" && firstStatement.body[1].type === "void_stmt") {
+    return doBlock;
+  }
+
+  const braceBlock = concat([
+    " { ",
+    variables ? path.call(print, "body", 0) : "",
+    path.call(print, "body", 1),
+    " }"
+  ]);
+
+  return group(ifBreak(doBlock, braceBlock));
 };
 
 module.exports = {

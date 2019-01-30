@@ -1,24 +1,32 @@
 const { concat, group, hardline, join } = require("prettier").doc.builders;
 
 const printStatementAdd = (path, options, print) => {
-  const [leftStatement, rightStatement] = path.getValue().body;
+  const [left, right] = path.getValue().body;
+
+  if (left.type === "stmts_new") {
+    return path.call(print, "body", 1);
+  }
+
   let buffer = hardline;
 
   // If there was originally multiple lines of whitespace between, compress down
   // to just one line of whitespace.
-  if ((rightStatement.lineno - leftStatement.lineno) > 1) {
+  if ((right.lineno - left.lineno) > 1) {
     buffer = concat([hardline, hardline]);
   }
 
-  if (leftStatement.type === "stmts_new") {
+  const [nestedLeftType, nestedRightType] = left.body.map(({ type }) => type);
+
+  // If there's a void statement at the beginning of the statement chain, it
+  // causes an unnecessary newline.
+  if (nestedLeftType === "stmts_new" && nestedRightType === "void_stmt") {
     return path.call(print, "body", 1);
   }
 
-  // This weird pattern is if there's a void statement at the beginning of the
-  // statement chain, it would otherwise cause an unnecessary newline.
-  const [nestedLeftType, nestedRightType] = leftStatement.body.map(({ type }) => type);
-  if (nestedLeftType === "stmts_new" && nestedRightType === "void_stmt") {
-    return path.call(print, "body", 1);
+  // If the only statement inside of a block is a comment, we'll hit this
+  // pattern. In this case only print the left side.
+  if (left.type === "stmts_add" && right.type === "void_stmt") {
+    return path.call(print, "body", 0);
   }
 
   return group(join(buffer, path.map(print, "body")));

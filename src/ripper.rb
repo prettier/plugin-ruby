@@ -8,7 +8,8 @@ class RipperJS < Ripper::SexpBuilder
     super
 
     @comment = nil
-    @current = nil
+    @magic = []
+    @stack = []
   end
 
   def self.sexp(src, filename = '-', lineno = 1)
@@ -35,20 +36,44 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def build_sexp(type, body)
-    { type: type, body: body, lineno: lineno, column: column }.tap do |sexp|
-      sexp[:comment] = @comment || nil
+    sexp = { type: type, body: body, lineno: lineno, column: column }
+
+    if @comment && type === :stmts_new
+      sexp = { type: :stmts_add, body: [sexp, @comment], lineno: @comment[:lineno], column: @comment[:column] }
       @comment = nil
-      @current = sexp
     end
+
+    @stack << sexp
+    sexp
   end
 
   def on_comment(comment)
-    sexp = { type: :comment, body: comment, lineno: lineno, column: column }
+    sexp = { type: :@comment, body: comment.chomp, lineno: lineno, column: column }
 
-    if @current
-      @current[:comment] = sexp
+    if RipperJS.lex_state_name(state) == 'EXPR_BEG' # on it's own line
+      right, left, prev = (-3..-1).map { |index| @stack[index] }
+
+      if !prev || prev[:type] != :stmts_add # the first statement
+        @comment = sexp
+      elsif left[:type] == :void_stmt # the only statement
+        prev[:body][1] = sexp
+      else # in the middle of a list of statements
+        @stack[-1].merge!(
+          body: [
+            {
+              type: :stmts_add,
+              body: [left, right],
+              lineno: prev[:body][0][:lineno],
+              column: prev[:body][0][:column]
+            },
+            sexp
+          ],
+          lineno: lineno,
+          column: column
+        )
+      end
     else
-      @comment = sexp
+      @stack[-1][:comment] = sexp.merge!(type: :comment)
     end
   end
 
