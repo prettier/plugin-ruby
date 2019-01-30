@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 if a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
 if a
@@ -9,9 +11,9 @@ elsif b
 end
 
 if a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long
 else
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
 if a
@@ -25,22 +27,24 @@ else
 end
 
 unless a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
+# rubocop:disable Style/UnlessElse
 unless a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long
 else
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
+# rubocop:enable Style/UnlessElse
 
 1 if a
 
-1 if super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+1 if super_super_super_super_super_super_super_super_super_super_super_super_long
 
 1 unless a
 
-1 unless super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+1 unless super_super_super_super_super_super_super_super_super_super_super_suplong
 
 if a
   1
@@ -55,5 +59,5 @@ else
 end
 
 a ? 1 : 2
-a ? super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  : super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+a ? super_super_super_super_super_super_super_super_super_super_super_long
+  : super_super_super_super_super_super_super_super_super_super_super_super_long
