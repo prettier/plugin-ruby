@@ -1,23 +1,25 @@
-while true
+# frozen_string_literal: true
+
+while a
   1
 end
 
-1 while true
+1 while a
 
-while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+while super_super_super_super_super_super_super_super_super_super_super_long
   1
 end
 
-1 while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+1 while super_super_super_super_super_super_super_super_super_super_super_supelong
 
-until true
+until a
   1
 end
 
-1 until true
+1 until a
 
-until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+until super_super_super_super_super_super_super_super_super_super_super_long
   1
 end
 
-1 until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+1 until super_super_super_super_super_super_super_super_super_super_super_supelong
