@@ -3,7 +3,7 @@
 exports[`alias.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
 
-alias a b
+alias a b # first
 
 alias c d
 
@@ -14,7 +14,7 @@ alias $e $f # rubocop:disable Style/GlobalVars
 exports[`alias.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
 
-alias a b
+alias a b # first
 
 alias c d
 
@@ -533,13 +533,11 @@ Pret::Tier = 'config'
 `;
 
 exports[`defined.rb matches expected output for off.json 1`] = `
-"defined?(a)
+"# frozen_string_literal: true
 
-defined?(a)
+defined?(a) # first
 
-defined?(
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-)
+defined?(a) # second
 
 defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
@@ -549,18 +547,20 @@ defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
-defined?(a) # comment
+defined?(
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+)
+
+defined?(a) # third
 "
 `;
 
 exports[`defined.rb matches expected output for on.json 1`] = `
-"defined?(a)
+"# frozen_string_literal: true
 
-defined?(a)
+defined?(a) # first
 
-defined?(
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-)
+defined?(a) # second
 
 defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
@@ -570,7 +570,11 @@ defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
-defined?(a) # comment
+defined?(
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+)
+
+defined?(a) # third
 "
 `;
 

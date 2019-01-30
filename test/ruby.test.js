@@ -77,7 +77,6 @@ const getUnhandled = () => {
     "mlhs_new",
     "operator_ambiguous",
     "parse_error",
-    "stmts_new",
     ""
   ];
 

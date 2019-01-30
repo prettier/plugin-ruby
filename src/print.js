@@ -250,7 +250,7 @@ const nodes = {
       parts.push(" < ", path.call(print, "body", 1));
     }
 
-    if (printedStatements.contents.parts[0] === "") {
+    if (printedStatements.contents.parts[0].parts.every(part => !part)) {
       return group(concat([concat(parts), ifBreak("", "; "), "end"]));
     }
 
@@ -564,7 +564,7 @@ const nodes = {
     const printedStatements = path.call(print, "body", 1);
     const parts = [group(concat(["when ", path.call(print, "body", 0)]))];
 
-    if (printedStatements !== "") {
+    if (!printedStatements.parts.every(part => !part)) {
       parts.push(indent(concat([hardline, printedStatements])));
     }
 

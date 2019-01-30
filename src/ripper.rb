@@ -38,9 +38,20 @@ class RipperJS < Ripper::SexpBuilder
   def build_sexp(type, body)
     sexp = { type: type, body: body, lineno: lineno, column: column }
 
-    if @comment && type === :stmts_new
-      sexp = { type: :stmts_add, body: [sexp, @comment], lineno: @comment[:lineno], column: @comment[:column] }
-      @comment = nil
+    if @beg_comment && type == :stmts_new
+      sexp = {
+        type: :stmts_add,
+        body: [sexp, @beg_comment],
+        lineno: @beg_comment[:lineno],
+        column: @beg_comment[:column]
+      }
+
+      @beg_comment = nil
+    end
+
+    if @end_comment
+      sexp[:comment] = @end_comment
+      @end_comment = nil
     end
 
     @stack << sexp
@@ -50,11 +61,12 @@ class RipperJS < Ripper::SexpBuilder
   def on_comment(comment)
     sexp = { type: :@comment, body: comment.chomp, lineno: lineno, column: column }
 
-    if RipperJS.lex_state_name(state) == 'EXPR_BEG' # on it's own line
+    case RipperJS.lex_state_name(state)
+    when 'EXPR_BEG' # on it's own line
       right, left, prev = (-3..-1).map { |index| @stack[index] }
 
       if !prev || prev[:type] != :stmts_add # the first statement
-        @comment = sexp
+        @beg_comment = sexp
       elsif left[:type] == :void_stmt # the only statement
         prev[:body][1] = sexp
       else # in the middle of a list of statements
@@ -72,8 +84,12 @@ class RipperJS < Ripper::SexpBuilder
           column: column
         )
       end
+    when 'EXPR_ARG', 'EXPR_ENDFN'
+      @end_comment = sexp.merge!(type: :comment)
+    when 'EXPR_END'
+      @stack[-1].merge!(comment: sexp.merge!(type: :comment))
     else
-      @stack[-1][:comment] = sexp.merge!(type: :comment)
+      raise ArgumentError, 'Found comment in unsupported lexer state'
     end
   end
 

@@ -1,6 +1,8 @@
-defined? a
+# frozen_string_literal: true
 
-defined?(a)
+defined? a # first
+
+defined?(a) # second
 
 defined? super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 
@@ -10,4 +12,4 @@ defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
-defined?(a) # comment
+defined?(a) # third

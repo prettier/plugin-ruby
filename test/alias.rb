@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-alias a b
+alias a b # first
 
 alias :c :d
 
