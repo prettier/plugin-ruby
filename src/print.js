@@ -171,11 +171,16 @@ const nodes = {
     indent(concat([hardline, concat(path.map(print, "body"))])),
     group(concat([hardline, "end"]))
   ])),
-  binary: (path, options, print) => group(concat([
-    concat([path.call(print, "body", 0), " "]),
-    path.getValue().body[1],
-    indent(concat([line, path.call(print, "body", 2)]))
-  ])),
+  binary: (path, options, print) => {
+    const operator = path.getValue().body[1];
+    const useNoSpace = operator === "**";
+
+    return group(concat([
+      concat([path.call(print, "body", 0), useNoSpace ? "" : " "]),
+      operator,
+      indent(concat([useNoSpace ? softline : line, path.call(print, "body", 2)]))
+    ]));
+  },
   block_var: (path, options, print) => concat(["|", path.call(print, "body", 0), "| "]),
   blockarg: (path, options, print) => concat(["&", path.call(print, "body", 0)]),
   bodystmt: (path, options, print) => {

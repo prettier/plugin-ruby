@@ -2,6 +2,6 @@
 
 alias a b # first
 
-alias :c :d
+alias c d
 
 alias $e $f # rubocop:disable Style/GlobalVars
