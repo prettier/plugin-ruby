@@ -10,7 +10,7 @@ Install the dependencies by running `yarn` in the root of the repository. You ca
 
 ## Options
 
-Below are the options (from [`src/index.js`](src/index.js)) that `prettier-ruby` currently supports:
+Below are the options (from [`src/ruby.js`](src/ruby.js)) that `prettier-ruby` currently supports:
 
 * `inlineConditionals` - When it fits on one line, allow if and unless statements to use the modifier form.
 * `inlineLoops` - When it fits on one line, allow while and until statements to use the modifier form.
