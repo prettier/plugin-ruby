@@ -65,4 +65,13 @@ class RipperJS < Ripper::SexpBuilder
   end
 end
 
-puts JSON.dump(RipperJS.sexp(*ARGV)) if $0 == __FILE__
+if $0 == __FILE__
+  response = RipperJS.sexp(*ARGV)
+
+  if response.nil?
+    STDERR.puts 'Invalid ruby'
+    exit 1
+  end
+
+  puts JSON.dump(response)
+end

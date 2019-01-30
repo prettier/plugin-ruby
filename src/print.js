@@ -159,6 +159,9 @@ const nodes = {
       indent(concat([line, printedValue]))
     ]));
   },
+  assign_error: (path, options, print) => {
+    throw new Error("Can't set variable");
+  },
   bare_assoc_hash: (path, options, print) => group(
     join(concat([",", line]),
     path.map(print, "body", 0)
@@ -258,6 +261,9 @@ const nodes = {
       indent(concat([hardline, printedStatements])),
       concat([hardline, "end"])
     ]));
+  },
+  class_name_error: (path, options, print) => {
+    throw new Error("class/module name must be CONSTANT");
   },
   command: (path, options, print) => group(join(" ", path.map(print, "body"))),
   command_call: (path, options, print) => group(concat([
@@ -597,10 +603,7 @@ const genericPrint = (path, options, print) => {
   }
 
   if (!printer) {
-    throw new Error(
-      `Unsupported node encountered: ${type}\n` +
-      JSON.stringify(body, null, 2)
-    );
+    throw new Error(`Unsupported node encountered: ${type}\n${JSON.stringify(body, null, 2)}`);
   }
 
   return printer(path, options, print);

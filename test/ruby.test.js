@@ -70,12 +70,24 @@ const getUnhandled = () => {
     throw new Error(error);
   }
 
-  const events = Object.keys(print.nodes);
+  const expected = [
+    "arg_ambiguous",
+    "heredoc_dedent",
+    "magic_comment",
+    "mlhs_new",
+    "operator_ambiguous",
+    "parse_error",
+    "stmts_new",
+    ""
+  ];
+
+  const events = Object.keys(print.nodes).concat(expected);
   return child.stdout.toString().split("\n").filter(event => (
     events.indexOf(event) === -1
   ));
 };
 
 getUnhandled().forEach(event => {
+  console.log(`unhandled ${event}`);
   test.todo(`handles the ${event} event`);
 });
