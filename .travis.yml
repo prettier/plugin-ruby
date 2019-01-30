@@ -1,6 +1,5 @@
-language: node_js
-node_js:
-- stable
+language: ruby
+rvm: 2.6.0
 branches:
   only: master
 script:
