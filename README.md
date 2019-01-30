@@ -19,4 +19,4 @@ Below are the options (from [`src/ruby.js`](src/ruby.js)) that `prettier-ruby` c
 
 ## Known limitations
 
-Currently, `prettier-ruby` drops a lot of comments.
+Currently, `prettier-ruby` is moving some comments around.

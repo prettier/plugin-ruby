@@ -1279,62 +1279,64 @@ super(1, 2)
 `;
 
 exports[`while.rb matches expected output for off.json 1`] = `
-"while true
+"while a
+  # frozen_string_literal: true
+
   1
 end
 
-while true
+while a
   1
 end
 
-while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+while super_super_super_super_super_super_super_super_super_super_super_long
   1
 end
 
-while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+while super_super_super_super_super_super_super_super_super_super_super_supelong
   1
 end
 
-until true
+until a
   1
 end
 
-until true
+until a
   1
 end
 
-until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+until super_super_super_super_super_super_super_super_super_super_super_long
   1
 end
 
-until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+until super_super_super_super_super_super_super_super_super_super_super_supelong
   1
 end
 "
 `;
 
 exports[`while.rb matches expected output for on.json 1`] = `
-"1 while true
+"while a
+  # frozen_string_literal: true
 
-1 while true
-
-while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
   1
 end
 
-while super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+1 while a
+
+1 while super_super_super_super_super_super_super_super_super_super_super_long
+
+while super_super_super_super_super_super_super_super_super_super_super_supelong
   1
 end
 
-1 until true
+1 until a
 
-1 until true
+1 until a
 
-until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-  1
-end
+1 until super_super_super_super_super_super_super_super_super_super_super_long
 
-until super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+until super_super_super_super_super_super_super_super_super_super_super_supelong
   1
 end
 "
@@ -1342,15 +1344,17 @@ end
 
 exports[`yield.rb matches expected output for off.json 1`] = `
 "[1, 2, 3].each do |i|
+  # frozen_string_literal: true
+
   yield
 
   yield i
 
-  yield (i)
+  yield(i)
 
   yield i, 2
 
-  yield (i, 2)
+  yield(i, 2)
 
   yield
 end
@@ -1359,15 +1363,17 @@ end
 
 exports[`yield.rb matches expected output for on.json 1`] = `
 "[1, 2, 3].each do |i|
+  # frozen_string_literal: true
+
   yield
 
   yield i
 
-  yield (i)
+  yield(i)
 
   yield i, 2
 
-  yield (i, 2)
+  yield(i, 2)
 
   yield
 end
