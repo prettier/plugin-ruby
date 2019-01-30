@@ -88,6 +88,5 @@ const getUnhandled = () => {
 };
 
 getUnhandled().forEach(event => {
-  console.log(`unhandled ${event}`);
   test.todo(`handles the ${event} event`);
 });
