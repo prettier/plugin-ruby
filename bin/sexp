@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'ripper'
+
+pp Ripper.sexp(ARGV.join(' '))

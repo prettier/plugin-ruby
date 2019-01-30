@@ -4,7 +4,7 @@
   "description": "prettier plugin for the Ruby programming language",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest",
     "print": "prettier --plugin=. --parser=ruby"
   },
   "repository": {

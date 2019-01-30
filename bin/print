@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+const prettier = require("prettier");
+const print = require("../src/print");
+
+const code = process.argv.slice(1).join(" ");
+console.log(prettier.format(code, { parser: "ruby", plugins: ["."] }));

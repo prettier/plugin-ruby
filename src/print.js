@@ -176,17 +176,20 @@ const nodes = {
   block_var: (path, options, print) => concat(["|", path.call(print, "body", 0), "| "]),
   blockarg: (path, options, print) => concat(["&", path.call(print, "body", 0)]),
   bodystmt: (path, options, print) => {
-    const [statements, ...additions] = path.getValue().body;
+    const [statements, rescue, elseClause, ensure] = path.getValue().body;
     const parts = [path.call(print, "body", 0)];
 
-    additions.forEach((addition, index) => {
-      if (addition) {
-        parts.push(dedent(concat([
-          hardline,
-          path.call(print, "body", index + 1)
-        ])));
-      }
-    });
+    if (rescue) {
+      parts.push(dedent(concat([hardline, path.call(print, "body", 1)])));
+    }
+
+    if (elseClause) {
+      parts.push(concat([dedent(concat([hardline, "else"])), hardline, path.call(print, "body", 2)]));
+    }
+
+    if (ensure) {
+      parts.push(dedent(concat([hardline, path.call(print, "body", 3)])));
+    }
 
     return group(concat(parts));
   },
@@ -215,8 +218,9 @@ const nodes = {
       printedName = path.call(print, "body", 2);
     }
 
-    return join(path.getValue().body[1], [
+    return concat([
       path.call(print, "body", 0),
+      path.call(print, "body", 1),
       printedName
     ]);
   },
@@ -256,17 +260,13 @@ const nodes = {
     ]));
   },
   command: (path, options, print) => group(join(" ", path.map(print, "body"))),
-  command_call: (path, options, print) => {
-    const [_target, operator, _method, _args] = path.getValue().body;
-
-    return group(concat([
-      path.call(print, "body", 0),
-      operator,
-      path.call(print, "body", 2),
-      " ",
-      path.call(print, "body", 3)
-    ]));
-  },
+  command_call: (path, options, print) => group(concat([
+    path.call(print, "body", 0),
+    path.call(print, "body", 1),
+    path.call(print, "body", 2),
+    " ",
+    path.call(print, "body", 3)
+  ])),
   comment: (path, options, print) => lineSuffix(` ${path.getValue().body.trim()}`),
   const_path_field: (path, options, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, options, print) => join("::", path.map(print, "body")),
@@ -308,11 +308,7 @@ const nodes = {
     indent(concat([hardline, concat(path.map(print, "body"))]))
   ])),
   fcall: concatBody,
-  field: (path, options, print) => group(concat([
-    path.call(print, "body", 0),
-    path.getValue().body[1],
-    path.call(print, "body", 2)
-  ])),
+  field: (path, options, print) => group(concat(path.map(print, "body"))),
   hash: (path, options, print) => {
     if (path.getValue().body[0] === null) {
       return '{}';
