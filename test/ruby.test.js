@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { spawn } = require("child_process");
+const { spawn, spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const prettier = require("prettier");
@@ -43,6 +43,14 @@ fs.readdirSync("./test/config").forEach(configFilename => {
       });
     });
   });
+
+  fs.readdirSync("./test/errors").forEach(filename => {
+    const text = fs.readFileSync(`./test/errors/${filename}`, "utf8");
+
+    test(`${filename} throws error on parsing`, () => {
+      expect(() => { prettier.format(text, { parser: "ruby", plugins: ["."], ...config }) }).toThrowError();
+    });
+  });
 });
 
 test("when encountering an unsupported node type", () => {
@@ -52,4 +60,22 @@ test("when encountering an unsupported node type", () => {
   };
 
   expect(() => print(path, null, null)).toThrow("Unsupported");
+});
+
+const getUnhandled = () => {
+  const child = spawnSync("ruby", ["-e", "require 'ripper'; puts Ripper::PARSER_EVENTS"]);
+
+  const error = child.stderr.toString();
+  if (error) {
+    throw new Error(error);
+  }
+
+  const events = Object.keys(print.nodes);
+  return child.stdout.toString().split("\n").filter(event => (
+    events.indexOf(event) === -1
+  ));
+};
+
+getUnhandled().forEach(event => {
+  test.todo(`handles the ${event} event`);
 });

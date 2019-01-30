@@ -48,8 +48,13 @@ const printParams = (path, options, print) => {
   return join(", ", parts);
 };
 
+const paramError = (path, options, print) => {
+  throw new Error("formal argument cannot be a global variable");
+}
+
 module.exports = {
   kwrest_param: printGenericRestParam("**"),
   rest_param: printGenericRestParam("*"),
-  params: printParams
+  params: printParams,
+  param_error: paramError
 };

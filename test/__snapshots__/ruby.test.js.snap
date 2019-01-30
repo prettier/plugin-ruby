@@ -1,24 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`alias.rb matches expected output for off.json 1`] = `
-"alias foo bar
+"alias a b
 
-alias :foo :bar
+alias c d
 
-alias $foo $bar
+alias $e $f
 
-alias foo bar # comment
+alias g h # comment
 "
 `;
 
 exports[`alias.rb matches expected output for on.json 1`] = `
-"alias foo bar
+"alias a b
 
-alias :foo :bar
+alias c d
 
-alias $foo $bar
+alias $e $f
 
-alias foo bar # comment
+alias g h # comment
 "
 `;
 

@@ -1,23 +1,27 @@
 const { concat, join } = require("prettier").doc.builders;
 
 const usingSymbols = path => {
-  const [left, right] = path.getValue().body;
-
-  return left.body[0].type === "symbol" && right.body[0].type === "symbol";
+  const [left, right] = path.getValue().body.map(node => node.body[0].type);
+  return left === "symbol" && right === "symbol";
 };
 
 const identFromSymbol = (path, print, index) => (
   path.call(print, "body", index, "body", 0, "body", 0)
 );
 
-const alias = (path, options, print) => {
-  const parts = ["alias "];
+const aliasError = (path, options, print) => {
+  throw new Error("can't make alias for the number variables");
+};
 
+const aliasVars = (path, options, print) => {
   if (usingSymbols(path)) {
-    parts.push(join(" ", [identFromSymbol(path, print, 0), identFromSymbol(path, print, 1)]));
-  } else {
-    parts.push(join(" ", path.map(print, "body")));
+    return join(" ", [identFromSymbol(path, print, 0), identFromSymbol(path, print, 1)]);
   }
+  return join(" ", path.map(print, "body"));
+};
+
+const alias = (path, options, print) => {
+  const parts = ["alias ", aliasVars(path, options, print)];
 
   const { comment } = path.getValue();
   if (comment) {
@@ -29,5 +33,6 @@ const alias = (path, options, print) => {
 
 module.exports = {
   alias,
+  alias_error: aliasError,
   var_alias: alias
 };

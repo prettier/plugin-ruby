@@ -307,6 +307,7 @@ const nodes = {
     "ensure",
     indent(concat([hardline, concat(path.map(print, "body"))]))
   ])),
+  excessed_comma: (path, options, print) => "",
   fcall: concatBody,
   field: (path, options, print) => group(concat(path.map(print, "body"))),
   hash: (path, options, print) => {
@@ -606,3 +607,4 @@ const genericPrint = (path, options, print) => {
 };
 
 module.exports = genericPrint;
+module.exports.nodes = nodes;
