@@ -1,7 +1,7 @@
+# frozen_string_literal: true
+
 alias a b
 
 alias :c :d
 
-alias $e $f
-
-alias g h # comment
+alias $e $f # rubocop:disable Style/GlobalVars
