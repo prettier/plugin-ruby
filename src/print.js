@@ -545,10 +545,6 @@ const nodes = {
     "undef ",
     path.call(print, "body", 0, 0)
   ]),
-  var_alias: (path, options, print) => concat([
-    "alias ",
-    join(" ", path.map(print, "body"))
-  ]),
   var_field: concatBody,
   var_ref: (path, options, print) => path.call(print, "body", 0),
   vcall: concatBody,

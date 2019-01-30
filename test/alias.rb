@@ -1,7 +1,7 @@
-alias foo bar
+alias a b
 
-alias :foo :bar
+alias :c :d
 
-alias $foo $bar
+alias $e $f
 
-alias foo bar # comment
+alias g h # comment
