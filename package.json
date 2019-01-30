@@ -2,7 +2,7 @@
   "name": "@prettier/plugin-ruby",
   "version": "0.0.1",
   "description": "prettier plugin for the Ruby programming language",
-  "main": "src/index.js",
+  "main": "src/ruby.js",
   "scripts": {
     "test": "jest",
     "print": "prettier --plugin=. --parser=ruby"
