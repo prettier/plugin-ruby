@@ -1,3 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'json'
 require 'ripper'
 
 class RipperJS < Ripper::SexpBuilder
@@ -17,12 +20,7 @@ class RipperJS < Ripper::SexpBuilder
   SCANNER_EVENTS.each do |event|
     module_eval(<<-End, __FILE__, __LINE__ + 1)
       def on_#{event}(token)
-        {
-          type: :@#{event},
-          body: token,
-          lineno: lineno,
-          column: column
-        }
+        { type: :@#{event}, body: token, lineno: lineno, column: column }
       end
     End
   end
@@ -37,12 +35,7 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def build_sexp(type, body)
-    {
-      type: type,
-      body: body,
-      lineno: lineno,
-      column: column
-    }.tap do |sexp|
+    { type: type, body: body, lineno: lineno, column: column }.tap do |sexp|
       sexp[:comment] = @comment || nil
       @comment = nil
       @current = sexp
@@ -71,3 +64,5 @@ class RipperJS < Ripper::SexpBuilder
     @last_node[:comment][:body] << comment
   end
 end
+
+puts JSON.dump(RipperJS.sexp(*ARGV))

@@ -1,11 +1,8 @@
 const { spawnSync } = require("child_process");
 const path = require("path");
 
-function sexp(text) {
-  const child = spawnSync("ruby", [
-    path.join(__dirname, "./print_sexp.rb"),
-    text
-  ]);
+const sexp = text => {
+  const child = spawnSync("ruby", [path.join(__dirname, "./ripper"), text]);
 
   const error = child.stderr.toString();
   if (error) {
@@ -14,6 +11,6 @@ function sexp(text) {
 
   const response = child.stdout.toString();
   return JSON.parse(response);
-}
+};
 
-module.exports.sexp = sexp;
+module.exports = sexp;
