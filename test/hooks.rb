@@ -1,7 +1,18 @@
-BEGIN { p 'begin' }
+# frozen_string_literal: true
+# rubocop:disable Style/BeginBlock
 
-BEGIN { super_super_super_super_super_super_super_super_super_super_super_super_super_super_long }
+BEGIN { p 'begin' } # first
 
-END { p 'end' }
+BEGIN {
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # second
+}
 
-END { super_super_super_super_super_super_super_super_super_super_super_super_super_super_long }
+BEGIN { super_super_super_super_super_super_super_super_super_super_super_super_super_super_long } # third
+
+END { p 'end' } # fourth
+
+END {
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # fifth
+}
+
+END { super_super_super_super_super_super_super_super_super_super_super_super_super_super_long } # sixth

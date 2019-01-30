@@ -5,7 +5,8 @@
   "main": "src/ruby.js",
   "scripts": {
     "test": "jest",
-    "print": "prettier --plugin=. --parser=ruby"
+    "print": "prettier --plugin=. --parser=ruby",
+    "rubocop": "run() { prettier --plugin=. --parser=ruby $1 | bundle exec rubocop --stdin out; }; run"
   },
   "repository": {
     "type": "git",

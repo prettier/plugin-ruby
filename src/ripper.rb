@@ -4,18 +4,35 @@ require 'json'
 require 'ripper'
 
 class RipperJS < Ripper::SexpBuilder
+  attr_reader :start_comments
+
   def initialize(*args)
     super
 
-    @beg_comment = []
+    @start_comments = []
+    @begin_comments = []
     @end_comment = nil
 
-    @magic = []
     @stack = []
   end
 
-  def self.sexp(src, filename = '-', lineno = 1)
-    new(src, filename, lineno).parse
+  def parse
+    super.tap do |sexp|
+      next if start_comments.empty?
+
+      node = sexp[:body][0]
+      node = node[:body][0] until node[:body][0][:type] != :stmts_add
+
+      start_comments.each do |comment|
+        node[:body][0] = {
+          type: :stmts_add,
+          body: [node[:body][0], comment],
+          lineno: comment[:lineno],
+          column: comment[:column]
+        }
+        node = node[:body][0]
+      end
+    end
   end
 
   private
@@ -40,17 +57,17 @@ class RipperJS < Ripper::SexpBuilder
   def build_sexp(type, body)
     sexp = { type: type, body: body, lineno: lineno, column: column }
 
-    if @beg_comment.any? && type == :stmts_new
-      @beg_comment.each do |beg_comment|
+    if @begin_comments.any? && type == :stmts_new
+      while @begin_comments.any?
+        begin_comment = @begin_comments.shift
+
         sexp = {
           type: :stmts_add,
-          body: [sexp, beg_comment],
-          lineno: beg_comment[:lineno],
-          column: beg_comment[:column]
+          body: [sexp, begin_comment],
+          lineno: begin_comment[:lineno],
+          column: begin_comment[:column]
         }
       end
-
-      @beg_comment = []
     end
 
     if @end_comment
@@ -67,20 +84,20 @@ class RipperJS < Ripper::SexpBuilder
 
     case RipperJS.lex_state_name(state)
     when 'EXPR_BEG' # on it's own line
-      right, left, prev = (-3..-1).map { |index| @stack[index] }
-
-      if !prev || prev[:type] != :stmts_add # the first statement
-        @beg_comment << sexp
-      elsif left[:type] == :void_stmt # the only statement
-        prev[:body][1] = sexp
+      if !@stack[-1] # the very first statement
+        @start_comments.unshift(sexp)
+      elsif @stack[-1][:type] != :stmts_add # the first statement of the block
+        @begin_comments << sexp
+      elsif @stack[-2][:type] == :void_stmt # the only statement of the block
+        @stack[-1][:body][1] = sexp
       else # in the middle of a list of statements
         @stack[-1].merge!(
           body: [
             {
               type: :stmts_add,
-              body: [left, right],
-              lineno: prev[:body][0][:lineno],
-              column: prev[:body][0][:column]
+              body: [@stack[-1][:body][0], @stack[-1][:body][1]],
+              lineno: @stack[-1][:body][0][:lineno],
+              column: @stack[-1][:body][0][:column]
             },
             sexp
           ],
@@ -88,12 +105,10 @@ class RipperJS < Ripper::SexpBuilder
           column: column
         )
       end
-    when 'EXPR_ARG', 'EXPR_ENDFN'
-      @end_comment = sexp.merge!(type: :comment)
     when 'EXPR_END'
       @stack[-1].merge!(comment: sexp.merge!(type: :comment))
     else
-      raise ArgumentError, 'Found comment in unsupported lexer state'
+      @end_comment = sexp.merge!(type: :comment)
     end
   end
 
@@ -108,10 +123,12 @@ class RipperJS < Ripper::SexpBuilder
   def on_embdoc_end(comment)
     @last_node[:comment][:body] << comment
   end
+
+  def on_magic_comment(*); end
 end
 
 if $0 == __FILE__
-  response = RipperJS.sexp(*ARGV)
+  response = RipperJS.new(ARGV[0]).parse
 
   if response.nil?
     STDERR.puts 'Invalid ruby'

@@ -20,7 +20,8 @@ const printMethod = offset => (path, options, print) => {
     printedParams
   );
 
-  if (body.body[0].body[1].type === "void_stmt") {
+  const firstStatement = body.body[0];
+  if (firstStatement.body[0].type === "stmts_new" && firstStatement.body[1].type === "void_stmt") {
     return group(concat([...declaration, "; end"]));
   }
 

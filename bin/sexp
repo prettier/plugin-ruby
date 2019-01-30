@@ -3,4 +3,4 @@
 require File.expand_path(File.join('..', 'src', 'ripper.rb'), __dir__)
 
 source = File.file?(ARGV[0]) ? File.read(ARGV[0]) : ARGV[0].gsub('\\n', "\n")
-pp RipperJS.sexp(source)
+pp RipperJS.new(source).parse

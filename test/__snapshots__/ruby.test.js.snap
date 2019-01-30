@@ -619,32 +619,54 @@ exports[`hash.rb matches expected output for on.json 1`] = `
 `;
 
 exports[`hooks.rb matches expected output for off.json 1`] = `
-"BEGIN { p \\"begin\\"}
+"# frozen_string_literal: true
+# rubocop:disable Style/BeginBlock
+
+BEGIN { p \\"begin\\" } # first
+
+BEGIN {
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # second
+}
 
 BEGIN {
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-}
+} # third
 
-END { p \\"end\\"}
+END { p \\"end\\" } # fourth
+
+END {
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # fifth
+}
 
 END {
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-}
+} # sixth
 "
 `;
 
 exports[`hooks.rb matches expected output for on.json 1`] = `
-"BEGIN { p 'begin'}
+"# frozen_string_literal: true
+# rubocop:disable Style/BeginBlock
+
+BEGIN { p 'begin' } # first
+
+BEGIN {
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # second
+}
 
 BEGIN {
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-}
+} # third
 
-END { p 'end'}
+END { p 'end' } # fourth
+
+END {
+  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # fifth
+}
 
 END {
   super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-}
+} # sixth
 "
 `;
 
@@ -1283,9 +1305,9 @@ super(1, 2)
 `;
 
 exports[`while.rb matches expected output for off.json 1`] = `
-"while a
-  # frozen_string_literal: true
+"# frozen_string_literal: true
 
+while a
   1
 end
 
@@ -1320,11 +1342,9 @@ end
 `;
 
 exports[`while.rb matches expected output for on.json 1`] = `
-"while a
-  # frozen_string_literal: true
+"# frozen_string_literal: true
 
-  1
-end
+1 while a
 
 1 while a
 
@@ -1347,9 +1367,9 @@ end
 `;
 
 exports[`yield.rb matches expected output for off.json 1`] = `
-"[1, 2, 3].each do |i|
-  # frozen_string_literal: true
+"# frozen_string_literal: true
 
+[1, 2, 3].each do |i|
   yield
 
   yield i
@@ -1366,9 +1386,9 @@ end
 `;
 
 exports[`yield.rb matches expected output for on.json 1`] = `
-"[1, 2, 3].each do |i|
-  # frozen_string_literal: true
+"# frozen_string_literal: true
 
+[1, 2, 3].each do |i|
   yield
 
   yield i
