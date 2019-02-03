@@ -17,6 +17,12 @@ Below are the options (from [`src/ruby.js`](src/ruby.js)) that `prettier-ruby` c
 * `preferHashLabels` - When possible, use the shortened hash key syntax, as opposed to hash rockets.
 * `preferSingleQuotes` - When double quotes are not necessary for interpolation, prefer the use of single quotes for string literals.
 
-## Known limitations
+## Status
 
-Currently, `prettier-ruby` is moving some comments around.
+`prettier-ruby` is nearing its first stable release! A couple of things still need fixing:
+
+* bare hashes as command arguments
+* comment spacing
+* embdocs (`=begin` ... `=end`)
+
+Pull requests and issues are welcome on [GitHub](https://github.com/kddeisz/prettier-ruby).
