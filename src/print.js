@@ -30,6 +30,20 @@ const nodes = {
   ...params,
   ...regexp,
   ...statements,
+  "@CHAR": (path, { preferSingleQuotes }, print) => {
+    const { body } = path.getValue();
+
+    if (body.length !== 2) {
+      return body;
+    }
+
+    const quote = preferSingleQuotes ? "\'" : "\"";
+    return body.length === 2 ? concat([quote, body.slice(1), quote]) : body;
+  },
+  "@int": (path, options, print) => {
+    const { body } = path.getValue();
+    return /^0[0-9]/.test(body) ? `0o${body.slice(1)}` : body;
+  },
   aref: (path, options, print) => {
     if (!path.getValue().body[1]) {
       return concat([path.call(print, "body", 0), "[]"]);
@@ -601,7 +615,7 @@ const genericPrint = (path, options, print) => {
   const { type, body } = path.getValue();
   const printer = nodes[type];
 
-  if (type[0] === "@") {
+  if (!(type in nodes) && type[0] === "@") {
     return body;
   }
 

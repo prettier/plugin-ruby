@@ -79,36 +79,6 @@ class RipperJS < Ripper::SexpBuilder
     sexp
   end
 
-  def on_CHAR(token)
-    if token.length == 2
-      # if the CHAR is only a single character (e.g., ?a), then we can safely
-      # replace with a string literal
-      return {
-        type: :string_literal,
-        body: [{
-          type: :string_add,
-          body: [
-            { type: :string_content, body: [], lineno: lineno, column: column },
-            { type: :@tstring_content, body: token[1..-1], lineno: lineno, column: column }
-          ],
-          lineno: lineno,
-          column: column
-        }],
-        lineno: lineno,
-        column: column + 1
-      }
-    end
-
-    { type: :@CHAR, body: token, lineno: lineno, column: column }
-  end
-
-  def on_int(token)
-    # automatically convert octal literals to use 0o syntax
-    body = token.gsub(/\A0([0-9])/) { "0o#{$1}" }
-
-    { type: :@int, body: body, lineno: lineno, column: column }
-  end
-
   def on_comment(comment)
     sexp = { type: :@comment, body: comment.chomp, lineno: lineno, column: column }
     lex_state = RipperJS.lex_state_name(state)
