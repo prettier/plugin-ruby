@@ -539,46 +539,54 @@ Pret::TIER = 'config'
 exports[`defined.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
 
+# rubocop:disable Lint/Void
+
 defined?(a) # first
 
 defined?(a) # second
 
 defined?(
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
 defined?(
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
 defined?(
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
-defined?(a) # third
+defined?(a)
+
+# rubocop:enable Lint/Void # third
 "
 `;
 
 exports[`defined.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
 
+# rubocop:disable Lint/Void
+
 defined?(a) # first
 
 defined?(a) # second
 
 defined?(
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
 defined?(
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
 defined?(
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
-defined?(a) # third
+defined?(a)
+
+# rubocop:enable Lint/Void # third
 "
 `;
 
@@ -624,53 +632,67 @@ exports[`hash.rb matches expected output for on.json 1`] = `
 
 exports[`hooks.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
-# rubocop:disable Style/BeginBlock
 
-BEGIN { p \\"begin\\" } # first
+# rubocop:disable Style/BeginBlock, Style/EndBlock
+
+BEGIN { p \\"begin\\" }
+
+BEGIN { p \\"begin\\" }
 
 BEGIN {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # second
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 }
 
 BEGIN {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-} # third
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+}
 
-END { p \\"end\\" } # fourth
+END { p \\"end\\" }
+
+END { p \\"end\\" }
 
 END {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # fifth
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 }
 
 END {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-} # sixth
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+}
+
+# rubocop:enable Style/BeginBlock, Style/EndBlock
 "
 `;
 
 exports[`hooks.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
-# rubocop:disable Style/BeginBlock
 
-BEGIN { p 'begin' } # first
+# rubocop:disable Style/BeginBlock, Style/EndBlock
+
+BEGIN { p 'begin' }
+
+BEGIN { p 'begin' }
 
 BEGIN {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # second
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 }
 
 BEGIN {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-} # third
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+}
 
-END { p 'end' } # fourth
+END { p 'end' }
+
+END { p 'end' }
 
 END {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # fifth
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 }
 
 END {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-} # sixth
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+}
+
+# rubocop:enable Style/BeginBlock, Style/EndBlock
 "
 `;
 

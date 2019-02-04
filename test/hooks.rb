@@ -1,18 +1,29 @@
 # frozen_string_literal: true
-# rubocop:disable Style/BeginBlock
 
-BEGIN { p 'begin' } # first
+# rubocop:disable Style/BeginBlock, Style/EndBlock
 
 BEGIN {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # second
+  p 'begin'
 }
 
-BEGIN { super_super_super_super_super_super_super_super_super_super_super_super_super_super_long } # third
+BEGIN { p 'begin' }
 
-END { p 'end' } # fourth
+BEGIN { super_super_super_super_super_super_super_super_super_super_super_super_long }
+
+BEGIN {
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+}
 
 END {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long # fifth
+  p 'end'
 }
 
-END { super_super_super_super_super_super_super_super_super_super_super_super_super_super_long } # sixth
+END { p 'end' }
+
+END { super_super_super_super_super_super_super_super_super_super_super_super_long }
+
+END {
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+}
+
+# rubocop:enable Style/BeginBlock, Style/EndBlock

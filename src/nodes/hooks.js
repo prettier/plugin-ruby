@@ -1,4 +1,4 @@
-const { concat, group, indent, line } = require("prettier").doc.builders;
+const { concat, group, indent, line, lineSuffixBoundary } = require("prettier").doc.builders;
 
 const printHook = name => (path, opts, print) => group(concat([
   `${name} {`,
