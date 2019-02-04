@@ -525,12 +525,6 @@ const nodes = {
     concat(path.map(print, "body"))
   ]),
   symbol_literal: concatBody,
-  symbols_add: (path, options, print) => concat([
-    path.call(print, "body", 0),
-    path.getValue().body[0].type === "symbols_new" ? "" : line,
-    path.call(print, "body", 1)
-  ]),
-  symbols_new: (path, options, print) => group(concat(["%I[", softline])),
   top_const_field: (path, options, print) => group(concat([
     "::",
     path.call(print, "body", 0)
@@ -566,6 +560,8 @@ const nodes = {
 
     return group(concat(parts));
   },
+  word_add: concatBody,
+  word_new: (path, options, print) => "",
   xstring_add: concatBody,
   xstring_literal: (path, options, print) => group(concat([
     "%x[",
