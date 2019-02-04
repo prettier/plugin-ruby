@@ -457,12 +457,27 @@ module.exports = {
   rescue_mod: (path, opts, print) => group(concat([
     "begin",
     indent(concat([hardline, path.call(print, "body", 0)])),
-    concat([hardline, "rescue StandardError"]),
+    hardline,
+    "rescue StandardError",
     indent(concat([hardline, path.call(print, "body", 1)])),
-    concat([hardline, "end"])
+    hardline,
+    "end"
   ])),
   retry: literal("retry"),
-  return: (path, opts, print) => group(concat(["return ", concat(path.map(print, "body"))])),
+  return: (path, opts, print) => {
+    const args = path.getValue().body[0].body[0];
+
+    if (!args) {
+      return "return";
+    }
+
+    if (args.body[1].type !== "paren") {
+      return concat(["return ", path.call(print, "body", 0)]);
+    }
+
+    // Ignoring the parens node and just going straight to the content
+    return concat(["return ", path.call(print, "body", 0, "body", 0, "body", 1, "body", 0)]);
+  },
   return0: literal("return"),
   sclass: (path, opts, print) => group(concat([
     concat(["class << ", path.call(print, "body", 0)]),

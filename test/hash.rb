@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
 {}
 
 { a: 'a', b: 'b', c: 'c' }
@@ -9,8 +13,10 @@
 {
   super_super_super_super_super_super_super_super_long:
     super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_long: {
+  super_super_super_super_super_super_super_super_super_long: {
     super_super_super_super_super_super_super_super_long:
       super_super_super_super_super_super_super_super_long
   }
 }
+
+# rubocop:enable Lint/Void

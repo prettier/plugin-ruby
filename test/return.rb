@@ -1,5 +1,17 @@
-return
+# frozen_string_literal: true
 
-return 1
+def foo
+  return if a
+end
 
-return(1)
+def bar
+  return 1 if a
+end
+
+def baz
+  return(1) if a
+end
+
+def qux
+  return 1, 2 if a
+end

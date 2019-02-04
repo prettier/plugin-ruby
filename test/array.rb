@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
 []
 
 [1, 2, 3]
@@ -15,23 +19,25 @@
 [1, 2, *[3, 4], 5, 6]
 
 [
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long, [
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_long, [
+    super_super_super_super_super_super_super_super_super_super_super_long,
+    super_super_super_super_super_super_super_super_super_super_super_long
   ]
 ]
 
 a[1]
 
-a[super_super_super_super_super_super_super_super_super_super_super_super_super_super_long]
+a[super_super_super_super_super_super_super_super_super_super_super_super_sulong]
 
 a[1] = 2
 
-a[super_super_super_super_super_super_super_super_super_super_super_super_super_super_long] =
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+a[super_super_super_super_super_super_super_super_super_super_super_super_sulong] =
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 
 a[1] = [
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_long
 ]
+
+# rubocop:enable Lint/Void

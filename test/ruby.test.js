@@ -58,15 +58,7 @@ const eachUnsupportedNode = callback => {
   });
 };
 
-const rubocopSkip = [
-  "array.rb",
-  "assign.rb",
-  "blocks.rb",
-  "hash.rb",
-  "layout.rb",
-  "method.rb",
-  "return.rb"
-];
+const rubocopSkip = ["assign.rb", "layout.rb", "method.rb"];
 
 eachConfig((prettierConfig, rubocopConfig, config) => {
   eachTest((file, contents) => {

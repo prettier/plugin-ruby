@@ -23,7 +23,11 @@ alias $e $f # rubocop:disable Style/GlobalVars
 `;
 
 exports[`array.rb matches expected output for off.json 1`] = `
-"[]
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
+[]
 
 [1, 2, 3]
 
@@ -40,35 +44,41 @@ exports[`array.rb matches expected output for off.json 1`] = `
 [1, 2, *[3, 4], 5, 6]
 
 [
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long, [
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_long, [
+    super_super_super_super_super_super_super_super_super_super_super_long,
+    super_super_super_super_super_super_super_super_super_super_super_long
   ]
 ]
 
 a[1]
 
 a[
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_sulong
 ]
 
 a[1] = 2
 
 a[
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_sulong
 ] =
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 
 a[1] = [
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_long
 ]
+
+# rubocop:enable Lint/Void
 "
 `;
 
 exports[`array.rb matches expected output for on.json 1`] = `
-"[]
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
+[]
 
 [1, 2, 3]
 
@@ -85,30 +95,32 @@ exports[`array.rb matches expected output for on.json 1`] = `
 [1, 2, *[3, 4], 5, 6]
 
 [
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long, [
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_long, [
+    super_super_super_super_super_super_super_super_super_super_super_long,
+    super_super_super_super_super_super_super_super_super_super_super_long
   ]
 ]
 
 a[1]
 
 a[
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_sulong
 ]
 
 a[1] = 2
 
 a[
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_sulong
 ] =
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 
 a[1] = [
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_long
 ]
+
+# rubocop:enable Lint/Void
 "
 `;
 
@@ -277,17 +289,20 @@ super_super_super_super_super_long && super_super_super_super_super_long &&
 `;
 
 exports[`blocks.rb matches expected output for off.json 1`] = `
-"loop { 1 }
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/UnusedBlockArgument
+# We should fix this to automatically prefix the variables with _.
+
+loop { 1 }
 
 loop { 1 }
 
 loop do
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
-loop do
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
+loop { super_super_super_super_super_super_super_super_super_super_super_long }
 
 loop { |i| 1 }
 
@@ -300,12 +315,10 @@ loop { |(a, b)| i }
 loop { |a, (b, c), d, *e| i }
 
 loop do |i|
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
-loop do |i|
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
+loop { |i| super_super_super_super_super_super_super_super_super_super_long }
 
 loop(&:i)
 
@@ -317,22 +330,30 @@ loop { |i, j| i.to_s }
   p i
 end
 
+# rubocop:disable Lint/AmbiguousBlockAssociation
+# We should handle this.
+
 target.method object.map { |arg| arg * 2 }
+
+# rubocop:enable Lint/UnusedBlockArgument, Lint/AmbiguousBlockAssociation
 "
 `;
 
 exports[`blocks.rb matches expected output for on.json 1`] = `
-"loop { 1 }
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/UnusedBlockArgument
+# We should fix this to automatically prefix the variables with _.
+
+loop { 1 }
 
 loop { 1 }
 
 loop do
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
-loop do
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
+loop { super_super_super_super_super_super_super_super_super_super_super_long }
 
 loop { |i| 1 }
 
@@ -345,12 +366,10 @@ loop { |(a, b)| i }
 loop { |a, (b, c), d, *e| i }
 
 loop do |i|
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
-loop do |i|
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
-end
+loop { |i| super_super_super_super_super_super_super_super_super_super_long }
 
 loop(&:i)
 
@@ -362,7 +381,12 @@ loop { |i, j| i.to_s }
   p i
 end
 
+# rubocop:disable Lint/AmbiguousBlockAssociation
+# We should handle this.
+
 target.method object.map { |arg| arg * 2 }
+
+# rubocop:enable Lint/UnusedBlockArgument, Lint/AmbiguousBlockAssociation
 "
 `;
 
@@ -621,7 +645,11 @@ defined?(a)
 `;
 
 exports[`hash.rb matches expected output for off.json 1`] = `
-"{}
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
+{}
 
 { :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
 
@@ -632,16 +660,22 @@ exports[`hash.rb matches expected output for off.json 1`] = `
 {
   :super_super_super_super_super_super_super_super_long =>
     super_super_super_super_super_super_super_super_long,
-  :super_super_super_super_super_super_super_super_long => {
+  :super_super_super_super_super_super_super_super_super_long => {
     :super_super_super_super_super_super_super_super_long =>
       super_super_super_super_super_super_super_super_long
   }
 }
+
+# rubocop:enable Lint/Void
 "
 `;
 
 exports[`hash.rb matches expected output for on.json 1`] = `
-"{}
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
+{}
 
 { a: 'a', b: 'b', c: 'c' }
 
@@ -652,11 +686,13 @@ exports[`hash.rb matches expected output for on.json 1`] = `
 {
   super_super_super_super_super_super_super_super_long:
     super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_long: {
+  super_super_super_super_super_super_super_super_super_long: {
     super_super_super_super_super_super_super_super_long:
       super_super_super_super_super_super_super_super_long
   }
 }
+
+# rubocop:enable Lint/Void
 "
 `;
 
@@ -1317,20 +1353,52 @@ end
 `;
 
 exports[`return.rb matches expected output for off.json 1`] = `
-"return
+"# frozen_string_literal: true
 
-return 1
+def foo
+  if a
+    return
+  end
+end
 
-return (1)
+def bar
+  if a
+    return 1
+  end
+end
+
+def baz
+  if a
+    return 1
+  end
+end
+
+def qux
+  if a
+    return 1, 2
+  end
+end
 "
 `;
 
 exports[`return.rb matches expected output for on.json 1`] = `
-"return
+"# frozen_string_literal: true
 
-return 1
+def foo
+  return if a
+end
 
-return (1)
+def bar
+  return 1 if a
+end
+
+def baz
+  return 1 if a
+end
+
+def qux
+  return 1, 2 if a
+end
 "
 `;
 
