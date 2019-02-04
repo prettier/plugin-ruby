@@ -27,7 +27,7 @@ const skipAssignIndent = node => (
     (node.type === "call" && skipAssignIndent(node.body[0]))
 );
 
-const surround = (left, right) => (path, options, print) => concat([
+const surround = (left, right) => (path, opts, print) => concat([
   left,
   path.call(print, "body", 0),
   right

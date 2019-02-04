@@ -2,7 +2,7 @@ const { concat, group, indent, join, line, softline } = require("prettier").doc.
 const { append, begin } = require("../utils");
 
 module.exports = {
-  array: (path, options, print) => {
+  array: (path, opts, print) => {
     if (path.getValue().body[0] === null) {
       return '[]';
     }

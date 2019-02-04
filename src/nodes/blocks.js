@@ -11,7 +11,7 @@ const { concat, group, ifBreak, indent, softline } = require("prettier").doc.bui
 //     [1, 2, 3].map(&:to_s)
 //
 // This additionally works with `do` blocks as well.
-const toProcTransform = (path, options, print) => {
+const toProcTransform = (path, opts, print) => {
   const [variables, statements] = path.getValue().body;
 
   // Ensure that there are variables being passed to this block.
@@ -48,8 +48,8 @@ const toProcTransform = (path, options, print) => {
   }
 };
 
-const printBlock = (path, options, print) => {
-  const toProcResponse = toProcTransform(path, options, print);
+const printBlock = (path, opts, print) => {
+  const toProcResponse = toProcTransform(path, opts, print);
   if (toProcResponse) {
     return toProcResponse;
   }

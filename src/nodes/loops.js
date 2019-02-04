@@ -14,7 +14,7 @@ const printLoop = keyword => (path, { inlineLoops }, print) => group(ifBreak(
   ])
 ));
 
-const printFor = (path, options, print) => group(concat([
+const printFor = (path, opts, print) => group(concat([
   path.call(print, "body", 1),
   ".each do |",
   path.call(print, "body", 0),

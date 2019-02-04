@@ -1,19 +1,19 @@
 const { concat, group, join } = require("prettier").doc.builders;
 
-const printGenericRestParam = symbol => (path, options, print) => (
+const printGenericRestParam = symbol => (path, opts, print) => (
   path.getValue().body[0] ? concat([symbol, path.call(print, "body", 0)]) : symbol
 );
 
-const printParams = (path, options, print) => {
-  const [reqs, opts, rest, post, kwargs, kwarg_rest, block] = path.getValue().body;
+const printParams = (path, opts, print) => {
+  const [reqs, optls, rest, post, kwargs, kwarg_rest, block] = path.getValue().body;
   let parts = [];
 
   if (reqs) {
     parts = parts.concat(path.map(print, "body", 0));
   }
 
-  if (opts) {
-    parts = parts.concat(opts.map((_, index) => concat([
+  if (optls) {
+    parts = parts.concat(optls.map((_, index) => concat([
       path.call(print, "body", 1, index, 0),
       " = ",
       path.call(print, "body", 1, index, 1)
@@ -48,7 +48,7 @@ const printParams = (path, options, print) => {
   return join(", ", parts);
 };
 
-const paramError = (path, options, print) => {
+const paramError = () => {
   throw new Error("formal argument cannot be a global variable");
 }
 

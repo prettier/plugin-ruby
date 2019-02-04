@@ -8,7 +8,7 @@ module.exports = {
   }],
   parsers: {
     ruby: {
-      parse: (text, parsers, options) => sexp(text),
+      parse: (text, parsers, opts) => sexp(text),
       astFormat: "ruby"
     }
   },

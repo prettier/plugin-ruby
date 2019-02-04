@@ -2,7 +2,7 @@ const { concat, group, hardline, join } = require("prettier").doc.builders;
 
 const getLine = stmt => (stmt.type === "def" ? stmt.body[0] : stmt).lineno;
 
-const printStatementAdd = (path, options, print) => {
+const printStatementAdd = (path, opts, print) => {
   const [left, right] = path.getValue().body;
   let buffer = hardline;
 

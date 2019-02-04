@@ -3,7 +3,7 @@ const { append, emptyList } = require("../utils");
 
 module.exports = {
   regexp_add: append,
-  regexp_literal: (path, options, print) => {
+  regexp_literal: (path, opts, print) => {
     const [contents, ending] = path.map(print, "body");
     const useBraces = contents.some(content => typeof content === "string" && content.includes("/"));
 
