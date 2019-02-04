@@ -1,5 +1,5 @@
 const { align, concat, dedent, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline } = require("prettier").doc.builders;
-const { append, concatBody, empty, literal, prefix, skipAssignIndent, surround } = require("./utils");
+const { append, concatBody, empty, first, literal, prefix, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
   ...require("./nodes/alias"),
@@ -261,7 +261,7 @@ module.exports = {
   comment: (path, options, print) => lineSuffix(` ${path.getValue().body.trim()}`),
   const_path_field: (path, options, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, options, print) => join("::", path.map(print, "body")),
-  const_ref: (path, options, print) => path.call(print, "body", 0),
+  const_ref: first,
   defined: (path, options, print) => group(concat([
     "defined?(",
     indent(concat([softline, path.call(print, "body", 0)])),
@@ -392,9 +392,9 @@ module.exports = {
   mrhs_add_star: (path, options, print) => group(concat([
     "*",
     concat(path.map(print, "body"))
-  ])),
+  ]))
   mrhs_new: (path, options, print) => "",
-  mrhs_new_from_args: (path, options, print) => path.call(print, "body", 0),
+  mrhs_new_from_args: first,
   module: (path, options, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
     indent(concat([hardline, path.call(print, "body", 1)])),
@@ -412,11 +412,7 @@ module.exports = {
     path.call(print, "body", 1),
     indent(concat([line, path.call(print, "body", 2)]))
   ])),
-  paren: (path, options, print) => concat([
-    "(",
-    concat(path.map(print, "body")),
-    ")"
-  ]),
+  paren: surround("(", ")"),
   program: (path, options, print) => markAsRoot(concat([
     join(literalline, path.map(print, "body")),
     literalline
@@ -499,7 +495,7 @@ module.exports = {
     path.call(print, "body", 0, 0)
   ]),
   var_field: concatBody,
-  var_ref: (path, options, print) => path.call(print, "body", 0),
+  var_ref: first,
   vcall: concatBody,
   when: (path, options, print) => {
     const [_predicates, _statements, addition] = path.getValue().body;

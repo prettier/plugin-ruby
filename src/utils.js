@@ -7,9 +7,11 @@ const append = (path, options, print) => [
 
 const begin = start => () => [start];
 
+const concatBody = (path, options, print) => concat(path.map(print, "body"));
+
 const empty = () => [];
 
-const concatBody = (path, options, print) => concat(path.map(print, "body"));
+const first = (path, options, print) => path.call(print, "body", 0);
 
 const literal = value => () => value;
 
@@ -32,8 +34,9 @@ const surround = (left, right) => (path, options, print) => concat([
 module.exports = {
   append,
   begin,
-  empty,
   concatBody,
+  empty,
+  first,
   literal,
   prefix,
   skipAssignIndent,
