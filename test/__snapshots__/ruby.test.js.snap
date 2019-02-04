@@ -694,6 +694,21 @@ exports[`hash.rb matches expected output for off.json 1`] = `
   }
 }
 
+foobar :alpha => alpha,
+       :beta => beta,
+       :gamma => gamma,
+       :delta => delta,
+       :epsilon => epsilon,
+       :zeta => zeta
+foobar(
+  :alpha => alpha,
+  :beta => beta,
+  :gamma => gamma,
+  :delta => delta,
+  :epsilon => epsilon,
+  :zeta => zeta
+)
+
 # rubocop:enable Lint/Void
 "
 `;
@@ -719,6 +734,21 @@ exports[`hash.rb matches expected output for on.json 1`] = `
       super_super_super_super_super_super_super_super_long
   }
 }
+
+foobar alpha: alpha,
+       beta: beta,
+       gamma: gamma,
+       delta: delta,
+       epsilon: epsilon,
+       zeta: zeta
+foobar(
+  alpha: alpha,
+  beta: beta,
+  gamma: gamma,
+  delta: delta,
+  epsilon: epsilon,
+  zeta: zeta
+)
 
 # rubocop:enable Lint/Void
 "
