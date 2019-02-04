@@ -8,7 +8,7 @@ const prettier = require("prettier");
 const print = require("../src/print");
 const nodes = require("../src/nodes");
 
-const format = (contents, config) => prettier.format(contents, {
+const format = (file, config) => prettier.format(fs.readFileSync(file, "utf8"), {
   parser: "ruby", plugins: ["."], ...config
 });
 
@@ -20,16 +20,14 @@ const eachConfig = callback => fs.readdirSync("./test/config").forEach(prettierC
   }
 });
 
-const eachTest = callback => fs.readdirSync("./test").forEach(file => {
+const eachTest = (config, callback) => fs.readdirSync("./test").forEach(file => {
   if (file.match(/.+\.rb$/)) {
-    const contents = fs.readFileSync(`./test/${file}`, "utf8");
-    callback(file, contents);
+    callback(file, () => format(`./test/${file}`, config));
   }
 });
 
-const eachError = callback => fs.readdirSync("./test/errors").forEach(file => {
-  const contents = fs.readFileSync(`./test/errors/${file}`, "utf8");
-  callback(file, contents);
+const eachError = (config, callback) => fs.readdirSync("./test/errors").forEach(file => {
+  callback(file, () => format(`./test/errors/${file}`, config));
 });
 
 const eachUnsupportedNode = callback => {
@@ -59,10 +57,10 @@ const eachUnsupportedNode = callback => {
 };
 
 eachConfig((prettierConfig, rubocopConfig, config) => {
-  eachTest((file, contents) => {
+  eachTest(config, (file, getContents) => {
     describe(file, () => {
       test(`matches expected output for ${prettierConfig}`, () => {
-        expect(format(contents, config)).toMatchSnapshot();
+        expect(getContents()).toMatchSnapshot();
       });
 
       test(`generated code passes rubocop for ${prettierConfig}`, () => new Promise((resolve, reject) => {
@@ -72,7 +70,7 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
           child.stdout.pipe(process.stdout);
         }
 
-        child.stdin.write(format(contents, config));
+        child.stdin.write(getContents());
         child.stdin.end();
 
         child.on("exit", resolve);
@@ -80,9 +78,9 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
     });
   });
 
-  eachError((file, contents) => {
+  eachError(config, (file, getContents) => {
     test(`${file} throws error on parsing`, () => {
-      expect(() => format(contents, config)).toThrowError();
+      expect(getContents).toThrowError();
     });
   });
 });

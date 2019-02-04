@@ -29,8 +29,7 @@ class RipperJS < Ripper::SexpBuilder
         node[:body][0] = {
           type: :stmts_add,
           body: [node[:body][0], comment],
-          lineno: comment[:lineno],
-          column: comment[:column]
+          lineno: comment[:lineno]
         }
         node = node[:body][0]
       end
@@ -42,7 +41,7 @@ class RipperJS < Ripper::SexpBuilder
   SCANNER_EVENTS.each do |event|
     module_eval(<<-End, __FILE__, __LINE__ + 1)
       def on_#{event}(token)
-        { type: :@#{event}, body: token, lineno: lineno, column: column }
+        { type: :@#{event}, body: token, lineno: lineno }
       end
     End
   end
@@ -57,7 +56,7 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def build_sexp(type, body)
-    sexp = { type: type, body: body, lineno: lineno, column: column }
+    sexp = { type: type, body: body, lineno: lineno }
 
     if @begin_comments.any? && type == :stmts_new
       while @begin_comments.any?
@@ -66,8 +65,7 @@ class RipperJS < Ripper::SexpBuilder
         sexp = {
           type: :stmts_add,
           body: [sexp, begin_comment],
-          lineno: begin_comment[:lineno],
-          column: begin_comment[:column]
+          lineno: begin_comment[:lineno]
         }
       end
     end
@@ -82,7 +80,7 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def on_comment(comment)
-    sexp = { type: :@comment, body: comment.chomp, lineno: lineno, column: column }
+    sexp = { type: :@comment, body: comment.chomp, lineno: lineno }
     lex_state = RipperJS.lex_state_name(state)
 
     if lex_state == 'EXPR_BEG' # on it's own line
@@ -95,7 +93,7 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def on_embdoc_beg(comment)
-    @embdoc = { type: :@embdoc, body: comment, lineno: lineno, column: column }
+    @embdoc = { type: :@embdoc, body: comment, lineno: lineno }
   end
 
   def on_embdoc(comment)
@@ -122,13 +120,11 @@ class RipperJS < Ripper::SexpBuilder
           {
             type: :stmts_add,
             body: [@stack[-1][:body][0], @stack[-1][:body][1]],
-            lineno: @stack[-1][:body][1][:lineno],
-            column: @stack[-1][:body][1][:column]
+            lineno: @stack[-1][:body][1][:lineno]
           },
           comment
         ],
-        lineno: lineno,
-        column: column
+        lineno: lineno
       )
     end
   end
