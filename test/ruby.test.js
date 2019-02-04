@@ -6,6 +6,7 @@ const path = require("path");
 const prettier = require("prettier");
 
 const print = require("../src/print");
+const nodes = require("../src/nodes");
 
 const rubocop = text => new Promise((resolve, reject) => {
   const child = spawn("bundle", ["exec", "rubocop", "--stdin", "/dev/null"]);
@@ -80,7 +81,7 @@ const getUnhandled = () => {
     ""
   ];
 
-  const events = Object.keys(print.nodes).concat(expected);
+  const events = Object.keys(nodes).concat(expected);
   return child.stdout.toString().split("\n").filter(event => (
     events.indexOf(event) === -1
   ));
