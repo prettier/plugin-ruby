@@ -11,7 +11,9 @@ class RipperJS < Ripper::SexpBuilder
 
     @start_comments = []
     @begin_comments = []
+
     @end_comment = nil
+    @embdoc = nil
 
     @stack = []
   end
@@ -84,27 +86,7 @@ class RipperJS < Ripper::SexpBuilder
     lex_state = RipperJS.lex_state_name(state)
 
     if lex_state == 'EXPR_BEG' # on it's own line
-      if !@stack[-1] # the very first statement
-        @start_comments.unshift(sexp)
-      elsif @stack[-1][:type] != :stmts_add # the first statement of the block
-        @begin_comments << sexp
-      elsif @stack[-2][:type] == :void_stmt # the only statement of the block
-        @stack[-1][:body][1] = sexp
-      else # in the middle of a list of statements
-        @stack[-1].merge!(
-          body: [
-            {
-              type: :stmts_add,
-              body: [@stack[-1][:body][0], @stack[-1][:body][1]],
-              lineno: @stack[-1][:body][1][:lineno],
-              column: @stack[-1][:body][1][:column]
-            },
-            sexp
-          ],
-          lineno: lineno,
-          column: column
-        )
-      end
+      handle_comment(sexp)
     elsif lex_state == 'EXPR_END' && @stack[-1]
       @stack[-1].merge!(comment: sexp.merge!(type: :comment))
     else
@@ -113,18 +95,43 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def on_embdoc_beg(comment)
-    @last_node[:comment] = { type: :embdoc, body: comment, lineno: lineno, column: column }
+    @embdoc = { type: :@embdoc, body: comment, lineno: lineno, column: column }
   end
 
   def on_embdoc(comment)
-    @last_node[:comment][:body] << comment
+    @embdoc[:body] << comment
   end
 
   def on_embdoc_end(comment)
-    @last_node[:comment][:body] << comment
+    @embdoc[:body] << comment.chomp
+    handle_comment(@embdoc)
   end
 
   def on_magic_comment(*); end
+
+  def handle_comment(comment)
+    if !@stack[-1] # the very first statement
+      @start_comments.unshift(comment)
+    elsif @stack[-1][:type] != :stmts_add # the first statement of the block
+      @begin_comments << comment
+    elsif @stack[-2][:type] == :void_stmt # the only statement of the block
+      @stack[-1][:body][1] = comment
+    else # in the middle of a list of statements
+      @stack[-1].merge!(
+        body: [
+          {
+            type: :stmts_add,
+            body: [@stack[-1][:body][0], @stack[-1][:body][1]],
+            lineno: @stack[-1][:body][1][:lineno],
+            column: @stack[-1][:body][1][:column]
+          },
+          comment
+        ],
+        lineno: lineno,
+        column: column
+      )
+    end
+  end
 end
 
 if $0 == __FILE__
