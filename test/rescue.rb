@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
 begin
   1
-rescue StandardError
+rescue ArgumentError
   retry
 rescue NoMethodError => exception
+  puts exception
   redo
-rescue StandardError, NoMethodError
+rescue SyntaxError, NoMethodError
   2
 rescue
   3

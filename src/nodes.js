@@ -422,16 +422,20 @@ module.exports = {
     const [exception, variable, _statements, addition] = path.getValue().body;
     const parts = ["rescue"];
 
-    if (exception) {
-      if (Array.isArray(exception)) {
-        parts.push(" ", path.call(print, "body", 0, 0));
-      } else {
-        parts.push(" ", path.call(print, "body", 0));
+    if (exception || variable) {
+      if (exception) {
+        if (Array.isArray(exception)) {
+          parts.push(" ", path.call(print, "body", 0, 0));
+        } else {
+          parts.push(" ", path.call(print, "body", 0));
+        }
       }
-    }
 
-    if (variable) {
-      parts.push(group(concat([" => ", path.call(print, "body", 1)])));
+      if (variable) {
+        parts.push(group(concat([" => ", path.call(print, "body", 1)])));
+      }
+    } else {
+      parts.push(" StandardError");
     }
 
     parts.push(indent(concat([hardline, path.call(print, "body", 2)])));
@@ -442,7 +446,13 @@ module.exports = {
 
     return group(concat(parts));
   },
-  rescue_mod: (path, opts, print) => group(join(" rescue ", path.map(print, "body"))),
+  rescue_mod: (path, opts, print) => group(concat([
+    "begin",
+    indent(concat([hardline, path.call(print, "body", 0)])),
+    concat([hardline, "rescue StandardError"]),
+    indent(concat([hardline, path.call(print, "body", 1)])),
+    concat([hardline, "end"])
+  ])),
   retry: literal("retry"),
   return: (path, opts, print) => group(concat(["return ", concat(path.map(print, "body"))])),
   return0: literal("return"),

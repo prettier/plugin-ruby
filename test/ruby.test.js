@@ -70,7 +70,6 @@ const rubocopSkip = [
   "layout.rb",
   "method.rb",
   "next.rb",
-  "rescue.rb",
   "return.rb",
   "strings.rb",
   "while.rb"

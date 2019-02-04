@@ -1223,15 +1223,18 @@ exports[`regexp.rb matches expected output for on.json 1`] = `
 `;
 
 exports[`rescue.rb matches expected output for off.json 1`] = `
-"begin
+"# frozen_string_literal: true
+
+begin
   1
-rescue StandardError
+rescue ArgumentError
   retry
 rescue NoMethodError => exception
+  puts exception
   redo
-rescue StandardError, NoMethodError
+rescue SyntaxError, NoMethodError
   2
-rescue
+rescue StandardError
   3
 else
   4
@@ -1239,20 +1242,27 @@ ensure
   5
 end
 
-a rescue nil
+begin
+  a
+rescue StandardError
+  nil
+end
 "
 `;
 
 exports[`rescue.rb matches expected output for on.json 1`] = `
-"begin
+"# frozen_string_literal: true
+
+begin
   1
-rescue StandardError
+rescue ArgumentError
   retry
 rescue NoMethodError => exception
+  puts exception
   redo
-rescue StandardError, NoMethodError
+rescue SyntaxError, NoMethodError
   2
-rescue
+rescue StandardError
   3
 else
   4
@@ -1260,7 +1270,11 @@ ensure
   5
 end
 
-a rescue nil
+begin
+  a
+rescue StandardError
+  nil
+end
 "
 `;
 
