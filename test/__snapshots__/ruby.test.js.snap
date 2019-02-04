@@ -257,20 +257,22 @@ super_super_super_super_super_super_super_long.super_super_super_super_super_sup
 `;
 
 exports[`binary.rb matches expected output for off.json 1`] = `
-"a && b && c && d
+"# frozen_string_literal: true
 
-super_super_super_super_super_super_super_super_super_long &&
-  super_super_super_super_super_super_super_super_super_long &&
-  super_super_super_super_super_super_super_super_super_long
+a && b && c && d
+
+super_super_super_super_super_long && super_super_super_super_super_long &&
+  super_super_super_super_super_long
 "
 `;
 
 exports[`binary.rb matches expected output for on.json 1`] = `
-"a && b && c && d
+"# frozen_string_literal: true
 
-super_super_super_super_super_super_super_super_super_long &&
-  super_super_super_super_super_super_super_super_super_long &&
-  super_super_super_super_super_super_super_super_super_long
+a && b && c && d
+
+super_super_super_super_super_long && super_super_super_super_super_long &&
+  super_super_super_super_super_long
 "
 `;
 
@@ -365,29 +367,43 @@ target.method object.map { |arg| arg * 2 }
 `;
 
 exports[`break.rb matches expected output for off.json 1`] = `
-"break
+"# frozen_string_literal: true
 
-break 1
+[].each { break }
 
-break(1)
+[].each { break 1 }
 
-break 1, 2
+[].each { break(1) }
+
+[].each { break 1, 2 }
 "
 `;
 
 exports[`break.rb matches expected output for on.json 1`] = `
-"break
+"# frozen_string_literal: true
 
-break 1
+[].each { break }
 
-break(1)
+[].each { break 1 }
 
-break 1, 2
+[].each { break(1) }
+
+[].each { break 1, 2 }
 "
 `;
 
 exports[`case.rb matches expected output for off.json 1`] = `
-"case
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/EmptyWhen
+# Disabling EmptyWhen on account of
+# https://github.com/rubocop-hq/rubocop/issues/3696.
+
+# rubocop:disable Style/EmptyCaseCondition
+# This is something that we should handle by converting each of the when
+# statements into valid if/elsif/else statements.
+
+case
 when a
   1
 end
@@ -421,11 +437,23 @@ when b
 else
   2
 end
+
+# rubocop:enable Lint/EmptyWhen, Style/EmptyCaseCondition
 "
 `;
 
 exports[`case.rb matches expected output for on.json 1`] = `
-"case
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/EmptyWhen
+# Disabling EmptyWhen on account of
+# https://github.com/rubocop-hq/rubocop/issues/3696.
+
+# rubocop:disable Style/EmptyCaseCondition
+# This is something that we should handle by converting each of the when
+# statements into valid if/elsif/else statements.
+
+case
 when a
   1
 end
@@ -459,6 +487,8 @@ when b
 else
   2
 end
+
+# rubocop:enable Lint/EmptyWhen, Style/EmptyCaseCondition
 "
 `;
 
@@ -600,11 +630,11 @@ exports[`hash.rb matches expected output for off.json 1`] = `
 { Foo => 1, Bar => 2 }
 
 {
-  :super_super_super_super_super_super_super_super_super_super_super_super_super_super_long =>
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  :super_super_super_super_super_super_super_super_super_super_super_super_super_super_long => {
-    :super_super_super_super_super_super_super_super_super_super_super_super_super_super_long =>
-      super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  :super_super_super_super_super_super_super_super_long =>
+    super_super_super_super_super_super_super_super_long,
+  :super_super_super_super_super_super_super_super_long => {
+    :super_super_super_super_super_super_super_super_long =>
+      super_super_super_super_super_super_super_super_long
   }
 }
 "
@@ -620,11 +650,11 @@ exports[`hash.rb matches expected output for on.json 1`] = `
 { Foo => 1, Bar => 2 }
 
 {
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long: {
-    super_super_super_super_super_super_super_super_super_super_super_super_super_super_long:
-      super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_long:
+    super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_long: {
+    super_super_super_super_super_super_super_super_long:
+      super_super_super_super_super_super_super_super_long
   }
 }
 "

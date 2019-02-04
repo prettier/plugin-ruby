@@ -1,7 +1,9 @@
-break
+# frozen_string_literal: true
 
-break 1
+[].each { break }
 
-break(1)
+[].each { break 1 }
 
-break 1, 2
+[].each { break(1) }
+
+[].each { break 1, 2 }

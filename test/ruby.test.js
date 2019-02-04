@@ -61,9 +61,7 @@ const eachUnsupportedNode = callback => {
 const rubocopSkip = [
   "array.rb",
   "assign.rb",
-  "binary.rb",
   "blocks.rb",
-  "break.rb",
   "hash.rb",
   "kwargs.rb",
   "layout.rb",
