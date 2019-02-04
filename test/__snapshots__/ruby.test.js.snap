@@ -463,14 +463,16 @@ end
 `;
 
 exports[`class.rb matches expected output for off.json 1`] = `
-"module Pret
+"# frozen_string_literal: true
+
+module Pret
   module Tier
     class Object; end
 
     class Object; end
 
     class Object
-      attr_accessor :config
+      attr_accessor :foo
     end
 
     class Object < BasicObject; end
@@ -478,7 +480,7 @@ exports[`class.rb matches expected output for off.json 1`] = `
     class Object < BasicObject; end
 
     class Object < BasicObject
-      attr_accessor :config
+      attr_accessor :bar
     end
 
     class << self
@@ -489,23 +491,25 @@ exports[`class.rb matches expected output for off.json 1`] = `
   end
 end
 
-Pret::Tier::Object
-Pret::Tier = \\"config\\"
+Pret::Tier::Object # rubocop:disable Lint/Void
+Pret::TIER = \\"config\\"
 
-::Pret::Tier::Object
-::Pret = \\"config\\"
+::Pret::Tier::Object # rubocop:disable Lint/Void
+::PRET = \\"config\\"
 "
 `;
 
 exports[`class.rb matches expected output for on.json 1`] = `
-"module Pret
+"# frozen_string_literal: true
+
+module Pret
   module Tier
     class Object; end
 
     class Object; end
 
     class Object
-      attr_accessor :config
+      attr_accessor :foo
     end
 
     class Object < BasicObject; end
@@ -513,7 +517,7 @@ exports[`class.rb matches expected output for on.json 1`] = `
     class Object < BasicObject; end
 
     class Object < BasicObject
-      attr_accessor :config
+      attr_accessor :bar
     end
 
     class << self
@@ -524,11 +528,11 @@ exports[`class.rb matches expected output for on.json 1`] = `
   end
 end
 
-Pret::Tier::Object
-Pret::Tier = 'config'
+Pret::Tier::Object # rubocop:disable Lint/Void
+Pret::TIER = 'config'
 
-::Pret::Tier::Object
-::Pret = 'config'
+::Pret::Tier::Object # rubocop:disable Lint/Void
+::PRET = 'config'
 "
 `;
 
@@ -671,8 +675,10 @@ END {
 `;
 
 exports[`if.rb matches expected output for off.json 1`] = `
-"if a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+"# frozen_string_literal: true
+
+if a
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
 if a
@@ -682,9 +688,9 @@ elsif b
 end
 
 if a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long
 else
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
 if a
@@ -698,20 +704,24 @@ else
 end
 
 unless a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
+# rubocop:disable Style/UnlessElse
+
 unless a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long
 else
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
+
+# rubocop:enable Style/UnlessElse
 
 if a
   1
 end
 
-if super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+if super_super_super_super_super_super_super_super_super_super_super_super_long
   1
 end
 
@@ -719,7 +729,7 @@ unless a
   1
 end
 
-unless super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+unless super_super_super_super_super_super_super_super_super_super_super_suplong
   1
 end
 
@@ -730,16 +740,18 @@ a ? 2 : 1
 a ? 1 : 2
 
 if a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long
 else
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 "
 `;
 
 exports[`if.rb matches expected output for on.json 1`] = `
-"if a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+"# frozen_string_literal: true
+
+if a
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
 if a
@@ -749,9 +761,9 @@ elsif b
 end
 
 if a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long
 else
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
 if a
@@ -765,24 +777,28 @@ else
 end
 
 unless a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
+# rubocop:disable Style/UnlessElse
+
 unless a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long
 else
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
+
+# rubocop:enable Style/UnlessElse
 
 1 if a
 
-if super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+if super_super_super_super_super_super_super_super_super_super_super_super_long
   1
 end
 
 1 unless a
 
-unless super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+unless super_super_super_super_super_super_super_super_super_super_super_suplong
   1
 end
 
@@ -793,9 +809,9 @@ a ? 2 : 1
 a ? 1 : 2
 
 if a
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_long
 else
-  super_super_super_super_super_super_super_super_super_super_super_super_super_super_long
+  super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 "
 `;
