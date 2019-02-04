@@ -1,11 +1,5 @@
 const { concat, group, indent, join, line, softline } = require("prettier").doc.builders;
-
-const append = (path, options, print) => [
-  ...path.call(print, "body", 0),
-  path.call(print, "body", 1)
-];
-
-const begin = elem => () => [elem];
+const { append, begin } = require("../utils");
 
 const arrays = {
   array: (path, options, print) => {

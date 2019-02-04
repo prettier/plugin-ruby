@@ -3,40 +3,19 @@ const {
   lineSuffix, literalline, markAsRoot, softline
 } = require("prettier").doc.builders;
 
-const alias = require("./nodes/alias");
-const arrays = require("./nodes/arrays");
-const blocks = require("./nodes/blocks");
-const conditionals = require("./nodes/conditionals");
-const hooks = require("./nodes/hooks");
-const loops = require("./nodes/loops");
-const methods = require("./nodes/methods");
-const params = require("./nodes/params");
-const regexp = require("./nodes/regexp");
-const statements = require("./nodes/statements");
-
-const append = (path, options, print) => [
-  ...path.call(print, "body", 0),
-  path.call(print, "body", 1)
-];
-
-const concatBody = (path, options, print) => concat(path.map(print, "body"));
-
-const shouldSkipAssignIndent = node => (
-  ["array", "hash"].includes(node.type) ||
-    (node.type === "call" && shouldSkipAssignIndent(node.body[0]))
-);
+const { append, concatBody, skipAssignIndent } = require("./utils");
 
 const nodes = {
-  ...alias,
-  ...arrays,
-  ...blocks,
-  ...conditionals,
-  ...hooks,
-  ...loops,
-  ...methods,
-  ...params,
-  ...regexp,
-  ...statements,
+  ...require("./nodes/alias"),
+  ...require("./nodes/arrays"),
+  ...require("./nodes/blocks"),
+  ...require("./nodes/conditionals"),
+  ...require("./nodes/hooks"),
+  ...require("./nodes/loops"),
+  ...require("./nodes/methods"),
+  ...require("./nodes/params"),
+  ...require("./nodes/regexp"),
+  ...require("./nodes/statements"),
   "@CHAR": (path, { preferSingleQuotes }, print) => {
     const { body } = path.getValue();
 
@@ -87,7 +66,7 @@ const nodes = {
       return path.call(print, "body", 1);
     }
 
-    const buffer = shouldSkipAssignIndent(rightArg) ? ", " : concat([",", line]);
+    const buffer = skipAssignIndent(rightArg) ? ", " : concat([",", line]);
     return join(buffer, path.map(print, "body"));
   },
   args_add_block: (path, options, print) => {
@@ -140,7 +119,7 @@ const nodes = {
         break;
     }
 
-    if (shouldSkipAssignIndent(path.getValue().body[1])) {
+    if (skipAssignIndent(path.getValue().body[1])) {
       parts.push(" ", printedValue);
     } else {
       parts.push(indent(concat([line, printedValue])));
@@ -159,7 +138,7 @@ const nodes = {
   assign: (path, options, print) => {
     const [printedTarget, printedValue] = path.map(print, "body");
 
-    if (shouldSkipAssignIndent(path.getValue().body[1])) {
+    if (skipAssignIndent(path.getValue().body[1])) {
       return group(concat([printedTarget, " = ", printedValue]));
     }
 
