@@ -33,7 +33,7 @@ const eachError = callback => fs.readdirSync("./test/errors").forEach(file => {
 });
 
 const eachUnsupportedNode = callback => {
-  const child = spawnSync("ruby", ["-e", "require 'ripper'; puts Ripper::PARSER_EVENTS"]);
+  const child = spawnSync("ruby", ["-rripper", "-e", "puts Ripper::PARSER_EVENTS"]);
 
   const error = child.stderr.toString();
   if (error) {
@@ -65,7 +65,6 @@ const rubocopSkip = [
   "blocks.rb",
   "break.rb",
   "case.rb",
-  "class.rb",
   "hash.rb",
   "kwargs.rb",
   "layout.rb",

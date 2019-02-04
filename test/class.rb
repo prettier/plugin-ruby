@@ -29,7 +29,7 @@ module Pret
 end
 
 Pret::Tier::Object # rubocop:disable Lint/Void
-Pret::TIER = 'config'
+Pret::TIER = 'config'.freeze
 
 ::Pret::Tier::Object # rubocop:disable Lint/Void
-::PRET = 'config'
+::PRET = 'config'.freeze
