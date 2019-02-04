@@ -6,7 +6,7 @@ This is a [prettier](https://prettier.io/) plugin for the Ruby programming langu
 
 ## Getting started
 
-You can pretty print a ruby source file by running `yarn print [PATH]`.
+First, add `prettier-plugin-ruby` to your `package.json` `dependencies`, then install using either `npm install` or `yarn install`. You will now be able to pretty print Ruby source files.
 
 ## Options
 
@@ -19,7 +19,7 @@ Below are the options (from [`src/ruby.js`](src/ruby.js)) that `prettier-ruby` c
 
 ## Development
 
-After checking out the repo, run `yarn` and `bundle` to install dependencies. Then, run `yarn test` to run the tests.
+After checking out the repo, run `yarn` and `bundle` to install dependencies. Then, run `yarn test` to run the tests. You can pretty print a Ruby source file by running `yarn print [PATH]`.
 
 ## Contributing
 
