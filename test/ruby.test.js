@@ -65,9 +65,7 @@ const rubocopSkip = [
   "hash.rb",
   "layout.rb",
   "method.rb",
-  "return.rb",
-  "strings.rb",
-  "while.rb"
+  "return.rb"
 ];
 
 eachConfig((prettierConfig, rubocopConfig, config) => {

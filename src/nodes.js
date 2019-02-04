@@ -535,9 +535,9 @@ module.exports = {
   word_new: empty,
   xstring_add: append,
   xstring_literal: (path, opts, print) => group(concat([
-    "%x[",
+    "`",
     indent(concat([softline, join(softline, path.call(print, "body", 0))])),
-    concat([softline, "]"])
+    concat([softline, "`"])
   ])),
   xstring_new: emptyList,
   yield: (path, opts, print) => concat([
