@@ -64,7 +64,6 @@ const rubocopSkip = [
   "binary.rb",
   "blocks.rb",
   "break.rb",
-  "case.rb",
   "hash.rb",
   "kwargs.rb",
   "layout.rb",
