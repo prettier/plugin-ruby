@@ -103,6 +103,7 @@ class RipperJS < Ripper::SexpBuilder
   def on_embdoc_end(comment)
     @embdoc[:body] << comment.chomp
     handle_comment(@embdoc)
+    @embdoc = nil
   end
 
   def on_magic_comment(*); end
