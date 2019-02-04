@@ -63,18 +63,20 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
         expect(getContents()).toMatchSnapshot();
       });
 
-      test(`generated code passes rubocop for ${prettierConfig}`, () => new Promise((resolve, reject) => {
-        const child = spawn("bundle", ["exec", "rubocop", "--stdin", file, "--config", rubocopConfig]);
+      if (!process.env.NOLINT) {
+        test(`generated code passes rubocop for ${prettierConfig}`, () => new Promise((resolve, reject) => {
+          const child = spawn("bundle", ["exec", "rubocop", "--stdin", file, "--config", rubocopConfig]);
 
-        if (process.env.VIOLATIONS) {
-          child.stdout.pipe(process.stdout);
-        }
+          if (process.env.VIOLATIONS) {
+            child.stdout.pipe(process.stdout);
+          }
 
-        child.stdin.write(getContents());
-        child.stdin.end();
+          child.stdin.write(getContents());
+          child.stdin.end();
 
-        child.on("exit", resolve);
-      }));
+          child.on("exit", resolve);
+        }));
+      }
     });
   });
 

@@ -83,7 +83,7 @@ class RipperJS < Ripper::SexpBuilder
     sexp = { type: :@comment, body: comment.chomp, line: lineno }
     lex_state = RipperJS.lex_state_name(state)
 
-    if lex_state == 'EXPR_BEG' # on it's own line
+    if lex_state == 'EXPR_BEG'
       handle_comment(sexp)
     elsif lex_state == 'EXPR_END' && @stack[-1]
       @stack[-1].merge!(comment: sexp.merge!(type: :comment))
@@ -120,7 +120,7 @@ class RipperJS < Ripper::SexpBuilder
         body: [
           {
             type: :stmts_add,
-            body: [@stack[-1][:body][0], @stack[-1][:body][1]],
+            body: @stack[-1][:body],
             line: @stack[-1][:body][1][:line]
           },
           comment
