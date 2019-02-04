@@ -29,7 +29,7 @@ class RipperJS < Ripper::SexpBuilder
         node[:body][0] = {
           type: :stmts_add,
           body: [node[:body][0], comment],
-          lineno: comment[:lineno]
+          line: comment[:line]
         }
         node = node[:body][0]
       end
@@ -41,7 +41,7 @@ class RipperJS < Ripper::SexpBuilder
   SCANNER_EVENTS.each do |event|
     module_eval(<<-End, __FILE__, __LINE__ + 1)
       def on_#{event}(token)
-        { type: :@#{event}, body: token, lineno: lineno }
+        { type: :@#{event}, body: token, line: lineno }
       end
     End
   end
@@ -56,7 +56,7 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def build_sexp(type, body)
-    sexp = { type: type, body: body, lineno: lineno }
+    sexp = { type: type, body: body, line: lineno }
 
     if @begin_comments.any? && type == :stmts_new
       while @begin_comments.any?
@@ -65,7 +65,7 @@ class RipperJS < Ripper::SexpBuilder
         sexp = {
           type: :stmts_add,
           body: [sexp, begin_comment],
-          lineno: begin_comment[:lineno]
+          line: begin_comment[:line]
         }
       end
     end
@@ -80,7 +80,7 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def on_comment(comment)
-    sexp = { type: :@comment, body: comment.chomp, lineno: lineno }
+    sexp = { type: :@comment, body: comment.chomp, line: lineno }
     lex_state = RipperJS.lex_state_name(state)
 
     if lex_state == 'EXPR_BEG' # on it's own line
@@ -93,7 +93,7 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def on_embdoc_beg(comment)
-    @embdoc = { type: :@embdoc, body: comment, lineno: lineno }
+    @embdoc = { type: :@embdoc, body: comment, line: lineno }
   end
 
   def on_embdoc(comment)
@@ -120,11 +120,11 @@ class RipperJS < Ripper::SexpBuilder
           {
             type: :stmts_add,
             body: [@stack[-1][:body][0], @stack[-1][:body][1]],
-            lineno: @stack[-1][:body][1][:lineno]
+            line: @stack[-1][:body][1][:line]
           },
           comment
         ],
-        lineno: lineno
+        line: lineno
       )
     end
   end
