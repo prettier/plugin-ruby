@@ -3,7 +3,7 @@ const {
   lineSuffix, literalline, markAsRoot, softline
 } = require("prettier").doc.builders;
 
-const { append, concatBody, literal, skipAssignIndent } = require("./utils");
+const { append, concatBody, empty, literal, skipAssignIndent } = require("./utils");
 
 const nodes = {
   ...require("./nodes/alias"),
@@ -552,7 +552,7 @@ const nodes = {
     indent(concat([softline, join(softline, path.call(print, "body", 0))])),
     concat([softline, "]"])
   ])),
-  xstring_new: (path, options, print) => [],
+  xstring_new: empty,
   yield: (path, options, print) => concat([
     "yield",
     path.getValue().body[0].type === "paren" ? "" : " ",
