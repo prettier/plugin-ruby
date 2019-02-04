@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/kddeisz/prettier-ruby#readme",
   "dependencies": {
-    "prettier": "^1.16.3"
+    "prettier": "^1.16.4"
   },
   "devDependencies": {
     "jest": "^24.0.0"
