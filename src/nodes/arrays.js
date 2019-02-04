@@ -24,8 +24,7 @@ const arrays = {
     const [first, ...rest] = path.call(print, "body", 0);
     return group(concat([
       first,
-      softline,
-      indent(join(line, rest)),
+      indent(concat([softline, join(line, rest)])),
       concat([softline, "]"])
     ]));
   },

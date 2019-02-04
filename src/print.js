@@ -14,6 +14,11 @@ const params = require("./nodes/params");
 const regexp = require("./nodes/regexp");
 const statements = require("./nodes/statements");
 
+const append = (path, options, print) => [
+  ...path.call(print, "body", 0),
+  path.call(print, "body", 1)
+];
+
 const concatBody = (path, options, print) => concat(path.map(print, "body"));
 
 const shouldSkipAssignIndent = node => (
@@ -302,7 +307,7 @@ const nodes = {
   ]),
   dyna_symbol: (path, options, print) => concat([
     ":\"",
-    concat(path.map(print, "body")),
+    concat(path.call(print, "body", 0)),
     "\""
   ]),
   else: (path, options, print) => concat([
@@ -562,13 +567,13 @@ const nodes = {
   },
   word_add: concatBody,
   word_new: (path, options, print) => "",
-  xstring_add: concatBody,
+  xstring_add: append,
   xstring_literal: (path, options, print) => group(concat([
     "%x[",
-    indent(concat([softline, path.call(print, "body", 0)])),
+    indent(concat([softline, join(softline, path.call(print, "body", 0))])),
     concat([softline, "]"])
   ])),
-  xstring_new: (path, options, print) => "",
+  xstring_new: (path, options, print) => [],
   yield: (path, options, print) => concat([
     "yield",
     path.getValue().body[0].type === "paren" ? "" : " ",
