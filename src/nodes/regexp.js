@@ -1,12 +1,8 @@
 const { concat, group, indent, softline } = require("prettier").doc.builders;
+const { append, empty } = require("../utils");
 
 module.exports = {
-  // Adding various parts to the regexp expression (in case of interpolation)
-  regexp_add: (path, options, print) => [
-    ...path.call(print, "body", 0),
-    path.call(print, "body", 1)
-  ],
-  // Parent node for regexp expressions
+  regexp_add: append,
   regexp_literal: (path, options, print) => {
     const [contents, ending] = path.map(print, "body");
     const useBraces = contents.some(content => typeof content === "string" && content.includes("/"));
@@ -18,6 +14,5 @@ module.exports = {
       useBraces ? "}" : "/"
     ]));
   },
-  // Start of a regexp expression
-  regexp_new: (path, options, print) => [],
+  regexp_new: empty
 };

@@ -7,6 +7,8 @@ const append = (path, options, print) => [
 
 const begin = start => () => [start];
 
+const empty = () => [];
+
 const concatBody = (path, options, print) => concat(path.map(print, "body"));
 
 const literal = value => () => value;
@@ -19,6 +21,7 @@ const skipAssignIndent = node => (
 module.exports = {
   append,
   begin,
+  empty,
   concatBody,
   literal,
   skipAssignIndent

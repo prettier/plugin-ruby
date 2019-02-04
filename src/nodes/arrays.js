@@ -1,7 +1,7 @@
 const { concat, group, indent, join, line, softline } = require("prettier").doc.builders;
 const { append, begin } = require("../utils");
 
-const arrays = {
+module.exports = {
   array: (path, options, print) => {
     if (path.getValue().body[0] === null) {
       return '[]';
@@ -31,5 +31,3 @@ const arrays = {
   words_add: append,
   words_new: begin("%W[")
 };
-
-module.exports = arrays;
