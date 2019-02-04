@@ -73,9 +73,7 @@ const rubocopSkip = [
   "rescue.rb",
   "return.rb",
   "strings.rb",
-  "super.rb",
-  "while.rb",
-  "yield.rb"
+  "while.rb"
 ];
 
 eachConfig((prettierConfig, rubocopConfig, config) => {

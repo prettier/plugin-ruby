@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 super
 
 super 1
