@@ -9,6 +9,8 @@ const begin = start => () => [start];
 
 const concatBody = (path, options, print) => concat(path.map(print, "body"));
 
+const literal = value => () => value;
+
 const skipAssignIndent = node => (
   ["array", "hash"].includes(node.type) ||
     (node.type === "call" && skipAssignIndent(node.body[0]))
@@ -18,5 +20,6 @@ module.exports = {
   append,
   begin,
   concatBody,
+  literal,
   skipAssignIndent
 };

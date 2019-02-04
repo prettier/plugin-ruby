@@ -3,7 +3,7 @@ const {
   lineSuffix, literalline, markAsRoot, softline
 } = require("prettier").doc.builders;
 
-const { append, concatBody, skipAssignIndent } = require("./utils");
+const { append, concatBody, literal, skipAssignIndent } = require("./utils");
 
 const nodes = {
   ...require("./nodes/alias"),
@@ -558,8 +558,8 @@ const nodes = {
     path.getValue().body[0].type === "paren" ? "" : " ",
     concat(path.map(print, "body"))
   ]),
-  yield0: (path, options, print) => "yield",
-  zsuper: (path, options, print) => "super"
+  yield0: literal("yield"),
+  zsuper: literal("super")
 };
 
 const genericPrint = (path, options, print) => {
