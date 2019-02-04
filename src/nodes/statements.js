@@ -1,12 +1,14 @@
 const { concat, group, hardline, join } = require("prettier").doc.builders;
 
+const getLine = stmt => (stmt.type === "def" ? stmt.body[0] : stmt).lineno;
+
 const printStatementAdd = (path, options, print) => {
   const [left, right] = path.getValue().body;
   let buffer = hardline;
 
   // If there was originally multiple lines of whitespace between, compress down
   // to just one line of whitespace.
-  if ((right.lineno - left.lineno) > 1) {
+  if ((getLine(right) - left.lineno) > 1) {
     buffer = concat([hardline, hardline]);
   }
 

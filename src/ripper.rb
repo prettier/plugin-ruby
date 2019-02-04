@@ -96,8 +96,8 @@ class RipperJS < Ripper::SexpBuilder
             {
               type: :stmts_add,
               body: [@stack[-1][:body][0], @stack[-1][:body][1]],
-              lineno: @stack[-1][:body][0][:lineno],
-              column: @stack[-1][:body][0][:column]
+              lineno: @stack[-1][:body][1][:lineno],
+              column: @stack[-1][:body][1][:column]
             },
             sexp
           ],
