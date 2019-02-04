@@ -1,20 +1,26 @@
-1.0
+# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
+1
 
 def foobar
-  :a
-
-  'b'
-  1
   2
-  
-  
-  
+
   3
+  4
+  5
+
+
+
+  6
 end
 
-2
-3
-4
+7
+8
+9
 
 
-5
+10
+
+# rubocop:enable Lint/Void

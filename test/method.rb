@@ -1,34 +1,36 @@
+# frozen_string_literal: true
+
+# rubocop:disable Lint/DuplicateMethods, Lint/UnusedMethodArgument
+# rubocop:disable Metrics/ParameterLists
+
+# rubocop:disable Style/MethodDefParentheses
+# We should handle this by placing parentheses around the arguments.
+
 def foo; end
 
 def foo(); end
 
-def foo a
+def foo alpha
 end
 
-def foo(a)
+def foo(alpha)
 end
 
 def self.foo; end
 
 def self.foo(); end
 
-def self.foo a
+def self.foo alpha
 end
 
-def self.foo(a)
+def self.foo(alpha)
 end
 
-def foo(super_super_super_super_super_super_super_super_super_super_super_super_super_super_long); end
-
-def foo(a, b, c, super_super_super_super_super_super_super_super_super_super_super_super_super_super_long)
+def foo(alpha, beta, *gamma, delta, epsilon:, zeta:, eta: 1, **theta, &block)
   'what'
 end
 
-def foo(a, b, c = 1, d = 2, *e, f, g, h:, i:, j: 1, k: 2, **l, &block)
-  'what'
-end
-
-def foo(a); 1; end
+def foo(alpha); 1; end
 
 def foo(*); end
 
@@ -52,3 +54,6 @@ foo(*bar, **baz, &block)
 foo(h: 1, **bar)
 foo(**bar, h: 1)
 foo(h: 1, **bar, i: 2)
+
+# rubocop:enable Lint/DuplicateMethods, Lint/UnusedMethodArgument
+# rubocop:enable Metrics/ParameterLists, Style/MethodDefParentheses

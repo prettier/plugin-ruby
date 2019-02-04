@@ -58,8 +58,6 @@ const eachUnsupportedNode = callback => {
   });
 };
 
-const rubocopSkip = ["assign.rb", "layout.rb", "method.rb"];
-
 eachConfig((prettierConfig, rubocopConfig, config) => {
   eachTest((file, contents) => {
     describe(file, () => {
@@ -67,22 +65,18 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
         expect(format(contents, config)).toMatchSnapshot();
       });
 
-      if (rubocopSkip.includes(file)) {
-        test.skip(`generated code passes rubocop for ${prettierConfig}`, () => {});
-      } else {
-        test(`generated code passes rubocop for ${prettierConfig}`, () => new Promise((resolve, reject) => {
-          const child = spawn("bundle", ["exec", "rubocop", "--stdin", file, "--config", rubocopConfig]);
+      test(`generated code passes rubocop for ${prettierConfig}`, () => new Promise((resolve, reject) => {
+        const child = spawn("bundle", ["exec", "rubocop", "--stdin", file, "--config", rubocopConfig]);
 
-          if (process.env.VIOLATIONS) {
-            child.stdout.pipe(process.stdout);
-          }
+        if (process.env.VIOLATIONS) {
+          child.stdout.pipe(process.stdout);
+        }
 
-          child.stdin.write(format(contents, config));
-          child.stdin.end();
+        child.stdin.write(format(contents, config));
+        child.stdin.end();
 
-          child.on("exit", resolve);
-        }));
-      }
+        child.on("exit", resolve);
+      }));
     });
   });
 
