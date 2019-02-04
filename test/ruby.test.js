@@ -66,7 +66,6 @@ const rubocopSkip = [
   "kwargs.rb",
   "layout.rb",
   "method.rb",
-  "next.rb",
   "return.rb",
   "strings.rb",
   "while.rb"

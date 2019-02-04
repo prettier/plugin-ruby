@@ -1,5 +1,7 @@
-next
+# frozen_string_literal: true
 
-next 1
+[].each { next }
 
-next(1)
+[].each { next 1 }
+
+[].each { next(1) }

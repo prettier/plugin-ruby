@@ -401,10 +401,18 @@ module.exports = {
     concat([hardline, "end"])
   ])),
   next: (path, opts, print) => {
-    if (path.getValue().body[0].type !== "args_new") {
+    const args = path.getValue().body[0].body[0];
+
+    if (!args) {
+      return "next";
+    }
+
+    if (args.body[1].type !== "paren") {
       return concat(["next ", path.call(print, "body", 0)]);
     }
-    return "next";
+
+    // Ignoring the parens node and just going straight to the content
+    return concat(["next ", path.call(print, "body", 0, "body", 0, "body", 1, "body", 0)]);
   },
   opassign: (path, opts, print) => group(concat([
     path.call(print, "body", 0),
