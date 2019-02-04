@@ -4,6 +4,7 @@ const {
 } = require("prettier").doc.builders;
 
 const alias = require("./nodes/alias");
+const arrays = require("./nodes/arrays");
 const blocks = require("./nodes/blocks");
 const conditionals = require("./nodes/conditionals");
 const hooks = require("./nodes/hooks");
@@ -22,6 +23,7 @@ const shouldSkipAssignIndent = node => (
 
 const nodes = {
   ...alias,
+  ...arrays,
   ...blocks,
   ...conditionals,
   ...hooks,
@@ -109,17 +111,6 @@ const nodes = {
     ]);
   },
   args_new: (path, options, print) => group(concat(["[", softline])),
-  array: (path, options, print) => {
-    if (path.getValue().body[0] === null) {
-      return '[]';
-    }
-
-    return group(concat([
-      path.getValue().body[0].type === "args_add" ? "[" : "",
-      indent(concat([softline, path.call(print, "body", 0)])),
-      concat([softline, "]"])
-    ]));
-  },
   assoc_new: (path, { preferHashLabels }, print) => {
     const parts = [];
     const [printedLabel, printedValue] = path.map(print, "body");
@@ -453,18 +444,6 @@ const nodes = {
     join(literalline, path.map(print, "body")),
     literalline
   ])),
-  qsymbols_add: (path, options, print) => concat([
-    path.call(print, "body", 0),
-    path.getValue().body[0].type === "qsymbols_new" ? "" : line,
-    path.call(print, "body", 1)
-  ]),
-  qsymbols_new: (path, options, print) => group(concat(["%i[", softline])),
-  qwords_add: (path, options, print) => concat([
-    path.call(print, "body", 0),
-    path.getValue().body[0].type === "qwords_new" ? "" : line,
-    path.call(print, "body", 1)
-  ]),
-  qwords_new: (path, options, print) => group(concat(["%w[", softline])),
   redo: (path, options, print) => "redo",
   rescue: (path, options, print) => {
     const [exception, variable, _statements, addition] = path.getValue().body;
@@ -587,14 +566,6 @@ const nodes = {
 
     return group(concat(parts));
   },
-  word_add: concatBody,
-  word_new: (path, options, print) => "",
-  words_add: (path, options, print) => concat([
-    path.call(print, "body", 0),
-    path.getValue().body[0].type === "words_new" ? "" : line,
-    path.call(print, "body", 1)
-  ]),
-  words_new: (path, options, print) => group(concat(["%W[", softline])),
   xstring_add: concatBody,
   xstring_literal: (path, options, print) => group(concat([
     "%x[",
