@@ -9,7 +9,9 @@ const begin = start => () => [start];
 
 const concatBody = (path, options, print) => concat(path.map(print, "body"));
 
-const empty = () => [];
+const empty = () => "";
+
+const emptyList = () => [];
 
 const first = (path, options, print) => path.call(print, "body", 0);
 
@@ -36,6 +38,7 @@ module.exports = {
   begin,
   concatBody,
   empty,
+  emptyList,
   first,
   literal,
   prefix,

@@ -1,5 +1,5 @@
 const { concat, group, indent, softline } = require("prettier").doc.builders;
-const { append, empty } = require("../utils");
+const { append, emptyList } = require("../utils");
 
 module.exports = {
   regexp_add: append,
@@ -14,5 +14,5 @@ module.exports = {
       useBraces ? "}" : "/"
     ]));
   },
-  regexp_new: empty
+  regexp_new: emptyList
 };

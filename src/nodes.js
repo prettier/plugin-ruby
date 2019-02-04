@@ -1,5 +1,5 @@
 const { align, concat, dedent, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline } = require("prettier").doc.builders;
-const { append, concatBody, empty, first, literal, prefix, skipAssignIndent, surround } = require("./utils");
+const { append, concatBody, empty, emptyList, first, literal, prefix, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
   ...require("./nodes/alias"),
@@ -303,7 +303,7 @@ module.exports = {
     "ensure",
     indent(concat([hardline, concat(path.map(print, "body"))]))
   ])),
-  excessed_comma: (path, options, print) => "",
+  excessed_comma: empty,
   fcall: concatBody,
   field: (path, options, print) => group(concat(path.map(print, "body"))),
   hash: (path, options, print) => {
@@ -392,8 +392,8 @@ module.exports = {
   mrhs_add_star: (path, options, print) => group(concat([
     "*",
     concat(path.map(print, "body"))
-  ]))
-  mrhs_new: (path, options, print) => "",
+  ])),
+  mrhs_new: empty,
   mrhs_new_from_args: first,
   module: (path, options, print) => group(concat([
     group(concat(["module ", path.call(print, "body", 0)])),
@@ -457,7 +457,7 @@ module.exports = {
     " \\",
     indent(concat([hardline, path.call(print, "body", 1)]))
   ])),
-  string_content: (path, options, print) => "",
+  string_content: empty,
   string_dvar: surround("#{", "}"),
   string_embexpr: surround("#{", "}"),
   string_literal: (path, { preferSingleQuotes }, print) => {
@@ -514,14 +514,14 @@ module.exports = {
     return group(concat(parts));
   },
   word_add: concatBody,
-  word_new: (path, options, print) => "",
+  word_new: empty,
   xstring_add: append,
   xstring_literal: (path, options, print) => group(concat([
     "%x[",
     indent(concat([softline, join(softline, path.call(print, "body", 0))])),
     concat([softline, "]"])
   ])),
-  xstring_new: empty,
+  xstring_new: emptyList,
   yield: (path, options, print) => concat([
     "yield",
     path.getValue().body[0].type === "paren" ? "" : " ",
