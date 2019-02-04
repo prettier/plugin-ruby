@@ -1,4 +1,4 @@
-const sexp = require("./sexp");
+const parse = require("./parse");
 const print = require("./print");
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
   }],
   parsers: {
     ruby: {
-      parse: (text, parsers, opts) => sexp(text),
+      parse,
       astFormat: "ruby"
     }
   },

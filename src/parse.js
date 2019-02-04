@@ -1,7 +1,7 @@
 const { spawnSync } = require("child_process");
 const path = require("path");
 
-const sexp = text => {
+module.exports = (text, parsers, opts) => {
   const child = spawnSync("ruby", [path.join(__dirname, "./ripper.rb"), text]);
 
   const error = child.stderr.toString();
@@ -12,5 +12,3 @@ const sexp = text => {
   const response = child.stdout.toString();
   return JSON.parse(response);
 };
-
-module.exports = sexp;
