@@ -1,8 +1,10 @@
-def foo(a:, b:, c: 1, d: 2)
-  a + b + c + d
+# frozen_string_literal: true
+
+def add(alpha:, beta:, gamma: 1, delta: 2)
+  alpha + beta + gamma + delta
 end
 
-foo(a: 1, b: 2, c: 3, d: 4)
+add(alpha: 1, beta: 2, gamma: 3, delta: 4)
 
-hash = { a: 1, b: 2, c: 3 }
-foo(**hash, d: 4)
+args = { alpha: 1, beta: 2, gamma: 3 }
+add(**args, delta: 4)

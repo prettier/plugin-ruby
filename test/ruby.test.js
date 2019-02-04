@@ -63,7 +63,6 @@ const rubocopSkip = [
   "assign.rb",
   "blocks.rb",
   "hash.rb",
-  "kwargs.rb",
   "layout.rb",
   "method.rb",
   "return.rb",
