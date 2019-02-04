@@ -1,4 +1,4 @@
-const { align, concat, dedent, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline } = require("prettier").doc.builders;
+const { align, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline } = require("prettier").doc.builders;
 const { append, concatBody, empty, emptyList, first, literal, prefix, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
@@ -144,10 +144,7 @@ module.exports = {
   assign_error: (path, opts, print) => {
     throw new Error("Can't set variable");
   },
-  bare_assoc_hash: (path, opts, print) => group(
-    join(concat([",", line]),
-    path.map(print, "body", 0)
-  )),
+  bare_assoc_hash: (path, opts, print) => group(join(concat([",", line]), path.map(print, "body", 0))),
   begin: (path, opts, print) => group(concat([
     "begin",
     indent(concat([hardline, concat(path.map(print, "body"))])),
@@ -250,7 +247,15 @@ module.exports = {
   class_name_error: (path, opts, print) => {
     throw new Error("class/module name must be CONSTANT");
   },
-  command: (path, opts, print) => group(join(" ", path.map(print, "body"))),
+  command: (path, opts, print) => {
+    const command = path.call(print, "body", 0);
+
+    // Hate, hate, hate this but can't figure out how to fix it.
+    return group(ifBreak(
+      concat([command, " ", align(command.length + 1, path.call(print, "body", 1))]),
+      concat([command, " ", path.call(print, "body", 1)])
+    ));
+  },
   command_call: (path, opts, print) => group(concat([
     path.call(print, "body", 0),
     path.call(print, "body", 1),
