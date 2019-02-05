@@ -1,4 +1,5 @@
 const { align, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline } = require("prettier").doc.builders;
+const { makeString } = require("prettier").util;
 const { append, concatBody, empty, emptyList, first, literal, prefix, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
@@ -506,7 +507,7 @@ module.exports = {
     }
 
     let delim = "\"";
-    if (preferSingleQuotes && parts.every(part => !part.parts || part.parts[0] !== "#{")) {
+    if (preferSingleQuotes && !parts.some(part => part.parts ? part.parts[0] === "#{" : part.includes("'"))) {
       delim = "\'";
     }
 

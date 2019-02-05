@@ -6,6 +6,8 @@
 
 'abc'
 
+"abc's"
+
 "abc"
 
 "#{abc} abc"
