@@ -36,6 +36,11 @@ Below are the options (from [`src/ruby.js`](src/ruby.js)) that `prettier-ruby` c
 
 After checking out the repo, run `yarn` and `bundle` to install dependencies. Then, run `yarn test` to run the tests. You can pretty print a Ruby source file by running `yarn print [PATH]`.
 
+Useful resources for understanding the AST structure are:
+
+* https://github.com/ruby/ruby/blob/trunk/parse.y - the Ruby parser that will give you the names of the nodes as well as their structure
+* https://github.com/ruby/ruby/blob/trunk/test/ripper/test_parser_events.rb - the test file that gives you code examples of each kind of node
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/kddeisz/prettier-ruby.
