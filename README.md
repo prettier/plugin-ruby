@@ -13,13 +13,13 @@ First, add `prettier-plugin-ruby` to your `package.json` `dependencies`, then in
 Verify by running against a file:
 
 ```
-yarn prettier --write --plugin=prettier-plugin-ruby --parser=ruby app/controllers/application_controller.rb
+prettier --write --plugin=prettier-plugin-ruby --parser=ruby path/to/file.rb
 ```
 
 If you're happy, you can can run `prettier-plugin` on an entire codebase:
 
 ```
-yarn prettier --write --plugin=prettier-plugin-ruby --parser=ruby app/**/*.rb
+prettier --write --plugin=prettier-plugin-ruby --parser=ruby **/*.rb
 ```
 
 ## Options
