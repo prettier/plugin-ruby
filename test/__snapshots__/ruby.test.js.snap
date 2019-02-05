@@ -1260,7 +1260,7 @@ exports[`numbers.rb matches expected output for off.json 1`] = `
 123_456_789_123_456_789
 123.45
 1.2e-3
-0xaabb # this is actually octal
+0xaabb
 0o377
 -0b1010
 0b001_001 # these are CHARs
@@ -1285,7 +1285,7 @@ exports[`numbers.rb matches expected output for on.json 1`] = `
 123_456_789_123_456_789
 123.45
 1.2e-3
-0xaabb # this is actually octal
+0xaabb
 0o377
 -0b1010
 0b001_001 # these are CHARs

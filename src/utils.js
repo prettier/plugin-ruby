@@ -1,23 +1,27 @@
 const { concat } = require("prettier").doc.builders;
 
-const append = (path, options, print) => [
+const append = (path, opts, print) => [
   ...path.call(print, "body", 0),
   path.call(print, "body", 1)
 ];
 
 const begin = start => () => [start];
 
-const concatBody = (path, options, print) => concat(path.map(print, "body"));
+const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
 const empty = () => "";
 
 const emptyList = () => [];
 
-const first = (path, options, print) => path.call(print, "body", 0);
+const first = (path, opts, print) => path.call(print, "body", 0);
 
 const literal = value => () => value;
 
-const prefix = value => (path, options, print) => concat([
+const makeCall = (path, opts, print) => (
+  ["::", "."].includes(path.getValue().body[1]) ? "." : path.call(print, "body", 1)
+);
+
+const prefix = value => (path, opts, print) => concat([
   value,
   path.call(print, "body", 0)
 ]);
@@ -41,6 +45,7 @@ module.exports = {
   emptyList,
   first,
   literal,
+  makeCall,
   prefix,
   skipAssignIndent,
   surround

@@ -1,5 +1,7 @@
 const { concat, group, ifBreak, indent, softline } = require("prettier").doc.builders;
 
+const isCall = node => ["::", "."].includes(node) || node.type === "@period";
+
 // If you have a simple block that only calls a method on the single required
 // parameter that is passed to it, then you can replace that block with the
 // simpler `Symbol#to_proc`. Meaning, it would go from:
@@ -43,7 +45,7 @@ const toProcTransform = (path, opts, print) => {
 
   // If we have a call, then we can compare to ensure the variables are the
   // same.
-  if (callBody && callBody[0] && callBody[0].type === "var_ref" && callBody[0].body[0].body === reqParams[0].body && callBody[1].type === "@period") {
+  if (callBody && callBody[0] && callBody[0].type === "var_ref" && callBody[0].body[0].body === reqParams[0].body && isCall(callBody[1])) {
     return `(&:${reqParams[0].body})`;
   }
 };

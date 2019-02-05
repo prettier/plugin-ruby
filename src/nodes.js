@@ -1,6 +1,5 @@
 const { align, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline } = require("prettier").doc.builders;
-const { makeString } = require("prettier").util;
-const { append, concatBody, empty, emptyList, first, literal, prefix, skipAssignIndent, surround } = require("./utils");
+const { append, concatBody, empty, emptyList, first, literal, makeCall, prefix, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
   ...require("./nodes/alias"),
@@ -172,7 +171,10 @@ module.exports = {
     }
 
     if (elseClause) {
-      parts.push(concat([dedent(concat([hardline, "else"])), hardline, path.call(print, "body", 2)]));
+      // Before Ruby 2.6, this piece of bodystmt was an explicit "else" node
+      const stmts = elseClause.type === "else" ? path.call(print, "body", 2, "body", 0) : path.call(print, "body", 2);
+
+      parts.push(concat([dedent(concat([hardline, "else"])), hardline, stmts]));
     }
 
     if (ensure) {
@@ -196,7 +198,6 @@ module.exports = {
     return concat(["break", printed]);
   },
   call: (path, opts, print) => {
-    const oper = path.getValue().body[1];
     let name = path.getValue().body[2];
 
     // You can call lambdas with a special syntax that looks like func.(*args).
@@ -205,11 +206,7 @@ module.exports = {
       name = path.call(print, "body", 2);
     }
 
-    return concat([
-      path.call(print, "body", 0),
-      oper === "::" ? "." : path.call(print, "body", 1),
-      name
-    ]);
+    return concat([path.call(print, "body", 0), makeCall(path, opts, print), name]);
   },
   case: (path, opts, print) => {
     const parts = ["case "];
@@ -260,7 +257,7 @@ module.exports = {
   },
   command_call: (path, opts, print) => group(concat([
     path.call(print, "body", 0),
-    path.call(print, "body", 1),
+    makeCall(path, opts, print),
     path.call(print, "body", 2),
     " ",
     path.call(print, "body", 3)
@@ -312,7 +309,10 @@ module.exports = {
   ])),
   excessed_comma: empty,
   fcall: concatBody,
-  field: (path, opts, print) => group(concat(path.map(print, "body"))),
+  field: (path, opts, print) => group(concat([
+    path.call(print, "body", 0),
+    concat([makeCall(path, opts, print), path.call(print, "body", 2)])
+  ])),
   hash: (path, opts, print) => {
     if (path.getValue().body[0] === null) {
       return '{}';

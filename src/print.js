@@ -1,11 +1,11 @@
 const { concat } = require("prettier").doc.builders;
 const nodes = require("./nodes");
 
-module.exports = (path, options, print) => {
+module.exports = (path, opts, print) => {
   const { type, body, comment } = path.getValue();
 
   if (type in nodes) {
-    const printed = nodes[type](path, options, print);
+    const printed = nodes[type](path, opts, print);
 
     if (comment) {
       return concat([printed, path.call(print, "comment")]);

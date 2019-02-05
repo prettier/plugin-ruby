@@ -10,7 +10,7 @@
 123.45
 1.2e-3
 0xaabb
-0377 # this is actually octal
+0377
 -0b1010
 0b001_001
 ?a # these are CHARs
