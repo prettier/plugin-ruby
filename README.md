@@ -6,7 +6,19 @@ This is a [prettier](https://prettier.io/) plugin for the Ruby programming langu
 
 ## Getting started
 
-First, add `prettier-plugin-ruby` to your `package.json` `dependencies`, then install using either `npm install` or `yarn install`. You will now be able to pretty print Ruby source files.
+First, add `prettier-plugin-ruby` to your `package.json` `dependencies`, then install using either `npm install` or `yarn install`.
+
+Verify by running against a file:
+
+```
+yarn prettier --write --plugin=prettier-plugin-ruby --parser=ruby app/controllers/application_controller.rb
+```
+
+If you're happy, you can can run `prettier-plugin` on an entire codebase:
+
+```
+yarn prettier --write --plugin=prettier-plugin-ruby --parser=ruby app/**/*.rb
+```
 
 ## Options
 
