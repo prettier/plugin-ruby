@@ -1,5 +1,8 @@
 language: ruby
-rvm: 2.6.0
+rvm:
+  - 2.6.0
+  - 2.5.0
+  - 2.4.0
 branches:
   only: master
 before_install:
