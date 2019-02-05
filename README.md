@@ -4,6 +4,8 @@
 
 This is a [prettier](https://prettier.io/) plugin for the Ruby programming language. Under the hood it uses Ruby's own `ripper` library which allows this package to maintain parity with the existing Ruby parser.
 
+`prettier-ruby` supports Ruby versions `2.5`, `2.6`, and `trunk`.
+
 ## Getting started
 
 First, add `prettier-plugin-ruby` to your `package.json` `dependencies`, then install using either `npm install` or `yarn install`.
