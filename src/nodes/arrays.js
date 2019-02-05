@@ -7,7 +7,7 @@ module.exports = {
       return '[]';
     }
 
-    if (path.getValue().body[0].type === "args_add") {
+    if (["args_add", "args_add_star"].includes(path.getValue().body[0].type)) {
       return group(concat([
         "[",
         indent(concat([softline, path.call(print, "body", 0)])),
