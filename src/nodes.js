@@ -365,6 +365,7 @@ module.exports = {
     return group(concat(path.map(print, "body")));
   },
   method_add_block: (path, opts, print) => concat(path.map(print, "body")),
+  methref: (path, opts, print) => join(".:", path.map(print, "body")),
   mlhs_add: (path, opts, print) => {
     if (path.getValue().body[0].type === "mlhs_new") {
       return path.call(print, "body", 1);
