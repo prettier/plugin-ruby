@@ -15,3 +15,7 @@ end
 def qux
   return 1, 2 if a
 end
+
+def qax
+  return foo :bar if a
+end

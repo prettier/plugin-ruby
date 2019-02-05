@@ -1462,6 +1462,12 @@ def qux
     return 1, 2
   end
 end
+
+def qax
+  if a
+    return foo :bar
+  end
+end
 "
 `;
 
@@ -1482,6 +1488,10 @@ end
 
 def qux
   return 1, 2 if a
+end
+
+def qax
+  return foo :bar if a
 end
 "
 `;

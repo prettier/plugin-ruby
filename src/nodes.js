@@ -478,12 +478,12 @@ module.exports = {
       return "return";
     }
 
-    if (args.body[1].type !== "paren") {
-      return concat(["return ", path.call(print, "body", 0)]);
+    if (args.body[1] && args.body[1].type === "paren") {
+      return concat(["return ", path.call(print, "body", 0, "body", 0, "body", 1, "body", 0)]);
     }
 
     // Ignoring the parens node and just going straight to the content
-    return concat(["return ", path.call(print, "body", 0, "body", 0, "body", 1, "body", 0)]);
+    return concat(["return ", path.call(print, "body", 0)]);
   },
   return0: literal("return"),
   sclass: (path, opts, print) => group(concat([
