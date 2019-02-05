@@ -7,6 +7,10 @@ class RipperJS < Ripper::SexpBuilder
   attr_reader :start_comments
 
   def initialize(*args)
+    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.5')
+      raise 'Unsupported ruby version'
+    end
+
     super
 
     @start_comments = []
