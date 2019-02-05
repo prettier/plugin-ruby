@@ -5,6 +5,8 @@ require 'ripper'
 
 class RipperJS < Ripper::SexpBuilder
   NO_COMMENTS = %i[
+    regexp_add
+    regexp_new
     string_add
     string_content
   ].freeze

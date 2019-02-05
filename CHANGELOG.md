@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Changed
 - Handle splat within an array, as in `[1, 2, *foo]`.
+- Disallow comments from being attached to intermediary regex nodes.
 
 ## [0.1.2] - 2019-02-05
 ### Changed
