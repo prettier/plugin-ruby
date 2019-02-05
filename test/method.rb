@@ -55,5 +55,7 @@ foo(h: 1, **bar)
 foo(**bar, h: 1)
 foo(h: 1, **bar, i: 2)
 
+Foo::foo
+
 # rubocop:enable Lint/DuplicateMethods, Lint/UnusedMethodArgument
 # rubocop:enable Metrics/ParameterLists, Style/MethodDefParentheses

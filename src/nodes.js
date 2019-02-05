@@ -195,6 +195,7 @@ module.exports = {
     return concat(["break", printed]);
   },
   call: (path, opts, print) => {
+    const oper = path.getValue().body[1];
     let name = path.getValue().body[2];
 
     // You can call lambdas with a special syntax that looks like func.(*args).
@@ -205,7 +206,7 @@ module.exports = {
 
     return concat([
       path.call(print, "body", 0),
-      path.call(print, "body", 1),
+      oper === "::" ? "." : path.call(print, "body", 1),
       name
     ]);
   },
