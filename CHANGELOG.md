@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Handle strings with apostrophes when using `preferSingleQuote`.
 - [INTERAL] Have travis run multiple ruby versions.
 - Explicitly fail if ruby version is < `2.5`.
+- Disallow comments from being attached to intermediary string nodes.
 
 ## [0.1.0] - 2019-02-04
 ### Added

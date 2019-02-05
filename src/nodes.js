@@ -497,7 +497,7 @@ module.exports = {
     " \\",
     indent(concat([hardline, path.call(print, "body", 1)]))
   ])),
-  string_content: empty,
+  string_content: emptyList,
   string_dvar: surround("#{", "}"),
   string_embexpr: surround("#{", "}"),
   string_literal: (path, { preferSingleQuotes }, print) => {

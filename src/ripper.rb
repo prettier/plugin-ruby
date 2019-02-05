@@ -4,6 +4,11 @@ require 'json'
 require 'ripper'
 
 class RipperJS < Ripper::SexpBuilder
+  NO_COMMENTS = %i[
+    string_add
+    string_content
+  ].freeze
+
   attr_reader :start_comments
 
   def initialize(*args)
@@ -74,7 +79,7 @@ class RipperJS < Ripper::SexpBuilder
       end
     end
 
-    if @end_comment
+    if @end_comment && !NO_COMMENTS.include?(type)
       sexp[:comment] = @end_comment
       @end_comment = nil
     end
