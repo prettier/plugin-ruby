@@ -53,6 +53,8 @@ const eachUnsupportedNode = callback => {
     "regexp_new",
     "stmts_add",
     "stmts_new",
+    "string_add",
+    "string_new",
     "symbols_add",
     "symbols_new",
     "void_stmt",

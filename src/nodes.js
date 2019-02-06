@@ -530,13 +530,12 @@ module.exports = {
 
     return concat(parts);
   },
-  string_add: append,
+  string: (path, opts, print) => path.map(print, "body"),
   string_concat: (path, opts, print) => group(concat([
     path.call(print, "body", 0),
     " \\",
     indent(concat([hardline, path.call(print, "body", 1)]))
   ])),
-  string_content: emptyList,
   string_dvar: surround("#{", "}"),
   string_embexpr: surround("#{", "}"),
   string_literal: (path, { preferSingleQuotes }, print) => {

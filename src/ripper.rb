@@ -149,10 +149,11 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  NO_COMMENTS = %i[args_new string_add string_content].freeze
+  NO_COMMENTS = %i[args_new].freeze
 
-  %i[qsymbols qwords regexp symbols words xstring].each do |event|
-    define_method(:"on_#{event}_new") do
+  %i[qsymbols qwords regexp string symbols words xstring].each do |event|
+    suffix = event == :string ? :content : :new
+    define_method(:"on_#{event}_#{suffix}") do
       { type: event, body: [], start: lineno, end: lineno }
     end
  
