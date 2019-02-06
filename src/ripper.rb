@@ -85,7 +85,7 @@ class RipperJS < Ripper::SexpBuilder
       block_comments << sexp
     when 'EXPR_END', 'EXPR_ARG|EXPR_LABELED', 'EXPR_ENDFN'
       last_sexp.merge!(comment: sexp)
-    when 'EXPR_CMDARG', 'EXPR_ENDARG', 'EXPR_ARG', 'EXPR_FNAME|EXPR_FITEM', 'EXPR_CLASS'
+    when 'EXPR_CMDARG', 'EXPR_END|EXPR_ENDARG', 'EXPR_ENDARG', 'EXPR_ARG', 'EXPR_FNAME|EXPR_FITEM', 'EXPR_CLASS'
       @inline_comment = sexp
     when 'EXPR_BEG|EXPR_LABEL', 'EXPR_MID'
       @inline_comment = sexp.merge!(break: true)
