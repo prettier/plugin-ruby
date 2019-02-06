@@ -45,6 +45,9 @@ const eachUnsupportedNode = callback => {
     "mlhs_new",
     "operator_ambiguous",
     "parse_error",
+    "stmts_add",
+    "stmts_new",
+    "void_stmt",
     ""
   ];
 

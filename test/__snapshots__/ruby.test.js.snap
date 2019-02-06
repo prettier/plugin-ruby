@@ -296,6 +296,10 @@ loop { 1 }
 loop { 1 }
 
 loop do
+  # foobar
+end
+
+loop do
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
@@ -345,6 +349,10 @@ exports[`blocks.rb matches expected output for on.json 1`] = `
 loop { 1 }
 
 loop { 1 }
+
+loop do
+  # foobar
+end
 
 loop do
   super_super_super_super_super_super_super_super_super_super_super_super_long

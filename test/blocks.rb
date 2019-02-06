@@ -9,6 +9,10 @@ loop do
   1
 end
 
+loop do
+  # foobar
+end
+
 loop { super_super_super_super_super_super_super_super_super_super_super_super_long }
 
 loop do
