@@ -28,25 +28,31 @@ const toProcTransform = (path, opts, print) => {
     return;
   }
 
-  const statementTypes = statements.body.map(statement => statement && statement.type);
   let callBody;
 
   // If the statement types match this pattern, we're in a brace block with an
   // eligible block.
-  if (statementTypes.length === 2 && statementTypes[0] === "stmts_new" && statementTypes[1] === "call") {
-    callBody = statements.body[1].body;
+  if (statements.body.length === 1 && statements.body[0].type === "call") {
+    callBody = statements.body[0].body;
   }
 
   // If the statement types match this pattern, we're in a `do` block with an
   // eligible block.
-  if (statementTypes.length === 4 && statementTypes[0] === "stmts_add" && statementTypes.slice(1).every(statementType => !statementType)) {
-    callBody = statements.body[0].body[1].body;
+  const statementTypes = statements.body.map(statement => statement && statement.type);
+  if (statementTypes.length === 4 && statementTypes[0] === "stmts" && statementTypes.slice(1).every(statementType => !statementType)) {
+    callBody = statements.body[0].body[0].body;
   }
 
   // If we have a call, then we can compare to ensure the variables are the
   // same.
-  if (callBody && callBody[0] && callBody[0].type === "var_ref" && callBody[0].body[0].body === reqParams[0].body && isCall(callBody[1])) {
-    return `(&:${reqParams[0].body})`;
+  if (
+    callBody && callBody[0] && callBody[0].type === "var_ref"
+    && callBody[0].body[0].body === reqParams[0].body
+    && isCall(callBody[1])
+    && callBody[2].type === "@ident"
+    && !callBody[3]
+  ) {
+    return `(&:${callBody[2].body})`;
   }
 };
 
@@ -67,8 +73,8 @@ const printBlock = (path, opts, print) => {
 
   // We can hit this next pattern if within the block the only statement is a
   // comment.
-  const firstStatement = statements.body[0];
-  if (firstStatement.type === "stmts_add" && firstStatement.body[0].type === "stmts_add" && firstStatement.body[1].type === "void_stmt") {
+  const stmts = statements.body[0].body;
+  if (stmts.length > 1 && (stmts.filter(stmt => stmt.type !== "@comment").length === 1)) {
     return doBlock;
   }
 

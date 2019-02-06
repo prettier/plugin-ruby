@@ -183,9 +183,8 @@ a = {
 
 a = [super_super_super_super_long, super_super_super_super_long].sort
 
-a = {
-  :a => super_super_super_super_long, :b => super_super_super_super_long
-}.sort
+a = { :a => super_super_super_super_long, :b => super_super_super_super_long }
+  .sort
 
 a.a = 1
 
@@ -297,6 +296,10 @@ loop { 1 }
 loop { 1 }
 
 loop do
+  # foobar
+end
+
+loop do
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
@@ -318,9 +321,11 @@ end
 
 loop { |i| super_super_super_super_super_super_super_super_super_super_long }
 
-loop(&:i)
+loop(&:to_s)
 
-loop(&:i)
+loop(&:to_s)
+
+loop { |i| i.to_s :db }
 
 loop { |i, j| i.to_s }
 
@@ -348,6 +353,10 @@ loop { 1 }
 loop { 1 }
 
 loop do
+  # foobar
+end
+
+loop do
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
@@ -369,9 +378,11 @@ end
 
 loop { |i| super_super_super_super_super_super_super_super_super_super_long }
 
-loop(&:i)
+loop(&:to_s)
 
-loop(&:i)
+loop(&:to_s)
+
+loop { |i| i.to_s :db }
 
 loop { |i, j| i.to_s }
 
@@ -519,10 +530,15 @@ exports[`class.rb matches expected output for off.json 1`] = `
 
 module Pret
   module Tier
+    # object documentation
     class Object; end
 
+    # second object
+    # documentation
     class Object; end
 
+    # third object
+    # documentation
     class Object
       attr_accessor :foo
     end
@@ -532,13 +548,24 @@ module Pret
     class Object < BasicObject; end
 
     class Object < BasicObject
+      # inside class documentation
       attr_accessor :bar
     end
 
     class << self
+      # method documentation
       def method; end
 
       undef method
+    end
+
+    module Prettier; end
+
+    module Prettier; end
+
+    module Prettier
+      # inside module documentation
+      attr_accessor :foo
     end
   end
 end
@@ -556,10 +583,15 @@ exports[`class.rb matches expected output for on.json 1`] = `
 
 module Pret
   module Tier
+    # object documentation
     class Object; end
 
+    # second object
+    # documentation
     class Object; end
 
+    # third object
+    # documentation
     class Object
       attr_accessor :foo
     end
@@ -569,13 +601,24 @@ module Pret
     class Object < BasicObject; end
 
     class Object < BasicObject
+      # inside class documentation
       attr_accessor :bar
     end
 
     class << self
+      # method documentation
       def method; end
 
       undef method
+    end
+
+    module Prettier; end
+
+    module Prettier; end
+
+    module Prettier
+      # inside module documentation
+      attr_accessor :foo
     end
   end
 end
@@ -585,6 +628,148 @@ Pret::TIER = 'config'.freeze
 
 ::Pret::Tier::Object # rubocop:disable Lint/Void
 ::PRET = 'config'.freeze
+"
+`;
+
+exports[`comments.rb matches expected output for off.json 1`] = `
+"# this is a comment at
+# the beginning of the file
+
+loop do
+  # this is the only statement
+  # inside this loop
+end
+
+loop do
+  # this is the first statement
+  # inside this loop
+  foo
+end
+
+loop do
+  foo
+  # this is the last statement
+  # inside this loop
+end
+
+def foo
+  # these are the only statements
+  # inside this method
+end
+
+class Foo
+  # these are the only statements
+  # inside this class
+end
+
+module Foo
+  # these are the only statements
+  # inside this module
+end
+
+module Foo
+  class Foo
+    def foo
+      # this comment is inside a method
+    end
+  end
+end
+
+foo # this is an inline comment
+bar # this is another inline comment
+
+[
+  # inside of an array
+  foo,
+  # inside of an array
+  bar
+]
+
+{
+  :foo =>
+    # these are comments
+    \\"bar\\",
+  :bar =>
+    # inside of a hash
+    \\"baz\\"
+}
+
+foo # inline comment inside of a dot
+  .bar
+
+# this is a comment
+# at the end of the file
+"
+`;
+
+exports[`comments.rb matches expected output for on.json 1`] = `
+"# this is a comment at
+# the beginning of the file
+
+loop do
+  # this is the only statement
+  # inside this loop
+end
+
+loop do
+  # this is the first statement
+  # inside this loop
+  foo
+end
+
+loop do
+  foo
+  # this is the last statement
+  # inside this loop
+end
+
+def foo
+  # these are the only statements
+  # inside this method
+end
+
+class Foo
+  # these are the only statements
+  # inside this class
+end
+
+module Foo
+  # these are the only statements
+  # inside this module
+end
+
+module Foo
+  class Foo
+    def foo
+      # this comment is inside a method
+    end
+  end
+end
+
+foo # this is an inline comment
+bar # this is another inline comment
+
+[
+  # inside of an array
+  foo,
+  # inside of an array
+  bar
+]
+
+{
+  foo:
+    # these are comments
+    'bar',
+  bar:
+    # inside of a hash
+    'baz'
+}
+
+foo # inline comment inside of a dot
+  .bar
+
+# this is a comment
+# at the end of the file
 "
 `;
 
@@ -609,9 +794,9 @@ defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
-defined?(a)
+defined?(a) # third
 
-# rubocop:enable Lint/Void # third
+# rubocop:enable Lint/Void
 "
 `;
 
@@ -636,9 +821,9 @@ defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
-defined?(a)
+defined?(a) # third
 
-# rubocop:enable Lint/Void # third
+# rubocop:enable Lint/Void
 "
 `;
 
@@ -828,6 +1013,10 @@ if a
 end
 
 if a
+  break # comment
+end
+
+if a
   1
 elsif b
   2
@@ -854,7 +1043,6 @@ unless a
 end
 
 # rubocop:disable Style/UnlessElse
-
 unless a
   super_super_super_super_super_super_super_super_super_super_super_long
 else
@@ -883,7 +1071,6 @@ a ? 1 : 2
 a ? 2 : 1
 
 a ? 1 : 2
-
 if a
   super_super_super_super_super_super_super_super_super_super_super_long
 else
@@ -897,6 +1084,10 @@ exports[`if.rb matches expected output for on.json 1`] = `
 
 if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+if a
+  break # comment
 end
 
 if a
@@ -926,7 +1117,6 @@ unless a
 end
 
 # rubocop:disable Style/UnlessElse
-
 unless a
   super_super_super_super_super_super_super_super_super_super_super_long
 else
@@ -951,7 +1141,6 @@ a ? 1 : 2
 a ? 2 : 1
 
 a ? 1 : 2
-
 if a
   super_super_super_super_super_super_super_super_super_super_super_long
 else
@@ -1263,8 +1452,8 @@ exports[`numbers.rb matches expected output for off.json 1`] = `
 0xaabb
 0o377
 -0b1010
-0b001_001 # these are CHARs
-\\"a\\"
+0b001_001
+\\"a\\" # these are CHARs
 ?\\\\C-a
 ?\\\\M-a
 ?\\\\M-\\\\C-a
@@ -1288,8 +1477,8 @@ exports[`numbers.rb matches expected output for on.json 1`] = `
 0xaabb
 0o377
 -0b1010
-0b001_001 # these are CHARs
-'a'
+0b001_001
+'a' # these are CHARs
 ?\\\\C-a
 ?\\\\M-a
 ?\\\\M-\\\\C-a

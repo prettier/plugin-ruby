@@ -9,6 +9,10 @@ loop do
   1
 end
 
+loop do
+  # foobar
+end
+
 loop { super_super_super_super_super_super_super_super_super_super_super_super_long }
 
 loop do
@@ -37,6 +41,10 @@ loop { |i| i.to_s }
 
 loop do |i|
   i.to_s
+end
+
+loop do |i|
+  i.to_s :db
 end
 
 loop { |i, j| i.to_s }

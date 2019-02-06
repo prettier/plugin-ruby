@@ -1,4 +1,4 @@
-const { align, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline } = require("prettier").doc.builders;
+const { align, breakParent, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline } = require("prettier").doc.builders;
 const { append, concatBody, empty, emptyList, first, literal, makeCall, prefix, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
@@ -11,7 +11,6 @@ module.exports = {
   ...require("./nodes/methods"),
   ...require("./nodes/params"),
   ...require("./nodes/regexp"),
-  ...require("./nodes/statements"),
   "@CHAR": (path, { preferSingleQuotes }, print) => {
     const { body } = path.getValue();
 
@@ -185,11 +184,12 @@ module.exports = {
   },
   break: (path, opts, print) => {
     const printed = path.call(print, "body", 0);
-    const { contents: { parts: [first] } } = printed;
 
-    if (first === "[") {
+    if (path.getValue().body[0].body.length === 0) {
       return "break";
     }
+
+    const { contents: { parts: [first] } } = printed;
 
     if (first && !first.parts || (first.parts && first.parts[0] !== "(")) {
       return concat(["break ", printed]);
@@ -206,7 +206,10 @@ module.exports = {
       name = path.call(print, "body", 2);
     }
 
-    return concat([path.call(print, "body", 0), makeCall(path, opts, print), name]);
+    return group(concat([
+      path.call(print, "body", 0),
+      indent(concat([softline, makeCall(path, opts, print), name])),
+    ]));
   },
   case: (path, opts, print) => {
     const parts = ["case "];
@@ -223,23 +226,22 @@ module.exports = {
     return group(concat(parts));
   },
   class: (path, opts, print) => {
-    const [_constant, superclass, _statements] = path.getValue().body;
-
-    const printedStatements = path.call(print, "body", 2);
-    const emptyStatements = printedStatements.contents.parts[0] === "";
+    const [_constant, superclass, statements] = path.getValue().body;
 
     const parts = ["class ", path.call(print, "body", 0)];
     if (superclass) {
       parts.push(" < ", path.call(print, "body", 1));
     }
 
-    if (printedStatements.contents.parts[0].parts.every(part => !part)) {
+    // If the body is empty, we can replace with a ;
+    const stmts = statements.body[0].body;
+    if (stmts.length === 1 && stmts[0].type === "void_stmt") {
       return group(concat([concat(parts), ifBreak("", "; "), "end"]));
     }
 
     return group(concat([
       concat(parts),
-      indent(concat([hardline, printedStatements])),
+      indent(concat([hardline, path.call(print, "body", 2)])),
       concat([hardline, "end"])
     ]));
   },
@@ -262,7 +264,6 @@ module.exports = {
     " ",
     path.call(print, "body", 3)
   ])),
-  comment: (path, opts, print) => lineSuffix(` ${path.getValue().body.trim()}`),
   const_path_field: (path, opts, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, opts, print) => join("::", path.map(print, "body")),
   const_ref: first,
@@ -403,11 +404,21 @@ module.exports = {
   ])),
   mrhs_new: empty,
   mrhs_new_from_args: first,
-  module: (path, opts, print) => group(concat([
-    group(concat(["module ", path.call(print, "body", 0)])),
-    indent(concat([hardline, path.call(print, "body", 1)])),
-    concat([hardline, "end"])
-  ])),
+  module: (path, opts, print) => {
+    const declaration = group(concat(["module ", path.call(print, "body", 0)]));
+
+    // If the body is empty, we can replace with a ;
+    const stmts = path.getValue().body[1].body[0].body;
+    if (stmts.length === 1 && stmts[0].type === "void_stmt") {
+      return group(concat([declaration, ifBreak("", "; "), "end"]));
+    }
+
+    return group(concat([
+      declaration,
+      indent(concat([hardline, path.call(print, "body", 1)])),
+      concat([hardline, "end"])
+    ]));
+  },
   next: (path, opts, print) => {
     const args = path.getValue().body[0].body[0];
 
@@ -492,6 +503,32 @@ module.exports = {
     indent(concat([hardline, path.call(print, "body", 1)])),
     concat([hardline, "end"])
   ])),
+  stmts: (path, opts, print) => {
+    const parts = [];
+    let line = null;
+
+    path.getValue().body.forEach((stmt, index) => {
+      if (stmt.type === "void_stmt") {
+        return;
+      }
+
+      const printed = path.call(print, "body", index);
+
+      if (line === null) {
+        parts.push(printed);
+      } else if (stmt.start - line > 1) {
+        parts.push(hardline, hardline, printed);
+      } else if (stmt.start === line) {
+        parts.push("; ", printed);
+      } else {
+        parts.push(hardline, printed);
+      }
+
+      line = stmt.end;
+    });
+
+    return concat(parts);
+  },
   string_add: append,
   string_concat: (path, opts, print) => group(concat([
     path.call(print, "body", 0),

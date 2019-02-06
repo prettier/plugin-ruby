@@ -20,8 +20,9 @@ const printMethod = offset => (path, opts, print) => {
     printedParams
   );
 
-  const firstStatement = body.body[0];
-  if (firstStatement.body[0].type === "stmts_new" && firstStatement.body[1].type === "void_stmt") {
+  // If the body is empty, we can replace with a ;
+  const stmts = body.body[0].body;
+  if (stmts.length === 1 && stmts[0].type === "void_stmt") {
     return group(concat([...declaration, "; end"]));
   }
 
