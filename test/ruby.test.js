@@ -49,6 +49,8 @@ const eachUnsupportedNode = callback => {
     "qsymbols_new",
     "qwords_add",
     "qwords_new",
+    "regexp_add",
+    "regexp_new",
     "stmts_add",
     "stmts_new",
     "symbols_add",
