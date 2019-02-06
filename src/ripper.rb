@@ -106,7 +106,7 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def on_embdoc_beg(comment)
-    @current_embdoc = { type: :@embdoc, body: comment, start: lineno, end: lineno }
+    @current_embdoc = { type: :embdoc, body: comment, start: lineno, end: lineno }
   end
 
   def on_embdoc(comment)

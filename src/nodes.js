@@ -1,4 +1,4 @@
-const { align, breakParent, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline } = require("prettier").doc.builders;
+const { align, breakParent, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
 const { append, concatBody, empty, emptyList, first, literal, makeCall, prefix, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
@@ -304,6 +304,7 @@ module.exports = {
 
     return group(concat(parts));
   },
+  embdoc: (path, opts, print) => concat([trim, path.getValue().body]),
   ensure: (path, opts, print) => group(concat([
     "ensure",
     indent(concat([hardline, concat(path.map(print, "body"))]))
