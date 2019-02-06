@@ -317,9 +317,9 @@ end
 
 loop { |i| super_super_super_super_super_super_super_super_super_super_long }
 
-loop(&:i)
+loop(&:to_s)
 
-loop(&:i)
+loop(&:to_s)
 
 loop { |i, j| i.to_s }
 
@@ -368,9 +368,9 @@ end
 
 loop { |i| super_super_super_super_super_super_super_super_super_super_long }
 
-loop(&:i)
+loop(&:to_s)
 
-loop(&:i)
+loop(&:to_s)
 
 loop { |i, j| i.to_s }
 
