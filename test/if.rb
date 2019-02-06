@@ -9,6 +9,12 @@ if a
 end
 
 if a
+
+else
+  b
+end
+
+if a
   1
 elsif b
   2

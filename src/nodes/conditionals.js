@@ -14,7 +14,7 @@ const printTernaryConditions = (keyword, truthyValue, falsyValue) => {
 };
 
 const printConditional = keyword => (path, { inlineConditionals }, print) => {
-  const [_predicate, _statements, addition] = path.getValue().body;
+  const [_predicate, statements, addition] = path.getValue().body;
 
   // If the addition is not an elsif or an else, then it's the second half of a
   // ternary expression
@@ -44,7 +44,11 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
 
     return group(ifBreak(
       printWithAddition(keyword, path, print),
-      concat(parts.concat(printTernaryConditions(keyword, truthyValue, falsyValue)))
+      concat([
+        statements.body.every(({ type }) => ["void_stmt", "@comment"].includes(type)) ? breakParent : "",
+        ...parts,
+        ...printTernaryConditions(keyword, truthyValue, falsyValue)
+      ])
     ));
   }
 
