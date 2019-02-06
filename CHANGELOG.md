@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Changed
 - Handle brace blocks on commands properly.
+- Break parent and return `do` blocks when called from a `command` node.
 
 ## [0.2.0] - 2019-02-06
 ### Added

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # rubocop:disable Lint/UnusedBlockArgument
-# We should fix this to automatically prefix the variables with _.
 
 loop { 1 }
 
@@ -14,6 +13,10 @@ loop do
 end
 
 port ENV.fetch('PORT') { 3000 }
+
+test 'foobar' do
+  foobar
+end
 
 loop { super_super_super_super_super_super_super_super_super_super_super_super_long }
 

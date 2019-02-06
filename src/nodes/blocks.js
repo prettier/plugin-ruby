@@ -78,6 +78,12 @@ const printBlock = (path, opts, print) => {
     return doBlock;
   }
 
+  // If the parent node is a command node, then there are no parentheses around
+  // the arguments to that command, so we need to break the block
+  if (path.getParentNode().body[0].type === "command") {
+    return doBlock;
+  }
+
   const braceBlock = concat([
     " { ",
     variables ? path.call(print, "body", 0) : "",
