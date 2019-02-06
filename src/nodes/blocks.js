@@ -73,7 +73,7 @@ const printBlock = (path, opts, print) => {
 
   // We can hit this next pattern if within the block the only statement is a
   // comment.
-  const stmts = statements.body[0].body;
+  const stmts = statements.type === "stmts" ? statements.body : statements.body[0].body;
   if (stmts.length > 1 && (stmts.filter(stmt => stmt.type !== "@comment").length === 1)) {
     return doBlock;
   }

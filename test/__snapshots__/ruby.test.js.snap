@@ -299,6 +299,8 @@ loop do
   # foobar
 end
 
+port ENV.fetch(\\"PORT\\") { 3000 }
+
 loop do
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
@@ -355,6 +357,8 @@ loop { 1 }
 loop do
   # foobar
 end
+
+port ENV.fetch('PORT') { 3000 }
 
 loop do
   super_super_super_super_super_super_super_super_super_super_super_super_long
