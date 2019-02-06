@@ -33,21 +33,21 @@ class RipperJS < Ripper::SexpBuilder
     super.tap do |sexp|
       next if start_comments.empty?
 
-      node = sexp[:body][0]
-      node = node[:body][0] until node[:body][0][:type] != :stmts_add
-
       start_comments.each do |comment|
-        node[:body][0] = {
-          type: :stmts_add,
-          body: [node[:body][0], comment],
-          line: comment[:line]
-        }
-        node = node[:body][0]
+        sexp[:body][0][:stmts].unshift(comment)
       end
     end
   end
 
   private
+
+  def on_stmts_new
+    { type: :stmts, stmts: [], line: lineno }
+  end
+
+  def on_stmts_add(stmts, stmt)
+    stmts.tap { |node| node[:stmts] << stmt }
+  end
 
   SCANNER_EVENTS.each do |event|
     module_eval(<<-End, __FILE__, __LINE__ + 1)

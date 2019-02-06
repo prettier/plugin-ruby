@@ -492,6 +492,28 @@ module.exports = {
     indent(concat([hardline, path.call(print, "body", 1)])),
     concat([hardline, "end"])
   ])),
+  stmts: (path, opts, print) => {
+    const parts = [];
+    let line = null;
+
+    path.getValue().stmts.forEach((stmt, index) => {
+      const printed = path.call(print, "stmts", index);
+
+      if (line === null) {
+        parts.push(printed);
+      } else if (stmt.line - line > 1) {
+        parts.push(hardline, hardline, printed);
+      } else if (stmt.line === line) {
+        parts.push("; ", printed);
+      } else {
+        parts.push(hardline, printed);
+      }
+
+      line = stmt.line;
+    });
+
+    return concat(parts);
+  },
   string_add: append,
   string_concat: (path, opts, print) => group(concat([
     path.call(print, "body", 0),
