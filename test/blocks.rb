@@ -43,6 +43,10 @@ loop do |i|
   i.to_s
 end
 
+loop do |i|
+  i.to_s :db
+end
+
 loop { |i, j| i.to_s }
 
 for i in [1, 2, 3] do

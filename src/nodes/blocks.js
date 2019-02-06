@@ -50,6 +50,7 @@ const toProcTransform = (path, opts, print) => {
     && callBody[0].body[0].body === reqParams[0].body
     && isCall(callBody[1])
     && callBody[2].type === "@ident"
+    && !callBody[3]
   ) {
     return `(&:${callBody[2].body})`;
   }

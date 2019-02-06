@@ -325,6 +325,8 @@ loop(&:to_s)
 
 loop(&:to_s)
 
+loop { |i| i.to_s :db }
+
 loop { |i, j| i.to_s }
 
 [1, 2, 3].each do |i|
@@ -379,6 +381,8 @@ loop { |i| super_super_super_super_super_super_super_super_super_super_long }
 loop(&:to_s)
 
 loop(&:to_s)
+
+loop { |i| i.to_s :db }
 
 loop { |i, j| i.to_s }
 
