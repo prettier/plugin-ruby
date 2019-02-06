@@ -58,6 +58,8 @@ const eachUnsupportedNode = callback => {
     "void_stmt",
     "words_add",
     "words_new",
+    "xstring_add",
+    "xstring_new",
     ""
   ];
 

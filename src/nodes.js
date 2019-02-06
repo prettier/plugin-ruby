@@ -594,13 +594,12 @@ module.exports = {
   },
   word_add: concatBody,
   word_new: empty,
-  xstring_add: append,
+  xstring: (path, opts, print) => path.map(print, "body"),
   xstring_literal: (path, opts, print) => group(concat([
     "`",
     indent(concat([softline, join(softline, path.call(print, "body", 0))])),
     concat([softline, "`"])
   ])),
-  xstring_new: emptyList,
   yield: (path, opts, print) => concat([
     "yield",
     path.getValue().body[0].type === "paren" ? "" : " ",

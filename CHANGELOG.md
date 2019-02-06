@@ -7,7 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Changed
 - Ignore current indentation when creating embdocs so that `=begin` is always at the beginning of the line.
-- Move `regexp_add` and `regexp_new` handling into the parser.
+- [INTERNAL] Move `regexp_add` and `regexp_new` handling into the parser.
+- [INTERNAL] Move `xstring_add` and `xstring_new` handling into the parser.
 
 ## [0.2.1] - 2019-02-06
 ### Changed
