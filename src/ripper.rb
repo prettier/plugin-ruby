@@ -23,7 +23,7 @@ class RipperJS < Ripper::SexpBuilder
 
   def parse
     super.tap do |sexp|
-      sexp[:body][0][:body] = (block_comments + sexp.dig(:body, 0, :body)).sort_by { |node| node[:line] }
+      sexp[:body][0][:body] = (block_comments + sexp.dig(:body, 0, :body)).sort_by { |node| node[:start] }
     end
   end
 
@@ -34,7 +34,7 @@ class RipperJS < Ripper::SexpBuilder
   (SCANNER_EVENTS - defined_events).each do |event|
     module_eval(<<-End, __FILE__, __LINE__ + 1)
       def on_#{event}(body)
-        { type: :@#{event}, body: body, line: lineno }
+        { type: :@#{event}, body: body, start: lineno, end: lineno }
       end
     End
   end
@@ -42,20 +42,25 @@ class RipperJS < Ripper::SexpBuilder
   (PARSER_EVENTS - defined_events).each do |event|
     module_eval(<<-End, __FILE__, __LINE__ + 1)
       def on_#{event}(*body)
-        build_sexp(:#{event}, body)
+        build_event(:#{event}, body)
       end
     End
   end
 
   def on_bodystmt(*body)
-    { type: :bodystmt, body: body, line: lineno }.tap do |sexp|
+    build_sexp(:bodystmt, body).tap do |sexp|
       attach_comments_to(sexp, body[0])
-      @last_sexp = sexp
     end
   end
 
   def on_CHAR(char)
-    @last_sexp = { type: :@CHAR, body: char, line: lineno }
+    @last_sexp = { type: :@CHAR, body: char, start: lineno, end: lineno }
+  end
+
+  def on_class(*body)
+    build_sexp(:class, body).tap do |sexp|
+      attach_comments_to(sexp, body[2][:body][0])
+    end
   end
 
   # We need to know exactly where the comment is, switching off the current
@@ -78,7 +83,7 @@ class RipperJS < Ripper::SexpBuilder
   #     EXPR_MAX_STATE
   # };
   def on_comment(comment)
-    sexp = { type: :@comment, body: comment.chomp, line: lineno }
+    sexp = { type: :@comment, body: comment.chomp, start: lineno, end: lineno }
 
     case RipperJS.lex_state_name(state)
     when 'EXPR_BEG'
@@ -95,14 +100,13 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def on_def(*body)
-    { type: :def, body: body, line: lineno }.tap do |sexp|
+    build_sexp(:def, body).tap do |sexp|
       attach_comments_to(sexp, body[2][:body][0])
-      @last_sexp = sexp
     end
   end
 
   def on_embdoc_beg(comment)
-    @current_embdoc = { type: :@embdoc, body: comment, line: lineno }
+    @current_embdoc = { type: :@embdoc, body: comment, start: lineno, end: lineno }
   end
 
   def on_embdoc(comment)
@@ -116,14 +120,19 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def on_method_add_block(*body)
-    { type: :method_add_block, body: body, line: lineno }.tap do |sexp|
+    build_sexp(:method_add_block, body).tap do |sexp|
       attach_comments_to(sexp, body[1][:body][1][:body][0])
-      @last_sexp = sexp
+    end
+  end
+
+  def on_sclass(*body)
+    build_sexp(:sclass, body).tap do |sexp|
+      attach_comments_to(sexp, body[1][:body][0])
     end
   end
 
   def on_stmts_new
-    { type: :stmts, body: [], line: lineno }
+    { type: :stmts, body: [], start: lineno, end: lineno }
   end
 
   def on_stmts_add(stmts, stmt)
@@ -131,45 +140,29 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def attach_comments_to(sexp, stmts)
-    range = first_line_from(sexp)..sexp[:line]
-    comments = block_comments.group_by { |comment| range.include?(comment[:line]) }
+    range = sexp[:start]..sexp[:end]
+    comments = block_comments.group_by { |comment| range.include?(comment[:start]) }
 
     if comments[true]
-      stmts[:body] = (stmts[:body] + comments[true]).sort_by { |node| node[:line] }
+      stmts[:body] = (stmts[:body] + comments[true]).sort_by { |node| node[:start] }
       @block_comments = comments.fetch(false) { [] }
     end
   end
 
   NO_COMMENTS = %i[args_new regexp_add regexp_new string_add string_content].freeze
 
-  def build_sexp(type, body)
-    { type: type, body: body, line: lineno }.tap do |sexp|
-      if inline_comment && !NO_COMMENTS.include?(type)
-        sexp[:comment] = inline_comment
-        @inline_comment = nil
-      end
+  def build_event(type, body)
+    build_sexp(type, body).tap do |sexp|
+      next if !inline_comment || NO_COMMENTS.include?(type)
 
-      @last_sexp = sexp
+      sexp[:comment] = inline_comment
+      @inline_comment = nil
     end
   end
 
-  def first_line_from(sexp)
-    lines = []
-    queue = [sexp]
-
-    while queue.any?
-      current = queue.shift
-
-      case current
-      when Array
-        queue += current.compact
-      when Hash
-        lines << current[:line]
-        queue += current[:body].compact if current[:body].is_a?(Array)
-      end
-    end
-
-    lines.min
+  def build_sexp(type, body)
+    start = body.map { |part| part.is_a?(Hash) ? part[:start] : lineno }.min || lineno
+    @last_sexp = { type: type, body: body, start: start, end: lineno }
   end
 end
 

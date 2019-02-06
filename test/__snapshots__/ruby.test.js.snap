@@ -530,10 +530,15 @@ exports[`class.rb matches expected output for off.json 1`] = `
 
 module Pret
   module Tier
+    # object documentation
     class Object; end
 
+    # second object
+    # documentation
     class Object; end
 
+    # third object
+    # documentation
     class Object
       attr_accessor :foo
     end
@@ -543,10 +548,12 @@ module Pret
     class Object < BasicObject; end
 
     class Object < BasicObject
+      # inside class documentation
       attr_accessor :bar
     end
 
     class << self
+      # method documentation
       def method; end
 
       undef method
@@ -557,6 +564,7 @@ module Pret
     module Prettier; end
 
     module Prettier
+      # inside module documentation
       attr_accessor :foo
     end
   end
@@ -575,10 +583,15 @@ exports[`class.rb matches expected output for on.json 1`] = `
 
 module Pret
   module Tier
+    # object documentation
     class Object; end
 
+    # second object
+    # documentation
     class Object; end
 
+    # third object
+    # documentation
     class Object
       attr_accessor :foo
     end
@@ -588,10 +601,12 @@ module Pret
     class Object < BasicObject; end
 
     class Object < BasicObject
+      # inside class documentation
       attr_accessor :bar
     end
 
     class << self
+      # method documentation
       def method; end
 
       undef method
@@ -602,6 +617,7 @@ module Pret
     module Prettier; end
 
     module Prettier
+      # inside module documentation
       attr_accessor :foo
     end
   end
@@ -1023,7 +1039,6 @@ unless a
 end
 
 # rubocop:disable Style/UnlessElse
-
 unless a
   super_super_super_super_super_super_super_super_super_super_super_long
 else
@@ -1052,7 +1067,6 @@ a ? 1 : 2
 a ? 2 : 1
 
 a ? 1 : 2
-
 if a
   super_super_super_super_super_super_super_super_super_super_super_long
 else
@@ -1099,7 +1113,6 @@ unless a
 end
 
 # rubocop:disable Style/UnlessElse
-
 unless a
   super_super_super_super_super_super_super_super_super_super_super_long
 else
@@ -1124,7 +1137,6 @@ a ? 1 : 2
 a ? 2 : 1
 
 a ? 1 : 2
-
 if a
   super_super_super_super_super_super_super_super_super_super_super_long
 else

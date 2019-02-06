@@ -2,11 +2,16 @@
 
 module Pret
   module Tier
+    # object documentation
     class Object; end
 
+    # second object
+    # documentation
     class Object
     end
 
+    # third object
+    # documentation
     class Object
       attr_accessor :foo
     end
@@ -17,10 +22,12 @@ module Pret
     end
 
     class Object < BasicObject
+      # inside class documentation
       attr_accessor :bar
     end
 
     class << self
+      # method documentation
       def method; end
 
       undef method
@@ -32,6 +39,7 @@ module Pret
     end
 
     module Prettier
+      # inside module documentation
       attr_accessor :foo
     end
   end

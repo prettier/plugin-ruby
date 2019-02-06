@@ -516,15 +516,15 @@ module.exports = {
 
       if (line === null) {
         parts.push(printed);
-      } else if (stmt.line - line > 1) {
+      } else if (stmt.start - line > 1) {
         parts.push(hardline, hardline, printed);
-      } else if (stmt.line === line) {
+      } else if (stmt.start === line) {
         parts.push("; ", printed);
       } else {
         parts.push(hardline, printed);
       }
 
-      line = stmt.line;
+      line = stmt.end;
     });
 
     return concat(parts);
