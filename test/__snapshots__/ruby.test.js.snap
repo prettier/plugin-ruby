@@ -1423,9 +1423,9 @@ exports[`numbers.rb matches expected output for off.json 1`] = `
 1.2e-3
 0xaabb
 0o377
--0b1010 # these are CHARs
+-0b1010
 0b001_001
-\\"a\\"
+\\"a\\" # these are CHARs
 ?\\\\C-a
 ?\\\\M-a
 ?\\\\M-\\\\C-a
@@ -1448,9 +1448,9 @@ exports[`numbers.rb matches expected output for on.json 1`] = `
 1.2e-3
 0xaabb
 0o377
--0b1010 # these are CHARs
+-0b1010
 0b001_001
-'a'
+'a' # these are CHARs
 ?\\\\C-a
 ?\\\\M-a
 ?\\\\M-\\\\C-a

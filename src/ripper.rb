@@ -29,16 +29,17 @@ class RipperJS < Ripper::SexpBuilder
 
   private
 
-  SCANNER_EVENTS.each do |event|
+  defined_events = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
+
+  (SCANNER_EVENTS - defined_events).each do |event|
     module_eval(<<-End, __FILE__, __LINE__ + 1)
-      def on_#{event}(token)
-        { type: :@#{event}, body: token, line: lineno }
+      def on_#{event}(body)
+        { type: :@#{event}, body: body, line: lineno }
       end
     End
   end
 
-  events = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
-  (PARSER_EVENTS - events).each do |event|
+  (PARSER_EVENTS - defined_events).each do |event|
     module_eval(<<-End, __FILE__, __LINE__ + 1)
       def on_#{event}(*body)
         build_sexp(:#{event}, body)
@@ -46,12 +47,15 @@ class RipperJS < Ripper::SexpBuilder
     End
   end
 
-  def on_stmts_new
-    { type: :stmts, body: [], line: lineno }
+  def on_bodystmt(*body)
+    { type: :bodystmt, body: body, line: lineno }.tap do |sexp|
+      attach_comments_to(sexp, body[0])
+      @last_sexp = sexp
+    end
   end
 
-  def on_stmts_add(stmts, stmt)
-    stmts.tap { |node| node[:body] << stmt }
+  def on_CHAR(char)
+    @last_sexp = { type: :@CHAR, body: char, line: lineno }
   end
 
   # We need to know exactly where the comment is, switching off the current
@@ -90,6 +94,13 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
+  def on_def(*body)
+    { type: :def, body: body, line: lineno }.tap do |sexp|
+      attach_comments_to(sexp, body[2][:body][0])
+      @last_sexp = sexp
+    end
+  end
+
   def on_embdoc_beg(comment)
     @current_embdoc = { type: :@embdoc, body: comment, line: lineno }
   end
@@ -104,7 +115,20 @@ class RipperJS < Ripper::SexpBuilder
     @current_embdoc = nil
   end
 
-  def on_magic_comment(*); end
+  def on_method_add_block(*body)
+    { type: :method_add_block, body: body, line: lineno }.tap do |sexp|
+      attach_comments_to(sexp, body[1][:body][1][:body][0])
+      @last_sexp = sexp
+    end
+  end
+
+  def on_stmts_new
+    { type: :stmts, body: [], line: lineno }
+  end
+
+  def on_stmts_add(stmts, stmt)
+    stmts.tap { |node| node[:body] << stmt }
+  end
 
   def attach_comments_to(sexp, stmts)
     range = first_line_from(sexp)..sexp[:line]
@@ -116,33 +140,7 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  def on_def(*body)
-    { type: :def, body: body, line: lineno }.tap do |sexp|
-      attach_comments_to(sexp, body[2][:body][0])
-      @last_sexp = sexp
-    end
-  end
-
-  def on_method_add_block(*body)
-    { type: :method_add_block, body: body, line: lineno }.tap do |sexp|
-      attach_comments_to(sexp, body[1][:body][1][:body][0])
-      @last_sexp = sexp
-    end
-  end
-
-  def on_bodystmt(*body)
-    { type: :bodystmt, body: body, line: lineno }.tap do |sexp|
-      attach_comments_to(sexp, body[0])
-      @last_sexp = sexp
-    end
-  end
-
-  NO_COMMENTS = %i[
-    regexp_add
-    regexp_new
-    string_add
-    string_content
-  ].freeze
+  NO_COMMENTS = %i[regexp_add regexp_new string_add string_content].freeze
 
   def build_sexp(type, body)
     { type: type, body: body, line: lineno }.tap do |sexp|

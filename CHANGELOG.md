@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Fix `to_proc` transforms to reference the method called as opposed to the parameter name.
 - [INTERNAL] Change statement lists to be generated within the parser instead of the printer, thereby allowing finer control over comments.
 - [INTERNAL] Completely revamp comment parsing by switching off the internal lexer state from `ripper`. This should drastically increase accuracy of comment parsing in general, and set us up for success in the future.
+- Allow comments to be attached to `CHAR` nodes.
 
 ## [0.1.2] - 2019-02-05
 ### Changed
