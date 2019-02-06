@@ -5,6 +5,10 @@ if a
 end
 
 if a
+  break # comment
+end
+
+if a
   1
 elsif b
   2

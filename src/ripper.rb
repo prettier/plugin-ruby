@@ -140,7 +140,7 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  NO_COMMENTS = %i[regexp_add regexp_new string_add string_content].freeze
+  NO_COMMENTS = %i[args_new regexp_add regexp_new string_add string_content].freeze
 
   def build_sexp(type, body)
     { type: type, body: body, line: lineno }.tap do |sexp|

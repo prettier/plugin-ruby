@@ -993,6 +993,10 @@ if a
 end
 
 if a
+  break # comment
+end
+
+if a
   1
 elsif b
   2
@@ -1062,6 +1066,10 @@ exports[`if.rb matches expected output for on.json 1`] = `
 
 if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+if a
+  break # comment
 end
 
 if a
