@@ -54,7 +54,7 @@ const eachUnsupportedNode = callback => {
     "stmts_add",
     "stmts_new",
     "string_add",
-    "string_new",
+    "string_content",
     "symbols_add",
     "symbols_new",
     "void_stmt",
@@ -105,7 +105,9 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
 });
 
 eachUnsupportedNode(event => {
-  test.todo(`handles the ${event} event`);
+  test(`handles the ${event} event`, () => {
+    expect(event).toEqual("handled");
+  });
 });
 
 test("when encountering an unsupported node type", () => {
