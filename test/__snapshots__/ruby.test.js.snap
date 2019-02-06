@@ -183,9 +183,8 @@ a = {
 
 a = [super_super_super_super_long, super_super_super_super_long].sort
 
-a = {
-  :a => super_super_super_super_long, :b => super_super_super_super_long
-}.sort
+a = { :a => super_super_super_super_long, :b => super_super_super_super_long }
+  .sort
 
 a.a = 1
 
@@ -540,6 +539,14 @@ module Pret
 
       undef method
     end
+
+    module Prettier; end
+
+    module Prettier; end
+
+    module Prettier
+      attr_accessor :foo
+    end
   end
 end
 
@@ -577,6 +584,14 @@ module Pret
 
       undef method
     end
+
+    module Prettier; end
+
+    module Prettier; end
+
+    module Prettier
+      attr_accessor :foo
+    end
   end
 end
 
@@ -585,6 +600,144 @@ Pret::TIER = 'config'.freeze
 
 ::Pret::Tier::Object # rubocop:disable Lint/Void
 ::PRET = 'config'.freeze
+"
+`;
+
+exports[`comments.rb matches expected output for off.json 1`] = `
+"# this is a comment at
+# the beginning of the file
+
+loop do
+  # this is the only statement
+  # inside this loop
+end
+
+loop do
+  # this is the first statement
+  # inside this loop
+  foo
+end
+
+loop do
+  foo
+  # this is the last statement
+  # inside this loop
+end
+
+def foo
+  # these are the only statements
+  # inside this method
+end
+
+class Foo
+  # these are the only statements
+  # inside this class
+end
+
+class Foo; end # this is an EXPR_CLASS comment
+
+module Foo
+  # these are the only statements
+  # inside this module
+end
+
+module Foo
+  class Foo
+    def foo
+      # this comment is inside a method
+    end
+  end
+end
+
+foo # this is an inline comment
+bar # this is another inline comment
+
+[
+  foo, # inside of an array
+  bar # inside of an array
+]
+
+{
+  :foo =>
+    \\"bar\\", # these are comments
+  :bar =>
+    \\"baz\\" # inside of a hash
+}
+
+foo # inline comment inside of a dot
+  .bar
+
+# this is a comment
+# at the end of the file
+"
+`;
+
+exports[`comments.rb matches expected output for on.json 1`] = `
+"# this is a comment at
+# the beginning of the file
+
+loop do
+  # this is the only statement
+  # inside this loop
+end
+
+loop do
+  # this is the first statement
+  # inside this loop
+  foo
+end
+
+loop do
+  foo
+  # this is the last statement
+  # inside this loop
+end
+
+def foo
+  # these are the only statements
+  # inside this method
+end
+
+class Foo
+  # these are the only statements
+  # inside this class
+end
+
+class Foo; end # this is an EXPR_CLASS comment
+
+module Foo
+  # these are the only statements
+  # inside this module
+end
+
+module Foo
+  class Foo
+    def foo
+      # this comment is inside a method
+    end
+  end
+end
+
+foo # this is an inline comment
+bar # this is another inline comment
+
+[
+  foo, # inside of an array
+  bar # inside of an array
+]
+
+{
+  foo:
+    'bar', # these are comments
+  bar:
+    'baz' # inside of a hash
+}
+
+foo # inline comment inside of a dot
+  .bar
+
+# this is a comment
+# at the end of the file
 "
 `;
 
@@ -609,9 +762,9 @@ defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
-defined?(a)
+defined?(a) # third
 
-# rubocop:enable Lint/Void # third
+# rubocop:enable Lint/Void
 "
 `;
 
@@ -636,9 +789,9 @@ defined?(
   super_super_super_super_super_super_super_super_super_super_super_super_long
 )
 
-defined?(a)
+defined?(a) # third
 
-# rubocop:enable Lint/Void # third
+# rubocop:enable Lint/Void
 "
 `;
 
@@ -1262,8 +1415,8 @@ exports[`numbers.rb matches expected output for off.json 1`] = `
 1.2e-3
 0xaabb
 0o377
--0b1010
-0b001_001 # these are CHARs
+-0b1010 # these are CHARs
+0b001_001
 \\"a\\"
 ?\\\\C-a
 ?\\\\M-a
@@ -1287,8 +1440,8 @@ exports[`numbers.rb matches expected output for on.json 1`] = `
 1.2e-3
 0xaabb
 0o377
--0b1010
-0b001_001 # these are CHARs
+-0b1010 # these are CHARs
+0b001_001
 'a'
 ?\\\\C-a
 ?\\\\M-a

@@ -25,6 +25,15 @@ module Pret
 
       undef method
     end
+
+    module Prettier; end
+
+    module Prettier
+    end
+
+    module Prettier
+      attr_accessor :foo
+    end
   end
 end
 

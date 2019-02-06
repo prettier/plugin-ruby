@@ -1,4 +1,4 @@
-const { concat } = require("prettier").doc.builders;
+const { breakParent, concat, lineSuffix } = require("prettier").doc.builders;
 const nodes = require("./nodes");
 
 module.exports = (path, opts, print) => {
@@ -8,7 +8,11 @@ module.exports = (path, opts, print) => {
     const printed = nodes[type](path, opts, print);
 
     if (comment) {
-      return concat([printed, path.call(print, "comment")]);
+      return concat([
+        printed,
+        comment.break ? breakParent : "",
+        lineSuffix(` ${comment.body}`)
+      ]);
     }
     return printed;
   }
