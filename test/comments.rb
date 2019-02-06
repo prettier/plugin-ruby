@@ -28,10 +28,6 @@ class Foo
   # inside this class
 end
 
-class # this is an EXPR_CLASS comment
-  Foo
-end
-
 module Foo
   # these are the only statements
   # inside this module

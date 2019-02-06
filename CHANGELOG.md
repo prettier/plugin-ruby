@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Allow comments to be attached to `CHAR` nodes.
 - [INTERNAL] Disallow comments from being attached to `args_new` nodes.
 - [INTERNAL] Track start and end lines so we can better insert block comments.
+- [INTERNAL] Handle intermediary array nodes in the parse for better comment handling.
 
 ## [0.1.2] - 2019-02-05
 ### Changed

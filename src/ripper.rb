@@ -151,6 +151,19 @@ class RipperJS < Ripper::SexpBuilder
 
   NO_COMMENTS = %i[args_new regexp_add regexp_new string_add string_content].freeze
 
+  %i[qsymbols qwords symbols words].each do |event|
+    define_method(:"on_#{event}_new") do
+      { type: event, body: [], start: lineno, end: lineno }
+    end
+ 
+    define_method(:"on_#{event}_add") do |parts, part|
+      parts.tap do |node|
+        node[:body] << part
+        node[:end] = lineno
+      end
+    end
+  end
+
   def build_event(type, body)
     build_sexp(type, body).tap do |sexp|
       next if !inline_comment || NO_COMMENTS.include?(type)

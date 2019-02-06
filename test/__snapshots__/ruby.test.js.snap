@@ -662,8 +662,6 @@ class Foo
   # inside this class
 end
 
-class Foo; end # this is an EXPR_CLASS comment
-
 module Foo
   # these are the only statements
   # inside this module
@@ -681,15 +679,19 @@ foo # this is an inline comment
 bar # this is another inline comment
 
 [
-  foo, # inside of an array
-  bar # inside of an array
+  # inside of an array
+  foo,
+  # inside of an array
+  bar
 ]
 
 {
   :foo =>
-    \\"bar\\", # these are comments
+    # these are comments
+    \\"bar\\",
   :bar =>
-    \\"baz\\" # inside of a hash
+    # inside of a hash
+    \\"baz\\"
 }
 
 foo # inline comment inside of a dot
@@ -731,8 +733,6 @@ class Foo
   # inside this class
 end
 
-class Foo; end # this is an EXPR_CLASS comment
-
 module Foo
   # these are the only statements
   # inside this module
@@ -750,15 +750,19 @@ foo # this is an inline comment
 bar # this is another inline comment
 
 [
-  foo, # inside of an array
-  bar # inside of an array
+  # inside of an array
+  foo,
+  # inside of an array
+  bar
 ]
 
 {
   foo:
-    'bar', # these are comments
+    # these are comments
+    'bar',
   bar:
-    'baz' # inside of a hash
+    # inside of a hash
+    'baz'
 }
 
 foo # inline comment inside of a dot
