@@ -1,5 +1,5 @@
 const { align, breakParent, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
-const { append, concatBody, empty, emptyList, first, literal, makeCall, prefix, skipAssignIndent, surround } = require("./utils");
+const { concatBody, empty, first, literal, makeCall, prefix, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
   ...require("./nodes/alias"),
