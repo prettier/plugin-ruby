@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Move `regexp_add` and `regexp_new` handling into the parser.
 - [INTERNAL] Move `xstring_add` and `xstring_new` handling into the parser.
 - [INTERNAL] Move `string_add` and `string_content` handling into the parser.
+- [INTERNAL] Move `mrhs_add` and `mrhs_new` handling into the parser.
 
 ## [0.2.1] - 2019-02-06
 ### Changed

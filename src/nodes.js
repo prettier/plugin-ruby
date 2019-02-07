@@ -393,18 +393,18 @@ module.exports = {
     indent(concat([softline, path.call(print, "body", 0)])),
     concat([softline, ")"])
   ])),
-  mrhs_add: (path, opts, print) => group(concat([
-    path.call(print, "body", 0),
-    ",",
-    line,
-    path.call(print, "body", 1)
-  ])),
-  mrhs_add_star: (path, opts, print) => group(concat([
-    "*",
-    concat(path.map(print, "body"))
-  ])),
-  mrhs_new: empty,
-  mrhs_new_from_args: first,
+  mrhs: (path, opts, print) => path.map(print, "body"),
+  mrhs_add_star: (path, opts, print) => group(join(
+    concat([",", line]),
+    [
+      ...path.call(print, "body", 0),
+      concat(["*", path.call(print, "body", 1)])
+    ]
+  )),
+  mrhs_new_from_args: (path, opts, print) => group(join(
+    concat([",", line]),
+    path.map(print, "body")
+  )),
   module: (path, opts, print) => {
     const declaration = group(concat(["module ", path.call(print, "body", 0)]));
 
