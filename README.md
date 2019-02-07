@@ -3,9 +3,9 @@
 [![Build Status](https://travis-ci.org/kddeisz/prettier-ruby.svg?branch=master)](https://travis-ci.org/kddeisz/prettier-ruby)
 [![NPM Version](https://img.shields.io/npm/v/prettier-plugin-ruby.svg)](https://www.npmjs.com/package/prettier-plugin-ruby)
 
-This is a [prettier](https://prettier.io/) plugin for the Ruby programming language. Under the hood it uses Ruby's own `ripper` library which allows this package to maintain parity with the existing Ruby parser.
+`prettier-ruby` is a [prettier](https://prettier.io/) plugin for the Ruby programming language. `prettier` is an opinionated code formatter that supports multiple languages and integrates with most editors. The idea is to eliminate discussions of style in code review and allow developers to get back to thinking about code design instead.
 
-`prettier-ruby` supports Ruby versions `2.5`, `2.6`, and `trunk`.
+Under the hood `prettier-ruby` uses Ruby's own `ripper` library which allows this package to maintain parity with the existing Ruby parser. `prettier-ruby` supports Ruby versions `2.5`, `2.6`, and `trunk`.
 
 ## Getting started
 
