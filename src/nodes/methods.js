@@ -2,10 +2,6 @@ const { concat, group, hardline, indent } = require("prettier").doc.builders;
 
 const printMethod = offset => (path, opts, print) => {
   const [name, params, body] = path.getValue().body.slice(offset);
-
-  const printedParams = path.call(print, "body", offset + 1);
-  const buffer = params.type === "params" && printedParams.parts.length > 0 ? " " : "";
-
   const declaration = ["def "];
 
   // In this case, we're printing a method that's defined as a singleton, so we
@@ -14,10 +10,14 @@ const printMethod = offset => (path, opts, print) => {
     declaration.push(path.call(print, "body", 0), path.call(print, "body", 1));
   }
 
+  // In case there are no parens but there are arguments
+  const parens = params.type === "params" && params.body.some(paramType => paramType);
+
   declaration.push(
     path.call(print, "body", offset),
-    buffer,
-    printedParams
+    parens ? "(" : "",
+    path.call(print, "body", offset + 1),
+    parens ? ")" : ""
   );
 
   // If the body is empty, we can replace with a ;

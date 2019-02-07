@@ -1352,7 +1352,7 @@ def foo; end
 
 def foo(); end
 
-def foo alpha; end
+def foo(alpha); end
 
 def foo(alpha); end
 
@@ -1360,7 +1360,7 @@ def self.foo; end
 
 def self.foo(); end
 
-def self.foo alpha; end
+def self.foo(alpha); end
 
 def self.foo(alpha); end
 
@@ -1415,7 +1415,7 @@ def foo; end
 
 def foo(); end
 
-def foo alpha; end
+def foo(alpha); end
 
 def foo(alpha); end
 
@@ -1423,7 +1423,7 @@ def self.foo; end
 
 def self.foo(); end
 
-def self.foo alpha; end
+def self.foo(alpha); end
 
 def self.foo(alpha); end
 
