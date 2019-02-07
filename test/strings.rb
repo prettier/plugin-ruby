@@ -30,6 +30,29 @@
 
 %x[super_super_super_super_super_super_super_super_super_super_super_super_su_long]
 
+<<-HERE
+This is a straight heredoc!
+HERE
+
+<<-HERE
+This is another straight heredoc, this time with interpolation!
+#{interpolation}
+So interpolated right now.
+HERE
+
+abc = <<-HERE
+This is a straight heredoc on an assign!
+HERE
+
+<<-PARENT
+This is a straight heredoc!
+#{
+<<-CHILD
+Why do I do this
+CHILD
+}
+PARENT
+
 <<~HERE
   This is a squiggly heredoc!
 HERE

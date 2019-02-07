@@ -154,6 +154,14 @@ class RipperJS < Ripper::SexpBuilder
     stmts.tap { |node| node[:body] << stmt }
   end
 
+  def on_string_literal(string)
+    if heredoc_stack.any? && string[:type] != :heredoc && string[:body][0][:start] > heredoc_stack[-1][:start]
+      string.merge!(heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
+    else
+      build_event(:string_literal, [string])
+    end
+  end
+
   def attach_comments_to(sexp, stmts)
     range = sexp[:start]..sexp[:end]
     comments = block_comments.group_by { |comment| range.include?(comment[:start]) }
