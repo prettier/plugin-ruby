@@ -42,6 +42,7 @@ const eachUnsupportedNode = callback => {
     "arg_ambiguous",
     "heredoc_dedent",
     "magic_comment",
+    "mlhs_add",
     "mlhs_new",
     "mrhs_add",
     "mrhs_new",

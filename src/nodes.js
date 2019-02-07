@@ -356,7 +356,7 @@ module.exports = {
     ));
   },
   massign: (path, opts, print) => group(concat([
-    path.call(print, "body", 0),
+    group(join(concat([",", line]), path.call(print, "body", 0))),
     " =",
     indent(concat([line, path.call(print, "body", 1)]))
   ])),
@@ -368,29 +368,18 @@ module.exports = {
   },
   method_add_block: (path, opts, print) => concat(path.map(print, "body")),
   methref: (path, opts, print) => join(".:", path.map(print, "body")),
-  mlhs_add: (path, opts, print) => {
-    if (path.getValue().body[0].type === "mlhs_new") {
-      return path.call(print, "body", 1);
-    }
-
-    return join(", ", path.map(print, "body"));
-  },
-  mlhs_add_post: (path, opts, print) => group(concat([
-    path.call(print, "body", 0),
-    ",",
-    group(concat([line, path.call(print, "body", 1)]))
-  ])),
-  mlhs_add_star: (path, opts, print) => {
-    const [leftAssign, paramName] = path.getValue().body;
-
-    const left = leftAssign.type !== "mlhs_new" ? concat([path.call(print, "body", 0), ",", line]) : "";
-    const star = paramName ? concat(["*", path.call(print, "body", 1)]) : "*"
-
-    return group(concat([left, star]));
-  },
+  mlhs: (path, opts, print) => path.map(print, "body"),
+  mlhs_add_post: (path, opts, print) => [
+    ...path.call(print, "body", 0),
+    ...path.call(print, "body", 1)
+  ],
+  mlhs_add_star: (path, opts, print) => [
+    ...path.call(print, "body", 0),
+    path.getValue().body[1] ? concat(["*", path.call(print, "body", 1)]) : "*"
+  ],
   mlhs_paren: (path, opts, print) => group(concat([
     "(",
-    indent(concat([softline, path.call(print, "body", 0)])),
+    indent(concat([softline, join(concat([",", line]), path.call(print, "body", 0))])),
     concat([softline, ")"])
   ])),
   mrhs: (path, opts, print) => path.map(print, "body"),
