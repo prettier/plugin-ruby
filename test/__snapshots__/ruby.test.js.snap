@@ -917,6 +917,8 @@ exports[`hash.rb matches expected output for off.json 1`] = `
   }
 }
 
+foo :abc => true # some comment
+
 foobar :alpha => alpha,
        :beta => beta,
        :gamma => gamma,
@@ -957,6 +959,8 @@ exports[`hash.rb matches expected output for on.json 1`] = `
       super_super_super_super_super_super_super_super_long
   }
 }
+
+foo abc: true # some comment
 
 foobar alpha: alpha,
        beta: beta,

@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Changed
 - Automatically add parens to method declarations.
+- Handle comments on bare hash assocs.
 
 ## [0.3.0] - 2019-02-07
 ### Added

@@ -94,8 +94,14 @@ module.exports = {
         }
         break;
       case "symbol_literal":
-        if (preferHashLabels) {
-          parts.push(concat([printedLabel.parts[0].parts[1], ":"]));
+        if (preferHashLabels && path.getValue().body[0].body.length === 1) {
+          const { comment } = path.getValue().body[0];
+
+          parts.push(concat([
+            path.call(print, "body", 0, "body", 0, "body", 0),
+            ":",
+            comment ? lineSuffix(` ${comment.body}`) : ""
+          ]));
         } else {
           parts.push(concat([printedLabel, " =>"]));
         }

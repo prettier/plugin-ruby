@@ -19,6 +19,8 @@
   }
 }
 
+foo :abc => true # some comment
+
 foobar alpha: alpha, beta: beta, gamma: gamma, delta: delta, epsilon: epsilon, zeta: zeta
 foobar(alpha: alpha, beta: beta, gamma: gamma, delta: delta, epsilon: epsilon, zeta: zeta)
 
