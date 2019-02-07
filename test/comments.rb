@@ -62,5 +62,11 @@ bar # this is another inline comment
 foo. # inline comment inside of a dot
   bar
 
+Foo.where(
+  foo: bar,
+  bar: baz
+  # This is a comment
+).to_a.find { |foo| foo.foo == bar.foo }
+
 # this is a comment
 # at the end of the file

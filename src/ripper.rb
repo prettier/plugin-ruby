@@ -136,7 +136,8 @@ class RipperJS < Ripper::SexpBuilder
 
   def on_method_add_block(*body)
     build_sexp(:method_add_block, body).tap do |sexp|
-      attach_comments_to(sexp, body[1][:body][1][:body][0])
+      stmts = body[1][:body][1][:type] == :stmts ? body[1][:body][1] : body[1][:body][1][:body][0]
+      attach_comments_to(sexp, stmts)
     end
   end
 
