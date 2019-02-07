@@ -5,7 +5,7 @@ require 'ripper'
 
 class RipperJS < Ripper::SexpBuilder
   attr_reader :block_comments, :inline_comment
-  attr_reader :current_embdoc, :current_heredoc
+  attr_reader :current_embdoc, :heredoc_stack
   attr_reader :last_sexp
 
   def initialize(*args)
@@ -19,7 +19,7 @@ class RipperJS < Ripper::SexpBuilder
     @inline_comment = nil
 
     @current_embdoc = nil
-    @current_heredoc = nil
+    @heredoc_stack = []
 
     @last_sexp = nil
   end
@@ -123,17 +123,15 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def on_heredoc_beg(beginning)
-    @current_heredoc = { type: :heredoc, beginning: beginning, start: lineno, end: lineno }
+    heredoc_stack << { type: :heredoc, beginning: beginning, start: lineno, end: lineno }
   end
 
   def on_heredoc_end(ending)
-    current_heredoc.merge!(ending: ending.chomp, end: lineno)
+    heredoc_stack[-1].merge!(ending: ending.chomp, end: lineno)
   end
 
   def on_heredoc_dedent(string, _width)
-    string.merge!(current_heredoc.slice(:type, :beginning, :ending, :start, :end)).tap do
-      @current_heredoc = nil
-    end
+    string.merge!(heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
   end
 
   def on_method_add_block(*body)

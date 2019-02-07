@@ -1775,12 +1775,21 @@ exports[`strings.rb matches expected output for off.json 1`] = `
 HERE
 
 <<~HERE
-    This is another squiggly heredoc!
+    This is another squiggly heredoc, this time with interpolation!
+    #{interpolation}
+    So interpolated right now.
 HERE
 
 abc = <<~HERE
   This is a squiggly heredoc on an assign!
 HERE
+
+<<~PARENT
+  This is a squiggly heredoc!
+  #{<<~CHILD
+      Why do I do this
+    CHILD}
+PARENT
 
 # rubocop:enable Lint/Void
 "
@@ -1826,12 +1835,21 @@ exports[`strings.rb matches expected output for on.json 1`] = `
 HERE
 
 <<~HERE
-    This is another squiggly heredoc!
+    This is another squiggly heredoc, this time with interpolation!
+    #{interpolation}
+    So interpolated right now.
 HERE
 
 abc = <<~HERE
   This is a squiggly heredoc on an assign!
 HERE
+
+<<~PARENT
+  This is a squiggly heredoc!
+  #{<<~CHILD
+      Why do I do this
+    CHILD}
+PARENT
 
 # rubocop:enable Lint/Void
 "

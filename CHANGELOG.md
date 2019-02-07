@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Added
 - Support squiggly heredocs.
+- Support nested squiggly heredocs (what).
 
 ### Changed
 - Ignore current indentation when creating embdocs so that `=begin` is always at the beginning of the line.

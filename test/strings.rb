@@ -44,4 +44,13 @@ abc = <<~HERE
   This is a squiggly heredoc on an assign!
 HERE
 
+<<~PARENT
+  This is a squiggly heredoc!
+  #{
+    <<~CHILD
+      Why do I do this
+    CHILD
+  }
+PARENT
+
 # rubocop:enable Lint/Void
