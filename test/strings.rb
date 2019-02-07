@@ -35,7 +35,9 @@
 HERE
 
 <<~HERE
-    This is another squiggly heredoc!
+    This is another squiggly heredoc, this time with interpolation!
+    #{interpolation}
+    So interpolated right now.
 HERE
 
 abc = <<~HERE

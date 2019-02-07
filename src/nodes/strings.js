@@ -17,7 +17,7 @@ module.exports = {
 
     return concat([
       beginning,
-      concat([hardline, path.call(print, "body", 0)]),
+      concat([hardline, ...path.map(print, "body")]),
       ending
     ]);
   },
