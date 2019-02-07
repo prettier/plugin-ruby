@@ -17,7 +17,7 @@ Verify by running against a file:
 prettier --write --plugin=prettier-plugin-ruby --parser=ruby path/to/file.rb
 ```
 
-If you're happy, you can can run `prettier-plugin` on an entire codebase:
+If you're happy, you can can run `prettier` on an entire codebase:
 
 ```
 prettier --write --plugin=prettier-plugin-ruby --parser=ruby **/*.rb
