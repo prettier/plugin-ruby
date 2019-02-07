@@ -11,16 +11,7 @@ module.exports = {
   ...require("./nodes/methods"),
   ...require("./nodes/params"),
   ...require("./nodes/regexp"),
-  "@CHAR": (path, { preferSingleQuotes }, print) => {
-    const { body } = path.getValue();
-
-    if (body.length !== 2) {
-      return body;
-    }
-
-    const quote = preferSingleQuotes ? "\'" : "\"";
-    return body.length === 2 ? concat([quote, body.slice(1), quote]) : body;
-  },
+  ...require("./nodes/strings"),
   "@int": (path, opts, print) => {
     const { body } = path.getValue();
     return /^0[0-9]/.test(body) ? `0o${body.slice(1)}` : body;
@@ -519,27 +510,6 @@ module.exports = {
 
     return concat(parts);
   },
-  string: (path, opts, print) => path.map(print, "body"),
-  string_concat: (path, opts, print) => group(concat([
-    path.call(print, "body", 0),
-    " \\",
-    indent(concat([hardline, path.call(print, "body", 1)]))
-  ])),
-  string_dvar: surround("#{", "}"),
-  string_embexpr: surround("#{", "}"),
-  string_literal: (path, { preferSingleQuotes }, print) => {
-    const parts = path.call(print, "body", 0);
-    if (parts === '') {
-      return preferSingleQuotes ? "''" : "\"\"";
-    }
-
-    let delim = "\"";
-    if (preferSingleQuotes && !parts.some(part => part.parts ? part.parts[0] === "#{" : part.includes("'"))) {
-      delim = "\'";
-    }
-
-    return concat([delim, ...parts, delim]);
-  },
   super: (path, opts, print) => {
     const buffer = path.getValue().body[0].type === "arg_paren" ? "": " ";
 
@@ -580,14 +550,6 @@ module.exports = {
 
     return group(concat(parts));
   },
-  word_add: concatBody,
-  word_new: empty,
-  xstring: (path, opts, print) => path.map(print, "body"),
-  xstring_literal: (path, opts, print) => group(concat([
-    "`",
-    indent(concat([softline, join(softline, path.call(print, "body", 0))])),
-    concat([softline, "`"])
-  ])),
   yield: (path, opts, print) => concat([
     "yield",
     path.getValue().body[0].type === "paren" ? "" : " ",

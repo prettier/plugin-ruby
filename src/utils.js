@@ -18,8 +18,9 @@ const prefix = value => (path, opts, print) => concat([
 ]);
 
 const skipAssignIndent = node => (
-  ["array", "hash"].includes(node.type) ||
-    (node.type === "call" && skipAssignIndent(node.body[0]))
+  ["array", "hash"].includes(node.type)
+    || (node.type === "call" && skipAssignIndent(node.body[0]))
+    || (node.type === "string_literal" && node.body[0].type === "heredoc")
 );
 
 const surround = (left, right) => (path, opts, print) => concat([

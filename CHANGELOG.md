@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Support squiggly heredocs.
+
 ### Changed
 - Ignore current indentation when creating embdocs so that `=begin` is always at the beginning of the line.
 - [INTERNAL] Move `regexp_add` and `regexp_new` handling into the parser.
