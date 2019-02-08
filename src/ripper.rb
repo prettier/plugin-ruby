@@ -32,24 +32,6 @@ class RipperJS < Ripper::SexpBuilder
 
   private
 
-  defined_events = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
-
-  (SCANNER_EVENTS - defined_events).each do |event|
-    module_eval(<<-End, __FILE__, __LINE__ + 1)
-      def on_#{event}(body)
-        build_scanner_event(:#{event}, body)
-      end
-    End
-  end
-
-  (PARSER_EVENTS - defined_events).each do |event|
-    module_eval(<<-End, __FILE__, __LINE__ + 1)
-      def on_#{event}(*body)
-        build_parser_event(:#{event}, body)
-      end
-    End
-  end
-
   def on_bodystmt(*body)
     build_sexp(:bodystmt, body).tap do |sexp|
       attach_comments_to(sexp, body[0])
@@ -185,8 +167,6 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  NO_COMMENTS = %i[args_new].freeze
-
   %i[mlhs mrhs qsymbols qwords regexp string symbols words xstring].each do |event|
     suffix = event == :string ? :content : :new
     define_method(:"on_#{event}_#{suffix}") do
@@ -201,9 +181,23 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
+  defined_events = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
+
+  (SCANNER_EVENTS - defined_events).each do |event|
+    define_method(:"on_#{event}") do |body|
+      build_scanner_event(event, body)
+    end
+  end
+
+  (PARSER_EVENTS - defined_events).each do |event|
+    define_method(:"on_#{event}") do |*body|
+      build_parser_event(event, body)
+    end
+  end
+
   def build_parser_event(type, body)
     build_sexp(type, body).tap do |sexp|
-      next if !inline_comment || NO_COMMENTS.include?(type)
+      next if !inline_comment || type == :args_new
 
       sexp[:comment] = inline_comment
       @inline_comment = nil
