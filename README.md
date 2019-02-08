@@ -52,7 +52,7 @@ end
 First, your system on which you're running is going to need a couple of things:
 
 * [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) `2.5` or newer - there are a lot of ways to install `ruby`, but I recommend [`rbenv`](https://github.com/rbenv/rbenv)
-* [`node`](https://nodejs.org/en/download/) - `prettier` is a JavaScript package, so you're going to need to install `node` to work with it
+* [`node`](https://nodejs.org/en/download/) `8.3` or newer - `prettier` is a JavaScript package, so you're going to need to install `node` to work with it
 * [`npm`](https://www.npmjs.com/get-npm) or [`yarn`](https://yarnpkg.com/en/docs/getting-started) - these are package managers for JavaScript, either one will do
 
 Second, you're going to need to list `prettier-plugin-ruby` as a JavaScript dependency from within whatever project on which you're working.
