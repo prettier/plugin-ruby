@@ -49,19 +49,37 @@ end
 
 ## Getting started
 
-First, add `prettier-plugin-ruby` to your `package.json` `dependencies`, then install using either `npm install` or `yarn install`.
+First, your system on which you're running is going to need a couple of things:
 
-Verify by running against a file:
+* [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) `2.5` or newer - there are a lot of ways to install `ruby`, but I recommend [`rbenv`](https://github.com/rbenv/rbenv)
+* [`node`](https://nodejs.org/en/download/) - `prettier` is a JavaScript package, so you're going to need to install `node` to work with it
+* [`npm`](https://www.npmjs.com/get-npm) or [`yarn`](https://yarnpkg.com/en/docs/getting-started) - these are package managers for JavaScript, either one will do
+
+Second, you're going to need to list `prettier-plugin-ruby` as a JavaScript dependency from within whatever project on which you're working.
+
+If you do not already have a `package.json` file in the root of your repository, you can create one with:
 
 ```
-prettier --write --plugin=prettier-plugin-ruby --parser=ruby path/to/file.rb
+echo '{ "name": "My Project" }' > package.json
+```
+
+After that you can add `prettier` and `prettier-plugin-ruby` to your `package.json` `dependencies` by running `npm install prettier prettier-plugin-ruby` if you are using `npm` or `yarn add prettier prettier-plugin-ruby` if you are using `yarn`.
+
+Finally, you can install your dependencies using either `npm install` for `npm` or `yarn install` for `yarn`.
+
+Now, you can run `prettier` to tidy up your `ruby` files! Verify by running against a file:
+
+```
+./node_modules/.bin/prettier --write --plugin=prettier-plugin-ruby --parser=ruby path/to/file.rb
 ```
 
 If you're happy, you can can run `prettier` on an entire codebase:
 
 ```
-prettier --write --plugin=prettier-plugin-ruby --parser=ruby **/*.rb
+./node_modules/.bin/prettier --write --plugin=prettier-plugin-ruby --parser=ruby **/*.rb
 ```
+
+Note that you can also install `prettier` globally with `npm install -g prettier` or you can add `./node_modules/.bin` to your `$PATH` so you don't need to reference the executable from the directory each time.
 
 ## Options
 
