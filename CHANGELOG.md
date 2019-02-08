@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Automatically add parens to method declarations.
 - Handle comments on bare hash assocs.
 - Handle `method_add_block` nodes where the statements may be nested one more level.
+- Handle heredocs nested no matter how many levels deep.
 
 ## [0.3.0] - 2019-02-07
 ### Added

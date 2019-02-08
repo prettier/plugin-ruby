@@ -37,7 +37,7 @@ class RipperJS < Ripper::SexpBuilder
   (SCANNER_EVENTS - defined_events).each do |event|
     module_eval(<<-End, __FILE__, __LINE__ + 1)
       def on_#{event}(body)
-        { type: :@#{event}, body: body, start: lineno, end: lineno }
+        build_scanner_event(:#{event}, body)
       end
     End
   end
@@ -45,7 +45,7 @@ class RipperJS < Ripper::SexpBuilder
   (PARSER_EVENTS - defined_events).each do |event|
     module_eval(<<-End, __FILE__, __LINE__ + 1)
       def on_#{event}(*body)
-        build_event(:#{event}, body)
+        build_parser_event(:#{event}, body)
       end
     End
   end
@@ -122,6 +122,18 @@ class RipperJS < Ripper::SexpBuilder
     @current_embdoc = nil
   end
 
+  def on_embexpr_beg(body)
+    build_scanner_event(:embexpr_beg, body).tap do |node|
+      heredoc_stack << node
+    end
+  end
+
+  def on_embexpr_end(body)
+    build_scanner_event(:embexpr_end, body).tap do
+      heredoc_stack.pop
+    end
+  end
+
   def on_heredoc_beg(beginning)
     heredoc_stack << { type: :heredoc, beginning: beginning, start: lineno, end: lineno }
   end
@@ -156,10 +168,10 @@ class RipperJS < Ripper::SexpBuilder
   end
 
   def on_string_literal(string)
-    if heredoc_stack.any? && string[:type] != :heredoc && string[:body][0][:start] > heredoc_stack[-1][:start]
+    if heredoc_stack.any? && string[:type] != :heredoc && heredoc_stack[-1][:type] == :heredoc
       string.merge!(heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
     else
-      build_event(:string_literal, [string])
+      build_parser_event(:string_literal, [string])
     end
   end
 
@@ -189,13 +201,17 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  def build_event(type, body)
+  def build_parser_event(type, body)
     build_sexp(type, body).tap do |sexp|
       next if !inline_comment || NO_COMMENTS.include?(type)
 
       sexp[:comment] = inline_comment
       @inline_comment = nil
     end
+  end
+
+  def build_scanner_event(type, body)
+    { type: :"@#{type}", body: body, start: lineno, end: lineno }
   end
 
   def build_sexp(type, body)

@@ -76,4 +76,16 @@ HERE
   }
 PARENT
 
+<<-GRAND
+#{'interpolated'}
+<<~PARENT
+  #{'more interpolated'}
+    <<-CHILD
+      #{'what is going on'}
+    CHILD
+  #{'more interpolated'}
+PARENT
+#{'interpolated'}
+GRAND
+
 # rubocop:enable Lint/Void
