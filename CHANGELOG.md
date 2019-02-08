@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Changed
 - [INTERNAL] Don't define duplicated methods in the parser.
+- Let prettier know about `.rb` and `.rake` files so you don't have to specify the parser when running.
 
 ## [0.3.1] - 2019-02-07
 ### Changed

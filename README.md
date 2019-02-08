@@ -70,13 +70,13 @@ Finally, you can install your dependencies using either `npm install` for `npm` 
 Now, you can run `prettier` to tidy up your `ruby` files! Verify by running against a file:
 
 ```
-./node_modules/.bin/prettier --write --plugin=prettier-plugin-ruby --parser=ruby path/to/file.rb
+./node_modules/.bin/prettier --write --plugin=prettier-plugin-ruby path/to/file.rb
 ```
 
 If you're happy, you can can run `prettier` on an entire codebase:
 
 ```
-./node_modules/.bin/prettier --write --plugin=prettier-plugin-ruby --parser=ruby **/*.rb
+./node_modules/.bin/prettier --write --plugin=prettier-plugin-ruby **/*.rb
 ```
 
 Note that you can also install `prettier` globally with `npm install -g prettier` or you can add `./node_modules/.bin` to your `$PATH` so you don't need to reference the executable from the directory each time.

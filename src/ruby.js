@@ -4,7 +4,10 @@ const print = require("./print");
 module.exports = {
   languages: [{
     name: "Ruby",
-    parsers: ["ruby"]
+    parsers: ["ruby"],
+    extensions: [".rb", ".rake"],
+    linguistLanguageId: 303,
+    vscodeLanguageIds: ["ruby"]
   }],
   parsers: {
     ruby: {
