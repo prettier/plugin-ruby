@@ -1134,6 +1134,18 @@ if a
 else
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
+
+if a
+  b 1
+else
+  b(2)
+end
+
+if a
+  b(1)
+else
+  b 2
+end
 "
 `;
 
@@ -1209,6 +1221,18 @@ if a
   super_super_super_super_super_super_super_super_super_super_super_long
 else
   super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+if a
+  b 1
+else
+  b(2)
+end
+
+if a
+  b(1)
+else
+  b 2
 end
 "
 `;
