@@ -1,11 +1,11 @@
-# prettier-ruby
+# @prettier/plugin-ruby
 
-[![Build Status](https://travis-ci.org/kddeisz/prettier-ruby.svg?branch=master)](https://travis-ci.org/kddeisz/prettier-ruby)
-[![NPM Version](https://img.shields.io/npm/v/prettier-plugin-ruby.svg)](https://www.npmjs.com/package/prettier-plugin-ruby)
+[![Build Status](https://travis-ci.org/prettier/plugin-ruby.svg?branch=master)](https://travis-ci.org/prettier/plugin-ruby)
+[![NPM Version](https://img.shields.io/npm/v/@prettier/plugin-ruby.svg)](https://www.npmjs.com/package/@prettier/plugin-ruby)
 
-`prettier-ruby` is a [prettier](https://prettier.io/) plugin for the Ruby programming language. `prettier` is an opinionated code formatter that supports multiple languages and integrates with most editors. The idea is to eliminate discussions of style in code review and allow developers to get back to thinking about code design instead.
+`@prettier/plugin-ruby` is a [prettier](https://prettier.io/) plugin for the Ruby programming language. `prettier` is an opinionated code formatter that supports multiple languages and integrates with most editors. The idea is to eliminate discussions of style in code review and allow developers to get back to thinking about code design instead.
 
-Under the hood `prettier-ruby` uses Ruby's own `ripper` library which allows this package to maintain parity with the existing Ruby parser. `prettier-ruby` supports Ruby versions `2.5`, `2.6`, and `trunk`.
+Under the hood `@prettier/plugin-ruby` uses Ruby's own `ripper` library which allows this package to maintain parity with the existing Ruby parser. `@prettier/plugin-ruby` supports Ruby versions `2.5`, `2.6`, and `trunk`.
 
 For example, the below [code segment](http://www.rubyinside.com/advent2006/4-ruby-obfuscation.html):
 
@@ -25,7 +25,7 @@ For example, the below [code segment](http://www.rubyinside.com/advent2006/4-rub
                     }
 ```
 
-when run through `prettier-ruby` will generate:
+when run through `@prettier/plugin-ruby` will generate:
 
 ```ruby
 d = [
@@ -83,7 +83,7 @@ Note that you can also install `prettier` globally with `npm install -g prettier
 
 ## Options
 
-Below are the options (from [`src/ruby.js`](src/ruby.js)) that `prettier-ruby` currently supports:
+Below are the options (from [`src/ruby.js`](src/ruby.js)) that `@prettier/plugin-ruby` currently supports:
 
 * `inlineConditionals` - When it fits on one line, allow if and unless statements to use the modifier form.
 * `inlineLoops` - When it fits on one line, allow while and until statements to use the modifier form.
@@ -101,7 +101,7 @@ Useful resources for understanding the AST structure are:
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/kddeisz/prettier-ruby.
+Bug reports and pull requests are welcome on GitHub at https://github.com/prettier/plugin-ruby.
 
 ## License
 
