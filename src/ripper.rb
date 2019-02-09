@@ -4,7 +4,7 @@ require 'json'
 require 'ripper'
 
 class RipperJS < Ripper::SexpBuilder
-  attr_reader :block_comments, :inline_comment
+  attr_reader :block_comments, :inline_comments
   attr_reader :current_embdoc, :heredoc_stack
   attr_reader :last_sexp
 
@@ -16,7 +16,7 @@ class RipperJS < Ripper::SexpBuilder
     super
 
     @block_comments = []
-    @inline_comment = nil
+    @inline_comments = []
 
     @current_embdoc = nil
     @heredoc_stack = []
@@ -76,13 +76,13 @@ class RipperJS < Ripper::SexpBuilder
     when 'EXPR_BEG'
       block_comments << sexp
     when 'EXPR_END', 'EXPR_ARG|EXPR_LABELED', 'EXPR_ENDFN'
-      last_sexp.merge!(comment: sexp)
+      last_sexp.merge!(comments: [sexp])
     when 'EXPR_CMDARG', 'EXPR_END|EXPR_ENDARG', 'EXPR_ENDARG', 'EXPR_ARG', 'EXPR_FNAME|EXPR_FITEM', 'EXPR_CLASS'
-      @inline_comment = sexp
+      @inline_comments << sexp
     when 'EXPR_BEG|EXPR_LABEL', 'EXPR_MID'
-      @inline_comment = sexp.merge!(break: true)
+      @inline_comments << sexp.merge!(break: true)
     when 'EXPR_DOT'
-      last_sexp.merge!(comment: sexp.merge!(break: true))
+      last_sexp.merge!(comments: [sexp.merge!(break: true)])
     end
   end
 
@@ -205,10 +205,10 @@ class RipperJS < Ripper::SexpBuilder
 
   def build_parser_event(type, body)
     build_sexp(type, body).tap do |sexp|
-      next if !inline_comment || type == :args_new
+      next if inline_comments.empty? || type == :args_new
 
-      sexp[:comment] = inline_comment
-      @inline_comment = nil
+      sexp[:comments] = inline_comments.reverse
+      @inline_comments = []
     end
   end
 

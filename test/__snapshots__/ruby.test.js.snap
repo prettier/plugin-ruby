@@ -693,6 +693,7 @@ foo # this is an inline comment
 bar # this is another inline comment
 
 [
+  # these are comments
   # inside of an array
   foo,
   # inside of an array
@@ -773,6 +774,7 @@ foo # this is an inline comment
 bar # this is another inline comment
 
 [
+  # these are comments
   # inside of an array
   foo,
   # inside of an array
