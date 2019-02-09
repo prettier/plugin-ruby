@@ -1,11 +1,11 @@
-<div style="text-align: center">
+<div align="center">
   <img alt="Prettier" height="124px" src="https://cdn.rawgit.com/prettier/prettier-logo/master/images/prettier-icon-light.svg">
   <img alt="Ruby" height="124px" vspace="" hspace="25" src="https://www.ruby-lang.org/images/header-ruby-logo@2x.png">
 </div>
 
-<h2 style="text-align: center">Prettier for Ruby</h2>
+<h2 align="center">Prettier for Ruby</h2>
 
-<p style="text-align: center">
+<p align="center">
   <a href="https://gitter.im/jlongster/prettier">
     <img alt="Gitter" src="https://img.shields.io/gitter/room/jlongster/prettier.svg?style=flat-square">
   </a>
