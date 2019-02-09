@@ -1862,6 +1862,8 @@ PARENT
 #{\\"interpolated\\"}
 GRAND
 
+\\"abc \\\\\\"abc\\\\\\" abc\\"
+
 # rubocop:enable Lint/Void
 "
 `;
@@ -1954,6 +1956,8 @@ PARENT
 PARENT
 #{'interpolated'}
 GRAND
+
+'abc \\"abc\\" abc'
 
 # rubocop:enable Lint/Void
 "
