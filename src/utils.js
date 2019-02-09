@@ -1,4 +1,4 @@
-const { concat } = require("prettier").doc.builders;
+const { breakParent, concat, hardline, lineSuffix } = require("prettier").doc.builders;
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
@@ -16,6 +16,29 @@ const prefix = value => (path, opts, print) => concat([
   value,
   path.call(print, "body", 0)
 ]);
+
+const printComments = (printed, start, comments) => {
+  let node = printed;
+
+  comments.forEach(comment => {
+    if (comment.start < start) {
+      node = concat([
+        comment.break ? breakParent : "",
+        comment.body,
+        hardline,
+        node
+      ]);
+    } else {
+      node = concat([
+        node,
+        comment.break ? breakParent : "",
+        lineSuffix(` ${comment.body}`)
+      ]);
+    }
+  });
+
+  return node;
+};
 
 const skipAssignIndent = node => (
   ["array", "hash", "heredoc"].includes(node.type)
@@ -36,6 +59,7 @@ module.exports = {
   literal,
   makeCall,
   prefix,
+  printComments,
   skipAssignIndent,
   surround
 };

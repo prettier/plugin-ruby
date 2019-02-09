@@ -1,5 +1,5 @@
 const { align, breakParent, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
-const { concatBody, empty, first, literal, makeCall, prefix, skipAssignIndent, surround } = require("./utils");
+const { concatBody, empty, first, literal, makeCall, prefix, printComments, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
   ...require("./nodes/alias"),
@@ -95,13 +95,14 @@ module.exports = {
         break;
       case "symbol_literal":
         if (preferHashLabels && path.getValue().body[0].body.length === 1) {
-          const { comment } = path.getValue().body[0];
+          const { comments, start } = path.getValue().body[0];
+          const node = concat([path.call(print, "body", 0, "body", 0, "body", 0), ":"]);
 
-          parts.push(concat([
-            path.call(print, "body", 0, "body", 0, "body", 0),
-            ":",
-            comment ? lineSuffix(` ${comment.body}`) : ""
-          ]));
+          if (comments) {
+            parts.push(printComments(node, start, comments));
+          } else {
+            parts.push(node);
+          }
         } else {
           parts.push(concat([printedLabel, " =>"]));
         }

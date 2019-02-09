@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Changed
 - Comments are now properly attached inside `defs` nodes.
+- Support multiple inline comments on nodes.
 
 ## [0.3.3] - 2019-02-09
 ### Changed
