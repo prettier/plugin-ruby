@@ -39,6 +39,10 @@ module Foo
       # this comment is inside a method
     end
 
+    def foo
+      print message # this is an inline comment
+    end
+
     def self.foo
       # this comment is inside a self method
     end
