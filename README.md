@@ -101,14 +101,18 @@ If you're happy, you can can run `prettier` on an entire codebase:
 
 Note that you can also install `prettier` globally with `npm install -g prettier` or you can add `./node_modules/.bin` to your `$PATH` so you don't need to reference the executable from the directory each time.
 
-## Options
+## Configuration
 
 Below are the options (from [`src/ruby.js`](src/ruby.js)) that `@prettier/plugin-ruby` currently supports:
 
-* `inlineConditionals` - When it fits on one line, allow if and unless statements to use the modifier form.
-* `inlineLoops` - When it fits on one line, allow while and until statements to use the modifier form.
-* `preferHashLabels` - When possible, use the shortened hash key syntax, as opposed to hash rockets.
-* `preferSingleQuotes` - When double quotes are not necessary for interpolation, prefer the use of single quotes for string literals.
+| --- | --- | --- |
+| `printWidth` | `80` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)). |
+| `tabWidth` | `2` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)). |
+| `inlineConditionals` | `true` | When it fits on one line, allows if and unless statements to use the modifier form. |
+| `inlineLoops` | `true` | When it fits on one line, allows while and until statements to use the modifier form. |
+| `preferHashLabels` | `true` | When possible, uses the shortened hash key syntax, as opposed to hash rockets. |
+| `preferSingleQuotes` | `true` | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals. |
+| --- | --- | --- |
 
 ## Development
 
