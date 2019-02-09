@@ -1,7 +1,27 @@
-# @prettier/plugin-ruby
+<div style="text-align: center">
+  <img alt="Prettier" height="124px" src="https://cdn.rawgit.com/prettier/prettier-logo/master/images/prettier-icon-light.svg">
+  <img alt="Ruby" height="124px" vspace="" hspace="25" src="https://www.ruby-lang.org/images/header-ruby-logo@2x.png">
+</div>
 
-[![Build Status](https://travis-ci.org/prettier/plugin-ruby.svg?branch=master)](https://travis-ci.org/prettier/plugin-ruby)
-[![NPM Version](https://img.shields.io/npm/v/@prettier/plugin-ruby.svg)](https://www.npmjs.com/package/@prettier/plugin-ruby)
+<h2 style="text-align: center">Prettier for Ruby</h2>
+
+<p style="text-align: center">
+  <a href="https://gitter.im/jlongster/prettier">
+    <img alt="Gitter" src="https://img.shields.io/gitter/room/jlongster/prettier.svg?style=flat-square">
+  </a>
+  <a href="https://travis-ci.org/prettier/plugin-ruby">
+    <img alt="Travis" src="https://img.shields.io/travis/prettier/plugin-ruby/master.svg?style=flat-square">
+  </a>
+  <a href="https://www.npmjs.com/package/@prettier/plugin-ruby">
+    <img alt="NPM Version" src="https://img.shields.io/npm/v/@prettier/plugin-ruby.svg?style=flat-square">
+  </a>
+  <a href="#badge">
+    <img alt="code style: prettier" src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square">
+  </a>
+  <a href="https://twitter.com/PrettierCode">
+    <img alt="Follow+Prettier+on+Twitter" src="https://img.shields.io/twitter/follow/prettiercode.svg?label=follow+prettier&style=flat-square">
+  </a>
+</p>
 
 `@prettier/plugin-ruby` is a [prettier](https://prettier.io/) plugin for the Ruby programming language. `prettier` is an opinionated code formatter that supports multiple languages and integrates with most editors. The idea is to eliminate discussions of style in code review and allow developers to get back to thinking about code design instead.
 
