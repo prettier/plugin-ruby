@@ -71,3 +71,15 @@ end
 a ? 1 : 2
 a ? super_super_super_super_super_super_super_super_super_super_super_long
   : super_super_super_super_super_super_super_super_super_super_super_super_long
+
+if a
+  b 1
+else
+  b(2)
+end
+
+if a
+  b(1)
+else
+  b 2
+end

@@ -284,10 +284,15 @@ module.exports = {
     concat(path.call(print, "body", 0)),
     "\""
   ]),
-  else: (path, opts, print) => concat([
-    "else",
-    indent(concat([softline, path.call(print, "body", 0)]))
-  ]),
+  else: (path, opts, print) => {
+    const stmts = path.getValue().body[0];
+
+    return concat([
+      stmts.body.length === 1 && stmts.body[0].type === "command" ? breakParent : "",
+      "else",
+      indent(concat([softline, path.call(print, "body", 0)]))
+    ]);
+  },
   elsif: (path, opts, print) => {
     const [_predicate, _statements, addition] = path.getValue().body;
     const parts = [
