@@ -92,6 +92,12 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
+  def on_defs(*body)
+    build_sexp(:defs, body).tap do |sexp|
+      attach_comments_to(sexp, body[4][:body][0])
+    end
+  end
+
   def on_embdoc_beg(comment)
     @current_embdoc = { type: :embdoc, body: comment, start: lineno, end: lineno }
   end

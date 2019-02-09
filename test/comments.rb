@@ -38,6 +38,10 @@ module Foo
     def foo
       # this comment is inside a method
     end
+
+    def self.foo
+      # this comment is inside a self method
+    end
   end
 end
 
