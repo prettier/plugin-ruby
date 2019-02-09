@@ -26,6 +26,8 @@ class RipperJS < Ripper::SexpBuilder
 
   def parse
     super.tap do |sexp|
+      next if block_comments.empty?
+
       sexp[:body][0][:body] = (block_comments + sexp.dig(:body, 0, :body)).sort_by { |node| node[:start] }
     end
   end

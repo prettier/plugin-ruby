@@ -88,4 +88,6 @@ PARENT
 #{'interpolated'}
 GRAND
 
+'abc "abc" abc'
+
 # rubocop:enable Lint/Void
