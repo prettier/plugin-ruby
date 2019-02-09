@@ -49,6 +49,11 @@ loop do |i|
 end
 
 loop do |i|
+  i.to_s
+  i.next
+end
+
+loop do |i|
   i.to_s :db
 end
 

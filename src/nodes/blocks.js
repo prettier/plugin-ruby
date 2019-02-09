@@ -1,4 +1,10 @@
-const { concat, group, ifBreak, indent, softline } = require("prettier").doc.builders;
+const {
+  concat,
+  group,
+  ifBreak,
+  indent,
+  softline
+} = require("prettier").doc.builders;
 
 const isCall = node => ["::", "."].includes(node) || node.type === "@period";
 
@@ -14,7 +20,7 @@ const isCall = node => ["::", "."].includes(node) || node.type === "@period";
 //
 // This additionally works with `do` blocks as well.
 const toProcTransform = (path, opts, print) => {
-  const [variables, statements] = path.getValue().body;
+  const [variables, blockContents] = path.getValue().body;
 
   // Ensure that there are variables being passed to this block.
   const params = variables && variables.body[0];
@@ -23,36 +29,47 @@ const toProcTransform = (path, opts, print) => {
   }
 
   // Ensure there is one and only one parameter, and that it is required.
-  const reqParams = params.body[0];
-  if (params.body.slice(1).some(varType => varType) || reqParams.length !== 1) {
+  const [requiredPositionalParams, ...otherParamTypes] = params.body;
+  if (
+    !Array.isArray(requiredPositionalParams) ||
+    requiredPositionalParams.length !== 1 ||
+    otherParamTypes.some(Boolean)
+  ) {
     return;
   }
 
-  let callBody;
+  let statements;
+  if (blockContents.type === "bodystmt") {
+    // We’re in a `do` block
+    const [blockStatements, ...rescueElseEnsure] = blockContents.body;
 
-  // If the statement types match this pattern, we're in a brace block with an
-  // eligible block.
-  if (statements.body.length === 1 && statements.body[0].type === "call") {
-    callBody = statements.body[0].body;
+    // You can’t use the to_proc shortcut if you’re rescuing
+    if (rescueElseEnsure.some(Boolean)) return;
+
+    statements = blockStatements;
+  } else {
+    // We’re in a brace block
+    statements = blockContents;
   }
 
-  // If the statement types match this pattern, we're in a `do` block with an
-  // eligible block.
-  const statementTypes = statements.body.map(statement => statement && statement.type);
-  if (statementTypes.length === 4 && statementTypes[0] === "stmts" && statementTypes.slice(1).every(statementType => !statementType)) {
-    callBody = statements.body[0].body[0].body;
-  }
+  // Ensure the block contains only one statement
+  if (statements.body.length !== 1) return;
 
-  // If we have a call, then we can compare to ensure the variables are the
-  // same.
+  // Ensure that statement is a call
+  const [statement] = statements.body;
+  if (statement.type !== "call") return;
+
+  // Ensure the call is a method of the block argument
+  const [varRef, call, method, args] = statement.body;
+
   if (
-    callBody && callBody[0] && callBody[0].type === "var_ref"
-    && callBody[0].body[0].body === reqParams[0].body
-    && isCall(callBody[1])
-    && callBody[2].type === "@ident"
-    && !callBody[3]
+    varRef.type === "var_ref" &&
+    varRef.body[0].body === requiredPositionalParams[0].body &&
+    isCall(call) &&
+    method.type === "@ident" &&
+    !args
   ) {
-    return `(&:${callBody[2].body})`;
+    return `(&:${method.body})`;
   }
 };
 
@@ -73,8 +90,12 @@ const printBlock = (path, opts, print) => {
 
   // We can hit this next pattern if within the block the only statement is a
   // comment.
-  const stmts = statements.type === "stmts" ? statements.body : statements.body[0].body;
-  if (stmts.length > 1 && (stmts.filter(stmt => stmt.type !== "@comment").length === 1)) {
+  const stmts =
+    statements.type === "stmts" ? statements.body : statements.body[0].body;
+  if (
+    stmts.length > 1 &&
+    stmts.filter(stmt => stmt.type !== "@comment").length === 1
+  ) {
     return doBlock;
   }
 
