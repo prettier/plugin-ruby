@@ -419,6 +419,10 @@ module.exports = {
       return "next";
     }
 
+    if (path.getValue().body[0].type === "args_add") {
+      return concat(["next ", path.call(print, "body", 0)]);
+    }
+
     if (args.body[1].type !== "paren") {
       return concat(["next ", path.call(print, "body", 0)]);
     }

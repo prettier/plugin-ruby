@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Support inline comments from within the `EXPR_END|EXPR_LABEL` lexer state.
 - Stop transforming multistatement blocks with `to_proc`. (Thanks to @cbothner.)
 - `do` blocks necessarily need to break their parent nodes.
+- Handle `next` node edge case with `args_add` as the body. (Thanks to @eins78 for the report.)
 
 ## [0.3.3] - 2019-02-09
 ### Changed
