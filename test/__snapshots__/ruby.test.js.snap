@@ -343,6 +343,12 @@ loop { |i, j| i.to_s }
   p i
 end
 
+def change
+  change_table :foo do
+    column :bar
+  end
+end
+
 # rubocop:disable Lint/AmbiguousBlockAssociation
 # We should handle this.
 
@@ -408,6 +414,12 @@ loop { |i, j| i.to_s }
 
 [1, 2, 3].each do |i|
   p i
+end
+
+def change
+  change_table :foo do
+    column :bar
+  end
 end
 
 # rubocop:disable Lint/AmbiguousBlockAssociation

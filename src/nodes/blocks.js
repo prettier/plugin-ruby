@@ -1,10 +1,4 @@
-const {
-  concat,
-  group,
-  ifBreak,
-  indent,
-  softline
-} = require("prettier").doc.builders;
+const { breakParent, concat, group, ifBreak, indent, softline } = require("prettier").doc.builders;
 
 const isCall = node => ["::", "."].includes(node) || node.type === "@period";
 
@@ -29,12 +23,8 @@ const toProcTransform = (path, opts, print) => {
   }
 
   // Ensure there is one and only one parameter, and that it is required.
-  const [requiredPositionalParams, ...otherParamTypes] = params.body;
-  if (
-    !Array.isArray(requiredPositionalParams) ||
-    requiredPositionalParams.length !== 1 ||
-    otherParamTypes.some(Boolean)
-  ) {
+  const [reqParams, ...other] = params.body;
+  if (!Array.isArray(reqParams) || reqParams.length !== 1 || other.some(Boolean)) {
     return;
   }
 
@@ -44,7 +34,9 @@ const toProcTransform = (path, opts, print) => {
     const [blockStatements, ...rescueElseEnsure] = blockContents.body;
 
     // You can’t use the to_proc shortcut if you’re rescuing
-    if (rescueElseEnsure.some(Boolean)) return;
+    if (rescueElseEnsure.some(Boolean)) {
+      return;
+    }
 
     statements = blockStatements;
   } else {
@@ -53,18 +45,22 @@ const toProcTransform = (path, opts, print) => {
   }
 
   // Ensure the block contains only one statement
-  if (statements.body.length !== 1) return;
+  if (statements.body.length !== 1) {
+    return;
+  }
 
   // Ensure that statement is a call
   const [statement] = statements.body;
-  if (statement.type !== "call") return;
+  if (statement.type !== "call") {
+    return;
+  }
 
   // Ensure the call is a method of the block argument
   const [varRef, call, method, args] = statement.body;
 
   if (
     varRef.type === "var_ref" &&
-    varRef.body[0].body === requiredPositionalParams[0].body &&
+    varRef.body[0].body === reqParams[0].body &&
     isCall(call) &&
     method.type === "@ident" &&
     !args
@@ -90,19 +86,15 @@ const printBlock = (path, opts, print) => {
 
   // We can hit this next pattern if within the block the only statement is a
   // comment.
-  const stmts =
-    statements.type === "stmts" ? statements.body : statements.body[0].body;
-  if (
-    stmts.length > 1 &&
-    stmts.filter(stmt => stmt.type !== "@comment").length === 1
-  ) {
-    return doBlock;
+  const stmts = statements.type === "stmts" ? statements.body : statements.body[0].body;
+  if (stmts.length > 1 && stmts.filter(stmt => stmt.type !== "@comment").length === 1) {
+    return concat([breakParent, doBlock]);
   }
 
   // If the parent node is a command node, then there are no parentheses around
   // the arguments to that command, so we need to break the block
   if (path.getParentNode().body[0].type === "command") {
-    return doBlock;
+    return concat([breakParent, doBlock]);
   }
 
   const braceBlock = concat([
