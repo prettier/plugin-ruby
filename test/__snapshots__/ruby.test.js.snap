@@ -330,6 +330,11 @@ loop(&:to_s)
 
 loop(&:to_s)
 
+loop do |i|
+  i.to_s
+  i.next
+end
+
 loop { |i| i.to_s :db }
 
 loop { |i, j| i.to_s }
@@ -391,6 +396,11 @@ loop { |i| super_super_super_super_super_super_super_super_super_super_long }
 loop(&:to_s)
 
 loop(&:to_s)
+
+loop do |i|
+  i.to_s
+  i.next
+end
 
 loop { |i| i.to_s :db }
 
