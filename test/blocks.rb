@@ -63,6 +63,12 @@ for i in [1, 2, 3] do
   p i
 end
 
+def change
+  change_table :foo do
+    column :bar
+  end
+end
+
 # rubocop:disable Lint/AmbiguousBlockAssociation
 # We should handle this.
 
