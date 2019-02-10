@@ -8,9 +8,15 @@ const first = (path, opts, print) => path.call(print, "body", 0);
 
 const literal = value => () => value;
 
-const makeCall = (path, opts, print) => (
-  ["::", "."].includes(path.getValue().body[1]) ? "." : path.call(print, "body", 1)
-);
+const makeCall = (path, opts, print) => {
+  const operation = path.getValue().body[1];
+
+  if ([".", "&."].includes(operation)) {
+    return operation;
+  }
+
+  return operation === "::" ? "." : path.call(print, "body", 1);
+};
 
 const prefix = value => (path, opts, print) => concat([
   value,
