@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Comments are now properly attached inside `defs` nodes.
 - Support multiple inline comments on nodes.
 - Support inline comments from within the `EXPR_END|EXPR_LABEL` lexer state.
+- Stop transforming multistatement blocks with `to_proc`. (Thanks to @cbothner.)
 
 ## [0.3.3] - 2019-02-09
 ### Changed
