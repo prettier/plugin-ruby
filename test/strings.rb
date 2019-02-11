@@ -12,6 +12,8 @@
 
 "#{abc} abc"
 
+"abc #{foo; bar} abc"
+
 "abc #{de} fghi #{jkl} mno"
 
 'abc' \
