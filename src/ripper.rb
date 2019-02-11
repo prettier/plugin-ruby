@@ -8,9 +8,11 @@ class RipperJS < Ripper::SexpBuilder
   attr_reader :current_embdoc, :heredoc_stack
   attr_reader :last_sexp
 
+  REQUIRED_RUBY_VERSION = '2.5'
+
   def initialize(*args)
-    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.5')
-      raise 'Unsupported ruby version'
+    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new(REQUIRED_RUBY_VERSION)
+      raise "Ruby version #{RUBY_VERSION} not supported. Please upgrade to #{REQUIRED_RUBY_VERSION} or above."
     end
 
     super
@@ -180,7 +182,7 @@ class RipperJS < Ripper::SexpBuilder
     define_method(:"on_#{event}_#{suffix}") do
       { type: event, body: [], start: lineno, end: lineno }
     end
- 
+
     define_method(:"on_#{event}_add") do |parts, part|
       parts.tap do |node|
         node[:body] << part
