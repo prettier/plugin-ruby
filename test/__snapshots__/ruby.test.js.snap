@@ -1104,6 +1104,10 @@ if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
+if not a
+  b
+end
+
 if a
   break # comment
 end
@@ -1195,6 +1199,8 @@ exports[`if.rb matches expected output for on.json 1`] = `
 if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
+
+b if not a
 
 if a
   break # comment

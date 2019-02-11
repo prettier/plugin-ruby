@@ -539,10 +539,14 @@ module.exports = {
   symbol_literal: concatBody,
   top_const_field: prefix("::"),
   top_const_ref: prefix("::"),
-  unary: (path, opts, print) => concat([
-    path.getValue().body[0][0],
-    path.call(print, "body", 1)
-  ]),
+  unary: (path, opts, print) => {
+    const operator = path.getValue().body[0];
+
+    return concat([
+      operator === "not" ? "not " : operator[0],
+      path.call(print, "body", 1)
+    ]);
+  },
   undef: (path, opts, print) => concat([
     "undef ",
     path.call(print, "body", 0, 0)
