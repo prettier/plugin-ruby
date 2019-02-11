@@ -76,5 +76,21 @@ Foo.where(
   # This is a comment
 ).to_a.find { |foo| foo.foo == bar.foo }
 
+if foo
+  # this is a comment in an if
+  bar
+end
+
+unless foo
+  # this is a comment in an unless
+  bar
+end
+
+case foo
+when bar
+  # this is a comment in a when
+  baz
+end
+
 # this is a comment
 # at the end of the file

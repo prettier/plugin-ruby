@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Changed
 - Support the `not` operator properly. (Thanks to @AlanFoster for the report.)
+- Handle comments properly inside `if`, `unless`, and `when` nodes. (Thanks to @AlanFoster for the report.)
 
 ## [0.3.5] - 2019-02-09
 ### Changed
