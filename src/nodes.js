@@ -515,10 +515,10 @@ module.exports = {
         parts.push(printed);
       } else if (stmt.start - line > 1) {
         parts.push(hardline, hardline, printed);
-      } else if (stmt.start === line) {
-        parts.push("; ", printed);
-      } else {
+      } else if (stmt.start !== line || path.getParentNode().type !== "string_embexpr") {
         parts.push(hardline, printed);
+      } else {
+        parts.push("; ", printed);
       }
 
       line = stmt.end;
