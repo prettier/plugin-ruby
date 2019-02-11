@@ -4,6 +4,10 @@ if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
+if not a
+  b
+end
+
 if a
   break # comment
 end
