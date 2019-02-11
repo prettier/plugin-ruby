@@ -12,6 +12,8 @@
 
 "#{abc} abc"
 
+"{\"abc\": true}"
+
 "abc #{foo; bar} abc"
 
 "abc #{de} fghi #{jkl} mno"

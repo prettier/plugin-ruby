@@ -5,8 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.3.7] - 2019-02-11
 ### Changed
 - Split up statements even if they started on the same line with `;`s unless they are within an embedded expression.
+- Properly handle escaped quotes within strings.
 
 ## [0.3.6] - 2019-02-10
 ### Changed
@@ -95,7 +98,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 - Initial release 🎉
 
-[Unreleased]: https://github.com/CultureHQ/add-to-calendar/compare/v0.3.6...HEAD
+[Unreleased]: https://github.com/CultureHQ/add-to-calendar/compare/v0.3.7...HEAD
+[0.3.7]: https://github.com/CultureHQ/add-to-calendar/compare/v0.3.6...v0.3.7
 [0.3.6]: https://github.com/CultureHQ/add-to-calendar/compare/v0.3.5...v0.3.6
 [0.3.5]: https://github.com/CultureHQ/add-to-calendar/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/CultureHQ/add-to-calendar/compare/v0.3.3...v0.3.4
