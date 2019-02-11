@@ -96,7 +96,7 @@ Now, you can run `prettier` to tidy up your `ruby` files! Verify by running agai
 If you're happy, you can can run `prettier` on an entire codebase:
 
 ```
-./node_modules/.bin/prettier --write --plugin=@prettier/plugin-ruby **/*.rb
+./node_modules/.bin/prettier --write --plugin=@prettier/plugin-ruby "**/*.{rb,rake}"
 ```
 
 Note that you can also install `prettier` globally with `npm install -g prettier` or you can add `./node_modules/.bin` to your `$PATH` so you don't need to reference the executable from the directory each time.
