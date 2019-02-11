@@ -743,6 +743,22 @@ Foo.where(:foo => bar, :bar => baz).to_a.find do |foo|
   foo.foo == bar.foo
 end
 
+if foo
+  # this is a comment in an if
+  bar
+end
+
+unless foo
+  # this is a comment in an unless
+  bar
+end
+
+case foo
+when bar
+  # this is a comment in a when
+  baz
+end
+
 # this is a comment
 # at the end of the file
 "
@@ -826,6 +842,22 @@ foo # inline comment inside of a dot
 Foo.where(foo: bar, bar: baz).to_a.find do |foo|
   # This is a comment
   foo.foo == bar.foo
+end
+
+if foo
+  # this is a comment in an if
+  bar
+end
+
+unless foo
+  # this is a comment in an unless
+  bar
+end
+
+case foo
+when bar
+  # this is a comment in a when
+  baz
 end
 
 # this is a comment

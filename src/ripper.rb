@@ -138,6 +138,12 @@ class RipperJS < Ripper::SexpBuilder
     string.merge!(heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
   end
 
+  def on_if(*body)
+    build_sexp(:if, body).tap do |sexp|
+      attach_comments_to(sexp, body[1])
+    end
+  end
+
   def on_method_add_block(*body)
     build_sexp(:method_add_block, body).tap do |sexp|
       stmts = body[1][:body][1][:type] == :stmts ? body[1][:body][1] : body[1][:body][1][:body][0]
@@ -164,6 +170,18 @@ class RipperJS < Ripper::SexpBuilder
       string.merge!(heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
     else
       build_parser_event(:string_literal, [string])
+    end
+  end
+
+  def on_unless(*body)
+    build_sexp(:unless, body).tap do |sexp|
+      attach_comments_to(sexp, body[1])
+    end
+  end
+
+  def on_when(*body)
+    build_sexp(:when, body).tap do |sexp|
+      attach_comments_to(sexp, body[1])
     end
   end
 
