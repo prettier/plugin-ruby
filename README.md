@@ -80,7 +80,7 @@ Second, you're going to need to list `@prettier/plugin-ruby` as a JavaScript dep
 
 If you do not already have a `package.json` file in the root of your repository, you can create one with:
 
-```
+```bash
 echo '{ "name": "My Project" }' > package.json
 ```
 
@@ -90,13 +90,13 @@ Finally, you can install your dependencies using either `npm install` for `npm` 
 
 Now, you can run `prettier` to tidy up your `ruby` files! Verify by running against a file:
 
-```
+```bash
 ./node_modules/.bin/prettier --write --plugin=@prettier/plugin-ruby path/to/file.rb
 ```
 
 If you're happy, you can can run `prettier` on an entire codebase:
 
-```
+```bash
 ./node_modules/.bin/prettier --write --plugin=@prettier/plugin-ruby '**/*.{rb,rake}'
 ```
 
