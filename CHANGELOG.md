@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Changed
 - [INTERNAL] Provide the `makeList` utility for the nodes that are lists from within ripper.
+- Again, this time for real, properly escape strings. (Thanks to @awinograd for the report.)
 
 ## [0.4.0] - 2019-02-12
 ### Added
