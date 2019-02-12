@@ -1,9 +1,9 @@
-const { concat, group, indent, join, line, softline } = require("prettier").doc.builders;
+const { concat, group, ifBreak, indent, join, line, softline } = require("prettier").doc.builders;
 
 const makeArray = start => (path, opts, print) => [start, ...path.map(print, "body")];
 
 module.exports = {
-  array: (path, opts, print) => {
+  array: (path, { trailingComma }, print) => {
     if (path.getValue().body[0] === null) {
       return '[]';
     }
@@ -11,7 +11,11 @@ module.exports = {
     if (["args_add", "args_add_star"].includes(path.getValue().body[0].type)) {
       return group(concat([
         "[",
-        indent(concat([softline, path.call(print, "body", 0)])),
+        indent(concat([
+          softline,
+          path.call(print, "body", 0),
+          trailingComma ? ifBreak(",", "") : ""
+        ])),
         concat([softline, "]"])
       ]));
     }

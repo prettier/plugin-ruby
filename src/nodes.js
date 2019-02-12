@@ -55,7 +55,7 @@ module.exports = {
     const buffer = skipAssignIndent(rightArg) ? ", " : concat([",", line]);
     return join(buffer, path.map(print, "body"));
   },
-  args_add_block: (path, opts, print) => {
+  args_add_block: (path, { trailingComma }, print) => {
     const [args, block] = path.getValue().body;
     const parts = args.type === "args_new" ? [] : [path.call(print, "body", 0)];
 
@@ -66,7 +66,10 @@ module.exports = {
       parts.push(concat(["&", path.call(print, "body", 1)]));
     }
 
-    return group(concat(parts));
+    return group(concat([
+      ...parts,
+      trailingComma ? ifBreak(",", "") : ""
+    ]));
   },
   args_add_star: (path, opts, print) => {
     if (path.getValue().body[0].type === "args_new") {
@@ -141,7 +144,9 @@ module.exports = {
   assign_error: (path, opts, print) => {
     throw new Error("Can't set variable");
   },
-  bare_assoc_hash: (path, opts, print) => group(join(concat([",", line]), path.map(print, "body", 0))),
+  bare_assoc_hash: (path, opts, print) => group(
+    join(concat([",", line]), path.map(print, "body", 0))
+  ),
   begin: (path, opts, print) => group(concat([
     "begin",
     indent(concat([hardline, concat(path.map(print, "body"))])),
@@ -318,14 +323,18 @@ module.exports = {
     path.call(print, "body", 0),
     concat([makeCall(path, opts, print), path.call(print, "body", 2)])
   ])),
-  hash: (path, opts, print) => {
+  hash: (path, { trailingComma }, print) => {
     if (path.getValue().body[0] === null) {
       return '{}';
     }
 
     return group(concat([
       "{",
-      indent(concat([line, concat(path.map(print, "body"))])),
+      indent(concat([
+        line,
+        concat(path.map(print, "body")),
+        trailingComma ? ifBreak(",", "") : "",
+      ])),
       concat([line, "}"])
     ]));
   },

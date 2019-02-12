@@ -114,6 +114,7 @@ Below are the options (from [`src/ruby.js`](src/ruby.js)) that `@prettier/plugin
 | `inlineLoops` | `true` | When it fits on one line, allows while and until statements to use the modifier form. |
 | `preferHashLabels` | `true` | When possible, uses the shortened hash key syntax, as opposed to hash rockets. |
 | `preferSingleQuotes` | `true` | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals. |
+| `trailingComma` | `false` | Adds a trailing comma to array literals, hash literals, and method calls. |
 
 ## Development
 
