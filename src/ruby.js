@@ -25,25 +25,31 @@ module.exports = {
       type: "boolean",
       category: "Global",
       default: true,
-      description: "When it fits on one line, allow if and unless statements to use the modifier form."
+      description: "When it fits on one line, allows if and unless statements to use the modifier form."
     },
     inlineLoops: {
       type: "boolean",
       category: "Global",
       default: true,
-      description: "When it fits on one line, allow while and until statements to use the modifier form."
+      description: "When it fits on one line, allows while and until statements to use the modifier form."
     },
     preferHashLabels: {
       type: "boolean",
       category: "Global",
       default: true,
-      description: "When possible, use the shortened hash key syntax, as opposed to hash rockets."
+      description: "When possible, uses the shortened hash key syntax, as opposed to hash rockets."
     },
     preferSingleQuotes: {
       type: "boolean",
       category: "Global",
       default: true,
-      description: "When double quotes are not necessary for interpolation, prefer the use of single quotes for string literals."
+      description: "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals."
+    },
+    trailingComma: {
+      type: "boolean",
+      category: "Global",
+      default: false,
+      description: "Adds a trailing comma to array literals, hash literals, and method calls."
     }
   },
   defaultOptions: {
