@@ -9,7 +9,7 @@ const makeString = (content, enclosingQuote) => {
 
   // Escape and unescape single and double quotes as needed to be able to
   // enclose `content` with `enclosingQuote`.
-  content.replace(quotePattern, (match, escaped, quote) => {
+  return content.replace(quotePattern, (match, escaped, quote) => {
     if (escaped === otherQuote) {
       return escaped;
     }
@@ -21,9 +21,9 @@ const makeString = (content, enclosingQuote) => {
     if (quote) {
       return quote;
     }
-  });
 
-  return content;
+    return "\\" + escaped;
+  });
 };
 
 module.exports = {

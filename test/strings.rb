@@ -12,7 +12,7 @@
 
 "#{abc} abc"
 
-"{\"abc\": true}"
+"{\"abc\": \"foo\nbar\"}"
 
 "abc #{foo; bar} abc"
 

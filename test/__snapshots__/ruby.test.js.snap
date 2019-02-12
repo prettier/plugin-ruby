@@ -1890,7 +1890,7 @@ exports[`strings.rb matches expected output for off.json 1`] = `
 
 \\"#{abc} abc\\"
 
-\\"{\\\\\\"abc\\\\\\": true}\\"
+\\"{\\\\\\"abc\\\\\\": \\\\\\"foo\\\\nbar\\\\\\"}\\"
 
 \\"abc #{foo; bar} abc\\"
 
@@ -1968,7 +1968,7 @@ PARENT
 #{\\"interpolated\\"}
 GRAND
 
-\\"abc \\"abc\\" abc\\"
+\\"abc \\\\\\"abc\\\\\\" abc\\"
 
 # rubocop:enable Lint/Void
 "
@@ -1989,7 +1989,7 @@ exports[`strings.rb matches expected output for on.json 1`] = `
 
 \\"#{abc} abc\\"
 
-'{\\\\\\"abc\\\\\\": true}'
+'{\\"abc\\": \\"foo\\\\nbar\\"}'
 
 \\"abc #{foo; bar} abc\\"
 
