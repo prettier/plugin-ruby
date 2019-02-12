@@ -1,5 +1,5 @@
 const { concat, group, hardline, indent, join, line, softline } = require("prettier").doc.builders;
-const { concatBody, empty, surround } = require("../utils");
+const { concatBody, empty, makeList, surround } = require("../utils");
 
 // Matches _any_ escape and unescaped quotes (both single and double).
 const quotePattern = /\\([\s\S])|(['"])/g;
@@ -46,7 +46,7 @@ module.exports = {
       ending
     ]);
   },
-  string: (path, opts, print) => path.map(print, "body"),
+  string: makeList,
   string_concat: (path, opts, print) => group(concat([
     path.call(print, "body", 0),
     " \\",
@@ -92,7 +92,7 @@ module.exports = {
   },
   word_add: concatBody,
   word_new: empty,
-  xstring: (path, opts, print) => path.map(print, "body"),
+  xstring: makeList,
   xstring_literal: (path, opts, print) => group(concat([
     "`",
     indent(concat([softline, join(softline, path.call(print, "body", 0))])),

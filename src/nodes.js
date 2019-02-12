@@ -1,5 +1,5 @@
 const { align, breakParent, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
-const { concatBody, empty, first, literal, makeCall, prefix, printComments, skipAssignIndent, surround } = require("./utils");
+const { concatBody, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
   ...require("./nodes/alias"),
@@ -380,7 +380,7 @@ module.exports = {
   },
   method_add_block: (path, opts, print) => concat(path.map(print, "body")),
   methref: (path, opts, print) => join(".:", path.map(print, "body")),
-  mlhs: (path, opts, print) => path.map(print, "body"),
+  mlhs: makeList,
   mlhs_add_post: (path, opts, print) => [
     ...path.call(print, "body", 0),
     ...path.call(print, "body", 1)
@@ -394,7 +394,7 @@ module.exports = {
     indent(concat([softline, join(concat([",", line]), path.call(print, "body", 0))])),
     concat([softline, ")"])
   ])),
-  mrhs: (path, opts, print) => path.map(print, "body"),
+  mrhs: makeList,
   mrhs_add_star: (path, opts, print) => group(join(
     concat([",", line]),
     [
