@@ -1,6 +1,18 @@
 const { concat, group, ifBreak, indent, join, line, softline } = require("prettier").doc.builders;
 
+const isStringArray = args => args.body.every(arg => (
+  arg.type === "string_literal" && arg.body[0].body.length === 1
+));
+
+const isSymbolArray = args => args.body.every(arg => (
+  arg.type === "symbol_literal"
+));
+
 const makeArray = start => (path, opts, print) => [start, ...path.map(print, "body")];
+
+const getSpecialArrayParts = (path, print, args) => args.body.map((_arg, index) => (
+  path.call(print, "body", 0, "body", index, "body", 0, "body", 0)
+));
 
 const printAref = (path, opts, print) => group(concat([
   path.call(print, "body", 0),
@@ -9,6 +21,13 @@ const printAref = (path, opts, print) => group(concat([
     softline,
     join(concat([",", line]), path.call(print, "body", 1))
   ])),
+  concat([softline, "]"])
+]));
+
+const printSpecialArray = ([first, ...rest]) => group(concat([
+  first,
+  "[",
+  indent(concat([softline, join(line, rest)])),
   concat([softline, "]"])
 ]));
 
@@ -22,11 +41,21 @@ module.exports = {
   },
   aref_field: printAref,
   array: (path, { trailingComma }, print) => {
-    if (path.getValue().body[0] === null) {
+    const args = path.getValue().body[0];
+
+    if (args === null) {
       return '[]';
     }
 
-    if (["args", "args_add_star"].includes(path.getValue().body[0].type)) {
+    if (isStringArray(args)) {
+      return printSpecialArray(["%w", ...getSpecialArrayParts(path, print, args)]);
+    }
+
+    if (isSymbolArray(args)) {
+      return printSpecialArray(["%i", ...getSpecialArrayParts(path, print, args)]);
+    }
+
+    if (["args", "args_add_star"].includes(args.type)) {
       return group(concat([
         "[",
         indent(concat([
@@ -38,13 +67,7 @@ module.exports = {
       ]));
     }
 
-    const [first, ...rest] = path.call(print, "body", 0);
-    return group(concat([
-      first,
-      "[",
-      indent(concat([softline, join(line, rest)])),
-      concat([softline, "]"])
-    ]));
+    return printSpecialArray(path.call(print, "body", 0));
   },
   qsymbols: makeArray("%i"),
   qwords: makeArray("%w"),

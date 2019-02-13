@@ -6,11 +6,9 @@
 
 [1, 2, 3]
 
-# rubocop:disable Style/WordArray
-# We need to fix this, but it can't be done until we get the args_new and
-# args_add refactor done.
 ['a', 'b', 'c']
-# rubocop:enable Style/WordArray
+
+[:a, :b, :c]
 
 %w[a b c]
 
