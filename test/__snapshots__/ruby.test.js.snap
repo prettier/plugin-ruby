@@ -51,7 +51,8 @@ exports[`array.rb matches expected output for off.json 1`] = `
 
 [
   super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_long, [
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  [
     super_super_super_super_super_super_super_super_super_super_super_long,
     super_super_super_super_super_super_super_super_super_super_super_long
   ]
@@ -108,7 +109,8 @@ exports[`array.rb matches expected output for on.json 1`] = `
 
 [
   super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_long, [
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  [
     super_super_super_super_super_super_super_super_super_super_super_long,
     super_super_super_super_super_super_super_super_super_super_super_long,
   ],
@@ -460,7 +462,7 @@ exports[`break.rb matches expected output for off.json 1`] = `
 
 [].each { break 1 }
 
-[].each { break(1) }
+[].each { break 1 }
 
 [].each { break 1, 2 }
 "
@@ -473,7 +475,7 @@ exports[`break.rb matches expected output for on.json 1`] = `
 
 [].each { break 1 }
 
-[].each { break(1) }
+[].each { break 1 }
 
 [].each { break 1, 2 }
 "
@@ -1549,6 +1551,25 @@ foo(
   iiiiiii
 )
 
+foo aaaaaaa,
+    bbbbbbb,
+    ccccccc,
+    ddddddd,
+    eeeeeee,
+    fffffff,
+    ggggggg,
+    hhhhhhh,
+    iiiiiii
+foo.foo aaaaaaa,
+        bbbbbbb,
+        ccccccc,
+        ddddddd,
+        eeeeeee,
+        fffffff,
+        ggggggg,
+        hhhhhhh,
+        iiiiiii
+
 foo(*bar)
 foo(**baz)
 foo(&block)
@@ -1621,6 +1642,25 @@ foo(
   iiiiiii,
 )
 
+foo aaaaaaa,
+    bbbbbbb,
+    ccccccc,
+    ddddddd,
+    eeeeeee,
+    fffffff,
+    ggggggg,
+    hhhhhhh,
+    iiiiiii
+foo.foo aaaaaaa,
+        bbbbbbb,
+        ccccccc,
+        ddddddd,
+        eeeeeee,
+        fffffff,
+        ggggggg,
+        hhhhhhh,
+        iiiiiii
+
 foo(*bar)
 foo(**baz)
 foo(&block)
@@ -1679,10 +1719,6 @@ exports[`numbers.rb matches expected output for off.json 1`] = `
 0o377
 -0b1010
 0b001_001
-\\"a\\" # these are CHARs
-?\\\\C-a
-?\\\\M-a
-?\\\\M-\\\\C-a
 
 # rubocop:enable Lint/Void
 "
@@ -1704,10 +1740,6 @@ exports[`numbers.rb matches expected output for on.json 1`] = `
 0o377
 -0b1010
 0b001_001
-'a' # these are CHARs
-?\\\\C-a
-?\\\\M-a
-?\\\\M-\\\\C-a
 
 # rubocop:enable Lint/Void
 "
@@ -1933,6 +1965,11 @@ exports[`strings.rb matches expected output for off.json 1`] = `
 # rubocop:disable Layout/ClosingParenthesisIndentation
 # rubocop:disable Style/StringLiteralsInInterpolation
 
+\\"a\\" # these are CHARs
+?\\\\C-a
+?\\\\M-a
+?\\\\M-\\\\C-a
+
 \\"\\"
 
 \\"abc\\"
@@ -2043,6 +2080,11 @@ exports[`strings.rb matches expected output for on.json 1`] = `
 # rubocop:disable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
 # rubocop:disable Layout/ClosingParenthesisIndentation
 # rubocop:disable Style/StringLiteralsInInterpolation
+
+'a' # these are CHARs
+?\\\\C-a
+?\\\\M-a
+?\\\\M-\\\\C-a
 
 ''
 
