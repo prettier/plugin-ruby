@@ -91,11 +91,8 @@ foo 'foo' do |bar|
   bar.to_s
 end
 
-# rubocop:disable Lint/AmbiguousBlockAssociation
-# We should handle this.
-
 target.method object.map do |arg|
   arg * 2
 end
 
-# rubocop:enable Lint/UnusedBlockArgument, Lint/AmbiguousBlockAssociation
+# rubocop:enable Lint/UnusedBlockArgument
