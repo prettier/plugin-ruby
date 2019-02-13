@@ -56,7 +56,7 @@ module.exports = {
   string_embexpr: (path, opts, print) => {
     const stmts = path.getValue().body[0].body;
     const isHeredoc = stmts.length === 1 && (
-      stmts[0].type === "heredoc" || stmts[0].body[0].type === "heredoc"
+      stmts[0].type === "heredoc" || (stmts[0].body[0] && stmts[0].body[0].type === "heredoc")
     );
 
     return concat([
