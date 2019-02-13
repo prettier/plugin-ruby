@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.4.1] - 2019-02-12
 ### Changed
 - [INTERNAL] Provide the `makeList` utility for the nodes that are lists from within ripper.
 - Again, this time for real, properly escape strings. (Thanks to @awinograd for the report.)
@@ -109,7 +111,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 - Initial release 🎉
 
-[Unreleased]: https://github.com/CultureHQ/add-to-calendar/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/CultureHQ/add-to-calendar/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/CultureHQ/add-to-calendar/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/CultureHQ/add-to-calendar/compare/v0.3.7...v0.4.0
 [0.3.7]: https://github.com/CultureHQ/add-to-calendar/compare/v0.3.6...v0.3.7
 [0.3.6]: https://github.com/CultureHQ/add-to-calendar/compare/v0.3.5...v0.3.6
