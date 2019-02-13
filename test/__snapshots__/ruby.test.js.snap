@@ -942,6 +942,8 @@ defined?(a) # third
 exports[`embdoc.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
 
+# rubocop:disable Style/BlockComments
+
 =begin
 this is
 
@@ -965,12 +967,16 @@ this is an embdoc even more indented
 =end
   end
 end
+
+# rubocop:enable Style/BlockComments
 "
 `;
 
 exports[`embdoc.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
 
+# rubocop:disable Style/BlockComments
+
 =begin
 this is
 
@@ -994,6 +1000,8 @@ this is an embdoc even more indented
 =end
   end
 end
+
+# rubocop:enable Style/BlockComments
 "
 `;
 
