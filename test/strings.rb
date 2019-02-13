@@ -19,7 +19,9 @@
 
 "{\"abc\": \"foo\nbar\"}"
 
-"abc #{foo; bar} abc" # rubocop:disable Style/Semicolon
+# rubocop:disable Style/Semicolon
+"abc #{foo; bar} abc"
+# rubocop:enable Style/Semicolon
 
 "abc #{de} fghi #{jkl} mno"
 
