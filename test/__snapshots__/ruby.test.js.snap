@@ -329,8 +329,22 @@ end
 port ENV.fetch(\\"PORT\\") { 3000 }
 
 test \\"foobar\\" do
+end
+
+te.st \\"foobar\\" do
+end
+
+test \\"foobar\\" do
   foobar
 end
+
+te.st \\"foobar\\" do
+  foobar
+end
+
+test \\"foobar\\", &:to_s
+
+te.st \\"foobar\\", &:to_s
 
 loop do
   super_super_super_super_super_super_super_super_super_super_super_super_long
@@ -377,12 +391,13 @@ def change
   end
 end
 
-# rubocop:disable Lint/AmbiguousBlockAssociation
-# We should handle this.
+foo \\"foo\\", &:to_s
 
-target.method object.map { |arg| arg * 2 }
+target.method object.map do |arg|
+  arg * 2
+end
 
-# rubocop:enable Lint/UnusedBlockArgument, Lint/AmbiguousBlockAssociation
+# rubocop:enable Lint/UnusedBlockArgument
 "
 `;
 
@@ -402,8 +417,22 @@ end
 port ENV.fetch('PORT') { 3000 }
 
 test 'foobar' do
+end
+
+te.st 'foobar' do
+end
+
+test 'foobar' do
   foobar
 end
+
+te.st 'foobar' do
+  foobar
+end
+
+test 'foobar', &:to_s
+
+te.st 'foobar', &:to_s
 
 loop do
   super_super_super_super_super_super_super_super_super_super_super_super_long
@@ -450,12 +479,13 @@ def change
   end
 end
 
-# rubocop:disable Lint/AmbiguousBlockAssociation
-# We should handle this.
+foo 'foo', &:to_s
 
-target.method object.map { |arg| arg * 2 }
+target.method object.map do |arg|
+  arg * 2
+end
 
-# rubocop:enable Lint/UnusedBlockArgument, Lint/AmbiguousBlockAssociation
+# rubocop:enable Lint/UnusedBlockArgument
 "
 `;
 
@@ -758,12 +788,10 @@ bar # this is another inline comment
 ]
 
 {
-  :foo =>
-    # these are comments
-    \\"bar\\",
-  :bar =>
-    # inside of a hash
-    \\"baz\\"
+  # these are comments
+  :foo => \\"bar\\",
+  # inside of a hash
+  :bar => \\"baz\\"
 }
 
 foo # inline comment inside of a dot
@@ -863,12 +891,10 @@ bar # this is another inline comment
 ]
 
 {
-  foo:
-    # these are comments
-    'bar',
-  bar:
-    # inside of a hash
-    'baz',
+  # these are comments
+  foo: 'bar',
+  # inside of a hash
+  bar: 'baz',
 }
 
 foo # inline comment inside of a dot
@@ -1268,6 +1294,14 @@ if a
 else
   b 2
 end
+
+a b do
+  if a
+    a \\"foo\\"
+  else
+    b
+  end
+end
 "
 `;
 
@@ -1359,6 +1393,14 @@ if a
   b(1)
 else
   b 2
+end
+
+a b do
+  if a
+    a 'foo'
+  else
+    b
+  end
 end
 "
 `;

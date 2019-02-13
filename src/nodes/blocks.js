@@ -1,4 +1,4 @@
-const { breakParent, concat, group, ifBreak, indent, softline } = require("prettier").doc.builders;
+const { breakParent, concat, group, ifBreak, indent, line, softline } = require("prettier").doc.builders;
 
 const isCall = node => ["::", "."].includes(node) || node.type === "@period";
 
@@ -65,6 +65,10 @@ const toProcTransform = (path, opts, print) => {
     method.type === "@ident" &&
     !args
   ) {
+    if (["command", "command_call"].includes(path.getParentNode().body[0].type)) {
+      return `, &:${method.body}`;
+    }
+
     return `(&:${method.body})`;
   }
 };
@@ -76,24 +80,29 @@ const printBlock = (path, opts, print) => {
   }
 
   const [variables, statements] = path.getValue().body;
+  const stmts = statements.type === "stmts" ? statements.body : statements.body[0].body;
+
+  let doBlockBody = "";
+  if (stmts.length !== 1 || stmts[0].type !== "void_stmt") {
+    doBlockBody = indent(concat([softline, path.call(print, "body", 1)]));
+  }
 
   const doBlock = concat([
     " do",
     variables ? concat([" ", path.call(print, "body", 0)]) : "",
-    indent(concat([softline, path.call(print, "body", 1)])),
+    doBlockBody,
     concat([softline, "end"])
   ]);
 
   // We can hit this next pattern if within the block the only statement is a
   // comment.
-  const stmts = statements.type === "stmts" ? statements.body : statements.body[0].body;
   if (stmts.length > 1 && stmts.filter(stmt => stmt.type !== "@comment").length === 1) {
     return concat([breakParent, doBlock]);
   }
 
   // If the parent node is a command node, then there are no parentheses around
   // the arguments to that command, so we need to break the block
-  if (path.getParentNode().body[0].type === "command") {
+  if (["command", "command_call"].includes(path.getParentNode().body[0].type)) {
     return concat([breakParent, doBlock]);
   }
 

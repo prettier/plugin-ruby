@@ -15,7 +15,25 @@ end
 port ENV.fetch('PORT') { 3000 }
 
 test 'foobar' do
+end
+
+te.st 'foobar' do
+end
+
+test 'foobar' do
   foobar
+end
+
+te.st 'foobar' do
+  foobar
+end
+
+test 'foobar' do |bar|
+  bar.to_s
+end
+
+te.st 'foobar' do |bar|
+  bar.to_s
 end
 
 loop { super_super_super_super_super_super_super_super_super_super_super_super_long }
@@ -69,11 +87,12 @@ def change
   end
 end
 
-# rubocop:disable Lint/AmbiguousBlockAssociation
-# We should handle this.
+foo 'foo' do |bar|
+  bar.to_s
+end
 
 target.method object.map do |arg|
   arg * 2
 end
 
-# rubocop:enable Lint/UnusedBlockArgument, Lint/AmbiguousBlockAssociation
+# rubocop:enable Lint/UnusedBlockArgument

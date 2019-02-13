@@ -89,3 +89,11 @@ if a
 else
   b 2
 end
+
+a b do
+  if a
+    a 'foo'
+  else
+    b
+  end
+end
