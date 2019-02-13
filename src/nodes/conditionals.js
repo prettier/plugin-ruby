@@ -1,11 +1,12 @@
 const { breakParent, concat, hardline, group, ifBreak, indent, softline } = require("prettier").doc.builders;
 
-const printWithAddition = (keyword, path, print) => concat([
+const printWithAddition = (keyword, path, print, { breaking }) => concat([
   `${keyword} `,
   path.call(print, "body", 0),
   indent(concat([softline, path.call(print, "body", 1)])),
   concat([softline, path.call(print, "body", 2)]),
-  concat([softline, "end"])
+  concat([softline, "end"]),
+  breaking ? breakParent : ""
 ]);
 
 const printTernaryConditions = (keyword, truthyValue, falsyValue) => {
@@ -43,7 +44,7 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
     const falsyValue = path.call(print, "body", 2, "body", 0);
 
     if (stmts.body.length === 1 && stmts.body[0].type === "command") {
-      return printWithAddition(keyword, path, print);
+      return printWithAddition(keyword, path, print, { breaking: true });
     }
 
     return group(ifBreak(
@@ -58,7 +59,7 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
 
   // If there's an additional clause, we know we can't go for the inline option
   if (addition) {
-    return group(printWithAddition(keyword, path, print));
+    return group(printWithAddition(keyword, path, print, { breaking: true }));
   }
 
   // If it's short enough, favor the inline conditional
