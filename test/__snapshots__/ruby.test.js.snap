@@ -145,10 +145,7 @@ a[1] = [
 exports[`assign.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
 
-# rubocop:disable Lint/UselessAssignment
-
-# rubocop:disable Style/ParallelAssignment
-# We should turn these into sequential statements.
+# rubocop:disable Lint/UselessAssignment, Style/ParallelAssignment
 
 a = 1
 
@@ -159,28 +156,25 @@ a =
 
 a, b, c = [1, 2, 3]
 
-a = 1, 2, 3
+a =
 
-a, b, c = 1, 2, 3
+a, b, c =
 
-a, *b = 1, 2, 3
+a, *b =
 
-a, *b, c, d = 1, 2, 3
+a, *b, c, d =
 
-a, * = 1, 2, 3
+a, * =
 
 a = *a
 
-(a, b), c = [1, 2], 3
+(a, b), c =
 
 * = [1, 2, 3]
 
 *, a = [1, 2, 3]
 
 super_super_super_long, super_super_super_long, super_super_super_long =
-  super_super_super_super_super_long,
-  super_super_super_super_super_long,
-  super_super_super_super_super_long
 
 a ||= 1
 
@@ -221,10 +215,7 @@ super_super_super_long.super_super_super_super_super_super_super_long =
 exports[`assign.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
 
-# rubocop:disable Lint/UselessAssignment
-
-# rubocop:disable Style/ParallelAssignment
-# We should turn these into sequential statements.
+# rubocop:disable Lint/UselessAssignment, Style/ParallelAssignment
 
 a = 1
 
@@ -235,28 +226,25 @@ a =
 
 a, b, c = [1, 2, 3]
 
-a = 1, 2, 3
+a =
 
-a, b, c = 1, 2, 3
+a, b, c =
 
-a, *b = 1, 2, 3
+a, *b =
 
-a, *b, c, d = 1, 2, 3
+a, *b, c, d =
 
-a, * = 1, 2, 3
+a, * =
 
 a = *a
 
-(a, b), c = [1, 2], 3
+(a, b), c =
 
 * = [1, 2, 3]
 
 *, a = [1, 2, 3]
 
 super_super_super_long, super_super_super_long, super_super_super_long =
-  super_super_super_super_super_long,
-  super_super_super_super_super_long,
-  super_super_super_super_super_long
 
 a ||= 1
 
@@ -397,6 +385,15 @@ target.method object.map do |arg|
   arg * 2
 end
 
+# from ruby test/ruby/test_call.rb
+assert_nil(
+  (
+    \\"a\\".sub! \\"b\\" do
+    end&.foo do
+    end
+  )
+)
+
 # rubocop:enable Lint/UnusedBlockArgument
 "
 `;
@@ -485,6 +482,15 @@ target.method object.map do |arg|
   arg * 2
 end
 
+# from ruby test/ruby/test_call.rb
+assert_nil(
+  (
+    'a'.sub! 'b' do
+    end&.foo do
+    end
+  ),
+)
+
 # rubocop:enable Lint/UnusedBlockArgument
 "
 `;
@@ -518,13 +524,7 @@ exports[`break.rb matches expected output for on.json 1`] = `
 exports[`case.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
 
-# rubocop:disable Lint/EmptyWhen
-# Disabling EmptyWhen on account of
-# https://github.com/rubocop-hq/rubocop/issues/3696.
-
-# rubocop:disable Style/EmptyCaseCondition
-# This is something that we should handle by converting each of the when
-# statements into valid if/elsif/else statements.
+# rubocop:disable Lint/EmptyWhen, rubocop:disable Style/EmptyCaseCondition.
 
 case
 when a
@@ -568,13 +568,7 @@ end
 exports[`case.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
 
-# rubocop:disable Lint/EmptyWhen
-# Disabling EmptyWhen on account of
-# https://github.com/rubocop-hq/rubocop/issues/3696.
-
-# rubocop:disable Style/EmptyCaseCondition
-# This is something that we should handle by converting each of the when
-# statements into valid if/elsif/else statements.
+# rubocop:disable Lint/EmptyWhen, rubocop:disable Style/EmptyCaseCondition.
 
 case
 when a
@@ -1047,6 +1041,34 @@ end
 "
 `;
 
+exports[`encoding.rb matches expected output for off.json 1`] = `
+"# -*- encoding: binary -*-
+
+# rubocop:disable Lint/Void
+
+# il était
+:il_était
+\\"ひらがな\\"
+/ひらがな/
+
+# rubocop:disable Lint/Void
+"
+`;
+
+exports[`encoding.rb matches expected output for on.json 1`] = `
+"# -*- encoding: binary -*-
+
+# rubocop:disable Lint/Void
+
+# il était
+:il_était
+'ひらがな'
+/ひらがな/
+
+# rubocop:disable Lint/Void
+"
+`;
+
 exports[`hash.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
 
@@ -1302,6 +1324,9 @@ a b do
     b
   end
 end
+
+# from ruby test/ruby/test_not.rb
+assert_equal(true, (not ()))
 "
 `;
 
@@ -1402,6 +1427,9 @@ a b do
     b
   end
 end
+
+# from ruby test/ruby/test_not.rb
+assert_equal(true, (not ()))
 "
 `;
 
@@ -1883,7 +1911,7 @@ rescue ArgumentError
 rescue NoMethodError => exception
   puts exception
   redo
-rescue SyntaxError, NoMethodError
+rescue
   2
 rescue StandardError
   3
@@ -1897,6 +1925,13 @@ begin
   a
 rescue StandardError
   nil
+end
+
+# from ruby spec/ruby/language/rescue_spec.rb
+def foo
+  bar
+rescue A, *B => e
+  baz
 end
 "
 `;
@@ -1911,7 +1946,7 @@ rescue ArgumentError
 rescue NoMethodError => exception
   puts exception
   redo
-rescue SyntaxError, NoMethodError
+rescue
   2
 rescue StandardError
   3
@@ -1925,6 +1960,13 @@ begin
   a
 rescue StandardError
   nil
+end
+
+# from ruby spec/ruby/language/rescue_spec.rb
+def foo
+  bar
+rescue A, *B => e
+  baz
 end
 "
 `;
