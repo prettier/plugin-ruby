@@ -92,7 +92,11 @@ module.exports = {
     path.map(print, "body", 0))
   ),
   assign: (path, opts, print) => {
-    const [printedTarget, printedValue] = path.map(print, "body");
+    let [printedTarget, printedValue] = path.map(print, "body");
+
+    if (["mrhs_add_star", "mrhs_new_from_args"].includes(path.getValue().body[1].type)) {
+      printedValue = group(join(concat([",", line]), printedValue));
+    }
 
     if (skipAssignIndent(path.getValue().body[1])) {
       return group(concat([printedTarget, " = ", printedValue]));
@@ -226,10 +230,14 @@ module.exports = {
     const parts = [
       path.call(print, "body", 0),
       makeCall(path, opts, print),
-      path.call(print, "body", 2),
-      " "
+      path.call(print, "body", 2)
     ];
 
+    if (!path.getValue().body[3]) {
+      return concat(parts);
+    }
+
+    parts.push(" ");
     const args = join(concat([",", line]), path.call(print, "body", 3));
 
     return group(ifBreak(
@@ -337,11 +345,19 @@ module.exports = {
       ])
     ));
   },
-  massign: (path, opts, print) => group(concat([
-    group(join(concat([",", line]), path.call(print, "body", 0))),
-    " =",
-    indent(concat([line, path.call(print, "body", 1)]))
-  ])),
+  massign: (path, opts, print) => {
+    let right = path.call(print, "body", 1);
+
+    if (["mrhs_add_star", "mrhs_new_from_args"].includes(path.getValue().body[1].type)) {
+      right = group(join(concat([",", line]), right));
+    }
+
+    return group(concat([
+      group(join(concat([",", line]), path.call(print, "body", 0))),
+      " =",
+      indent(concat([line, right]))
+    ]));
+  },
   method_add_arg: (path, opts, print) => {
     if (path.getValue().body[1].type === "args_new") {
       return path.call(print, "body", 0);
@@ -365,17 +381,19 @@ module.exports = {
     concat([softline, ")"])
   ])),
   mrhs: makeList,
-  mrhs_add_star: (path, opts, print) => group(join(
-    concat([",", line]),
-    [
-      ...path.call(print, "body", 0),
-      concat(["*", path.call(print, "body", 1)])
-    ]
-  )),
-  mrhs_new_from_args: (path, opts, print) => group(join(
-    concat([",", line]),
-    [...path.call(print, "body", 0), path.call(print, "body", 1)]
-  )),
+  mrhs_add_star: (path, opts, print) => [
+    ...path.call(print, "body", 0),
+    concat(["*", path.call(print, "body", 1)])
+  ],
+  mrhs_new_from_args: (path, opts, print) => {
+    const parts = path.call(print, "body", 0);
+
+    if (path.getValue().body.length > 1) {
+      parts.push(path.call(print, "body", 1));
+    }
+
+    return parts;
+  },
   module: (path, opts, print) => {
     const declaration = group(concat(["module ", path.call(print, "body", 0)]));
 
@@ -412,6 +430,10 @@ module.exports = {
     indent(concat([line, path.call(print, "body", 2)]))
   ])),
   paren: (path, opts, print) => {
+    if (!path.getValue().body[0]) {
+      return "()";
+    }
+
     let content = path.call(print, "body", 0);
 
     if (["args", "args_add_star", "args_add_block"].includes(path.getValue().body[0].type)) {
@@ -438,7 +460,10 @@ module.exports = {
         if (Array.isArray(exception)) {
           parts.push(" ", path.call(print, "body", 0, 0));
         } else {
-          parts.push(" ", path.call(print, "body", 0));
+          parts.push(
+            " ",
+            align("rescue ".length, group(join(concat([",", line]), path.call(print, "body", 0))))
+          );
         }
       }
 

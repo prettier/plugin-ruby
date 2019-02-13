@@ -4,11 +4,14 @@ if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
-# rubocop:disable Style/Not, Style/NegatedIf
+# rubocop:disable Style/Not, Style/NegatedIf, Lint/EmptyExpression
 if not a
   b
 end
-# rubocop:enable Style/Not, Style/NegatedIf
+
+# from ruby test/ruby/test_not.rb
+assert_equal(true, (not ()))
+# rubocop:enable Style/Not, Style/NegatedIf, Lint/EmptyExpression
 
 if a
   break # comment

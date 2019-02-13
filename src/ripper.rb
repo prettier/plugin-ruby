@@ -82,7 +82,7 @@ class RipperJS < Ripper::SexpBuilder
   #     EXPR_MAX_STATE
   # };
   def on_comment(comment)
-    sexp = { type: :@comment, body: comment.chomp, start: lineno, end: lineno }
+    sexp = { type: :@comment, body: comment.force_encoding('UTF-8').chomp, start: lineno, end: lineno }
 
     case RipperJS.lex_state_name(state)
     when 'EXPR_BEG'
@@ -205,6 +205,12 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
+  %i[ident tstring_content].each do |event|
+    define_method(:"on_#{event}") do |body|
+      build_scanner_event(event, body.force_encoding('UTF-8'))
+    end
+  end
+
   %i[args mlhs mrhs qsymbols qwords regexp string symbols words xstring].each do |event|
     suffix = event == :string ? :content : :new
     define_method(:"on_#{event}_#{suffix}") do
@@ -260,5 +266,5 @@ if $0 == __FILE__
     exit 1
   end
 
-  puts JSON.dump(response)
+  puts JSON.fast_generate(response)
 end
