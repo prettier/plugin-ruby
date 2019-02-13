@@ -36,6 +36,16 @@ class RipperJS < Ripper::SexpBuilder
 
   private
 
+  # This one is weird, but basically we want to steal the comments that were
+  # attached to the right side of the hash association
+  def on_assoc_new(left, right)
+    build_sexp(:assoc_new, [left, right]).tap do |sexp|
+      next unless right[:comments]
+
+      sexp.merge!(comments: right.delete(:comments))
+    end
+  end
+
   def on_bodystmt(*body)
     build_sexp(:bodystmt, body).tap do |sexp|
       attach_comments_to(sexp, body[0])
