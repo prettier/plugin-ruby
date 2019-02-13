@@ -33,7 +33,11 @@ exports[`array.rb matches expected output for off.json 1`] = `
 
 %w[a b c]
 
+[\\"a\\", \\"b c\\", \\"d\\"]
+
 %i[a b c]
+
+[:a, :\\"b c\\", :d]
 
 %w[a b c]
 
@@ -89,7 +93,11 @@ exports[`array.rb matches expected output for on.json 1`] = `
 
 %w[a b c]
 
+['a', 'b c', 'd']
+
 %i[a b c]
+
+[:a, :\\"b c\\", :d]
 
 %w[a b c]
 

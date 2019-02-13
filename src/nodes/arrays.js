@@ -1,7 +1,9 @@
 const { concat, group, ifBreak, indent, join, line, softline } = require("prettier").doc.builders;
 
 const isStringArray = args => args.body.every(arg => (
-  arg.type === "string_literal" && arg.body[0].body.length === 1
+  arg.type === "string_literal"
+  && arg.body[0].body.length === 1
+  && !arg.body[0].body[0].body.includes(" ")
 ));
 
 const isSymbolArray = args => args.body.every(arg => (
