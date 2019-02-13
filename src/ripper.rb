@@ -195,7 +195,7 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  %i[mlhs mrhs qsymbols qwords regexp string symbols words xstring].each do |event|
+  %i[args mlhs mrhs qsymbols qwords regexp string symbols words xstring].each do |event|
     suffix = event == :string ? :content : :new
     define_method(:"on_#{event}_#{suffix}") do
       { type: event, body: [], start: lineno, end: lineno }
@@ -225,7 +225,7 @@ class RipperJS < Ripper::SexpBuilder
 
   def build_parser_event(type, body)
     build_sexp(type, body).tap do |sexp|
-      next if inline_comments.empty? || type == :args_new
+      next if inline_comments.empty?
 
       sexp[:comments] = inline_comments.reverse
       @inline_comments = []

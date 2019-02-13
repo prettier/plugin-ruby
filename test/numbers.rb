@@ -13,9 +13,5 @@
 0377
 -0b1010
 0b001_001
-?a # these are CHARs
-?\C-a
-?\M-a
-?\M-\C-a
 
 # rubocop:enable Lint/Void
