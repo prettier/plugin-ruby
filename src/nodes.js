@@ -226,10 +226,14 @@ module.exports = {
     const parts = [
       path.call(print, "body", 0),
       makeCall(path, opts, print),
-      path.call(print, "body", 2),
-      " "
+      path.call(print, "body", 2)
     ];
 
+    if (!path.getValue().body[3]) {
+      return concat(parts);
+    }
+
+    parts.push(" ");
     const args = join(concat([",", line]), path.call(print, "body", 3));
 
     return group(ifBreak(
@@ -372,10 +376,15 @@ module.exports = {
       concat(["*", path.call(print, "body", 1)])
     ]
   )),
-  mrhs_new_from_args: (path, opts, print) => group(join(
-    concat([",", line]),
-    [...path.call(print, "body", 0), path.call(print, "body", 1)]
-  )),
+  mrhs_new_from_args: (path, opts, print) => {
+    const parts = path.call(print, "body", 0);
+
+    if (path.getValue().body.length > 1) {
+      parts.push(path.call(print, "body", 1));
+    }
+
+    return parts;
+  },
   module: (path, opts, print) => {
     const declaration = group(concat(["module ", path.call(print, "body", 0)]));
 
@@ -412,6 +421,10 @@ module.exports = {
     indent(concat([line, path.call(print, "body", 2)]))
   ])),
   paren: (path, opts, print) => {
+    if (!path.getValue().body[0]) {
+      return "()";
+    }
+
     let content = path.call(print, "body", 0);
 
     if (["args", "args_add_star", "args_add_block"].includes(path.getValue().body[0].type)) {

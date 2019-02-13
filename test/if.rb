@@ -97,3 +97,6 @@ a b do
     b
   end
 end
+
+# from ruby test/ruby/test_not.rb
+assert_equal(true, (not ()))

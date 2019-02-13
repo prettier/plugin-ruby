@@ -18,3 +18,10 @@ ensure
 end
 
 a rescue nil
+
+# from ruby spec/ruby/language/rescue_spec.rb
+def foo
+  bar
+rescue A, *B => e
+  baz
+end

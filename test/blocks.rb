@@ -95,4 +95,7 @@ target.method object.map do |arg|
   arg * 2
 end
 
+# from ruby test/ruby/test_call.rb
+assert_nil(("a".sub! "b" do end&.foo {}))
+
 # rubocop:enable Lint/UnusedBlockArgument

@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Lint/UselessAssignment
-
-# rubocop:disable Style/ParallelAssignment
-# We should turn these into sequential statements.
+# rubocop:disable Lint/UselessAssignment, Style/ParallelAssignment
 
 a = 1
 
