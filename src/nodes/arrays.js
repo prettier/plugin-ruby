@@ -42,7 +42,7 @@ module.exports = {
     return printAref(path, opts, print);
   },
   aref_field: printAref,
-  array: (path, { trailingComma }, print) => {
+  array: (path, { addTrailingCommas }, print) => {
     const args = path.getValue().body[0];
 
     if (args === null) {
@@ -63,7 +63,7 @@ module.exports = {
         indent(concat([
           softline,
           join(concat([",", line]), path.call(print, "body", 0)),
-          trailingComma ? ifBreak(",", "") : ""
+          addTrailingCommas ? ifBreak(",", "") : ""
         ])),
         concat([softline, "]"])
       ]));

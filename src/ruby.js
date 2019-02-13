@@ -21,6 +21,12 @@ module.exports = {
     }
   },
   options: {
+    addTrailingCommas: {
+      type: "boolean",
+      category: "Global",
+      default: false,
+      description: "Adds a trailing comma to array literals, hash literals, and method calls."
+    },
     inlineConditionals: {
       type: "boolean",
       category: "Global",
@@ -44,12 +50,6 @@ module.exports = {
       category: "Global",
       default: true,
       description: "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals."
-    },
-    trailingComma: {
-      type: "boolean",
-      category: "Global",
-      default: false,
-      description: "Adds a trailing comma to array literals, hash literals, and method calls."
     }
   },
   defaultOptions: {

@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 - [INTERNAL] Move the `args_add` and `args_new` handling into the parser.
 - Change `command_call` nodes to properly indent when broken and to not add a trailing comma. (Thanks to @uri for the report.)
+- Rename the `trailingComma` option to `addTrailingCommas` to not conflict with the JS option.
 
 ## [0.4.1] - 2019-02-12
 ### Changed
