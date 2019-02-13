@@ -4,9 +4,11 @@ if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
+# rubocop:disable Style/Not, Style/NegatedIf
 if not a
   b
 end
+# rubocop:enable Style/Not, Style/NegatedIf
 
 if a
   break # comment

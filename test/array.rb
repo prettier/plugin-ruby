@@ -6,7 +6,11 @@
 
 [1, 2, 3]
 
+# rubocop:disable Style/WordArray
+# We need to fix this, but it can't be done until we get the args_new and
+# args_add refactor done.
 ['a', 'b', 'c']
+# rubocop:enable Style/WordArray
 
 %w[a b c]
 
@@ -16,7 +20,9 @@
 
 %I[a#{a}a b#{b}b c#{c}c]
 
+# rubocop:disable Lint/UnneededSplatExpansion
 [1, 2, *[3, 4], 5, 6]
+# rubocop:enable Lint/UnneededSplatExpansion
 
 [
   super_super_super_super_super_super_super_super_super_super_super_long,

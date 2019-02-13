@@ -68,7 +68,7 @@ module.exports = {
 
     return group(concat([
       ...parts,
-      trailingComma ? ifBreak(",", "") : ""
+      path.getParentNode().type !== "command" && trailingComma ? ifBreak(",", "") : ""
     ]));
   },
   args_add_star: (path, opts, print) => {

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Style/BlockComments
+
 =begin
 this is
 
@@ -23,3 +25,5 @@ this is an embdoc even more indented
 =end
   end
 end
+
+# rubocop:enable Style/BlockComments

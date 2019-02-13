@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Style/GuardClause, Style/RedundantReturn
+
 def foo
   return if a
 end
@@ -19,3 +22,6 @@ end
 def qax
   return foo :bar if a
 end
+
+# rubocop:enable Style/GuardClause, Style/RedundantReturn
+# rubocop:enable Lint/UnneededCopDisableDirective

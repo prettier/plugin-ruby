@@ -31,7 +31,11 @@ exports[`array.rb matches expected output for off.json 1`] = `
 
 [1, 2, 3]
 
+# rubocop:disable Style/WordArray
+# We need to fix this, but it can't be done until we get the args_new and
+# args_add refactor done.
 [\\"a\\", \\"b\\", \\"c\\"]
+# rubocop:enable Style/WordArray
 
 %w[a b c]
 
@@ -41,7 +45,9 @@ exports[`array.rb matches expected output for off.json 1`] = `
 
 %I[a#{a}a b#{b}b c#{c}c]
 
+# rubocop:disable Lint/UnneededSplatExpansion
 [1, 2, *[3, 4], 5, 6]
+# rubocop:enable Lint/UnneededSplatExpansion
 
 [
   super_super_super_super_super_super_super_super_super_super_super_long,
@@ -82,7 +88,11 @@ exports[`array.rb matches expected output for on.json 1`] = `
 
 [1, 2, 3]
 
+# rubocop:disable Style/WordArray
+# We need to fix this, but it can't be done until we get the args_new and
+# args_add refactor done.
 ['a', 'b', 'c']
+# rubocop:enable Style/WordArray
 
 %w[a b c]
 
@@ -92,7 +102,9 @@ exports[`array.rb matches expected output for on.json 1`] = `
 
 %I[a#{a}a b#{b}b c#{c}c]
 
+# rubocop:disable Lint/UnneededSplatExpansion
 [1, 2, *[3, 4], 5, 6]
+# rubocop:enable Lint/UnneededSplatExpansion
 
 [
   super_super_super_super_super_super_super_super_super_super_super_long,
@@ -181,10 +193,15 @@ a = {
   :c => super_super_super_super_super_super_super_super_super_super_long
 }
 
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Layout/MultilineMethodCallIndentation
+# I know, I know
 a = [super_super_super_super_long, super_super_super_super_long].sort
 
 a = { :a => super_super_super_super_long, :b => super_super_super_super_long }
   .sort
+# rubocop:enable Layout/MultilineMethodCallIndentation
+# rubocop:enable Lint/UnneededCopDisableDirective
 
 a.a = 1
 
@@ -252,9 +269,14 @@ a = {
   c: super_super_super_super_super_super_super_super_super_super_long,
 }
 
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Layout/MultilineMethodCallIndentation
+# I know, I know
 a = [super_super_super_super_long, super_super_super_super_long].sort
 
 a = { a: super_super_super_super_long, b: super_super_super_super_long }.sort
+# rubocop:enable Layout/MultilineMethodCallIndentation
+# rubocop:enable Lint/UnneededCopDisableDirective
 
 a.a = 1
 
@@ -603,10 +625,10 @@ module Pret
 end
 
 Pret::Tier::Object # rubocop:disable Lint/Void
-Pret::TIER = \\"config\\".freeze
+Pret::TIER = \\"config\\".to_s
 
 ::Pret::Tier::Object # rubocop:disable Lint/Void
-::PRET = \\"config\\".freeze
+::PRET = \\"config\\".to_s
 "
 `;
 
@@ -656,16 +678,19 @@ module Pret
 end
 
 Pret::Tier::Object # rubocop:disable Lint/Void
-Pret::TIER = 'config'.freeze
+Pret::TIER = 'config'.to_s
 
 ::Pret::Tier::Object # rubocop:disable Lint/Void
-::PRET = 'config'.freeze
+::PRET = 'config'.to_s
 "
 `;
 
 exports[`comments.rb matches expected output for off.json 1`] = `
-"# this is a comment at
+"# frozen_string_literal: true
+
+# this is a comment at
 # the beginning of the file
+# rubocop:disable Lint/Void
 
 loop do
   # this is the only statement
@@ -705,7 +730,7 @@ module Foo
       # this comment is inside a method
     end
 
-    def foo
+    def bar
       print message # this is an inline comment
     end
 
@@ -759,14 +784,18 @@ when bar
   baz
 end
 
+# rubocop:enable Lint/Void
 # this is a comment
 # at the end of the file
 "
 `;
 
 exports[`comments.rb matches expected output for on.json 1`] = `
-"# this is a comment at
+"# frozen_string_literal: true
+
+# this is a comment at
 # the beginning of the file
+# rubocop:disable Lint/Void
 
 loop do
   # this is the only statement
@@ -806,7 +835,7 @@ module Foo
       # this comment is inside a method
     end
 
-    def foo
+    def bar
       print message # this is an inline comment
     end
 
@@ -860,6 +889,7 @@ when bar
   baz
 end
 
+# rubocop:enable Lint/Void
 # this is a comment
 # at the end of the file
 "
@@ -922,6 +952,8 @@ defined?(a) # third
 exports[`embdoc.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
 
+# rubocop:disable Style/BlockComments
+
 =begin
 this is
 
@@ -945,12 +977,16 @@ this is an embdoc even more indented
 =end
   end
 end
+
+# rubocop:enable Style/BlockComments
 "
 `;
 
 exports[`embdoc.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
 
+# rubocop:disable Style/BlockComments
+
 =begin
 this is
 
@@ -974,6 +1010,8 @@ this is an embdoc even more indented
 =end
   end
 end
+
+# rubocop:enable Style/BlockComments
 "
 `;
 
@@ -1049,7 +1087,7 @@ foobar alpha: alpha,
        gamma: gamma,
        delta: delta,
        epsilon: epsilon,
-       zeta: zeta,
+       zeta: zeta
 foobar(
   alpha: alpha,
   beta: beta,
@@ -1136,9 +1174,11 @@ if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
+# rubocop:disable Style/Not, Style/NegatedIf
 if not a
   b
 end
+# rubocop:enable Style/Not, Style/NegatedIf
 
 if a
   break # comment
@@ -1232,7 +1272,9 @@ if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
+# rubocop:disable Style/Not, Style/NegatedIf
 b if not a
+# rubocop:enable Style/Not, Style/NegatedIf
 
 if a
   break # comment
@@ -1461,9 +1503,6 @@ exports[`method.rb matches expected output for off.json 1`] = `
 # rubocop:disable Lint/DuplicateMethods, Lint/UnusedMethodArgument
 # rubocop:disable Metrics/ParameterLists
 
-# rubocop:disable Style/MethodDefParentheses
-# We should handle this by placing parentheses around the arguments.
-
 def foo; end
 
 def foo(); end
@@ -1526,7 +1565,7 @@ Foo.foo
 foo&.foo
 
 # rubocop:enable Lint/DuplicateMethods, Lint/UnusedMethodArgument
-# rubocop:enable Metrics/ParameterLists, Style/MethodDefParentheses
+# rubocop:enable Metrics/ParameterLists
 "
 `;
 
@@ -1535,9 +1574,6 @@ exports[`method.rb matches expected output for on.json 1`] = `
 
 # rubocop:disable Lint/DuplicateMethods, Lint/UnusedMethodArgument
 # rubocop:disable Metrics/ParameterLists
-
-# rubocop:disable Style/MethodDefParentheses
-# We should handle this by placing parentheses around the arguments.
 
 def foo; end
 
@@ -1601,7 +1637,7 @@ Foo.foo
 foo&.foo
 
 # rubocop:enable Lint/DuplicateMethods, Lint/UnusedMethodArgument
-# rubocop:enable Metrics/ParameterLists, Style/MethodDefParentheses
+# rubocop:enable Metrics/ParameterLists
 "
 `;
 
@@ -1818,6 +1854,9 @@ end
 exports[`return.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
 
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Style/GuardClause, Style/RedundantReturn
+
 def foo
   if a
     return
@@ -1847,11 +1886,17 @@ def qax
     return foo :bar
   end
 end
+
+# rubocop:enable Style/GuardClause, Style/RedundantReturn
+# rubocop:enable Lint/UnneededCopDisableDirective
 "
 `;
 
 exports[`return.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
+
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Style/GuardClause, Style/RedundantReturn
 
 def foo
   return if a
@@ -1872,13 +1917,21 @@ end
 def qax
   return foo :bar if a
 end
+
+# rubocop:enable Style/GuardClause, Style/RedundantReturn
+# rubocop:enable Lint/UnneededCopDisableDirective
 "
 `;
 
 exports[`strings.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
 
-# rubocop:disable Lint/Void
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
+# rubocop:disable Layout/SpaceInsideStringInterpolation
+# rubocop:disable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
+# rubocop:disable Layout/ClosingParenthesisIndentation
+# rubocop:disable Style/StringLiteralsInInterpolation
 
 \\"\\"
 
@@ -1892,7 +1945,9 @@ exports[`strings.rb matches expected output for off.json 1`] = `
 
 \\"{\\\\\\"abc\\\\\\": \\\\\\"foo\\\\nbar\\\\\\"}\\"
 
+# rubocop:disable Style/Semicolon
 \\"abc #{foo; bar} abc\\"
+# rubocop:enable Style/Semicolon
 
 \\"abc #{de} fghi #{jkl} mno\\"
 
@@ -1910,9 +1965,7 @@ exports[`strings.rb matches expected output for off.json 1`] = `
 
 \`abc\`
 
-\`
-  super_super_super_super_super_super_super_super_super_super_super_super_su_long
-\`
+\`super_super_super_super_super_super_super_super_super_super_super_super_s_long\`
 
 <<-HERE
 This is a straight heredoc!
@@ -1932,7 +1985,8 @@ HERE
 This is a straight heredoc!
 #{<<-CHILD
 Why do I do this
-CHILD}
+CHILD
+}
 PARENT
 
 <<~HERE
@@ -1953,7 +2007,8 @@ HERE
   This is a squiggly heredoc!
   #{<<~CHILD
       Why do I do this
-    CHILD}
+    CHILD
+}
 PARENT
 
 <<-GRAND
@@ -1970,14 +2025,24 @@ GRAND
 
 \\"abc \\\\\\"abc\\\\\\" abc\\"
 
-# rubocop:enable Lint/Void
+# rubocop:enable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
+# rubocop:enable Layout/SpaceInsideStringInterpolation
+# rubocop:enable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
+# rubocop:enable Layout/ClosingParenthesisIndentation
+# rubocop:enable Style/StringLiteralsInInterpolation
+# rubocop:enable Lint/UnneededCopDisableDirective
 "
 `;
 
 exports[`strings.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
 
-# rubocop:disable Lint/Void
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
+# rubocop:disable Layout/SpaceInsideStringInterpolation
+# rubocop:disable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
+# rubocop:disable Layout/ClosingParenthesisIndentation
+# rubocop:disable Style/StringLiteralsInInterpolation
 
 ''
 
@@ -1991,7 +2056,9 @@ exports[`strings.rb matches expected output for on.json 1`] = `
 
 '{\\"abc\\": \\"foo\\\\nbar\\"}'
 
+# rubocop:disable Style/Semicolon
 \\"abc #{foo; bar} abc\\"
+# rubocop:enable Style/Semicolon
 
 \\"abc #{de} fghi #{jkl} mno\\"
 
@@ -2009,9 +2076,7 @@ exports[`strings.rb matches expected output for on.json 1`] = `
 
 \`abc\`
 
-\`
-  super_super_super_super_super_super_super_super_super_super_super_super_su_long
-\`
+\`super_super_super_super_super_super_super_super_super_super_super_super_s_long\`
 
 <<-HERE
 This is a straight heredoc!
@@ -2031,7 +2096,8 @@ HERE
 This is a straight heredoc!
 #{<<-CHILD
 Why do I do this
-CHILD}
+CHILD
+}
 PARENT
 
 <<~HERE
@@ -2052,7 +2118,8 @@ HERE
   This is a squiggly heredoc!
   #{<<~CHILD
       Why do I do this
-    CHILD}
+    CHILD
+}
 PARENT
 
 <<-GRAND
@@ -2069,7 +2136,12 @@ GRAND
 
 'abc \\"abc\\" abc'
 
-# rubocop:enable Lint/Void
+# rubocop:enable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
+# rubocop:enable Layout/SpaceInsideStringInterpolation
+# rubocop:enable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
+# rubocop:enable Layout/ClosingParenthesisIndentation
+# rubocop:enable Style/StringLiteralsInInterpolation
+# rubocop:enable Lint/UnneededCopDisableDirective
 "
 `;
 

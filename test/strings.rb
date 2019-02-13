@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-# rubocop:disable Lint/Void
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
+# rubocop:disable Layout/SpaceInsideStringInterpolation
+# rubocop:disable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
+# rubocop:disable Layout/ClosingParenthesisIndentation
+# rubocop:disable Style/StringLiteralsInInterpolation
 
 ''
 
@@ -14,7 +19,9 @@
 
 "{\"abc\": \"foo\nbar\"}"
 
+# rubocop:disable Style/Semicolon
 "abc #{foo; bar} abc"
+# rubocop:enable Style/Semicolon
 
 "abc #{de} fghi #{jkl} mno"
 
@@ -32,7 +39,7 @@
 
 %x[abc]
 
-%x[super_super_super_super_super_super_super_super_super_super_super_super_su_long]
+%x[super_super_super_super_super_super_super_super_super_super_super_super_s_long]
 
 <<-HERE
 This is a straight heredoc!
@@ -94,4 +101,9 @@ GRAND
 
 'abc "abc" abc'
 
-# rubocop:enable Lint/Void
+# rubocop:enable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
+# rubocop:enable Layout/SpaceInsideStringInterpolation
+# rubocop:enable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
+# rubocop:enable Layout/ClosingParenthesisIndentation
+# rubocop:enable Style/StringLiteralsInInterpolation
+# rubocop:enable Lint/UnneededCopDisableDirective

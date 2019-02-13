@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "print": "prettier --plugin=.",
-    "rubocop": "run() { prettier --plugin=. $1 | bundle exec rubocop --stdin $1; }; run"
+    "rubocop": "run() { prettier --plugin=. $@ | bundle exec rubocop --stdin $1; }; run"
   },
   "repository": {
     "type": "git",

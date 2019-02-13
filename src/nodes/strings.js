@@ -53,7 +53,18 @@ module.exports = {
     indent(concat([hardline, path.call(print, "body", 1)]))
   ])),
   string_dvar: surround("#{", "}"),
-  string_embexpr: surround("#{", "}"),
+  string_embexpr: (path, opts, print) => {
+    const stmts = path.getValue().body[0].body;
+    const isHeredoc = stmts.length === 1 && (
+      stmts[0].type === "heredoc" || stmts[0].body[0].type === "heredoc"
+    );
+
+    return concat([
+      "#{",
+      path.call(print, "body", 0),
+      concat([isHeredoc ? hardline : "", "}"])
+    ]);
+  },
   string_literal: (path, { preferSingleQuotes }, print) => {
     const string = path.getValue().body[0];
 

@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 # this is a comment at
 # the beginning of the file
+# rubocop:disable Lint/Void
 
 loop do
   # this is the only statement
@@ -39,7 +42,7 @@ module Foo
       # this comment is inside a method
     end
 
-    def foo
+    def bar
       print message # this is an inline comment
     end
 
@@ -92,5 +95,6 @@ when bar
   baz
 end
 
+# rubocop:enable Lint/Void
 # this is a comment
 # at the end of the file

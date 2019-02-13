@@ -94,7 +94,9 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
           child.stdin.write(getContents());
           child.stdin.end();
 
-          child.on("exit", resolve);
+          child.on("exit", code => (
+            code === 0 ? resolve() : reject(`rubocop exited with status ${code}`)
+          ));
         }));
       }
     });

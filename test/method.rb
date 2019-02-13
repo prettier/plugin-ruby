@@ -3,9 +3,6 @@
 # rubocop:disable Lint/DuplicateMethods, Lint/UnusedMethodArgument
 # rubocop:disable Metrics/ParameterLists
 
-# rubocop:disable Style/MethodDefParentheses
-# We should handle this by placing parentheses around the arguments.
-
 def foo; end
 
 def foo(); end
@@ -60,4 +57,4 @@ Foo::foo
 foo&.foo
 
 # rubocop:enable Lint/DuplicateMethods, Lint/UnusedMethodArgument
-# rubocop:enable Metrics/ParameterLists, Style/MethodDefParentheses
+# rubocop:enable Metrics/ParameterLists
