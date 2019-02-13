@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Changed
 - Force `do` blocks that we know have to be `do` blocks to break. (Thanks to @yuki24 for the report.)
+- Handle `command` and `command_call` nodes `do` blocks by forcing them to break. (Thanks to @kmcq for the report.)
 
 ## [0.5.0] - 2019-02-13
 ### Added

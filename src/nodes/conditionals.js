@@ -43,7 +43,7 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
     const truthyValue = path.call(print, "body", 1);
     const falsyValue = path.call(print, "body", 2, "body", 0);
 
-    if (stmts.body.length === 1 && stmts.body[0].type === "command") {
+    if (stmts.body.length === 1 && ["command", "command_call"].includes(stmts.body[0].type)) {
       return printWithAddition(keyword, path, print, { breaking: true });
     }
 

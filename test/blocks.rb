@@ -15,7 +15,25 @@ end
 port ENV.fetch('PORT') { 3000 }
 
 test 'foobar' do
+end
+
+te.st 'foobar' do
+end
+
+test 'foobar' do
   foobar
+end
+
+te.st 'foobar' do
+  foobar
+end
+
+test 'foobar' do |bar|
+  bar.to_s
+end
+
+te.st 'foobar' do |bar|
+  bar.to_s
 end
 
 loop { super_super_super_super_super_super_super_super_super_super_super_super_long }
@@ -67,6 +85,10 @@ def change
   change_table :foo do
     column :bar
   end
+end
+
+foo 'foo' do |bar|
+  bar.to_s
 end
 
 # rubocop:disable Lint/AmbiguousBlockAssociation
