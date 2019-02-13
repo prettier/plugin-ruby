@@ -2024,6 +2024,8 @@ exports[`strings.rb matches expected output for off.json 1`] = `
 
 \\"abc\\"
 
+\\"abc #{super} abc\\"
+
 \\"#{abc} abc\\"
 
 \\"{\\\\\\"abc\\\\\\": \\\\\\"foo\\\\nbar\\\\\\"}\\"
@@ -2139,6 +2141,8 @@ exports[`strings.rb matches expected output for on.json 1`] = `
 \\"abc's\\"
 
 'abc'
+
+\\"abc #{super} abc\\"
 
 \\"#{abc} abc\\"
 

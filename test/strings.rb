@@ -20,6 +20,8 @@
 
 "abc"
 
+"abc #{super} abc"
+
 "#{abc} abc"
 
 "{\"abc\": \"foo\nbar\"}"
