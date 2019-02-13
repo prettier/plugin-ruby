@@ -51,6 +51,9 @@ a = {
   c: super_super_super_super_super_super_super_super_super_super_long
 }
 
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Layout/MultilineMethodCallIndentation
+# I know, I know
 a = [
   super_super_super_super_long,
   super_super_super_super_long
@@ -60,6 +63,8 @@ a = {
   a: super_super_super_super_long,
   b: super_super_super_super_long
 }.sort
+# rubocop:enable Layout/MultilineMethodCallIndentation
+# rubocop:enable Lint/UnneededCopDisableDirective
 
 a.a = 1
 

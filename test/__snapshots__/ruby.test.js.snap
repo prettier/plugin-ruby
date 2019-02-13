@@ -193,10 +193,15 @@ a = {
   :c => super_super_super_super_super_super_super_super_super_super_long
 }
 
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Layout/MultilineMethodCallIndentation
+# I know, I know
 a = [super_super_super_super_long, super_super_super_super_long].sort
 
 a = { :a => super_super_super_super_long, :b => super_super_super_super_long }
   .sort
+# rubocop:enable Layout/MultilineMethodCallIndentation
+# rubocop:enable Lint/UnneededCopDisableDirective
 
 a.a = 1
 
@@ -264,9 +269,14 @@ a = {
   c: super_super_super_super_super_super_super_super_super_super_long,
 }
 
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Layout/MultilineMethodCallIndentation
+# I know, I know
 a = [super_super_super_super_long, super_super_super_super_long].sort
 
 a = { a: super_super_super_super_long, b: super_super_super_super_long }.sort
+# rubocop:enable Layout/MultilineMethodCallIndentation
+# rubocop:enable Lint/UnneededCopDisableDirective
 
 a.a = 1
 
@@ -615,10 +625,10 @@ module Pret
 end
 
 Pret::Tier::Object # rubocop:disable Lint/Void
-Pret::TIER = \\"config\\".freeze
+Pret::TIER = \\"config\\".to_s
 
 ::Pret::Tier::Object # rubocop:disable Lint/Void
-::PRET = \\"config\\".freeze
+::PRET = \\"config\\".to_s
 "
 `;
 
@@ -668,10 +678,10 @@ module Pret
 end
 
 Pret::Tier::Object # rubocop:disable Lint/Void
-Pret::TIER = 'config'.freeze
+Pret::TIER = 'config'.to_s
 
 ::Pret::Tier::Object # rubocop:disable Lint/Void
-::PRET = 'config'.freeze
+::PRET = 'config'.to_s
 "
 `;
 
@@ -1844,6 +1854,9 @@ end
 exports[`return.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
 
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Style/GuardClause, Style/RedundantReturn
+
 def foo
   if a
     return
@@ -1873,11 +1886,17 @@ def qax
     return foo :bar
   end
 end
+
+# rubocop:enable Style/GuardClause, Style/RedundantReturn
+# rubocop:enable Lint/UnneededCopDisableDirective
 "
 `;
 
 exports[`return.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
+
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Style/GuardClause, Style/RedundantReturn
 
 def foo
   return if a
@@ -1898,6 +1917,9 @@ end
 def qax
   return foo :bar if a
 end
+
+# rubocop:enable Style/GuardClause, Style/RedundantReturn
+# rubocop:enable Lint/UnneededCopDisableDirective
 "
 `;
 
