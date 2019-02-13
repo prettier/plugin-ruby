@@ -16,74 +16,37 @@ module.exports = {
     const { body } = path.getValue();
     return /^0[0-9]/.test(body) ? `0o${body.slice(1)}` : body;
   },
-  aref: (path, opts, print) => {
-    if (!path.getValue().body[1]) {
-      return concat([path.call(print, "body", 0), "[]"]);
-    }
-
-    return group(concat([
-      path.call(print, "body", 0),
-      "[",
-      indent(concat([softline, path.call(print, "body", 1)])),
-      concat([softline, "]"])
-    ]));
-  },
-  aref_field: (path, opts, print) => group(concat([
-    path.call(print, "body", 0),
-    "[",
-    indent(concat([softline, path.call(print, "body", 1)])),
-    concat([softline, "]"])
-  ])),
-  arg_paren: (path, opts, print) => {
+  arg_paren: (path, { trailingComma }, print) => {
     if (path.getValue().body[0] === null) {
       return "";
     }
 
     return group(concat([
       "(",
-      indent(concat([softline, path.call(print, "body", 0)])),
+      indent(concat([
+        softline,
+        join(concat([",", line]), path.call(print, "body", 0)),
+        trailingComma ? ifBreak(",", "") : ""
+      ])),
       concat([softline, ")"])
     ]))
   },
-  args_add: (path, opts, print) => {
-    const [leftArg, rightArg] = path.getValue().body;
+  args: makeList,
+  args_add_block: (path, opts, print) => {
+    const parts = path.call(print, "body", 0);
 
-    if (leftArg.type === "args_new") {
-      return path.call(print, "body", 1);
-    }
-
-    const buffer = skipAssignIndent(rightArg) ? ", " : concat([",", line]);
-    return join(buffer, path.map(print, "body"));
-  },
-  args_add_block: (path, { trailingComma }, print) => {
-    const [args, block] = path.getValue().body;
-    const parts = args.type === "args_new" ? [] : [path.call(print, "body", 0)];
-
-    if (block) {
-      if (parts.length > 0) {
-        parts.push(",", line);
-      }
+    if (path.getValue().body[1]) {
       parts.push(concat(["&", path.call(print, "body", 1)]));
     }
 
-    return group(concat([
-      ...parts,
-      path.getParentNode().type !== "command" && trailingComma ? ifBreak(",", "") : ""
-    ]));
+    return parts;
   },
   args_add_star: (path, opts, print) => {
-    if (path.getValue().body[0].type === "args_new") {
-      return concat(["*", path.call(print, "body", 1)]);
-    }
+    const [before, star, ...after] = path.map(print, "body");
+    const parts = [...before, concat(["*", star]), ...after];
 
-    return concat([
-      path.call(print, "body", 0),
-      ",",
-      line,
-      concat(["*", path.call(print, "body", 1)])
-    ]);
+    return parts;
   },
-  args_new: (path, opts, print) => group(concat(["[", softline])),
   assoc_new: (path, { preferHashLabels }, print) => {
     const parts = [];
     const [printedLabel, printedValue] = path.map(print, "body");
@@ -186,19 +149,17 @@ module.exports = {
     return group(concat(parts));
   },
   break: (path, opts, print) => {
-    const printed = path.call(print, "body", 0);
+    const content = path.getValue().body[0];
 
-    if (path.getValue().body[0].body.length === 0) {
+    if (content.body.length === 0) {
       return "break";
     }
 
-    const { contents: { parts: [first] } } = printed;
-
-    if (first && !first.parts || (first.parts && first.parts[0] !== "(")) {
-      return concat(["break ", printed]);
+    if (content.body[0].body[0].type === "paren") {
+      return concat(["break ", path.call(print, "body", 0, "body", 0, "body", 0, "body", 0)]);
     }
 
-    return concat(["break", printed]);
+    return concat(["break ", join(", ", path.call(print, "body", 0))]);
   },
   call: (path, opts, print) => {
     let name = path.getValue().body[2];
@@ -253,20 +214,29 @@ module.exports = {
   },
   command: (path, opts, print) => {
     const command = path.call(print, "body", 0);
+    const args = join(concat([",", line]), path.call(print, "body", 1));
 
     // Hate, hate, hate this but can't figure out how to fix it.
     return group(ifBreak(
-      concat([command, " ", align(command.length + 1, path.call(print, "body", 1))]),
-      concat([command, " ", path.call(print, "body", 1)])
+      concat([command, " ", align(command.length + 1, args)]),
+      concat([command, " ", args])
     ));
   },
-  command_call: (path, opts, print) => group(concat([
-    path.call(print, "body", 0),
-    makeCall(path, opts, print),
-    path.call(print, "body", 2),
-    " ",
-    path.call(print, "body", 3)
-  ])),
+  command_call: (path, opts, print) => {
+    const parts = [
+      path.call(print, "body", 0),
+      makeCall(path, opts, print),
+      path.call(print, "body", 2),
+      " "
+    ];
+
+    const args = join(concat([",", line]), path.call(print, "body", 3));
+
+    return group(ifBreak(
+      concat([...parts, align(parts.reduce((sum, part) => sum + part.length, 0), args)]),
+      concat([...parts, args])
+    ));
+  },
   const_path_field: (path, opts, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, opts, print) => join("::", path.map(print, "body")),
   const_ref: first,
@@ -404,7 +374,7 @@ module.exports = {
   )),
   mrhs_new_from_args: (path, opts, print) => group(join(
     concat([",", line]),
-    path.map(print, "body")
+    [...path.call(print, "body", 0), path.call(print, "body", 1)]
   )),
   module: (path, opts, print) => {
     const declaration = group(concat(["module ", path.call(print, "body", 0)]));
@@ -428,16 +398,12 @@ module.exports = {
       return "next";
     }
 
-    if (path.getValue().body[0].type === "args_add") {
-      return concat(["next ", path.call(print, "body", 0)]);
-    }
-
-    if (args.body[1].type !== "paren") {
-      return concat(["next ", path.call(print, "body", 0)]);
+    if (args.body[0].type !== "paren") {
+      return concat(["next ", join(",", path.call(print, "body", 0))]);
     }
 
     // Ignoring the parens node and just going straight to the content
-    return concat(["next ", path.call(print, "body", 0, "body", 0, "body", 1, "body", 0)]);
+    return concat(["next ", path.call(print, "body", 0, "body", 0, "body", 0, "body", 0)]);
   },
   opassign: (path, opts, print) => group(concat([
     path.call(print, "body", 0),
@@ -445,7 +411,19 @@ module.exports = {
     path.call(print, "body", 1),
     indent(concat([line, path.call(print, "body", 2)]))
   ])),
-  paren: surround("(", ")"),
+  paren: (path, opts, print) => {
+    let content = path.call(print, "body", 0);
+
+    if (["args", "args_add_star", "args_add_block"].includes(path.getValue().body[0].type)) {
+      content = join(concat([",", line]), content);
+    }
+
+    return group(concat([
+      "(",
+      indent(concat([softline, content])),
+      concat([softline, ")"])
+    ]));
+  },
   program: (path, opts, print) => markAsRoot(concat([
     join(literalline, path.map(print, "body")),
     literalline
@@ -496,12 +474,12 @@ module.exports = {
       return "return";
     }
 
-    if (args.body[1] && args.body[1].type === "paren") {
-      return concat(["return ", path.call(print, "body", 0, "body", 0, "body", 1, "body", 0)]);
+    if (args.body[0] && args.body[0].type === "paren") {
+      // Ignoring the parens node and just going straight to the content
+      return concat(["return ", path.call(print, "body", 0, "body", 0, "body", 0, "body", 0)]);
     }
 
-    // Ignoring the parens node and just going straight to the content
-    return concat(["return ", path.call(print, "body", 0)]);
+    return concat(["return ", join(", ", path.call(print, "body", 0))]);
   },
   return0: literal("return"),
   sclass: (path, opts, print) => group(concat([
@@ -536,13 +514,11 @@ module.exports = {
     return concat(parts);
   },
   super: (path, opts, print) => {
-    const buffer = path.getValue().body[0].type === "arg_paren" ? "": " ";
+    if (path.getValue().body[0].type === "arg_paren") {
+      return concat(["super", path.call(print, "body", 0)]);
+    }
 
-    return group(concat([
-      "super",
-      buffer,
-      path.call(print, "body", 0)
-    ]))
+    return concat(["super ", join(", ", path.call(print, "body", 0))]);
   },
   symbol: prefix(":"),
   symbol_literal: concatBody,
@@ -562,15 +538,15 @@ module.exports = {
   ]),
   var_field: concatBody,
   var_ref: first,
-  vcall: concatBody,
+  vcall: first,
   when: (path, opts, print) => {
     const [_predicates, _statements, addition] = path.getValue().body;
 
-    const printedStatements = path.call(print, "body", 1);
-    const parts = [group(concat(["when ", path.call(print, "body", 0)]))];
+    const stmts = path.call(print, "body", 1);
+    const parts = [group(concat(["when ", join(", ", path.call(print, "body", 0))]))];
 
-    if (!printedStatements.parts.every(part => !part)) {
-      parts.push(indent(concat([hardline, printedStatements])));
+    if (!stmts.parts.every(part => !part)) {
+      parts.push(indent(concat([hardline, stmts])));
     }
 
     if (addition) {
@@ -579,11 +555,13 @@ module.exports = {
 
     return group(concat(parts));
   },
-  yield: (path, opts, print) => concat([
-    "yield",
-    path.getValue().body[0].type === "paren" ? "" : " ",
-    concat(path.map(print, "body"))
-  ]),
+  yield: (path, opts, print) => {
+    if (path.getValue().body[0].type === "paren") {
+      return concat(["yield", path.call(print, "body", 0)]);
+    }
+
+    return concat(["yield ", join(", ", path.call(print, "body", 0))]);
+  },
   yield0: literal("yield"),
   zsuper: literal("super")
 };

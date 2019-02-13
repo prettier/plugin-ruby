@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Automatically convert arrays of all string literals to %w arrays.
+- Automatically convert arrays of all symbol literals to %i arrays.
+
+### Changed
+- [INTERNAL] Move the `args_add` and `args_new` handling into the parser.
+- Change `command_call` nodes to properly indent when broken and to not add a trailing comma. (Thanks to @uri for the report.)
 
 ## [0.4.1] - 2019-02-12
 ### Changed

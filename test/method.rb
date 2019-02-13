@@ -41,6 +41,9 @@ foo(1, 2, *abc)
 foo(1, 2, *abc, 3, 4)
 foo(aaaaaaa, bbbbbbb, ccccccc, ddddddd, eeeeeee, fffffff, ggggggg, hhhhhhh, iiiiiii)
 
+foo aaaaaaa, bbbbbbb, ccccccc, ddddddd, eeeeeee, fffffff, ggggggg, hhhhhhh, iiiiiii
+foo.foo aaaaaaa, bbbbbbb, ccccccc, ddddddd, eeeeeee, fffffff, ggggggg, hhhhhhh, iiiiiii
+
 foo(*bar)
 foo(**baz)
 foo(&block)

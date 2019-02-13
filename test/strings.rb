@@ -7,6 +7,11 @@
 # rubocop:disable Layout/ClosingParenthesisIndentation
 # rubocop:disable Style/StringLiteralsInInterpolation
 
+?a # these are CHARs
+?\C-a
+?\M-a
+?\M-\C-a
+
 ''
 
 'abc'

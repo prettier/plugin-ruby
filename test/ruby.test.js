@@ -40,6 +40,8 @@ const eachUnsupportedNode = callback => {
 
   const expected = [
     "arg_ambiguous",
+    "args_add",
+    "args_new",
     "heredoc_dedent",
     "magic_comment",
     "mlhs_add",
