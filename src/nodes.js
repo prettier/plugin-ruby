@@ -328,6 +328,16 @@ module.exports = {
     }
 
     const noParams = params.body.every(type => !type);
+    const commandNode = path.getParentNode(2);
+
+    if (commandNode && ["command", "command_call"].includes(commandNode.type)) {
+      return group(concat([
+        "lambda { ",
+        noParams ? "" : concat(["|", paramsConcat, "|"]),
+        indent(concat([line, path.call(print, "body", 1)])),
+        concat([line, "}"])
+      ]));
+    }
 
     return group(ifBreak(
       concat([

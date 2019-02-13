@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ### Changed
 - Use `JSON::fast_generate` to get the s-expressions back from the parser.
+- Handle broken lambdas from within `command` and `command_call` nodes. (Thanks to @NoahTheDuke for the report.)
 
 ## [0.5.2] - 2019-02-13
 ### Changed
