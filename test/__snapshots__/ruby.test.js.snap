@@ -156,25 +156,28 @@ a =
 
 a, b, c = [1, 2, 3]
 
-a =
+a = 1, 2, 3
 
-a, b, c =
+a, b, c = 1, 2, 3
 
-a, *b =
+a, *b = 1, 2, 3
 
-a, *b, c, d =
+a, *b, c, d = 1, 2, 3
 
-a, * =
+a, * = 1, 2, 3
 
 a = *a
 
-(a, b), c =
+(a, b), c = [1, 2], 3
 
 * = [1, 2, 3]
 
 *, a = [1, 2, 3]
 
 super_super_super_long, super_super_super_long, super_super_super_long =
+  super_super_super_super_super_long,
+  super_super_super_super_super_long,
+  super_super_super_super_super_long
 
 a ||= 1
 
@@ -226,25 +229,28 @@ a =
 
 a, b, c = [1, 2, 3]
 
-a =
+a = 1, 2, 3
 
-a, b, c =
+a, b, c = 1, 2, 3
 
-a, *b =
+a, *b = 1, 2, 3
 
-a, *b, c, d =
+a, *b, c, d = 1, 2, 3
 
-a, * =
+a, * = 1, 2, 3
 
 a = *a
 
-(a, b), c =
+(a, b), c = [1, 2], 3
 
 * = [1, 2, 3]
 
 *, a = [1, 2, 3]
 
 super_super_super_long, super_super_super_long, super_super_super_long =
+  super_super_super_super_super_long,
+  super_super_super_super_super_long,
+  super_super_super_super_super_long
 
 a ||= 1
 
@@ -1911,14 +1917,18 @@ rescue ArgumentError
 rescue NoMethodError => exception
   puts exception
   redo
-rescue
+rescue SyntaxError, NoMethodError
   2
-rescue StandardError
+rescue SomeSuperSuperLongError,
+       SomeOtherSuperSuperLongError,
+       OneLastSuperLongError
   3
-else
+rescue StandardError
   4
-ensure
+else
   5
+ensure
+  6
 end
 
 begin
@@ -1946,14 +1956,18 @@ rescue ArgumentError
 rescue NoMethodError => exception
   puts exception
   redo
-rescue
+rescue SyntaxError, NoMethodError
   2
-rescue StandardError
+rescue SomeSuperSuperLongError,
+       SomeOtherSuperSuperLongError,
+       OneLastSuperLongError
   3
-else
+rescue StandardError
   4
-ensure
+else
   5
+ensure
+  6
 end
 
 begin

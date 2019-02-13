@@ -9,12 +9,14 @@ rescue NoMethodError => exception
   redo
 rescue SyntaxError, NoMethodError
   2
-rescue
+rescue SomeSuperSuperLongError, SomeOtherSuperSuperLongError, OneLastSuperLongError
   3
-else
+rescue
   4
-ensure
+else
   5
+ensure
+  6
 end
 
 a rescue nil

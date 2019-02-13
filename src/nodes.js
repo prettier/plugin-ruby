@@ -92,7 +92,11 @@ module.exports = {
     path.map(print, "body", 0))
   ),
   assign: (path, opts, print) => {
-    const [printedTarget, printedValue] = path.map(print, "body");
+    let [printedTarget, printedValue] = path.map(print, "body");
+
+    if (["mrhs_add_star", "mrhs_new_from_args"].includes(path.getValue().body[1].type)) {
+      printedValue = group(join(concat([",", line]), printedValue));
+    }
 
     if (skipAssignIndent(path.getValue().body[1])) {
       return group(concat([printedTarget, " = ", printedValue]));
@@ -341,11 +345,19 @@ module.exports = {
       ])
     ));
   },
-  massign: (path, opts, print) => group(concat([
-    group(join(concat([",", line]), path.call(print, "body", 0))),
-    " =",
-    indent(concat([line, path.call(print, "body", 1)]))
-  ])),
+  massign: (path, opts, print) => {
+    let right = path.call(print, "body", 1);
+
+    if (["mrhs_add_star", "mrhs_new_from_args"].includes(path.getValue().body[1].type)) {
+      right = group(join(concat([",", line]), right));
+    }
+
+    return group(concat([
+      group(join(concat([",", line]), path.call(print, "body", 0))),
+      " =",
+      indent(concat([line, right]))
+    ]));
+  },
   method_add_arg: (path, opts, print) => {
     if (path.getValue().body[1].type === "args_new") {
       return path.call(print, "body", 0);
@@ -369,13 +381,10 @@ module.exports = {
     concat([softline, ")"])
   ])),
   mrhs: makeList,
-  mrhs_add_star: (path, opts, print) => group(join(
-    concat([",", line]),
-    [
-      ...path.call(print, "body", 0),
-      concat(["*", path.call(print, "body", 1)])
-    ]
-  )),
+  mrhs_add_star: (path, opts, print) => [
+    ...path.call(print, "body", 0),
+    concat(["*", path.call(print, "body", 1)])
+  ],
   mrhs_new_from_args: (path, opts, print) => {
     const parts = path.call(print, "body", 0);
 
@@ -451,7 +460,10 @@ module.exports = {
         if (Array.isArray(exception)) {
           parts.push(" ", path.call(print, "body", 0, 0));
         } else {
-          parts.push(" ", path.call(print, "body", 0));
+          parts.push(
+            " ",
+            align("rescue ".length, group(join(concat([",", line]), path.call(print, "body", 0))))
+          );
         }
       }
 
