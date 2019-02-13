@@ -530,7 +530,7 @@ exports[`break.rb matches expected output for on.json 1`] = `
 exports[`case.rb matches expected output for off.json 1`] = `
 "# frozen_string_literal: true
 
-# rubocop:disable Lint/EmptyWhen, rubocop:disable Style/EmptyCaseCondition.
+# rubocop:disable Lint/EmptyWhen, Style/EmptyCaseCondition
 
 case
 when a
@@ -574,7 +574,7 @@ end
 exports[`case.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
 
-# rubocop:disable Lint/EmptyWhen, rubocop:disable Style/EmptyCaseCondition.
+# rubocop:disable Lint/EmptyWhen, Style/EmptyCaseCondition
 
 case
 when a
@@ -1049,29 +1049,31 @@ end
 
 exports[`encoding.rb matches expected output for off.json 1`] = `
 "# -*- encoding: binary -*-
+# frozen_string_literal: true
 
-# rubocop:disable Lint/Void
+# rubocop:disable Lint/Void, Style/AsciiComments
 
 # il était
 :il_était
 \\"ひらがな\\"
 /ひらがな/
 
-# rubocop:disable Lint/Void
+# rubocop:enable Lint/Void, Style/AsciiComments
 "
 `;
 
 exports[`encoding.rb matches expected output for on.json 1`] = `
 "# -*- encoding: binary -*-
+# frozen_string_literal: true
 
-# rubocop:disable Lint/Void
+# rubocop:disable Lint/Void, Style/AsciiComments
 
 # il était
 :il_était
 'ひらがな'
 /ひらがな/
 
-# rubocop:disable Lint/Void
+# rubocop:enable Lint/Void, Style/AsciiComments
 "
 `;
 
@@ -1234,11 +1236,14 @@ if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
-# rubocop:disable Style/Not, Style/NegatedIf
+# rubocop:disable Style/Not, Style/NegatedIf, Lint/EmptyExpression
 if not a
   b
 end
-# rubocop:enable Style/Not, Style/NegatedIf
+
+# from ruby test/ruby/test_not.rb
+assert_equal(true, (not ()))
+# rubocop:enable Style/Not, Style/NegatedIf, Lint/EmptyExpression
 
 if a
   break # comment
@@ -1330,9 +1335,6 @@ a b do
     b
   end
 end
-
-# from ruby test/ruby/test_not.rb
-assert_equal(true, (not ()))
 "
 `;
 
@@ -1343,9 +1345,12 @@ if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
-# rubocop:disable Style/Not, Style/NegatedIf
+# rubocop:disable Style/Not, Style/NegatedIf, Lint/EmptyExpression
 b if not a
-# rubocop:enable Style/Not, Style/NegatedIf
+
+# from ruby test/ruby/test_not.rb
+assert_equal(true, (not ()))
+# rubocop:enable Style/Not, Style/NegatedIf, Lint/EmptyExpression
 
 if a
   break # comment
@@ -1433,9 +1438,6 @@ a b do
     b
   end
 end
-
-# from ruby test/ruby/test_not.rb
-assert_equal(true, (not ()))
 "
 `;
 
@@ -1939,9 +1941,9 @@ end
 
 # from ruby spec/ruby/language/rescue_spec.rb
 def foo
-  bar
+  a
 rescue A, *B => e
-  baz
+  e
 end
 "
 `;
@@ -1978,9 +1980,9 @@ end
 
 # from ruby spec/ruby/language/rescue_spec.rb
 def foo
-  bar
+  a
 rescue A, *B => e
-  baz
+  e
 end
 "
 `;

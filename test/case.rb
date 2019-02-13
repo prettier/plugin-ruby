@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Lint/EmptyWhen, rubocop:disable Style/EmptyCaseCondition.
+# rubocop:disable Lint/EmptyWhen, Style/EmptyCaseCondition
 
 case
 when a

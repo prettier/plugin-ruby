@@ -23,7 +23,7 @@ a rescue nil
 
 # from ruby spec/ruby/language/rescue_spec.rb
 def foo
-  bar
+  a
 rescue A, *B => e
-  baz
+  e
 end
