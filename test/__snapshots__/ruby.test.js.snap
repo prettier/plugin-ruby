@@ -31,7 +31,11 @@ exports[`array.rb matches expected output for off.json 1`] = `
 
 [1, 2, 3]
 
+# rubocop:disable Style/WordArray
+# We need to fix this, but it can't be done until we get the args_new and
+# args_add refactor done.
 [\\"a\\", \\"b\\", \\"c\\"]
+# rubocop:enable Style/WordArray
 
 %w[a b c]
 
@@ -41,7 +45,9 @@ exports[`array.rb matches expected output for off.json 1`] = `
 
 %I[a#{a}a b#{b}b c#{c}c]
 
+# rubocop:disable Lint/UnneededSplatExpansion
 [1, 2, *[3, 4], 5, 6]
+# rubocop:enable Lint/UnneededSplatExpansion
 
 [
   super_super_super_super_super_super_super_super_super_super_super_long,
@@ -82,7 +88,11 @@ exports[`array.rb matches expected output for on.json 1`] = `
 
 [1, 2, 3]
 
+# rubocop:disable Style/WordArray
+# We need to fix this, but it can't be done until we get the args_new and
+# args_add refactor done.
 ['a', 'b', 'c']
+# rubocop:enable Style/WordArray
 
 %w[a b c]
 
@@ -92,7 +102,9 @@ exports[`array.rb matches expected output for on.json 1`] = `
 
 %I[a#{a}a b#{b}b c#{c}c]
 
+# rubocop:disable Lint/UnneededSplatExpansion
 [1, 2, *[3, 4], 5, 6]
+# rubocop:enable Lint/UnneededSplatExpansion
 
 [
   super_super_super_super_super_super_super_super_super_super_super_long,
@@ -664,8 +676,11 @@ Pret::TIER = 'config'.freeze
 `;
 
 exports[`comments.rb matches expected output for off.json 1`] = `
-"# this is a comment at
+"# frozen_string_literal: true
+
+# this is a comment at
 # the beginning of the file
+# rubocop:disable Lint/Void
 
 loop do
   # this is the only statement
@@ -705,7 +720,7 @@ module Foo
       # this comment is inside a method
     end
 
-    def foo
+    def bar
       print message # this is an inline comment
     end
 
@@ -759,14 +774,18 @@ when bar
   baz
 end
 
+# rubocop:enable Lint/Void
 # this is a comment
 # at the end of the file
 "
 `;
 
 exports[`comments.rb matches expected output for on.json 1`] = `
-"# this is a comment at
+"# frozen_string_literal: true
+
+# this is a comment at
 # the beginning of the file
+# rubocop:disable Lint/Void
 
 loop do
   # this is the only statement
@@ -806,7 +825,7 @@ module Foo
       # this comment is inside a method
     end
 
-    def foo
+    def bar
       print message # this is an inline comment
     end
 
@@ -860,6 +879,7 @@ when bar
   baz
 end
 
+# rubocop:enable Lint/Void
 # this is a comment
 # at the end of the file
 "
@@ -1136,9 +1156,11 @@ if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
+# rubocop:disable Style/Not, Style/NegatedIf
 if not a
   b
 end
+# rubocop:enable Style/Not, Style/NegatedIf
 
 if a
   break # comment
@@ -1232,7 +1254,9 @@ if a
   super_super_super_super_super_super_super_super_super_super_super_super_long
 end
 
+# rubocop:disable Style/Not, Style/NegatedIf
 b if not a
+# rubocop:enable Style/Not, Style/NegatedIf
 
 if a
   break # comment
@@ -1461,9 +1485,6 @@ exports[`method.rb matches expected output for off.json 1`] = `
 # rubocop:disable Lint/DuplicateMethods, Lint/UnusedMethodArgument
 # rubocop:disable Metrics/ParameterLists
 
-# rubocop:disable Style/MethodDefParentheses
-# We should handle this by placing parentheses around the arguments.
-
 def foo; end
 
 def foo(); end
@@ -1526,7 +1547,7 @@ Foo.foo
 foo&.foo
 
 # rubocop:enable Lint/DuplicateMethods, Lint/UnusedMethodArgument
-# rubocop:enable Metrics/ParameterLists, Style/MethodDefParentheses
+# rubocop:enable Metrics/ParameterLists
 "
 `;
 
@@ -1535,9 +1556,6 @@ exports[`method.rb matches expected output for on.json 1`] = `
 
 # rubocop:disable Lint/DuplicateMethods, Lint/UnusedMethodArgument
 # rubocop:disable Metrics/ParameterLists
-
-# rubocop:disable Style/MethodDefParentheses
-# We should handle this by placing parentheses around the arguments.
 
 def foo; end
 
@@ -1601,7 +1619,7 @@ Foo.foo
 foo&.foo
 
 # rubocop:enable Lint/DuplicateMethods, Lint/UnusedMethodArgument
-# rubocop:enable Metrics/ParameterLists, Style/MethodDefParentheses
+# rubocop:enable Metrics/ParameterLists
 "
 `;
 
