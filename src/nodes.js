@@ -16,7 +16,7 @@ module.exports = {
     const { body } = path.getValue();
     return /^0[0-9]/.test(body) ? `0o${body.slice(1)}` : body;
   },
-  arg_paren: (path, { trailingComma }, print) => {
+  arg_paren: (path, { addTrailingCommas }, print) => {
     if (path.getValue().body[0] === null) {
       return "";
     }
@@ -26,7 +26,7 @@ module.exports = {
       indent(concat([
         softline,
         join(concat([",", line]), path.call(print, "body", 0)),
-        trailingComma ? ifBreak(",", "") : ""
+        addTrailingCommas ? ifBreak(",", "") : ""
       ])),
       concat([softline, ")"])
     ]))
@@ -293,7 +293,7 @@ module.exports = {
     path.call(print, "body", 0),
     concat([makeCall(path, opts, print), path.call(print, "body", 2)])
   ])),
-  hash: (path, { trailingComma }, print) => {
+  hash: (path, { addTrailingCommas }, print) => {
     if (path.getValue().body[0] === null) {
       return '{}';
     }
@@ -303,7 +303,7 @@ module.exports = {
       indent(concat([
         line,
         concat(path.map(print, "body")),
-        trailingComma ? ifBreak(",", "") : "",
+        addTrailingCommas ? ifBreak(",", "") : "",
       ])),
       concat([line, "}"])
     ]));
