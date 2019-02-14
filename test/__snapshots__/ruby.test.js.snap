@@ -1495,6 +1495,15 @@ a[1, 2, 3]
 ->(a) { a }
 
 -> { 1 }
+
+command :fooooooooooooobaaaaaaarrrrr,
+        lambda { |argument|
+          argument + argument + argument + argument + argument + argument
+        }
+comm.and :fooooooooooooobaaaaaaarrrrr,
+         lambda { |argument|
+           argument + argument + argument + argument + argument + argument
+         }
 "
 `;
 
@@ -1524,6 +1533,15 @@ a[1, 2, 3]
 ->(a) { a }
 
 -> { 1 }
+
+command :fooooooooooooobaaaaaaarrrrr,
+        lambda { |argument|
+          argument + argument + argument + argument + argument + argument
+        }
+comm.and :fooooooooooooobaaaaaaarrrrr,
+         lambda { |argument|
+           argument + argument + argument + argument + argument + argument
+         }
 "
 `;
 
