@@ -241,7 +241,7 @@ class RipperJS < Ripper::SexpBuilder
 
   def build_parser_event(type, body)
     build_sexp(type, body).tap do |sexp|
-      next if inline_comments.empty?
+      next if inline_comments.empty? || type == :args_add_block
 
       sexp[:comments] = inline_comments.reverse
       @inline_comments = []
