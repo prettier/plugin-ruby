@@ -78,6 +78,20 @@ const eachUnsupportedNode = callback => {
   });
 };
 
+let tmpDir;
+
+beforeAll(() => {
+  tmpDir = fs.mkdtempSync("minitest-");
+});
+
+afterAll(() => {
+  fs.readdirSync(tmpDir).forEach(file => {
+    fs.unlinkSync(path.join(tmpDir, file));
+  });
+
+  fs.rmdirSync(tmpDir);
+});
+
 eachConfig((prettierConfig, rubocopConfig, config) => {
   eachTest(config, (file, getContents) => {
     describe(file, () => {
@@ -98,6 +112,19 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
 
           child.on("exit", code => (
             code === 0 ? resolve() : reject(`rubocop exited with status ${code}`)
+          ));
+        }));
+      }
+
+      if (["regexp.rb"].includes(file)) {
+        test(`generated code passes as a ruby test for ${prettierConfig}`, () => new Promise((resolve, reject) => {
+          const filepath = path.join(tmpDir, file);
+          fs.writeFileSync(filepath, getContents());
+
+          const child = spawn("bundle", ["exec", "ruby", "-rminitest/autorun", filepath]);
+
+          child.on("exit", code => (
+            code === 0 ? resolve() : reject(`minitest exited with status ${code}`)
           ));
         }));
       }

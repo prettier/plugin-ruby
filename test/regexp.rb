@@ -1,25 +1,65 @@
 # frozen_string_literal: true
 
-# rubocop:disable Lint/Void
+class RegexpTest < Minitest::Test
+  def test_default
+    regexp = /abc/
 
-/abc/
+    assert_match regexp, 'abcde'
+  end
 
-%r{a/b/c}
+  def test_braces
+    regexp = %r{abc}
 
-%r{abc}
+    assert_match regexp, 'abcde'
+  end
 
-%r/abc/
+  def test_braces_with_slashes
+    regexp = %r{a/b/c}
 
-%r[abc]
+    assert_match regexp, 'a/b/c/d/e'
+  end
 
-%r(abc)
+  def test_slashes
+    regexp = %r/abc/
 
-/a#{b}c/
+    assert_match regexp, 'abcde'
+  end
 
-/abc/i
+  def test_brackets
+    regexp = %r[abc]
 
-%r{abc}i
+    assert_match regexp, 'abcde'
+  end
 
-/#$&/
+  def test_parens
+    regexp = %r(abc)
 
-# rubocop:enable Lint/Void
+    assert_match regexp, 'abcde'
+  end
+
+  def test_interpolation
+    inter = 'b'
+    regexp = /a#{inter}c/
+
+    assert_match regexp, 'abcde'
+  end
+
+  def test_modifier
+    regexp = /abc/i
+
+    assert_match regexp, 'ABCDE'
+  end
+
+  def test_brace_modifier
+    regexp = %r{abc}i
+
+    assert_match regexp, 'ABCDE'
+  end
+
+  def test_global_interpolation
+    'foo' =~ /foo/
+    regexp = /#$&/
+
+    assert_match regexp, 'foobar'
+  end
+end
