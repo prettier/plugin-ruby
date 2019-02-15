@@ -72,9 +72,9 @@ end
 
 First, your system on which you're running is going to need a couple of things:
 
-* [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) `2.5` or newer - there are a lot of ways to install `ruby`, but I recommend [`rbenv`](https://github.com/rbenv/rbenv)
-* [`node`](https://nodejs.org/en/download/) `8.3` or newer - `prettier` is a JavaScript package, so you're going to need to install `node` to work with it
-* [`npm`](https://www.npmjs.com/get-npm) or [`yarn`](https://yarnpkg.com/en/docs/getting-started) - these are package managers for JavaScript, either one will do
+- [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) `2.5` or newer - there are a lot of ways to install `ruby`, but I recommend [`rbenv`](https://github.com/rbenv/rbenv)
+- [`node`](https://nodejs.org/en/download/) `8.3` or newer - `prettier` is a JavaScript package, so you're going to need to install `node` to work with it
+- [`npm`](https://www.npmjs.com/get-npm) or [`yarn`](https://yarnpkg.com/en/docs/getting-started) - these are package managers for JavaScript, either one will do
 
 Second, you're going to need to list `@prettier/plugin-ruby` as a JavaScript dependency from within whatever project on which you're working.
 
@@ -91,13 +91,13 @@ Finally, you can install your dependencies using either `npm install` for `npm` 
 Now, you can run `prettier` to tidy up your `ruby` files! Verify by running against a file:
 
 ```bash
-./node_modules/.bin/prettier --write --plugin=@prettier/plugin-ruby path/to/file.rb
+./node_modules/.bin/prettier --write path/to/file.rb
 ```
 
 If you're happy, you can can run `prettier` on an entire codebase:
 
 ```bash
-./node_modules/.bin/prettier --write --plugin=@prettier/plugin-ruby '**/*.{rb,rake}'
+./node_modules/.bin/prettier --write '**/*.{rb,rake}'
 ```
 
 Note that you can also install `prettier` globally with `npm install -g prettier` or you can add `./node_modules/.bin` to your `$PATH` so you don't need to reference the executable from the directory each time.
@@ -106,15 +106,15 @@ Note that you can also install `prettier` globally with `npm install -g prettier
 
 Below are the options (from [`src/ruby.js`](src/ruby.js)) that `@prettier/plugin-ruby` currently supports:
 
-| Name | Default | Description |
-|------|:-------:|-------------|
-| `printWidth` | `80` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)). |
-| `tabWidth` | `2` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)). |
-| `addTrailingCommas` | `false` | Adds a trailing comma to array literals, hash literals, and method calls. |
-| `inlineConditionals` | `true` | When it fits on one line, allows if and unless statements to use the modifier form. |
-| `inlineLoops` | `true` | When it fits on one line, allows while and until statements to use the modifier form. |
-| `preferHashLabels` | `true` | When possible, uses the shortened hash key syntax, as opposed to hash rockets. |
-| `preferSingleQuotes` | `true` | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals. |
+| Name                 | Default | Description                                                                                                   |
+| -------------------- | :-----: | ------------------------------------------------------------------------------------------------------------- |
+| `printWidth`         |  `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).              |
+| `tabWidth`           |   `2`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).                |
+| `addTrailingCommas`  | `false` | Adds a trailing comma to array literals, hash literals, and method calls.                                     |
+| `inlineConditionals` | `true`  | When it fits on one line, allows if and unless statements to use the modifier form.                           |
+| `inlineLoops`        | `true`  | When it fits on one line, allows while and until statements to use the modifier form.                         |
+| `preferHashLabels`   | `true`  | When possible, uses the shortened hash key syntax, as opposed to hash rockets.                                |
+| `preferSingleQuotes` | `true`  | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals. |
 
 ## Development
 
@@ -122,8 +122,8 @@ After checking out the repo, run `yarn` and `bundle` to install dependencies. Th
 
 Useful resources for understanding the AST structure are:
 
-* https://github.com/ruby/ruby/blob/trunk/parse.y - the Ruby parser that will give you the names of the nodes as well as their structure
-* https://github.com/ruby/ruby/blob/trunk/test/ripper/test_parser_events.rb - the test file that gives you code examples of each kind of node
+- https://github.com/ruby/ruby/blob/trunk/parse.y - the Ruby parser that will give you the names of the nodes as well as their structure
+- https://github.com/ruby/ruby/blob/trunk/test/ripper/test_parser_events.rb - the test file that gives you code examples of each kind of node
 
 ## Contributing
 
