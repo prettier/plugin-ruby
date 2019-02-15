@@ -400,6 +400,10 @@ assert_nil(
   )
 )
 
+list_of_things_that_is_long_and_will_cause_a_line_break.select(:foo).reject(
+  &:blank?
+)
+
 # rubocop:enable Lint/UnusedBlockArgument
 "
 `;
@@ -495,6 +499,10 @@ assert_nil(
     end&.foo do
     end
   ),
+)
+
+list_of_things_that_is_long_and_will_cause_a_line_break.select(:foo).reject(
+  &:blank?
 )
 
 # rubocop:enable Lint/UnusedBlockArgument

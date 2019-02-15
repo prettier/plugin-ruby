@@ -98,4 +98,6 @@ end
 # from ruby test/ruby/test_call.rb
 assert_nil(("a".sub! "b" do end&.foo {}))
 
+list_of_things_that_is_long_and_will_cause_a_line_break.select(:foo).reject(&:blank?)
+
 # rubocop:enable Lint/UnusedBlockArgument
