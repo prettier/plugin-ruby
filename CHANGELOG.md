@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.6.1] - 2019-02-15
 ### Changed
 - Fix Ruby 2.5 inline comments on `args_add_block` nodes. (Thanks to @meleyal for the report.)
 - Support passing `super()` explicitly with no arguments. (Thanks to @meleyal for the report.)
@@ -146,7 +148,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 - Initial release 🎉
 
-[Unreleased]: https://github.com/CultureHQ/add-to-calendar/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/CultureHQ/add-to-calendar/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/CultureHQ/add-to-calendar/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/CultureHQ/add-to-calendar/compare/v0.5.2...v0.6.0
 [0.5.2]: https://github.com/CultureHQ/add-to-calendar/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/CultureHQ/add-to-calendar/compare/v0.5.0...v0.5.1
