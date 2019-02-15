@@ -116,6 +116,21 @@ Below are the options (from [`src/ruby.js`](src/ruby.js)) that `@prettier/plugin
 | `preferHashLabels`   | `true`  | When possible, uses the shortened hash key syntax, as opposed to hash rockets.                                |
 | `preferSingleQuotes` | `true`  | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals. |
 
+Any of these can be added to your existing [prettier configuration
+file](https://prettier.io/docs/en/configuration.html). For example:
+
+```json
+{
+  "preferSingleQuotes": false
+}
+```
+
+Or, they can be passed to `prettier` as arguments:
+
+```bash
+./node_modules/.bin/prettier --prefer-single-quotes false --write '**/*.{rb,rake}'
+```
+
 ## Development
 
 After checking out the repo, run `yarn` and `bundle` to install dependencies. Then, run `yarn test` to run the tests. You can pretty print a Ruby source file by running `yarn print [PATH]`.
