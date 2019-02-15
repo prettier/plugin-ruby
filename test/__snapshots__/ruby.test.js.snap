@@ -2322,6 +2322,8 @@ exports[`super.rb matches expected output for off.json 1`] = `
 
 super
 
+super()
+
 super 1
 
 super(1)
@@ -2336,6 +2338,8 @@ exports[`super.rb matches expected output for on.json 1`] = `
 "# frozen_string_literal: true
 
 super
+
+super()
 
 super 1
 

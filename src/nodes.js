@@ -549,7 +549,16 @@ module.exports = {
     return concat(parts);
   },
   super: (path, opts, print) => {
-    if (path.getValue().body[0].type === "arg_paren") {
+    const args = path.getValue().body[0];
+
+    if (args.type === "arg_paren") {
+      // In case there are explicitly no arguments but they are using parens,
+      // we assume they are attempting to override the initializer and pass no
+      // arguments up.
+      if (args.body[0] === null) {
+        return "super()";
+      }
+
       return concat(["super", path.call(print, "body", 0)]);
     }
 
