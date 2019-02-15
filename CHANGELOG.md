@@ -6,8 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 ### Changed
-- Fix Ruby 2.5 inline comments on `args_add_block` nodes.
-- Support passing `super()` explicitly with no arguments.
+- Fix Ruby 2.5 inline comments on `args_add_block` nodes. (Thanks to @meleyal for the report.)
+- Support passing `super()` explicitly with no arguments. (Thanks to @meleyal for the report.)
 
 ## [0.6.0] - 2019-02-14
 ### Added
