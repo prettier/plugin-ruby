@@ -3,7 +3,7 @@
   <img alt="Ruby" height="124px" vspace="" hspace="25" src="https://www.ruby-lang.org/images/header-ruby-logo@2x.png">
 </div>
 
-<h2 align="center">Prettier for Ruby</h2>
+<h1 align="center">Prettier for Ruby</h1>
 
 <p align="center">
   <a href="https://gitter.im/jlongster/prettier">
@@ -22,6 +22,12 @@
     <img alt="Follow+Prettier+on+Twitter" src="https://img.shields.io/twitter/follow/prettiercode.svg?label=follow+prettier&style=flat-square">
   </a>
 </p>
+
+## WORK IN PROGRESS
+
+Please note that this plugin is under active development, and might not be ready to run on production code yet.
+
+## About
 
 `@prettier/plugin-ruby` is a [prettier](https://prettier.io/) plugin for the Ruby programming language. `prettier` is an opinionated code formatter that supports multiple languages and integrates with most editors. The idea is to eliminate discussions of style in code review and allow developers to get back to thinking about code design instead.
 
@@ -68,53 +74,50 @@ a.transpose.each do |a|
 end
 ```
 
-## Getting started
+## Requirements
 
-First, your system on which you're running is going to need a couple of things:
+- [Ruby](https://www.ruby-lang.org/) 2.5+
+- [Node.js](https://nodejs.org/) 8.3+
 
-* [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) `2.5` or newer - there are a lot of ways to install `ruby`, but I recommend [`rbenv`](https://github.com/rbenv/rbenv)
-* [`node`](https://nodejs.org/en/download/) `8.3` or newer - `prettier` is a JavaScript package, so you're going to need to install `node` to work with it
-* [`npm`](https://www.npmjs.com/get-npm) or [`yarn`](https://yarnpkg.com/en/docs/getting-started) - these are package managers for JavaScript, either one will do
+## Install
 
-Second, you're going to need to list `@prettier/plugin-ruby` as a JavaScript dependency from within whatever project on which you're working.
+1. Create a `package.json` file in the root of your repository (if you don't already have one):
 
-If you do not already have a `package.json` file in the root of your repository, you can create one with:
+   ```bash
+   npm init -y
+   ```
 
-```bash
-echo '{ "name": "My Project" }' > package.json
-```
+2. Install dependencies:
 
-After that you can add `prettier` and `@prettier/plugin-ruby` to your `package.json` `devDependencies` by running `npm install --save-dev prettier @prettier/plugin-ruby` if you are using `npm` or `yarn add --dev prettier @prettier/plugin-ruby` if you are using `yarn`.
+   ```bash
+   npm install --save-dev prettier @prettier/plugin-ruby
+   ```
 
-Finally, you can install your dependencies using either `npm install` for `npm` or `yarn install` for `yarn`.
+3. Now, you can run `prettier` to tidy up your `ruby` files! Verify by running against a file:
 
-Now, you can run `prettier` to tidy up your `ruby` files! Verify by running against a file:
+   ```bash
+   prettier --write path/to/file.rb
+   ```
 
-```bash
-./node_modules/.bin/prettier --write --plugin=@prettier/plugin-ruby path/to/file.rb
-```
+   If you're happy, you can run `prettier` on an entire codebase:
 
-If you're happy, you can can run `prettier` on an entire codebase:
-
-```bash
-./node_modules/.bin/prettier --write --plugin=@prettier/plugin-ruby '**/*.{rb,rake}'
-```
-
-Note that you can also install `prettier` globally with `npm install -g prettier` or you can add `./node_modules/.bin` to your `$PATH` so you don't need to reference the executable from the directory each time.
+   ```bash
+   prettier --write **/*.{rb,rake}
+   ```
 
 ## Configuration
 
 Below are the options (from [`src/ruby.js`](src/ruby.js)) that `@prettier/plugin-ruby` currently supports:
 
-| Name | Default | Description |
-|------|:-------:|-------------|
-| `printWidth` | `80` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)). |
-| `tabWidth` | `2` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)). |
-| `addTrailingCommas` | `false` | Adds a trailing comma to array literals, hash literals, and method calls. |
-| `inlineConditionals` | `true` | When it fits on one line, allows if and unless statements to use the modifier form. |
-| `inlineLoops` | `true` | When it fits on one line, allows while and until statements to use the modifier form. |
-| `preferHashLabels` | `true` | When possible, uses the shortened hash key syntax, as opposed to hash rockets. |
-| `preferSingleQuotes` | `true` | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals. |
+| Name                 | Default | Description                                                                                                   |
+| -------------------- | :-----: | ------------------------------------------------------------------------------------------------------------- |
+| `printWidth`         |  `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).              |
+| `tabWidth`           |   `2`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).                |
+| `addTrailingCommas`  | `false` | Adds a trailing comma to array literals, hash literals, and method calls.                                     |
+| `inlineConditionals` | `true`  | When it fits on one line, allows if and unless statements to use the modifier form.                           |
+| `inlineLoops`        | `true`  | When it fits on one line, allows while and until statements to use the modifier form.                         |
+| `preferHashLabels`   | `true`  | When possible, uses the shortened hash key syntax, as opposed to hash rockets.                                |
+| `preferSingleQuotes` | `true`  | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals. |
 
 ## Development
 
@@ -122,8 +125,8 @@ After checking out the repo, run `yarn` and `bundle` to install dependencies. Th
 
 Useful resources for understanding the AST structure are:
 
-* https://github.com/ruby/ruby/blob/trunk/parse.y - the Ruby parser that will give you the names of the nodes as well as their structure
-* https://github.com/ruby/ruby/blob/trunk/test/ripper/test_parser_events.rb - the test file that gives you code examples of each kind of node
+- https://github.com/ruby/ruby/blob/trunk/parse.y - the Ruby parser that will give you the names of the nodes as well as their structure
+- https://github.com/ruby/ruby/blob/trunk/test/ripper/test_parser_events.rb - the test file that gives you code examples of each kind of node
 
 ## Contributing
 
