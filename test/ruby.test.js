@@ -111,7 +111,7 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
           child.stdin.end();
 
           child.on("exit", code => (
-            code === 0 ? resolve() : reject(`rubocop exited with status ${code}`)
+            code === 0 ? resolve() : reject(child.stdout.read().toString())
           ));
         }));
       }
@@ -124,7 +124,7 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
           const child = spawn("bundle", ["exec", "ruby", "-rminitest/autorun", filepath]);
 
           child.on("exit", code => (
-            code === 0 ? resolve() : reject(`minitest exited with status ${code}`)
+            code === 0 ? resolve() : reject(child.stdout.read().toString())
           ));
         }));
       }
