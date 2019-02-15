@@ -55,6 +55,8 @@ end
 foo # this is an inline comment
 bar # this is another inline comment
 
+foo 'bar' # this is an inline comment
+
 [
   # these are comments
   # inside of an array
