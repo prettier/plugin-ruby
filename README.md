@@ -3,7 +3,7 @@
   <img alt="Ruby" height="124px" vspace="" hspace="25" src="https://www.ruby-lang.org/images/header-ruby-logo@2x.png">
 </div>
 
-<h2 align="center">Prettier for Ruby</h2>
+<h1 align="center">Prettier for Ruby</h1>
 
 <p align="center">
   <a href="https://gitter.im/jlongster/prettier">
