@@ -6,12 +6,14 @@ module.exports = {
   regexp_literal: (path, opts, print) => {
     const [contents, ending] = path.map(print, "body");
     const useBraces = contents.some(content => typeof content === "string" && content.includes("/"));
+    const modifiers = ending.slice(1);
 
     return group(concat([
       useBraces ? "%r{" : "/",
       indent(concat([softline, ...contents])),
       softline,
-      useBraces ? "}" : "/"
+      useBraces ? "}" : "/",
+      modifiers
     ]));
   }
 };
