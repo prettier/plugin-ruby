@@ -26,14 +26,6 @@ class RipperJS < Ripper::SexpBuilder
     @last_sexp = nil
   end
 
-  def parse
-    super.tap do |sexp|
-      next if block_comments.empty?
-
-      sexp[:body][0][:body] = (block_comments + sexp.dig(:body, 0, :body)).sort_by { |node| node[:start] }
-    end
-  end
-
   private
 
   # This one is weird, but basically we want to steal the comments that were
@@ -158,6 +150,13 @@ class RipperJS < Ripper::SexpBuilder
     build_sexp(:method_add_block, body).tap do |sexp|
       stmts = body[1][:body][1][:type] == :stmts ? body[1][:body][1] : body[1][:body][1][:body][0]
       attach_comments_to(sexp, stmts)
+    end
+  end
+
+  def on_program(*body)
+    build_sexp(:program, body).tap do |sexp|
+      sexp.merge!(start: 1)
+      attach_comments_to(sexp, body[0])
     end
   end
 
