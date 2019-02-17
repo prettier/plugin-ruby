@@ -1892,9 +1892,9 @@ exports[`regexp.rb matches expected output for off.json 1`] = `
 
 /a#{b}c/
 
-/abc/
+/abc/i
 
-/abc/
+/abc/i
 
 /#{$&}/
 
@@ -1921,9 +1921,9 @@ exports[`regexp.rb matches expected output for on.json 1`] = `
 
 /a#{b}c/
 
-/abc/
+/abc/i
 
-/abc/
+/abc/i
 
 /#{$&}/
 
