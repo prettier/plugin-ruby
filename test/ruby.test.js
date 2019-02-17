@@ -78,6 +78,14 @@ const eachUnsupportedNode = callback => {
   });
 };
 
+const handleChildProcess = child => new Promise((resolve, reject) => child.on("exit", code => {
+  if (code === 0) {
+    resolve();
+  } else {
+    reject((child.stdout.read() || child.stderr.read() || "").toString());
+  }
+}));
+
 let tmpDir;
 
 beforeAll(() => {
@@ -100,7 +108,7 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
       });
 
       if (!process.env.NOLINT) {
-        test(`generated code passes rubocop for ${prettierConfig}`, () => new Promise((resolve, reject) => {
+        test(`generated code passes rubocop for ${prettierConfig}`, () => {
           const child = spawn("bundle", ["exec", "rubocop", "--stdin", file, "--config", rubocopConfig]);
 
           if (process.env.VIOLATIONS) {
@@ -110,23 +118,18 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
           child.stdin.write(getContents());
           child.stdin.end();
 
-          child.on("exit", code => (
-            code === 0 ? resolve() : reject(child.stdout.read().toString())
-          ));
-        }));
+          return handleChildProcess(child);
+        });
       }
 
       if (["regexp.rb"].includes(file)) {
-        test(`generated code passes as a ruby test for ${prettierConfig}`, () => new Promise((resolve, reject) => {
+        test(`generated code passes as a ruby test for ${prettierConfig}`, () => {
           const filepath = path.join(tmpDir, file);
           fs.writeFileSync(filepath, getContents());
 
           const child = spawn("bundle", ["exec", "ruby", "-rminitest/autorun", filepath]);
-
-          child.on("exit", code => (
-            code === 0 ? resolve() : reject(child.stdout.read().toString())
-          ));
-        }));
+          return handleChildProcess(child);
+        });
       }
     });
   });
