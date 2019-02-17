@@ -1704,6 +1704,10 @@ foo(
   hhhhhhh,
   iiiiiii
 )
+foo(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  &block
+)
 
 foo aaaaaaa,
     bbbbbbb,
@@ -1810,6 +1814,10 @@ foo(
   ggggggg,
   hhhhhhh,
   iiiiiii,
+)
+foo(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  &block
 )
 
 foo aaaaaaa,

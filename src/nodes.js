@@ -26,7 +26,7 @@ module.exports = {
       indent(concat([
         softline,
         join(concat([",", line]), path.call(print, "body", 0)),
-        addTrailingCommas ? ifBreak(",", "") : ""
+        addTrailingCommas && !path.getValue().body[0].body[1] ? ifBreak(",", "") : ""
       ])),
       concat([softline, ")"])
     ]))

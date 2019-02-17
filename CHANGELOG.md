@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Add support for testing the test fixtures with minitest.
 - [INTERNAL] Switch over `alias` and `regexp` tests to minitest.
 - Break up method args to split into multiple lines. (Thanks to @aaronjensen for the report.)
+- Handle blocks args when trailing commas are on. (Thanks to @christoomey for the report.)
 
 ## [0.6.1] - 2019-02-15
 ### Changed
