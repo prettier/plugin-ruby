@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 - Handle regexp suffixes. (Thanks to @AlanFoster.)
 - [INTERNAL] Add support for testing the test fixtures with minitest.
+- [INTERNAL] Switch over `alias` and `regexp` tests to minitest.
 
 ## [0.6.1] - 2019-02-15
 ### Changed

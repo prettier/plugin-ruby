@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-alias a b # first
+# rubocop:disable Style/GlobalVars
+class AliasTest < Minitest::Test
+  def test_plain_alias
+    assert_equal 'plain alias', foo
+  end
 
-alias c d
+  def test_global_alias
+    $bar = 'global alias'
+    assert_equal 'global alias', $foo
+  end
 
-alias $e $f # rubocop:disable Style/GlobalVars
+  private
+
+  def baz
+    'plain alias'
+  end
+
+  alias bar baz # inline comment
+  alias :foo :bar
+  alias $foo $bar
+end
+# rubocop:enable Style/GlobalVars
