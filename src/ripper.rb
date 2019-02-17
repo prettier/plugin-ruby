@@ -167,14 +167,6 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  def on_stmts_new
-    { type: :stmts, body: [], start: lineno, end: lineno }
-  end
-
-  def on_stmts_add(stmts, stmt)
-    stmts.tap { |node| node[:body] << stmt }
-  end
-
   def on_string_literal(string)
     if heredoc_stack.any? && string[:type] != :heredoc && heredoc_stack[-1][:type] == :heredoc
       string.merge!(heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
@@ -211,7 +203,7 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  %i[args mlhs mrhs qsymbols qwords regexp string symbols words xstring].each do |event|
+  %i[args mlhs mrhs qsymbols qwords regexp stmts string symbols words xstring].each do |event|
     suffix = event == :string ? :content : :new
     define_method(:"on_#{event}_#{suffix}") do
       { type: event, body: [], start: lineno, end: lineno }
