@@ -4,20 +4,40 @@ require 'json'
 require 'ripper'
 
 module Node
-  module Start
+  # Some nodes are lists that come back from the parser. They always start with
+  # *_new (or in the case of string, *_content) and each additional node in the
+  # list is an *_add node. This module takes those nodes and turns them into one
+  # node with an array body.
+  module ListTypes
+    %i[args mlhs mrhs qsymbols qwords regexp stmts string symbols words xstring].each do |event|
+      suffix = event == :string ? :content : :new
+      define_method(:"on_#{event}_#{suffix}") do
+        { type: event, body: [], start: lineno, end: lineno }
+      end
+
+      define_method(:"on_#{event}_add") do |parts, part|
+        parts.tap do |node|
+          node[:body] << part
+          node[:end] = lineno
+        end
+      end
+    end
+  end
+
+  # For most nodes, it's enough to look at the child nodes to determine the
+  # start of the parent node. However, for some nodes it's necessary to keep
+  # track of the keywords as they come in from the lexer and to modify the start
+  # node one we have it.
+  module StartLine
     def initialize(*args)
       super(*args)
       @keywords = []
     end
 
-    def self.included(base)
-      base.attr_reader :keywords
-    end
-
     private
 
     def find_start(body)
-      keywords[keywords.rindex { |keyword| keyword[:body] == body }][:start]
+      @keywords[@keywords.rindex { |keyword| keyword[:body] == body }][:start]
     end
 
     %i[begin else elsif ensure rescue until while].each do |event|
@@ -28,26 +48,31 @@ module Node
       end
     end
 
+    def on_kw(body)
+      super(body).tap { |sexp| @keywords << sexp }
+    end
+
     def on_program(*body)
       super(*body).tap { |sexp| sexp.merge!(start: 1) }
     end
   end
 
-  module Comments
+  # Nodes that are always on their own line occur when the lexer is in the
+  # EXPR_BEG node. Those comments are tracked within the @block_comments
+  # instance variable. Then for each node that could contain them, we attach
+  # them after the node has been built.
+  module BlockComments
     def initialize(*args)
       super(*args)
       @block_comments = []
-    end
-
-    def self.included(base)
-      base.attr_reader :block_comments
+      @current_embdoc = nil
     end
 
     private
 
     def attach_comments(sexp, stmts)
       range = sexp[:start]..sexp[:end]
-      comments = block_comments.group_by { |comment| range.include?(comment[:start]) }
+      comments = @block_comments.group_by { |comment| range.include?(comment[:start]) }
 
       if comments[true]
         stmts[:body] = (stmts[:body] + comments[true]).sort_by { |node| node[:start] }
@@ -80,6 +105,28 @@ module Node
       end
     end
 
+    def on_comment(body)
+      super(body).tap do |sexp|
+        next unless RipperJS.lex_state_name(state) == 'EXPR_BEG'
+
+        @block_comments << sexp
+      end
+    end
+
+    def on_embdoc_beg(comment)
+      @current_embdoc = { type: :embdoc, body: comment, start: lineno, end: lineno }
+    end
+
+    def on_embdoc(comment)
+      @current_embdoc[:body] << comment
+    end
+
+    def on_embdoc_end(comment)
+      @current_embdoc[:body] << comment.chomp
+      @block_comments << @current_embdoc
+      @current_embdoc = nil
+    end
+
     def on_method_add_block(*body)
       super(*body).tap do |sexp|
         stmts = body[1][:body][1][:type] == :stmts ? body[1][:body][1] : body[1][:body][1][:body][0]
@@ -90,9 +137,7 @@ module Node
 end
 
 class RipperJS < Ripper::SexpBuilder
-  attr_reader :inline_comments
-  attr_reader :current_embdoc, :heredoc_stack
-  attr_reader :last_sexp
+  attr_reader :inline_comments, :heredoc_stack, :last_sexp
 
   REQUIRED_RUBY_VERSION = '2.5'
 
@@ -104,10 +149,7 @@ class RipperJS < Ripper::SexpBuilder
     super
 
     @inline_comments = []
-
-    @current_embdoc = nil
     @heredoc_stack = []
-
     @last_sexp = nil
   end
 
@@ -150,8 +192,6 @@ class RipperJS < Ripper::SexpBuilder
     sexp = { type: :@comment, body: comment.force_encoding('UTF-8').chomp, start: lineno, end: lineno }
 
     case RipperJS.lex_state_name(state)
-    when 'EXPR_BEG'
-      block_comments << sexp
     when 'EXPR_END', 'EXPR_ARG|EXPR_LABELED', 'EXPR_ENDFN'
       last_sexp.merge!(comments: [sexp])
     when 'EXPR_CMDARG', 'EXPR_END|EXPR_ENDARG', 'EXPR_ENDARG', 'EXPR_ARG', 'EXPR_FNAME|EXPR_FITEM', 'EXPR_CLASS', 'EXPR_END|EXPR_LABEL'
@@ -161,20 +201,8 @@ class RipperJS < Ripper::SexpBuilder
     when 'EXPR_DOT'
       last_sexp.merge!(comments: [sexp.merge!(break: true)])
     end
-  end
 
-  def on_embdoc_beg(comment)
-    @current_embdoc = { type: :embdoc, body: comment, start: lineno, end: lineno }
-  end
-
-  def on_embdoc(comment)
-    current_embdoc[:body] << comment
-  end
-
-  def on_embdoc_end(comment)
-    current_embdoc[:body] << comment.chomp
-    block_comments << current_embdoc
-    @current_embdoc = nil
+    sexp
   end
 
   def on_embexpr_beg(body)
@@ -209,33 +237,9 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  def attach_comments_to(sexp, stmts)
-    range = sexp[:start]..sexp[:end]
-    comments = block_comments.group_by { |comment| range.include?(comment[:start]) }
-
-    if comments[true]
-      stmts[:body] = (stmts[:body] + comments[true]).sort_by { |node| node[:start] }
-      @block_comments = comments.fetch(false) { [] }
-    end
-  end
-
   %i[ident tstring_content].each do |event|
     define_method(:"on_#{event}") do |body|
       build_scanner_event(event, body.force_encoding('UTF-8'))
-    end
-  end
-
-  %i[args mlhs mrhs qsymbols qwords regexp stmts string symbols words xstring].each do |event|
-    suffix = event == :string ? :content : :new
-    define_method(:"on_#{event}_#{suffix}") do
-      { type: event, body: [], start: lineno, end: lineno }
-    end
-
-    define_method(:"on_#{event}_add") do |parts, part|
-      parts.tap do |node|
-        node[:body] << part
-        node[:end] = lineno
-      end
     end
   end
 
@@ -243,9 +247,7 @@ class RipperJS < Ripper::SexpBuilder
 
   (SCANNER_EVENTS - defined_events).each do |event|
     define_method(:"on_#{event}") do |body|
-      build_scanner_event(event, body).tap do |sexp|
-        keywords << sexp if event == :kw
-      end
+      build_scanner_event(event, body)
     end
   end
 
@@ -273,8 +275,9 @@ class RipperJS < Ripper::SexpBuilder
     @last_sexp = { type: type, body: body, start: start, end: lineno }
   end
 
-  prepend Node::Start
-  prepend Node::Comments
+  prepend Node::ListTypes
+  prepend Node::StartLine
+  prepend Node::BlockComments
 end
 
 if $0 == __FILE__
