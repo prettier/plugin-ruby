@@ -27,6 +27,10 @@ def foo(alpha, beta, *gamma, delta, epsilon:, zeta:, eta: 1, **theta, &block)
   'what'
 end
 
+def foo(alpha:, beta:, gamma:, delta:, epsilon:, zeta:, eta:, theta:, iota:, kappa:, lambda:)
+  'what'
+end
+
 def foo(alpha); 1; end
 
 def foo(*); end
