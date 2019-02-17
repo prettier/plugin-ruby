@@ -120,7 +120,7 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
         });
       }
 
-      if (["alias.rb", "regexp.rb"].includes(file)) {
+      if (["alias.rb", "binary.rb", "regexp.rb"].includes(file)) {
         test(`generated code passes as a ruby test for ${prettierConfig}`, () => {
           const filepath = path.join(tmpDir, file);
           fs.writeFileSync(filepath, getContents());

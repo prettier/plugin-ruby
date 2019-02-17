@@ -1,7 +1,19 @@
 # frozen_string_literal: true
 
-a && b && c && d
+class BinaryTest < Minitest::Test
+  def test_unbroken
+    value = true
 
-super_super_super_super_super_long &&
-  super_super_super_super_super_long &&
-  super_super_super_super_super_long
+    assert(value && value && value)
+  end
+
+  def test_broken
+    super_super_super_super_super_long = true
+
+    assert(
+      super_super_super_super_super_long &&
+        super_super_super_super_super_long &&
+        super_super_super_super_super_long
+    )
+  end
+end
