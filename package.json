@@ -5,6 +5,7 @@
   "main": "src/ruby.js",
   "scripts": {
     "test": "jest",
+    "build:gem": "pkg --output pkg/prettier --targets=linux,macos,win node_modules/prettier/bin-prettier.js",
     "print": "prettier --plugin=.",
     "rubocop": "run() { prettier --plugin=. $@ | bundle exec rubocop --stdin $1; }; run"
   },
@@ -17,13 +18,14 @@
   "bugs": {
     "url": "https://github.com/prettier/plugin-ruby/issues"
   },
-  "homepage": "https://github.com/prettier/plugin-ruby#readme",
+  "homepage": "https://github.com/prettier/plugin-ruby",
   "dependencies": {
     "prettier": "^1.16.4"
   },
   "devDependencies": {
     "all-contributors-cli": "^6.1.2",
-    "jest": "^24.0.0"
+    "jest": "^24.0.0",
+    "pkg": "^4.3.7"
   },
   "engines": {
     "node": ">=8.3.0"

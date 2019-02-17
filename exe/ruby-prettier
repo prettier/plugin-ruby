@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require 'prettier'
+# Allow a single path to be passed to the CLI to align closer to Prettier's API
+# https://github.com/erikhuda/thor/issues/370
+ARGV.unshift(Prettier::CLI.default_task) unless Prettier::CLI.all_tasks.has_key?(ARGV[0]) || Prettier::CLI.instance_variable_get(:@map).has_key?(ARGV[0])
+Prettier::CLI.start(ARGV)

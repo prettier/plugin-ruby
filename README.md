@@ -67,11 +67,47 @@ a.transpose.each do |a|
 end
 ```
 
-## Getting started
+## Getting Started
+
+There are two ways to use this plugin. The fastest way to get up and running with Prettier for Ruby is to add the Gem dependency.
+Or you can integrate directly with this plugin using Node and NPM.
+
+Note, both approaches require [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) `2.5` or newer - there are a lot of ways to install `ruby`, but I recommend [`rbenv`](https://github.com/rbenv/rbenv)
+
+## Integrating with Ruby Gems
+
+This approach should not require node to be present on your machine. Update your `Gemfile` with the prettier dependency:
+
+```
+gem 'prettier', group: :development
+```
+
+After running a `bundle` you will now have access to `ruby-prettier` on your command line:
+Verify by running against a file:
+
+```bash
+bundle exec ruby-prettier --write path/to/file.rb
+```
+
+If you're happy, you can can run `prettier` on an entire codebase:
+
+```bash
+bundle exec ruby-prettier --write '**/*.{rb,rake}'
+```
+
+## Configuring Rubocop
+
+After you have installed the Prettier Ruby gem, modify your `.rubocop.yml` file to inherit from Prettier's rubocop file:
+
+```yml
+inherit_gem:
+     prettier: .rubocop.yml
+```
+
+## Integrating with NPM
 
 First, your system on which you're running is going to need a couple of things:
 
-- [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) `2.5` or newer - there are a lot of ways to install `ruby`, but I recommend [`rbenv`](https://github.com/rbenv/rbenv)
 - [`node`](https://nodejs.org/en/download/) `8.3` or newer - `prettier` is a JavaScript package, so you're going to need to install `node` to work with it
 - [`npm`](https://www.npmjs.com/get-npm) or [`yarn`](https://yarnpkg.com/en/docs/getting-started) - these are package managers for JavaScript, either one will do
 

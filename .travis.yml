@@ -12,7 +12,13 @@ install:
 - bundle install --jobs=3 --retry=3 --deployment
 - yarn install
 script:
+# Ensure that the core JavaScript prettier code works
 - yarn test
+# Ensuring that the Prettier Ruby Gem can be built, tests pass, and we can lint the Ruby codebase
+- yarn build:gem
+- gem build prettier.gemspec
+- bundle exec rake test
+- bundle exec ruby-prettier --check 'src/ripper.rb' 'lib/**/*.rb' 'test/gem/**/*.rb' 'prettier.gemspec'
 cache:
 - bundler
 - yarn

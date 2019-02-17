@@ -84,7 +84,7 @@ global.run_spec = (dirname) => {
               fs.writeFileSync(filepath, getContents());
 
               const child = spawn("bundle", [
-                  "exec", "ruby", "test/minitest.rb", tmpDir, file
+                  "exec", "ruby", "test/jest_minitest.rb", tmpDir, file
               ]);
 
               return handleChildProcess(child);
