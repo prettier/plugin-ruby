@@ -6,7 +6,7 @@ require 'ripper'
 class RipperJS < Ripper::SexpBuilder
   attr_reader :block_comments, :inline_comments
   attr_reader :current_embdoc, :heredoc_stack
-  attr_reader :last_sexp
+  attr_reader :last_sexp, :keywords
 
   REQUIRED_RUBY_VERSION = '2.5'
 
@@ -24,6 +24,7 @@ class RipperJS < Ripper::SexpBuilder
     @heredoc_stack = []
 
     @last_sexp = nil
+    @keywords = []
   end
 
   private
@@ -35,6 +36,13 @@ class RipperJS < Ripper::SexpBuilder
       next unless right[:comments]
 
       sexp.merge!(comments: right.delete(:comments))
+    end
+  end
+
+  def on_begin(*body)
+    build_sexp(:begin, body).tap do |sexp|
+      sexp.merge!(start: find_start('begin'))
+      attach_comments_to(sexp, body[0][:body][0])
     end
   end
 
@@ -102,6 +110,20 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
+  def on_else(*body)
+    build_sexp(:else, body).tap do |sexp|
+      sexp.merge!(start: find_start('else'))
+      attach_comments_to(sexp, body[0])
+    end
+  end
+
+  def on_elsif(*body)
+    build_sexp(:elsif, body).tap do |sexp|
+      sexp.merge!(start: find_start('elsif'))
+      attach_comments_to(sexp, body[1])
+    end
+  end
+
   def on_embdoc_beg(comment)
     @current_embdoc = { type: :embdoc, body: comment, start: lineno, end: lineno }
   end
@@ -125,6 +147,13 @@ class RipperJS < Ripper::SexpBuilder
   def on_embexpr_end(body)
     build_scanner_event(:embexpr_end, body).tap do
       heredoc_stack.pop
+    end
+  end
+
+  def on_ensure(*body)
+    build_sexp(:ensure, body).tap do |sexp|
+      sexp.merge!(start: find_start('ensure'))
+      attach_comments_to(sexp, body[0])
     end
   end
 
@@ -160,6 +189,13 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
+  def on_rescue(*body)
+    build_sexp(:rescue, body).tap do |sexp|
+      sexp.merge!(start: find_start('rescue'))
+      attach_comments_to(sexp, body[2])
+    end
+  end
+
   def on_sclass(*body)
     build_sexp(:sclass, body).tap do |sexp|
       attach_comments_to(sexp, body[1][:body][0])
@@ -180,8 +216,22 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
+  def on_until(*body)
+    build_sexp(:while, body).tap do |sexp|
+      sexp.merge!(start: find_start('until'))
+      attach_comments_to(sexp, body[1])
+    end
+  end
+
   def on_when(*body)
     build_sexp(:when, body).tap do |sexp|
+      attach_comments_to(sexp, body[1])
+    end
+  end
+
+  def on_while(*body)
+    build_sexp(:while, body).tap do |sexp|
+      sexp.merge!(start: find_start('while'))
       attach_comments_to(sexp, body[1])
     end
   end
@@ -220,7 +270,9 @@ class RipperJS < Ripper::SexpBuilder
 
   (SCANNER_EVENTS - defined_events).each do |event|
     define_method(:"on_#{event}") do |body|
-      build_scanner_event(event, body)
+      build_scanner_event(event, body).tap do |sexp|
+        keywords << sexp if event == :kw
+      end
     end
   end
 
@@ -246,6 +298,10 @@ class RipperJS < Ripper::SexpBuilder
   def build_sexp(type, body)
     start = body.map { |part| part.is_a?(Hash) ? part[:start] : lineno }.min || lineno
     @last_sexp = { type: type, body: body, start: start, end: lineno }
+  end
+
+  def find_start(body)
+    keywords[keywords.rindex { |keyword| keyword[:body] == body }][:start]
   end
 end
 
