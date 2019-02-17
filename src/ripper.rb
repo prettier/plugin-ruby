@@ -3,10 +3,96 @@
 require 'json'
 require 'ripper'
 
+module Node
+  module Start
+    def initialize(*args)
+      super(*args)
+      @keywords = []
+    end
+
+    def self.included(base)
+      base.attr_reader :keywords
+    end
+
+    private
+
+    def find_start(body)
+      keywords[keywords.rindex { |keyword| keyword[:body] == body }][:start]
+    end
+
+    %i[begin else elsif ensure rescue until while].each do |event|
+      string = event.to_s
+
+      define_method(:"on_#{event}") do |*body|
+        super(*body).tap { |sexp| sexp.merge!(start: find_start(string)) }
+      end
+    end
+
+    def on_program(*body)
+      super(*body).tap { |sexp| sexp.merge!(start: 1) }
+    end
+  end
+
+  module Comments
+    def initialize(*args)
+      super(*args)
+      @block_comments = []
+    end
+
+    def self.included(base)
+      base.attr_reader :block_comments
+    end
+
+    private
+
+    def attach_comments(sexp, stmts)
+      range = sexp[:start]..sexp[:end]
+      comments = block_comments.group_by { |comment| range.include?(comment[:start]) }
+
+      if comments[true]
+        stmts[:body] = (stmts[:body] + comments[true]).sort_by { |node| node[:start] }
+        @block_comments = comments.fetch(false) { [] }
+      end
+    end
+
+    nodes = {
+      begin: [0, :body, 0],
+      bodystmt: [0],
+      class: [2, :body, 0],
+      def: [2, :body, 0],
+      defs: [4, :body, 0],
+      else: [0],
+      elsif: [1],
+      ensure: [0],
+      if: [1],
+      program: [0],
+      rescue: [2],
+      sclass: [1, :body, 0],
+      unless: [1],
+      until: [1],
+      when: [1],
+      while: [1]
+    }
+
+    nodes.each do |event, path|
+      define_method(:"on_#{event}") do |*body|
+        super(*body).tap { |sexp| attach_comments(sexp, body.dig(*path)) }
+      end
+    end
+
+    def on_method_add_block(*body)
+      super(*body).tap do |sexp|
+        stmts = body[1][:body][1][:type] == :stmts ? body[1][:body][1] : body[1][:body][1][:body][0]
+        attach_comments(sexp, stmts)
+      end
+    end
+  end
+end
+
 class RipperJS < Ripper::SexpBuilder
-  attr_reader :block_comments, :inline_comments
+  attr_reader :inline_comments
   attr_reader :current_embdoc, :heredoc_stack
-  attr_reader :last_sexp, :keywords
+  attr_reader :last_sexp
 
   REQUIRED_RUBY_VERSION = '2.5'
 
@@ -17,14 +103,12 @@ class RipperJS < Ripper::SexpBuilder
 
     super
 
-    @block_comments = []
     @inline_comments = []
 
     @current_embdoc = nil
     @heredoc_stack = []
 
     @last_sexp = nil
-    @keywords = []
   end
 
   private
@@ -39,27 +123,8 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  def on_begin(*body)
-    build_sexp(:begin, body).tap do |sexp|
-      sexp.merge!(start: find_start('begin'))
-      attach_comments_to(sexp, body[0][:body][0])
-    end
-  end
-
-  def on_bodystmt(*body)
-    build_sexp(:bodystmt, body).tap do |sexp|
-      attach_comments_to(sexp, body[0])
-    end
-  end
-
   def on_CHAR(char)
     @last_sexp = { type: :@CHAR, body: char, start: lineno, end: lineno }
-  end
-
-  def on_class(*body)
-    build_sexp(:class, body).tap do |sexp|
-      attach_comments_to(sexp, body[2][:body][0])
-    end
   end
 
   # We need to know exactly where the comment is, switching off the current
@@ -98,32 +163,6 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  def on_def(*body)
-    build_sexp(:def, body).tap do |sexp|
-      attach_comments_to(sexp, body[2][:body][0])
-    end
-  end
-
-  def on_defs(*body)
-    build_sexp(:defs, body).tap do |sexp|
-      attach_comments_to(sexp, body[4][:body][0])
-    end
-  end
-
-  def on_else(*body)
-    build_sexp(:else, body).tap do |sexp|
-      sexp.merge!(start: find_start('else'))
-      attach_comments_to(sexp, body[0])
-    end
-  end
-
-  def on_elsif(*body)
-    build_sexp(:elsif, body).tap do |sexp|
-      sexp.merge!(start: find_start('elsif'))
-      attach_comments_to(sexp, body[1])
-    end
-  end
-
   def on_embdoc_beg(comment)
     @current_embdoc = { type: :embdoc, body: comment, start: lineno, end: lineno }
   end
@@ -150,13 +189,6 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
-  def on_ensure(*body)
-    build_sexp(:ensure, body).tap do |sexp|
-      sexp.merge!(start: find_start('ensure'))
-      attach_comments_to(sexp, body[0])
-    end
-  end
-
   def on_heredoc_beg(beginning)
     heredoc_stack << { type: :heredoc, beginning: beginning, start: lineno, end: lineno }
   end
@@ -169,70 +201,11 @@ class RipperJS < Ripper::SexpBuilder
     string.merge!(heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
   end
 
-  def on_if(*body)
-    build_sexp(:if, body).tap do |sexp|
-      attach_comments_to(sexp, body[1])
-    end
-  end
-
-  def on_method_add_block(*body)
-    build_sexp(:method_add_block, body).tap do |sexp|
-      stmts = body[1][:body][1][:type] == :stmts ? body[1][:body][1] : body[1][:body][1][:body][0]
-      attach_comments_to(sexp, stmts)
-    end
-  end
-
-  def on_program(*body)
-    build_sexp(:program, body).tap do |sexp|
-      sexp.merge!(start: 1)
-      attach_comments_to(sexp, body[0])
-    end
-  end
-
-  def on_rescue(*body)
-    build_sexp(:rescue, body).tap do |sexp|
-      sexp.merge!(start: find_start('rescue'))
-      attach_comments_to(sexp, body[2])
-    end
-  end
-
-  def on_sclass(*body)
-    build_sexp(:sclass, body).tap do |sexp|
-      attach_comments_to(sexp, body[1][:body][0])
-    end
-  end
-
   def on_string_literal(string)
     if heredoc_stack.any? && string[:type] != :heredoc && heredoc_stack[-1][:type] == :heredoc
       string.merge!(heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
     else
       build_parser_event(:string_literal, [string])
-    end
-  end
-
-  def on_unless(*body)
-    build_sexp(:unless, body).tap do |sexp|
-      attach_comments_to(sexp, body[1])
-    end
-  end
-
-  def on_until(*body)
-    build_sexp(:while, body).tap do |sexp|
-      sexp.merge!(start: find_start('until'))
-      attach_comments_to(sexp, body[1])
-    end
-  end
-
-  def on_when(*body)
-    build_sexp(:when, body).tap do |sexp|
-      attach_comments_to(sexp, body[1])
-    end
-  end
-
-  def on_while(*body)
-    build_sexp(:while, body).tap do |sexp|
-      sexp.merge!(start: find_start('while'))
-      attach_comments_to(sexp, body[1])
     end
   end
 
@@ -300,9 +273,8 @@ class RipperJS < Ripper::SexpBuilder
     @last_sexp = { type: type, body: body, start: start, end: lineno }
   end
 
-  def find_start(body)
-    keywords[keywords.rindex { |keyword| keyword[:body] == body }][:start]
-  end
+  prepend Node::Start
+  prepend Node::Comments
 end
 
 if $0 == __FILE__
