@@ -125,7 +125,7 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
           const filepath = path.join(tmpDir, file);
           fs.writeFileSync(filepath, getContents());
 
-          const child = spawn("bundle", ["exec", "ruby", "-rminitest/autorun", filepath]);
+          const child = spawn("bundle", ["exec", "ruby", "test/minitest.rb", tmpDir, file]);
           return handleChildProcess(child);
         });
       }
