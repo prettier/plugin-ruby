@@ -1,4 +1,4 @@
-const { concat, group, join } = require("prettier").doc.builders;
+const { concat, group, join, line } = require("prettier").doc.builders;
 
 const printGenericRestParam = symbol => (path, opts, print) => (
   path.getValue().body[0] ? concat([symbol, path.call(print, "body", 0)]) : symbol
@@ -45,7 +45,7 @@ const printParams = (path, opts, print) => {
     parts.push(path.call(print, "body", 6));
   }
 
-  return join(", ", parts);
+  return group(join(concat([",", line]), parts));
 };
 
 const paramError = () => {
