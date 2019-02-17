@@ -20,10 +20,8 @@ const eachConfig = callback => fs.readdirSync("./test/config").forEach(prettierC
   }
 });
 
-const eachTest = (config, callback) => fs.readdirSync("./test").forEach(file => {
-  if (file.match(/.+\.rb$/)) {
-    callback(file, () => format(`./test/${file}`, config));
-  }
+const eachTest = (config, callback) => fs.readdirSync("./test/cases").forEach(file => {
+  callback(file, () => format(`./test/cases/${file}`, config));
 });
 
 const eachError = (config, callback) => fs.readdirSync("./test/errors").forEach(file => {
