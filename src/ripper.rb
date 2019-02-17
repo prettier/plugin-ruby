@@ -134,10 +134,48 @@ module Node
       end
     end
   end
+
+  # Tracking heredocs in somewhat interesting. Straight-line heredocs are
+  # reported as strings, whereas squiggly-line heredocs are reported as
+  # heredocs.
+  module Heredocs
+    def initialize(*args)
+      super(*args)
+      @heredoc_stack = []
+    end
+
+    def on_embexpr_beg(body)
+      super(body).tap { |sexp| @heredoc_stack << sexp }
+    end
+
+    def on_embexpr_end(body)
+      super(body).tap { @heredoc_stack.pop }
+    end
+
+    def on_heredoc_beg(beginning)
+      @heredoc_stack << { type: :heredoc, beginning: beginning, start: lineno, end: lineno }
+    end
+
+    def on_heredoc_end(ending)
+      @heredoc_stack[-1].merge!(ending: ending.chomp, end: lineno)
+    end
+
+    def on_heredoc_dedent(string, _width)
+      string.merge!(@heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
+    end
+
+    def on_string_literal(string)
+      if @heredoc_stack.any? && string[:type] != :heredoc && @heredoc_stack[-1][:type] == :heredoc
+        string.merge!(@heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
+      else
+        super
+      end
+    end
+  end
 end
 
 class RipperJS < Ripper::SexpBuilder
-  attr_reader :inline_comments, :heredoc_stack, :last_sexp
+  attr_reader :inline_comments, :last_sexp
 
   REQUIRED_RUBY_VERSION = '2.5'
 
@@ -149,7 +187,6 @@ class RipperJS < Ripper::SexpBuilder
     super
 
     @inline_comments = []
-    @heredoc_stack = []
     @last_sexp = nil
   end
 
@@ -165,6 +202,9 @@ class RipperJS < Ripper::SexpBuilder
     end
   end
 
+  # Most scanner events don't stand on their own a s-expressions, but the CHAR
+  # scanner event is effectively just a string, so we need to track it as a
+  # s-expression.
   def on_CHAR(char)
     @last_sexp = { type: :@CHAR, body: char, start: lineno, end: lineno }
   end
@@ -203,38 +243,6 @@ class RipperJS < Ripper::SexpBuilder
     end
 
     sexp
-  end
-
-  def on_embexpr_beg(body)
-    build_scanner_event(:embexpr_beg, body).tap do |node|
-      heredoc_stack << node
-    end
-  end
-
-  def on_embexpr_end(body)
-    build_scanner_event(:embexpr_end, body).tap do
-      heredoc_stack.pop
-    end
-  end
-
-  def on_heredoc_beg(beginning)
-    heredoc_stack << { type: :heredoc, beginning: beginning, start: lineno, end: lineno }
-  end
-
-  def on_heredoc_end(ending)
-    heredoc_stack[-1].merge!(ending: ending.chomp, end: lineno)
-  end
-
-  def on_heredoc_dedent(string, _width)
-    string.merge!(heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
-  end
-
-  def on_string_literal(string)
-    if heredoc_stack.any? && string[:type] != :heredoc && heredoc_stack[-1][:type] == :heredoc
-      string.merge!(heredoc_stack.pop.slice(:type, :beginning, :ending, :start, :end))
-    else
-      build_parser_event(:string_literal, [string])
-    end
   end
 
   %i[ident tstring_content].each do |event|
@@ -278,6 +286,7 @@ class RipperJS < Ripper::SexpBuilder
   prepend Node::ListTypes
   prepend Node::StartLine
   prepend Node::BlockComments
+  prepend Node::Heredocs
 end
 
 if $0 == __FILE__
