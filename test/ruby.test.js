@@ -20,10 +20,8 @@ const eachConfig = callback => fs.readdirSync("./test/config").forEach(prettierC
   }
 });
 
-const eachTest = (config, callback) => fs.readdirSync("./test").forEach(file => {
-  if (file.match(/.+\.rb$/)) {
-    callback(file, () => format(`./test/${file}`, config));
-  }
+const eachTest = (config, callback) => fs.readdirSync("./test/cases").forEach(file => {
+  callback(file, () => format(`./test/cases/${file}`, config));
 });
 
 const eachError = (config, callback) => fs.readdirSync("./test/errors").forEach(file => {
@@ -78,6 +76,28 @@ const eachUnsupportedNode = callback => {
   });
 };
 
+const handleChildProcess = child => new Promise((resolve, reject) => child.on("exit", code => {
+  if (code === 0) {
+    resolve();
+  } else {
+    reject((child.stdout.read() || child.stderr.read() || "").toString());
+  }
+}));
+
+let tmpDir;
+
+beforeAll(() => {
+  tmpDir = fs.mkdtempSync("minitest-");
+});
+
+afterAll(() => {
+  fs.readdirSync(tmpDir).forEach(file => {
+    fs.unlinkSync(path.join(tmpDir, file));
+  });
+
+  fs.rmdirSync(tmpDir);
+});
+
 eachConfig((prettierConfig, rubocopConfig, config) => {
   eachTest(config, (file, getContents) => {
     describe(file, () => {
@@ -86,7 +106,7 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
       });
 
       if (!process.env.NOLINT) {
-        test(`generated code passes rubocop for ${prettierConfig}`, () => new Promise((resolve, reject) => {
+        test(`generated code passes rubocop for ${prettierConfig}`, () => {
           const child = spawn("bundle", ["exec", "rubocop", "--stdin", file, "--config", rubocopConfig]);
 
           if (process.env.VIOLATIONS) {
@@ -96,10 +116,18 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
           child.stdin.write(getContents());
           child.stdin.end();
 
-          child.on("exit", code => (
-            code === 0 ? resolve() : reject(`rubocop exited with status ${code}`)
-          ));
-        }));
+          return handleChildProcess(child);
+        });
+      }
+
+      if (["regexp.rb"].includes(file)) {
+        test(`generated code passes as a ruby test for ${prettierConfig}`, () => {
+          const filepath = path.join(tmpDir, file);
+          fs.writeFileSync(filepath, getContents());
+
+          const child = spawn("bundle", ["exec", "ruby", "test/minitest.rb", tmpDir, file]);
+          return handleChildProcess(child);
+        });
       }
     });
   });
