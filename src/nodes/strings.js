@@ -38,10 +38,10 @@ module.exports = {
     return body.length === 2 ? concat([quote, body.slice(1), quote]) : body;
   },
   heredoc: (path, opts, print) => {
-    const { beginning, ending } = path.getValue();
+    const { beging, ending } = path.getValue();
 
     return concat([
-      beginning,
+      beging,
       concat([hardline, ...path.map(print, "body")]),
       ending
     ]);
