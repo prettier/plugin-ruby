@@ -325,10 +325,10 @@ class RipperJS < Ripper::SexpBuilder
     REQUIRED = Gem::Version.new('2.5')
 
     def initialize
-      super(<<~ERR)
-        Ruby version #{RUBY_VERSION} not supported.
-        Please upgrade to #{REQUIRED} or above.
-      ERR
+      super(
+        "Ruby version #{RUBY_VERSION} not supported. " \
+          "Please upgrade to #{REQUIRED} or above."
+      )
     end
   end
 
