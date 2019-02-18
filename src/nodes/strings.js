@@ -1,4 +1,4 @@
-const { concat, group, hardline, indent, join, line, softline } = require("prettier").doc.builders;
+const { concat, group, hardline, indent, join, line, literalline, softline } = require("prettier").doc.builders;
 const { concatBody, empty, makeList, surround } = require("../utils");
 
 // Matches _any_ escape and unescaped quotes (both single and double).
@@ -42,7 +42,7 @@ module.exports = {
 
     return concat([
       beging,
-      concat([hardline, ...path.map(print, "body")]),
+      concat([literalline, ...path.map(print, "body")]),
       ending
     ]);
   },
