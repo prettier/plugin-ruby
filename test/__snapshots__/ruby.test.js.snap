@@ -874,10 +874,44 @@ unless foo
   bar
 end
 
+while foo
+  # this is a comment at the beginning of a while
+  bar
+end
+
+while foo
+  bar
+  # this is a comment at the end of a while
+end
+
+until foo
+  # this is a comment at the beginning of a until
+  bar
+end
+
+until foo
+  bar
+  # this is a comment at the end of a until
+end
+
 case foo
 when bar
-  # this is a comment in a when
-  baz
+  # this is a comment at the beginning of a when
+  1
+when baz
+  2
+  # this is a comment at the end of a when
+end
+
+begin
+  # comment at the beginning of a begin
+  1
+rescue StandardError
+  # comment at the beginning of a rescue
+  2
+ensure
+  # comment at the end of a rescue
+  3
 end
 
 # rubocop:enable Lint/Void
@@ -979,10 +1013,44 @@ unless foo
   bar
 end
 
+while foo
+  # this is a comment at the beginning of a while
+  bar
+end
+
+while foo
+  bar
+  # this is a comment at the end of a while
+end
+
+until foo
+  # this is a comment at the beginning of a until
+  bar
+end
+
+until foo
+  bar
+  # this is a comment at the end of a until
+end
+
 case foo
 when bar
-  # this is a comment in a when
-  baz
+  # this is a comment at the beginning of a when
+  1
+when baz
+  2
+  # this is a comment at the end of a when
+end
+
+begin
+  # comment at the beginning of a begin
+  1
+rescue StandardError
+  # comment at the beginning of a rescue
+  2
+ensure
+  # comment at the end of a rescue
+  3
 end
 
 # rubocop:enable Lint/Void
