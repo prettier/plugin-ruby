@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Switch over `binary` fixture to minitest.
 - [INTERNAL] Reconfigure parser into multiple layer modules so that it's easier to understand and manage.
 - Handle comments from within `begin`, `rescue`, `ensure`, `while`, and `until` nodes.
+- Properly indent heredocs without taking into account current indentation level.
 
 ## [0.6.2] - 2019-02-17
 ### Changed
