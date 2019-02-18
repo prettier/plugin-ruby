@@ -231,8 +231,10 @@ module Layer
     # Certain events needs to steal the comments from their children in order
     # for them to display properly.
     events = {
+      args_add_block: [:body, 0],
       assoc_new: [:body, 1],
       break: [:body, 0],
+      command: [:body, 1],
       string_literal: [:body, 0]
     }
 
@@ -308,7 +310,7 @@ module Layer
       define_method(:"on_#{event}") do |*body|
         super(*body).tap do |sexp|
           @last_sexp = sexp
-          next if inline_comments.empty? || event == :args_add_block
+          next if inline_comments.empty?
 
           sexp[:comments] = inline_comments.reverse
           @inline_comments = []
