@@ -10,7 +10,17 @@ module Layer
   # into one node with an array body.
   module Lists
     events = %i[
-      args mlhs mrhs qsymbols qwords regexp stmts string symbols words xstring
+      args
+      mlhs
+      mrhs
+      qsymbols
+      qwords
+      regexp
+      stmts
+      string
+      symbols
+      words
+      xstring
     ]
 
     private
@@ -109,9 +119,7 @@ module Layer
     def attach_comments(sexp, stmts)
       range = sexp[:start]..sexp[:end]
       comments =
-        block_comments.group_by do |comment|
-          range.include?(comment[:start])
-        end
+        block_comments.group_by { |comment| range.include?(comment[:start]) }
 
       if comments[true]
         stmts[:body] =
@@ -292,8 +300,7 @@ module Layer
       case RipperJS.lex_state_name(state)
       when 'EXPR_END', 'EXPR_ARG|EXPR_LABELED', 'EXPR_ENDFN'
         last_sexp.merge!(comments: [sexp])
-      when 'EXPR_CMDARG', 'EXPR_END|EXPR_ENDARG', 'EXPR_ENDARG', 'EXPR_ARG',
-           'EXPR_FNAME|EXPR_FITEM', 'EXPR_CLASS', 'EXPR_END|EXPR_LABEL'
+      when 'EXPR_CMDARG', 'EXPR_END|EXPR_ENDARG', 'EXPR_ENDARG', 'EXPR_ARG', 'EXPR_FNAME|EXPR_FITEM', 'EXPR_CLASS', 'EXPR_END|EXPR_LABEL'
         inline_comments << sexp
       when 'EXPR_BEG|EXPR_LABEL', 'EXPR_MID'
         inline_comments << sexp.merge!(break: true)
