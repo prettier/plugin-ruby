@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`alias.rb matches expected output for off.json 1`] = `
+exports[`for the off.json config alias.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Style/GlobalVars
@@ -28,35 +28,7 @@ end
 "
 `;
 
-exports[`alias.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Style/GlobalVars
-class AliasTest < Minitest::Test
-  def test_plain_alias
-    assert_equal 'plain alias', foo
-  end
-
-  def test_global_alias
-    $bar = 'global alias'
-    assert_equal 'global alias', $foo
-  end
-
-  private
-
-  def baz
-    'plain alias'
-  end
-
-  alias bar baz # inline comment
-  alias foo bar
-  alias $foo $bar
-end
-# rubocop:enable Style/GlobalVars
-"
-`;
-
-exports[`array.rb matches expected output for off.json 1`] = `
+exports[`for the off.json config array.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/Void
@@ -116,67 +88,7 @@ a[1] = [
 "
 `;
 
-exports[`array.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/Void
-
-[]
-
-[1, 2, 3]
-
-%w[a b c]
-
-['a', 'b c', 'd']
-
-%i[a b c]
-
-[:a, :\\"b c\\", :d]
-
-%w[a b c]
-
-%i[a b c]
-
-%W[a#{a}a b#{b}a c#{c}c]
-
-%I[a#{a}a b#{b}b c#{c}c]
-
-# rubocop:disable Lint/UnneededSplatExpansion
-[1, 2, *[3, 4], 5, 6]
-# rubocop:enable Lint/UnneededSplatExpansion
-
-[
-  super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_long,
-  [
-    super_super_super_super_super_super_super_super_super_super_super_long,
-    super_super_super_super_super_super_super_super_super_super_super_long,
-  ],
-]
-
-a[1]
-
-a[
-  super_super_super_super_super_super_super_super_super_super_super_super_sulong
-]
-
-a[1] = 2
-
-a[
-  super_super_super_super_super_super_super_super_super_super_super_super_sulong
-] =
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-
-a[1] = [
-  super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_long,
-]
-
-# rubocop:enable Lint/Void
-"
-`;
-
-exports[`assign.rb matches expected output for off.json 1`] = `
+exports[`for the off.json config assign.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/UselessAssignment, Style/ParallelAssignment
@@ -249,79 +161,7 @@ super_super_super_long.super_super_super_super_super_super_super_long =
 "
 `;
 
-exports[`assign.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/UselessAssignment, Style/ParallelAssignment
-
-a = 1
-
-a =
-  begin
-    2
-  end
-
-a, b, c = [1, 2, 3]
-
-a = 1, 2, 3
-
-a, b, c = 1, 2, 3
-
-a, *b = 1, 2, 3
-
-a, *b, c, d = 1, 2, 3
-
-a, * = 1, 2, 3
-
-a = *a
-
-(a, b), c = [1, 2], 3
-
-* = [1, 2, 3]
-
-*, a = [1, 2, 3]
-
-super_super_super_long, super_super_super_long, super_super_super_long =
-  super_super_super_super_super_long,
-  super_super_super_super_super_long,
-  super_super_super_super_super_long
-
-a ||= 1
-
-a ||=
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-
-a = [
-  super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_long,
-  super_super_super_super_super_super_super_super_super_super_super_long,
-]
-
-a = {
-  a: super_super_super_super_super_super_super_super_super_super_long,
-  b: super_super_super_super_super_super_super_super_super_super_long,
-  c: super_super_super_super_super_super_super_super_super_super_long,
-}
-
-# rubocop:disable Lint/UnneededCopDisableDirective
-# rubocop:disable Layout/MultilineMethodCallIndentation
-# I know, I know
-a = [super_super_super_super_long, super_super_super_super_long].sort
-
-a = { a: super_super_super_super_long, b: super_super_super_super_long }.sort
-# rubocop:enable Layout/MultilineMethodCallIndentation
-# rubocop:enable Lint/UnneededCopDisableDirective
-
-a.a = 1
-
-super_super_super_long.super_super_super_super_super_super_super_long =
-  super_super_super_super_super_super_super_super_super_super_super_long
-
-# rubocop:enable Lint/UselessAssignment, Style/ParallelAssignment
-"
-`;
-
-exports[`binary.rb matches expected output for off.json 1`] = `
+exports[`for the off.json config binary.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 class BinaryTest < Minitest::Test
@@ -344,30 +184,7 @@ end
 "
 `;
 
-exports[`binary.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-class BinaryTest < Minitest::Test
-  def test_unbroken
-    value = true
-
-    assert(value && value && value)
-  end
-
-  def test_broken
-    super_super_super_super_super_long = true
-
-    assert(
-      super_super_super_super_super_long &&
-        super_super_super_super_super_long &&
-        super_super_super_super_super_long,
-    )
-  end
-end
-"
-`;
-
-exports[`blocks.rb matches expected output for off.json 1`] = `
+exports[`for the off.json config blocks.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/UnusedBlockArgument
@@ -464,104 +281,7 @@ assert_nil(
 "
 `;
 
-exports[`blocks.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/UnusedBlockArgument
-
-loop { 1 }
-
-loop { 1 }
-
-loop do
-  # foobar
-end
-
-port ENV.fetch('PORT') { 3000 }
-
-test 'foobar' do
-end
-
-te.st 'foobar' do
-end
-
-test 'foobar' do
-  foobar
-end
-
-te.st 'foobar' do
-  foobar
-end
-
-test 'foobar', &:to_s
-
-te.st 'foobar', &:to_s
-
-loop do
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-loop { super_super_super_super_super_super_super_super_super_super_super_long }
-
-loop { |i| 1 }
-
-loop { |i| i }
-
-loop { |*| i }
-
-loop { |(a, b)| i }
-
-loop { |a, (b, c), d, *e| i }
-
-loop do |i|
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-loop { |i| super_super_super_super_super_super_super_super_super_super_long }
-
-loop(&:to_s)
-
-loop(&:to_s)
-
-loop do |i|
-  i.to_s
-  i.next
-end
-
-loop { |i| i.to_s :db }
-
-loop { |i, j| i.to_s }
-
-[1, 2, 3].each do |i|
-  p i
-end
-
-def change
-  change_table :foo do
-    column :bar
-  end
-end
-
-foo 'foo', &:to_s
-
-target.method object.map do |arg|
-  arg * 2
-end
-
-# from ruby test/ruby/test_call.rb
-assert_nil(
-  (
-    'a'.sub! 'b' do
-    end&.foo do
-    end
-  ),
-)
-
-# rubocop:enable Lint/UnusedBlockArgument
-"
-`;
-
-exports[`break.rb matches expected output for off.json 1`] = `
+exports[`for the off.json config break.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 [].each { break }
@@ -574,20 +294,7 @@ exports[`break.rb matches expected output for off.json 1`] = `
 "
 `;
 
-exports[`break.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-[].each { break }
-
-[].each { break 1 }
-
-[].each { break 1 }
-
-[].each { break 1, 2 }
-"
-`;
-
-exports[`case.rb matches expected output for off.json 1`] = `
+exports[`for the off.json config case.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/EmptyWhen, Style/EmptyCaseCondition
@@ -631,51 +338,7 @@ end
 "
 `;
 
-exports[`case.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/EmptyWhen, Style/EmptyCaseCondition
-
-case
-when a
-  1
-end
-
-case a
-when b
-  1
-end
-
-case a
-when b, c
-  1
-end
-
-case a
-when b
-when c
-  1
-end
-
-case a
-when b
-  1
-when c
-  2
-end
-
-case a
-when b
-  1
-else
-  2
-end
-
-# rubocop:enable Lint/EmptyWhen, Style/EmptyCaseCondition
-"
-`;
-
-exports[`class.rb matches expected output for off.json 1`] = `
+exports[`for the off.json config class.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 module Pret
@@ -728,60 +391,7 @@ Pret::TIER = \\"config\\".to_s
 "
 `;
 
-exports[`class.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-module Pret
-  module Tier
-    # object documentation
-    class Object; end
-
-    # second object
-    # documentation
-    class Object; end
-
-    # third object
-    # documentation
-    class Object
-      attr_accessor :foo
-    end
-
-    class Object < BasicObject; end
-
-    class Object < BasicObject; end
-
-    class Object < BasicObject
-      # inside class documentation
-      attr_accessor :bar
-    end
-
-    class << self
-      # method documentation
-      def method; end
-
-      undef method
-    end
-
-    module Prettier; end
-
-    module Prettier; end
-
-    module Prettier
-      # inside module documentation
-      attr_accessor :foo
-    end
-  end
-end
-
-Pret::Tier::Object # rubocop:disable Lint/Void
-Pret::TIER = 'config'.to_s
-
-::Pret::Tier::Object # rubocop:disable Lint/Void
-::PRET = 'config'.to_s
-"
-`;
-
-exports[`comments.rb matches expected output for off.json 1`] = `
+exports[`for the off.json config comments.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # this is a comment at
@@ -920,7 +530,1235 @@ end
 "
 `;
 
-exports[`comments.rb matches expected output for on.json 1`] = `
+exports[`for the off.json config defined.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
+defined?(a) # first
+
+defined?(a) # second
+
+defined?(
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+)
+
+defined?(
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+)
+
+defined?(
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+)
+
+defined?(a) # third
+
+# rubocop:enable Lint/Void
+"
+`;
+
+exports[`for the off.json config embdoc.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Style/BlockComments
+
+=begin
+this is
+
+some really
+
+long documentation
+that is contained
+in an embdoc
+=end
+
+class Foo
+=begin
+this is an embdoc inside a class
+=end
+end
+
+module Foo
+  class Foo
+=begin
+this is an embdoc even more indented
+=end
+  end
+end
+
+# rubocop:enable Style/BlockComments
+"
+`;
+
+exports[`for the off.json config encoding.rb matches expected output 1`] = `
+"# -*- encoding: binary -*-
+# frozen_string_literal: true
+
+# rubocop:disable Lint/Void, Style/AsciiComments
+
+# il était
+:il_était
+\\"ひらがな\\"
+/ひらがな/
+
+# rubocop:enable Lint/Void, Style/AsciiComments
+"
+`;
+
+exports[`for the off.json config hash.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
+{}
+
+{ :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
+
+{ :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
+
+{ Foo => 1, Bar => 2 }
+
+{
+  :super_super_super_super_super_super_super_super_long =>
+    super_super_super_super_super_super_super_super_long,
+  :super_super_super_super_super_super_super_super_super_long => {
+    :super_super_super_super_super_super_super_super_long =>
+      super_super_super_super_super_super_super_super_long
+  }
+}
+
+foo :abc => true # some comment
+
+foobar :alpha => alpha,
+       :beta => beta,
+       :gamma => gamma,
+       :delta => delta,
+       :epsilon => epsilon,
+       :zeta => zeta
+foobar(
+  :alpha => alpha,
+  :beta => beta,
+  :gamma => gamma,
+  :delta => delta,
+  :epsilon => epsilon,
+  :zeta => zeta
+)
+
+# rubocop:enable Lint/Void
+"
+`;
+
+exports[`for the off.json config hooks.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Style/BeginBlock, Style/EndBlock
+
+BEGIN { p \\"begin\\" }
+
+BEGIN { p \\"begin\\" }
+
+BEGIN {
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+}
+
+BEGIN {
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+}
+
+END { p \\"end\\" }
+
+END { p \\"end\\" }
+
+END {
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+}
+
+END {
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+}
+
+# rubocop:enable Style/BeginBlock, Style/EndBlock
+"
+`;
+
+exports[`for the off.json config if.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+if a
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+# rubocop:disable Style/Not, Style/NegatedIf, Lint/EmptyExpression
+if not a
+  b
+end
+
+# from ruby test/ruby/test_not.rb
+assert_equal(true, (not ()))
+# rubocop:enable Style/Not, Style/NegatedIf, Lint/EmptyExpression
+
+if a
+  break # comment
+end
+
+if a
+
+else
+  b
+end
+
+if a
+  1
+elsif b
+  2
+end
+
+if a
+  super_super_super_super_super_super_super_super_super_super_super_long
+else
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+if a
+  1
+elsif b
+  2
+elsif c
+  3
+else
+  4
+end
+
+unless a
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+# rubocop:disable Style/UnlessElse
+unless a
+  super_super_super_super_super_super_super_super_super_super_super_long
+else
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+# rubocop:enable Style/UnlessElse
+
+if a
+  1
+end
+
+if super_super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+unless a
+  1
+end
+
+unless super_super_super_super_super_super_super_super_super_super_super_suplong
+  1
+end
+
+a ? 1 : 2
+
+a ? 2 : 1
+
+a ? 1 : 2
+if a
+  super_super_super_super_super_super_super_super_super_super_super_long
+else
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+if a
+  b 1
+else
+  b(2)
+end
+
+if a
+  b(1)
+else
+  b 2
+end
+
+a b do
+  if a
+    a \\"foo\\"
+  else
+    b
+  end
+end
+"
+`;
+
+exports[`for the off.json config kwargs.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+def add(alpha:, beta:, gamma: 1, delta: 2)
+  alpha + beta + gamma + delta
+end
+
+add(:alpha => 1, :beta => 2, :gamma => 3, :delta => 4)
+
+args = { :alpha => 1, :beta => 2, :gamma => 3 }
+add(**args, :delta => 4)
+"
+`;
+
+exports[`for the off.json config lambda.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+-> { 1 }
+
+->(a, b, c) { a + b + c }
+
+lambda do
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+lambda do |a, b, c|
+  a + b + c + super_super_super_super_super_super_super_super_super_long
+end
+
+a.call(1, 2, 3)
+
+a.call(1, 2, 3)
+
+a[]
+
+a[1, 2, 3]
+
+->(a) { a }
+
+-> { 1 }
+
+command :fooooooooooooobaaaaaaarrrrr,
+        lambda { |argument|
+          argument + argument + argument + argument + argument + argument
+        }
+comm.and :fooooooooooooobaaaaaaarrrrr,
+         lambda { |argument|
+           argument + argument + argument + argument + argument + argument
+         }
+"
+`;
+
+exports[`for the off.json config layout.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
+1
+
+def foobar
+  2
+
+  3
+  4
+  5
+
+  6
+end
+
+7
+8
+9
+
+10
+
+# rubocop:enable Lint/Void
+"
+`;
+
+exports[`for the off.json config method.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/DuplicateMethods, Lint/UnusedMethodArgument
+# rubocop:disable Metrics/ParameterLists
+
+def foo; end
+
+def foo(); end
+
+def foo(alpha); end
+
+def foo(alpha); end
+
+def self.foo; end
+
+def self.foo(); end
+
+def self.foo(alpha); end
+
+def self.foo(alpha); end
+
+def foo(alpha, beta, *gamma, delta, epsilon:, zeta:, eta: 1, **theta, &block)
+  \\"what\\"
+end
+
+def foo(
+  alpha:,
+  beta:,
+  gamma:,
+  delta:,
+  epsilon:,
+  zeta:,
+  eta:,
+  theta:,
+  iota:,
+  kappa:,
+  lambda:
+)
+  \\"what\\"
+end
+
+def foo(alpha)
+  1
+end
+
+def foo(*); end
+
+def foo(**); end
+
+foo
+
+foo(1)
+foo(1, 2)
+foo(1, 2, *abc)
+foo(1, 2, *abc, 3, 4)
+foo(
+  aaaaaaa,
+  bbbbbbb,
+  ccccccc,
+  ddddddd,
+  eeeeeee,
+  fffffff,
+  ggggggg,
+  hhhhhhh,
+  iiiiiii
+)
+foo(
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  &block
+)
+
+foo aaaaaaa,
+    bbbbbbb,
+    ccccccc,
+    ddddddd,
+    eeeeeee,
+    fffffff,
+    ggggggg,
+    hhhhhhh,
+    iiiiiii
+foo.foo aaaaaaa,
+        bbbbbbb,
+        ccccccc,
+        ddddddd,
+        eeeeeee,
+        fffffff,
+        ggggggg,
+        hhhhhhh,
+        iiiiiii
+
+foo(*bar)
+foo(**baz)
+foo(&block)
+
+foo(*bar, &block)
+foo(**baz, &block)
+foo(*bar, **baz, &block)
+
+foo(:h => 1, **bar)
+foo(**bar, :h => 1)
+foo(:h => 1, **bar, :i => 2)
+
+Foo.foo
+foo&.foo
+
+# rubocop:enable Lint/DuplicateMethods, Lint/UnusedMethodArgument
+# rubocop:enable Metrics/ParameterLists
+"
+`;
+
+exports[`for the off.json config next.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+[].each { next }
+
+[].each { next 1 }
+
+[].each { next 1 }
+"
+`;
+
+exports[`for the off.json config numbers.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
+123
+-123
+1_123
+-543
+123_456_789_123_456_789
+123.45
+1.2e-3
+0xaabb
+0o377
+-0b1010
+0b001_001
+
+# rubocop:enable Lint/Void
+"
+`;
+
+exports[`for the off.json config ranges.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/UselessAssignment
+
+dot2 = 1..2 # dot2
+dot3 = 3...4 # dot3
+
+# rubocop:enable Lint/UselessAssignment
+"
+`;
+
+exports[`for the off.json config regexp.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+class RegexpTest < Minitest::Test
+  def test_default
+    regexp = /abc/
+
+    assert_match regexp, \\"abcde\\"
+  end
+
+  def test_braces
+    regexp = /abc/
+
+    assert_match regexp, \\"abcde\\"
+  end
+
+  def test_braces_with_slashes
+    regexp = %r{a/b/c}
+
+    assert_match regexp, \\"a/b/c/d/e\\"
+  end
+
+  def test_slashes
+    regexp = /abc/
+
+    assert_match regexp, \\"abcde\\"
+  end
+
+  def test_brackets
+    regexp = /abc/
+
+    assert_match regexp, \\"abcde\\"
+  end
+
+  def test_parens
+    regexp = /abc/
+
+    assert_match regexp, \\"abcde\\"
+  end
+
+  def test_interpolation
+    inter = \\"b\\"
+    regexp = /a#{inter}c/
+
+    assert_match regexp, \\"abcde\\"
+  end
+
+  def test_modifier
+    regexp = /abc/i
+
+    assert_match regexp, \\"ABCDE\\"
+  end
+
+  def test_brace_modifier
+    regexp = /abc/i
+
+    assert_match regexp, \\"ABCDE\\"
+  end
+
+  def test_global_interpolation
+    \\"foo\\" =~ /foo/
+    regexp = /#{$&}/
+
+    assert_match regexp, \\"foobar\\"
+  end
+end
+"
+`;
+
+exports[`for the off.json config rescue.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+begin
+  1
+rescue ArgumentError
+  retry
+rescue NoMethodError => exception
+  puts exception
+  redo
+rescue SyntaxError, NoMethodError
+  2
+rescue SomeSuperSuperLongError,
+       SomeOtherSuperSuperLongError,
+       OneLastSuperLongError
+  3
+rescue StandardError
+  4
+else
+  5
+ensure
+  6
+end
+
+begin
+  a
+rescue StandardError
+  nil
+end
+
+# from ruby spec/ruby/language/rescue_spec.rb
+def foo
+  a
+rescue A, *B => e
+  e
+end
+"
+`;
+
+exports[`for the off.json config return.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Style/GuardClause, Style/RedundantReturn
+
+def foo
+  if a
+    return
+  end
+end
+
+def bar
+  if a
+    return 1
+  end
+end
+
+def baz
+  if a
+    return 1
+  end
+end
+
+def qux
+  if a
+    return 1, 2
+  end
+end
+
+def qax
+  if a
+    return foo :bar
+  end
+end
+
+# rubocop:enable Style/GuardClause, Style/RedundantReturn
+# rubocop:enable Lint/UnneededCopDisableDirective
+"
+`;
+
+exports[`for the off.json config strings.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
+# rubocop:disable Layout/SpaceInsideStringInterpolation
+# rubocop:disable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
+# rubocop:disable Layout/ClosingParenthesisIndentation
+# rubocop:disable Style/StringLiteralsInInterpolation
+
+\\"a\\" # these are CHARs
+?\\\\C-a
+?\\\\M-a
+?\\\\M-\\\\C-a
+
+\\"\\"
+
+\\"abc\\"
+
+\\"abc's\\"
+
+\\"abc\\"
+
+\\"abc\\\\n\\"
+
+\\"\\\\M-\\\\C-a\\"
+
+\\"abc #{super} abc\\"
+
+\\"#{abc} abc\\"
+
+\\"{\\\\\\"abc\\\\\\": \\\\\\"foo\\\\nbar\\\\\\"}\\"
+
+# rubocop:disable Style/Semicolon
+\\"abc #{foo; bar} abc\\"
+# rubocop:enable Style/Semicolon
+
+\\"abc #{de} fghi #{jkl} mno\\"
+
+\\"abc\\" \\\\
+  \\"def\\" \\\\
+  \\"ghi\\"
+
+\\"abc #{\\"abc #{abc} abc\\"} abc\\"
+
+{ \\"a\\" => 1 }
+
+{ \\"a #{a}\\" => 1 }
+
+:\\"abc#{abc}abc\\"
+
+\`abc\`
+
+\`super_super_super_super_super_super_super_super_super_super_super_super_s_long\`
+
+<<-HERE
+This is a straight heredoc!
+HERE
+
+<<-HERE
+This is another straight heredoc, this time with interpolation!
+#{interpolation}
+So interpolated right now.
+HERE
+
+abc = <<-HERE
+This is a straight heredoc on an assign!
+HERE
+
+<<-PARENT
+This is a straight heredoc!
+#{<<-CHILD
+Why do I do this
+CHILD
+}
+PARENT
+
+<<~HERE
+  This is a squiggly heredoc!
+HERE
+
+<<~HERE
+    This is another squiggly heredoc, this time with interpolation!
+    #{interpolation}
+    So interpolated right now.
+HERE
+
+abc = <<~HERE
+  This is a squiggly heredoc on an assign!
+HERE
+
+<<~PARENT
+  This is a squiggly heredoc!
+  #{<<~CHILD
+      Why do I do this
+    CHILD
+}
+PARENT
+
+<<-GRAND
+#{\\"interpolated\\"}
+<<~PARENT
+  #{\\"more interpolated\\"}
+    <<-CHILD
+      #{\\"what is going on\\"}
+    CHILD
+  #{\\"more interpolated\\"}
+PARENT
+#{\\"interpolated\\"}
+GRAND
+
+\\"abc \\\\\\"abc\\\\\\" abc\\"
+
+# rubocop:enable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
+# rubocop:enable Layout/SpaceInsideStringInterpolation
+# rubocop:enable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
+# rubocop:enable Layout/ClosingParenthesisIndentation
+# rubocop:enable Style/StringLiteralsInInterpolation
+# rubocop:enable Lint/UnneededCopDisableDirective
+"
+`;
+
+exports[`for the off.json config super.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+super
+
+super()
+
+super 1
+
+super(1)
+
+super 1, 2
+
+super(1, 2)
+"
+`;
+
+exports[`for the off.json config while.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+while a
+  1
+end
+
+while a
+  1
+end
+
+while super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+while super_super_super_super_super_super_super_super_super_super_super_supelong
+  1
+end
+
+until a
+  1
+end
+
+until a
+  1
+end
+
+until super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+until super_super_super_super_super_super_super_super_super_super_super_supelong
+  1
+end
+"
+`;
+
+exports[`for the off.json config yield.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+[1, 2, 3].each do |i|
+  yield
+
+  yield i
+
+  yield(i)
+
+  yield i, 2
+
+  yield(i, 2)
+
+  yield
+end
+"
+`;
+
+exports[`for the on.json config alias.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Style/GlobalVars
+class AliasTest < Minitest::Test
+  def test_plain_alias
+    assert_equal 'plain alias', foo
+  end
+
+  def test_global_alias
+    $bar = 'global alias'
+    assert_equal 'global alias', $foo
+  end
+
+  private
+
+  def baz
+    'plain alias'
+  end
+
+  alias bar baz # inline comment
+  alias foo bar
+  alias $foo $bar
+end
+# rubocop:enable Style/GlobalVars
+"
+`;
+
+exports[`for the on.json config array.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/Void
+
+[]
+
+[1, 2, 3]
+
+%w[a b c]
+
+['a', 'b c', 'd']
+
+%i[a b c]
+
+[:a, :\\"b c\\", :d]
+
+%w[a b c]
+
+%i[a b c]
+
+%W[a#{a}a b#{b}a c#{c}c]
+
+%I[a#{a}a b#{b}b c#{c}c]
+
+# rubocop:disable Lint/UnneededSplatExpansion
+[1, 2, *[3, 4], 5, 6]
+# rubocop:enable Lint/UnneededSplatExpansion
+
+[
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  [
+    super_super_super_super_super_super_super_super_super_super_super_long,
+    super_super_super_super_super_super_super_super_super_super_super_long,
+  ],
+]
+
+a[1]
+
+a[
+  super_super_super_super_super_super_super_super_super_super_super_super_sulong
+]
+
+a[1] = 2
+
+a[
+  super_super_super_super_super_super_super_super_super_super_super_super_sulong
+] =
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+
+a[1] = [
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_long,
+]
+
+# rubocop:enable Lint/Void
+"
+`;
+
+exports[`for the on.json config assign.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/UselessAssignment, Style/ParallelAssignment
+
+a = 1
+
+a =
+  begin
+    2
+  end
+
+a, b, c = [1, 2, 3]
+
+a = 1, 2, 3
+
+a, b, c = 1, 2, 3
+
+a, *b = 1, 2, 3
+
+a, *b, c, d = 1, 2, 3
+
+a, * = 1, 2, 3
+
+a = *a
+
+(a, b), c = [1, 2], 3
+
+* = [1, 2, 3]
+
+*, a = [1, 2, 3]
+
+super_super_super_long, super_super_super_long, super_super_super_long =
+  super_super_super_super_super_long,
+  super_super_super_super_super_long,
+  super_super_super_super_super_long
+
+a ||= 1
+
+a ||=
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+
+a = [
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_super_long,
+]
+
+a = {
+  a: super_super_super_super_super_super_super_super_super_super_long,
+  b: super_super_super_super_super_super_super_super_super_super_long,
+  c: super_super_super_super_super_super_super_super_super_super_long,
+}
+
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Layout/MultilineMethodCallIndentation
+# I know, I know
+a = [super_super_super_super_long, super_super_super_super_long].sort
+
+a = { a: super_super_super_super_long, b: super_super_super_super_long }.sort
+# rubocop:enable Layout/MultilineMethodCallIndentation
+# rubocop:enable Lint/UnneededCopDisableDirective
+
+a.a = 1
+
+super_super_super_long.super_super_super_super_super_super_super_long =
+  super_super_super_super_super_super_super_super_super_super_super_long
+
+# rubocop:enable Lint/UselessAssignment, Style/ParallelAssignment
+"
+`;
+
+exports[`for the on.json config binary.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+class BinaryTest < Minitest::Test
+  def test_unbroken
+    value = true
+
+    assert(value && value && value)
+  end
+
+  def test_broken
+    super_super_super_super_super_long = true
+
+    assert(
+      super_super_super_super_super_long &&
+        super_super_super_super_super_long &&
+        super_super_super_super_super_long,
+    )
+  end
+end
+"
+`;
+
+exports[`for the on.json config blocks.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/UnusedBlockArgument
+
+loop { 1 }
+
+loop { 1 }
+
+loop do
+  # foobar
+end
+
+port ENV.fetch('PORT') { 3000 }
+
+test 'foobar' do
+end
+
+te.st 'foobar' do
+end
+
+test 'foobar' do
+  foobar
+end
+
+te.st 'foobar' do
+  foobar
+end
+
+test 'foobar', &:to_s
+
+te.st 'foobar', &:to_s
+
+loop do
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+loop { super_super_super_super_super_super_super_super_super_super_super_long }
+
+loop { |i| 1 }
+
+loop { |i| i }
+
+loop { |*| i }
+
+loop { |(a, b)| i }
+
+loop { |a, (b, c), d, *e| i }
+
+loop do |i|
+  super_super_super_super_super_super_super_super_super_super_super_super_long
+end
+
+loop { |i| super_super_super_super_super_super_super_super_super_super_long }
+
+loop(&:to_s)
+
+loop(&:to_s)
+
+loop do |i|
+  i.to_s
+  i.next
+end
+
+loop { |i| i.to_s :db }
+
+loop { |i, j| i.to_s }
+
+[1, 2, 3].each do |i|
+  p i
+end
+
+def change
+  change_table :foo do
+    column :bar
+  end
+end
+
+foo 'foo', &:to_s
+
+target.method object.map do |arg|
+  arg * 2
+end
+
+# from ruby test/ruby/test_call.rb
+assert_nil(
+  (
+    'a'.sub! 'b' do
+    end&.foo do
+    end
+  ),
+)
+
+# rubocop:enable Lint/UnusedBlockArgument
+"
+`;
+
+exports[`for the on.json config break.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+[].each { break }
+
+[].each { break 1 }
+
+[].each { break 1 }
+
+[].each { break 1, 2 }
+"
+`;
+
+exports[`for the on.json config case.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/EmptyWhen, Style/EmptyCaseCondition
+
+case
+when a
+  1
+end
+
+case a
+when b
+  1
+end
+
+case a
+when b, c
+  1
+end
+
+case a
+when b
+when c
+  1
+end
+
+case a
+when b
+  1
+when c
+  2
+end
+
+case a
+when b
+  1
+else
+  2
+end
+
+# rubocop:enable Lint/EmptyWhen, Style/EmptyCaseCondition
+"
+`;
+
+exports[`for the on.json config class.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+module Pret
+  module Tier
+    # object documentation
+    class Object; end
+
+    # second object
+    # documentation
+    class Object; end
+
+    # third object
+    # documentation
+    class Object
+      attr_accessor :foo
+    end
+
+    class Object < BasicObject; end
+
+    class Object < BasicObject; end
+
+    class Object < BasicObject
+      # inside class documentation
+      attr_accessor :bar
+    end
+
+    class << self
+      # method documentation
+      def method; end
+
+      undef method
+    end
+
+    module Prettier; end
+
+    module Prettier; end
+
+    module Prettier
+      # inside module documentation
+      attr_accessor :foo
+    end
+  end
+end
+
+Pret::Tier::Object # rubocop:disable Lint/Void
+Pret::TIER = 'config'.to_s
+
+::Pret::Tier::Object # rubocop:disable Lint/Void
+::PRET = 'config'.to_s
+"
+`;
+
+exports[`for the on.json config comments.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # this is a comment at
@@ -1059,7 +1897,7 @@ end
 "
 `;
 
-exports[`defined.rb matches expected output for off.json 1`] = `
+exports[`for the on.json config defined.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/Void
@@ -1086,34 +1924,7 @@ defined?(a) # third
 "
 `;
 
-exports[`defined.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/Void
-
-defined?(a) # first
-
-defined?(a) # second
-
-defined?(
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-)
-
-defined?(
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-)
-
-defined?(
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-)
-
-defined?(a) # third
-
-# rubocop:enable Lint/Void
-"
-`;
-
-exports[`embdoc.rb matches expected output for off.json 1`] = `
+exports[`for the on.json config embdoc.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Style/BlockComments
@@ -1146,55 +1957,7 @@ end
 "
 `;
 
-exports[`embdoc.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Style/BlockComments
-
-=begin
-this is
-
-some really
-
-long documentation
-that is contained
-in an embdoc
-=end
-
-class Foo
-=begin
-this is an embdoc inside a class
-=end
-end
-
-module Foo
-  class Foo
-=begin
-this is an embdoc even more indented
-=end
-  end
-end
-
-# rubocop:enable Style/BlockComments
-"
-`;
-
-exports[`encoding.rb matches expected output for off.json 1`] = `
-"# -*- encoding: binary -*-
-# frozen_string_literal: true
-
-# rubocop:disable Lint/Void, Style/AsciiComments
-
-# il était
-:il_était
-\\"ひらがな\\"
-/ひらがな/
-
-# rubocop:enable Lint/Void, Style/AsciiComments
-"
-`;
-
-exports[`encoding.rb matches expected output for on.json 1`] = `
+exports[`for the on.json config encoding.rb matches expected output 1`] = `
 "# -*- encoding: binary -*-
 # frozen_string_literal: true
 
@@ -1209,50 +1972,7 @@ exports[`encoding.rb matches expected output for on.json 1`] = `
 "
 `;
 
-exports[`hash.rb matches expected output for off.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/Void
-
-{}
-
-{ :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
-
-{ :a => \\"a\\", :b => \\"b\\", :c => \\"c\\" }
-
-{ Foo => 1, Bar => 2 }
-
-{
-  :super_super_super_super_super_super_super_super_long =>
-    super_super_super_super_super_super_super_super_long,
-  :super_super_super_super_super_super_super_super_super_long => {
-    :super_super_super_super_super_super_super_super_long =>
-      super_super_super_super_super_super_super_super_long
-  }
-}
-
-foo :abc => true # some comment
-
-foobar :alpha => alpha,
-       :beta => beta,
-       :gamma => gamma,
-       :delta => delta,
-       :epsilon => epsilon,
-       :zeta => zeta
-foobar(
-  :alpha => alpha,
-  :beta => beta,
-  :gamma => gamma,
-  :delta => delta,
-  :epsilon => epsilon,
-  :zeta => zeta
-)
-
-# rubocop:enable Lint/Void
-"
-`;
-
-exports[`hash.rb matches expected output for on.json 1`] = `
+exports[`for the on.json config hash.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/Void
@@ -1295,40 +2015,7 @@ foobar(
 "
 `;
 
-exports[`hooks.rb matches expected output for off.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Style/BeginBlock, Style/EndBlock
-
-BEGIN { p \\"begin\\" }
-
-BEGIN { p \\"begin\\" }
-
-BEGIN {
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-}
-
-BEGIN {
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-}
-
-END { p \\"end\\" }
-
-END { p \\"end\\" }
-
-END {
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-}
-
-END {
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-}
-
-# rubocop:enable Style/BeginBlock, Style/EndBlock
-"
-`;
-
-exports[`hooks.rb matches expected output for on.json 1`] = `
+exports[`for the on.json config hooks.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Style/BeginBlock, Style/EndBlock
@@ -1361,116 +2048,7 @@ END {
 "
 `;
 
-exports[`if.rb matches expected output for off.json 1`] = `
-"# frozen_string_literal: true
-
-if a
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-# rubocop:disable Style/Not, Style/NegatedIf, Lint/EmptyExpression
-if not a
-  b
-end
-
-# from ruby test/ruby/test_not.rb
-assert_equal(true, (not ()))
-# rubocop:enable Style/Not, Style/NegatedIf, Lint/EmptyExpression
-
-if a
-  break # comment
-end
-
-if a
-
-else
-  b
-end
-
-if a
-  1
-elsif b
-  2
-end
-
-if a
-  super_super_super_super_super_super_super_super_super_super_super_long
-else
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-if a
-  1
-elsif b
-  2
-elsif c
-  3
-else
-  4
-end
-
-unless a
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-# rubocop:disable Style/UnlessElse
-unless a
-  super_super_super_super_super_super_super_super_super_super_super_long
-else
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-# rubocop:enable Style/UnlessElse
-
-if a
-  1
-end
-
-if super_super_super_super_super_super_super_super_super_super_super_super_long
-  1
-end
-
-unless a
-  1
-end
-
-unless super_super_super_super_super_super_super_super_super_super_super_suplong
-  1
-end
-
-a ? 1 : 2
-
-a ? 2 : 1
-
-a ? 1 : 2
-if a
-  super_super_super_super_super_super_super_super_super_super_super_long
-else
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-if a
-  b 1
-else
-  b(2)
-end
-
-if a
-  b(1)
-else
-  b 2
-end
-
-a b do
-  if a
-    a \\"foo\\"
-  else
-    b
-  end
-end
-"
-`;
-
-exports[`if.rb matches expected output for on.json 1`] = `
+exports[`for the on.json config if.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 if a
@@ -1573,21 +2151,7 @@ end
 "
 `;
 
-exports[`kwargs.rb matches expected output for off.json 1`] = `
-"# frozen_string_literal: true
-
-def add(alpha:, beta:, gamma: 1, delta: 2)
-  alpha + beta + gamma + delta
-end
-
-add(:alpha => 1, :beta => 2, :gamma => 3, :delta => 4)
-
-args = { :alpha => 1, :beta => 2, :gamma => 3 }
-add(**args, :delta => 4)
-"
-`;
-
-exports[`kwargs.rb matches expected output for on.json 1`] = `
+exports[`for the on.json config kwargs.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 def add(alpha:, beta:, gamma: 1, delta: 2)
@@ -1601,7 +2165,7 @@ add(**args, delta: 4)
 "
 `;
 
-exports[`lambda.rb matches expected output for off.json 1`] = `
+exports[`for the on.json config lambda.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 -> { 1 }
@@ -1639,45 +2203,7 @@ comm.and :fooooooooooooobaaaaaaarrrrr,
 "
 `;
 
-exports[`lambda.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
--> { 1 }
-
-->(a, b, c) { a + b + c }
-
-lambda do
-  super_super_super_super_super_super_super_super_super_super_super_super_long
-end
-
-lambda do |a, b, c|
-  a + b + c + super_super_super_super_super_super_super_super_super_long
-end
-
-a.call(1, 2, 3)
-
-a.call(1, 2, 3)
-
-a[]
-
-a[1, 2, 3]
-
-->(a) { a }
-
--> { 1 }
-
-command :fooooooooooooobaaaaaaarrrrr,
-        lambda { |argument|
-          argument + argument + argument + argument + argument + argument
-        }
-comm.and :fooooooooooooobaaaaaaarrrrr,
-         lambda { |argument|
-           argument + argument + argument + argument + argument + argument
-         }
-"
-`;
-
-exports[`layout.rb matches expected output for off.json 1`] = `
+exports[`for the on.json config layout.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/Void
@@ -1704,145 +2230,7 @@ end
 "
 `;
 
-exports[`layout.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/Void
-
-1
-
-def foobar
-  2
-
-  3
-  4
-  5
-
-  6
-end
-
-7
-8
-9
-
-10
-
-# rubocop:enable Lint/Void
-"
-`;
-
-exports[`method.rb matches expected output for off.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/DuplicateMethods, Lint/UnusedMethodArgument
-# rubocop:disable Metrics/ParameterLists
-
-def foo; end
-
-def foo(); end
-
-def foo(alpha); end
-
-def foo(alpha); end
-
-def self.foo; end
-
-def self.foo(); end
-
-def self.foo(alpha); end
-
-def self.foo(alpha); end
-
-def foo(alpha, beta, *gamma, delta, epsilon:, zeta:, eta: 1, **theta, &block)
-  \\"what\\"
-end
-
-def foo(
-  alpha:,
-  beta:,
-  gamma:,
-  delta:,
-  epsilon:,
-  zeta:,
-  eta:,
-  theta:,
-  iota:,
-  kappa:,
-  lambda:
-)
-  \\"what\\"
-end
-
-def foo(alpha)
-  1
-end
-
-def foo(*); end
-
-def foo(**); end
-
-foo
-
-foo(1)
-foo(1, 2)
-foo(1, 2, *abc)
-foo(1, 2, *abc, 3, 4)
-foo(
-  aaaaaaa,
-  bbbbbbb,
-  ccccccc,
-  ddddddd,
-  eeeeeee,
-  fffffff,
-  ggggggg,
-  hhhhhhh,
-  iiiiiii
-)
-foo(
-  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
-  &block
-)
-
-foo aaaaaaa,
-    bbbbbbb,
-    ccccccc,
-    ddddddd,
-    eeeeeee,
-    fffffff,
-    ggggggg,
-    hhhhhhh,
-    iiiiiii
-foo.foo aaaaaaa,
-        bbbbbbb,
-        ccccccc,
-        ddddddd,
-        eeeeeee,
-        fffffff,
-        ggggggg,
-        hhhhhhh,
-        iiiiiii
-
-foo(*bar)
-foo(**baz)
-foo(&block)
-
-foo(*bar, &block)
-foo(**baz, &block)
-foo(*bar, **baz, &block)
-
-foo(:h => 1, **bar)
-foo(**bar, :h => 1)
-foo(:h => 1, **bar, :i => 2)
-
-Foo.foo
-foo&.foo
-
-# rubocop:enable Lint/DuplicateMethods, Lint/UnusedMethodArgument
-# rubocop:enable Metrics/ParameterLists
-"
-`;
-
-exports[`method.rb matches expected output for on.json 1`] = `
+exports[`for the on.json config method.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/DuplicateMethods, Lint/UnusedMethodArgument
@@ -1953,7 +2341,7 @@ foo&.foo
 "
 `;
 
-exports[`next.rb matches expected output for off.json 1`] = `
+exports[`for the on.json config next.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 [].each { next }
@@ -1964,18 +2352,7 @@ exports[`next.rb matches expected output for off.json 1`] = `
 "
 `;
 
-exports[`next.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-[].each { next }
-
-[].each { next 1 }
-
-[].each { next 1 }
-"
-`;
-
-exports[`numbers.rb matches expected output for off.json 1`] = `
+exports[`for the on.json config numbers.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/Void
@@ -1996,28 +2373,7 @@ exports[`numbers.rb matches expected output for off.json 1`] = `
 "
 `;
 
-exports[`numbers.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/Void
-
-123
--123
-1_123
--543
-123_456_789_123_456_789
-123.45
-1.2e-3
-0xaabb
-0o377
--0b1010
-0b001_001
-
-# rubocop:enable Lint/Void
-"
-`;
-
-exports[`ranges.rb matches expected output for off.json 1`] = `
+exports[`for the on.json config ranges.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/UselessAssignment
@@ -2029,88 +2385,7 @@ dot3 = 3...4 # dot3
 "
 `;
 
-exports[`ranges.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/UselessAssignment
-
-dot2 = 1..2 # dot2
-dot3 = 3...4 # dot3
-
-# rubocop:enable Lint/UselessAssignment
-"
-`;
-
-exports[`regexp.rb matches expected output for off.json 1`] = `
-"# frozen_string_literal: true
-
-class RegexpTest < Minitest::Test
-  def test_default
-    regexp = /abc/
-
-    assert_match regexp, \\"abcde\\"
-  end
-
-  def test_braces
-    regexp = /abc/
-
-    assert_match regexp, \\"abcde\\"
-  end
-
-  def test_braces_with_slashes
-    regexp = %r{a/b/c}
-
-    assert_match regexp, \\"a/b/c/d/e\\"
-  end
-
-  def test_slashes
-    regexp = /abc/
-
-    assert_match regexp, \\"abcde\\"
-  end
-
-  def test_brackets
-    regexp = /abc/
-
-    assert_match regexp, \\"abcde\\"
-  end
-
-  def test_parens
-    regexp = /abc/
-
-    assert_match regexp, \\"abcde\\"
-  end
-
-  def test_interpolation
-    inter = \\"b\\"
-    regexp = /a#{inter}c/
-
-    assert_match regexp, \\"abcde\\"
-  end
-
-  def test_modifier
-    regexp = /abc/i
-
-    assert_match regexp, \\"ABCDE\\"
-  end
-
-  def test_brace_modifier
-    regexp = /abc/i
-
-    assert_match regexp, \\"ABCDE\\"
-  end
-
-  def test_global_interpolation
-    \\"foo\\" =~ /foo/
-    regexp = /#{$&}/
-
-    assert_match regexp, \\"foobar\\"
-  end
-end
-"
-`;
-
-exports[`regexp.rb matches expected output for on.json 1`] = `
+exports[`for the on.json config regexp.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 class RegexpTest < Minitest::Test
@@ -2179,7 +2454,7 @@ end
 "
 `;
 
-exports[`rescue.rb matches expected output for off.json 1`] = `
+exports[`for the on.json config rescue.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 begin
@@ -2218,87 +2493,7 @@ end
 "
 `;
 
-exports[`rescue.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-begin
-  1
-rescue ArgumentError
-  retry
-rescue NoMethodError => exception
-  puts exception
-  redo
-rescue SyntaxError, NoMethodError
-  2
-rescue SomeSuperSuperLongError,
-       SomeOtherSuperSuperLongError,
-       OneLastSuperLongError
-  3
-rescue StandardError
-  4
-else
-  5
-ensure
-  6
-end
-
-begin
-  a
-rescue StandardError
-  nil
-end
-
-# from ruby spec/ruby/language/rescue_spec.rb
-def foo
-  a
-rescue A, *B => e
-  e
-end
-"
-`;
-
-exports[`return.rb matches expected output for off.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/UnneededCopDisableDirective
-# rubocop:disable Style/GuardClause, Style/RedundantReturn
-
-def foo
-  if a
-    return
-  end
-end
-
-def bar
-  if a
-    return 1
-  end
-end
-
-def baz
-  if a
-    return 1
-  end
-end
-
-def qux
-  if a
-    return 1, 2
-  end
-end
-
-def qax
-  if a
-    return foo :bar
-  end
-end
-
-# rubocop:enable Style/GuardClause, Style/RedundantReturn
-# rubocop:enable Lint/UnneededCopDisableDirective
-"
-`;
-
-exports[`return.rb matches expected output for on.json 1`] = `
+exports[`for the on.json config return.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/UnneededCopDisableDirective
@@ -2329,125 +2524,7 @@ end
 "
 `;
 
-exports[`strings.rb matches expected output for off.json 1`] = `
-"# frozen_string_literal: true
-
-# rubocop:disable Lint/UnneededCopDisableDirective
-# rubocop:disable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
-# rubocop:disable Layout/SpaceInsideStringInterpolation
-# rubocop:disable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
-# rubocop:disable Layout/ClosingParenthesisIndentation
-# rubocop:disable Style/StringLiteralsInInterpolation
-
-\\"a\\" # these are CHARs
-?\\\\C-a
-?\\\\M-a
-?\\\\M-\\\\C-a
-
-\\"\\"
-
-\\"abc\\"
-
-\\"abc's\\"
-
-\\"abc\\"
-
-\\"abc #{super} abc\\"
-
-\\"#{abc} abc\\"
-
-\\"{\\\\\\"abc\\\\\\": \\\\\\"foo\\\\nbar\\\\\\"}\\"
-
-# rubocop:disable Style/Semicolon
-\\"abc #{foo; bar} abc\\"
-# rubocop:enable Style/Semicolon
-
-\\"abc #{de} fghi #{jkl} mno\\"
-
-\\"abc\\" \\\\
-  \\"def\\" \\\\
-  \\"ghi\\"
-
-\\"abc #{\\"abc #{abc} abc\\"} abc\\"
-
-{ \\"a\\" => 1 }
-
-{ \\"a #{a}\\" => 1 }
-
-:\\"abc#{abc}abc\\"
-
-\`abc\`
-
-\`super_super_super_super_super_super_super_super_super_super_super_super_s_long\`
-
-<<-HERE
-This is a straight heredoc!
-HERE
-
-<<-HERE
-This is another straight heredoc, this time with interpolation!
-#{interpolation}
-So interpolated right now.
-HERE
-
-abc = <<-HERE
-This is a straight heredoc on an assign!
-HERE
-
-<<-PARENT
-This is a straight heredoc!
-#{<<-CHILD
-Why do I do this
-CHILD
-}
-PARENT
-
-<<~HERE
-  This is a squiggly heredoc!
-HERE
-
-<<~HERE
-    This is another squiggly heredoc, this time with interpolation!
-    #{interpolation}
-    So interpolated right now.
-HERE
-
-abc = <<~HERE
-  This is a squiggly heredoc on an assign!
-HERE
-
-<<~PARENT
-  This is a squiggly heredoc!
-  #{<<~CHILD
-      Why do I do this
-    CHILD
-}
-PARENT
-
-<<-GRAND
-#{\\"interpolated\\"}
-<<~PARENT
-  #{\\"more interpolated\\"}
-    <<-CHILD
-      #{\\"what is going on\\"}
-    CHILD
-  #{\\"more interpolated\\"}
-PARENT
-#{\\"interpolated\\"}
-GRAND
-
-\\"abc \\\\\\"abc\\\\\\" abc\\"
-
-# rubocop:enable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
-# rubocop:enable Layout/SpaceInsideStringInterpolation
-# rubocop:enable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
-# rubocop:enable Layout/ClosingParenthesisIndentation
-# rubocop:enable Style/StringLiteralsInInterpolation
-# rubocop:enable Lint/UnneededCopDisableDirective
-"
-`;
-
-exports[`strings.rb matches expected output for on.json 1`] = `
+exports[`for the on.json config strings.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 # rubocop:disable Lint/UnneededCopDisableDirective
@@ -2470,11 +2547,15 @@ exports[`strings.rb matches expected output for on.json 1`] = `
 
 'abc'
 
+\\"abc\\\\n\\"
+
+\\"\\\\M-\\\\C-a\\"
+
 \\"abc #{super} abc\\"
 
 \\"#{abc} abc\\"
 
-'{\\"abc\\": \\"foo\\\\nbar\\"}'
+\\"{\\\\\\"abc\\\\\\": \\\\\\"foo\\\\nbar\\\\\\"}\\"
 
 # rubocop:disable Style/Semicolon
 \\"abc #{foo; bar} abc\\"
@@ -2565,7 +2646,7 @@ GRAND
 "
 `;
 
-exports[`super.rb matches expected output for off.json 1`] = `
+exports[`for the on.json config super.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 super
@@ -2582,61 +2663,7 @@ super(1, 2)
 "
 `;
 
-exports[`super.rb matches expected output for on.json 1`] = `
-"# frozen_string_literal: true
-
-super
-
-super()
-
-super 1
-
-super(1)
-
-super 1, 2
-
-super(1, 2)
-"
-`;
-
-exports[`while.rb matches expected output for off.json 1`] = `
-"# frozen_string_literal: true
-
-while a
-  1
-end
-
-while a
-  1
-end
-
-while super_super_super_super_super_super_super_super_super_super_super_long
-  1
-end
-
-while super_super_super_super_super_super_super_super_super_super_super_supelong
-  1
-end
-
-until a
-  1
-end
-
-until a
-  1
-end
-
-until super_super_super_super_super_super_super_super_super_super_super_long
-  1
-end
-
-until super_super_super_super_super_super_super_super_super_super_super_supelong
-  1
-end
-"
-`;
-
-exports[`while.rb matches expected output for on.json 1`] = `
+exports[`for the on.json config while.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 1 while a
@@ -2661,26 +2688,7 @@ end
 "
 `;
 
-exports[`yield.rb matches expected output for off.json 1`] = `
-"# frozen_string_literal: true
-
-[1, 2, 3].each do |i|
-  yield
-
-  yield i
-
-  yield(i)
-
-  yield i, 2
-
-  yield(i, 2)
-
-  yield
-end
-"
-`;
-
-exports[`yield.rb matches expected output for on.json 1`] = `
+exports[`for the on.json config yield.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 [1, 2, 3].each do |i|
