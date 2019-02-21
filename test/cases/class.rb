@@ -26,12 +26,9 @@ module Pret
       attr_accessor :bar
     end
 
-    class Super::SuperSuperLongClassName < SuperSuperSuperSuperLongggClassName
-    end
+    class SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName; end
 
-    class SuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName < OtherClass; end
-
-    module SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName; end
+    module SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongModName; end
 
     class << self
       # method documentation

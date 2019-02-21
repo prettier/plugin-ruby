@@ -365,13 +365,10 @@ module Pret
       attr_accessor :bar
     end
 
-    class Super::SuperSuperLongClassName < SuperSuperSuperSuperLongggClassName
+    class SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName
     end
 
-    class SuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName < OtherClass
-    end
-
-    module SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName
+    module SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongModName
     end
 
     class << self
@@ -1741,13 +1738,10 @@ module Pret
       attr_accessor :bar
     end
 
-    class Super::SuperSuperLongClassName < SuperSuperSuperSuperLongggClassName
+    class SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName
     end
 
-    class SuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName < OtherClass
-    end
-
-    module SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName
+    module SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongModName
     end
 
     class << self
