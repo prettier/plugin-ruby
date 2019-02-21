@@ -204,7 +204,7 @@ module.exports = {
     // If the body is empty, we can replace with a ;
     const stmts = statements.body[0].body;
     if (stmts.length === 1 && stmts[0].type === "void_stmt") {
-      return group(concat([concat(parts), ifBreak("", "; "), "end"]));
+      return group(concat([concat(parts), ifBreak(line, "; "), "end"]));
     }
 
     return group(concat([
@@ -410,7 +410,7 @@ module.exports = {
     // If the body is empty, we can replace with a ;
     const stmts = path.getValue().body[1].body[0].body;
     if (stmts.length === 1 && stmts[0].type === "void_stmt") {
-      return group(concat([declaration, ifBreak("", "; "), "end"]));
+      return group(concat([declaration, ifBreak(line, "; "), "end"]));
     }
 
     return group(concat([
