@@ -20,6 +20,10 @@
 
 "abc"
 
+"abc\n"
+
+"\M-\C-a"
+
 "abc #{super} abc"
 
 "#{abc} abc"

@@ -1,8 +1,14 @@
 const { concat, group, hardline, indent, join, line, literalline, softline } = require("prettier").doc.builders;
 const { concatBody, empty, makeList, surround } = require("../utils");
+const escapePattern = require("../escapePattern");
 
-// Matches _any_ escape and unescaped quotes (both single and double).
-const quotePattern = /\\([\s\S])|(['"])/g;
+const isSingleQuotable = stringPart => (
+  stringPart.type === "@tstring_content"
+  && !stringPart.body.includes("'")
+  && !escapePattern.test(stringPart.body)
+);
+
+const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
 
 const makeString = (content, enclosingQuote) => {
   const otherQuote = enclosingQuote === '"' ? "'" : '"';
@@ -84,7 +90,7 @@ module.exports = {
     // embedded expressions and there aren't any single quotes in the string
     // already, we can safely switch to single quotes.
     let quote = "\"";
-    if (preferSingleQuotes && string.body.every(part => part.type === "@tstring_content" && !part.body.includes("'"))) {
+    if (preferSingleQuotes && string.body.every(isSingleQuotable)) {
       quote = "\'";
     }
 
