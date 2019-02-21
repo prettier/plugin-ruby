@@ -12,6 +12,7 @@ const escapePattern = require("../src/escapePattern");
 const expectedMinitestFiles = [
   "alias.rb",
   "binary.rb",
+  "kwargs.rb",
   "regexp.rb"
 ];
 
