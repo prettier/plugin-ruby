@@ -365,6 +365,12 @@ module Pret
       attr_accessor :bar
     end
 
+    class SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName
+    end
+
+    module SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongModName
+    end
+
     class << self
       # method documentation
       def method; end
@@ -1730,6 +1736,12 @@ module Pret
     class Object < BasicObject
       # inside class documentation
       attr_accessor :bar
+    end
+
+    class SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName
+    end
+
+    module SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongModName
     end
 
     class << self

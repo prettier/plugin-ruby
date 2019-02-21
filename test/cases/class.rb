@@ -26,6 +26,10 @@ module Pret
       attr_accessor :bar
     end
 
+    class SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongClassName; end
+
+    module SuperSuperSuperSuperSuperSuperSuperSuperSuperSuperSuperLongModName; end
+
     class << self
       # method documentation
       def method; end
