@@ -330,13 +330,24 @@ module.exports = {
     const noParams = params.body.every(type => !type);
     const commandNode = path.getParentNode(2);
 
+    const inlineLambda = concat([
+      "->",
+      noParams ? "" : concat(["(", paramsConcat, ")"]),
+      " { ",
+      path.call(print, "body", 1),
+      " }"
+    ]);
+
     if (commandNode && ["command", "command_call"].includes(commandNode.type)) {
-      return group(concat([
-        "lambda { ",
-        noParams ? "" : concat(["|", paramsConcat, "|"]),
-        indent(concat([line, path.call(print, "body", 1)])),
-        concat([line, "}"])
-      ]));
+      return group(ifBreak(
+        concat([
+          "lambda {",
+          noParams ? "" : concat([" |", paramsConcat, "|"]),
+          indent(concat([line, path.call(print, "body", 1)])),
+          concat([line, "}"])
+        ]),
+        inlineLambda
+      ));
     }
 
     return group(ifBreak(
@@ -346,13 +357,7 @@ module.exports = {
         indent(concat([softline, path.call(print, "body", 1)])),
         concat([softline, "end"])
       ]),
-      concat([
-        "->",
-        noParams ? "" : concat(["(", paramsConcat, ")"]),
-        " { ",
-        path.call(print, "body", 1),
-        " }"
-      ])
+      inlineLambda
     ));
   },
   massign: (path, opts, print) => {

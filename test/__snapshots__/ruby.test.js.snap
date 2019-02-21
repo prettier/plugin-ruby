@@ -837,6 +837,9 @@ a[1, 2, 3]
 
 -> { 1 }
 
+command :foobar, ->(argument) { argument + argument }
+comm.and :foobar, ->(argument) { argument + argument }
+
 command :fooooooooooooobaaaaaaarrrrr,
         lambda { |argument|
           argument + argument + argument + argument + argument + argument
@@ -2203,6 +2206,9 @@ a[1, 2, 3]
 ->(a) { a }
 
 -> { 1 }
+
+command :foobar, ->(argument) { argument + argument }
+comm.and :foobar, ->(argument) { argument + argument }
 
 command :fooooooooooooobaaaaaaarrrrr,
         lambda { |argument|
