@@ -800,15 +800,17 @@ exports[`for the off.json config kwargs.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 class KwargsTest < Minitest::Test
-  def add(alpha:, beta:, gamma: 1, delta: 2)
-    alpha + beta + gamma + delta
-  end
-
   def test_kwargs
     assert_equal 10, add(:alpha => 1, :beta => 2, :gamma => 3, :delta => 4)
 
     args = { :alpha => 1, :beta => 2, :gamma => 3 }
     assert_equal 10, add(**args, :delta => 4)
+  end
+
+  private
+
+  def add(alpha:, beta:, gamma: 1, delta: 2)
+    alpha + beta + gamma + delta
   end
 end
 "
@@ -1007,31 +1009,33 @@ exports[`for the off.json config next.rb matches expected output 1`] = `
 exports[`for the off.json config numbers.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
-# rubocop:disable Metrics/MethodLength
-
 class NumbersTest < Minitest::Test
-  def test_positive_numbers
-    assert_equal_to_s \\"123\\", 123
-    assert_equal_to_s \\"-123\\", -123
-    assert_equal_to_s \\"1123\\", 1_123
-    assert_equal_to_s \\"-543\\", -543
-    assert_equal_to_s \\"123456789123456789\\", 123_456_789_123_456_789
-    assert_equal_to_s \\"123.45\\", 123.45
-    assert_equal_to_s \\"0.0012\\", 1.2e-3
-    assert_equal_to_s \\"43707\\", 0xaabb
-    assert_equal_to_s \\"255\\", 0o377
-    assert_equal_to_s \\"-10\\", -0b1010
-    assert_equal_to_s \\"9\\", 0b001_001
+  def test_numbers
+    assert_equal_str \\"123\\", 123
+    assert_equal_str \\"-123\\", -123
+    assert_equal_str \\"1123\\", 1_123
+    assert_equal_str \\"-543\\", -543
+    assert_equal_str \\"123456789123456789\\", 123_456_789_123_456_789
+  end
+
+  def test_floats
+    assert_equal_str \\"123.45\\", 123.45
+    assert_equal_str \\"0.0012\\", 1.2e-3
+  end
+
+  def test_bases
+    assert_equal_str \\"43707\\", 0xaabb
+    assert_equal_str \\"255\\", 0o377
+    assert_equal_str \\"-10\\", -0b1010
+    assert_equal_str \\"9\\", 0b001_001
   end
 
   private
 
-  def assert_equal_to_s(expected, value)
-    assert_equal expected.to_s, value.to_s
+  def assert_equal_str(expected, value)
+    assert_equal expected, value.to_s
   end
 end
-
-# rubocop:enable Metrics/MethodLength
 "
 `;
 
@@ -2184,15 +2188,17 @@ exports[`for the on.json config kwargs.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
 class KwargsTest < Minitest::Test
-  def add(alpha:, beta:, gamma: 1, delta: 2)
-    alpha + beta + gamma + delta
-  end
-
   def test_kwargs
     assert_equal 10, add(alpha: 1, beta: 2, gamma: 3, delta: 4)
 
     args = { alpha: 1, beta: 2, gamma: 3 }
     assert_equal 10, add(**args, delta: 4)
+  end
+
+  private
+
+  def add(alpha:, beta:, gamma: 1, delta: 2)
+    alpha + beta + gamma + delta
   end
 end
 "
@@ -2391,31 +2397,33 @@ exports[`for the on.json config next.rb matches expected output 1`] = `
 exports[`for the on.json config numbers.rb matches expected output 1`] = `
 "# frozen_string_literal: true
 
-# rubocop:disable Metrics/MethodLength
-
 class NumbersTest < Minitest::Test
-  def test_positive_numbers
-    assert_equal_to_s '123', 123
-    assert_equal_to_s '-123', -123
-    assert_equal_to_s '1123', 1_123
-    assert_equal_to_s '-543', -543
-    assert_equal_to_s '123456789123456789', 123_456_789_123_456_789
-    assert_equal_to_s '123.45', 123.45
-    assert_equal_to_s '0.0012', 1.2e-3
-    assert_equal_to_s '43707', 0xaabb
-    assert_equal_to_s '255', 0o377
-    assert_equal_to_s '-10', -0b1010
-    assert_equal_to_s '9', 0b001_001
+  def test_numbers
+    assert_equal_str '123', 123
+    assert_equal_str '-123', -123
+    assert_equal_str '1123', 1_123
+    assert_equal_str '-543', -543
+    assert_equal_str '123456789123456789', 123_456_789_123_456_789
+  end
+
+  def test_floats
+    assert_equal_str '123.45', 123.45
+    assert_equal_str '0.0012', 1.2e-3
+  end
+
+  def test_bases
+    assert_equal_str '43707', 0xaabb
+    assert_equal_str '255', 0o377
+    assert_equal_str '-10', -0b1010
+    assert_equal_str '9', 0b001_001
   end
 
   private
 
-  def assert_equal_to_s(expected, value)
-    assert_equal expected.to_s, value.to_s
+  def assert_equal_str(expected, value)
+    assert_equal expected, value.to_s
   end
 end
-
-# rubocop:enable Metrics/MethodLength
 "
 `;
 
