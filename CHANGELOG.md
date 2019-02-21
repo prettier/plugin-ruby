@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 - Support checking for escaping within strings to force double quotes (e.g., "\n").
 - Handle cases with empty class and module declarations that need to break. (Thanks to @RossKinsella for the report.)
-- [INTERNAL] Align the `bin/print` and `bin/sexp` API to support `bin/print` taking a filepath.
+- [INTERNAL] Align the `bin/print` and `bin/sexp` API to support `bin/print` taking a filepath. (Thanks to @AlanFoster.)
+- Support lambdas that don't break and are inline. (Thanks to @AndrewRayCode for the report.)
 
 ## [0.6.3] - 2019-02-18
 ### Changed

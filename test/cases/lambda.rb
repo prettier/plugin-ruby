@@ -20,5 +20,8 @@ a[1, 2, 3]
 
 -> () { 1 }
 
+command :foobar, ->(argument) { argument + argument }
+comm.and :foobar, ->(argument) { argument + argument }
+
 command :fooooooooooooobaaaaaaarrrrr, ->(argument) { argument + argument + argument + argument + argument + argument }
 comm.and :fooooooooooooobaaaaaaarrrrr, ->(argument) { argument + argument + argument + argument + argument + argument }
