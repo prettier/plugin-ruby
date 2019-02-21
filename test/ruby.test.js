@@ -13,6 +13,7 @@ const expectedMinitestFiles = [
   "alias.rb",
   "binary.rb",
   "numbers.rb",
+  "kwargs.rb",
   "regexp.rb"
 ];
 
