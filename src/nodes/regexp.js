@@ -7,12 +7,11 @@ module.exports = {
     const [contents, ending] = path.map(print, "body");
     const useBraces = contents.some(content => typeof content === "string" && content.includes("/"));
 
-    return group(concat([
+    return concat([
       useBraces ? "%r{" : "/",
-      indent(concat([softline, ...contents])),
-      softline,
+      ...contents,
       useBraces ? "}" : "/",
       ending.slice(1)
-    ]));
+    ]);
   }
 };
