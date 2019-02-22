@@ -16,6 +16,10 @@ module.exports = {
     const { body } = path.getValue();
     return /^0[0-9]/.test(body) ? `0o${body.slice(1)}` : body;
   },
+  "@__end__": (path, opts, print) => {
+    const { body } = path.getValue();
+    return concat([trim, "__END__", literalline, body]);
+  },
   arg_paren: (path, { addTrailingCommas }, print) => {
     if (path.getValue().body[0] === null) {
       return "";
