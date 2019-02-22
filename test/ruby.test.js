@@ -155,7 +155,7 @@ eachConfig((prettierConfig, rubocopConfig, config) => {
 
     eachError(config, (file, getContents) => {
       test(`${file} throws error on parsing`, () => {
-        expect(getContents).toThrowError();
+        expect(getContents).toThrowError('Invalid ruby');
       });
     });
   });

@@ -371,9 +371,10 @@ class RipperJS < Ripper::SexpBuilder
 end
 
 if $0 == __FILE__
-  response = RipperJS.new($stdin.read).parse
+  builder = RipperJS.new($stdin.read)
+  response = builder.parse
 
-  if response.nil?
+  if builder.error?
     STDERR.puts 'Invalid ruby'
     exit 1
   end
