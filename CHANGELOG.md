@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Support lambdas that don't break and are inline. (Thanks to @AndrewRayCode for the report.)
 - [INTERNAL] Switch over the numbers.rb test to minitest. (Thanks to @AlanFoster.)
 - [INTERNAL] Switch over the kwargs.rb test to minitest. (Thanks to @AlanFoster.)
+- [INTERNAL] Bail out early if the Ruby input is invalid. (Thanks to @AlanFoster.)
 
 ## [0.6.3] - 2019-02-18
 ### Changed
