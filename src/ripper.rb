@@ -325,6 +325,30 @@ module Layer
       end
     end
   end
+
+  # Handles __END__ syntax, which allows individual scripts to keep content
+  # after the main ruby code that can be read through DATA.
+  module Ending
+    def initialize(source, *args)
+      super(source, *args)
+      @source = source
+      @ending = nil
+    end
+
+    def self.prepended(base)
+      base.attr_reader :source, :ending
+    end
+
+    def on___end__(body)
+      @ending = super(source.split("\n")[lineno..-1].join("\n"))
+    end
+
+    def on_program(*body)
+      super(*body).tap do |sexp|
+        sexp[:body][0][:body] << ending if ending
+      end
+    end
+  end
 end
 
 class RipperJS < Ripper::SexpBuilder
@@ -368,6 +392,7 @@ class RipperJS < Ripper::SexpBuilder
   prepend Layer::BlockComments
   prepend Layer::Heredocs
   prepend Layer::Encoding
+  prepend Layer::Ending
 end
 
 if $0 == __FILE__
