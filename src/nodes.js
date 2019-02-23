@@ -371,8 +371,15 @@ module.exports = {
       right = group(join(concat([",", line]), right));
     }
 
+    let left = path.call(print, "body", 0);
+
+    if (path.getValue().body[0].type === "mlhs_paren") {
+      // Ignoring the mlhs_paren node and just going straight to the content
+      left = path.call(print, "body", 0, "body", 0);
+    }
+
     return group(concat([
-      group(join(concat([",", line]), path.call(print, "body", 0))),
+      group(join(concat([",", line]), left)),
       " =",
       indent(concat([line, right]))
     ]));
