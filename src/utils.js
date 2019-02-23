@@ -49,7 +49,7 @@ const printComments = (printed, start, comments) => {
 };
 
 const skipAssignIndent = node => (
-  ["array", "hash", "heredoc"].includes(node.type)
+  ["array", "hash", "heredoc", "regexp_literal"].includes(node.type)
     || (node.type === "call" && skipAssignIndent(node.body[0]))
     || (node.type === "string_literal" && node.body[0].type === "heredoc")
 );

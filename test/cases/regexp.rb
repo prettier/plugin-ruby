@@ -62,4 +62,15 @@ class RegexpTest < Minitest::Test
 
     assert_match regexp, 'foobar'
   end
+
+  def test_float
+    float_pat = /\A
+      [[:digit:]]+ # 1 or more digits before the decimal point
+      (\.          # Decimal point
+          [[:digit:]]+ # 1 or more digits after the decimal point
+      )? # The decimal point and following digits are optional
+    \Z/x
+
+    assert_match float_pat, "12.56"
+  end
 end
