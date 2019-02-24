@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.7.0] - 2019-02-24
 ### Changed
 - Support checking for escaping within strings to force double quotes (e.g., "\n").
 - Handle cases with empty class and module declarations that need to break. (Thanks to @RossKinsella for the report.)
@@ -180,7 +182,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 - Initial release 🎉
 
-[Unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.6.3...HEAD
+[Unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/prettier/plugin-ruby/compare/v0.6.3...v0.7.0
 [0.6.3]: https://github.com/prettier/plugin-ruby/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/prettier/plugin-ruby/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/prettier/plugin-ruby/compare/v0.6.0...v0.6.1
