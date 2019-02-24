@@ -32,9 +32,21 @@ module Pret
 
     class << self
       # method documentation
-      def method; end
+      def method1; end
 
-      undef method
+      def method2; end
+
+      def method3; end
+
+      def method_with_a_long_name1; end
+
+      def method_with_a_long_name2; end
+
+      def method_with_a_long_name3; end
+
+      undef method1
+      undef method2, method3
+      undef method_with_a_long_name1, method_with_a_long_name2, method_with_a_long_name3
     end
 
     module Prettier; end
