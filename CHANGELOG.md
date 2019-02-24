@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Support `__END__` content.
 - Fix up issue with whitespace being added within regexp that are multiline. (Thanks to @AlanFoster.)
 - Better support for destructuring within multi assignment. (Thanks to @AlanFoster.)
+- [INTERNAL] Switch `next` test over to minitest.
+- Handle multiple arguments to `next` with a space between.
 
 ## [0.6.3] - 2019-02-18
 ### Changed
