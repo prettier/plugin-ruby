@@ -48,4 +48,9 @@ a[1] = [
   super_super_super_super_super_super_super_super_super_super_super_long
 ]
 
+a[1] = [
+  # abc
+  %w[abc]
+]
+
 # rubocop:enable Lint/Void

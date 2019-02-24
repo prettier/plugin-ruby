@@ -84,6 +84,11 @@ a[1] = [
   super_super_super_super_super_super_super_super_super_super_super_long
 ]
 
+a[1] = [
+  # abc
+  %w[abc]
+]
+
 # rubocop:enable Lint/Void
 "
 `;
@@ -1552,6 +1557,11 @@ a[
 a[1] = [
   super_super_super_super_super_super_super_super_super_super_super_long,
   super_super_super_super_super_super_super_super_super_super_super_long,
+]
+
+a[1] = [
+  # abc
+  %w[abc],
 ]
 
 # rubocop:enable Lint/Void

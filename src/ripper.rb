@@ -268,6 +268,20 @@ module Layer
       end
     end
 
+    SPECIAL_LITERALS = %i[qsymbols qwords symbols words].freeze
+
+    # Special array literals are handled in different ways and so their comments
+    # need to be passed up to their parent array node.
+    def on_array(*body)
+      @last_sexp =
+        super(*body).tap do |sexp|
+          next unless SPECIAL_LITERALS.include?(body.dig(0, :type))
+
+          comments = sexp.dig(:body, 0).delete(:comments)
+          sexp.merge!(comments: comments) if comments
+        end
+    end
+
     # Most scanner events don't stand on their own a s-expressions, but the CHAR
     # scanner event is effectively just a string, so we need to track it as a
     # s-expression.
