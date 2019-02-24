@@ -584,21 +584,13 @@ module.exports = {
       path.call(print, "body", 1)
     ]);
   },
-  undef: (path, opts, print) => {
-    return (
-      group(
-        concat([
-          'undef ',
-          indent(
-            concat([
-              softline,
-              join(concat([',', line]), path.map(print, 'body', 0))
-            ])
-          )
-        ])
-      )
-    );
-  },
+  undef: (path, opts, print) => group(concat([
+    "undef ",
+    align(
+      "undef ".length,
+      join(concat([",", line]), path.map(print, "body", 0))
+    )
+  ])),
   var_field: concatBody,
   var_ref: first,
   vcall: first,

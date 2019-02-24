@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Handle multi-line conditional predicate (should align with keyword). (Thanks to @AndrewRayCode for the report.)
 - Properly support adding trailing commas with and without blocks. (Thanks to @aaronjensen for the report.)
 - Fix regression of handling comments within arrays on array literals. (Thanks to @AlanFoster for the report.)
+- Support multiple arguments to `undef`. (Thanks to @AlanFoster.)
 
 ## [0.6.3] - 2019-02-18
 ### Changed

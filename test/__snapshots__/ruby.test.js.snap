@@ -398,10 +398,9 @@ module Pret
 
       undef method1
       undef method2, method3
-      undef
-        method_with_a_long_name1,
-        method_with_a_long_name2,
-        method_with_a_long_name3
+      undef method_with_a_long_name1,
+            method_with_a_long_name2,
+            method_with_a_long_name3
     end
 
     module Prettier; end
@@ -1887,10 +1886,9 @@ module Pret
 
       undef method1
       undef method2, method3
-      undef
-        method_with_a_long_name1,
-        method_with_a_long_name2,
-        method_with_a_long_name3
+      undef method_with_a_long_name1,
+            method_with_a_long_name2,
+            method_with_a_long_name3
     end
 
     module Prettier; end
