@@ -394,11 +394,20 @@ module.exports = {
     ...path.call(print, "body", 0),
     path.getValue().body[1] ? concat(["*", path.call(print, "body", 1)]) : "*"
   ],
-  mlhs_paren: (path, opts, print) => group(concat([
-    "(",
-    indent(concat([softline, join(concat([",", line]), path.call(print, "body", 0))])),
-    concat([softline, ")"])
-  ])),
+  mlhs_paren: (path, opts, print) => {
+    if (["massign", "mlhs_paren"].includes(path.getParentNode().type)) {
+      // If we're nested in brackets as part of the left hand side of an assignment
+      // (a, b, c) = 1, 2, 3
+      // ignore the current node and just go straight to the content
+      return path.call(print, "body", 0);
+    }
+
+    return group(concat([
+      "(",
+      indent(concat([softline, join(concat([",", line]), path.call(print, "body", 0))])),
+      concat([softline, ")"])
+    ]))
+  },
   mrhs: makeList,
   mrhs_add_star: (path, opts, print) => [
     ...path.call(print, "body", 0),
