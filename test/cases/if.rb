@@ -100,3 +100,13 @@ a b do
     b
   end
 end
+
+if Some::Constant.super_super_super_super_super_super_super_super_super_super_long
+  1
+elsif Some::Constant.super_super_super_super_super_super_super_super_super_super_long
+  2
+end
+
+unless Some::Constant.super_super_super_super_super_super_super_super_super_super_long
+  1
+end

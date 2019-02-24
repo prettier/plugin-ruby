@@ -1,8 +1,8 @@
-const { breakParent, concat, hardline, group, ifBreak, indent, softline } = require("prettier").doc.builders;
+const { align, breakParent, concat, hardline, group, ifBreak, indent, softline } = require("prettier").doc.builders;
 
 const printWithAddition = (keyword, path, print, { breaking = false } = {}) => concat([
   `${keyword} `,
-  path.call(print, "body", 0),
+  align(keyword.length - 1, path.call(print, "body", 0)),
   indent(concat([softline, path.call(print, "body", 1)])),
   concat([softline, path.call(print, "body", 2)]),
   concat([softline, "end"]),
@@ -66,7 +66,7 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
   return group(ifBreak(
     concat([
       `${keyword} `,
-      path.call(print, "body", 0),
+      align(keyword.length - 1, path.call(print, "body", 0)),
       indent(concat([softline, path.call(print, "body", 1)])),
       concat([softline, "end"])
     ]),
@@ -80,6 +80,19 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
 };
 
 module.exports = {
+  elsif: (path, opts, print) => {
+    const [_predicate, _statements, addition] = path.getValue().body;
+    const parts = [
+      group(concat(["elsif ", align("elsif".length - 1, path.call(print, "body", 0))])),
+      indent(concat([hardline, path.call(print, "body", 1)]))
+    ];
+
+    if (addition) {
+      parts.push(group(concat([hardline, path.call(print, "body", 2)])));
+    }
+
+    return group(concat(parts));
+  },
   if: printConditional("if"),
   ifop: printConditional("if"),
   if_mod: printConditional("if"),
