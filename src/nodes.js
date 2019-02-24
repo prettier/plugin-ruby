@@ -281,19 +281,6 @@ module.exports = {
       indent(concat([softline, path.call(print, "body", 0)]))
     ]);
   },
-  elsif: (path, opts, print) => {
-    const [_predicate, _statements, addition] = path.getValue().body;
-    const parts = [
-      group(concat(["elsif ", path.call(print, "body", 0)])),
-      indent(concat([hardline, path.call(print, "body", 1)]))
-    ];
-
-    if (addition) {
-      parts.push(group(concat([hardline, path.call(print, "body", 2)])));
-    }
-
-    return group(concat(parts));
-  },
   embdoc: (path, opts, print) => concat([trim, path.getValue().body]),
   ensure: (path, opts, print) => group(concat([
     "ensure",
