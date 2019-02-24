@@ -444,12 +444,12 @@ module.exports = {
       return "next";
     }
 
-    if (args.body[0].type !== "paren") {
-      return concat(["next ", join(",", path.call(print, "body", 0))]);
+    if (args.body[0].type === "paren") {
+      // Ignoring the parens node and just going straight to the content
+      return concat(["next ", path.call(print, "body", 0, "body", 0, "body", 0, "body", 0)]);
     }
 
-    // Ignoring the parens node and just going straight to the content
-    return concat(["next ", path.call(print, "body", 0, "body", 0, "body", 0, "body", 0)]);
+    return concat(["next ", join(", ", path.call(print, "body", 0))]);
   },
   opassign: (path, opts, print) => group(concat([
     path.call(print, "body", 0),
