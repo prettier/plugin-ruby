@@ -371,15 +371,8 @@ module.exports = {
       right = group(join(concat([",", line]), right));
     }
 
-    let left = path.call(print, "body", 0);
-
-    if (path.getValue().body[0].type === "mlhs_paren") {
-      // Ignoring the mlhs_paren node and just going straight to the content
-      left = path.call(print, "body", 0, "body", 0);
-    }
-
     return group(concat([
-      group(join(concat([",", line]), left)),
+      group(join(concat([",", line]), path.call(print, "body", 0))),
       " =",
       indent(concat([line, right]))
     ]));
@@ -401,11 +394,20 @@ module.exports = {
     ...path.call(print, "body", 0),
     path.getValue().body[1] ? concat(["*", path.call(print, "body", 1)]) : "*"
   ],
-  mlhs_paren: (path, opts, print) => group(concat([
-    "(",
-    indent(concat([softline, join(concat([",", line]), path.call(print, "body", 0))])),
-    concat([softline, ")"])
-  ])),
+  mlhs_paren: (path, opts, print) => {
+    if (["massign", "mlhs_paren"].includes(path.getParentNode().type)) {
+      // If we're nested in brackets as part of the left hand side of an assignment
+      // (a, b, c) = 1, 2, 3
+      // ignore the current node and just go straight to the content
+      return path.call(print, "body", 0);
+    }
+
+    return group(concat([
+      "(",
+      indent(concat([softline, join(concat([",", line]), path.call(print, "body", 0))])),
+      concat([softline, ")"])
+    ]))
+  },
   mrhs: makeList,
   mrhs_add_star: (path, opts, print) => [
     ...path.call(print, "body", 0),
