@@ -25,12 +25,15 @@ module.exports = {
       return "";
     }
 
+    const args = path.getValue().body[0];
+    const hasBlock = args.type === "args_add_block" && args.body[1];
+
     return group(concat([
       "(",
       indent(concat([
         softline,
         join(concat([",", line]), path.call(print, "body", 0)),
-        addTrailingCommas && !path.getValue().body[0].body[1] ? ifBreak(",", "") : ""
+        addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
       ])),
       concat([softline, ")"])
     ]))

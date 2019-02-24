@@ -978,7 +978,25 @@ foo(
   iiiiiii
 )
 foo(
-  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  aaaaaaa,
+  bbbbbbb,
+  ccccccc,
+  ddddddd,
+  eeeeeee,
+  fffffff,
+  ggggggg,
+  hhhhhhh,
+  iiiiiii
+)
+foo(
+  aaaaaaa,
+  bbbbbbb,
+  ccccccc,
+  ddddddd,
+  eeeeeee,
+  fffffff,
+  ggggggg,
+  hhhhhhh,
   &block
 )
 
@@ -2423,7 +2441,25 @@ foo(
   iiiiiii,
 )
 foo(
-  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+  aaaaaaa,
+  bbbbbbb,
+  ccccccc,
+  ddddddd,
+  eeeeeee,
+  fffffff,
+  ggggggg,
+  hhhhhhh,
+  iiiiiii,
+)
+foo(
+  aaaaaaa,
+  bbbbbbb,
+  ccccccc,
+  ddddddd,
+  eeeeeee,
+  fffffff,
+  ggggggg,
+  hhhhhhh,
   &block
 )
 
