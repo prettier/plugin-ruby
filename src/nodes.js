@@ -335,10 +335,10 @@ module.exports = {
     if (commandNode && ["command", "command_call"].includes(commandNode.type)) {
       return group(ifBreak(
         concat([
-          "lambda {",
+          "lambda do",
           noParams ? "" : concat([" |", paramsConcat, "|"]),
           indent(concat([line, path.call(print, "body", 1)])),
-          concat([line, "}"])
+          concat([line, "end"])
         ]),
         inlineLambda
       ));

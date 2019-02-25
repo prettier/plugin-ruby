@@ -892,13 +892,13 @@ command :foobar, ->(argument) { argument + argument }
 comm.and :foobar, ->(argument) { argument + argument }
 
 command :fooooooooooooobaaaaaaarrrrr,
-        lambda { |argument|
+        lambda do |argument|
           argument + argument + argument + argument + argument + argument
-        }
+        end
 comm.and :fooooooooooooobaaaaaaarrrrr,
-         lambda { |argument|
+         lambda do |argument|
            argument + argument + argument + argument + argument + argument
-         }
+         end
 "
 `;
 
@@ -2374,13 +2374,13 @@ command :foobar, ->(argument) { argument + argument }
 comm.and :foobar, ->(argument) { argument + argument }
 
 command :fooooooooooooobaaaaaaarrrrr,
-        lambda { |argument|
+        lambda do |argument|
           argument + argument + argument + argument + argument + argument
-        }
+        end
 comm.and :fooooooooooooobaaaaaaarrrrr,
-         lambda { |argument|
+         lambda do |argument|
            argument + argument + argument + argument + argument + argument
-         }
+         end
 "
 `;
 
