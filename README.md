@@ -132,12 +132,7 @@ Or, they can be passed to `prettier` as arguments:
 
 ## Development
 
-After checking out the repo, run `yarn` and `bundle` to install dependencies. Then, run `yarn test` to run the tests. You can pretty print a Ruby source file by running `yarn print [PATH]`.
-
-Useful resources for understanding the AST structure are:
-
-- https://github.com/ruby/ruby/blob/trunk/parse.y - the Ruby parser that will give you the names of the nodes as well as their structure
-- https://github.com/ruby/ruby/blob/trunk/test/ripper/test_parser_events.rb - the test file that gives you code examples of each kind of node
+Check out our [development guide](development.md).
 
 ## Contributing
 
