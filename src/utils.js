@@ -2,9 +2,26 @@ const { breakParent, concat, hardline, lineSuffix } = require("prettier").doc.bu
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
+const docLength = function (doc) {
+  if (doc.length) {
+    return doc.length;
+  }
+
+  if (doc.parts) {
+    return doc.parts.reduce((sum, doc) => sum + docLength(doc), 0);
+  };
+
+  return 0;
+}
+
 const empty = () => "";
 
 const first = (path, opts, print) => path.call(print, "body", 0);
+
+const isVCallAccessModifier = node =>
+  node.type === 'vcall' &&
+  node.body[0].type === "@ident" &&
+  ["private", "public", "protected"].includes(node.body[0].body);
 
 const literal = value => () => value;
 
@@ -62,8 +79,10 @@ const surround = (left, right) => (path, opts, print) => concat([
 
 module.exports = {
   concatBody,
+  docLength,
   empty,
   first,
+  isVCallAccessModifier,
   literal,
   makeCall,
   makeList,

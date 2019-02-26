@@ -1,6 +1,6 @@
 const { align, breakParent, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
 const { removeLines } = require("prettier").doc.utils;
-const { concatBody, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent, surround } = require("./utils");
+const { concatBody, docLength, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent, isVCallAccessModifier } = require("./utils");
 
 module.exports = {
   ...require("./nodes/alias"),
@@ -228,11 +228,32 @@ module.exports = {
     const command = path.call(print, "body", 0);
     const args = join(concat([",", line]), path.call(print, "body", 1));
 
+    const hasDefArgs = function (node) {
+     const hasImmediateDef =
+        node.type === 'command'
+        && node.body[1].type === 'args_add_block'
+        && node.body[1].body[0].type === 'args'
+        && node.body[1].body[0].body[0].type === 'def';
+      if (hasImmediateDef) return true
+
+      const hasNestedDef =
+        node.type === 'command'
+        && node.body[1].type === 'args'
+        && node.body[1].body[0].type === 'command'
+        && hasDefArgs(node.body[1].body[0]);
+
+      return hasNestedDef;
+    };
+
     // Hate, hate, hate this but can't figure out how to fix it.
-    return group(ifBreak(
-      concat([command, " ", align(command.length + 1, args)]),
-      concat([command, " ", args])
-    ));
+    return group(
+      ifBreak(
+        hasDefArgs(path.getNode())
+          ? concat([command, " ", args])
+          : concat([command, " ", align(command.length + 1, args)]),
+        concat([command, " ", args])
+      )
+    );
   },
   command_call: (path, opts, print) => {
     const parts = [
@@ -249,7 +270,7 @@ module.exports = {
     const args = join(concat([",", line]), path.call(print, "body", 3));
 
     return group(ifBreak(
-      concat([...parts, align(parts.reduce((sum, part) => sum + part.length, 0), args)]),
+      concat([...parts, align(docLength(concat(parts)), args)]),
       concat([...parts, args])
     ));
   },
@@ -533,7 +554,7 @@ module.exports = {
   ])),
   stmts: (path, opts, print) => {
     const parts = [];
-    let line = null;
+    let previousStmt = null;
 
     path.getValue().body.forEach((stmt, index) => {
       if (stmt.type === "void_stmt") {
@@ -541,8 +562,11 @@ module.exports = {
       }
 
       const printed = path.call(print, "body", index);
+      let line = previousStmt && previousStmt.end;
 
-      if (line === null) {
+      if (previousStmt && (isVCallAccessModifier(previousStmt) || isVCallAccessModifier(stmt))) {
+        parts.push(hardline, hardline, printed);
+      } else if (!previousStmt) {
         parts.push(printed);
       } else if (stmt.start - line > 1) {
         parts.push(hardline, hardline, printed);
@@ -552,7 +576,7 @@ module.exports = {
         parts.push("; ", printed);
       }
 
-      line = stmt.end;
+      previousStmt = stmt;
     });
 
     return concat(parts);
