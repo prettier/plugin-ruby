@@ -1,4 +1,5 @@
 const { concat, group, hardline, indent } = require("prettier").doc.builders;
+const { paren } = require("../utils")
 
 const printMethod = offset => (path, opts, print) => {
   const [name, params, body] = path.getValue().body.slice(offset);
@@ -12,12 +13,10 @@ const printMethod = offset => (path, opts, print) => {
 
   // In case there are no parens but there are arguments
   const parens = params.type === "params" && params.body.some(paramType => paramType);
-
+  const content = path.call(print, "body", offset + 1);
   declaration.push(
     path.call(print, "body", offset),
-    parens ? "(" : "",
-    path.call(print, "body", offset + 1),
-    parens ? ")" : ""
+    parens ? paren(content) : content
   );
 
   // If the body is empty, we can replace with a ;

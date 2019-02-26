@@ -63,11 +63,9 @@ class AccessModifiersTest < Minitest::Test
       true
     end
 
-    # rubocop:disable all
     protected def protected_foo _alpha: 'foobar', _beta: 'foobar', _gamma: 'foobar', _delta: 'foobar', _zeta: 'foobar'
       true
     end
-    # rubocop:enable all
   end
 end
 

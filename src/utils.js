@@ -1,4 +1,4 @@
-const { breakParent, concat, hardline, lineSuffix } = require("prettier").doc.builders;
+const { breakParent, concat, group, hardline, indent, lineSuffix, softline } = require("prettier").doc.builders;
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
@@ -41,6 +41,12 @@ const prefix = value => (path, opts, print) => concat([
   value,
   path.call(print, "body", 0)
 ]);
+
+const paren = (content) => group(concat([
+  "(",
+  indent(concat([softline, content])),
+  concat([softline, ")"])
+]));
 
 const printComments = (printed, start, comments) => {
   let node = printed;
@@ -86,6 +92,7 @@ module.exports = {
   literal,
   makeCall,
   makeList,
+  paren,
   prefix,
   printComments,
   skipAssignIndent,
