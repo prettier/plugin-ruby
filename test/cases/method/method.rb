@@ -49,6 +49,8 @@ foo(aaaaaaa, bbbbbbb, ccccccc, ddddddd, eeeeeee, fffffff, ggggggg, hhhhhhh, &blo
 
 foo aaaaaaa, bbbbbbb, ccccccc, ddddddd, eeeeeee, fffffff, ggggggg, hhhhhhh, iiiiiii
 foo.foo aaaaaaa, bbbbbbb, ccccccc, ddddddd, eeeeeee, fffffff, ggggggg, hhhhhhh, iiiiiii
+Foo::Bar::Baz.qux aaaaaaa, bbbbbbb, ccccccc, ddddddd, eeeeeee, fffffff, ggggggg, hhhhhhh, iiiiiii
+Foo::Bar::Baz.qux aaaaaaa, bbbbbbb, ccccccc, ddddddd, eeeeeee, fffffff, ggggggg, hhhhhhh, iiiiiii, &block
 
 foo(*bar)
 foo(**baz)
