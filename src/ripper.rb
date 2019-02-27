@@ -216,6 +216,33 @@ module Layer
     end
   end
 
+  # Ripper's AST for strings does not have enough information to distinguish between
+  # '\n' and "\n", this layer enriches the default StringLiteral node with the start/ends
+  # of string literals so that they can be distinguished and handled appropriately.
+  module StringLiterals
+    def initialize(*args)
+      super(*args)
+      @tstring_begs = []
+      @tstring_ends = []
+    end
+
+    def on_tstring_beg(string)
+      @tstring_begs.push(string)
+    end
+
+    def on_tstring_end(string)
+      @tstring_ends.push(string)
+    end
+
+    def on_string_literal(string)
+      super.tap do |sexp|
+        sexp.merge!(
+          tstring_beg: @tstring_begs.pop, tstring_end: @tstring_ends.pop
+        )
+      end
+    end
+  end
+
   # These are the event types that contain _actual_ string content. If there is
   # an encoding magic comment at the top of the file, ripper will actually
   # change into that encoding for the storage of the string. This will break
@@ -358,9 +385,7 @@ module Layer
     end
 
     def on_program(*body)
-      super(*body).tap do |sexp|
-        sexp[:body][0][:body] << ending if ending
-      end
+      super(*body).tap { |sexp| sexp[:body][0][:body] << ending if ending }
     end
   end
 end
@@ -402,6 +427,7 @@ class RipperJS < Ripper::SexpBuilder
 
   prepend Layer::Lists
   prepend Layer::StartLine
+  prepend Layer::StringLiterals
   prepend Layer::InlineComments
   prepend Layer::BlockComments
   prepend Layer::Heredocs

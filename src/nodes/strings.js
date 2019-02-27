@@ -8,6 +8,11 @@ const isSingleQuotable = stringPart => (
   && !escapePattern.test(stringPart.body)
 );
 
+const isDoubleQuotable = stringPart => (
+  stringPart.type === "@tstring_content"
+  && !escapePattern.test(stringPart.body)
+);
+
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
 
 const makeString = (content, enclosingQuote) => {
@@ -72,7 +77,7 @@ module.exports = {
     ]);
   },
   string_literal: (path, { preferSingleQuotes }, print) => {
-    const string = path.getValue().body[0];
+    const { tstring_beg, body: [string] } = path.getValue();
 
     // If this string is actually a heredoc, bail out and return to the print
     // function for heredocs
@@ -86,12 +91,33 @@ module.exports = {
       return preferSingleQuotes ? "''" : "\"\"";
     }
 
+    const isSingleQuote = tstring_beg === "'";
+    const isDoubleQuote = tstring_beg === "\"";
+    const preferDoubleQuotes = !preferSingleQuotes;
+
     // Determine the quote to use. If we prefer single quotes and there are no
     // embedded expressions and there aren't any single quotes in the string
     // already, we can safely switch to single quotes.
-    let quote = "\"";
-    if (preferSingleQuotes && string.body.every(isSingleQuotable)) {
+    let quote = undefined;
+
+    if (isSingleQuote && preferSingleQuotes) {
       quote = "\'";
+    } else if (isDoubleQuote && preferDoubleQuotes) {
+      quote = "\""
+    } else if (isSingleQuote && preferDoubleQuotes) {
+      if (string.body.every(isDoubleQuotable)) {
+        quote = "\"";
+      } else {
+        quote = "\'";
+      }
+    } else if (isDoubleQuote && preferSingleQuotes) {
+      if (string.body.every(isSingleQuotable)) {
+        quote = "\'";
+      } else {
+        quote = "\"";
+      }
+    } else {
+      throw new Error("Could not correctly format string literal");
     }
 
     const parts = [];

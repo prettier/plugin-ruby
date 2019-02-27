@@ -6,6 +6,8 @@
 # rubocop:disable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
 # rubocop:disable Layout/ClosingParenthesisIndentation
 # rubocop:disable Style/StringLiteralsInInterpolation
+# rubocop:disable Style/UnneededInterpolation
+# rubocop:disable Lint/InterpolationCheck
 
 ?a # these are CHARs
 ?\C-a
@@ -22,7 +24,15 @@
 
 "abc\n"
 
+'\n'
+"\n"
+'\x0'
 "\x0"
+'#{"\n"}'
+"#{"\n"}"
+"#{'\n'}"
+"#{'\n'}#{"\n"}"
+"#{"\n#{'\n'}#{"\n"}\n"}#{'\n'}"
 
 "\M-\C-a"
 
@@ -120,3 +130,5 @@ GRAND
 # rubocop:enable Layout/ClosingParenthesisIndentation
 # rubocop:enable Style/StringLiteralsInInterpolation
 # rubocop:enable Lint/UnneededCopDisableDirective
+# rubocop:enable Style/UnneededInterpolation
+# rubocop:enable Lint/InterpolationCheck
