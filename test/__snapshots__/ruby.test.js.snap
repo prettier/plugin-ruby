@@ -250,6 +250,11 @@ end
 
 loop { |i| super_super_super_super_super_super_super_super_super_super_long }
 
+# rubocop:disable Metrics/LineLength
+define_method :long_method_name_that_forces_overflow do |_some_long_argument_that_overflows = Time.now, _other_arg = nil|
+end
+# rubocop:enable Metrics/LineLength
+
 loop(&:to_s)
 
 loop(&:to_s)
@@ -899,6 +904,13 @@ comm.and :fooooooooooooobaaaaaaarrrrr,
          lambda { |argument|
            argument + argument + argument + argument + argument + argument
          }
+
+# rubocop:disable Metrics/LineLength
+command :fooooooooooooobaaaaaaarrrrr,
+        lambda { |_fooooooooooooobaaaaaaarrrrr1, _fooooooooooooobaaaaaaarrrrr2, _fooooooooooooobaaaaaaarrrrr3|
+          true
+        }
+# rubocop:enable Metrics/LineLength
 "
 `;
 
@@ -1738,6 +1750,11 @@ end
 
 loop { |i| super_super_super_super_super_super_super_super_super_super_long }
 
+# rubocop:disable Metrics/LineLength
+define_method :long_method_name_that_forces_overflow do |_some_long_argument_that_overflows = Time.now, _other_arg = nil|
+end
+# rubocop:enable Metrics/LineLength
+
 loop(&:to_s)
 
 loop(&:to_s)
@@ -2381,6 +2398,13 @@ comm.and :fooooooooooooobaaaaaaarrrrr,
          lambda { |argument|
            argument + argument + argument + argument + argument + argument
          }
+
+# rubocop:disable Metrics/LineLength
+command :fooooooooooooobaaaaaaarrrrr,
+        lambda { |_fooooooooooooobaaaaaaarrrrr1, _fooooooooooooobaaaaaaarrrrr2, _fooooooooooooobaaaaaaarrrrr3|
+          true
+        }
+# rubocop:enable Metrics/LineLength
 "
 `;
 

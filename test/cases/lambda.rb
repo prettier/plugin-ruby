@@ -25,3 +25,7 @@ comm.and :foobar, ->(argument) { argument + argument }
 
 command :fooooooooooooobaaaaaaarrrrr, ->(argument) { argument + argument + argument + argument + argument + argument }
 comm.and :fooooooooooooobaaaaaaarrrrr, ->(argument) { argument + argument + argument + argument + argument + argument }
+
+# rubocop:disable Metrics/LineLength
+command :fooooooooooooobaaaaaaarrrrr, ->(_fooooooooooooobaaaaaaarrrrr1, _fooooooooooooobaaaaaaarrrrr2, _fooooooooooooobaaaaaaarrrrr3) { true }
+# rubocop:enable Metrics/LineLength
