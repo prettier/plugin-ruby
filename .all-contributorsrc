@@ -1,0 +1,27 @@
+{
+  "projectName": "plugin-ruby",
+  "projectOwner": "kddeisz",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "contributors": [
+    {
+      "login": "kddeisz",
+      "name": "Kevin Deisz",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/5093358?v=4",
+      "profile": "https://kevindeisz.com",
+      "contributions": [
+        "code",
+        "doc",
+        "maintenance",
+        "review",
+        "test"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}

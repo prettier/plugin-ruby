@@ -163,3 +163,15 @@ The package is available as open source under the terms of the [MIT License](htt
     </tr>
   <tbody>
 </table>
+
+## Contributors
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+<table><tr><td align="center"><a href="https://kevindeisz.com"><img src="https://avatars2.githubusercontent.com/u/5093358?v=4" width="100px;" alt="Kevin Deisz"/><br /><sub><b>Kevin Deisz</b></sub></a><br /><a href="https://github.com/kddeisz/plugin-ruby/commits?author=kddeisz" title="Code">💻</a> <a href="https://github.com/kddeisz/plugin-ruby/commits?author=kddeisz" title="Documentation">📖</a> <a href="#maintenance-kddeisz" title="Maintenance">🚧</a> <a href="#review-kddeisz" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/kddeisz/plugin-ruby/commits?author=kddeisz" title="Tests">⚠️</a></td></tr></table>
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
