@@ -42,6 +42,15 @@
       "contributions": [
         "test"
       ]
+    },
+    {
+      "login": "aaronjensen",
+      "name": "Aaron Jensen",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/8588?v=4",
+      "profile": "https://twitter.com/aaronjensen",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7
