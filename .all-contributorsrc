@@ -21,6 +21,18 @@
         "review",
         "test"
       ]
+    },
+    {
+      "login": "AlanFoster",
+      "name": "Alan Foster",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/1271782?v=4",
+      "profile": "https://www.alanfoster.me/",
+      "contributions": [
+        "code",
+        "doc",
+        "review",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7
