@@ -1,4 +1,5 @@
 const { align, breakParent, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
+const { removeLines } = require("prettier").doc.utils;
 const { concatBody, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
@@ -136,7 +137,7 @@ module.exports = {
       indent(concat([useNoSpace ? softline : line, path.call(print, "body", 2)]))
     ]));
   },
-  block_var: (path, opts, print) => concat(["|", path.call(print, "body", 0), "| "]),
+  block_var: (path, opts, print) => concat(["|", removeLines(path.call(print, "body", 0)), "| "]),
   blockarg: (path, opts, print) => concat(["&", path.call(print, "body", 0)]),
   bodystmt: (path, opts, print) => {
     const [statements, rescue, elseClause, ensure] = path.getValue().body;
@@ -336,7 +337,7 @@ module.exports = {
       return group(ifBreak(
         concat([
           "lambda {",
-          noParams ? "" : concat([" |", paramsConcat, "|"]),
+          noParams ? "" : concat([" |", removeLines(paramsConcat), "|"]),
           indent(concat([line, path.call(print, "body", 1)])),
           concat([line, "}"])
         ]),
@@ -347,7 +348,7 @@ module.exports = {
     return group(ifBreak(
       concat([
         "lambda do",
-        noParams ? "" : concat([" |", paramsConcat, "|"]),
+        noParams ? "" : concat([" |", removeLines(paramsConcat), "|"]),
         indent(concat([softline, path.call(print, "body", 1)])),
         concat([softline, "end"])
       ]),

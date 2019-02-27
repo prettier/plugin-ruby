@@ -60,6 +60,11 @@ loop do |i|
   super_super_super_super_super_super_super_super_super_super_long
 end
 
+# rubocop:disable Metrics/LineLength
+define_method :long_method_name_that_forces_overflow do |_some_long_argument_that_overflows = Time.now,  _other_arg = nil|
+end
+# rubocop:enable Metrics/LineLength
+
 loop { |i| i.to_s }
 
 loop do |i|
