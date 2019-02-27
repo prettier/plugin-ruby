@@ -22,6 +22,8 @@
 
 "abc\n"
 
+"\x0"
+
 "\M-\C-a"
 
 "abc #{super} abc"
