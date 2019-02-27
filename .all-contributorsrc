@@ -51,6 +51,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "cbothner",
+      "name": "Cameron Bothner",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/4642599?v=4",
+      "profile": "http://cameronbothner.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
