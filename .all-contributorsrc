@@ -33,6 +33,15 @@
         "review",
         "test"
       ]
+    },
+    {
+      "login": "johnschoeman",
+      "name": "johnschoeman",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/16049495?v=4",
+      "profile": "https://github.com/johnschoeman",
+      "contributions": [
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7
