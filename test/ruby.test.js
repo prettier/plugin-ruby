@@ -191,13 +191,16 @@ describe("escape sequences", () => {
   });
 
   test("identifies octal bits", () => {
-    shouldMatch("\\123");
-    shouldNotMatch("\\1a3");
+    shouldMatch("\\1");
+    shouldMatch("\\12");
+    shouldNotMatch("\\8");
   });
 
   test("identifies hex bits", () => {
+    shouldMatch("\\x0");
+    shouldMatch("\\xa");
     shouldMatch("\\xab");
-    shouldNotMatch("\\xag");
+    shouldNotMatch("\\xg");
   });
 
   test("identifies unicode char", () => {

@@ -31,11 +31,11 @@
  * (<tt>\\\\</tt>).
  */
 const patterns = [
-  "[abtnvfres\\\\]",      // simple
-  "\\d{3}",                // octal bits
-  "x[0-9a-fA-F]{2}",       // hex bit
+  "[abtnvfres\\\\]",       // simple
+  "[0-7]{1,3}",            // octal bits
+  "x[0-9a-fA-F]{1,2}",     // hex bit
   "u[0-9a-fA-F]{4}",       // unicode char
-  "u\\{[0-9a-fA-F ]+\\}", // unicode chars
+  "u\\{[0-9a-fA-F ]+\\}",  // unicode chars
   "c[ -~]|C\\-[ -~]",      // control
   "M\\-[ -~]",             // meta
   "M\\-\\\\C\\-[ -~]|M\\-\\\\c[ -~]|c\\\\M\\-[ -~]", // meta control

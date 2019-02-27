@@ -1319,6 +1319,8 @@ exports[`for the off.json config strings.rb matches expected output 1`] = `
 
 \\"abc\\\\n\\"
 
+\\"\\\\x0\\"
+
 \\"\\\\M-\\\\C-a\\"
 
 \\"abc #{super} abc\\"
@@ -2790,6 +2792,8 @@ exports[`for the on.json config strings.rb matches expected output 1`] = `
 'abc'
 
 \\"abc\\\\n\\"
+
+\\"\\\\x0\\"
 
 \\"\\\\M-\\\\C-a\\"
 
