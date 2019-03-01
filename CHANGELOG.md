@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Switch over assign.rb test case to minitest. (Thanks to @johnschoeman.)
 - [INTERNAL] Add a contributing guide. (Thanks to @AlanFoster.)
 - Handle longer command nodes. (Thanks to @AlanFoster.)
+- [INTERNAL] Add `eslint` and fix up existing violations.
 
 ## [0.7.0] - 2019-02-24
 ### Changed
