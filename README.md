@@ -1,5 +1,5 @@
 <div align="center">
-  <img alt="Prettier Ruby" height="124px" src="https://cdn.rawgit.com/prettier/plugin-ruby/master/docs/logo.png">
+  <img alt="Prettier Ruby" height="124px" src="./docs/logo.png">
 </div>
 
 <h1 align="center">Prettier for Ruby</h1>
