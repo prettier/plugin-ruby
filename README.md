@@ -147,22 +147,6 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/pretti
 
 The package is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
 
-## Maintainers
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center">
-        <a href="https://github.com/kddeisz">
-          <img width="150" height="150" src="https://github.com/kddeisz.png?v=3&s=150">
-          </br>
-          Kevin Deisz
-        </a>
-      </td>
-    </tr>
-  <tbody>
-</table>
-
 ## Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
