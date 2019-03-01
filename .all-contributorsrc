@@ -1,0 +1,66 @@
+{
+  "projectName": "plugin-ruby",
+  "projectOwner": "kddeisz",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "contributors": [
+    {
+      "login": "kddeisz",
+      "name": "Kevin Deisz",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/5093358?v=4",
+      "profile": "https://kevindeisz.com",
+      "contributions": [
+        "code",
+        "doc",
+        "maintenance",
+        "review",
+        "test"
+      ]
+    },
+    {
+      "login": "AlanFoster",
+      "name": "Alan Foster",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/1271782?v=4",
+      "profile": "https://www.alanfoster.me/",
+      "contributions": [
+        "code",
+        "doc",
+        "review",
+        "test"
+      ]
+    },
+    {
+      "login": "johnschoeman",
+      "name": "johnschoeman",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/16049495?v=4",
+      "profile": "https://github.com/johnschoeman",
+      "contributions": [
+        "test"
+      ]
+    },
+    {
+      "login": "aaronjensen",
+      "name": "Aaron Jensen",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/8588?v=4",
+      "profile": "https://twitter.com/aaronjensen",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "cbothner",
+      "name": "Cameron Bothner",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/4642599?v=4",
+      "profile": "http://cameronbothner.com",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
