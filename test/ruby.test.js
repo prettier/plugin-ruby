@@ -11,6 +11,7 @@ const escapePattern = require("../src/escapePattern");
 
 const expectedMinitestFiles = [
   "alias.rb",
+  "array.rb",
   "binary.rb",
   "next.rb",
   "numbers.rb",
