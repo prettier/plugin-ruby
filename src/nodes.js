@@ -13,11 +13,11 @@ module.exports = {
   ...require("./nodes/params"),
   ...require("./nodes/regexp"),
   ...require("./nodes/strings"),
-  "@int": path => {
+  "@int": (path, _opts, _print) => {
     const { body } = path.getValue();
     return /^0[0-9]/.test(body) ? `0o${body.slice(1)}` : body;
   },
-  "@__end__": path => {
+  "@__end__": (path, _opts, _print) => {
     const { body } = path.getValue();
     return concat([trim, "__END__", literalline, body]);
   },
@@ -117,7 +117,7 @@ module.exports = {
       indent(concat([line, adjustedValue]))
     ]));
   },
-  assign_error: () => {
+  assign_error: (_path, _opts, _print) => {
     throw new Error("Can't set variable");
   },
   bare_assoc_hash: (path, opts, print) => group(
@@ -141,7 +141,7 @@ module.exports = {
   block_var: (path, opts, print) => concat(["|", removeLines(path.call(print, "body", 0)), "| "]),
   blockarg: (path, opts, print) => concat(["&", path.call(print, "body", 0)]),
   bodystmt: (path, opts, print) => {
-    const [, rescue, elseClause, ensure] = path.getValue().body;
+    const [_statements, rescue, elseClause, ensure] = path.getValue().body;
     const parts = [path.call(print, "body", 0)];
 
     if (rescue) {
@@ -203,7 +203,7 @@ module.exports = {
     return group(concat(parts));
   },
   class: (path, opts, print) => {
-    const [, superclass, statements] = path.getValue().body;
+    const [_constant, superclass, statements] = path.getValue().body;
 
     const parts = ["class ", path.call(print, "body", 0)];
     if (superclass) {
@@ -222,7 +222,7 @@ module.exports = {
       concat([hardline, "end"])
     ]));
   },
-  class_name_error: () => {
+  class_name_error: (_path, _opts, _print) => {
     throw new Error("class/module name must be CONSTANT");
   },
   command: (path, opts, print) => {
@@ -286,7 +286,7 @@ module.exports = {
       indent(concat([softline, path.call(print, "body", 0)]))
     ]);
   },
-  embdoc: path => concat([trim, path.getValue().body]),
+  embdoc: (path, _opts, _print) => concat([trim, path.getValue().body]),
   ensure: (path, opts, print) => group(concat([
     "ensure",
     indent(concat([hardline, concat(path.map(print, "body"))]))
@@ -472,7 +472,7 @@ module.exports = {
   ])),
   redo: literal("redo"),
   rescue: (path, opts, print) => {
-    const [exception, variable, , addition] = path.getValue().body;
+    const [exception, variable, _statements, addition] = path.getValue().body;
     const parts = ["rescue"];
 
     if (exception || variable) {
@@ -597,7 +597,7 @@ module.exports = {
   var_ref: first,
   vcall: first,
   when: (path, opts, print) => {
-    const [, , addition] = path.getValue().body;
+    const [_predicates, _statements, addition] = path.getValue().body;
 
     const stmts = path.call(print, "body", 1);
     const parts = [group(concat(["when ", join(", ", path.call(print, "body", 0))]))];

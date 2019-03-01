@@ -9,7 +9,7 @@ const identFromSymbol = (path, print, index) => (
   path.call(print, "body", index, "body", 0, "body", 0)
 );
 
-const aliasError = () => {
+const aliasError = (_path, _opts, _print) => {
   throw new Error("can't make alias for the number variables");
 };
 

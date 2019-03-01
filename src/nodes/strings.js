@@ -33,7 +33,7 @@ const makeString = (content, enclosingQuote) => {
 };
 
 module.exports = {
-  "@CHAR": (path, { preferSingleQuotes }) => {
+  "@CHAR": (path, { preferSingleQuotes }, _print) => {
     const { body } = path.getValue();
 
     if (body.length !== 2) {
