@@ -8,6 +8,8 @@
     "arrow-body-style": ["error", "as-needed"],
     "arrow-parens": ["error", "as-needed"],
     "comma-dangle": ["error", "never"],
+    "global-require": "off",
+    "object-curly-newline": "off",
     "quotes": ["error", "double"]
   }
 }

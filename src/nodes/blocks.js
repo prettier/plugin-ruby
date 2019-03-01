@@ -1,4 +1,4 @@
-const { breakParent, concat, group, ifBreak, indent, line, softline } = require("prettier").doc.builders;
+const { breakParent, concat, group, ifBreak, indent, softline } = require("prettier").doc.builders;
 
 const isCall = node => ["::", "."].includes(node) || node.type === "@period";
 
@@ -13,19 +13,19 @@ const isCall = node => ["::", "."].includes(node) || node.type === "@period";
 //     [1, 2, 3].map(&:to_s)
 //
 // This additionally works with `do` blocks as well.
-const toProcTransform = (path, opts, print) => {
+const toProcTransform = path => {
   const [variables, blockContents] = path.getValue().body;
 
   // Ensure that there are variables being passed to this block.
   const params = variables && variables.body[0];
   if (!params || params.type !== "params") {
-    return;
+    return null;
   }
 
   // Ensure there is one and only one parameter, and that it is required.
   const [reqParams, ...other] = params.body;
   if (!Array.isArray(reqParams) || reqParams.length !== 1 || other.some(Boolean)) {
-    return;
+    return null;
   }
 
   let statements;
@@ -35,7 +35,7 @@ const toProcTransform = (path, opts, print) => {
 
     // You can’t use the to_proc shortcut if you’re rescuing
     if (rescueElseEnsure.some(Boolean)) {
-      return;
+      return null;
     }
 
     statements = blockStatements;
@@ -46,24 +46,24 @@ const toProcTransform = (path, opts, print) => {
 
   // Ensure the block contains only one statement
   if (statements.body.length !== 1) {
-    return;
+    return null;
   }
 
   // Ensure that statement is a call
   const [statement] = statements.body;
   if (statement.type !== "call") {
-    return;
+    return null;
   }
 
   // Ensure the call is a method of the block argument
   const [varRef, call, method, args] = statement.body;
 
   if (
-    varRef.type === "var_ref" &&
-    varRef.body[0].body === reqParams[0].body &&
-    isCall(call) &&
-    method.type === "@ident" &&
-    !args
+    varRef.type === "var_ref"
+    && varRef.body[0].body === reqParams[0].body
+    && isCall(call)
+    && method.type === "@ident"
+    && !args
   ) {
     if (["command", "command_call"].includes(path.getParentNode().body[0].type)) {
       return `, &:${method.body}`;
@@ -71,10 +71,12 @@ const toProcTransform = (path, opts, print) => {
 
     return `(&:${method.body})`;
   }
+
+  return null;
 };
 
 const printBlock = (path, opts, print) => {
-  const toProcResponse = toProcTransform(path, opts, print);
+  const toProcResponse = toProcTransform(path);
   if (toProcResponse) {
     return toProcResponse;
   }

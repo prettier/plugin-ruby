@@ -1,7 +1,7 @@
 const { concat, group, hardline, indent } = require("prettier").doc.builders;
 
 const printMethod = offset => (path, opts, print) => {
-  const [name, params, body] = path.getValue().body.slice(offset);
+  const [, params, body] = path.getValue().body.slice(offset);
   const declaration = ["def "];
 
   // In this case, we're printing a method that's defined as a singleton, so we

@@ -15,7 +15,7 @@ const printTernaryConditions = (keyword, truthyValue, falsyValue) => {
 };
 
 const printConditional = keyword => (path, { inlineConditionals }, print) => {
-  const [_predicate, stmts, addition] = path.getValue().body;
+  const [, stmts, addition] = path.getValue().body;
 
   // If the addition is not an elsif or an else, then it's the second half of a
   // ternary expression
@@ -81,7 +81,7 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
 
 module.exports = {
   elsif: (path, opts, print) => {
-    const [_predicate, _statements, addition] = path.getValue().body;
+    const [, , addition] = path.getValue().body;
     const parts = [
       group(concat(["elsif ", align("elsif".length - 1, path.call(print, "body", 0))])),
       indent(concat([hardline, path.call(print, "body", 1)]))

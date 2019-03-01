@@ -1,6 +1,6 @@
-const { align, breakParent, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
+const { align, breakParent, concat, dedent, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
 const { removeLines } = require("prettier").doc.utils;
-const { concatBody, docLength, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent, surround } = require("./utils");
+const { concatBody, docLength, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent } = require("./utils");
 
 module.exports = {
   ...require("./nodes/alias"),
@@ -13,11 +13,11 @@ module.exports = {
   ...require("./nodes/params"),
   ...require("./nodes/regexp"),
   ...require("./nodes/strings"),
-  "@int": (path, opts, print) => {
+  "@int": path => {
     const { body } = path.getValue();
     return /^0[0-9]/.test(body) ? `0o${body.slice(1)}` : body;
   },
-  "@__end__": (path, opts, print) => {
+  "@__end__": path => {
     const { body } = path.getValue();
     return concat([trim, "__END__", literalline, body]);
   },
@@ -37,7 +37,7 @@ module.exports = {
         addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
       ])),
       concat([softline, ")"])
-    ]))
+    ]));
   },
   args: makeList,
   args_add_block: (path, opts, print) => {
@@ -82,7 +82,7 @@ module.exports = {
         }
         break;
       default:
-        parts.push(concat([printedLabel, " =>"]))
+        parts.push(concat([printedLabel, " =>"]));
         break;
     }
 
@@ -95,28 +95,29 @@ module.exports = {
     return group(concat(parts));
   },
   assoc_splat: prefix("**"),
-  assoclist_from_args: (path, opts, print) => group(
-    join(concat([",", line]),
-    path.map(print, "body", 0))
-  ),
+  assoclist_from_args: (path, opts, print) => group(join(
+    concat([",", line]),
+    path.map(print, "body", 0)
+  )),
   assign: (path, opts, print) => {
-    let [printedTarget, printedValue] = path.map(print, "body");
+    const [printedTarget, printedValue] = path.map(print, "body");
+    let adjustedValue = printedValue;
 
     if (["mrhs_add_star", "mrhs_new_from_args"].includes(path.getValue().body[1].type)) {
-      printedValue = group(join(concat([",", line]), printedValue));
+      adjustedValue = group(join(concat([",", line]), printedValue));
     }
 
     if (skipAssignIndent(path.getValue().body[1])) {
-      return group(concat([printedTarget, " = ", printedValue]));
+      return group(concat([printedTarget, " = ", adjustedValue]));
     }
 
     return group(concat([
       printedTarget,
       " =",
-      indent(concat([line, printedValue]))
+      indent(concat([line, adjustedValue]))
     ]));
   },
-  assign_error: (path, opts, print) => {
+  assign_error: () => {
     throw new Error("Can't set variable");
   },
   bare_assoc_hash: (path, opts, print) => group(
@@ -140,7 +141,7 @@ module.exports = {
   block_var: (path, opts, print) => concat(["|", removeLines(path.call(print, "body", 0)), "| "]),
   blockarg: (path, opts, print) => concat(["&", path.call(print, "body", 0)]),
   bodystmt: (path, opts, print) => {
-    const [statements, rescue, elseClause, ensure] = path.getValue().body;
+    const [, rescue, elseClause, ensure] = path.getValue().body;
     const parts = [path.call(print, "body", 0)];
 
     if (rescue) {
@@ -184,7 +185,7 @@ module.exports = {
 
     return group(concat([
       path.call(print, "body", 0),
-      indent(concat([softline, makeCall(path, opts, print), name])),
+      indent(concat([softline, makeCall(path, opts, print), name]))
     ]));
   },
   case: (path, opts, print) => {
@@ -202,7 +203,7 @@ module.exports = {
     return group(concat(parts));
   },
   class: (path, opts, print) => {
-    const [_constant, superclass, statements] = path.getValue().body;
+    const [, superclass, statements] = path.getValue().body;
 
     const parts = ["class ", path.call(print, "body", 0)];
     if (superclass) {
@@ -221,7 +222,7 @@ module.exports = {
       concat([hardline, "end"])
     ]));
   },
-  class_name_error: (path, opts, print) => {
+  class_name_error: () => {
     throw new Error("class/module name must be CONSTANT");
   },
   command: (path, opts, print) => {
@@ -285,7 +286,7 @@ module.exports = {
       indent(concat([softline, path.call(print, "body", 0)]))
     ]);
   },
-  embdoc: (path, opts, print) => concat([trim, path.getValue().body]),
+  embdoc: path => concat([trim, path.getValue().body]),
   ensure: (path, opts, print) => group(concat([
     "ensure",
     indent(concat([hardline, concat(path.map(print, "body"))]))
@@ -298,7 +299,7 @@ module.exports = {
   ])),
   hash: (path, { addTrailingCommas }, print) => {
     if (path.getValue().body[0] === null) {
-      return '{}';
+      return "{}";
     }
 
     return group(concat([
@@ -306,7 +307,7 @@ module.exports = {
       indent(concat([
         line,
         concat(path.map(print, "body")),
-        addTrailingCommas ? ifBreak(",", "") : "",
+        addTrailingCommas ? ifBreak(",", "") : ""
       ])),
       concat([line, "}"])
     ]));
@@ -318,7 +319,7 @@ module.exports = {
     if (params.type === "params") {
       paramsConcat = path.call(print, "body", 0);
     } else {
-      params = params.body[0];
+      ([params] = params.body);
       paramsConcat = path.call(print, "body", 0, "body", 0);
     }
 
@@ -397,7 +398,7 @@ module.exports = {
       "(",
       indent(concat([softline, join(concat([",", line]), path.call(print, "body", 0))])),
       concat([softline, ")"])
-    ]))
+    ]));
   },
   mrhs: makeList,
   mrhs_add_star: (path, opts, print) => [
@@ -471,7 +472,7 @@ module.exports = {
   ])),
   redo: literal("redo"),
   rescue: (path, opts, print) => {
-    const [exception, variable, _statements, addition] = path.getValue().body;
+    const [exception, variable, , addition] = path.getValue().body;
     const parts = ["rescue"];
 
     if (exception || variable) {
@@ -533,7 +534,7 @@ module.exports = {
   ])),
   stmts: (path, opts, print) => {
     const parts = [];
-    let line = null;
+    let lineNo = null;
 
     path.getValue().body.forEach((stmt, index) => {
       if (stmt.type === "void_stmt") {
@@ -542,17 +543,17 @@ module.exports = {
 
       const printed = path.call(print, "body", index);
 
-      if (line === null) {
+      if (lineNo === null) {
         parts.push(printed);
-      } else if (stmt.start - line > 1) {
+      } else if (stmt.start - lineNo > 1) {
         parts.push(hardline, hardline, printed);
-      } else if (stmt.start !== line || path.getParentNode().type !== "string_embexpr") {
+      } else if (stmt.start !== lineNo || path.getParentNode().type !== "string_embexpr") {
         parts.push(hardline, printed);
       } else {
         parts.push("; ", printed);
       }
 
-      line = stmt.end;
+      lineNo = stmt.end;
     });
 
     return concat(parts);
@@ -596,7 +597,7 @@ module.exports = {
   var_ref: first,
   vcall: first,
   when: (path, opts, print) => {
-    const [_predicates, _statements, addition] = path.getValue().body;
+    const [, , addition] = path.getValue().body;
 
     const stmts = path.call(print, "body", 1);
     const parts = [group(concat(["when ", join(", ", path.call(print, "body", 0))]))];
