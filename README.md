@@ -1,6 +1,5 @@
 <div align="center">
-  <img alt="Prettier" height="124px" src="https://cdn.rawgit.com/prettier/prettier-logo/master/images/prettier-icon-light.svg">
-  <img alt="Ruby" height="124px" vspace="" hspace="25" src="https://www.ruby-lang.org/images/header-ruby-logo@2x.png">
+  <img alt="Prettier Ruby" height="124px" src="https://cdn.rawgit.com/prettier/plugin-ruby/master/docs/logo.png">
 </div>
 
 <h1 align="center">Prettier for Ruby</h1>
