@@ -1,0 +1,13 @@
+{
+  "extends": "airbnb",
+  "env": {
+    "jest": true,
+    "node": true
+  },
+  "rules": {
+    "arrow-body-style": ["error", "as-needed"],
+    "arrow-parens": ["error", "as-needed"],
+    "comma-dangle": ["error", "never"],
+    "quotes": ["error", "double"]
+  }
+}

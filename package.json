@@ -4,9 +4,10 @@
   "description": "prettier plugin for the Ruby programming language",
   "main": "src/ruby.js",
   "scripts": {
-    "test": "jest",
+    "lint": "eslint .",
     "print": "prettier --plugin=.",
-    "rubocop": "run() { prettier --plugin=. $@ | bundle exec rubocop --stdin $1; }; run"
+    "rubocop": "run() { prettier --plugin=. $@ | bundle exec rubocop --stdin $1; }; run",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,11 @@
   },
   "devDependencies": {
     "all-contributors-cli": "^6.1.2",
+    "eslint": "^5.14.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.12.4",
     "jest": "^24.0.0"
   },
   "engines": {
