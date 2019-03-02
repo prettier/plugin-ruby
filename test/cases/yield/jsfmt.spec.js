@@ -1,1 +1,1 @@
-run_spec(__dirname);
+runTest(__dirname);

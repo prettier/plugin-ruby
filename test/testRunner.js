@@ -43,8 +43,8 @@ const handleChildProcess = child => new Promise((resolve, reject) => (
   })
 ));
 
-global.run_spec = (dirname) => {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'minitest-'));
+global.runTest = dirname => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "minitest-"));
 
   afterAll(() => {
     fs.readdirSync(tmpDir).forEach(file => {
@@ -57,18 +57,18 @@ global.run_spec = (dirname) => {
     describe(`for the ${prettierConfig} config`, () => {
       eachTest(dirname, config, (file, getContents) => {
         describe(file, () => {
-          test(`matches expected output`, () => {
+          test("matches expected output", () => {
             expect(getContents()).toMatchSnapshot();
           });
 
           if (!process.env.NOLINT) {
-            test(`generated code passes rubocop`, () => {
+            test("generated code passes rubocop", () => {
               const child = spawn("bundle", [
                 "exec", "rubocop", "--stdin", file, "--config", rubocopConfig
               ]);
 
               if (process.env.VIOLATIONS) {
-                  child.stdout.pipe(process.stdout);
+                child.stdout.pipe(process.stdout);
               }
 
               child.stdin.write(getContents());
@@ -84,13 +84,13 @@ global.run_spec = (dirname) => {
               fs.writeFileSync(filepath, getContents());
 
               const child = spawn("bundle", [
-                  "exec", "ruby", "test/minitest.rb", tmpDir, file
+                "exec", "ruby", "test/minitest.rb", tmpDir, file
               ]);
 
               return handleChildProcess(child);
             });
           } else {
-            test.todo(`generated code passes as a ruby test`);
+            test.todo("generated code passes as a ruby test");
           }
         });
       });

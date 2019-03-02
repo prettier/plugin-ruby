@@ -27,5 +27,11 @@
   },
   "engines": {
     "node": ">=8.3.0"
+  },
+  "jest": {
+    "setupFiles": [
+      "./test/testRunner.js"
+    ],
+    "testRegex": ".test.js"
   }
 }

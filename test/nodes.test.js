@@ -49,8 +49,8 @@ const possibleNodes = function() {
 };
 
 describe("node support", () => {
-  test.skip("handles all ripper parsing events", () => {
-    const supportedNodes = Object.keys(nodes);
-    expect(possibleNodes()).toEqual(expect.arrayContaining(supportedNodes.concat(expectedUnhandledNodes)));
+  test("handles all ripper parsing events", () => {
+    const supportedNodes = Object.keys(nodes).concat(expectedUnhandledNodes).sort();
+    expect(supportedNodes).toEqual(expect.arrayContaining(possibleNodes().sort()));
   });
 });
