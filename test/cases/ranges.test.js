@@ -1,0 +1,1 @@
+runCase("ranges.rb");

@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`while.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+1 while a
+
+1 while a
+
+1 while super_super_super_super_super_super_super_super_super_super_super_long
+
+while super_super_super_super_super_super_super_super_super_super_super_supelong
+  1
+end
+
+1 until a
+
+1 until a
+
+1 until super_super_super_super_super_super_super_super_super_super_super_long
+
+until super_super_super_super_super_super_super_super_super_super_super_supelong
+  1
+end
+"
+`;

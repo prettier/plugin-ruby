@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ranges.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/UselessAssignment
+
+dot2 = 1..2 # dot2
+dot3 = 3...4 # dot3
+
+# rubocop:enable Lint/UselessAssignment
+"
+`;
