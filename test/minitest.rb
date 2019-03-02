@@ -1,5 +1,5 @@
+# frozen_string_literal: true
+
 require 'bundler/setup'
 require 'minitest/autorun'
-
-$LOAD_PATH.unshift(ARGV[0])
-require ARGV[1]
+require ARGV[0]
