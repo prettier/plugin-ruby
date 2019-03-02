@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`encoding.rb matches expected output 1`] = `
+"# -*- encoding: binary -*-
+# frozen_string_literal: true
+
+# rubocop:disable Lint/Void, Style/AsciiComments
+
+# il était
+:il_était
+'ひらがな'
+/ひらがな/
+
+# rubocop:enable Lint/Void, Style/AsciiComments
+"
+`;

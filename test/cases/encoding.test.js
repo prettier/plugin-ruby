@@ -1,0 +1,1 @@
+runCase("encoding.rb");
