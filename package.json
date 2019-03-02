@@ -32,6 +32,6 @@
     "setupFiles": [
       "./test/testRunner.js"
     ],
-    "testRegex": ".test.js"
+    "testRegex": ".test.js$"
   }
 }
