@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Don't allow line breaks between brace block params. (Thanks to @AlanFoster.)
 - [INTERNAL] Switch over the array.rb test case to minitest. (Thanks to @johnschoeman.)
 - [INTERNAL] Test improvements to allow running in parallel. (Thanks to @AlanFoster.)
+- [INTERNAL] Switch over assign.rb test case to minitest. (Thanks to @johnschoeman.)
 
 ## [0.7.0] - 2019-02-24
 ### Changed

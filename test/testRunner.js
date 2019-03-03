@@ -6,6 +6,7 @@ const prettier = require("prettier");
 const minitestFiles = [
   "alias.rb",
   "array.rb",
+  "assign.rb",
   "binary.rb",
   "next.rb",
   "numbers.rb",
