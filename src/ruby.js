@@ -5,7 +5,7 @@ module.exports = {
   languages: [{
     name: "Ruby",
     parsers: ["ruby"],
-    extensions: [".rb", ".rake"],
+    extensions: [".rb", ".rake", ".gemspec"],
     linguistLanguageId: 303,
     vscodeLanguageIds: ["ruby"]
   }],
