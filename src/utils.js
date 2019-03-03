@@ -8,7 +8,7 @@ const docLength = doc => {
   }
 
   if (doc.parts) {
-    return doc.parts.reduce((sum, doc) => sum + docLength(doc), 0);
+    return doc.parts.reduce((sum, child) => sum + docLength(child), 0);
   }
 
   return 0;

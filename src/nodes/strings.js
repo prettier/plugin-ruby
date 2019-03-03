@@ -1,4 +1,4 @@
-const { concat, group, hardline, indent, join, line, literalline, softline } = require("prettier").doc.builders;
+const { concat, group, hardline, indent, join, literalline, softline } = require("prettier").doc.builders;
 const { concatBody, empty, makeList, surround } = require("../utils");
 const escapePattern = require("../escapePattern");
 
@@ -11,7 +11,7 @@ const isSingleQuotable = stringPart => (
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
 
 const makeString = (content, enclosingQuote) => {
-  const otherQuote = enclosingQuote === '"' ? "'" : '"';
+  const otherQuote = enclosingQuote === "\"" ? "'" : enclosingQuote;
 
   // Escape and unescape single and double quotes as needed to be able to
   // enclose `content` with `enclosingQuote`.
@@ -21,26 +21,26 @@ const makeString = (content, enclosingQuote) => {
     }
 
     if (quote === enclosingQuote) {
-      return "\\" + quote;
+      return `\\${quote}`;
     }
 
     if (quote) {
       return quote;
     }
 
-    return "\\" + escaped;
+    return `\\${escaped}`;
   });
 };
 
 module.exports = {
-  "@CHAR": (path, { preferSingleQuotes }, print) => {
+  "@CHAR": (path, { preferSingleQuotes }, _print) => {
     const { body } = path.getValue();
 
     if (body.length !== 2) {
       return body;
     }
 
-    const quote = preferSingleQuotes ? "\'" : "\"";
+    const quote = preferSingleQuotes ? "'" : "\"";
     return body.length === 2 ? concat([quote, body.slice(1), quote]) : body;
   },
   heredoc: (path, opts, print) => {
@@ -91,7 +91,7 @@ module.exports = {
     // already, we can safely switch to single quotes.
     let quote = "\"";
     if (preferSingleQuotes && string.body.every(isSingleQuotable)) {
-      quote = "\'";
+      quote = "'";
     }
 
     const parts = [];

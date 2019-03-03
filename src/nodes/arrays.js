@@ -46,7 +46,7 @@ module.exports = {
     const args = path.getValue().body[0];
 
     if (args === null) {
-      return '[]';
+      return "[]";
     }
 
     if (isStringArray(args)) {

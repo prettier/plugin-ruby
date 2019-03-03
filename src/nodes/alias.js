@@ -9,7 +9,7 @@ const identFromSymbol = (path, print, index) => (
   path.call(print, "body", index, "body", 0, "body", 0)
 );
 
-const aliasError = (path, opts, print) => {
+const aliasError = (_path, _opts, _print) => {
   throw new Error("can't make alias for the number variables");
 };
 
@@ -20,9 +20,7 @@ const aliasVars = (path, opts, print) => {
   return join(" ", path.map(print, "body"));
 };
 
-const alias = (path, opts, print) => {
-  return concat(["alias ", aliasVars(path, opts, print)]);
-};
+const alias = (path, opts, print) => concat(["alias ", aliasVars(path, opts, print)]);
 
 module.exports = {
   alias,

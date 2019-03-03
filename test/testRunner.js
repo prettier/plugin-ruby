@@ -54,7 +54,9 @@ global.runCase = (filename, prettierConfig = {}, rubocopConfig = "default.yml") 
         fs.writeFileSync(filepath, contents);
 
         const child = spawn("bundle", ["exec", "ruby", "test/minitest.rb", filepath]);
-        return asyncProcess(child).finally(() => fs.unlinkSync(filepath));
+        const ensure = () => fs.unlinkSync(filepath);
+
+        return asyncProcess(child).then(ensure).catch(ensure);
       });
     } else {
       test.todo("generated code passes as a ruby test");

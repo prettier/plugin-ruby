@@ -5,7 +5,7 @@ const printGenericRestParam = symbol => (path, opts, print) => (
 );
 
 const printParams = (path, opts, print) => {
-  const [reqs, optls, rest, post, kwargs, kwarg_rest, block] = path.getValue().body;
+  const [reqs, optls, rest, post, kwargs, kwargRest, block] = path.getValue().body;
   let parts = [];
 
   if (reqs) {
@@ -29,7 +29,7 @@ const printParams = (path, opts, print) => {
   }
 
   if (kwargs) {
-    parts = parts.concat(kwargs.map(([kwarg, value], index) => {
+    parts = parts.concat(kwargs.map(([, value], index) => {
       if (!value) {
         return path.call(print, "body", 4, index, 0);
       }
@@ -37,7 +37,7 @@ const printParams = (path, opts, print) => {
     }));
   }
 
-  if (kwarg_rest) {
+  if (kwargRest) {
     parts.push(path.call(print, "body", 5));
   }
 
@@ -50,7 +50,7 @@ const printParams = (path, opts, print) => {
 
 const paramError = () => {
   throw new Error("formal argument cannot be a global variable");
-}
+};
 
 module.exports = {
   kwrest_param: printGenericRestParam("**"),

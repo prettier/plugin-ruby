@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+gem update --system
+gem install bundler
+
+source ~/.nvm/nvm.sh
+nvm install 10
+nvm use 10
+
+yarn --ignore-engines install

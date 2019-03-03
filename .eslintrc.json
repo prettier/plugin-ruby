@@ -1,0 +1,22 @@
+{
+  "extends": "airbnb-base",
+  "env": {
+    "jest": true,
+    "node": true
+  },
+  "rules": {
+    "arrow-body-style": ["error", "as-needed"],
+    "arrow-parens": ["error", "as-needed"],
+    "comma-dangle": ["error", "never"],
+    "global-require": "off",
+    "no-unused-vars": ["error", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_"
+    }],
+    "object-curly-newline": "off",
+    "quotes": ["error", "double"]
+  },
+  "globals": {
+    "runCase": "readonly"
+  }
+}
