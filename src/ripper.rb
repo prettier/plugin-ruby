@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'json'
+require 'json' unless defined?(JSON)
 require 'ripper'
 
 module Layer
@@ -358,9 +358,7 @@ module Layer
     end
 
     def on_program(*body)
-      super(*body).tap do |sexp|
-        sexp[:body][0][:body] << ending if ending
-      end
+      super(*body).tap { |sexp| sexp[:body][0][:body] << ending if ending }
     end
   end
 end

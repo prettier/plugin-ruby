@@ -9,6 +9,10 @@ before_install: bin/ci-install
 script:
 - yarn test
 - yarn lint
+- yarn build
+- gem build prettier.gemspec
+- bundle exec rake test
+- bundle exec ruby-prettier --check 'src/ripper.rb' 'lib/**/*.rb' 'test/*_test.rb' 'prettier.gemspec'
 cache:
 - bundler
 - yarn

@@ -53,7 +53,7 @@ global.runCase = (filename, prettierConfig = {}, rubocopConfig = "default.yml") 
         const filepath = `${file.slice(0, -3)}.fmt.rb`;
         fs.writeFileSync(filepath, contents);
 
-        const child = spawn("bundle", ["exec", "ruby", "test/minitest.rb", filepath]);
+        const child = spawn("bundle", ["exec", "ruby", "test/test_runner.rb", filepath]);
         const ensure = () => fs.unlinkSync(filepath);
 
         return asyncProcess(child).then(ensure).catch(ensure);

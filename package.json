@@ -4,6 +4,7 @@
   "description": "prettier plugin for the Ruby programming language",
   "main": "src/ruby.js",
   "scripts": {
+    "build": "pkg --output pkg/prettier --targets=linux,macos,win node_modules/prettier/bin-prettier.js",
     "lint": "eslint .",
     "print": "prettier --plugin=.",
     "rubocop": "run() { prettier --plugin=. $@ | bundle exec rubocop --stdin $1; }; run",
@@ -27,7 +28,8 @@
     "eslint": "^5.14.1",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",
-    "jest": "^24.0.0"
+    "jest": "^24.0.0",
+    "pkg": "^4.3.7"
   },
   "engines": {
     "node": ">=8.3.0"
