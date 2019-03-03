@@ -15,5 +15,8 @@
     }],
     "object-curly-newline": "off",
     "quotes": ["error", "double"]
+  },
+  "globals": {
+    "runCase": "readonly"
   }
 }

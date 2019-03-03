@@ -33,7 +33,7 @@ const expectedUnhandledNodes = [
   ""
 ];
 
-const possibleNodes = function() {
+const possibleNodes = () => {
   const child = spawnSync("ruby", [
     "-rripper",
     "-e",
