@@ -130,13 +130,9 @@ Or, they can be passed to `prettier` as arguments:
 ./node_modules/.bin/prettier --prefer-single-quotes false --write '**/*.{rb,rake}'
 ```
 
-## Development
-
-Check out our [development guide](development.md).
-
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/prettier/plugin-ruby.
+Check out our [contributing guide](CONTRIBUTING.md). Bug reports and pull requests are welcome on GitHub at https://github.com/prettier/plugin-ruby.
 
 ## License
 
