@@ -1,0 +1,4 @@
+inherit_from: ./default.yml
+
+Style/HashSyntax:
+  EnforcedStyle: hash_rockets

@@ -24,3 +24,40 @@ until super_super_super_super_super_super_super_super_super_super_super_supelong
 end
 "
 `;
+
+exports[`while.rb matches expected output 2`] = `
+"# frozen_string_literal: true
+
+while a
+  1
+end
+
+while a
+  1
+end
+
+while super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+while super_super_super_super_super_super_super_super_super_super_super_supelong
+  1
+end
+
+until a
+  1
+end
+
+until a
+  1
+end
+
+until super_super_super_super_super_super_super_super_super_super_super_long
+  1
+end
+
+until super_super_super_super_super_super_super_super_super_super_super_supelong
+  1
+end
+"
+`;

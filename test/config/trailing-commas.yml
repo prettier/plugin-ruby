@@ -1,8 +1,4 @@
-AllCops:
-  TargetRubyVersion: 2.5
-
-Style/Documentation:
-  Enabled: false
+inherit_from: ./default.yml
 
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: consistent_comma

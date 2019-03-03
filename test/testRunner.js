@@ -23,10 +23,10 @@ const asyncProcess = child => new Promise((resolve, reject) => (
   })
 ));
 
-global.runCase = filename => {
+global.runCase = (filename, prettierConfig = {}, rubocopConfig = "default.yml") => {
   const file = path.join(__dirname, "cases", filename);
   const contents = prettier.format(fs.readFileSync(file, "utf8"), {
-    parser: "ruby", plugins: ["."]
+    parser: "ruby", plugins: ["."], ...prettierConfig
   });
 
   describe(filename, () => {
@@ -36,7 +36,9 @@ global.runCase = filename => {
 
     if (!process.env.NOLINT) {
       test("generated code passes rubocop", () => {
-        const child = spawn("bundle", ["exec", "rubocop", "--stdin", file]);
+        const child = spawn("bundle", [
+          "exec", "rubocop", "--stdin", file, "--config", `test/config/${rubocopConfig}`
+        ]);
 
         child.stdin.write(contents);
         child.stdin.end();
