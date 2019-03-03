@@ -1,6 +1,6 @@
 const { align, breakParent, concat, dedent, dedentToRoot, group, hardline, ifBreak, indent, join, line, lineSuffix, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
 const { removeLines } = require("prettier").doc.utils;
-const { concatBody, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent, surround } = require("./utils");
+const { concatBody, docLength, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent, surround } = require("./utils");
 
 module.exports = {
   ...require("./nodes/alias"),
@@ -249,7 +249,7 @@ module.exports = {
     const args = join(concat([",", line]), path.call(print, "body", 3));
 
     return group(ifBreak(
-      concat([...parts, align(parts.reduce((sum, part) => sum + part.length, 0), args)]),
+      concat([...parts, align(docLength(concat(parts)), args)]),
       concat([...parts, args])
     ));
   },
