@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
     end
 
   spec.bindir = 'exe'
-  spec.executables = 'ruby-prettier'
+  spec.executables = 'rbprettier'
   spec.require_paths = %w[lib]
 
   spec.add_development_dependency 'bundler', '~> 2.0'
