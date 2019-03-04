@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Handle longer command nodes. (Thanks to @AlanFoster.)
 - [INTERNAL] Add `eslint` and fix up existing violations.
 - Add the infra for the `prettier` ruby gem. (Thanks to @AlanFoster.)
+- Changed the ruby executable within the `prettier` gem to `rbprettier` for easier autocomplete.
 
 ## [0.7.0] - 2019-02-24
 ### Changed
