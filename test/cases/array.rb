@@ -15,6 +15,13 @@ class ArrayTest < Minitest::Test
     assert_equal_join 'a, b, c', %i[a b c]
   end
 
+  # rubocop:disable Style/UnneededInterpolation
+  def test_string_arrays_with_interpolation
+    interp = 'b'
+    assert_equal_join 'a, b, c', ['a', "#{interp}", 'c']
+  end
+  # rubocop:enable Style/UnneededInterpolation
+
   def test_literals_with_interpolation
     foo = 'foo'
     bar = 'bar'
