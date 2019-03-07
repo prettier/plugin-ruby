@@ -49,7 +49,7 @@ module Prettier
       end
 
       def run_task
-        Prettier.run(*[('--write' if write), source_files].compact)
+        Prettier.run([('--write' if write), source_files].compact)
         exit($?.exitstatus) if $?.exited?
       end
     end
