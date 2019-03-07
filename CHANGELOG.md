@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- [INTERNAL] Add `eslint` and fix up existing violations.
+- Add the infra for the `prettier` ruby gem. (Thanks to @AlanFoster.)
+- Add a `rake` task for easier process integration for the ruby gem.
+
 ### Changed
 - Fix string escaping for hex digit bit patterns when there's only one character after the "x".
 - Don't allow line breaks between brace block params. (Thanks to @AlanFoster.)
@@ -13,8 +18,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Switch over assign.rb test case to minitest. (Thanks to @johnschoeman.)
 - [INTERNAL] Add a contributing guide. (Thanks to @AlanFoster.)
 - Handle longer command nodes. (Thanks to @AlanFoster.)
-- [INTERNAL] Add `eslint` and fix up existing violations.
-- Add the infra for the `prettier` ruby gem. (Thanks to @AlanFoster.)
 - Changed the ruby executable within the `prettier` gem to `rbprettier` for easier autocomplete.
 
 ## [0.7.0] - 2019-02-24
