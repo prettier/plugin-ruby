@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Add `eslint` and fix up existing violations.
 - Add the infra for the `prettier` ruby gem. (Thanks to @AlanFoster.)
 - Add a `rake` task for easier process integration for the ruby gem.
+- Handle direct interpolation of strings with %w array literals (i.e., `["#{foo}"]` should not be transformed into a %w array).
 
 ### Changed
 - Fix string escaping for hex digit bit patterns when there's only one character after the "x".
