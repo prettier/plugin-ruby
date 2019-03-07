@@ -25,7 +25,8 @@ const nodes = {
     const { body } = path.getValue();
     return concat([trim, "__END__", literalline, body]);
   },
-  arg_paren: (path, opts, print) => {
+  access_ctrl: first,
+  arg_paren: (path, { addTrailingCommas }, print) => {
     if (path.getValue().body[0] === null) {
       return "";
     }
@@ -454,10 +455,11 @@ const nodes = {
     concat([hardline, "end"])
   ])),
   stmts: (path, opts, print) => {
+    const stmts = path.getValue().body;
     const parts = [];
     let lineNo = null;
 
-    path.getValue().body.forEach((stmt, index) => {
+    stmts.forEach((stmt, index) => {
       if (stmt.type === "void_stmt") {
         return;
       }
@@ -465,8 +467,10 @@ const nodes = {
       const printed = path.call(print, "body", index);
 
       if (lineNo === null) {
-        parts.push(printed);
-      } else if (stmt.start - lineNo > 1) {
+        parts.push(dedent(concat([hardline, printed])));
+      } else if (stmt.type === "access_ctrl") {
+        parts.push(dedent(concat([hardline, hardline, printed])));
+      } else if (stmt.start - lineNo > 1 || stmts[index - 1].type === "access_ctrl") {
         parts.push(hardline, hardline, printed);
       } else if (stmt.start !== lineNo || path.getParentNode().type !== "string_embexpr") {
         parts.push(hardline, printed);
