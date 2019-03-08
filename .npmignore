@@ -1,4 +1,7 @@
 /coverage/
+/exe/
 /node_modules/
+/lib/
+/pkg/
 /test/
 /yarn-error.log
