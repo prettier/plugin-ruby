@@ -2,17 +2,7 @@ const { align, breakParent, concat, dedent, group, hardline, ifBreak, indent, jo
 const { removeLines } = require("prettier").doc.utils;
 const { concatBody, docLength, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent } = require("./utils");
 
-module.exports = {
-  ...require("./nodes/alias"),
-  ...require("./nodes/arrays"),
-  ...require("./nodes/blocks"),
-  ...require("./nodes/conditionals"),
-  ...require("./nodes/hooks"),
-  ...require("./nodes/loops"),
-  ...require("./nodes/methods"),
-  ...require("./nodes/params"),
-  ...require("./nodes/regexp"),
-  ...require("./nodes/strings"),
+const nodes = {
   "@int": (path, _opts, _print) => {
     const { body } = path.getValue();
     return /^0[0-9]/.test(body) ? `0o${body.slice(1)}` : body;
@@ -50,8 +40,8 @@ module.exports = {
     return parts;
   },
   args_add_star: (path, opts, print) => {
-    const [before, star, ...after] = path.map(print, "body");
-    const parts = [...before, concat(["*", star]), ...after];
+    const printed = path.map(print, "body");
+    const parts = printed[0].concat([concat(["*", printed[1]])]).concat(printed.slice(2));
 
     return parts;
   },
@@ -250,8 +240,8 @@ module.exports = {
     const args = join(concat([",", line]), path.call(print, "body", 3));
 
     return group(ifBreak(
-      concat([...parts, align(docLength(concat(parts)), args)]),
-      concat([...parts, args])
+      concat(parts.concat([align(docLength(concat(parts)), args)])),
+      concat(parts.concat([args]))
     ));
   },
   const_path_field: (path, opts, print) => join("::", path.map(print, "body")),
@@ -378,18 +368,18 @@ module.exports = {
   method_add_block: (path, opts, print) => concat(path.map(print, "body")),
   methref: (path, opts, print) => join(".:", path.map(print, "body")),
   mlhs: makeList,
-  mlhs_add_post: (path, opts, print) => [
-    ...path.call(print, "body", 0),
-    ...path.call(print, "body", 1)
-  ],
-  mlhs_add_star: (path, opts, print) => [
-    ...path.call(print, "body", 0),
-    path.getValue().body[1] ? concat(["*", path.call(print, "body", 1)]) : "*"
-  ],
+  mlhs_add_post: (path, opts, print) => (
+    path.call(print, "body", 0).concat(path.call(print, "body", 1))
+  ),
+  mlhs_add_star: (path, opts, print) => (
+    path.call(print, "body", 0).concat([
+      path.getValue().body[1] ? concat(["*", path.call(print, "body", 1)]) : "*"
+    ])
+  ),
   mlhs_paren: (path, opts, print) => {
     if (["massign", "mlhs_paren"].includes(path.getParentNode().type)) {
-      // If we're nested in brackets as part of the left hand side of an assignment
-      // (a, b, c) = 1, 2, 3
+      // If we're nested in brackets as part of the left hand side of an
+      // assignment, i.e., (a, b, c) = 1, 2, 3
       // ignore the current node and just go straight to the content
       return path.call(print, "body", 0);
     }
@@ -401,10 +391,9 @@ module.exports = {
     ]));
   },
   mrhs: makeList,
-  mrhs_add_star: (path, opts, print) => [
-    ...path.call(print, "body", 0),
-    concat(["*", path.call(print, "body", 1)])
-  ],
+  mrhs_add_star: (path, opts, print) => (
+    path.call(print, "body", 0).concat([concat(["*", path.call(print, "body", 1)])])
+  ),
   mrhs_new_from_args: (path, opts, print) => {
     const parts = path.call(print, "body", 0);
 
@@ -622,3 +611,18 @@ module.exports = {
   yield0: literal("yield"),
   zsuper: literal("super")
 };
+
+module.exports = Object.assign(
+  {},
+  require("./nodes/alias"),
+  require("./nodes/arrays"),
+  require("./nodes/blocks"),
+  require("./nodes/conditionals"),
+  require("./nodes/hooks"),
+  require("./nodes/loops"),
+  require("./nodes/methods"),
+  require("./nodes/params"),
+  require("./nodes/regexp"),
+  require("./nodes/strings"),
+  nodes
+);

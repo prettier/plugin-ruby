@@ -47,13 +47,12 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
       return printWithAddition(keyword, path, print, { breaking: true });
     }
 
+    const forceBreak = stmts.body.every(({ type }) => ["void_stmt", "@comment"].includes(type)) ? breakParent : "";
+    const ternary = printTernaryConditions(keyword, truthyValue, falsyValue);
+
     return group(ifBreak(
       printWithAddition(keyword, path, print),
-      concat([
-        stmts.body.every(({ type }) => ["void_stmt", "@comment"].includes(type)) ? breakParent : "",
-        ...parts,
-        ...printTernaryConditions(keyword, truthyValue, falsyValue)
-      ])
+      concat([forceBreak].concat(parts).concat(ternary))
     ));
   }
 
@@ -75,7 +74,7 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
       path.call(print, "body", 1),
       ` ${keyword} `,
       path.call(print, "body", 0)
-    ]),
+    ])
   ));
 };
 

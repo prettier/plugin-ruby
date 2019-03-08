@@ -23,15 +23,17 @@ const toProcTransform = path => {
   }
 
   // Ensure there is one and only one parameter, and that it is required.
-  const [reqParams, ...other] = params.body;
-  if (!Array.isArray(reqParams) || reqParams.length !== 1 || other.some(Boolean)) {
+  const reqParams = params.body[0];
+  const otherParams = params.body.slice(1);
+  if (!Array.isArray(reqParams) || reqParams.length !== 1 || otherParams.some(Boolean)) {
     return null;
   }
 
   let statements;
   if (blockContents.type === "bodystmt") {
     // We’re in a `do` block
-    const [blockStatements, ...rescueElseEnsure] = blockContents.body;
+    const blockStatements = blockContents.body[0];
+    const rescueElseEnsure = blockStatements.body.slice(1);
 
     // You can’t use the to_proc shortcut if you’re rescuing
     if (rescueElseEnsure.some(Boolean)) {

@@ -48,7 +48,7 @@ module.exports = {
 
     return concat([
       beging,
-      concat([literalline, ...path.map(print, "body")]),
+      concat([literalline].concat(path.map(print, "body"))),
       ending
     ]);
   },
@@ -105,7 +105,7 @@ module.exports = {
       }
     });
 
-    return concat([quote, ...parts, quote]);
+    return concat([quote].concat(parts).concat([quote]));
   },
   word_add: concatBody,
   word_new: empty,

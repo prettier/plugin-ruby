@@ -26,9 +26,10 @@ const asyncProcess = child => new Promise((resolve, reject) => (
 
 global.runCase = (filename, prettierConfig = {}, rubocopConfig = "default.yml") => {
   const file = path.join(__dirname, "cases", filename);
-  const contents = prettier.format(fs.readFileSync(file, "utf8"), {
-    parser: "ruby", plugins: ["."], ...prettierConfig
-  });
+  const contents = prettier.format(
+    fs.readFileSync(file, "utf8"),
+    Object.assign({}, { parser: "ruby", plugins: ["."] }, prettierConfig)
+  );
 
   describe(filename, () => {
     test("matches expected output", () => {
