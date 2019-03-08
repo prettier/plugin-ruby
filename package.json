@@ -31,9 +31,6 @@
     "jest": "^24.0.0",
     "pkg": "^4.3.7"
   },
-  "engines": {
-    "node": ">=8.3.0"
-  },
   "jest": {
     "setupFiles": [
       "./test/testRunner.js"

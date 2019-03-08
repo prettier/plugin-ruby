@@ -21,6 +21,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Handle longer command nodes. (Thanks to @AlanFoster.)
 - Changed the ruby executable within the `prettier` gem to `rbprettier` for easier autocomplete.
 
+### Removed
+- All instances of the spread (`...`) operator so that we can support older versions of node.
+
 ## [0.7.0] - 2019-02-24
 ### Changed
 - Support checking for escaping within strings to force double quotes (e.g., "\n").

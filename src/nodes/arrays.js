@@ -11,7 +11,9 @@ const isSymbolArray = args => args.body.every(arg => (
   arg.type === "symbol_literal"
 ));
 
-const makeArray = start => (path, opts, print) => [start, ...path.map(print, "body")];
+const makeArray = start => (path, opts, print) => (
+  [start].concat(path.map(print, "body"))
+);
 
 const getSpecialArrayParts = (path, print, args) => args.body.map((_arg, index) => (
   path.call(print, "body", 0, "body", index, "body", 0, "body", 0)
@@ -27,10 +29,10 @@ const printAref = (path, opts, print) => group(concat([
   concat([softline, "]"])
 ]));
 
-const printSpecialArray = ([first, ...rest]) => group(concat([
-  first,
+const printSpecialArray = parts => group(concat([
+  parts[0],
   "[",
-  indent(concat([softline, join(line, rest)])),
+  indent(concat([softline, join(line, parts.slice(1))])),
   concat([softline, "]"])
 ]));
 
@@ -51,11 +53,11 @@ module.exports = {
     }
 
     if (isStringArray(args)) {
-      return printSpecialArray(["%w", ...getSpecialArrayParts(path, print, args)]);
+      return printSpecialArray(["%w"].concat(getSpecialArrayParts(path, print, args)));
     }
 
     if (isSymbolArray(args)) {
-      return printSpecialArray(["%i", ...getSpecialArrayParts(path, print, args)]);
+      return printSpecialArray(["%i"].concat(getSpecialArrayParts(path, print, args)));
     }
 
     if (["args", "args_add_star"].includes(args.type)) {

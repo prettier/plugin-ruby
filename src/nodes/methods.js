@@ -23,7 +23,7 @@ const printMethod = offset => (path, opts, print) => {
   // If the body is empty, we can replace with a ;
   const stmts = body.body[0].body;
   if (stmts.length === 1 && stmts[0].type === "void_stmt") {
-    return group(concat([...declaration, "; end"]));
+    return group(concat(declaration.concat(["; end"])));
   }
 
   return group(concat([
