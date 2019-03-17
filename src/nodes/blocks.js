@@ -110,11 +110,14 @@ const printBlock = (path, opts, print) => {
     return concat([breakParent, doBlock]);
   }
 
+  const blockContents = statements.body[0].body;
+  const blockContentsEmpty = blockContents.length === 0;
+
   const braceBlock = concat([
     " { ",
     variables ? path.call(print, "body", 0) : "",
     path.call(print, "body", 1),
-    " }"
+    blockContentsEmpty ? "}" : " }"
   ]);
 
   return group(ifBreak(doBlock, braceBlock));

@@ -24,6 +24,24 @@ describe 'Blocks' do
     end
   end
 
+  describe 'a block with no parameter and a body' do
+    it 'surrounds the block content with one space' do
+      assert_equal_and_valid(
+        'loop {   true}',
+        'loop { true }'
+      )
+    end
+  end
+
+  describe 'a block with a parameter and no body' do
+    it 'inserts one space around the parameter' do
+      assert_equal_and_valid(
+        'loop {|el|   }',
+        'loop { |el| }'
+      )
+    end
+  end
+
   def assert_equal_and_valid(input, expected)
     result = apply_prettier(input)
     assert_equal expected, result

@@ -42,6 +42,8 @@ loop do
   super_super_super_super_super_super_super_super_super_super_super_long
 end
 
+loop { |i| }
+
 loop { |i| 1 }
 
 loop { |i; j| 1 }
