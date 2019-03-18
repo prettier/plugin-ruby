@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
-const ruby = require("../src/ruby");
+const { hasPragma } = require("../src/ruby").parsers.ruby;
 
-console.log(ruby.parsers.ruby.hasPragma(fs.readFileSync(process.argv[2], "utf-8")));
+console.log(hasPragma(fs.readFileSync(process.argv[2], "utf-8")));
