@@ -432,6 +432,7 @@ const nodes = {
 
     return concat(["next ", join(", ", path.call(print, "body", 0))]);
   },
+  number_arg: first,
   opassign: (path, opts, print) => group(concat([
     path.call(print, "body", 0),
     " ",
