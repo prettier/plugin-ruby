@@ -3,18 +3,8 @@
 const fs = require("fs");
 const prettier = require("prettier");
 
-const isFile = function(path) {
-  try {
-    return fs.statSync(path).isFile();
-  } catch (err) {
-    return false;
-  }
-};
-
-const code = isFile(process.argv[2])
+const code = fs.existsSync(process.argv[2])
   ? fs.readFileSync(process.argv[2], "utf-8")
-  : process.argv
-      .slice(2)
-      .join(" ")
-      .replace(/\\n/g, "\n");
+  : process.argv.slice(2).join(" ").replace(/\\n/g, "\n");
+
 console.log(prettier.format(code, { parser: "ruby", plugins: ["."] }));

@@ -1,18 +1,37 @@
 const parse = require("./parse");
 const print = require("./print");
 
+const pragmaPattern = /#\s*@(prettier|format)/;
+const hasPragma = text => pragmaPattern.test(text);
+
 module.exports = {
   languages: [{
     name: "Ruby",
     parsers: ["ruby"],
-    extensions: [".rb", ".rake", ".gemspec"],
-    linguistLanguageId: 303,
+    extensions: [
+      ".gemspec",
+      ".podspec",
+      ".rake",
+      ".rb",
+      ".ru"
+    ],
+    filenames: [
+      ".irbrc",
+      ".pryrc",
+      "Capfile",
+      "Gemfile",
+      "Guardfile",
+      "Podfile",
+      "Rakefile"
+    ],
+    linguistLanguageId: 326,
     vscodeLanguageIds: ["ruby"]
   }],
   parsers: {
     ruby: {
       parse,
-      astFormat: "ruby"
+      astFormat: "ruby",
+      hasPragma
     }
   },
   printers: {
