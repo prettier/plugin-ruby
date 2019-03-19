@@ -1,5 +1,33 @@
 const { align, breakParent, concat, hardline, group, ifBreak, indent, softline } = require("prettier").doc.builders;
 
+const noTernary = [
+  "@comment",
+  "alias",
+  "assign",
+  "break",
+  "command",
+  "command_call",
+  "if_mod",
+  "ifop",
+  "lambda",
+  "massign",
+  "next",
+  "opassign",
+  "rescue_mod",
+  "return",
+  "return0",
+  "super",
+  "undef",
+  "unless_mod",
+  "until_mod",
+  "var_alias",
+  "void_stmt",
+  "while_mod",
+  "yield",
+  "yield0",
+  "zsuper"
+];
+
 const printWithAddition = (keyword, path, print, { breaking = false } = {}) => concat([
   `${keyword} `,
   align(keyword.length - 1, path.call(print, "body", 0)),
@@ -13,6 +41,10 @@ const printTernaryConditions = (keyword, truthyValue, falsyValue) => {
   const parts = [truthyValue, " : ", falsyValue];
   return keyword === "if" ? parts : parts.reverse();
 };
+
+const canTernary = stmts => (
+  stmts.body.length === 1 && !noTernary.includes(stmts.body[0].type)
+);
 
 const printConditional = keyword => (path, { inlineConditionals }, print) => {
   const [_predicate, stmts, addition] = path.getValue().body;
@@ -38,21 +70,16 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
   }
 
   // If there is an else and only an else, attempt to shorten to a ternary
-  if (addition && addition.type === "else") {
-    const parts = [path.call(print, "body", 0), " ? "];
-    const truthyValue = path.call(print, "body", 1);
-    const falsyValue = path.call(print, "body", 2, "body", 0);
-
-    if (stmts.body.length === 1 && ["command", "command_call"].includes(stmts.body[0].type)) {
-      return printWithAddition(keyword, path, print, { breaking: true });
-    }
-
-    const forceBreak = stmts.body.every(({ type }) => ["void_stmt", "@comment"].includes(type)) ? breakParent : "";
-    const ternary = printTernaryConditions(keyword, truthyValue, falsyValue);
+  if (addition && addition.type === "else" && canTernary(stmts) && canTernary(addition.body[0])) {
+    const ternary = printTernaryConditions(
+      keyword,
+      path.call(print, "body", 1),
+      path.call(print, "body", 2, "body", 0)
+    );
 
     return group(ifBreak(
       printWithAddition(keyword, path, print),
-      concat([forceBreak].concat(parts).concat(ternary))
+      concat([path.call(print, "body", 0), " ? "].concat(ternary))
     ));
   }
 
