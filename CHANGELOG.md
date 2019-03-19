@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Support the `hasPragma` function.
 - Support the new `number_arg` node type in Ruby 2.7.
 
+### Changed
+- Limit the number of nodes that are allowed to turn into ternary expressions.
+
 ## [0.8.0] - 2019-03-08
 ### Added
 - [INTERNAL] Add `eslint` and fix up existing violations.
