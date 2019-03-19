@@ -2,11 +2,30 @@ const { concat, group, hardline, indent, join, literalline, softline } = require
 const { concatBody, empty, makeList, surround } = require("../utils");
 const escapePattern = require("../escapePattern");
 
-const isSingleQuotable = stringPart => (
-  stringPart.type === "@tstring_content"
-  && !stringPart.body.includes("'")
-  && !escapePattern.test(stringPart.body)
-);
+// If there is some part of this string that matches an escape sequence or that
+// contains the interpolation pattern ("#{"), then we are locked into whichever
+// quote the user chose. (If they chose single quotes, then double quoting
+// would activate the escape sequence, and if they chose double quotes, then
+// single quotes would deactivate it.)
+const isQuoteLocked = string => string.body.some(part => (
+  part.type === "@tstring_content" && (
+    escapePattern.test(part.body) || part.body.includes("#{")
+  )
+));
+
+// A string is considered to be able to use single quotes if it contains only
+// plain string content and that content does not contain a single quote.
+const isSingleQuotable = string => string.body.every(part => (
+  part.type === "@tstring_content" && !part.body.includes("'")
+));
+
+const getStringQuote = (string, preferSingleQuotes) => {
+  if (isQuoteLocked(string)) {
+    return string.quote;
+  }
+
+  return preferSingleQuotes && isSingleQuotable(string) ? "'" : "\"";
+};
 
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
 
@@ -86,15 +105,9 @@ module.exports = {
       return preferSingleQuotes ? "''" : "\"\"";
     }
 
-    // Determine the quote to use. If we prefer single quotes and there are no
-    // embedded expressions and there aren't any single quotes in the string
-    // already, we can safely switch to single quotes.
-    let quote = "\"";
-    if (preferSingleQuotes && string.body.every(isSingleQuotable)) {
-      quote = "'";
-    }
-
+    const quote = getStringQuote(string, preferSingleQuotes);
     const parts = [];
+
     string.body.forEach((part, index) => {
       if (part.type === "@tstring_content") {
         // In this case, the part of the string is just regular string content
