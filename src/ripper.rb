@@ -353,12 +353,23 @@ module Layer
       base.attr_reader :source, :ending
     end
 
+    private
+
     def on___end__(body)
       @ending = super(source.split("\n")[lineno..-1].join("\n"))
     end
 
     def on_program(*body)
       super(*body).tap { |sexp| sexp[:body][0][:body] << ending if ending }
+    end
+  end
+
+  # Adds the used quote type onto string nodes.
+  module Strings
+    private
+
+    def on_tstring_end(quote)
+      last_sexp.merge!(quote: quote)
     end
   end
 end
@@ -405,6 +416,7 @@ class RipperJS < Ripper::SexpBuilder
   prepend Layer::Heredocs
   prepend Layer::Encoding
   prepend Layer::Ending
+  prepend Layer::Strings
 end
 
 if $0 == __FILE__

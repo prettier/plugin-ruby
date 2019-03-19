@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
 # rubocop:disable Lint/UnneededCopDisableDirective
-# rubocop:disable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
-# rubocop:disable Layout/SpaceInsideStringInterpolation
-# rubocop:disable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
+
 # rubocop:disable Layout/ClosingParenthesisIndentation
+# rubocop:disable Layout/SpaceInsideStringInterpolation
+# rubocop:disable Lint/InterpolationCheck
+# rubocop:disable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
+# rubocop:disable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
 # rubocop:disable Style/StringLiteralsInInterpolation
+# rubocop:disable Style/UnneededInterpolation
 
 ?a # these are CHARs
 ?\C-a
@@ -22,7 +25,15 @@
 
 "abc\n"
 
+'\n'
+"\n"
+'\x0'
 "\x0"
+'#{"\n"}'
+"#{"\n"}"
+"#{'\n'}"
+"#{'\n'}#{"\n"}"
+"#{"\n#{'\n'}#{"\n"}\n"}#{'\n'}"
 
 "\M-\C-a"
 
@@ -114,9 +125,12 @@ GRAND
 
 'abc "abc" abc'
 
-# rubocop:enable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
-# rubocop:enable Layout/SpaceInsideStringInterpolation
-# rubocop:enable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
 # rubocop:enable Layout/ClosingParenthesisIndentation
+# rubocop:enable Layout/SpaceInsideStringInterpolation
+# rubocop:enable Lint/InterpolationCheck
+# rubocop:enable Lint/LiteralInInterpolation, Layout/ClosingHeredocIndentation
+# rubocop:enable Lint/Void, Layout/IndentHeredoc, Lint/UselessAssignment
 # rubocop:enable Style/StringLiteralsInInterpolation
+# rubocop:enable Style/UnneededInterpolation
+
 # rubocop:enable Lint/UnneededCopDisableDirective
