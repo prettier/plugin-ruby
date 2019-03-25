@@ -65,8 +65,10 @@ exports[`strings.rb matches expected output 1`] = `
 :\\"abc#{abc}abc\\"
 
 \`abc\`
-
 \`super_super_super_super_super_super_super_super_super_super_super_super_s_long\`
+\`
+  super_super_super_super_super_super_super_super_super_super_super_super_s_long
+\`.to_s
 
 <<-HERE
 This is a straight heredoc!
@@ -233,8 +235,10 @@ exports[`strings.rb matches expected output 2`] = `
 :\\"abc#{abc}abc\\"
 
 \`abc\`
-
 \`super_super_super_super_super_super_super_super_super_super_super_super_s_long\`
+\`
+  super_super_super_super_super_super_super_super_super_super_super_super_s_long
+\`.to_s
 
 <<-HERE
 This is a straight heredoc!

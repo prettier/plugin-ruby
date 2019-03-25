@@ -62,8 +62,8 @@
 :"abc#{abc}abc"
 
 %x[abc]
-
 %x[super_super_super_super_super_super_super_super_super_super_super_super_s_long]
+%x[super_super_super_super_super_super_super_super_super_super_super_super_s_long].to_s
 
 <<-HERE
 This is a straight heredoc!
