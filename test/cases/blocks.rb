@@ -65,6 +65,11 @@ define_method :long_method_name_that_forces_overflow do |_some_long_argument_tha
 end
 # rubocop:enable Metrics/LineLength
 
+some_method.each do |foo|
+  bar
+  baz
+end.to_i
+
 loop { |i| i.to_s }
 
 loop do |i|

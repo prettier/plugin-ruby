@@ -177,20 +177,6 @@ const nodes = {
 
     return concat(["break ", join(", ", path.call(print, "body", 0))]);
   },
-  call: (path, opts, print) => {
-    let name = path.getValue().body[2];
-
-    // You can call lambdas with a special syntax that looks like func.(*args).
-    // In this case, "call" is returned for the 3rd child node.
-    if (name !== "call") {
-      name = path.call(print, "body", 2);
-    }
-
-    return group(concat([
-      path.call(print, "body", 0),
-      indent(concat([softline, makeCall(path, opts, print), name]))
-    ]));
-  },
   case: (path, opts, print) => {
     const parts = ["case "];
 
@@ -602,6 +588,7 @@ module.exports = Object.assign(
   require("./nodes/alias"),
   require("./nodes/arrays"),
   require("./nodes/blocks"),
+  require("./nodes/calls"),
   require("./nodes/commands"),
   require("./nodes/conditionals"),
   require("./nodes/hooks"),
