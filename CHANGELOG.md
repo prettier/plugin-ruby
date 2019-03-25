@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Changed
 - Force method calls after blocks and xstrings to hang onto the end of the previous nodes.
+- Check before anything else for an invalid ruby version.
 
 ## [0.9.1] - 2019-03-24
 ### Changed
