@@ -1,29 +1,5 @@
-const { align, concat, group, ifBreak, join, line, literalline } = require("prettier").doc.builders;
-const { docLength, makeCall } = require("../utils");
-
-const makeArgs = (path, opts, print, argsIndex) => {
-  let argNodes = path.getValue().body[argsIndex];
-  const argPattern = [print, "body", argsIndex, "body"];
-
-  if (argNodes.type === "args_add_block") {
-    [argNodes] = argNodes.body;
-    argPattern.push(0, "body");
-  }
-
-  const args = path.call(print, "body", argsIndex);
-  const heredocs = [];
-
-  argNodes.body.forEach((argNode, index) => {
-    if (argNode.type === "heredoc") {
-      const content = path.map.apply(path, argPattern.slice().concat([index, "body"]));
-      heredocs.push(concat([literalline].concat(content).concat([argNode.ending])));
-
-      args[index] = argNode.beging;
-    }
-  });
-
-  return { args, heredocs };
-};
+const { align, concat, group, ifBreak, join, line } = require("prettier").doc.builders;
+const { docLength, makeArgs, makeCall } = require("../utils");
 
 module.exports = {
   command: (path, opts, print) => {

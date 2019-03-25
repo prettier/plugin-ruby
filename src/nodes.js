@@ -1,6 +1,6 @@
 const { align, breakParent, concat, dedent, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
 const { removeLines } = require("prettier").doc.utils;
-const { concatBody, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent } = require("./utils");
+const { concatBody, empty, first, literal, makeArgs, makeCall, makeList, prefix, printComments, skipAssignIndent } = require("./utils");
 
 const nodes = {
   "@int": (path, _opts, _print) => {
@@ -11,23 +11,36 @@ const nodes = {
     const { body } = path.getValue();
     return concat([trim, "__END__", literalline, body]);
   },
-  arg_paren: (path, { addTrailingCommas }, print) => {
+  arg_paren: (path, opts, print) => {
     if (path.getValue().body[0] === null) {
       return "";
     }
 
-    const args = path.getValue().body[0];
-    const hasBlock = args.type === "args_add_block" && args.body[1];
+    const { addTrailingCommas } = opts;
+    const { args, heredocs } = makeArgs(path, opts, print, 0);
 
-    return group(concat([
+    const argsNode = path.getValue().body[0];
+    const hasBlock = argsNode.type === "args_add_block" && argsNode.body[1];
+
+    if (heredocs.length > 1) {
+      return concat(["(", join(", ", args), ")"].concat(heredocs));
+    }
+
+    const parenDoc = group(concat([
       "(",
       indent(concat([
         softline,
-        join(concat([",", line]), path.call(print, "body", 0)),
+        join(concat([",", line]), args),
         addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
       ])),
       concat([softline, ")"])
     ]));
+
+    if (heredocs.length === 1) {
+      return group(concat([parenDoc].concat(heredocs)));
+    }
+
+    return parenDoc;
   },
   args: makeList,
   args_add_block: (path, opts, print) => {

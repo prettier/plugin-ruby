@@ -125,6 +125,36 @@ GRAND
 
 'abc "abc" abc'
 
+foo_bar 1, 2, 3, <<-HERE
+  baz
+HERE
+
+foo.bar 1, 2, 3, <<-HERE
+  baz
+HERE
+
+foo_bar(1, 2, 3, <<-HERE)
+  baz
+HERE
+
+foo_bar 1, 2, 3, <<-HERE, <<-THERE
+  here
+HERE
+  there
+THERE
+
+foo.bar 1, 2, 3, <<-HERE, <<-THERE
+  here
+HERE
+  there
+THERE
+
+foo_bar(1, 2, 3, <<-HERE, <<-THERE)
+  here
+HERE
+  there
+THERE
+
 # rubocop:enable Layout/ClosingParenthesisIndentation
 # rubocop:enable Layout/SpaceInsideStringInterpolation
 # rubocop:enable Lint/InterpolationCheck
