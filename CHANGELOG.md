@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Changed
 - Better support string quotes by favoring what the user chose if the string contains escape patterns.
+- Better support heredocs within method calls.
 
 ## [0.9.0] - 2019-03-18
 ### Added

@@ -14,6 +14,7 @@
       "varsIgnorePattern": "^_"
     }],
     "object-curly-newline": "off",
+    "prefer-spread": "off",
     "quotes": ["error", "double"]
   },
   "globals": {
