@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
 
+REQUIRED_VERSION = Gem::Version.new('2.5')
+if Gem::Version.new(RUBY_VERSION) < REQUIRED_VERSION
+  raise "Ruby version #{RUBY_VERSION} not supported. " \
+          "Please upgrade to #{REQUIRED_VERSION} or above."
+end
+
 require 'json' unless defined?(JSON)
 require 'ripper'
 
@@ -374,26 +380,7 @@ module Layer
   end
 end
 
-class RipperJS < Ripper::SexpBuilder
-  class InvalidRubyVersionError < StandardError
-    REQUIRED = Gem::Version.new('2.5')
-
-    def initialize
-      super(
-        "Ruby version #{RUBY_VERSION} not supported. " \
-          "Please upgrade to #{REQUIRED} or above."
-      )
-    end
-  end
-
-  def initialize(*args)
-    if Gem::Version.new(RUBY_VERSION) < InvalidRubyVersionError::REQUIRED
-      raise InvalidRubyVersionError
-    end
-
-    super
-  end
-
+class RipperJS < Ripper
   private
 
   SCANNER_EVENTS.each do |event|
