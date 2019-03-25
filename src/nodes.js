@@ -1,6 +1,6 @@
 const { align, breakParent, concat, dedent, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
 const { removeLines } = require("prettier").doc.utils;
-const { concatBody, docLength, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent } = require("./utils");
+const { concatBody, empty, first, literal, makeCall, makeList, prefix, printComments, skipAssignIndent } = require("./utils");
 
 const nodes = {
   "@int": (path, _opts, _print) => {
@@ -214,35 +214,6 @@ const nodes = {
   },
   class_name_error: (_path, _opts, _print) => {
     throw new Error("class/module name must be CONSTANT");
-  },
-  command: (path, opts, print) => {
-    const command = path.call(print, "body", 0);
-    const args = join(concat([",", line]), path.call(print, "body", 1));
-
-    // Hate, hate, hate this but can't figure out how to fix it.
-    return group(ifBreak(
-      concat([command, " ", align(command.length + 1, args)]),
-      concat([command, " ", args])
-    ));
-  },
-  command_call: (path, opts, print) => {
-    const parts = [
-      path.call(print, "body", 0),
-      makeCall(path, opts, print),
-      path.call(print, "body", 2)
-    ];
-
-    if (!path.getValue().body[3]) {
-      return concat(parts);
-    }
-
-    parts.push(" ");
-    const args = join(concat([",", line]), path.call(print, "body", 3));
-
-    return group(ifBreak(
-      concat(parts.concat([align(docLength(concat(parts)), args)])),
-      concat(parts.concat([args]))
-    ));
   },
   const_path_field: (path, opts, print) => join("::", path.map(print, "body")),
   const_path_ref: (path, opts, print) => join("::", path.map(print, "body")),
@@ -618,6 +589,7 @@ module.exports = Object.assign(
   require("./nodes/alias"),
   require("./nodes/arrays"),
   require("./nodes/blocks"),
+  require("./nodes/commands"),
   require("./nodes/conditionals"),
   require("./nodes/hooks"),
   require("./nodes/loops"),
