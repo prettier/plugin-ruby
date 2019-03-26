@@ -142,7 +142,7 @@ const nodes = {
     ]));
   },
   block_var: (path, opts, print) => {
-    let parts = ["|", removeLines(path.call(print, "body", 0))];
+    const parts = ["|", removeLines(path.call(print, "body", 0))];
 
     // The second part of this node is a list of optional block-local variables
     if (path.getValue().body[1]) {
