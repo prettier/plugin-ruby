@@ -10,7 +10,7 @@ class ArrayTest < Minitest::Test
     assert_equal_join 'a, b, c', %w[a b c]
     assert_equal_join 'a, b c, d', ['a', 'b c', 'd']
     assert_equal_join 'a, b, c', %i[a b c]
-    assert_equal_join 'a, b c, d', [:a, :\\"b c\\", :d]
+    assert_equal_join 'a, b c, d', [:a, :'b c', :d]
   end
 
   def test_literals
@@ -104,7 +104,7 @@ class ArrayTest < Minitest::Test
     assert_equal_join 'a, b, c', %w[a b c]
     assert_equal_join 'a, b c, d', ['a', 'b c', 'd']
     assert_equal_join 'a, b, c', %i[a b c]
-    assert_equal_join 'a, b c, d', [:a, :\\"b c\\", :d]
+    assert_equal_join 'a, b c, d', [:a, :'b c', :d]
   end
 
   def test_literals

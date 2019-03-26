@@ -2,6 +2,8 @@ const { concat, group, indent, softline } = require("prettier").doc.builders;
 const { makeCall } = require("../utils");
 
 const noIndent = [
+  "array",
+  "hash",
   "method_add_block",
   "xstring_literal"
 ];

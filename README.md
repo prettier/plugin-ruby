@@ -108,6 +108,7 @@ Below are the options (from [`src/ruby.js`](src/ruby.js)) that `@prettier/plugin
 | Name                 | Default | Description                                                                                                   |
 | -------------------- | :-----: | ------------------------------------------------------------------------------------------------------------- |
 | `printWidth`         |  `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).              |
+| `requirePragma`      | `false` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#require-pragma)).           |
 | `tabWidth`           |   `2`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).                |
 | `addTrailingCommas`  | `false` | Adds a trailing comma to array literals, hash literals, and method calls.                                     |
 | `inlineConditionals` | `true`  | When it fits on one line, allows if and unless statements to use the modifier form.                           |

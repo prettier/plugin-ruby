@@ -129,8 +129,9 @@ class AssignTest < Minitest::Test
     arr = [super_super_super_super_long, super_super_super_super_long].sort
     assert_equal %w[baz baz], arr
 
-    arr = { a: super_super_super_super_long, b: super_super_super_super_long }
-      .sort
+    arr = {
+      a: super_super_super_super_long, b: super_super_super_super_long
+    }.sort
       .to_h
     assert_equal({ a: 'baz', b: 'baz' }, arr)
 

@@ -60,6 +60,7 @@
 { "a #{a}" => 1 }
 
 :"abc#{abc}abc"
+:'abc#{abc}abc'
 
 %x[abc]
 %x[super_super_super_super_super_super_super_super_super_super_super_super_s_long]
