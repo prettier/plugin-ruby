@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.10.0] - 2019-03-25
 ### Added
 - Support for block-local variables.
 - Support for dyna-symbols that are using single quotes.
@@ -222,7 +224,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 - Initial release 🎉
 
-[Unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/prettier/plugin-ruby/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/prettier/plugin-ruby/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/prettier/plugin-ruby/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/prettier/plugin-ruby/compare/v0.7.0...v0.8.0
