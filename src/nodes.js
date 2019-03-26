@@ -141,7 +141,17 @@ const nodes = {
       indent(concat([useNoSpace ? softline : line, path.call(print, "body", 2)]))
     ]));
   },
-  block_var: (path, opts, print) => concat(["|", removeLines(path.call(print, "body", 0)), "| "]),
+  block_var: (path, opts, print) => {
+    let parts = ["|", removeLines(path.call(print, "body", 0))];
+
+    // The second part of this node is a list of optional block-local variables
+    if (path.getValue().body[1]) {
+      parts.push("; ", join(", ", path.map(print, "body", 1)));
+    }
+
+    parts.push("| ");
+    return concat(parts);
+  },
   blockarg: (path, opts, print) => concat(["&", path.call(print, "body", 0)]),
   bodystmt: (path, opts, print) => {
     const [_statements, rescue, elseClause, ensure] = path.getValue().body;
@@ -232,11 +242,11 @@ const nodes = {
     "...",
     path.getValue().body[1] ? path.call(print, "body", 1) : ""
   ]),
-  dyna_symbol: (path, opts, print) => concat([
-    ":\"",
-    concat(path.call(print, "body", 0)),
-    "\""
-  ]),
+  dyna_symbol: (path, opts, print) => {
+    const { quote } = path.getValue().body[0];
+
+    return concat([`:${quote}`, concat(path.call(print, "body", 0)), quote]);
+  },
   else: (path, opts, print) => {
     const stmts = path.getValue().body[0];
 
@@ -329,13 +339,8 @@ const nodes = {
       indent(concat([line, right]))
     ]));
   },
-  method_add_arg: (path, opts, print) => {
-    if (path.getValue().body[1].type === "args_new") {
-      return path.call(print, "body", 0);
-    }
-    return group(concat(path.map(print, "body")));
-  },
-  method_add_block: (path, opts, print) => concat(path.map(print, "body")),
+  method_add_arg: concatBody,
+  method_add_block: concatBody,
   methref: (path, opts, print) => join(".:", path.map(print, "body")),
   mlhs: makeList,
   mlhs_add_post: (path, opts, print) => (

@@ -5,8 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Support for block-local variables.
+- Support for dyna-symbols that are using single quotes.
+
 ### Changed
-- Force method calls after blocks and xstrings to hang onto the end of the previous nodes.
+- Force method calls after arrays, blocks, hashes, and xstrings to hang onto the end of the previous nodes.
 - Check before anything else for an invalid ruby version.
 
 ## [0.9.1] - 2019-03-24

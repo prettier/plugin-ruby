@@ -63,6 +63,7 @@ exports[`strings.rb matches expected output 1`] = `
 { \\"a #{a}\\" => 1 }
 
 :\\"abc#{abc}abc\\"
+:'abc#{abc}abc'
 
 \`abc\`
 \`super_super_super_super_super_super_super_super_super_super_super_super_s_long\`
@@ -233,6 +234,7 @@ exports[`strings.rb matches expected output 2`] = `
 { \\"a #{a}\\" => 1 }
 
 :\\"abc#{abc}abc\\"
+:'abc#{abc}abc'
 
 \`abc\`
 \`super_super_super_super_super_super_super_super_super_super_super_super_s_long\`

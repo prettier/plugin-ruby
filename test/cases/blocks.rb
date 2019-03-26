@@ -44,6 +44,8 @@ end
 
 loop { |i| 1 }
 
+loop { |i; j| 1 }
+
 loop do |i|
   i
 end
@@ -69,6 +71,16 @@ some_method.each do |foo|
   bar
   baz
 end.to_i
+
+[
+  super_super_super_super_super_super_super_super_super_super_long,
+  super_super_super_super_super_super_super_super_super_super_long
+].to_s
+
+{
+  a: 'super_super_super_super_super_super_super_super_super_super_long',
+  b: 'super_super_super_super_super_super_super_super_super_super_long'
+}.to_s
 
 loop { |i| i.to_s }
 
