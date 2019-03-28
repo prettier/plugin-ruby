@@ -83,11 +83,9 @@ If you do not already have a `package.json` file in the root of your repository,
 echo '{ "name": "My Project" }' > package.json
 ```
 
-After that you can add `prettier` and `@prettier/plugin-ruby` to your `package.json` `devDependencies` by running `npm install --save-dev prettier @prettier/plugin-ruby` if you are using `npm` or `yarn add --dev prettier @prettier/plugin-ruby` if you are using `yarn`.
+After that you can add `prettier` and `@prettier/plugin-ruby` to your `package.json`'s `devDependencies` by running `npm install --save-dev prettier @prettier/plugin-ruby` if you are using `npm` or `yarn add --dev prettier @prettier/plugin-ruby` if you are using `yarn`.
 
-Finally, you can install your dependencies using either `npm install` for `npm` or `yarn install` for `yarn`.
-
-Now, you can run `prettier` to tidy up your `ruby` files! Verify by running against a file:
+Now, you can run `prettier` to tidy up your `ruby` files! Verify by running against one single file:
 
 ```bash
 ./node_modules/.bin/prettier --write path/to/file.rb
