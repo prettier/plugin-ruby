@@ -97,7 +97,7 @@ If you're happy, you can can run `prettier` on an entire codebase:
 ./node_modules/.bin/prettier --write '**/*.{rb,rake}'
 ```
 
-Note that you can also install `prettier` globally with `npm install -g prettier` or you can add `./node_modules/.bin` to your `$PATH` so you don't need to reference the executable from the directory each time.
+Note that you can also install `prettier` globally with `npm install -g prettier @prettier/plugin-ruby` or you can add `./node_modules/.bin` to your `$PATH` so you don't need to reference the executable from the directory each time.
 
 ## Configuration
 
