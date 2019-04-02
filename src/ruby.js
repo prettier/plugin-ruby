@@ -24,6 +24,9 @@ module.exports = {
       "Podfile",
       "Rakefile"
     ],
+    interpreters: [
+      "ruby"
+    ],
     linguistLanguageId: 326,
     vscodeLanguageIds: ["ruby"]
   }],
