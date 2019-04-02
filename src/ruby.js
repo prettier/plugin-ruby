@@ -4,6 +4,10 @@ const print = require("./print");
 const pragmaPattern = /#\s*@(prettier|format)/;
 const hasPragma = text => pragmaPattern.test(text);
 
+// extensions, filenames and interpreters mostly pulled from linguist and rubocop
+// https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
+// https://github.com/rubocop-hq/rubocop/blob/master/spec/rubocop/target_finder_spec.rb
+
 module.exports = {
   languages: [{
     name: "Ruby",
