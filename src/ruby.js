@@ -31,7 +31,6 @@ module.exports = {
       ".rbx",
       ".ru",
       ".ruby",
-      ".spec",
       ".thor",
       ".watchr"
     ],
