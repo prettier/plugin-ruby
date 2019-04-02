@@ -48,7 +48,6 @@ module.exports = {
       "Deliverfile",
       "Fastfile",
       "Gemfile",
-      "Gemfile.lock",
       "Guardfile",
       "Jarfile",
       "Mavenfile",
