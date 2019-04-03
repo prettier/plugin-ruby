@@ -4,27 +4,70 @@ const print = require("./print");
 const pragmaPattern = /#\s*@(prettier|format)/;
 const hasPragma = text => pragmaPattern.test(text);
 
+// extensions, filenames and interpreters mostly pulled from linguist and rubocop
+// https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
+// https://github.com/rubocop-hq/rubocop/blob/master/spec/rubocop/target_finder_spec.rb
+
 module.exports = {
   languages: [{
     name: "Ruby",
     parsers: ["ruby"],
     extensions: [
+      ".arb",
+      ".axlsx",
+      ".builder",
+      ".eye",
+      ".fcgi",
+      ".gemfile",
       ".gemspec",
+      ".god",
+      ".jb",
+      ".jbuilder",
+      ".mspec",
+      ".opal",
+      ".pluginspec",
       ".podspec",
+      ".rabl",
       ".rake",
       ".rb",
-      ".ru"
+      ".rbuild",
+      ".rbw",
+      ".rbx",
+      ".ru",
+      ".ruby",
+      ".thor",
+      ".watchr"
     ],
     filenames: [
       ".irbrc",
       ".pryrc",
+      "Appraisals",
+      "Berksfile",
+      "Brewfile",
+      "Buildfile",
       "Capfile",
+      "Cheffile",
+      "Dangerfile",
+      "Deliverfile",
+      "Fastfile",
       "Gemfile",
       "Guardfile",
+      "Jarfile",
+      "Mavenfile",
       "Podfile",
-      "Rakefile"
+      "Puppetfile",
+      "Rakefile",
+      "Snapfile",
+      "Thorfile",
+      "Vagabondfile",
+      "Vagrantfile",
+      "buildfile"
     ],
     interpreters: [
+      "jruby",
+      "macruby",
+      "rake",
+      "rbx",
       "ruby"
     ],
     linguistLanguageId: 326,
