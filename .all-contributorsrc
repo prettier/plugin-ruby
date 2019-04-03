@@ -60,6 +60,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "localhostdotdev",
+      "name": "localhost.dev",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/47308085?v=4",
+      "profile": "https://localhost.dev",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7
