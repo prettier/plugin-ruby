@@ -1,6 +1,6 @@
 const long = Array(80).fill("a").join("");
 
-const ruby = ([code]) => {
+const ruby = code => {
   const lines = code.split("\n");
   const indent = lines[1].split("").findIndex(char => /[^\s]/.test(char));
 

@@ -1,4 +1,4 @@
-const { ruby } = require("./utils");
+const { long, ruby } = require("./utils");
 
 describe("array", () => {
   test("basic formatting", () => {
@@ -22,19 +22,26 @@ describe("array", () => {
   });
 
   test("breaks appropriately", () => {
-    const contents = ruby`
+    const contents = ruby(`
       [
-        super_super_super_super_super_super_long,
-        super_super_super_super_super_super_long,
+        ${long},
+        ${long},
         [
-          super_super_super_super_super_super_long,
-          super_super_super_super_super_super_long,
-          super_super_super_super_super_super_long
+          ${long},
+          ${long},
+          ${long}
         ]
       ]
-    `;
+    `);
 
     expect(contents).toMatchFormat();
+  });
+
+  test("adds trailing commas when requested", () => {
+    const before = `[${long}, ${long}, ${long}]`;
+    const after = `[\n  ${long},\n  ${long},\n  ${long},\n]`;
+
+    expect(before).toChangeFormat(after, { addTrailingCommas: true })
   });
 
   test("reference", () => {
@@ -48,13 +55,13 @@ describe("array", () => {
   });
 
   test("comments within assignment", () => {
-    const contents = ruby`
+    const contents = ruby(`
       array = %w[foo bar]
       array[1] = [
         # abc
         %w[abc]
       ]
-    `;
+    `);
 
     expect(contents).toMatchFormat();
   });
