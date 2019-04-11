@@ -377,6 +377,11 @@ module Layer
     def on_tstring_end(quote)
       last_sexp.merge!(quote: quote)
     end
+
+    def on_label_end(quote)
+      # `quote` is ": or ':
+      last_sexp.merge!(quote: quote[0])
+    end
   end
 end
 

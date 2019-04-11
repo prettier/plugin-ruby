@@ -84,6 +84,16 @@ const nodes = {
           parts.push(concat([printedLabel, " =>"]));
         }
         break;
+      case "dyna_symbol":
+        if (preferHashLabels) {
+          parts.push(concat(
+            printedLabel.parts.slice(1) // get rid of the : at the start
+              .concat(":"),
+          ));
+        } else {
+          parts.push(concat([printedLabel, " =>"]));
+        }
+        break;
       default:
         parts.push(concat([printedLabel, " =>"]));
         break;
@@ -245,7 +255,7 @@ const nodes = {
   dyna_symbol: (path, opts, print) => {
     const { quote } = path.getValue().body[0];
 
-    return concat([`:${quote}`, concat(path.call(print, "body", 0)), quote]);
+    return concat([":", quote, concat(path.call(print, "body", 0)), quote]);
   },
   else: (path, opts, print) => {
     const stmts = path.getValue().body[0];

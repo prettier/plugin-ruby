@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`string_symbol_key.rb matches expected output 1`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Style/SymbolLiteral
+
+def foo
+  {
+    'test': 1,
+    'special-key': 2,
+    \\"double-quote\\": 3,
+    \\"#{1 + 1}\\": 4,
+    \\"non-hash-label\\": 5
+  }
+end
+
+# rubocop:enable Style/SymbolLiteral
+# rubocop:enable Lint/UnneededCopDisableDirective
+"
+`;
+
+exports[`string_symbol_key.rb matches expected output 2`] = `
+"# frozen_string_literal: true
+
+# rubocop:disable Lint/UnneededCopDisableDirective
+# rubocop:disable Style/SymbolLiteral
+
+def foo
+  {
+    :'test' => 1,
+    :'special-key' => 2,
+    :\\"double-quote\\" => 3,
+    :\\"#{1 + 1}\\" => 4,
+    :\\"non-hash-label\\" => 5
+  }
+end
+
+# rubocop:enable Style/SymbolLiteral
+# rubocop:enable Lint/UnneededCopDisableDirective
+"
+`;
