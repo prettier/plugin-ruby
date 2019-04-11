@@ -1,1 +1,0 @@
-runCase("alias.rb");
