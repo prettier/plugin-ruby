@@ -32,9 +32,9 @@
     "pkg": "^4.3.7"
   },
   "jest": {
-    "setupFiles": [
-      "./test/testRunner.js"
+    "setupFilesAfterEnv": [
+      "./setupTests.js"
     ],
-    "testRegex": ".test.js$"
+    "testRegex": "test/js/.+\\.test\\.js$"
   }
 }
