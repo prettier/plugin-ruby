@@ -19,7 +19,7 @@ const checkFormat = (before, after, config) => new Promise(resolve => {
 
     resolve({
       pass: formatted === `${after}\n`,
-      message: () => `Expected:\n${after}\nReceived:\n${actual}`
+      message: () => `Expected:\n${after}\nReceived:\n${formatted}`
     });
   });
 });
