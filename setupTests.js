@@ -6,7 +6,7 @@ const checkFormat = (before, after, config) => {
 
   return {
     pass: actual === `${after}\n`,
-    message: () => `Expected:\n  ${after}\nReceived:\n  ${actual}`
+    message: () => `Expected:\n${after}\nReceived:\n${actual}`
   };
 };
 

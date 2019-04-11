@@ -1,7 +1,4 @@
-const ruby = code => {
-  const indent = code.split("\n")[1].split("").findIndex(char => /[^\s]/.test(char));
-  return code.split("\n").map(line => line.slice(indent)).join("\n");
-};
+const { ruby } = require("./utils");
 
 describe("array", () => {
   test("basic formatting", () => {
@@ -25,7 +22,7 @@ describe("array", () => {
   });
 
   test("breaks appropriately", () => {
-    const contents = ruby(`
+    const contents = ruby`
       [
         super_super_super_super_super_super_long,
         super_super_super_super_super_super_long,
@@ -35,7 +32,7 @@ describe("array", () => {
           super_super_super_super_super_super_long
         ]
       ]
-    `);
+    `;
 
     expect(contents).toMatchFormat();
   });
@@ -51,13 +48,13 @@ describe("array", () => {
   });
 
   test("comments within assignment", () => {
-    const contents = ruby(`
+    const contents = ruby`
       array = %w[foo bar]
       array[1] = [
         # abc
         %w[abc]
       ]
-    `);
+    `;
 
     expect(contents).toMatchFormat();
   });

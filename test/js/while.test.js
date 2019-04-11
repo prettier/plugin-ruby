@@ -1,4 +1,4 @@
-const long = Array(80).fill("a").join("");
+const { long } = require("./utils");
 
 describe.each(["while", "until"])("%s", keyword => {
   describe("inlines allowed", () => {
