@@ -119,4 +119,14 @@ describe("assign", () => {
       `))
     ));
   });
+
+  describe("constants", () => {
+    test("assigning to constant", () => (
+      expect("Pret::TIER = 'config'").toMatchFormat()
+    ));
+
+    test("assigning to top level constants", () => (
+      expect("::PRETTIER = 'config'").toMatchFormat()
+    ));
+  });
 });
