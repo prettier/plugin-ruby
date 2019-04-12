@@ -28,6 +28,10 @@ describe("hash", () => {
     });
   });
 
+  test.skip("dynamic symbol hash key", () => (
+    expect(`{ 'foo': 'bar' }`).toMatchFormat()
+  ));
+
   describe("bare assoc hash", () => {
     test("commands", () => (
       expect("foobar alpha: alpha, beta: beta").toMatchFormat()
