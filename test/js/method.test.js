@@ -149,6 +149,12 @@ describe("method", () => {
       test("lonely operator", () => (
         expect("foo&.foo").toMatchFormat()
       ));
+
+      if (process.env.RUBY_VERSION >= "2.7") {
+        test("method reference operator", () => (
+          expect("foo.:foo").toMatchFormat()
+        ));
+      }
     });
 
     describe("breaking", () => {
