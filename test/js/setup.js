@@ -50,5 +50,19 @@ expect.extend({
       pass,
       message: () => `Expected format to throw an error for: ${before}`
     };
+  },
+  toInferRubyParser(filename) {
+    const filepath = path.join(__dirname,  filename);
+    const plugin = path.join(__dirname, "..", "..", "src", "ruby");
+
+    return prettier.getFileInfo(filepath, { plugins: [plugin] }).then(
+      ({ inferredParser }) => ({
+        pass: inferredParser === "ruby",
+        message: () => `
+          Expected prettier to infer the ruby parser for ${filename},
+          but got ${inferredParser} instead
+        `
+      })
+    );
   }
 });

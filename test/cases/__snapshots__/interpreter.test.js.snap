@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`interpreter matches expected output 1`] = `
-"#!/usr/bin/env ruby
-# frozen_string_literal: true
-
-does(something)
-"
-`;
