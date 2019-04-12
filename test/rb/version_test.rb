@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class PrettierTest < Minitest::Test
+class VersionTest < Minitest::Test
   def test_version
     refute_nil ::Prettier::VERSION
   end

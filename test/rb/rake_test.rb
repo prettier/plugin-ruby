@@ -3,7 +3,7 @@
 require 'test_helper'
 require 'prettier/rake/task'
 
-class TaskTest < Minitest::Test
+class RakeTest < Minitest::Test
   Invoke = Struct.new(:args)
 
   def test_task
