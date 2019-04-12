@@ -37,18 +37,23 @@ expect.extend({
   toMatchFormat(before, config = {}) {
     return checkFormat(before, before, config);
   },
-  toFailFormat(before) {
+  toFailFormat(before, message) {
     let pass = false;
+    let error = null;
 
     try {
       realFormat(before);
-    } catch (error) {
-      pass = /Invalid ruby/g.test(error);
+    } catch (caught) {
+      error = caught;
+      pass = caught.message === message;
     }
 
     return {
       pass,
-      message: () => `Expected format to throw an error for: ${before}`
+      message: () => `
+        Expected format to throw an error for ${before} with ${message},
+        but got ${error.message} instead
+      `
     };
   },
   toInferRubyParser(filename) {

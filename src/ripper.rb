@@ -410,7 +410,7 @@ if $0 == __FILE__
   builder = RipperJS.new($stdin.read)
   response = builder.parse
 
-  if builder.error?
+  if !response && builder.error?
     STDERR.puts 'Invalid ruby'
     exit 1
   end
