@@ -15,7 +15,9 @@ describe.each(["while", "until"])("%s", keyword => {
     ));
 
     test("breaks inlines on large predicates", () => (
-      expect(`1 ${keyword} ${long}`).toChangeFormat(`${keyword} ${long}\n  1\nend`)
+      expect(`1 ${keyword} ${long}`).toChangeFormat(
+        `${keyword} ${long}\n  1\nend`
+      )
     ));
   });
 
@@ -25,15 +27,21 @@ describe.each(["while", "until"])("%s", keyword => {
     ));
 
     test("transforms to multiline", () => (
-      expect(`1 ${keyword} a`).toChangeFormat(`${keyword} a\n  1\nend`, { inlineLoops: false })
+      expect(`1 ${keyword} a`).toChangeFormat(`${keyword} a\n  1\nend`, {
+        inlineLoops: false
+      })
     ));
 
     test("breaks on large predicates", () => (
-      expect(`${keyword} ${long}\n  1\nend`).toMatchFormat({ inlineLoops: false })
+      expect(`${keyword} ${long}\n  1\nend`).toMatchFormat({
+        inlineLoops: false
+      })
     ));
 
     test("breaks inlines on large predicates", () => (
-      expect(`1 ${keyword} ${long}`).toChangeFormat(`${keyword} ${long}\n  1\nend`)
+      expect(`1 ${keyword} ${long}`).toChangeFormat(
+        `${keyword} ${long}\n  1\nend`
+      )
     ));
   });
 });
