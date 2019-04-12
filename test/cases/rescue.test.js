@@ -1,1 +1,0 @@
-runCase("rescue.rb");
