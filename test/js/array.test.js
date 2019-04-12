@@ -83,4 +83,8 @@ describe("array", () => {
 
     return expect(contents).toMatchFormat();
   });
+
+  test("breaking maintains calls on the end", () => (
+    expect(`[${long}].freeze`).toChangeFormat(`[\n  ${long}\n].freeze`)
+  ));
 });

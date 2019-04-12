@@ -20,6 +20,12 @@ describe("hash", () => {
     return expect(content).toMatchFormat();
   });
 
+  test("breaking maintains calls on the end", () => (
+    expect(`{ a: ${long} }.freeze`).toChangeFormat(
+      `{\n  a:\n    ${long}\n}.freeze`
+    )
+  ));
+
   test("breaking with trailing commas", () => {
     const expected = `{\n  ${long}:\n    ${long},\n}`;
 
