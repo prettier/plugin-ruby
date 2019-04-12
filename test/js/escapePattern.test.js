@@ -1,4 +1,4 @@
-const escapePattern = require("../src/escapePattern");
+const escapePattern = require("../../src/escapePattern");
 
 describe("escape sequences", () => {
   const should = value => string => (
