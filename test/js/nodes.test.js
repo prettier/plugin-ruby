@@ -1,5 +1,7 @@
 const { spawnSync } = require("child_process");
-const nodes = require("../src/nodes");
+
+const nodes = require("../../src/nodes");
+const print = require("../../src/print");
 
 const expectedUnhandledNodes = [
   "arg_ambiguous",
@@ -34,11 +36,7 @@ const expectedUnhandledNodes = [
 ];
 
 const possibleNodes = () => {
-  const child = spawnSync("ruby", [
-    "-rripper",
-    "-e",
-    "puts Ripper::PARSER_EVENTS"
-  ]);
+  const child = spawnSync("ruby", ["-rripper", "-e", "puts Ripper::PARSER_EVENTS"]);
 
   const error = child.stderr.toString();
   if (error) {
@@ -52,5 +50,11 @@ describe("node support", () => {
   test("handles all ripper parsing events", () => {
     const supportedNodes = Object.keys(nodes).concat(expectedUnhandledNodes).sort();
     expect(supportedNodes).toEqual(expect.arrayContaining(possibleNodes().sort()));
+  });
+
+  test("when encountering an unsupported node type", () => {
+    const path = { getValue: () => ({ type: "unsupported", body: {} }) };
+
+    expect(() => print(path)).toThrow("Unsupported");
   });
 });
