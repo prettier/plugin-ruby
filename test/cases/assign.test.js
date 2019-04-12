@@ -1,1 +1,0 @@
-runCase("assign.rb");
