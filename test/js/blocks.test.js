@@ -1,6 +1,10 @@
 const { long, ruby } = require("./utils");
 
 describe("blocks", () => {
+  test("empty", () => (
+    expect("loop {}").toMatchFormat()
+  ));
+
   test("single line non-breaking", () => (
     expect("loop { 1 }").toMatchFormat()
   ));
@@ -76,6 +80,10 @@ describe("blocks", () => {
   ));
 
   describe("args", () => {
+    test("no body", () => (
+      expect("loop { |i| }").toMatchFormat()
+    ));
+
     test("single line non-breaking", () => (
       expect("loop { |i| 1 }").toMatchFormat()
     ));
