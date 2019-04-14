@@ -1,13 +1,13 @@
 language: ruby
 rvm:
 - ruby-head
-- 2.6.1
-- 2.5.3
+- 2.6.2
+- 2.5.5
 branches:
   only: master
 before_install: bin/ci-install
 script:
-- yarn test
+- RUBY_VERSION=$(ruby -e 'puts RUBY_VERSION') yarn test
 - yarn lint
 - yarn build
 - gem build prettier.gemspec
