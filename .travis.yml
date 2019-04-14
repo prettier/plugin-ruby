@@ -12,7 +12,7 @@ script:
 - yarn build
 - gem build prettier.gemspec
 - bundle exec rake test
-- bundle exec rbprettier --check 'src/ripper.rb' 'lib/**/*.rb' 'test/*_test.rb' 'prettier.gemspec'
+- bundle exec rbprettier --check 'src/ripper.rb' 'lib/**/*.rb' 'test/rb/*_test.rb' 'prettier.gemspec'
 cache:
 - bundler
 - yarn
