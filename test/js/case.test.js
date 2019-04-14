@@ -1,3 +1,5 @@
+const { long, ruby } = require("./utils");
+
 describe("case", () => {
   test("empty case", () => (
     expect("case\nwhen a\n  1\nend").toMatchFormat()
@@ -10,6 +12,19 @@ describe("case", () => {
   test("multiple predicates, one when", () => (
     expect("case a\nwhen b, c\n  1\nend").toMatchFormat()
   ));
+
+  test("breaking with multiple predicates, one when", () => {
+    const content = ruby(`
+      case foo
+      when '${long}',
+           'a${long}',
+           'b${long}'
+        bar
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 
   test("multiple consecutive whens", () => (
     expect("case a\nwhen b\nwhen c\n  1\nend").toMatchFormat()
