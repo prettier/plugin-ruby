@@ -249,6 +249,7 @@ module Layer
       assoc_new: [:body, 1],
       break: [:body, 0],
       command: [:body, 1],
+      command_call: [:body, 3],
       string_literal: [:body, 0]
     }
 
