@@ -1,5 +1,3 @@
-const { ruby } = require("./utils");
-
 describe("layout", () => {
   test("turns multiple blank lines into just one blank line", () => (
     expect("1\n\n\n\n\n2").toChangeFormat("1\n\n2")
@@ -11,5 +9,5 @@ describe("layout", () => {
 
   test("maintains semicolons from within interpolation", () => (
     expect(`"a#{b; c}"`).toMatchFormat()
-  )); 
+  ));
 });

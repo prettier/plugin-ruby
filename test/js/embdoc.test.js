@@ -40,6 +40,6 @@ describe("embdoc", () => {
       end
     `);
 
-    return expect(content).toMatchFormat()
+    return expect(content).toMatchFormat();
   });
 });

@@ -133,6 +133,7 @@ describe("comments", () => {
       return expect(content).toMatchFormat();
     });
 
+    /* eslint-disable no-useless-escape */
     test("end content", () => {
       const content = ruby(`
         a = 1

@@ -53,7 +53,7 @@ describe("array", () => {
     const before = `[${long}, ${long}, ${long}]`;
     const after = `[\n  ${long},\n  ${long},\n  ${long},\n]`;
 
-    return expect(before).toChangeFormat(after, { addTrailingCommas: true })
+    return expect(before).toChangeFormat(after, { addTrailingCommas: true });
   });
 
   test("literal reference", () => (

@@ -17,5 +17,5 @@ describe("yield", () => {
 
   test("yield with multiple arguments, with parens", () => (
     expect("yield(i, 2)").toMatchFormat()
-  ))
+  ));
 });

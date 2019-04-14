@@ -1,8 +1,9 @@
 const { spawn } = require("child_process");
 const path = require("path");
+const prettier = require("prettier");
 const readline = require("readline");
 
-const prettier = require("prettier");
+// eslint-disable-next-line no-underscore-dangle
 const { formatAST } = prettier.__debug;
 
 const parser = spawn("ruby", ["./test/js/parser.rb"]);
@@ -57,7 +58,7 @@ expect.extend({
     };
   },
   toInferRubyParser(filename) {
-    const filepath = path.join(__dirname,  filename);
+    const filepath = path.join(__dirname, filename);
     const plugin = path.join(__dirname, "..", "..", "src", "ruby");
 
     return prettier.getFileInfo(filepath, { plugins: [plugin] }).then(
