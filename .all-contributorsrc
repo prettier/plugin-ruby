@@ -70,6 +70,16 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "deecewan",
+      "name": "David Buchan-Swanson",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/4755785?v=4",
+      "profile": "https://deecewan.github.io",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
