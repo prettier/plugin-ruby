@@ -34,9 +34,23 @@ describe("hash", () => {
     });
   });
 
-  test.skip("dynamic symbol hash key", () => (
-    expect(`{ 'foo': 'bar' }`).toMatchFormat()
-  ));
+  describe("dynamic string keys", () => {
+    test("basic", () => (
+      expect(`{ 'foo': 'bar' }`).toMatchFormat()
+    ));
+
+    test("with interpolation", () => (
+      expect(`{ "#{1 + 1}": 2 }`).toMatchFormat()
+    ));
+
+    test("basic without hash labels", () => (
+      expect(`{ :'foo' => 'bar' }`).toMatchFormat({ preferHashLabels: false })
+    ));
+
+    test("with interpolation without hash labels", () => (
+      expect(`{ :"#{1 + 1}" => 2 }`).toMatchFormat({ preferHashLabels: false })
+    ));
+  });
 
   describe("bare assoc hash", () => {
     test("commands", () => (
