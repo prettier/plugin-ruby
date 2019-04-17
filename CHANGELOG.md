@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 - Fixed support for dynamic string hash keys. (Thanks to @deecewan.)
 - [INTERNAL] Moved `case/when` into its own file and added better documentation.
+- [INTERNAL] Moves `begin/rescue` into its own file.
 
 ## [0.10.0] - 2019-03-25
 ### Added

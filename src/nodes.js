@@ -147,11 +147,6 @@ const nodes = {
   bare_assoc_hash: (path, opts, print) => group(
     join(concat([",", line]), path.map(print, "body", 0))
   ),
-  begin: (path, opts, print) => group(concat([
-    "begin",
-    indent(concat([hardline, concat(path.map(print, "body"))])),
-    group(concat([hardline, "end"]))
-  ])),
   binary: (path, opts, print) => {
     const operator = path.getValue().body[1];
     const useNoSpace = operator === "**";
@@ -264,10 +259,6 @@ const nodes = {
     ]);
   },
   embdoc: (path, _opts, _print) => concat([trim, path.getValue().body]),
-  ensure: (path, opts, print) => group(concat([
-    "ensure",
-    indent(concat([hardline, concat(path.map(print, "body"))]))
-  ])),
   excessed_comma: empty,
   fcall: concatBody,
   field: (path, opts, print) => group(concat([
@@ -442,48 +433,6 @@ const nodes = {
     join(literalline, path.map(print, "body")),
     literalline
   ])),
-  redo: literal("redo"),
-  rescue: (path, opts, print) => {
-    const [exception, variable, _statements, addition] = path.getValue().body;
-    const parts = ["rescue"];
-
-    if (exception || variable) {
-      if (exception) {
-        if (Array.isArray(exception)) {
-          parts.push(" ", path.call(print, "body", 0, 0));
-        } else {
-          parts.push(
-            " ",
-            align("rescue ".length, group(join(concat([",", line]), path.call(print, "body", 0))))
-          );
-        }
-      }
-
-      if (variable) {
-        parts.push(group(concat([" => ", path.call(print, "body", 1)])));
-      }
-    } else {
-      parts.push(" StandardError");
-    }
-
-    parts.push(indent(concat([hardline, path.call(print, "body", 2)])));
-
-    if (addition) {
-      parts.push(concat([hardline, path.call(print, "body", 3)]));
-    }
-
-    return group(concat(parts));
-  },
-  rescue_mod: (path, opts, print) => group(concat([
-    "begin",
-    indent(concat([hardline, path.call(print, "body", 0)])),
-    hardline,
-    "rescue StandardError",
-    indent(concat([hardline, path.call(print, "body", 1)])),
-    hardline,
-    "end"
-  ])),
-  retry: literal("retry"),
   return: (path, opts, print) => {
     const args = path.getValue().body[0].body[0];
 
@@ -593,6 +542,7 @@ module.exports = Object.assign(
   require("./nodes/methods"),
   require("./nodes/params"),
   require("./nodes/regexp"),
+  require("./nodes/rescue"),
   require("./nodes/strings"),
   nodes
 );

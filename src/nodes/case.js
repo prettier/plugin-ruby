@@ -30,7 +30,7 @@ module.exports = {
     ));
 
     const stmts = path.call(print, "body", 1);
-    const parts = [concat(["when ", align(5, preds)])];
+    const parts = [concat(["when ", align("when ".length, preds)])];
 
     // It's possible in a when to just have empty void statements, in which case
     // we would skip adding the body.
