@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Big tests refactor.
 - Make multiple `when` predicates break at 80 chars and then wrap to be inline with the other predicates.
 
+### Changed
+- Fixed support for dynamic string hash keys. (Thanks to @deecewan.)
+
 ## [0.10.0] - 2019-03-25
 ### Added
 - Support for block-local variables.
