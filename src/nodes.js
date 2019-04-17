@@ -1,4 +1,4 @@
-const { align, breakParent, concat, dedent, fill, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
+const { align, breakParent, concat, dedent, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
 const { removeLines } = require("prettier").doc.utils;
 const { concatBody, empty, first, literal, makeArgs, makeCall, makeList, prefix, printComments, skipAssignIndent } = require("./utils");
 
@@ -207,20 +207,6 @@ const nodes = {
     }
 
     return concat(["break ", join(", ", path.call(print, "body", 0))]);
-  },
-  case: (path, opts, print) => {
-    const parts = ["case "];
-
-    if (path.getValue().body[0]) {
-      parts.push(path.call(print, "body", 0));
-    }
-
-    parts.push(
-      group(concat([hardline, path.call(print, "body", 1)])),
-      group(concat([hardline, "end"]))
-    );
-
-    return group(concat(parts));
   },
   class: (path, opts, print) => {
     const [_constant, superclass, statements] = path.getValue().body;
@@ -582,29 +568,6 @@ const nodes = {
   var_field: concatBody,
   var_ref: first,
   vcall: first,
-  when: (path, opts, print) => {
-    const [_predicates, _statements, addition] = path.getValue().body;
-
-    const predicates = path.call(print, "body", 0).reduce(
-      (accum, pred, index) => (
-        index === 0 ? [pred] : accum.concat([",", line, pred])
-      ),
-      null
-    );
-
-    const stmts = path.call(print, "body", 1);
-    const parts = [group(concat(["when ", align(5, fill(predicates))]))];
-
-    if (!stmts.parts.every(part => !part)) {
-      parts.push(indent(concat([hardline, stmts])));
-    }
-
-    if (addition) {
-      parts.push(concat([hardline, path.call(print, "body", 2)]));
-    }
-
-    return group(concat(parts));
-  },
   yield: (path, opts, print) => {
     if (path.getValue().body[0].type === "paren") {
       return concat(["yield", path.call(print, "body", 0)]);
@@ -622,6 +585,7 @@ module.exports = Object.assign(
   require("./nodes/arrays"),
   require("./nodes/blocks"),
   require("./nodes/calls"),
+  require("./nodes/case"),
   require("./nodes/commands"),
   require("./nodes/conditionals"),
   require("./nodes/hooks"),
