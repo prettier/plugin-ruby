@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ## [Unreleased]
 ### Added
 - Support for parsing things with a ruby shebang (e.g., `#!/usr/bin/env ruby` or `#!/usr/bin/ruby`).
+- [INTERNAL] Big tests refactor.
+- Make multiple `when` predicates break at 80 chars and then wrap to be inline with the other predicates.
 
 ## [0.10.0] - 2019-03-25
 ### Added

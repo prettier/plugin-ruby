@@ -1,0 +1,239 @@
+const { long, ruby } = require("./utils");
+
+describe("method", () => {
+  describe("definitions", () => {
+    test("shorthand for empty methods", () => (
+      expect("def foo; end").toMatchFormat()
+    ));
+
+    test("shorthand for empty methods with parens", () => (
+      expect("def foo(); end").toMatchFormat()
+    ));
+
+    test("single arg, no parens", () => (
+      expect("def foo bar\nend").toChangeFormat("def foo(bar); end")
+    ));
+
+    test("single arg, with parens", () => (
+      expect("def foo(bar)\nend").toChangeFormat("def foo(bar); end")
+    ));
+
+    test("shorthand for empty singleton methods", () => (
+      expect("def self.foo; end").toMatchFormat()
+    ));
+
+    test("shorthand for empty singleton methods with parens", () => (
+      expect("def self.foo(); end").toMatchFormat()
+    ));
+
+    test("singleton, single arg, no parens", () => (
+      expect("def self.foo bar\nend").toChangeFormat("def self.foo(bar); end")
+    ));
+
+    test("singleton, single arg, with parens", () => (
+      expect("def self.foo(bar)\nend").toChangeFormat("def self.foo(bar); end")
+    ));
+
+    test("shorthand with a body", () => (
+      expect("def foo(alpha); 1; end").toChangeFormat(
+        "def foo(alpha)\n  1\nend"
+      )
+    ));
+
+    test("single splat arg with no name", () => (
+      expect("def foo(*); end").toMatchFormat()
+    ));
+
+    test("double splat arg with no name", () => (
+      expect("def foo(**); end").toMatchFormat()
+    ));
+
+    test("every single arg type", () => {
+      const content = ruby(`
+        def method(req, *rest, post, kwarg:, kwarg_opt: 1, **kwarg_rest, &block)
+          'foo'
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("breaking", () => (
+      expect(`def foo(${long}:, a${long}:); end`).toChangeFormat(ruby(`
+        def foo(
+          ${long}:,
+          a${long}:
+        ); end
+      `))
+    ));
+
+    test.skip("breaking with trailing comma", () => (
+      expect(`def foo(${long}:, a${long}:); end`).toChangeFormat(
+        ruby(`
+          def foo(
+            ${long}:,
+            a${long}:,
+          ); end
+        `),
+        { addTrailingCommas: true }
+      )
+    ));
+  });
+
+  describe("method calls", () => {
+    test("empty parens", () => (
+      expect("foo()").toChangeFormat("foo")
+    ));
+
+    test("single args", () => (
+      expect("foo(1)").toMatchFormat()
+    ));
+
+    test("multi arg", () => (
+      expect("foo(1, 2)").toMatchFormat()
+    ));
+
+    test("just block", () => (
+      expect("foo(&block)").toMatchFormat()
+    ));
+
+    describe("single splat", () => {
+      test("plain", () => (
+        expect("foo(*bar)").toMatchFormat()
+      ));
+
+      test("with multi args", () => (
+        expect("foo(1, 2, *abc)").toMatchFormat()
+      ));
+
+      test("between multi args", () => (
+        expect("foo(1, 2, *abc, 3, 4)").toMatchFormat()
+      ));
+
+      test("with block", () => (
+        expect("foo(*bar, &block)").toMatchFormat()
+      ));
+    });
+
+    describe("double splat", () => {
+      test("plain", () => (
+        expect("foo(**bar)").toMatchFormat()
+      ));
+
+      test("with block", () => (
+        expect("foo(**bar, &block)").toMatchFormat()
+      ));
+
+      test("with splat and block", () => (
+        expect("foo(*bar, **baz, &lock)").toMatchFormat()
+      ));
+
+      test("after kwarg", () => (
+        expect("foo(kwarg: 1, **splat)").toMatchFormat()
+      ));
+
+      test("before kwarg", () => (
+        expect("foo(**splat, kwarg: 1)").toMatchFormat()
+      ));
+
+      test("before kwargs", () => (
+        expect("foo(before: 1, **splat, after: 1)").toMatchFormat()
+      ));
+    });
+
+    describe("different operators", () => {
+      test("double colon gets changed", () => (
+        expect("Foo::foo").toChangeFormat("Foo.foo")
+      ));
+
+      test("lonely operator", () => (
+        expect("foo&.foo").toMatchFormat()
+      ));
+
+      if (process.env.RUBY_VERSION >= "2.7") {
+        test("method reference operator", () => (
+          expect("foo.:foo").toMatchFormat()
+        ));
+      }
+    });
+
+    describe("breaking", () => {
+      describe("without trailing commas", () => {
+        test("starting with no trailing comma stays", () => (
+          expect(`foo(${long}, a${long})`).toChangeFormat(
+            `foo(\n  ${long},\n  a${long}\n)`
+          )
+        ));
+
+        test("starting with trailing comma changes", () => (
+          expect(`foo(${long}, a${long},)`).toChangeFormat(
+            `foo(\n  ${long},\n  a${long}\n)`
+          )
+        ));
+
+        test("with block on the end", () => (
+          expect(`foo(${long}, &block)`).toChangeFormat(
+            `foo(\n  ${long},\n  &block\n)`
+          )
+        ));
+
+        test("on commands", () => (
+          expect(`command ${long}, a${long}`).toChangeFormat(ruby(`
+            command ${long},
+                    a${long}
+          `))
+        ));
+
+        test("on command calls", () => (
+          expect(`command.call ${long}, a${long}`).toChangeFormat(ruby(`
+            command.call ${long},
+                         a${long}
+          `))
+        ));
+      });
+
+      describe("with trailing commas", () => {
+        test("starting with no trailing comma changes", () => (
+          expect(`foo(${long}, a${long})`).toChangeFormat(
+            `foo(\n  ${long},\n  a${long},\n)`,
+            { addTrailingCommas: true }
+          )
+        ));
+
+        test("starting with trailing comma stays", () => (
+          expect(`foo(${long}, a${long},)`).toChangeFormat(
+            `foo(\n  ${long},\n  a${long},\n)`,
+            { addTrailingCommas: true }
+          )
+        ));
+
+        test("with block on the end", () => (
+          expect(`foo(${long}, &block)`).toChangeFormat(
+            `foo(\n  ${long},\n  &block\n)`,
+            { addTrailingCommas: true }
+          )
+        ));
+
+        test("on commands", () => (
+          expect(`command ${long}, a${long}`).toChangeFormat(
+            ruby(`
+              command ${long},
+                      a${long}
+            `),
+            { addTrailingCommas: true }
+          )
+        ));
+
+        test("on command calls", () => (
+          expect(`command.call ${long}, a${long}`).toChangeFormat(
+            ruby(`
+              command.call ${long},
+                           a${long}
+            `),
+            { addTrailingCommas: true }
+          )
+        ));
+      });
+    });
+  });
+});

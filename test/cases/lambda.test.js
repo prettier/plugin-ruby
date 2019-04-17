@@ -1,1 +1,0 @@
-runCase("lambda.rb");

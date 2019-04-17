@@ -249,6 +249,7 @@ module Layer
       assoc_new: [:body, 1],
       break: [:body, 0],
       command: [:body, 1],
+      command_call: [:body, 3],
       string_literal: [:body, 0]
     }
 
@@ -268,7 +269,7 @@ module Layer
       define_method(:"on_#{event}") do |*body|
         @last_sexp =
           super(*body).tap do |sexp|
-            comments = sexp.dig(*path).delete(:comments)
+            comments = (sexp.dig(*path) || {}).delete(:comments)
             sexp.merge!(comments: comments) if comments
           end
       end
@@ -320,7 +321,8 @@ module Layer
       case RipperJS.lex_state_name(state)
       when 'EXPR_END', 'EXPR_ARG|EXPR_LABELED', 'EXPR_ENDFN'
         last_sexp.merge!(comments: [sexp])
-      when 'EXPR_CMDARG', 'EXPR_END|EXPR_ENDARG', 'EXPR_ENDARG', 'EXPR_ARG', 'EXPR_FNAME|EXPR_FITEM', 'EXPR_CLASS', 'EXPR_END|EXPR_LABEL'
+      when 'EXPR_CMDARG', 'EXPR_END|EXPR_ENDARG', 'EXPR_ENDARG', 'EXPR_ARG',
+           'EXPR_FNAME|EXPR_FITEM', 'EXPR_CLASS', 'EXPR_END|EXPR_LABEL'
         inline_comments << sexp
       when 'EXPR_BEG|EXPR_LABEL', 'EXPR_MID'
         inline_comments << sexp.merge!(break: true)
@@ -410,7 +412,7 @@ if $0 == __FILE__
   builder = RipperJS.new($stdin.read)
   response = builder.parse
 
-  if builder.error?
+  if !response && builder.error?
     STDERR.puts 'Invalid ruby'
     exit 1
   end

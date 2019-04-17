@@ -1,4 +1,4 @@
-const { align, breakParent, concat, dedent, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
+const { align, breakParent, concat, dedent, fill, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
 const { removeLines } = require("prettier").doc.utils;
 const { concatBody, empty, first, literal, makeArgs, makeCall, makeList, prefix, printComments, skipAssignIndent } = require("./utils");
 
@@ -564,8 +564,15 @@ const nodes = {
   when: (path, opts, print) => {
     const [_predicates, _statements, addition] = path.getValue().body;
 
+    const predicates = path.call(print, "body", 0).reduce(
+      (accum, pred, index) => (
+        index === 0 ? [pred] : accum.concat([",", line, pred])
+      ),
+      null
+    );
+
     const stmts = path.call(print, "body", 1);
-    const parts = [group(concat(["when ", join(", ", path.call(print, "body", 0))]))];
+    const parts = [group(concat(["when ", align(5, fill(predicates))]))];
 
     if (!stmts.parts.every(part => !part)) {
       parts.push(indent(concat([hardline, stmts])));

@@ -1,1 +1,0 @@
-runCase("blocks.rb");

@@ -110,11 +110,14 @@ const printBlock = (path, opts, print) => {
     return concat([breakParent, doBlock]);
   }
 
+  const hasBody = stmts.some(({ type }) => type !== "void_stmt");
   const braceBlock = concat([
-    " { ",
+    " {",
+    (hasBody || variables) ? " " : "",
     variables ? path.call(print, "body", 0) : "",
     path.call(print, "body", 1),
-    " }"
+    hasBody ? " " : "",
+    "}"
   ]);
 
   return group(ifBreak(doBlock, braceBlock));
