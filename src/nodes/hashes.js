@@ -39,10 +39,22 @@ module.exports = {
 
     return group(concat(parts));
   },
-  assoclist_from_args: (path, opts, print) => group(join(
-    concat([",", line]),
-    path.map(print, "body", 0)
-  )),
+  assoclist_from_args: (path, { addTrailingCommas }, print) => {
+    const assocNodes = path.getValue().body[0];
+    const assocDocs = [];
+
+    assocNodes.forEach((assocNode, index) => {
+      assocDocs.push(path.call(print, "body", 0, index));
+
+      if (index !== assocNodes.length - 1) {
+        assocDocs.push(concat([",", line]));
+      } else if (addTrailingCommas) {
+        assocDocs.push(ifBreak(",", ""));
+      }
+    });
+
+    return group(concat(assocDocs));
+  },
   bare_assoc_hash: (path, opts, print) => group(
     join(concat([",", line]), path.map(print, "body", 0))
   ),
@@ -53,11 +65,7 @@ module.exports = {
 
     return group(concat([
       "{",
-      indent(concat([
-        line,
-        concat(path.map(print, "body")),
-        addTrailingCommas ? ifBreak(",", "") : ""
-      ])),
+      indent(concat([line, concat(path.map(print, "body"))])),
       concat([line, "}"])
     ]));
   }
