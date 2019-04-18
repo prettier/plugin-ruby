@@ -451,6 +451,43 @@ class RipperJS < Ripper
   prepend Layer::Ending
   prepend Layer::Strings
   prepend Layer::AccessControls
+
+  # When the only statement inside of a `def` node is a `begin` node, then you
+  # can safely replace the body of the `def` with the body of the `begin`. For
+  # example:
+  #
+  # def foo
+  #   begin
+  #     try_something
+  #   rescue SomeError => error
+  #     handle_error(error)
+  #   end
+  # end
+  #
+  # The above can get transformed into:
+  #
+  # def foo
+  #   try_something
+  # rescue SomeError => error
+  #   handle_error(error)
+  # end
+  prepend(
+    Module.new do
+      private
+
+      def on_def(ident, params, bodystmt)
+        def_bodystmt = bodystmt
+        stmts, *other_parts = bodystmt[:body]
+
+        if !other_parts.any? && stmts[:body].length == 1 &&
+           stmts.dig(:body, 0, :type) == :begin
+          def_bodystmt = stmts.dig(:body, 0, :body, 0)
+        end
+
+        super(ident, params, def_bodystmt)
+      end
+    end
+  )
 end
 
 if $0 == __FILE__

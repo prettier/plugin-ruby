@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Better support for inline access control modifiers. (Thanks for @AlanFoster.)
 - Better support for heredocs in hash literals. (Thanks to @jpickwell for the report.)
 - Better support for heredocs in array literals.
+- Support automatically transforming `def/begin/rescue/end/end` into `def/rescue/end`.
 
 ### Changed
 - Fixed support for dynamic string hash keys. (Thanks to @deecewan.)
