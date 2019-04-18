@@ -1,7 +1,12 @@
+/.github/
 /coverage/
 /exe/
 /node_modules/
 /lib/
 /pkg/
 /test/
+
+/Gemfile*
+/Rakefile
+/prettier-*.gem
 /yarn-error.log
