@@ -87,4 +87,59 @@ describe("array", () => {
   test("breaking maintains calls on the end", () => (
     expect(`[${long}].freeze`).toChangeFormat(`[\n  ${long}\n].freeze`)
   ));
+
+  describe.each(["<<-HERE", "<<~HERE"])("%s heredocs as elements", start => {
+    test("as the first value", () => {
+      const content = ruby(`
+        [
+          ${start},
+            this is the heredoc
+          HERE
+          foo
+        ]
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("as the last value", () => {
+      const content = ruby(`
+        [
+          foo,
+          ${start}
+            this is the heredoc
+          HERE
+        ]
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("with splats in the array", () => {
+      const content = ruby(`
+        [
+          foo,
+          *bar,
+          baz,
+          ${start}
+            this is the heredoc
+          HERE
+        ]
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("with trailing commas", () => {
+      const content = ruby(`
+        [
+          ${start},
+            this is the heredoc
+          HERE
+        ]
+      `);
+
+      return expect(content).toMatchFormat({ addTrailingCommas: true });
+    });
+  });
 });
