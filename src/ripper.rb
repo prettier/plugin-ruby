@@ -297,7 +297,7 @@ module Layer
         super(*body).tap do |sexp|
           comments =
             (sexp.dig(:body, 0).delete(:comments) || []) +
-            (sexp.dig(:body, 1).delete(:comments) || [])
+              (sexp.dig(:body, 1).delete(:comments) || [])
 
           sexp.merge!(comments: comments) if comments.any?
         end
