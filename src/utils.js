@@ -1,4 +1,4 @@
-const { breakParent, concat, hardline, lineSuffix, literalline } = require("prettier").doc.builders;
+const { breakParent, concat, hardline, ifBreak, line, lineSuffix, literalline } = require("prettier").doc.builders;
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
@@ -104,6 +104,10 @@ const skipAssignIndent = node => (
     || (node.type === "string_literal" && node.body[0].type === "heredoc")
 );
 
+// If a parent node is breaking, the `softline` builder might cause another
+// break. This avoids that.
+const supersoftline = () => ifBreak(line, "");
+
 const surround = (left, right) => (path, opts, print) => concat([
   left,
   path.call(print, "body", 0),
@@ -122,5 +126,6 @@ module.exports = {
   prefix,
   printComments,
   skipAssignIndent,
+  supersoftline,
   surround
 };

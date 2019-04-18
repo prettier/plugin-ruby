@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Alignment of `to` is explicitly allowed to not indent to better support rspec. (Thanks to @aaronjensen for the report.)
 - Fix up the `to_proc` transform so that it works with other argument handling appropriately.
 - Fixed regression on regexp comments.
+- Fix up interpolation of functions in multi-line heredocs. (Thanks to @localhostdotdev for the report.)
 
 ## [0.10.0] - 2019-03-25
 ### Added

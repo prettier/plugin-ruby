@@ -166,6 +166,17 @@ describe("strings", () => {
   });
 
   describe("heredocs", () => {
+    test("interpolation doesn't automatically break", () => {
+      const content = ruby(`
+        <<~HERE
+          ${long}
+          #{foo(bar)}
+        HERE
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
     describe("straight", () => {
       test("basic", () => {
         const content = ruby(`

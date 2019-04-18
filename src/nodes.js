@@ -2,7 +2,7 @@ const { align, breakParent, concat, dedent, group, hardline, ifBreak, indent, jo
 const { removeLines } = require("prettier").doc.utils;
 
 const toProc = require("./toProc");
-const { concatBody, empty, first, literal, makeArgs, makeCall, makeList, prefix, printComments, skipAssignIndent } = require("./utils");
+const { concatBody, empty, first, literal, makeArgs, makeCall, makeList, prefix, printComments, skipAssignIndent, supersoftline } = require("./utils");
 
 const nodes = {
   "@int": (path, _opts, _print) => {
@@ -46,11 +46,11 @@ const nodes = {
     const parenDoc = group(concat([
       "(",
       indent(concat([
-        softline,
+        supersoftline,
         join(concat([",", line]), args),
         addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
       ])),
-      concat([softline, ")"])
+      concat([supersoftline, ")"])
     ]));
 
     if (heredocs.length === 1) {
