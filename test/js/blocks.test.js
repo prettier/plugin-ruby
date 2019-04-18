@@ -41,6 +41,16 @@ describe("blocks", () => {
     expect("command.call 'foobar' do\n  foo\nend").toMatchFormat()
   ));
 
+  test("blocks nested inside commands use braces", () => {
+    const expected = ruby(`
+      foo ${long} {
+            ${long}
+          }.bar
+    `);
+
+    return expect(`foo ${long} { ${long} }.bar`).toChangeFormat(expected);
+  });
+
   test("breaking maintains calls on the end", () => {
     const content = ruby(`
       method.each do |foo|
@@ -71,8 +81,8 @@ describe("blocks", () => {
     expect(`assert_nil(("a".sub! "b" do end&.foo {}))`).toChangeFormat(ruby(`
       assert_nil(
         (
-          'a'.sub! 'b' do
-          end&.foo do
+          'a'.sub! 'b' {
+          }&.foo do
           end
         )
       )
