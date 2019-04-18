@@ -10,11 +10,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Big tests refactor.
 - Make multiple `when` predicates break at 80 chars and then wrap to be inline with the other predicates.
 - Automatically add underscores in large numbers that aren't already formatted.
+- Better support for inline access control modifiers. (Thanks for @AlanFoster.)
 
 ### Changed
 - Fixed support for dynamic string hash keys. (Thanks to @deecewan.)
 - [INTERNAL] Moved `case/when` into its own file and added better documentation.
 - [INTERNAL] Moves `begin/rescue` into its own file.
+- Automatically add newlines around access modifiers. (Thanks for @AlanFoster.)
 
 ## [0.10.0] - 2019-03-25
 ### Added

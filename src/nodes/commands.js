@@ -1,6 +1,12 @@
 const { align, concat, group, ifBreak, join, line } = require("prettier").doc.builders;
 const { docLength, makeArgs, makeCall } = require("../utils");
 
+const hasDef = node => (
+  node.body[1].type === "args_add_block"
+  && node.body[1].body[0].type === "args"
+  && node.body[1].body[0].body[0].type === "def"
+);
+
 module.exports = {
   command: (path, opts, print) => {
     const command = path.call(print, "body", 0);
@@ -11,8 +17,10 @@ module.exports = {
     }
 
     const joinedArgs = join(concat([",", line]), args);
+    const breakArgs = hasDef(path.getValue()) ? joinedArgs : align(command.length + 1, joinedArgs);
+
     const commandDoc = group(ifBreak(
-      concat([command, " ", align(command.length + 1, joinedArgs)]),
+      concat([command, " ", breakArgs]),
       concat([command, " ", joinedArgs])
     ));
 

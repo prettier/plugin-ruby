@@ -385,6 +385,8 @@ module Layer
     end
   end
 
+  # Normally access controls are reported as vcall nodes. This module creates a
+  # new node type to explicitly track those nodes instead.
   module AccessControls
     def initialize(source, *args)
       super(source, *args)
@@ -399,7 +401,11 @@ module Layer
 
     def on_vcall(ident)
       super(ident).tap do |sexp|
-        next if !%w[private protected public].include?(ident[:body]) || ident[:body] != lines[lineno - 1].strip
+        if !%w[private protected public].include?(ident[:body]) ||
+           ident[:body] != lines[lineno - 1].strip
+          next
+        end
+
         sexp.merge!(type: :access_ctrl)
       end
     end
