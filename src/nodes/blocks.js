@@ -1,4 +1,5 @@
 const { breakParent, concat, group, ifBreak, indent, softline } = require("prettier").doc.builders;
+const { hasAncestor } = require("../utils");
 
 const printBlock = (path, opts, print) => {
   const [variables, statements] = path.getValue().body;
@@ -9,11 +10,18 @@ const printBlock = (path, opts, print) => {
     doBlockBody = indent(concat([softline, path.call(print, "body", 1)]));
   }
 
+  // If this block is nested underneath a command or command_call node, then we
+  // can't use `do...end` because that will get associated with the parent node
+  // as opposed to the current node (because of the difference in operator
+  // precedence). Instead, we still use a multi-line format but switch to using
+  // braces instead.
+  const useBraces = hasAncestor(path, ["command", "command_call"]);
+
   const doBlock = concat([
-    " do",
+    useBraces ? " {" : " do",
     variables ? concat([" ", path.call(print, "body", 0)]) : "",
     doBlockBody,
-    concat([softline, "end"])
+    concat([softline, useBraces ? "}" : "end"])
   ]);
 
   // We can hit this next pattern if within the block the only statement is a

@@ -22,6 +22,22 @@ const empty = () => "";
 
 const first = (path, opts, print) => path.call(print, "body", 0);
 
+const hasAncestor = (path, types) => {
+  let parent = 0;
+  let parentNode = path.getParentNode();
+
+  while (parentNode) {
+    if (types.includes(parentNode.type)) {
+      return true;
+    }
+
+    parent += 1;
+    parentNode = path.getParentNode(parent);
+  }
+
+  return false;
+};
+
 const literal = value => () => value;
 
 const makeArgs = (path, opts, print, argsIndex) => {
@@ -115,6 +131,7 @@ module.exports = {
   docLength,
   empty,
   first,
+  hasAncestor,
   literal,
   makeArgs,
   makeCall,
