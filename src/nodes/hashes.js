@@ -1,18 +1,18 @@
 const { concat, group, ifBreak, indent, join, line, literalline } = require("prettier").doc.builders;
 const { skipAssignIndent } = require("../utils");
 
-const pathDive = (path, steps) => {
-  let node = path.getValue();
+const nodeDive = (node, steps) => {
+  let current = node;
 
   steps.forEach(step => {
-    node = node[step];
+    current = current[step];
   });
 
-  return node;
+  return current;
 };
 
 const makeLabel = (path, { preferHashLabels }, print, steps) => {
-  const labelNode = pathDive(path, steps);
+  const labelNode = nodeDive(path.getValue(), steps);
   const labelDoc = path.call.apply(path, [print].concat(steps));
 
   switch (labelNode.type) {
@@ -20,7 +20,7 @@ const makeLabel = (path, { preferHashLabels }, print, steps) => {
       if (preferHashLabels) {
         return labelDoc;
       }
-      return`:${labelDoc.slice(0, labelDoc.length - 1)} =>`;
+      return `:${labelDoc.slice(0, labelDoc.length - 1)} =>`;
     case "symbol_literal":
       if (preferHashLabels && labelNode.body.length === 1) {
         const symbolSteps = steps.concat("body", 0, "body", 0);
@@ -58,9 +58,14 @@ module.exports = {
 
     assocNodes.forEach((assocNode, index) => {
       const isInner = index !== assocNodes.length - 1;
+      const valueNode = assocNode.body[1];
 
-      if (assocNode.body[1].type === "heredoc") {
-        const { beging, ending } = assocNode.body[1];
+      const isStraightHeredoc = valueNode.type === "heredoc";
+      const isSquigglyHeredoc = valueNode.type === "string_literal" && valueNode.body[0].type === "heredoc";
+
+      if (isStraightHeredoc || isSquigglyHeredoc) {
+        const heredocSteps = isStraightHeredoc ? ["body", 1] : ["body", 1, "body", 0];
+        const { beging, ending } = nodeDive(assocNode, heredocSteps);
 
         assocDocs.push(
           makeLabel(path, opts, print, ["body", 0, index, "body", 0]),
@@ -68,7 +73,7 @@ module.exports = {
           beging,
           (isInner || addTrailingCommas) ? "," : "",
           literalline,
-          concat(path.map(print, "body", 0, index, "body", 1, "body")),
+          concat(path.map.apply(path, [print, "body", 0, index].concat(heredocSteps).concat("body"))),
           ending,
           isInner ? line : ""
         );
@@ -88,7 +93,7 @@ module.exports = {
   bare_assoc_hash: (path, opts, print) => group(
     join(concat([",", line]), path.map(print, "body", 0))
   ),
-  hash: (path, { addTrailingCommas }, print) => {
+  hash: (path, opts, print) => {
     if (path.getValue().body[0] === null) {
       return "{}";
     }

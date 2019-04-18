@@ -34,6 +34,46 @@ describe("hash", () => {
     });
   });
 
+  describe.each(["<<-HERE", "<<~HERE"])("%s heredocs as values", start => {
+    test("as the first value", () => {
+      const content = ruby(`
+        {
+          foo: ${start},
+            this is the heredoc
+          HERE
+          bar: 'bar'
+        }
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("as the last value", () => {
+      const content = ruby(`
+        {
+          foo: 'foo',
+          bar: ${start}
+            this is the heredoc
+          HERE
+        }
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("with trailing commas", () => {
+      const content = ruby(`
+        {
+          foo: ${start},
+            this is the heredoc
+          HERE
+        }
+      `);
+
+      return expect(content).toMatchFormat({ addTrailingCommas: true });
+    });
+  });
+
   describe("dynamic string keys", () => {
     test("basic", () => (
       expect(`{ 'foo': 'bar' }`).toMatchFormat()
