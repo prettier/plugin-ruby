@@ -92,10 +92,6 @@ const nodes = {
     return parts;
   },
   assoc_splat: prefix("**"),
-  assoclist_from_args: (path, opts, print) => group(join(
-    concat([",", line]),
-    path.map(print, "body", 0)
-  )),
   assign: (path, opts, print) => {
     const [printedTarget, printedValue] = path.map(print, "body");
     let adjustedValue = printedValue;

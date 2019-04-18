@@ -80,6 +80,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "jpickwell",
+      "name": "Jordan Pickwell",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/4682321?v=4",
+      "profile": "https://github.com/jpickwell",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

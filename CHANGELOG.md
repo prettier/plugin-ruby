@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Make multiple `when` predicates break at 80 chars and then wrap to be inline with the other predicates.
 - Automatically add underscores in large numbers that aren't already formatted.
 - Better support for inline access control modifiers. (Thanks for @AlanFoster.)
+- Better support for heredocs in hash literals. (Thanks to @jpickwell for the report.)
+- Better support for heredocs in array literals.
 
 ### Changed
 - Fixed support for dynamic string hash keys. (Thanks to @deecewan.)
