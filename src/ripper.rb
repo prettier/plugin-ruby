@@ -246,12 +246,12 @@ module Layer
     # for them to display properly.
     events = {
       args_add_block: [:body, 0],
-      assoc_new: [:body, 1],
       break: [:body, 0],
       command: [:body, 1],
       command_call: [:body, 3],
       regexp_literal: [:body, 0],
-      string_literal: [:body, 0]
+      string_literal: [:body, 0],
+      symbol_literal: [:body, 0]
     }
 
     def initialize(*args)
@@ -287,6 +287,19 @@ module Layer
 
           comments = sexp.dig(:body, 0).delete(:comments)
           sexp.merge!(comments: comments) if comments
+        end
+    end
+
+    # Handling this specially because we want to pull the comments out of both
+    # child nodes.
+    def on_assoc_new(*body)
+      @last_sexp =
+        super(*body).tap do |sexp|
+          comments =
+            (sexp.dig(:body, 0).delete(:comments) || []) +
+            (sexp.dig(:body, 1).delete(:comments) || [])
+
+          sexp.merge!(comments: comments) if comments.any?
         end
     end
 

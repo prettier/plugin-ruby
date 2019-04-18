@@ -1,5 +1,5 @@
 const { concat, group, ifBreak, indent, join, line } = require("prettier").doc.builders;
-const { printComments, skipAssignIndent } = require("../utils");
+const { skipAssignIndent } = require("../utils");
 
 module.exports = {
   assoc_new: (path, { preferHashLabels }, print) => {
@@ -16,14 +16,7 @@ module.exports = {
         break;
       case "symbol_literal":
         if (preferHashLabels && path.getValue().body[0].body.length === 1) {
-          const { comments, start } = path.getValue().body[0];
-          const node = concat([path.call(print, "body", 0, "body", 0, "body", 0), ":"]);
-
-          if (comments) {
-            parts.push(printComments(node, start, comments));
-          } else {
-            parts.push(node);
-          }
+          parts.push(concat([path.call(print, "body", 0, "body", 0, "body", 0), ":"]));
         } else {
           parts.push(concat([printedLabel, " =>"]));
         }
@@ -48,6 +41,10 @@ module.exports = {
 
     return group(concat(parts));
   },
+  assoclist_from_args: (path, opts, print) => group(join(
+    concat([",", line]),
+    path.map(print, "body", 0)
+  )),
   bare_assoc_hash: (path, opts, print) => group(
     join(concat([",", line]), path.map(print, "body", 0))
   ),
