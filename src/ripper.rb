@@ -464,13 +464,16 @@ class RipperJS < Ripper
   #   end
   # end
   #
-  # The above can get transformed into:
+  # can get transformed into:
   #
   # def foo
   #   try_something
   # rescue SomeError => error
   #   handle_error(error)
   # end
+  #
+  # This module handles this by hoisting up the `bodystmt` node from the inner
+  # `begin` up to the `def`.
   prepend(
     Module.new do
       private
@@ -485,6 +488,37 @@ class RipperJS < Ripper
         end
 
         super(ident, params, def_bodystmt)
+      end
+    end
+  )
+
+  # By default, Ripper parses the expression `lambda { foo }` as a
+  # `method_add_block` node, so we can't turn it back into `-> { foo }`. This
+  # module overrides that behavior and reports it back as a `lambda` node
+  # instead.
+  prepend(
+    Module.new do
+      private
+
+      def on_method_add_block(method_add_arg, block)
+        fcall, args = method_add_arg[:body]
+
+        # If there are arguments to the `lambda`, that means `lambda` has been
+        # overridden as a function so we cannot transform it into a `lambda`
+        # node.
+        if fcall[:type] != :fcall || args[:type] != :args || args[:body].any?
+          return super
+        end
+
+        ident = fcall.dig(:body, 0)
+        return super if ident[:type] != :@ident || ident[:body] != 'lambda'
+
+        super.tap do |sexp|
+          params, stmts = block[:body]
+          params ||= { type: :params, body: [] }
+
+          sexp.merge!(type: :lambda, body: [params, stmts])
+        end
       end
     end
   )
