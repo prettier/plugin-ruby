@@ -2,7 +2,7 @@ const { align, breakParent, concat, dedent, group, hardline, ifBreak, indent, jo
 const { removeLines } = require("prettier").doc.utils;
 
 const toProc = require("./toProc");
-const { concatBody, empty, first, literal, makeArgs, makeCall, makeList, prefix, printComments, skipAssignIndent } = require("./utils");
+const { concatBody, empty, first, literal, makeArgs, makeCall, makeList, prefix, skipAssignIndent } = require("./utils");
 
 const nodes = {
   "@int": (path, _opts, _print) => {
@@ -91,52 +91,6 @@ const nodes = {
 
     return parts;
   },
-  assoc_new: (path, { preferHashLabels }, print) => {
-    const parts = [];
-    const [printedLabel, printedValue] = path.map(print, "body");
-
-    switch (path.getValue().body[0].type) {
-      case "@label":
-        if (preferHashLabels) {
-          parts.push(printedLabel);
-        } else {
-          parts.push(`:${printedLabel.slice(0, printedLabel.length - 1)} =>`);
-        }
-        break;
-      case "symbol_literal":
-        if (preferHashLabels && path.getValue().body[0].body.length === 1) {
-          const { comments, start } = path.getValue().body[0];
-          const node = concat([path.call(print, "body", 0, "body", 0, "body", 0), ":"]);
-
-          if (comments) {
-            parts.push(printComments(node, start, comments));
-          } else {
-            parts.push(node);
-          }
-        } else {
-          parts.push(concat([printedLabel, " =>"]));
-        }
-        break;
-      case "dyna_symbol":
-        if (preferHashLabels) {
-          parts.push(concat(printedLabel.parts.slice(1).concat(":")));
-        } else {
-          parts.push(concat([printedLabel, " =>"]));
-        }
-        break;
-      default:
-        parts.push(concat([printedLabel, " =>"]));
-        break;
-    }
-
-    if (skipAssignIndent(path.getValue().body[1])) {
-      parts.push(" ", printedValue);
-    } else {
-      parts.push(indent(concat([line, printedValue])));
-    }
-
-    return group(concat(parts));
-  },
   assoc_splat: prefix("**"),
   assoclist_from_args: (path, opts, print) => group(join(
     concat([",", line]),
@@ -163,9 +117,6 @@ const nodes = {
   assign_error: (_path, _opts, _print) => {
     throw new Error("Can't set variable");
   },
-  bare_assoc_hash: (path, opts, print) => group(
-    join(concat([",", line]), path.map(print, "body", 0))
-  ),
   binary: (path, opts, print) => {
     const operator = path.getValue().body[1];
     const useNoSpace = operator === "**";
@@ -284,21 +235,6 @@ const nodes = {
     path.call(print, "body", 0),
     concat([makeCall(path, opts, print), path.call(print, "body", 2)])
   ])),
-  hash: (path, { addTrailingCommas }, print) => {
-    if (path.getValue().body[0] === null) {
-      return "{}";
-    }
-
-    return group(concat([
-      "{",
-      indent(concat([
-        line,
-        concat(path.map(print, "body")),
-        addTrailingCommas ? ifBreak(",", "") : ""
-      ])),
-      concat([line, "}"])
-    ]));
-  },
   lambda: (path, opts, print) => {
     let params = path.getValue().body[0];
     let paramsConcat = "";
@@ -575,6 +511,7 @@ module.exports = Object.assign(
   require("./nodes/case"),
   require("./nodes/commands"),
   require("./nodes/conditionals"),
+  require("./nodes/hashes"),
   require("./nodes/hooks"),
   require("./nodes/loops"),
   require("./nodes/methods"),

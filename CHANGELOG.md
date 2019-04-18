@@ -15,13 +15,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 - Fixed support for dynamic string hash keys. (Thanks to @deecewan.)
 - [INTERNAL] Moved `case/when` into its own file and added better documentation.
-- [INTERNAL] Moves `begin/rescue` into its own file.
+- [INTERNAL] Moved `begin/rescue` into its own file.
 - Automatically add newlines around access modifiers. (Thanks for @AlanFoster.)
 - Alignment of command calls with arguments is fixed.
 - Alignment of `to` is explicitly allowed to not indent to better support rspec. (Thanks to @aaronjensen for the report.)
 - Fix up the `to_proc` transform so that it works with other argument handling appropriately.
 - Fixed regression on regexp comments.
 - Fix up block delimiters when nested inside a `command` or `command_call` node. (Thanks to @CodingItWrong for the report.)
+- [INTERNAL] Moved hashes into its own file.
 
 ## [0.10.0] - 2019-03-25
 ### Added
