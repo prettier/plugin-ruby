@@ -1,4 +1,4 @@
-const { concat, group, ifBreak, indent, join, line } = require("prettier").doc.builders;
+const { concat, group, ifBreak, indent, join, line, literalline } = require("prettier").doc.builders;
 const { skipAssignIndent } = require("../utils");
 
 const pathDive = (path, steps) => {
@@ -50,17 +50,36 @@ module.exports = {
 
     return group(concat(parts));
   },
-  assoclist_from_args: (path, { addTrailingCommas }, print) => {
+  assoclist_from_args: (path, opts, print) => {
+    const { addTrailingCommas } = opts;
+
     const assocNodes = path.getValue().body[0];
     const assocDocs = [];
 
     assocNodes.forEach((assocNode, index) => {
-      assocDocs.push(path.call(print, "body", 0, index));
+      const isInner = index !== assocNodes.length - 1;
 
-      if (index !== assocNodes.length - 1) {
-        assocDocs.push(concat([",", line]));
-      } else if (addTrailingCommas) {
-        assocDocs.push(ifBreak(",", ""));
+      if (assocNode.body[1].type === "heredoc") {
+        const { beging, ending } = assocNode.body[1];
+
+        assocDocs.push(
+          makeLabel(path, opts, print, ["body", 0, index, "body", 0]),
+          " ",
+          beging,
+          (isInner || addTrailingCommas) ? "," : "",
+          literalline,
+          concat(path.map(print, "body", 0, index, "body", 1, "body")),
+          ending,
+          isInner ? line : ""
+        );
+      } else {
+        assocDocs.push(path.call(print, "body", 0, index));
+
+        if (isInner) {
+          assocDocs.push(concat([",", line]));
+        } else if (addTrailingCommas) {
+          assocDocs.push(ifBreak(",", ""));
+        }
       }
     });
 
