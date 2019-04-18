@@ -80,4 +80,18 @@ describe("lambda", () => {
   test("brackets with multiple args", () => (
     expect("a[1, 2, 3]").toMatchFormat()
   ));
+
+  describe("lambda method to stabby lambda literal", () => {
+    test("basic", () => (
+      expect("lambda { foo }").toChangeFormat("-> { foo }")
+    ));
+
+    test("with args", () => (
+      expect("lambda { |foo| foo }").toChangeFormat("->(foo) { foo }")
+    ));
+
+    test("does not transform overridden lambda", () => (
+      expect("lambda(foo) { foo }").toMatchFormat()
+    ));
+  });
 });
