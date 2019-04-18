@@ -384,6 +384,32 @@ module Layer
       last_sexp.merge!(quote: quote[0]) # quote is ": or ':
     end
   end
+
+  # Normally access controls are reported as vcall nodes. This module creates a
+  # new node type to explicitly track those nodes instead.
+  module AccessControls
+    def initialize(source, *args)
+      super(source, *args)
+      @lines = source.split("\n")
+    end
+
+    def self.prepended(base)
+      base.attr_reader :lines
+    end
+
+    private
+
+    def on_vcall(ident)
+      super(ident).tap do |sexp|
+        if !%w[private protected public].include?(ident[:body]) ||
+           ident[:body] != lines[lineno - 1].strip
+          next
+        end
+
+        sexp.merge!(type: :access_ctrl)
+      end
+    end
+  end
 end
 
 class RipperJS < Ripper
@@ -410,6 +436,7 @@ class RipperJS < Ripper
   prepend Layer::Encoding
   prepend Layer::Ending
   prepend Layer::Strings
+  prepend Layer::AccessControls
 end
 
 if $0 == __FILE__
