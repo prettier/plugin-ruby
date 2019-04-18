@@ -1,42 +1,40 @@
 const { concat, group, ifBreak, indent, join, line } = require("prettier").doc.builders;
 const { skipAssignIndent } = require("../utils");
 
-module.exports = {
-  assoc_new: (path, { preferHashLabels }, print) => {
-    const parts = [];
-    const [printedLabel, printedValue] = path.map(print, "body");
+const makeLabel = (path, { preferHashLabels }, print) => {
+  const labelNode = path.getValue().body[0];
+  const labelDoc = path.call(print, "body", 0);
 
-    switch (path.getValue().body[0].type) {
-      case "@label":
-        if (preferHashLabels) {
-          parts.push(printedLabel);
-        } else {
-          parts.push(`:${printedLabel.slice(0, printedLabel.length - 1)} =>`);
-        }
-        break;
-      case "symbol_literal":
-        if (preferHashLabels && path.getValue().body[0].body.length === 1) {
-          parts.push(concat([path.call(print, "body", 0, "body", 0, "body", 0), ":"]));
-        } else {
-          parts.push(concat([printedLabel, " =>"]));
-        }
-        break;
-      case "dyna_symbol":
-        if (preferHashLabels) {
-          parts.push(concat(printedLabel.parts.slice(1).concat(":")));
-        } else {
-          parts.push(concat([printedLabel, " =>"]));
-        }
-        break;
-      default:
-        parts.push(concat([printedLabel, " =>"]));
-        break;
-    }
+  switch (labelNode.type) {
+    case "@label":
+      if (preferHashLabels) {
+        return labelDoc;
+      }
+      return`:${labelDoc.slice(0, labelDoc.length - 1)} =>`;
+    case "symbol_literal":
+      if (preferHashLabels && labelNode.body.length === 1) {
+        return concat([path.call(print, "body", 0, "body", 0, "body", 0), ":"]);
+      }
+      return concat([labelDoc, " =>"]);
+    case "dyna_symbol":
+      if (preferHashLabels) {
+        return concat(labelDoc.parts.slice(1).concat(":"));
+      }
+      return concat([labelDoc, " =>"]);
+    default:
+      return concat([labelDoc, " =>"]);
+  }
+};
+
+module.exports = {
+  assoc_new: (path, opts, print) => {
+    const valueDoc = path.call(print, "body", 1);
+    const parts = [makeLabel(path, opts, print)];
 
     if (skipAssignIndent(path.getValue().body[1])) {
-      parts.push(" ", printedValue);
+      parts.push(" ", valueDoc);
     } else {
-      parts.push(indent(concat([line, printedValue])));
+      parts.push(indent(concat([line, valueDoc])));
     }
 
     return group(concat(parts));
