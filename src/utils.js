@@ -11,6 +11,10 @@ const docLength = doc => {
     return doc.parts.reduce((sum, child) => sum + docLength(child), 0);
   }
 
+  if (doc.contents) {
+    return docLength(doc.contents);
+  }
+
   return 0;
 };
 

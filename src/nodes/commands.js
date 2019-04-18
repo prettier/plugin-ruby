@@ -49,9 +49,13 @@ module.exports = {
     }
 
     const joinedArgs = join(concat([",", line]), args);
+    const breakArgs = path.getValue().body[2].body === "to"
+      ? joinedArgs
+      : align(docLength(concat(parts)), joinedArgs);
+
     const commandDoc = group(ifBreak(
-      concat(parts.concat([align(docLength(concat(parts)), joinedArgs)])),
-      concat(parts.concat([joinedArgs]))
+      concat(parts.concat(breakArgs)),
+      concat(parts.concat(joinedArgs))
     ));
 
     if (heredocs.length === 1) {
