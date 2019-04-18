@@ -1,9 +1,19 @@
 const { concat, group, ifBreak, indent, join, line } = require("prettier").doc.builders;
 const { skipAssignIndent } = require("../utils");
 
-const makeLabel = (path, { preferHashLabels }, print) => {
-  const labelNode = path.getValue().body[0];
-  const labelDoc = path.call(print, "body", 0);
+const pathDive = (path, steps) => {
+  let node = path.getValue();
+
+  steps.forEach(step => {
+    node = node[step];
+  });
+
+  return node;
+};
+
+const makeLabel = (path, { preferHashLabels }, print, steps) => {
+  const labelNode = pathDive(path, steps);
+  const labelDoc = path.call.apply(path, [print].concat(steps));
 
   switch (labelNode.type) {
     case "@label":
@@ -13,7 +23,8 @@ const makeLabel = (path, { preferHashLabels }, print) => {
       return`:${labelDoc.slice(0, labelDoc.length - 1)} =>`;
     case "symbol_literal":
       if (preferHashLabels && labelNode.body.length === 1) {
-        return concat([path.call(print, "body", 0, "body", 0, "body", 0), ":"]);
+        const symbolSteps = steps.concat("body", 0, "body", 0);
+        return concat([path.call.apply(path, [print].concat(symbolSteps)), ":"]);
       }
       return concat([labelDoc, " =>"]);
     case "dyna_symbol":
@@ -29,7 +40,7 @@ const makeLabel = (path, { preferHashLabels }, print) => {
 module.exports = {
   assoc_new: (path, opts, print) => {
     const valueDoc = path.call(print, "body", 1);
-    const parts = [makeLabel(path, opts, print)];
+    const parts = [makeLabel(path, opts, print, ["body", 0])];
 
     if (skipAssignIndent(path.getValue().body[1])) {
       parts.push(" ", valueDoc);
