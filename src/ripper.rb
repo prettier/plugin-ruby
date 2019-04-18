@@ -250,6 +250,7 @@ module Layer
       break: [:body, 0],
       command: [:body, 1],
       command_call: [:body, 3],
+      regexp_literal: [:body, 0],
       string_literal: [:body, 0]
     }
 
