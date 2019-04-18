@@ -154,6 +154,30 @@ describe("blocks", () => {
       return expect(content).toChangeFormat("command.call 'foo', &:to_s");
     });
 
+    test("with args and parens", () => (
+      expect("foo(bar) { |baz| baz.to_i }").toChangeFormat("foo(bar, &:to_i)")
+    ));
+
+    test("with commands", () => {
+      const content = ruby(`
+        command bar do |baz|
+          baz.to_i
+        end
+      `);
+
+      return expect(content).toChangeFormat("command bar, &:to_i");
+    });
+
+    test("with command calls", () => {
+      const content = ruby(`
+        command.call bar do |baz|
+          baz.to_i
+        end
+      `);
+
+      return expect(content).toChangeFormat("command.call bar, &:to_i");
+    });
+
     test("does not happen when there are multiple lines", () => {
       const content = ruby(`
         loop do |i|

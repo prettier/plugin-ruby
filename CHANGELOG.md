@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Automatically add newlines around access modifiers. (Thanks for @AlanFoster.)
 - Alignment of command calls with arguments is fixed.
 - Alignment of `to` is explicitly allowed to not indent to better support rspec. (Thanks to @aaronjensen for the report.)
+- Fix up the `to_proc` transform so that it works with other argument handling appropriately.
 
 ## [0.10.0] - 2019-03-25
 ### Added

@@ -1,5 +1,7 @@
 const { align, breakParent, concat, dedent, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
 const { removeLines } = require("prettier").doc.utils;
+
+const toProc = require("./toProc");
 const { concatBody, empty, first, literal, makeArgs, makeCall, makeList, prefix, printComments, skipAssignIndent } = require("./utils");
 
 const nodes = {
@@ -57,7 +59,23 @@ const nodes = {
 
     return parenDoc;
   },
-  args: makeList,
+  args: (path, opts, print) => {
+    const args = path.map(print, "body");
+    let blockNode = null;
+
+    [1, 2, 3].find(parent => {
+      const parentNode = path.getParentNode(parent);
+      blockNode = parentNode && parentNode.type === "method_add_block" && parentNode.body[1];
+      return blockNode;
+    });
+
+    const proc = blockNode && toProc(blockNode);
+    if (proc) {
+      args.push(proc);
+    }
+
+    return args;
+  },
   args_add_block: (path, opts, print) => {
     const parts = path.call(print, "body", 0);
 
@@ -338,8 +356,26 @@ const nodes = {
       indent(concat([line, right]))
     ]));
   },
-  method_add_arg: concatBody,
-  method_add_block: concatBody,
+  method_add_arg: (path, opts, print) => {
+    const [method, args] = path.map(print, "body");
+    const argNode = path.getValue().body[1];
+
+    // This case will ONLY be hit if we can successfully turn the block into a
+    // to_proc call. In that case, we just explicitly add the parens around it.
+    if (argNode.type === "args" && args.length > 0) {
+      return concat([method, "("].concat(args).concat(")"));
+    }
+
+    return concat([method, args]);
+  },
+  method_add_block: (path, opts, print) => {
+    const [_method, block] = path.getValue().body;
+
+    if (toProc(block)) {
+      return path.call(print, "body", 0);
+    }
+    return concat(path.map(print, "body"));
+  },
   methref: (path, opts, print) => join(".:", path.map(print, "body")),
   mlhs: makeList,
   mlhs_add_post: (path, opts, print) => (
