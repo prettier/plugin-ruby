@@ -66,18 +66,6 @@ describe("method", () => {
         ); end
       `))
     ));
-
-    test.skip("breaking with trailing comma", () => (
-      expect(`def foo(${long}:, a${long}:); end`).toChangeFormat(
-        ruby(`
-          def foo(
-            ${long}:,
-            a${long}:,
-          ); end
-        `),
-        { addTrailingCommas: true }
-      )
-    ));
   });
 
   describe("method calls", () => {
@@ -96,6 +84,28 @@ describe("method", () => {
     test("just block", () => (
       expect("foo(&block)").toMatchFormat()
     ));
+
+    describe("commands", () => {
+      test("alignment", () => {
+        const content = ruby(`
+          command.call some_method(
+                         ${long}
+                       )
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("alignment for `to`", () => {
+        const content = ruby(`
+          expect(value).to matcher(
+            ${long}
+          )
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+    });
 
     describe("single splat", () => {
       test("plain", () => (

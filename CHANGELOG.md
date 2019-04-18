@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Moved `case/when` into its own file and added better documentation.
 - [INTERNAL] Moves `begin/rescue` into its own file.
 - Automatically add newlines around access modifiers. (Thanks for @AlanFoster.)
+- Alignment of command calls with arguments is fixed.
+- Alignment of `to` is explicitly allowed to not indent to better support rspec. (Thanks to @aaronjensen for the report.)
 
 ## [0.10.0] - 2019-03-25
 ### Added
