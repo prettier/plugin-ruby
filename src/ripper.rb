@@ -502,6 +502,10 @@ class RipperJS < Ripper
 
       def on_method_add_block(method_add_arg, block)
         fcall, args = method_add_arg[:body]
+        
+        # `method_add_arg[:body]` can be empty
+        fcall ||= {}
+        args ||= {}
 
         # If there are arguments to the `lambda`, that means `lambda` has been
         # overridden as a function so we cannot transform it into a `lambda`
