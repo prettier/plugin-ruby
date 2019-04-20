@@ -8,7 +8,7 @@ module Prettier
 
   class << self
     def run(args)
-      prettier = File.expand_path(File.join('..', 'pkg', target), __dir__)
+      prettier = File.expand_path(File.join('../exe/nodejs', target), __dir__)
       plugin = File.expand_path(File.join('..'), __dir__)
       quoted = args.map { |arg| arg.start_with?('-') ? arg : "'#{arg}'" }
 

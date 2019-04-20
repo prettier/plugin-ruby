@@ -16,10 +16,15 @@ Gem::Specification.new do |spec|
     Dir.chdir(File.expand_path('..', __FILE__)) do
       `git ls-files -z`.split("\x0").select do |f|
         f.match(
-          /^(bin|exe|src|CHANGELOG.md|package.json|yarn.lock|.rubocop.yml)/
+          /^(bin|exe|src|lib|CHANGELOG.md|package.json|yarn.lock|.rubocop.yml)/
         )
       end
-    end
+    end +
+      %w[
+        exe/nodejs/prettier-linux
+        exe/nodejs/prettier-macos
+        exe/nodejs/prettier-win.exe
+      ]
 
   spec.bindir = 'exe'
   spec.executables = 'rbprettier'

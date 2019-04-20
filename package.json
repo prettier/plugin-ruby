@@ -4,7 +4,7 @@
   "description": "prettier plugin for the Ruby programming language",
   "main": "src/ruby.js",
   "scripts": {
-    "build": "pkg --output pkg/prettier --targets=linux,macos,win node_modules/prettier/bin-prettier.js",
+    "build": "pkg --output exe/nodejs/prettier --targets=linux,macos,win node_modules/prettier/bin-prettier.js",
     "lint": "eslint --cache .",
     "print": "prettier --plugin=.",
     "rubocop": "run() { prettier --plugin=. $@ | bundle exec rubocop --stdin $1; }; run",
