@@ -89,6 +89,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "CodingItWrong",
+      "name": "Josh Justice",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/15832198?v=4",
+      "profile": "http://codingitwrong.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7
