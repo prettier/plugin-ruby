@@ -54,6 +54,15 @@ describe("lambda", () => {
     `))
   ));
 
+  test("stabby lambda literal that breaks deeply within a command node", () => (
+    expect(`command :foo, bar: -> { ${long} }`).toChangeFormat(ruby(`
+      command :foo,
+              bar: lambda {
+                ${long}
+              }
+    `))
+  ));
+
   test("very long arguments list doesn't break within pipes", () => {
     const content = `command :foo, ->(${long}, a${long}, aa${long}) { true }`;
 
