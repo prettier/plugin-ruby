@@ -231,50 +231,6 @@ const nodes = {
     path.call(print, "body", 0),
     concat([makeCall(path, opts, print), path.call(print, "body", 2)])
   ])),
-  lambda: (path, opts, print) => {
-    let params = path.getValue().body[0];
-    let paramsConcat = "";
-
-    if (params.type === "params") {
-      paramsConcat = path.call(print, "body", 0);
-    } else {
-      ([params] = params.body);
-      paramsConcat = path.call(print, "body", 0, "body", 0);
-    }
-
-    const noParams = params.body.every(type => !type);
-    const commandNode = path.getParentNode(2);
-
-    const inlineLambda = concat([
-      "->",
-      noParams ? "" : concat(["(", paramsConcat, ")"]),
-      " { ",
-      path.call(print, "body", 1),
-      " }"
-    ]);
-
-    if (commandNode && ["command", "command_call"].includes(commandNode.type)) {
-      return group(ifBreak(
-        concat([
-          "lambda {",
-          noParams ? "" : concat([" |", removeLines(paramsConcat), "|"]),
-          indent(concat([line, path.call(print, "body", 1)])),
-          concat([line, "}"])
-        ]),
-        inlineLambda
-      ));
-    }
-
-    return group(ifBreak(
-      concat([
-        "lambda do",
-        noParams ? "" : concat([" |", removeLines(paramsConcat), "|"]),
-        indent(concat([softline, path.call(print, "body", 1)])),
-        concat([softline, "end"])
-      ]),
-      inlineLambda
-    ));
-  },
   massign: (path, opts, print) => {
     let right = path.call(print, "body", 1);
 
@@ -509,6 +465,7 @@ module.exports = Object.assign(
   require("./nodes/conditionals"),
   require("./nodes/hashes"),
   require("./nodes/hooks"),
+  require("./nodes/lambdas"),
   require("./nodes/loops"),
   require("./nodes/methods"),
   require("./nodes/params"),

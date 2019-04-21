@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- If a lambda literal is nested under a `command` or `command_call` node anywhere in the heirarchy, then it needs to use the higher-precedence `{ ... }` braces as opposed to the `do ... end` delimiters.
 
 ## [0.12.0] - 2019-04-18
 ### Added
