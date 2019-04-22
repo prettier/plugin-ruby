@@ -97,6 +97,14 @@ describe("strings", () => {
     test("very interpolated", () => (
       expect(`"abc #{"abc #{abc} abc"} abc"`).toMatchFormat()
     ));
+
+    test("breaks interpolation on #{ ... } and not some inner node", () => (
+      expect(`"${long} #{foo[:bar]} ${long}"`).toChangeFormat(ruby(`
+        "${long} #{
+          foo[:bar]
+        } ${long}"
+      `))
+    ));
   });
 
   describe("char literals", () => {
@@ -203,7 +211,8 @@ describe("strings", () => {
         const content = ruby(`
           <<-PARENT
           This is a straight heredoc
-          #{<<-CHILD
+          #{
+            <<-CHILD
           This is an interpolated straight heredoc
           CHILD
           }
@@ -251,8 +260,9 @@ describe("strings", () => {
         const content = ruby(`
           <<~PARENT
             This is a squiggly heredoc
-            #{<<~CHILD
-                This is an interpolated squiggly heredoc
+            #{
+            <<~CHILD
+              This is an interpolated squiggly heredoc
               CHILD
           }
           PARENT
