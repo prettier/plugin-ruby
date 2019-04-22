@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 - If a lambda literal is nested under a `command` or `command_call` node anywhere in the heirarchy, then it needs to use the higher-precedence `{ ... }` braces as opposed to the `do ... end` delimiters.
 - Calling `super` with a block and no args was causing the parser to fail when attempting to inspect lambda nodes. (Thanks to @jpickwell for the report.)
+- Support better breaking within interpolation by grouping the interpolated content.
 
 ## [0.12.0] - 2019-04-18
 ### Added
