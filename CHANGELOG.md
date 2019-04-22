@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.12.1] - 2019-04-22
 ### Changed
 - If a lambda literal is nested under a `command` or `command_call` node anywhere in the heirarchy, then it needs to use the higher-precedence `{ ... }` braces as opposed to the `do ... end` delimiters.
 - Calling `super` with a block and no args was causing the parser to fail when attempting to inspect lambda nodes. (Thanks to @jpickwell for the report.)
@@ -255,7 +257,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 - Initial release 🎉
 
-[Unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.12.1...HEAD
+[0.12.1]: https://github.com/prettier/plugin-ruby/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/prettier/plugin-ruby/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/prettier/plugin-ruby/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/prettier/plugin-ruby/compare/v0.9.1...v0.10.0
