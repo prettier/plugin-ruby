@@ -500,8 +500,13 @@ class RipperJS < Ripper
     Module.new do
       private
 
-      def on_method_add_block(method_add_arg, block)
-        fcall, args = method_add_arg[:body]
+      def on_method_add_block(invocation, block)
+        # It's possible to hit a `method_add_block` node without going through
+        # `method_add_arg` node, ex: `super {}`. In that case we're definitely
+        # not going to transform into a lambda.
+        return super if invocation[:type] != :method_add_arg
+
+        fcall, args = invocation[:body]
 
         # If there are arguments to the `lambda`, that means `lambda` has been
         # overridden as a function so we cannot transform it into a `lambda`
