@@ -102,5 +102,9 @@ describe("lambda", () => {
     test("does not transform overridden lambda", () => (
       expect("lambda(foo) { foo }").toMatchFormat()
     ));
+
+    test("does not break on super", () => (
+      expect("super {}").toMatchFormat()
+    ));
   });
 });
