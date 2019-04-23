@@ -15,10 +15,8 @@ class RakeTest < Minitest::Test
     end
 
     invoke = nil
-    $?.stub(:exited?, false) do
-      Prettier.stub(:run, ->(args) { invoke = Invoke.new(args) }) do
-        Rake::Task['format'].invoke
-      end
+    Prettier.stub(:run, ->(args) { invoke = Invoke.new(args) }) do
+      Rake::Task['format'].invoke
     end
 
     assert_equal ['--write', source_files], invoke.args

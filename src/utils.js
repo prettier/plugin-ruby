@@ -1,4 +1,4 @@
-const { breakParent, concat, hardline, lineSuffix, literalline } = require("prettier").doc.builders;
+const { breakParent, concat, hardline, lineSuffix, literalline } = require("./builders");
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 

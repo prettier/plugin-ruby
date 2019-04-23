@@ -1,4 +1,4 @@
-const { concat, join } = require("prettier").doc.builders;
+const { concat, join } = require("../builders");
 
 const usingSymbols = path => {
   const [left, right] = path.getValue().body.map(node => node.body[0].type);

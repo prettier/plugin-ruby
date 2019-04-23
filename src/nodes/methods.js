@@ -1,4 +1,4 @@
-const { concat, group, hardline, indent } = require("prettier").doc.builders;
+const { concat, group, hardline, indent } = require("../builders");
 
 const printMethod = offset => (path, opts, print) => {
   const [_name, params, body] = path.getValue().body.slice(offset);

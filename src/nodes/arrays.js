@@ -1,4 +1,4 @@
-const { concat, group, ifBreak, indent, join, line, literalline, softline } = require("prettier").doc.builders;
+const { concat, group, ifBreak, indent, join, line, literalline, softline } = require("../builders");
 
 const isStringArray = args => args.body.every(arg => (
   arg.type === "string_literal"

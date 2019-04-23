@@ -1,4 +1,4 @@
-const { concat } = require("prettier").doc.builders;
+const { concat } = require("../builders");
 const { makeList } = require("../utils");
 
 module.exports = {

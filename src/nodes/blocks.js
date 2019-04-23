@@ -1,4 +1,4 @@
-const { breakParent, concat, group, ifBreak, indent, softline } = require("prettier").doc.builders;
+const { breakParent, concat, group, ifBreak, indent, softline } = require("../builders");
 const { hasAncestor } = require("../utils");
 
 const printBlock = (path, opts, print) => {

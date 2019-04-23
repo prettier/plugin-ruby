@@ -28,8 +28,7 @@
     "eslint": "^5.15.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",
-    "jest": "^24.0.0",
-    "pkg": "^4.3.7"
+    "jest": "^24.0.0"
   },
   "jest": {
     "setupFilesAfterEnv": [

@@ -10,9 +10,8 @@ script:
 - RUBY_VERSION=$(ruby -e 'puts RUBY_VERSION') yarn test
 - yarn lint
 - yarn build
-- gem build prettier.gemspec
+- yarn print --check '{**/*.{gemspec,rb},Gemfile,Rakefile}'
 - bundle exec rake test
-- bundle exec rbprettier --check 'src/ripper.rb' 'lib/**/*.rb' 'test/rb/*_test.rb' 'prettier.gemspec'
 cache:
 - bundler
 - yarn

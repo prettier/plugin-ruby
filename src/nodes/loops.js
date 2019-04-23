@@ -1,4 +1,4 @@
-const { breakParent, concat, group, hardline, ifBreak, indent, softline } = require("prettier").doc.builders;
+const { breakParent, concat, group, hardline, ifBreak, indent, softline } = require("../builders");
 
 const printLoop = keyword => (path, { inlineLoops }, print) => group(ifBreak(
   concat([

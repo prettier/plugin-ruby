@@ -1,6 +1,4 @@
-const { concat, group, ifBreak, indent, line, softline } = require("prettier").doc.builders;
-const { removeLines } = require("prettier").doc.utils;
-
+const { concat, group, ifBreak, indent, line, removeLines, softline } = require("../builders");
 const { hasAncestor } = require("../utils");
 
 module.exports = {

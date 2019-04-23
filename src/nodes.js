@@ -1,5 +1,4 @@
-const { align, breakParent, concat, dedent, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, softline, trim } = require("prettier").doc.builders;
-const { removeLines } = require("prettier").doc.utils;
+const { align, breakParent, concat, dedent, group, hardline, ifBreak, indent, join, line, literalline, markAsRoot, removeLines, softline, trim } = require("./builders");
 
 const toProc = require("./toProc");
 const { concatBody, empty, first, literal, makeArgs, makeCall, makeList, prefix, skipAssignIndent } = require("./utils");

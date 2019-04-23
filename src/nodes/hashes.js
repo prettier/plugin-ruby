@@ -1,4 +1,4 @@
-const { concat, group, ifBreak, indent, join, line, literalline } = require("prettier").doc.builders;
+const { concat, group, ifBreak, indent, join, line, literalline } = require("../builders");
 const { skipAssignIndent } = require("../utils");
 
 const nodeDive = (node, steps) => {

@@ -1,4 +1,4 @@
-const { align, concat, group, hardline, indent, join, line } = require("prettier").doc.builders;
+const { align, concat, group, hardline, indent, join, line } = require("../builders");
 const { literal } = require("../utils");
 
 module.exports = {
