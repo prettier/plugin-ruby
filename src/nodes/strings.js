@@ -1,4 +1,12 @@
-const { concat, group, hardline, indent, join, literalline, softline } = require("prettier").doc.builders;
+const {
+  concat,
+  group,
+  hardline,
+  indent,
+  join,
+  literalline,
+  softline
+} = require("../builders");
 const { concatBody, empty, makeList, surround } = require("../utils");
 const escapePattern = require("../escapePattern");
 
@@ -7,30 +15,32 @@ const escapePattern = require("../escapePattern");
 // quote the user chose. (If they chose single quotes, then double quoting
 // would activate the escape sequence, and if they chose double quotes, then
 // single quotes would deactivate it.)
-const isQuoteLocked = string => string.body.some(part => (
-  part.type === "@tstring_content" && (
-    escapePattern.test(part.body) || part.body.includes("#{")
-  )
-));
+const isQuoteLocked = string =>
+  string.body.some(
+    part =>
+      part.type === "@tstring_content" &&
+      (escapePattern.test(part.body) || part.body.includes("#{"))
+  );
 
 // A string is considered to be able to use single quotes if it contains only
 // plain string content and that content does not contain a single quote.
-const isSingleQuotable = string => string.body.every(part => (
-  part.type === "@tstring_content" && !part.body.includes("'")
-));
+const isSingleQuotable = string =>
+  string.body.every(
+    part => part.type === "@tstring_content" && !part.body.includes("'")
+  );
 
 const getStringQuote = (string, preferSingleQuotes) => {
   if (isQuoteLocked(string)) {
     return string.quote;
   }
 
-  return preferSingleQuotes && isSingleQuotable(string) ? "'" : "\"";
+  return preferSingleQuotes && isSingleQuotable(string) ? "'" : '"';
 };
 
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
 
 const makeString = (content, enclosingQuote) => {
-  const otherQuote = enclosingQuote === "\"" ? "'" : enclosingQuote;
+  const otherQuote = enclosingQuote === '"' ? "'" : enclosingQuote;
 
   // Escape and unescape single and double quotes as needed to be able to
   // enclose `content` with `enclosingQuote`.
@@ -59,7 +69,7 @@ module.exports = {
       return body;
     }
 
-    const quote = preferSingleQuotes ? "'" : "\"";
+    const quote = preferSingleQuotes ? "'" : '"';
     return body.length === 2 ? concat([quote, body.slice(1), quote]) : body;
   },
   heredoc: (path, opts, print) => {
@@ -72,17 +82,23 @@ module.exports = {
     ]);
   },
   string: makeList,
-  string_concat: (path, opts, print) => group(concat([
-    path.call(print, "body", 0),
-    " \\",
-    indent(concat([hardline, path.call(print, "body", 1)]))
-  ])),
+  string_concat: (path, opts, print) =>
+    group(
+      concat([
+        path.call(print, "body", 0),
+        " \\",
+        indent(concat([hardline, path.call(print, "body", 1)]))
+      ])
+    ),
   string_dvar: surround("#{", "}"),
-  string_embexpr: (path, opts, print) => group(concat([
-    "#{",
-    indent(concat([softline, path.call(print, "body", 0)])),
-    concat([softline, "}"])
-  ])),
+  string_embexpr: (path, opts, print) =>
+    group(
+      concat([
+        "#{",
+        indent(concat([softline, path.call(print, "body", 0)])),
+        concat([softline, "}"])
+      ])
+    ),
   string_literal: (path, { preferSingleQuotes }, print) => {
     const string = path.getValue().body[0];
 
@@ -95,7 +111,7 @@ module.exports = {
     // If the string is empty, it will not have any parts, so just print out the
     // quotes corresponding to the config
     if (string.body.length === 0) {
-      return preferSingleQuotes ? "''" : "\"\"";
+      return preferSingleQuotes ? "''" : '""';
     }
 
     const quote = getStringQuote(string, preferSingleQuotes);
@@ -116,9 +132,12 @@ module.exports = {
   word_add: concatBody,
   word_new: empty,
   xstring: makeList,
-  xstring_literal: (path, opts, print) => group(concat([
-    "`",
-    indent(concat([softline, join(softline, path.call(print, "body", 0))])),
-    concat([softline, "`"])
-  ]))
+  xstring_literal: (path, opts, print) =>
+    group(
+      concat([
+        "`",
+        indent(concat([softline, join(softline, path.call(print, "body", 0))])),
+        concat([softline, "`"])
+      ])
+    )
 };

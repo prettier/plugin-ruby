@@ -17,5 +17,7 @@ module.exports = (path, opts, print) => {
     return body;
   }
 
-  throw new Error(`Unsupported node encountered: ${type}\n${JSON.stringify(body, null, 2)}`);
+  throw new Error(
+    `Unsupported node encountered: ${type}\n${JSON.stringify(body, null, 2)}`
+  );
 };

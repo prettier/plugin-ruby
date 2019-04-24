@@ -1,4 +1,4 @@
-const { concat, group, hardline, indent } = require("prettier").doc.builders;
+const { concat, group, hardline, indent } = require("../builders");
 
 const printMethod = offset => (path, opts, print) => {
   const [_name, params, body] = path.getValue().body.slice(offset);
@@ -11,7 +11,8 @@ const printMethod = offset => (path, opts, print) => {
   }
 
   // In case there are no parens but there are arguments
-  const parens = params.type === "params" && params.body.some(paramType => paramType);
+  const parens =
+    params.type === "params" && params.body.some(paramType => paramType);
 
   declaration.push(
     path.call(print, "body", offset),
@@ -26,11 +27,13 @@ const printMethod = offset => (path, opts, print) => {
     return group(concat(declaration.concat(["; end"])));
   }
 
-  return group(concat([
-    group(concat(declaration)),
-    indent(concat([hardline, path.call(print, "body", offset + 2)])),
-    group(concat([hardline, "end"]))
-  ]));
+  return group(
+    concat([
+      group(concat(declaration)),
+      indent(concat([hardline, path.call(print, "body", offset + 2)])),
+      group(concat([hardline, "end"]))
+    ])
+  );
 };
 
 module.exports = {

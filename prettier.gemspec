@@ -13,12 +13,16 @@ Gem::Specification.new do |spec|
   spec.license = package['license']
 
   spec.files =
-    Dir.chdir(File.expand_path('..', __FILE__)) do
-      `git ls-files -z`.split("\x0").select do |f|
-        f.match(
-          /^(bin|exe|src|CHANGELOG.md|package.json|yarn.lock|.rubocop.yml)/
-        )
-      end
+    Dir.chdir(__dir__) do
+      Dir['{{exe,lib,src}/**/*,*.md}'] +
+        %w[
+          bin/console
+          LICENSE
+          node_modules/prettier/bin-prettier.js
+          node_modules/prettier/index.js
+          node_modules/prettier/third-party.js
+          package.json
+        ]
     end
 
   spec.bindir = 'exe'

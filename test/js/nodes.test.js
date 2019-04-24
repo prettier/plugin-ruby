@@ -36,7 +36,11 @@ const expectedUnhandledNodes = [
 ];
 
 const possibleNodes = () => {
-  const child = spawnSync("ruby", ["-rripper", "-e", "puts Ripper::PARSER_EVENTS"]);
+  const child = spawnSync("ruby", [
+    "-rripper",
+    "-e",
+    "puts Ripper::PARSER_EVENTS"
+  ]);
 
   const error = child.stderr.toString();
   if (error) {
@@ -48,8 +52,12 @@ const possibleNodes = () => {
 
 describe("node support", () => {
   test("handles all ripper parsing events", () => {
-    const supportedNodes = Object.keys(nodes).concat(expectedUnhandledNodes).sort();
-    expect(supportedNodes).toEqual(expect.arrayContaining(possibleNodes().sort()));
+    const supportedNodes = Object.keys(nodes)
+      .concat(expectedUnhandledNodes)
+      .sort();
+    expect(supportedNodes).toEqual(
+      expect.arrayContaining(possibleNodes().sort())
+    );
   });
 
   test("when encountering an unsupported node type", () => {

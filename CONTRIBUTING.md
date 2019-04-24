@@ -14,6 +14,7 @@ Ripper is the built-in CRuby lexer and parser that understands your Ruby code. I
 
 You can explore Ripper within an interactive Ruby terminal. The process of identifying the tokens within your source code is called lexing:
 
+<!-- prettier-ignore -->
 ```ruby
 $ irb
 > require 'ripper'
@@ -24,6 +25,7 @@ $ irb
 
 Once the tokens are understood, Ripper constructs an abstract syntax tree:
 
+<!-- prettier-ignore -->
 ```ruby
 $ irb
 > require 'ripper'

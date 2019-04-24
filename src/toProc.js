@@ -27,7 +27,11 @@ const toProc = node => {
   // Ensure there is one and only one parameter, and that it is required.
   const reqParams = params.body[0];
   const otherParams = params.body.slice(1);
-  if (!Array.isArray(reqParams) || reqParams.length !== 1 || otherParams.some(Boolean)) {
+  if (
+    !Array.isArray(reqParams) ||
+    reqParams.length !== 1 ||
+    otherParams.some(Boolean)
+  ) {
     return null;
   }
 
@@ -63,11 +67,11 @@ const toProc = node => {
   const [varRef, call, method, args] = statement.body;
 
   if (
-    varRef.type !== "var_ref"
-    || varRef.body[0].body !== reqParams[0].body
-    || !isCall(call)
-    || method.type !== "@ident"
-    || args
+    varRef.type !== "var_ref" ||
+    varRef.body[0].body !== reqParams[0].body ||
+    !isCall(call) ||
+    method.type !== "@ident" ||
+    args
   ) {
     return null;
   }

@@ -1,11 +1,10 @@
-const { align, concat, group, ifBreak, join, line } = require("prettier").doc.builders;
+const { align, concat, group, ifBreak, join, line } = require("../builders");
 const { docLength, makeArgs, makeCall } = require("../utils");
 
-const hasDef = node => (
-  node.body[1].type === "args_add_block"
-  && node.body[1].body[0].type === "args"
-  && node.body[1].body[0].body[0].type === "def"
-);
+const hasDef = node =>
+  node.body[1].type === "args_add_block" &&
+  node.body[1].body[0].type === "args" &&
+  node.body[1].body[0].body[0].type === "def";
 
 module.exports = {
   command: (path, opts, print) => {
@@ -17,12 +16,16 @@ module.exports = {
     }
 
     const joinedArgs = join(concat([",", line]), args);
-    const breakArgs = hasDef(path.getValue()) ? joinedArgs : align(command.length + 1, joinedArgs);
+    const breakArgs = hasDef(path.getValue())
+      ? joinedArgs
+      : align(command.length + 1, joinedArgs);
 
-    const commandDoc = group(ifBreak(
-      concat([command, " ", breakArgs]),
-      concat([command, " ", joinedArgs])
-    ));
+    const commandDoc = group(
+      ifBreak(
+        concat([command, " ", breakArgs]),
+        concat([command, " ", joinedArgs])
+      )
+    );
 
     if (heredocs.length === 1) {
       return group(concat([commandDoc].concat(heredocs)));
@@ -49,14 +52,14 @@ module.exports = {
     }
 
     const joinedArgs = join(concat([",", line]), args);
-    const breakArgs = path.getValue().body[2].body === "to"
-      ? joinedArgs
-      : align(docLength(concat(parts)), joinedArgs);
+    const breakArgs =
+      path.getValue().body[2].body === "to"
+        ? joinedArgs
+        : align(docLength(concat(parts)), joinedArgs);
 
-    const commandDoc = group(ifBreak(
-      concat(parts.concat(breakArgs)),
-      concat(parts.concat(joinedArgs))
-    ));
+    const commandDoc = group(
+      ifBreak(concat(parts.concat(breakArgs)), concat(parts.concat(joinedArgs)))
+    );
 
     if (heredocs.length === 1) {
       return group(concat([commandDoc].concat(heredocs)));

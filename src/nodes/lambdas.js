@@ -1,6 +1,12 @@
-const { concat, group, ifBreak, indent, line, softline } = require("prettier").doc.builders;
-const { removeLines } = require("prettier").doc.utils;
-
+const {
+  concat,
+  group,
+  ifBreak,
+  indent,
+  line,
+  removeLines,
+  softline
+} = require("../builders");
 const { hasAncestor } = require("../utils");
 
 module.exports = {
@@ -11,7 +17,7 @@ module.exports = {
     if (params.type === "params") {
       paramsConcat = path.call(print, "body", 0);
     } else {
-      ([params] = params.body);
+      [params] = params.body;
       paramsConcat = path.call(print, "body", 0, "body", 0);
     }
 
@@ -25,25 +31,29 @@ module.exports = {
     ]);
 
     if (hasAncestor(path, ["command", "command_call"])) {
-      return group(ifBreak(
-        concat([
-          "lambda {",
-          noParams ? "" : concat([" |", removeLines(paramsConcat), "|"]),
-          indent(concat([line, path.call(print, "body", 1)])),
-          concat([line, "}"])
-        ]),
-        inlineLambda
-      ));
+      return group(
+        ifBreak(
+          concat([
+            "lambda {",
+            noParams ? "" : concat([" |", removeLines(paramsConcat), "|"]),
+            indent(concat([line, path.call(print, "body", 1)])),
+            concat([line, "}"])
+          ]),
+          inlineLambda
+        )
+      );
     }
 
-    return group(ifBreak(
-      concat([
-        "lambda do",
-        noParams ? "" : concat([" |", removeLines(paramsConcat), "|"]),
-        indent(concat([softline, path.call(print, "body", 1)])),
-        concat([softline, "end"])
-      ]),
-      inlineLambda
-    ));
+    return group(
+      ifBreak(
+        concat([
+          "lambda do",
+          noParams ? "" : concat([" |", removeLines(paramsConcat), "|"]),
+          indent(concat([softline, path.call(print, "body", 1)])),
+          concat([softline, "end"])
+        ]),
+        inlineLambda
+      )
+    );
   }
 };

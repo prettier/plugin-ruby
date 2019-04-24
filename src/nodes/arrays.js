@@ -1,40 +1,58 @@
-const { concat, group, ifBreak, indent, join, line, literalline, softline } = require("prettier").doc.builders;
+const {
+  concat,
+  group,
+  ifBreak,
+  indent,
+  join,
+  line,
+  literalline,
+  softline
+} = require("../builders");
 
-const isStringArray = args => args.body.every(arg => (
-  arg.type === "string_literal"
-  && arg.body[0].body.length === 1
-  && arg.body[0].body[0].type === "@tstring_content"
-  && !arg.body[0].body[0].body.includes(" ")
-));
+const isStringArray = args =>
+  args.body.every(
+    arg =>
+      arg.type === "string_literal" &&
+      arg.body[0].body.length === 1 &&
+      arg.body[0].body[0].type === "@tstring_content" &&
+      !arg.body[0].body[0].body.includes(" ")
+  );
 
-const isSymbolArray = args => args.body.every(arg => (
-  arg.type === "symbol_literal"
-));
+const isSymbolArray = args =>
+  args.body.every(arg => arg.type === "symbol_literal");
 
-const makeArray = start => (path, opts, print) => (
-  [start].concat(path.map(print, "body"))
-);
+const makeArray = start => (path, opts, print) =>
+  [start].concat(path.map(print, "body"));
 
-const getSpecialArrayParts = (path, print, args) => args.body.map((_arg, index) => (
-  path.call(print, "body", 0, "body", index, "body", 0, "body", 0)
-));
+const getSpecialArrayParts = (path, print, args) =>
+  args.body.map((_arg, index) =>
+    path.call(print, "body", 0, "body", index, "body", 0, "body", 0)
+  );
 
-const printAref = (path, opts, print) => group(concat([
-  path.call(print, "body", 0),
-  "[",
-  indent(concat([
-    softline,
-    join(concat([",", line]), path.call(print, "body", 1))
-  ])),
-  concat([softline, "]"])
-]));
+const printAref = (path, opts, print) =>
+  group(
+    concat([
+      path.call(print, "body", 0),
+      "[",
+      indent(
+        concat([
+          softline,
+          join(concat([",", line]), path.call(print, "body", 1))
+        ])
+      ),
+      concat([softline, "]"])
+    ])
+  );
 
-const printSpecialArray = parts => group(concat([
-  parts[0],
-  "[",
-  indent(concat([softline, join(line, parts.slice(1))])),
-  concat([softline, "]"])
-]));
+const printSpecialArray = parts =>
+  group(
+    concat([
+      parts[0],
+      "[",
+      indent(concat([softline, join(line, parts.slice(1))])),
+      concat([softline, "]"])
+    ])
+  );
 
 // Extract out the actual elements, taking into account nesting with
 // `args_add_star` nodes. The only nodes that get passed into this function are
@@ -72,11 +90,15 @@ module.exports = {
     }
 
     if (isStringArray(args)) {
-      return printSpecialArray(["%w"].concat(getSpecialArrayParts(path, print, args)));
+      return printSpecialArray(
+        ["%w"].concat(getSpecialArrayParts(path, print, args))
+      );
     }
 
     if (isSymbolArray(args)) {
-      return printSpecialArray(["%i"].concat(getSpecialArrayParts(path, print, args)));
+      return printSpecialArray(
+        ["%i"].concat(getSpecialArrayParts(path, print, args))
+      );
     }
 
     if (!["args", "args_add_star"].includes(args.type)) {
@@ -95,7 +117,8 @@ module.exports = {
       const isInner = index !== elements.length - 1;
 
       const isStraightHeredoc = element.type === "heredoc";
-      const isSquigglyHeredoc = element.type === "string_literal" && element.body[0].type === "heredoc";
+      const isSquigglyHeredoc =
+        element.type === "string_literal" && element.body[0].type === "heredoc";
 
       if (isStraightHeredoc || isSquigglyHeredoc) {
         const heredocNode = isStraightHeredoc ? element : element.body[0];
@@ -107,7 +130,7 @@ module.exports = {
 
         normalDocs.push(
           heredocNode.beging,
-          (isInner || addTrailingCommas) ? "," : "",
+          isInner || addTrailingCommas ? "," : "",
           literalline,
           concat(path.map.apply(path, heredocPath.concat("body"))),
           heredocNode.ending,
@@ -124,11 +147,13 @@ module.exports = {
       }
     });
 
-    return group(concat([
-      "[",
-      indent(concat([softline].concat(normalDocs))),
-      concat([softline, "]"])
-    ]));
+    return group(
+      concat([
+        "[",
+        indent(concat([softline].concat(normalDocs))),
+        concat([softline, "]"])
+      ])
+    );
   },
   qsymbols: makeArray("%i"),
   qwords: makeArray("%w"),

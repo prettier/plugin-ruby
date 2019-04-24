@@ -1,9 +1,8 @@
 const escapePattern = require("../../src/escapePattern");
 
 describe("escape sequences", () => {
-  const should = value => string => (
-    expect(escapePattern.test(string)).toBe(value)
-  );
+  const should = value => string =>
+    expect(escapePattern.test(string)).toBe(value);
 
   const shouldMatch = should(true);
   const shouldNotMatch = should(false);

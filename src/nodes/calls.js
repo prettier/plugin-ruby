@@ -1,12 +1,7 @@
-const { concat, group, indent, softline } = require("prettier").doc.builders;
+const { concat, group, indent, softline } = require("../builders");
 const { makeCall } = require("../utils");
 
-const noIndent = [
-  "array",
-  "hash",
-  "method_add_block",
-  "xstring_literal"
-];
+const noIndent = ["array", "hash", "method_add_block", "xstring_literal"];
 
 module.exports = {
   call: (path, opts, print) => {
@@ -26,6 +21,8 @@ module.exports = {
       return concat([receiver, operator, name]);
     }
 
-    return group(concat([receiver, indent(concat([softline, operator, name]))]));
+    return group(
+      concat([receiver, indent(concat([softline, operator, name]))])
+    );
   }
 };

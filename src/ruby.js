@@ -11,70 +11,66 @@ const hasPragma = text => pragmaPattern.test(text);
  */
 
 module.exports = {
-  languages: [{
-    name: "Ruby",
-    parsers: ["ruby"],
-    extensions: [
-      ".arb",
-      ".axlsx",
-      ".builder",
-      ".eye",
-      ".fcgi",
-      ".gemfile",
-      ".gemspec",
-      ".god",
-      ".jb",
-      ".jbuilder",
-      ".mspec",
-      ".opal",
-      ".pluginspec",
-      ".podspec",
-      ".rabl",
-      ".rake",
-      ".rb",
-      ".rbuild",
-      ".rbw",
-      ".rbx",
-      ".ru",
-      ".ruby",
-      ".thor",
-      ".watchr"
-    ],
-    filenames: [
-      ".irbrc",
-      ".pryrc",
-      "Appraisals",
-      "Berksfile",
-      "Brewfile",
-      "Buildfile",
-      "Capfile",
-      "Cheffile",
-      "Dangerfile",
-      "Deliverfile",
-      "Fastfile",
-      "Gemfile",
-      "Guardfile",
-      "Jarfile",
-      "Mavenfile",
-      "Podfile",
-      "Puppetfile",
-      "Rakefile",
-      "Snapfile",
-      "Thorfile",
-      "Vagabondfile",
-      "Vagrantfile",
-      "buildfile"
-    ],
-    interpreters: [
-      "jruby",
-      "macruby",
-      "rake",
-      "rbx",
-      "ruby"
-    ],
-    linguistLanguageId: 326,
-    vscodeLanguageIds: ["ruby"]
-  }],
+  languages: [
+    {
+      name: "Ruby",
+      parsers: ["ruby"],
+      extensions: [
+        ".arb",
+        ".axlsx",
+        ".builder",
+        ".eye",
+        ".fcgi",
+        ".gemfile",
+        ".gemspec",
+        ".god",
+        ".jb",
+        ".jbuilder",
+        ".mspec",
+        ".opal",
+        ".pluginspec",
+        ".podspec",
+        ".rabl",
+        ".rake",
+        ".rb",
+        ".rbuild",
+        ".rbw",
+        ".rbx",
+        ".ru",
+        ".ruby",
+        ".thor",
+        ".watchr"
+      ],
+      filenames: [
+        ".irbrc",
+        ".pryrc",
+        "Appraisals",
+        "Berksfile",
+        "Brewfile",
+        "Buildfile",
+        "Capfile",
+        "Cheffile",
+        "Dangerfile",
+        "Deliverfile",
+        "Fastfile",
+        "Gemfile",
+        "Guardfile",
+        "Jarfile",
+        "Mavenfile",
+        "Podfile",
+        "Puppetfile",
+        "Rakefile",
+        "Snapfile",
+        "Thorfile",
+        "Vagabondfile",
+        "Vagrantfile",
+        "buildfile"
+      ],
+      interpreters: ["jruby", "macruby", "rake", "rbx", "ruby"],
+      linguistLanguageId: 326,
+      vscodeLanguageIds: ["ruby"]
+    }
+  ],
   parsers: {
     ruby: {
       parse,
@@ -92,31 +88,36 @@ module.exports = {
       type: "boolean",
       category: "Global",
       default: false,
-      description: "Adds a trailing comma to array literals, hash literals, and method calls."
+      description:
+        "Adds a trailing comma to array literals, hash literals, and method calls."
     },
     inlineConditionals: {
       type: "boolean",
       category: "Global",
       default: true,
-      description: "When it fits on one line, allows if and unless statements to use the modifier form."
+      description:
+        "When it fits on one line, allows if and unless statements to use the modifier form."
     },
     inlineLoops: {
       type: "boolean",
       category: "Global",
       default: true,
-      description: "When it fits on one line, allows while and until statements to use the modifier form."
+      description:
+        "When it fits on one line, allows while and until statements to use the modifier form."
     },
     preferHashLabels: {
       type: "boolean",
       category: "Global",
       default: true,
-      description: "When possible, uses the shortened hash key syntax, as opposed to hash rockets."
+      description:
+        "When possible, uses the shortened hash key syntax, as opposed to hash rockets."
     },
     preferSingleQuotes: {
       type: "boolean",
       category: "Global",
       default: true,
-      description: "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals."
+      description:
+        "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals."
     }
   },
   defaultOptions: {

@@ -50,7 +50,7 @@ module Prettier
 
       def run_task
         Prettier.run([('--write' if write), source_files].compact)
-        exit($?.exitstatus) if $?.exited?
+        exit($?.exitstatus) if $?&.exited?
       end
     end
   end

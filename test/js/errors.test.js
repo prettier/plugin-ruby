@@ -1,7 +1,5 @@
 describe("errors", () => {
-  test("invalid ruby", () => (
-    expect("<>").toFailFormat()
-  ));
+  test("invalid ruby", () => expect("<>").toFailFormat());
 
   test("alias errors throws on parsing", () => {
     expect("alias $a $1").toFailFormat(

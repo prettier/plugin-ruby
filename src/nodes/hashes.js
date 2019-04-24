@@ -1,4 +1,12 @@
-const { concat, group, ifBreak, indent, join, line, literalline } = require("prettier").doc.builders;
+const {
+  concat,
+  group,
+  ifBreak,
+  indent,
+  join,
+  line,
+  literalline
+} = require("../builders");
 const { skipAssignIndent } = require("../utils");
 
 const nodeDive = (node, steps) => {
@@ -24,7 +32,10 @@ const makeLabel = (path, { preferHashLabels }, print, steps) => {
     case "symbol_literal":
       if (preferHashLabels && labelNode.body.length === 1) {
         const symbolSteps = steps.concat("body", 0, "body", 0);
-        return concat([path.call.apply(path, [print].concat(symbolSteps)), ":"]);
+        return concat([
+          path.call.apply(path, [print].concat(symbolSteps)),
+          ":"
+        ]);
       }
       return concat([labelDoc, " =>"]);
     case "dyna_symbol":
@@ -61,19 +72,28 @@ module.exports = {
       const valueNode = assocNode.body[1];
 
       const isStraightHeredoc = valueNode.type === "heredoc";
-      const isSquigglyHeredoc = valueNode.type === "string_literal" && valueNode.body[0].type === "heredoc";
+      const isSquigglyHeredoc =
+        valueNode.type === "string_literal" &&
+        valueNode.body[0].type === "heredoc";
 
       if (isStraightHeredoc || isSquigglyHeredoc) {
-        const heredocSteps = isStraightHeredoc ? ["body", 1] : ["body", 1, "body", 0];
+        const heredocSteps = isStraightHeredoc
+          ? ["body", 1]
+          : ["body", 1, "body", 0];
         const { beging, ending } = nodeDive(assocNode, heredocSteps);
 
         assocDocs.push(
           makeLabel(path, opts, print, ["body", 0, index, "body", 0]),
           " ",
           beging,
-          (isInner || addTrailingCommas) ? "," : "",
+          isInner || addTrailingCommas ? "," : "",
           literalline,
-          concat(path.map.apply(path, [print, "body", 0, index].concat(heredocSteps).concat("body"))),
+          concat(
+            path.map.apply(
+              path,
+              [print, "body", 0, index].concat(heredocSteps).concat("body")
+            )
+          ),
           ending,
           isInner ? line : ""
         );
@@ -90,18 +110,19 @@ module.exports = {
 
     return group(concat(assocDocs));
   },
-  bare_assoc_hash: (path, opts, print) => group(
-    join(concat([",", line]), path.map(print, "body", 0))
-  ),
+  bare_assoc_hash: (path, opts, print) =>
+    group(join(concat([",", line]), path.map(print, "body", 0))),
   hash: (path, opts, print) => {
     if (path.getValue().body[0] === null) {
       return "{}";
     }
 
-    return group(concat([
-      "{",
-      indent(concat([line, concat(path.map(print, "body"))])),
-      concat([line, "}"])
-    ]));
+    return group(
+      concat([
+        "{",
+        indent(concat([line, concat(path.map(print, "body"))])),
+        concat([line, "}"])
+      ])
+    );
   }
 };

@@ -1,4 +1,10 @@
-const { breakParent, concat, hardline, lineSuffix, literalline } = require("prettier").doc.builders;
+const {
+  breakParent,
+  concat,
+  hardline,
+  lineSuffix,
+  literalline
+} = require("./builders");
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
@@ -59,7 +65,10 @@ const makeArgs = (path, opts, print, argsIndex) => {
     if (argNode.type === "heredoc") {
       pattern = [index, "body"];
       heredoc = argNode;
-    } else if (argNode.type === "string_literal" && argNode.body[0].type === "heredoc") {
+    } else if (
+      argNode.type === "string_literal" &&
+      argNode.body[0].type === "heredoc"
+    ) {
       pattern = [index, "body", 0, "body"];
       [heredoc] = argNode.body;
     } else {
@@ -67,7 +76,9 @@ const makeArgs = (path, opts, print, argsIndex) => {
     }
 
     const content = path.map.apply(path, argPattern.slice().concat(pattern));
-    heredocs.push(concat([literalline].concat(content).concat([heredoc.ending])));
+    heredocs.push(
+      concat([literalline].concat(content).concat([heredoc.ending]))
+    );
     args[index] = heredoc.beging;
   });
 
@@ -86,10 +97,8 @@ const makeCall = (path, opts, print) => {
 
 const makeList = (path, opts, print) => path.map(print, "body");
 
-const prefix = value => (path, opts, print) => concat([
-  value,
-  path.call(print, "body", 0)
-]);
+const prefix = value => (path, opts, print) =>
+  concat([value, path.call(print, "body", 0)]);
 
 const printComments = (printed, start, comments) => {
   let node = printed;
@@ -114,17 +123,15 @@ const printComments = (printed, start, comments) => {
   return node;
 };
 
-const skipAssignIndent = node => (
-  ["array", "hash", "heredoc", "lambda", "regexp_literal"].includes(node.type)
-    || (node.type === "call" && skipAssignIndent(node.body[0]))
-    || (node.type === "string_literal" && node.body[0].type === "heredoc")
-);
+const skipAssignIndent = node =>
+  ["array", "hash", "heredoc", "lambda", "regexp_literal"].includes(
+    node.type
+  ) ||
+  (node.type === "call" && skipAssignIndent(node.body[0])) ||
+  (node.type === "string_literal" && node.body[0].type === "heredoc");
 
-const surround = (left, right) => (path, opts, print) => concat([
-  left,
-  path.call(print, "body", 0),
-  right
-]);
+const surround = (left, right) => (path, opts, print) =>
+  concat([left, path.call(print, "body", 0), right]);
 
 module.exports = {
   concatBody,

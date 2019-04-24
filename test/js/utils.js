@@ -1,4 +1,6 @@
-const long = Array(80).fill("a").join("");
+const long = Array(80)
+  .fill("a")
+  .join("");
 
 const ruby = code => {
   const lines = code.split("\n");

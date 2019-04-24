@@ -2,33 +2,25 @@ const { long, ruby } = require("./utils");
 
 describe("conditionals", () => {
   // from ruby test/ruby/test_not.rb
-  test("not operator, empty parens", () => (
-    expect("assert_equal(true, (not ()))").toMatchFormat()
-  ));
+  test("not operator, empty parens", () =>
+    expect("assert_equal(true, (not ()))").toMatchFormat());
 
   describe("when inline allowed", () => {
     describe.each(["if", "unless"])("%s keyword", keyword => {
-      test("inline stays", () => (
-        expect(`1 ${keyword} a`).toMatchFormat()
-      ));
+      test("inline stays", () => expect(`1 ${keyword} a`).toMatchFormat());
 
-      test("multi line changes", () => (
-        expect(`${keyword} a\n  1\nend`).toChangeFormat(`1 ${keyword} a`)
-      ));
+      test("multi line changes", () =>
+        expect(`${keyword} a\n  1\nend`).toChangeFormat(`1 ${keyword} a`));
 
-      test("inline breaking changes", () => (
+      test("inline breaking changes", () =>
         expect(`${long} ${keyword} ${long}`).toChangeFormat(
           `${keyword} ${long}\n  ${long}\nend`
-        )
-      ));
+        ));
 
-      test("multi line breaking stays", () => (
-        expect(`${keyword} ${long}\n  ${long}\nend`).toMatchFormat()
-      ));
+      test("multi line breaking stays", () =>
+        expect(`${keyword} ${long}\n  ${long}\nend`).toMatchFormat());
 
-      test("not operator", () => (
-        expect(`b ${keyword} not a`).toMatchFormat()
-      ));
+      test("not operator", () => expect(`b ${keyword} not a`).toMatchFormat());
 
       test("empty first body", () => {
         const content = ruby(`
@@ -66,36 +58,31 @@ describe("conditionals", () => {
 
   describe("when inline not allowed", () => {
     describe.each(["if", "unless"])("%s keyword", keyword => {
-      test("inline changes", () => (
+      test("inline changes", () =>
         expect(`1 ${keyword} a`).toChangeFormat(`${keyword} a\n  1\nend`, {
           inlineConditionals: false
-        })
-      ));
+        }));
 
-      test("multi line stays", () => (
+      test("multi line stays", () =>
         expect(`${keyword} a\n  1\nend`).toMatchFormat({
           inlineConditionals: false
-        })
-      ));
+        }));
 
-      test("inline breaking changes", () => (
+      test("inline breaking changes", () =>
         expect(`${long} ${keyword} ${long}`).toChangeFormat(
           `${keyword} ${long}\n  ${long}\nend`,
           { inlineConditionals: false }
-        )
-      ));
+        ));
 
-      test("multi line breaking stays", () => (
+      test("multi line breaking stays", () =>
         expect(`${keyword} ${long}\n  ${long}\nend`).toMatchFormat({
           inlineConditionals: false
-        })
-      ));
+        }));
 
-      test("not operator", () => (
+      test("not operator", () =>
         expect(`${keyword} not a\n  b\nend`).toMatchFormat({
           inlineConditionals: false
-        })
-      ));
+        }));
 
       test("empty first body", () => {
         const content = ruby(`
@@ -132,19 +119,18 @@ describe("conditionals", () => {
   });
 
   describe("ternaries", () => {
-    test("non-breaking", () => (
-      expect("a ? 1 : 2").toMatchFormat()
-    ));
+    test("non-breaking", () => expect("a ? 1 : 2").toMatchFormat());
 
-    test("breaking", () => (
-      expect(`a ? ${long} : ${long}`).toChangeFormat(ruby(`
+    test("breaking", () =>
+      expect(`a ? ${long} : ${long}`).toChangeFormat(
+        ruby(`
         if a
           ${long}
         else
           ${long}
         end
-      `))
-    ));
+      `)
+      ));
 
     test("transform from if/else", () => {
       const content = ruby(`

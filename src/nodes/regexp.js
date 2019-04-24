@@ -1,4 +1,4 @@
-const { concat } = require("prettier").doc.builders;
+const { concat } = require("../builders");
 const { makeList } = require("../utils");
 
 module.exports = {
@@ -6,8 +6,12 @@ module.exports = {
   regexp_literal: (path, opts, print) => {
     const [contents, ending] = path.map(print, "body");
 
-    const useBraces = contents.some(content => typeof content === "string" && content.includes("/"));
-    const parts = [useBraces ? "%r{" : "/"].concat(contents).concat([useBraces ? "}" : "/", ending.slice(1)]);
+    const useBraces = contents.some(
+      content => typeof content === "string" && content.includes("/")
+    );
+    const parts = [useBraces ? "%r{" : "/"]
+      .concat(contents)
+      .concat([useBraces ? "}" : "/", ending.slice(1)]);
 
     return concat(parts);
   }
