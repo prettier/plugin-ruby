@@ -1,7 +1,11 @@
-const { spawn } = require("child_process");
+const { spawn, spawnSync } = require("child_process");
 const path = require("path");
 const prettier = require("prettier");
 const readline = require("readline");
+
+// Set RUBY_VERSION so certain tests only run for certain versions
+process.env.RUBY_VERSION =
+  spawnSync("ruby", ["-e", "puts RUBY_VERSION"]).stdout.toString().trim();
 
 // eslint-disable-next-line no-underscore-dangle
 const { formatAST } = prettier.__debug;
