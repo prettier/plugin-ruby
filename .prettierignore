@@ -2,3 +2,11 @@
 /coverage/
 /pkg/
 /vendor/
+
+/.all-contributorsrc
+/.eslintcache
+/.*ignore
+/bin/ci-install
+/docs/logo.png
+/*.lock
+/LICENSE
