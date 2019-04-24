@@ -1,20 +1,20 @@
 language: ruby
 rvm:
-- ruby-head
-- 2.6.3
-- 2.5.5
+  - ruby-head
+  - 2.6.3
+  - 2.5.5
 branches:
   only: master
 before_install: bin/ci-install
 script:
-- RUBY_VERSION=$(ruby -e 'puts RUBY_VERSION') yarn test
-- yarn lint
-- yarn test
-- yarn print --check '**/*'
-- bundle exec rake test
+  - RUBY_VERSION=$(ruby -e 'puts RUBY_VERSION') yarn test
+  - yarn lint
+  - yarn test
+  - yarn print --check '**/*'
+  - bundle exec rake test
 cache:
-- bundler
-- yarn
+  - bundler
+  - yarn
 matrix:
   allow_failures:
     - rvm: ruby-head

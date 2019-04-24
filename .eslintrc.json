@@ -9,10 +9,13 @@
     "arrow-parens": ["error", "as-needed"],
     "comma-dangle": ["error", "never"],
     "global-require": "off",
-    "no-unused-vars": ["error", {
-      "argsIgnorePattern": "^_",
-      "varsIgnorePattern": "^_"
-    }],
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
     "object-curly-newline": "off",
     "prefer-spread": "off",
     "quotes": "off"
