@@ -14,22 +14,25 @@ const rl = readline.createInterface({
   output: parser.stdin
 });
 
-const checkFormat = (before, after, config) => new Promise(resolve => {
-  const opts = Object.assign({ parser: "ruby", plugins: ["."] }, config);
+const checkFormat = (before, after, config) =>
+  new Promise(resolve => {
+    const opts = Object.assign({ parser: "ruby", plugins: ["."] }, config);
 
-  rl.question(`${before}\n---\n`, response => {
-    const { formatted } = formatAST(JSON.parse(response), opts);
+    rl.question(`${before}\n---\n`, response => {
+      const { formatted } = formatAST(JSON.parse(response), opts);
 
-    resolve({
-      pass: formatted === `${after}\n`,
-      message: () => `Expected:\n${after}\nReceived:\n${formatted}`
+      resolve({
+        pass: formatted === `${after}\n`,
+        message: () => `Expected:\n${after}\nReceived:\n${formatted}`
+      });
     });
   });
-});
 
-const realFormat = content => prettier.format(content, {
-  parser: "ruby", plugins: ["."]
-});
+const realFormat = content =>
+  prettier.format(content, {
+    parser: "ruby",
+    plugins: ["."]
+  });
 
 expect.extend({
   toChangeFormat(before, after, config = {}) {
@@ -61,14 +64,14 @@ expect.extend({
     const filepath = path.join(__dirname, filename);
     const plugin = path.join(__dirname, "..", "..", "src", "ruby");
 
-    return prettier.getFileInfo(filepath, { plugins: [plugin] }).then(
-      ({ inferredParser }) => ({
+    return prettier
+      .getFileInfo(filepath, { plugins: [plugin] })
+      .then(({ inferredParser }) => ({
         pass: inferredParser === "ruby",
         message: () => `
           Expected prettier to infer the ruby parser for ${filename},
           but got ${inferredParser} instead
         `
-      })
-    );
+      }));
   }
 });

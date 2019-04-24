@@ -1,15 +1,16 @@
 const { ruby } = require("./utils");
 
 describe("rescue", () => {
-  test("inline", () => (
-    expect("a rescue nil").toChangeFormat(ruby(`
+  test("inline", () =>
+    expect("a rescue nil").toChangeFormat(
+      ruby(`
       begin
         a
       rescue StandardError
         nil
       end
-    `))
-  ));
+    `)
+    ));
 
   // from ruby spec/ruby/language/rescue_spec.rb
   test("splat errors", () => {
@@ -47,7 +48,8 @@ describe("rescue", () => {
       end
     `);
 
-    return expect(content).toChangeFormat(ruby(`
+    return expect(content).toChangeFormat(
+      ruby(`
       begin
         1
       rescue ArgumentError
@@ -68,6 +70,7 @@ describe("rescue", () => {
       ensure
         6
       end
-    `));
+    `)
+    );
   });
 });

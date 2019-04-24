@@ -1,37 +1,26 @@
 const { long, ruby } = require("./utils");
 
 describe("array", () => {
-  test("empty arrays", () => (
-    expect("[]").toMatchFormat()
-  ));
+  test("empty arrays", () => expect("[]").toMatchFormat());
 
-  test("basic formatting", () => (
-    expect("[1, 2, 3]").toMatchFormat()
-  ));
+  test("basic formatting", () => expect("[1, 2, 3]").toMatchFormat());
 
-  test("transforms basic string arrays", () => (
-    expect("['a', 'b', 'c', 'd', 'e']").toChangeFormat("%w[a b c d e]")
-  ));
+  test("transforms basic string arrays", () =>
+    expect("['a', 'b', 'c', 'd', 'e']").toChangeFormat("%w[a b c d e]"));
 
-  test("does not transform string arrays with spaces", () => (
-    expect("['a', 'b c', 'd', 'e']").toMatchFormat()
-  ));
+  test("does not transform string arrays with spaces", () =>
+    expect("['a', 'b c', 'd', 'e']").toMatchFormat());
 
-  test("does not transform string arrays with interpolation", () => (
-    expect(`['a', "b#{c}d", 'e']`).toMatchFormat()
-  ));
+  test("does not transform string arrays with interpolation", () =>
+    expect(`['a', "b#{c}d", 'e']`).toMatchFormat());
 
-  test("transforms basic symbol arrays", () => (
-    expect("[:a, :b, :c]").toChangeFormat("%i[a b c]")
-  ));
+  test("transforms basic symbol arrays", () =>
+    expect("[:a, :b, :c]").toChangeFormat("%i[a b c]"));
 
-  test("does not transform symbol arrays with dynamic symbols", () => (
-    expect("[:'a + b']").toMatchFormat()
-  ));
+  test("does not transform symbol arrays with dynamic symbols", () =>
+    expect("[:'a + b']").toMatchFormat());
 
-  test("handles splats", () => (
-    expect("[1, 2, *[3, 4], 5, 6]").toMatchFormat()
-  ));
+  test("handles splats", () => expect("[1, 2, *[3, 4], 5, 6]").toMatchFormat());
 
   test("breaks appropriately", () => {
     const contents = ruby(`
@@ -56,21 +45,13 @@ describe("array", () => {
     return expect(before).toChangeFormat(after, { addTrailingCommas: true });
   });
 
-  test("literal reference", () => (
-    expect("array[5]").toMatchFormat()
-  ));
+  test("literal reference", () => expect("array[5]").toMatchFormat());
 
-  test("dynamic reference", () => (
-    expect("array[idx]").toMatchFormat()
-  ));
+  test("dynamic reference", () => expect("array[idx]").toMatchFormat());
 
-  test("literal assignment", () => (
-    expect("array[5] = 6").toMatchFormat()
-  ));
+  test("literal assignment", () => expect("array[5] = 6").toMatchFormat());
 
-  test("dynamic assignment", () => (
-    expect("array[idx] = 6").toMatchFormat()
-  ));
+  test("dynamic assignment", () => expect("array[idx] = 6").toMatchFormat());
 
   test("comments within assignment", () => {
     const contents = ruby(`
@@ -84,9 +65,8 @@ describe("array", () => {
     return expect(contents).toMatchFormat();
   });
 
-  test("breaking maintains calls on the end", () => (
-    expect(`[${long}].freeze`).toChangeFormat(`[\n  ${long}\n].freeze`)
-  ));
+  test("breaking maintains calls on the end", () =>
+    expect(`[${long}].freeze`).toChangeFormat(`[\n  ${long}\n].freeze`));
 
   describe.each(["<<-HERE", "<<~HERE"])("%s heredocs as elements", start => {
     test("as the first value", () => {

@@ -151,17 +151,14 @@ describe("comments", () => {
   });
 
   describe("inline", () => {
-    test("basic", () => (
-      expect("foo # this is an inline comment").toMatchFormat()
-    ));
+    test("basic", () =>
+      expect("foo # this is an inline comment").toMatchFormat());
 
-    test("commands", () => (
-      expect("command 'foo' # this is an inline comment").toMatchFormat()
-    ));
+    test("commands", () =>
+      expect("command 'foo' # this is an inline comment").toMatchFormat());
 
-    test("command calls", () => (
-      expect("command.call 'foo' # this is an inline comment").toMatchFormat()
-    ));
+    test("command calls", () =>
+      expect("command.call 'foo' # this is an inline comment").toMatchFormat());
   });
 
   describe("arrays", () => {
