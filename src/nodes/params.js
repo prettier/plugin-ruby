@@ -1,11 +1,20 @@
 const { concat, group, join, line } = require("../builders");
 
-const printGenericRestParam = symbol => (path, opts, print) => (
-  path.getValue().body[0] ? concat([symbol, path.call(print, "body", 0)]) : symbol
-);
+const printGenericRestParam = symbol => (path, opts, print) =>
+  path.getValue().body[0]
+    ? concat([symbol, path.call(print, "body", 0)])
+    : symbol;
 
 const printParams = (path, opts, print) => {
-  const [reqs, optls, rest, post, kwargs, kwargRest, block] = path.getValue().body;
+  const [
+    reqs,
+    optls,
+    rest,
+    post,
+    kwargs,
+    kwargRest,
+    block
+  ] = path.getValue().body;
   let parts = [];
 
   if (reqs) {
@@ -13,11 +22,15 @@ const printParams = (path, opts, print) => {
   }
 
   if (optls) {
-    parts = parts.concat(optls.map((_, index) => concat([
-      path.call(print, "body", 1, index, 0),
-      " = ",
-      path.call(print, "body", 1, index, 1)
-    ])));
+    parts = parts.concat(
+      optls.map((_, index) =>
+        concat([
+          path.call(print, "body", 1, index, 0),
+          " = ",
+          path.call(print, "body", 1, index, 1)
+        ])
+      )
+    );
   }
 
   if (rest) {
@@ -29,12 +42,14 @@ const printParams = (path, opts, print) => {
   }
 
   if (kwargs) {
-    parts = parts.concat(kwargs.map(([, value], index) => {
-      if (!value) {
-        return path.call(print, "body", 4, index, 0);
-      }
-      return group(join(" ", path.map(print, "body", 4, index)));
-    }));
+    parts = parts.concat(
+      kwargs.map(([, value], index) => {
+        if (!value) {
+          return path.call(print, "body", 4, index, 0);
+        }
+        return group(join(" ", path.map(print, "body", 4, index)));
+      })
+    );
   }
 
   if (kwargRest) {

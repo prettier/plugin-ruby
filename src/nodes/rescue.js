@@ -1,17 +1,27 @@
-const { align, concat, group, hardline, indent, join, line } = require("../builders");
+const {
+  align,
+  concat,
+  group,
+  hardline,
+  indent,
+  join,
+  line
+} = require("../builders");
 const { literal } = require("../utils");
 
 module.exports = {
-  begin: (path, opts, print) => concat([
-    "begin",
-    indent(concat([hardline, concat(path.map(print, "body"))])),
-    hardline,
-    "end"
-  ]),
-  ensure: (path, opts, print) => concat([
-    "ensure",
-    indent(concat([hardline, concat(path.map(print, "body"))]))
-  ]),
+  begin: (path, opts, print) =>
+    concat([
+      "begin",
+      indent(concat([hardline, concat(path.map(print, "body"))])),
+      hardline,
+      "end"
+    ]),
+  ensure: (path, opts, print) =>
+    concat([
+      "ensure",
+      indent(concat([hardline, concat(path.map(print, "body"))]))
+    ]),
   redo: literal("redo"),
   rescue: (path, opts, print) => {
     const [exception, variable, _stmts, addition] = path.getValue().body;
@@ -53,14 +63,15 @@ module.exports = {
 
     return group(concat(parts));
   },
-  rescue_mod: (path, opts, print) => concat([
-    "begin",
-    indent(concat([hardline, path.call(print, "body", 0)])),
-    hardline,
-    "rescue StandardError",
-    indent(concat([hardline, path.call(print, "body", 1)])),
-    hardline,
-    "end"
-  ]),
+  rescue_mod: (path, opts, print) =>
+    concat([
+      "begin",
+      indent(concat([hardline, path.call(print, "body", 0)])),
+      hardline,
+      "rescue StandardError",
+      indent(concat([hardline, path.call(print, "body", 1)])),
+      hardline,
+      "end"
+    ]),
   retry: literal("retry")
 };

@@ -1,4 +1,12 @@
-const { align, concat, fill, group, hardline, indent, line } = require("../builders");
+const {
+  align,
+  concat,
+  fill,
+  group,
+  hardline,
+  indent,
+  line
+} = require("../builders");
 
 module.exports = {
   case: (path, opts, print) => {
@@ -10,24 +18,24 @@ module.exports = {
       statement.push(" ", path.call(print, "body", 0));
     }
 
-    return concat(statement.concat([
-      hardline,
-      path.call(print, "body", 1),
-      hardline,
-      "end"
-    ]));
+    return concat(
+      statement.concat([hardline, path.call(print, "body", 1), hardline, "end"])
+    );
   },
   when: (path, opts, print) => {
     const [_preds, _stmts, addition] = path.getValue().body;
 
     // The `fill` builder command expects an array of docs alternating with
     // line breaks. This is so it can loop through and determine where to break.
-    const preds = fill(path.call(print, "body", 0).reduce(
-      (accum, pred, index) => (
-        index === 0 ? [pred] : accum.concat([",", line, pred])
-      ),
-      null
-    ));
+    const preds = fill(
+      path
+        .call(print, "body", 0)
+        .reduce(
+          (accum, pred, index) =>
+            index === 0 ? [pred] : accum.concat([",", line, pred]),
+          null
+        )
+    );
 
     const stmts = path.call(print, "body", 1);
     const parts = [concat(["when ", align("when ".length, preds)])];

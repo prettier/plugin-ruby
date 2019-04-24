@@ -2,6 +2,8 @@
 // method. In that case, we need to pull `prettier` from the node_modules
 // directly, as it's been shipped with the gem.
 const source = process.env.RBPRETTIER ? "../node_modules/prettier" : "prettier";
+
+// eslint-disable-next-line import/no-dynamic-require
 const { builders, utils } = require(source).doc;
 
 module.exports = Object.assign({}, builders, utils);

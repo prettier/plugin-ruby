@@ -1,14 +1,13 @@
 {
-  "extends": "airbnb-base",
+  "extends": [
+    "airbnb-base",
+    "prettier"
+  ],
   "env": {
     "jest": true,
     "node": true
   },
   "rules": {
-    "arrow-body-style": ["error", "as-needed"],
-    "arrow-parens": ["error", "as-needed"],
-    "comma-dangle": ["error", "never"],
-    "global-require": "off",
     "no-unused-vars": [
       "error",
       {
@@ -16,11 +15,6 @@
         "varsIgnorePattern": "^_"
       }
     ],
-    "object-curly-newline": "off",
-    "prefer-spread": "off",
-    "quotes": "off"
-  },
-  "globals": {
-    "runCase": "readonly"
+    "prefer-spread": "off"
   }
 }

@@ -1,9 +1,17 @@
-const { breakParent, concat, group, ifBreak, indent, softline } = require("../builders");
+const {
+  breakParent,
+  concat,
+  group,
+  ifBreak,
+  indent,
+  softline
+} = require("../builders");
 const { hasAncestor } = require("../utils");
 
 const printBlock = (path, opts, print) => {
   const [variables, statements] = path.getValue().body;
-  const stmts = statements.type === "stmts" ? statements.body : statements.body[0].body;
+  const stmts =
+    statements.type === "stmts" ? statements.body : statements.body[0].body;
 
   let doBlockBody = "";
   if (stmts.length !== 1 || stmts[0].type !== "void_stmt") {
@@ -26,7 +34,10 @@ const printBlock = (path, opts, print) => {
 
   // We can hit this next pattern if within the block the only statement is a
   // comment.
-  if (stmts.length > 1 && stmts.filter(stmt => stmt.type !== "@comment").length === 1) {
+  if (
+    stmts.length > 1 &&
+    stmts.filter(stmt => stmt.type !== "@comment").length === 1
+  ) {
     return concat([breakParent, doBlock]);
   }
 
@@ -39,7 +50,7 @@ const printBlock = (path, opts, print) => {
   const hasBody = stmts.some(({ type }) => type !== "void_stmt");
   const braceBlock = concat([
     " {",
-    (hasBody || variables) ? " " : "",
+    hasBody || variables ? " " : "",
     variables ? path.call(print, "body", 0) : "",
     path.call(print, "body", 1),
     hasBody ? " " : "",
