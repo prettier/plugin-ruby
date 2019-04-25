@@ -29,15 +29,21 @@ const makeLabel = (path, { preferHashLabels }, print, steps) => {
         return labelDoc;
       }
       return `:${labelDoc.slice(0, labelDoc.length - 1)} =>`;
-    case "symbol_literal":
-      if (preferHashLabels && labelNode.body.length === 1) {
+    case "symbol_literal": {
+      // You can have a symbol literal as a key in a hash that ends with an =
+      // character, which breaks when you use hash labels.
+      const endsInEquals = labelNode.body[0].body[0].body.endsWith("=");
+
+      if (preferHashLabels && labelNode.body.length === 1 && !endsInEquals) {
         const symbolSteps = steps.concat("body", 0, "body", 0);
+
         return concat([
           path.call.apply(path, [print].concat(symbolSteps)),
           ":"
         ]);
       }
       return concat([labelDoc, " =>"]);
+    }
     case "dyna_symbol":
       if (preferHashLabels) {
         return concat(labelDoc.parts.slice(1).concat(":"));
