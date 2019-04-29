@@ -143,6 +143,9 @@ describe("hash", () => {
 
     test("hash rockets stay when needed", () =>
       expect("{ Foo => 1, Bar => 2 }").toMatchFormat());
+
+    test("ending in equals stays", () =>
+      expect("{ :foo= => 'bar' }").toMatchFormat());
   });
 
   describe("when hash labels disallowed", () => {
@@ -161,5 +164,8 @@ describe("hash", () => {
       expect("{ Foo => 1, Bar => 2 }").toMatchFormat({
         preferHashLabels: false
       }));
+
+    test("ending in equals stays", () =>
+      expect("{ :foo= => 'bar' }").toMatchFormat());
   });
 });

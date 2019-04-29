@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- When symbol literal hash keys end with `=`, they cannot be transformed into hash labels.
+
 ## [0.12.1] - 2019-04-22
 
 ### Changed
