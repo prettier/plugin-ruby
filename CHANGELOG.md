@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [0.12.2] - 2019-04-30
+
 ### Changed
 
 - When symbol literal hash keys end with `=`, they cannot be transformed into hash labels.
@@ -332,7 +334,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.12.1...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.12.2...HEAD
+[0.12.2]: https://github.com/prettier/plugin-ruby/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/prettier/plugin-ruby/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/prettier/plugin-ruby/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/prettier/plugin-ruby/compare/v0.10.0...v0.11.0
