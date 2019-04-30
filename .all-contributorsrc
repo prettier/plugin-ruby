@@ -98,7 +98,17 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "xipgroc",
+      "name": "xipgroc",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/28561131?v=4",
+      "profile": "https://github.com/xipgroc",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
-  "contributorsPerLine": 7
+  "contributorsPerLine": 7,
+  "commitConvention": "none"
 }
