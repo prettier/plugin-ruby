@@ -325,9 +325,18 @@ const nodes = {
     return concat([method, args]);
   },
   method_add_block: (path, opts, print) => {
-    const [_method, block] = path.getValue().body;
+    const [method, block] = path.getValue().body;
+    const proc = toProc(block);
 
-    if (toProc(block)) {
+    if (proc && method.type === "call") {
+      return group(concat([
+        path.call(print, "body", 0),
+        "(",
+        indent(concat([softline, proc])),
+        concat([softline, ")"])
+      ]));
+    }
+    if (proc) {
       return path.call(print, "body", 0);
     }
     return concat(path.map(print, "body"));
