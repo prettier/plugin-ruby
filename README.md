@@ -22,9 +22,7 @@
   </a>
 </p>
 
-`@prettier/plugin-ruby` is a [prettier](https://prettier.io/) plugin for the Ruby programming language. `prettier` is an opinionated code formatter that supports multiple languages and integrates with most editors. The idea is to eliminate discussions of style in code review and allow developers to get back to thinking about code design instead.
-
-Under the hood `@prettier/plugin-ruby` uses Ruby's own `ripper` library which allows this package to maintain parity with the existing Ruby parser. `@prettier/plugin-ruby` supports Ruby versions `2.5`, `2.6`, and `trunk`.
+`@prettier/plugin-ruby` is a [prettier](https://prettier.io/) plugin for the Ruby programming language (versions `2.5` and above). `prettier` is an opinionated code formatter that supports multiple languages and integrates with most editors. The idea is to eliminate discussions of style in code review and allow developers to get back to thinking about code design instead.
 
 For example, the below [code segment](http://www.rubyinside.com/advent2006/4-ruby-obfuscation.html):
 
@@ -70,35 +68,55 @@ end
 
 ## Getting started
 
-First, your system on which you're running is going to need a couple of things:
+To run `prettier` with the Ruby plugin, you're going to need [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) (version `2.5` or newer) and [`node`](https://nodejs.org/en/download/) (version `8.3` or newer).
 
-- [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) `2.5` or newer - there are a lot of ways to install `ruby`, but I recommend [`rbenv`](https://github.com/rbenv/rbenv)
-- [`node`](https://nodejs.org/en/download/) `8.3` or newer - `prettier` is a JavaScript package, so you're going to need to install `node` to work with it
-- [`npm`](https://www.npmjs.com/get-npm) or [`yarn`](https://yarnpkg.com/en/docs/getting-started) - these are package managers for JavaScript, either one will do
+If you're integrating with a project that is not already using `prettier`, you should use the ruby gem. Otherwise you can use the `npm` package directly.
 
-Second, you're going to need to list `@prettier/plugin-ruby` as a JavaScript dependency from within whatever project on which you're working.
+### Ruby gem
 
-If you do not already have a `package.json` file in the root of your repository, you can create one with:
+Add this line to your application's Gemfile:
 
-```bash
-echo '{ "name": "My Project" }' > package.json
+```ruby
+gem 'prettier'
 ```
 
-After that you can add `prettier` and `@prettier/plugin-ruby` to your `package.json`'s `devDependencies` by running `npm install --save-dev prettier @prettier/plugin-ruby` if you are using `npm` or `yarn add --dev prettier @prettier/plugin-ruby` if you are using `yarn`.
-
-Now, you can run `prettier` to tidy up your `ruby` files! Verify by running against one single file:
+And then execute:
 
 ```bash
-./node_modules/.bin/prettier --write path/to/file.rb
+bundle
 ```
 
-If you're happy, you can can run `prettier` on an entire codebase:
+Or install it yourself as:
 
 ```bash
-./node_modules/.bin/prettier --write '**/*.{rb,rake}'
+gem install prettier
 ```
 
-Note that you can also install `prettier` globally with `npm install -g prettier @prettier/plugin-ruby` or you can add `./node_modules/.bin` to your `$PATH` so you don't need to reference the executable from the directory each time.
+The `rbprettier` executable is now installed and ready for use:
+
+```bash
+bundle exec rbprettier --write '**/*.rb'
+```
+
+### `npm` package
+
+If you're using the `npm` CLI, then add the plugin by:
+
+```bash
+npm install --save-dev prettier @prettier/plugin-ruby
+```
+
+Or if you're using `yarn`, then add the plugin by:
+
+```bash
+yarn add --dev prettier @prettier/plugin-ruby
+```
+
+The `prettier` executable is now installed and ready for use:
+
+```bash
+./node_modules/.bin/prettier --write '**/*.rb'
+```
 
 ## Configuration
 
@@ -127,7 +145,7 @@ file](https://prettier.io/docs/en/configuration.html). For example:
 Or, they can be passed to `prettier` as arguments:
 
 ```bash
-./node_modules/.bin/prettier --prefer-single-quotes false --write '**/*.{rb,rake}'
+prettier --prefer-single-quotes false --write '**/*.rb'
 ```
 
 ## Contributing
