@@ -115,8 +115,18 @@ describe("blocks", () => {
   });
 
   describe("to_proc transform", () => {
-    test("basic", () =>
+    test("basic inline", () =>
       expect("loop { |i| i.to_s }").toChangeFormat("loop(&:to_s)"));
+
+    test("basic multi-line", () => {
+      const content = ruby(`
+        list.each do |node|
+          node.print
+        end
+      `);
+
+      return expect(content).toChangeFormat("list.each(&:print)");
+    });
 
     test("happens for command nodes", () => {
       const content = ruby(`
