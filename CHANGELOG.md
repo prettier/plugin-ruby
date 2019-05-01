@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [INTERNAL] Move massign nodes into their own file.
+
 ## [0.12.2] - 2019-04-30
 
 ### Changed
