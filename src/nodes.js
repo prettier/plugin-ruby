@@ -1,5 +1,5 @@
 const { concat, group, indent, line, softline } = require("./builders");
-const { concatBody, empty, first, prefix } = require("./utils");
+const { concatBody, empty, first } = require("./utils");
 
 const nodes = {
   "@int": (path, _opts, _print) => {
@@ -11,7 +11,7 @@ const nodes = {
       return `0o${body.slice(1)}`;
     }
 
-    // If the number is a decimal number, is sufficiently large, and is not
+    // If the number is a base 10 number, is sufficiently large, and is not
     // already formatted with underscores, then add them in in between the
     // numbers every three characters starting from the right.
     if (!body.startsWith("0") && body.length >= 4 && !body.includes("_")) {
@@ -58,14 +58,7 @@ const nodes = {
       "...",
       path.getValue().body[1] ? path.call(print, "body", 1) : ""
     ]),
-  dyna_symbol: (path, opts, print) => {
-    const { quote } = path.getValue().body[0];
-
-    return concat([":", quote, concat(path.call(print, "body", 0)), quote]);
-  },
   excessed_comma: empty,
-  symbol: prefix(":"),
-  symbol_literal: concatBody,
   unary: (path, opts, print) => {
     const operator = path.getValue().body[0];
 
