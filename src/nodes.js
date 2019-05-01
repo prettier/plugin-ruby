@@ -128,7 +128,6 @@ const nodes = {
 
     return parts;
   },
-  assoc_splat: prefix("**"),
   assign: (path, opts, print) => {
     const [printedTarget, printedValue] = path.map(print, "body");
     let adjustedValue = printedValue;

@@ -7,7 +7,7 @@ const {
   line,
   literalline
 } = require("../builders");
-const { skipAssignIndent } = require("../utils");
+const { prefix, skipAssignIndent } = require("../utils");
 
 const nodeDive = (node, steps) => {
   let current = node;
@@ -67,6 +67,7 @@ module.exports = {
 
     return group(concat(parts));
   },
+  assoc_splat: prefix("**"),
   assoclist_from_args: (path, opts, print) => {
     const { addTrailingCommas } = opts;
 
