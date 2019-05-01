@@ -1,6 +1,4 @@
 const {
-  align,
-  breakParent,
   concat,
   dedent,
   group,
@@ -258,17 +256,6 @@ const nodes = {
 
     return concat([":", quote, concat(path.call(print, "body", 0)), quote]);
   },
-  else: (path, opts, print) => {
-    const stmts = path.getValue().body[0];
-
-    return concat([
-      stmts.body.length === 1 && stmts.body[0].type === "command"
-        ? breakParent
-        : "",
-      "else",
-      indent(concat([softline, path.call(print, "body", 0)]))
-    ]);
-  },
   embdoc: (path, _opts, _print) => concat([trim, path.getValue().body]),
   excessed_comma: empty,
   fcall: concatBody,
@@ -310,7 +297,6 @@ const nodes = {
     }
     return concat(path.map(print, "body"));
   },
-  methref: (path, opts, print) => join(".:", path.map(print, "body")),
   module: (path, opts, print) => {
     const declaration = group(concat(["module ", path.call(print, "body", 0)]));
 
@@ -382,24 +368,6 @@ const nodes = {
     markAsRoot(
       concat([join(literalline, path.map(print, "body")), literalline])
     ),
-  return: (path, opts, print) => {
-    const args = path.getValue().body[0].body[0];
-
-    if (!args) {
-      return "return";
-    }
-
-    if (args.body[0] && args.body[0].type === "paren") {
-      // Ignoring the parens node and just going straight to the content
-      return concat([
-        "return ",
-        path.call(print, "body", 0, "body", 0, "body", 0, "body", 0)
-      ]);
-    }
-
-    return concat(["return ", join(", ", path.call(print, "body", 0))]);
-  },
-  return0: literal("return"),
   sclass: (path, opts, print) =>
     group(
       concat([
@@ -441,22 +409,6 @@ const nodes = {
 
     return concat(parts);
   },
-  super: (path, opts, print) => {
-    const args = path.getValue().body[0];
-
-    if (args.type === "arg_paren") {
-      // In case there are explicitly no arguments but they are using parens,
-      // we assume they are attempting to override the initializer and pass no
-      // arguments up.
-      if (args.body[0] === null) {
-        return "super()";
-      }
-
-      return concat(["super", path.call(print, "body", 0)]);
-    }
-
-    return concat(["super ", join(", ", path.call(print, "body", 0))]);
-  },
   symbol: prefix(":"),
   symbol_literal: concatBody,
   top_const_field: prefix("::"),
@@ -469,16 +421,6 @@ const nodes = {
       path.call(print, "body", 1)
     ]);
   },
-  undef: (path, opts, print) =>
-    group(
-      concat([
-        "undef ",
-        align(
-          "undef ".length,
-          join(concat([",", line]), path.map(print, "body", 0))
-        )
-      ])
-    ),
   var_field: concatBody,
   var_ref: first,
   vcall: first,

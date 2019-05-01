@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [INTERNAL] Move massign nodes into their own file.
+- [INTERNAL] Move `assocsplat` into hashes file.
+- [INTERNAL] Move `block_var` into blocks file.
+- [INTERNAL] Move `else` node into the conditionals file.
+- [INTERNAL] Move `super` and `undef` nodes into the methods file.
 
 ## [0.12.2] - 2019-04-30
 
