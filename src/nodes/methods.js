@@ -92,5 +92,6 @@ module.exports = {
           join(concat([",", line]), path.map(print, "body", 0))
         )
       ])
-    )
+    ),
+  zsuper: literal("super")
 };

@@ -304,8 +304,7 @@ const nodes = {
 
     return concat(["yield ", join(", ", path.call(print, "body", 0))]);
   },
-  yield0: literal("yield"),
-  zsuper: literal("super")
+  yield0: literal("yield")
 };
 
 module.exports = Object.assign(
