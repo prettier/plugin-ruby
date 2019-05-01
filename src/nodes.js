@@ -20,7 +20,6 @@ const {
   first,
   literal,
   makeArgs,
-  makeCall,
   prefix
 } = require("./utils");
 
@@ -204,9 +203,6 @@ const nodes = {
   class_name_error: (_path, _opts, _print) => {
     throw new Error("class/module name must be CONSTANT");
   },
-  const_path_field: (path, opts, print) => join("::", path.map(print, "body")),
-  const_path_ref: (path, opts, print) => join("::", path.map(print, "body")),
-  const_ref: first,
   defined: (path, opts, print) =>
     group(
       concat([
@@ -235,13 +231,6 @@ const nodes = {
   embdoc: (path, _opts, _print) => concat([trim, path.getValue().body]),
   excessed_comma: empty,
   fcall: concatBody,
-  field: (path, opts, print) =>
-    group(
-      concat([
-        path.call(print, "body", 0),
-        concat([makeCall(path, opts, print), path.call(print, "body", 2)])
-      ])
-    ),
   method_add_arg: (path, opts, print) => {
     const [method, args] = path.map(print, "body");
     const argNode = path.getValue().body[1];
@@ -378,8 +367,6 @@ const nodes = {
   },
   symbol: prefix(":"),
   symbol_literal: concatBody,
-  top_const_field: prefix("::"),
-  top_const_ref: prefix("::"),
   unary: (path, opts, print) => {
     const operator = path.getValue().body[0];
 
@@ -412,6 +399,7 @@ module.exports = Object.assign(
   require("./nodes/case"),
   require("./nodes/commands"),
   require("./nodes/conditionals"),
+  require("./nodes/constants"),
   require("./nodes/hashes"),
   require("./nodes/hooks"),
   require("./nodes/lambdas"),

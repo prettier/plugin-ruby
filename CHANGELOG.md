@@ -13,7 +13,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Move `block_var` into blocks file.
 - [INTERNAL] Move `else` node into the conditionals file.
 - [INTERNAL] Move `super` and `undef` nodes into the methods file.
-- [INTERNAL] Move `assign` nodes into their own file.
+- [INTERNAL] Move assign nodes into their own file.
+- [INTERNAL] Move constant nodes into their own file.
 
 ## [0.12.2] - 2019-04-30
 
