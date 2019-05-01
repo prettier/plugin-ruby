@@ -1,4 +1,4 @@
-const { concat, group, indent, join, line, softline } = require("../builders");
+const { concat, group, indent, join, line, softline } = require("../prettier");
 const { makeList } = require("../utils");
 
 module.exports = {

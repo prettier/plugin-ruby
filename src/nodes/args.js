@@ -6,7 +6,7 @@ const {
   join,
   line,
   softline
-} = require("../builders");
+} = require("../prettier");
 
 const toProc = require("../toProc");
 const { makeArgs } = require("../utils");

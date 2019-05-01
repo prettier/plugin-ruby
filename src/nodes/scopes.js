@@ -5,7 +5,7 @@ const {
   ifBreak,
   indent,
   line
-} = require("../builders");
+} = require("../prettier");
 
 module.exports = {
   class: (path, opts, print) => {

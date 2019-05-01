@@ -6,7 +6,7 @@ const {
   ifBreak,
   indent,
   softline
-} = require("../builders");
+} = require("../prettier");
 
 const printLoop = keyword => (path, { inlineLoops }, print) =>
   group(

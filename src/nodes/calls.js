@@ -1,4 +1,4 @@
-const { concat, group, indent, softline } = require("../builders");
+const { concat, group, indent, softline } = require("../prettier");
 const toProc = require("../toProc");
 const { concatBody, first, makeCall } = require("../utils");
 

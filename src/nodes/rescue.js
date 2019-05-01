@@ -6,7 +6,7 @@ const {
   indent,
   join,
   line
-} = require("../builders");
+} = require("../prettier");
 const { literal } = require("../utils");
 
 module.exports = {

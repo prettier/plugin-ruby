@@ -10,7 +10,7 @@ const {
   markAsRoot,
   softline,
   trim
-} = require("../builders");
+} = require("../prettier");
 
 module.exports = {
   "@__end__": (path, _opts, _print) => {

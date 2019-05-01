@@ -4,6 +4,13 @@
 const source = process.env.RBPRETTIER ? "../node_modules/prettier" : "prettier";
 
 // eslint-disable-next-line import/no-dynamic-require
-const { builders, utils } = require(source).doc;
+const prettier = require(source);
 
-module.exports = Object.assign({}, builders, utils);
+// Just combine all the things into one big object so that we can import
+// whatever we need from prettier without having to dive too deeply.
+module.exports = Object.assign(
+  {},
+  prettier.doc.builders,
+  prettier.doc.utils,
+  prettier.util
+);

@@ -4,7 +4,7 @@ const {
   hardline,
   lineSuffix,
   literalline
-} = require("./builders");
+} = require("./prettier");
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 

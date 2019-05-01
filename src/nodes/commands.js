@@ -1,4 +1,4 @@
-const { align, concat, group, ifBreak, join, line } = require("../builders");
+const { align, concat, group, ifBreak, join, line } = require("../prettier");
 const { docLength, makeArgs, makeCall } = require("../utils");
 
 const hasDef = node =>

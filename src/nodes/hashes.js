@@ -6,7 +6,7 @@ const {
   join,
   line,
   literalline
-} = require("../builders");
+} = require("../prettier");
 const { prefix, skipAssignIndent } = require("../utils");
 
 const nodeDive = (node, steps) => {

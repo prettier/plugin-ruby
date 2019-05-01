@@ -1,4 +1,4 @@
-const { concat, group, indent, line, softline } = require("../builders");
+const { concat, group, indent, line, softline } = require("../prettier");
 
 module.exports = {
   binary: (path, opts, print) => {

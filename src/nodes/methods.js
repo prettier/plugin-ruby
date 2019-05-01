@@ -6,7 +6,7 @@ const {
   indent,
   join,
   line
-} = require("../builders");
+} = require("../prettier");
 const { first, literal } = require("../utils");
 
 const printMethod = offset => (path, opts, print) => {

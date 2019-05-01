@@ -1,4 +1,4 @@
-const { concat, group, indent, join, line } = require("../builders");
+const { concat, group, indent, join, line } = require("../prettier");
 const { concatBody, first, skipAssignIndent } = require("../utils");
 
 module.exports = {

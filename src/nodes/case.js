@@ -6,7 +6,7 @@ const {
   hardline,
   indent,
   line
-} = require("../builders");
+} = require("../prettier");
 
 module.exports = {
   case: (path, opts, print) => {

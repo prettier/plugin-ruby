@@ -7,7 +7,7 @@ const {
   line,
   literalline,
   softline
-} = require("../builders");
+} = require("../prettier");
 
 const isStringArray = args =>
   args.body.every(

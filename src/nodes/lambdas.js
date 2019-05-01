@@ -6,7 +6,7 @@ const {
   line,
   removeLines,
   softline
-} = require("../builders");
+} = require("../prettier");
 const { hasAncestor } = require("../utils");
 
 module.exports = {

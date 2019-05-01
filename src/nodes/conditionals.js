@@ -7,7 +7,7 @@ const {
   ifBreak,
   indent,
   softline
-} = require("../builders");
+} = require("../prettier");
 
 const noTernary = [
   "@comment",

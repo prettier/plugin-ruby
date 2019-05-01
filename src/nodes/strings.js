@@ -6,7 +6,7 @@ const {
   join,
   literalline,
   softline
-} = require("../builders");
+} = require("../prettier");
 const { concatBody, empty, makeList, prefix, surround } = require("../utils");
 const escapePattern = require("../escapePattern");
 

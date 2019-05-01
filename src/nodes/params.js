@@ -1,4 +1,4 @@
-const { concat, group, join, line } = require("../builders");
+const { concat, group, join, line } = require("../prettier");
 
 const printGenericRestParam = symbol => (path, opts, print) =>
   path.getValue().body[0]

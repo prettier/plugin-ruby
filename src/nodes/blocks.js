@@ -7,7 +7,7 @@ const {
   join,
   removeLines,
   softline
-} = require("../builders");
+} = require("../prettier");
 const { empty, first, hasAncestor } = require("../utils");
 
 const printBlock = (path, opts, print) => {
