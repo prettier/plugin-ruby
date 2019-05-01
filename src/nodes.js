@@ -296,7 +296,6 @@ const nodes = {
 
     return concat(["next ", join(", ", path.call(print, "body", 0))]);
   },
-  number_arg: first,
   paren: (path, opts, print) => {
     if (!path.getValue().body[0]) {
       return "()";

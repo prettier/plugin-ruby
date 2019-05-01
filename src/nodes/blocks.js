@@ -8,7 +8,7 @@ const {
   removeLines,
   softline
 } = require("../builders");
-const { hasAncestor } = require("../utils");
+const { first, hasAncestor } = require("../utils");
 
 const printBlock = (path, opts, print) => {
   const [variables, statements] = path.getValue().body;
@@ -75,5 +75,6 @@ module.exports = {
     return concat(parts);
   },
   brace_block: printBlock,
-  do_block: printBlock
+  do_block: printBlock,
+  number_arg: first
 };
