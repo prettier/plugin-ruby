@@ -50,24 +50,6 @@ module.exports = {
   def: printMethod(0),
   defs: printMethod(2),
   methref: (path, opts, print) => join(".:", path.map(print, "body")),
-  return: (path, opts, print) => {
-    const args = path.getValue().body[0].body[0];
-
-    if (!args) {
-      return "return";
-    }
-
-    if (args.body[0] && args.body[0].type === "paren") {
-      // Ignoring the parens node and just going straight to the content
-      return concat([
-        "return ",
-        path.call(print, "body", 0, "body", 0, "body", 0, "body", 0)
-      ]);
-    }
-
-    return concat(["return ", join(", ", path.call(print, "body", 0))]);
-  },
-  return0: literal("return"),
   super: (path, opts, print) => {
     const args = path.getValue().body[0];
 
