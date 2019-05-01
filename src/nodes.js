@@ -11,7 +11,6 @@ const {
   line,
   literalline,
   markAsRoot,
-  removeLines,
   softline,
   trim
 } = require("./builders");
@@ -164,17 +163,6 @@ const nodes = {
         )
       ])
     );
-  },
-  block_var: (path, opts, print) => {
-    const parts = ["|", removeLines(path.call(print, "body", 0))];
-
-    // The second part of this node is a list of optional block-local variables
-    if (path.getValue().body[1]) {
-      parts.push("; ", join(", ", path.map(print, "body", 1)));
-    }
-
-    parts.push("| ");
-    return concat(parts);
   },
   blockarg: (path, opts, print) => concat(["&", path.call(print, "body", 0)]),
   bodystmt: (path, opts, print) => {

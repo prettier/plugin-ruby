@@ -4,6 +4,8 @@ const {
   group,
   ifBreak,
   indent,
+  join,
+  removeLines,
   softline
 } = require("../builders");
 const { hasAncestor } = require("../utils");
@@ -61,6 +63,17 @@ const printBlock = (path, opts, print) => {
 };
 
 module.exports = {
+  block_var: (path, opts, print) => {
+    const parts = ["|", removeLines(path.call(print, "body", 0))];
+
+    // The second part of this node is a list of optional block-local variables
+    if (path.getValue().body[1]) {
+      parts.push("; ", join(", ", path.map(print, "body", 1)));
+    }
+
+    parts.push("| ");
+    return concat(parts);
+  },
   brace_block: printBlock,
   do_block: printBlock
 };
