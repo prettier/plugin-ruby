@@ -33,7 +33,7 @@ const printParams = (path, opts, print) => {
     );
   }
 
-  if (rest) {
+  if (rest && rest.type !== "excessed_comma") {
     parts.push(path.call(print, "body", 2));
   }
 
@@ -60,7 +60,18 @@ const printParams = (path, opts, print) => {
     parts.push(path.call(print, "body", 6));
   }
 
-  return group(join(concat([",", line]), parts));
+  // You can put an extra comma at the end of block args between pipes to
+  // change what it does. Below is the difference:
+  //
+  // [[1, 2], [3, 4]].each { |x| p x } # prints [1, 2] then [3, 4]
+  // [[1, 2], [3, 4]].each { |x,| p x } # prints 1 then 3
+  //
+  // In ruby 2.5, the excessed comma is indicated by having a 0 in the rest
+  // param position. In ruby 2.6+ it's indicated by having an "excessed_comma"
+  // node in the rest position. Seems odd, but it's true.
+  const comma = rest === 0 || (rest && rest.type === "excessed_comma");
+
+  return group(concat([join(concat([",", line]), parts), comma ? "," : ""]));
 };
 
 const paramError = () => {

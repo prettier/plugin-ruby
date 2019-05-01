@@ -7,7 +7,7 @@ const {
   literalline,
   softline
 } = require("../builders");
-const { concatBody, empty, makeList, surround } = require("../utils");
+const { concatBody, empty, makeList, prefix, surround } = require("../utils");
 const escapePattern = require("../escapePattern");
 
 // If there is some part of this string that matches an escape sequence or that
@@ -72,6 +72,11 @@ module.exports = {
     const quote = preferSingleQuotes ? "'" : '"';
     return body.length === 2 ? concat([quote, body.slice(1), quote]) : body;
   },
+  dyna_symbol: (path, opts, print) => {
+    const { quote } = path.getValue().body[0];
+
+    return concat([":", quote, concat(path.call(print, "body", 0)), quote]);
+  },
   heredoc: (path, opts, print) => {
     const { beging, ending } = path.getValue();
 
@@ -129,6 +134,8 @@ module.exports = {
 
     return concat([quote].concat(parts).concat([quote]));
   },
+  symbol: prefix(":"),
+  symbol_literal: concatBody,
   word_add: concatBody,
   word_new: empty,
   xstring: makeList,

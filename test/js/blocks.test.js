@@ -80,6 +80,8 @@ describe("blocks", () => {
     `)
     ));
 
+  test("excessed_comma nodes", () => expect("proc { |x,| }").toMatchFormat());
+
   describe("args", () => {
     test("no body", () => expect("loop { |i| }").toMatchFormat());
 
