@@ -3,7 +3,6 @@ const {
   dedent,
   group,
   hardline,
-  ifBreak,
   indent,
   join,
   line,
@@ -98,31 +97,6 @@ const nodes = {
 
     return concat(["break ", join(", ", path.call(print, "body", 0))]);
   },
-  class: (path, opts, print) => {
-    const [_constant, superclass, statements] = path.getValue().body;
-
-    const parts = ["class ", path.call(print, "body", 0)];
-    if (superclass) {
-      parts.push(" < ", path.call(print, "body", 1));
-    }
-
-    // If the body is empty, we can replace with a ;
-    const stmts = statements.body[0].body;
-    if (stmts.length === 1 && stmts[0].type === "void_stmt") {
-      return group(concat([concat(parts), ifBreak(line, "; "), "end"]));
-    }
-
-    return group(
-      concat([
-        concat(parts),
-        indent(concat([hardline, path.call(print, "body", 2)])),
-        concat([hardline, "end"])
-      ])
-    );
-  },
-  class_name_error: (_path, _opts, _print) => {
-    throw new Error("class/module name must be CONSTANT");
-  },
   defined: (path, opts, print) =>
     group(
       concat([
@@ -182,23 +156,6 @@ const nodes = {
     }
     return concat(path.map(print, "body"));
   },
-  module: (path, opts, print) => {
-    const declaration = group(concat(["module ", path.call(print, "body", 0)]));
-
-    // If the body is empty, we can replace with a ;
-    const stmts = path.getValue().body[1].body[0].body;
-    if (stmts.length === 1 && stmts[0].type === "void_stmt") {
-      return group(concat([declaration, ifBreak(line, "; "), "end"]));
-    }
-
-    return group(
-      concat([
-        declaration,
-        indent(concat([hardline, path.call(print, "body", 1)])),
-        concat([hardline, "end"])
-      ])
-    );
-  },
   next: (path, opts, print) => {
     const args = path.getValue().body[0].body[0];
 
@@ -242,14 +199,6 @@ const nodes = {
   program: (path, opts, print) =>
     markAsRoot(
       concat([join(literalline, path.map(print, "body")), literalline])
-    ),
-  sclass: (path, opts, print) =>
-    group(
-      concat([
-        concat(["class << ", path.call(print, "body", 0)]),
-        indent(concat([hardline, path.call(print, "body", 1)])),
-        concat([hardline, "end"])
-      ])
     ),
   stmts: (path, opts, print) => {
     const stmts = path.getValue().body;
@@ -328,6 +277,7 @@ module.exports = Object.assign(
   require("./nodes/params"),
   require("./nodes/regexp"),
   require("./nodes/rescue"),
+  require("./nodes/scopes"),
   require("./nodes/strings"),
   nodes
 );

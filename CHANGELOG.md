@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ### Changed
 
-- [INTERNAL] Move arg, assign, constant, and massign nodes into their own files.
+- [INTERNAL] Move arg, assign, constant, massign, and scope nodes into their own files.
 - [INTERNAL] Move `assocsplat`, `block_var`, `else`, `number_arg`, `super`, and `undef` nodes into appropriate files.
 
 ## [0.12.2] - 2019-04-30
