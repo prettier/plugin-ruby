@@ -7,7 +7,7 @@ const {
   join,
   line
 } = require("../builders");
-const { literal } = require("../utils");
+const { first, literal } = require("../utils");
 
 const printMethod = offset => (path, opts, print) => {
   const [_name, params, body] = path.getValue().body.slice(offset);
@@ -46,6 +46,7 @@ const printMethod = offset => (path, opts, print) => {
 };
 
 module.exports = {
+  access_ctrl: first,
   def: printMethod(0),
   defs: printMethod(2),
   methref: (path, opts, print) => join(".:", path.map(print, "body")),

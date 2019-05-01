@@ -42,7 +42,6 @@ const nodes = {
     const { body } = path.getValue();
     return concat([trim, "__END__", literalline, body]);
   },
-  access_ctrl: first,
   binary: (path, opts, print) => {
     const operator = path.getValue().body[1];
     const useNoSpace = operator === "**";
