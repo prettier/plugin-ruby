@@ -21,8 +21,7 @@ const {
   literal,
   makeArgs,
   makeCall,
-  prefix,
-  skipAssignIndent
+  prefix
 } = require("./utils");
 
 const nodes = {
@@ -124,29 +123,6 @@ const nodes = {
       .concat(printed.slice(2));
 
     return parts;
-  },
-  assign: (path, opts, print) => {
-    const [printedTarget, printedValue] = path.map(print, "body");
-    let adjustedValue = printedValue;
-
-    if (
-      ["mrhs_add_star", "mrhs_new_from_args"].includes(
-        path.getValue().body[1].type
-      )
-    ) {
-      adjustedValue = group(join(concat([",", line]), printedValue));
-    }
-
-    if (skipAssignIndent(path.getValue().body[1])) {
-      return group(concat([printedTarget, " = ", adjustedValue]));
-    }
-
-    return group(
-      concat([printedTarget, " =", indent(concat([line, adjustedValue]))])
-    );
-  },
-  assign_error: (_path, _opts, _print) => {
-    throw new Error("Can't set variable");
   },
   binary: (path, opts, print) => {
     const operator = path.getValue().body[1];
@@ -332,15 +308,6 @@ const nodes = {
     return concat(["next ", join(", ", path.call(print, "body", 0))]);
   },
   number_arg: first,
-  opassign: (path, opts, print) =>
-    group(
-      concat([
-        path.call(print, "body", 0),
-        " ",
-        path.call(print, "body", 1),
-        indent(concat([line, path.call(print, "body", 2)]))
-      ])
-    ),
   paren: (path, opts, print) => {
     if (!path.getValue().body[0]) {
       return "()";
@@ -439,6 +406,7 @@ module.exports = Object.assign(
   {},
   require("./nodes/alias"),
   require("./nodes/arrays"),
+  require("./nodes/assign"),
   require("./nodes/blocks"),
   require("./nodes/calls"),
   require("./nodes/case"),
