@@ -1,5 +1,5 @@
 const { concat, group, indent, join, line } = require("../builders");
-const { skipAssignIndent } = require("../utils");
+const { concatBody, first, skipAssignIndent } = require("../utils");
 
 module.exports = {
   assign: (path, opts, print) => {
@@ -33,5 +33,7 @@ module.exports = {
         path.call(print, "body", 1),
         indent(concat([line, path.call(print, "body", 2)]))
       ])
-    )
+    ),
+  var_field: concatBody,
+  var_ref: first
 };

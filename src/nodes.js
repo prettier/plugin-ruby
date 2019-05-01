@@ -1,5 +1,3 @@
-const { concatBody, first } = require("./utils");
-
 const nodes = {
   "@int": (path, _opts, _print) => {
     const { body } = path.getValue();
@@ -22,9 +20,7 @@ const nodes = {
     }
 
     return body;
-  },
-  var_field: concatBody,
-  var_ref: first
+  }
 };
 
 module.exports = Object.assign(
