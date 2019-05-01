@@ -11,8 +11,6 @@ const {
   softline,
   trim
 } = require("./builders");
-
-const toProc = require("./toProc");
 const { concatBody, empty, first, literal, prefix } = require("./utils");
 
 const nodes = {
@@ -123,38 +121,6 @@ const nodes = {
   },
   embdoc: (path, _opts, _print) => concat([trim, path.getValue().body]),
   excessed_comma: empty,
-  fcall: concatBody,
-  method_add_arg: (path, opts, print) => {
-    const [method, args] = path.map(print, "body");
-    const argNode = path.getValue().body[1];
-
-    // This case will ONLY be hit if we can successfully turn the block into a
-    // to_proc call. In that case, we just explicitly add the parens around it.
-    if (argNode.type === "args" && args.length > 0) {
-      return concat([method, "("].concat(args).concat(")"));
-    }
-
-    return concat([method, args]);
-  },
-  method_add_block: (path, opts, print) => {
-    const [method, block] = path.getValue().body;
-    const proc = toProc(block);
-
-    if (proc && method.type === "call") {
-      return group(
-        concat([
-          path.call(print, "body", 0),
-          "(",
-          indent(concat([softline, proc])),
-          concat([softline, ")"])
-        ])
-      );
-    }
-    if (proc) {
-      return path.call(print, "body", 0);
-    }
-    return concat(path.map(print, "body"));
-  },
   next: (path, opts, print) => {
     const args = path.getValue().body[0].body[0];
 
@@ -244,7 +210,6 @@ const nodes = {
   },
   var_field: concatBody,
   var_ref: first,
-  vcall: first,
   yield: (path, opts, print) => {
     if (path.getValue().body[0].type === "paren") {
       return concat(["yield", path.call(print, "body", 0)]);
