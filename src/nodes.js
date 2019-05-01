@@ -14,14 +14,7 @@ const {
 } = require("./builders");
 
 const toProc = require("./toProc");
-const {
-  concatBody,
-  empty,
-  first,
-  literal,
-  makeArgs,
-  prefix
-} = require("./utils");
+const { concatBody, empty, first, literal, prefix } = require("./utils");
 
 const nodes = {
   "@int": (path, _opts, _print) => {
@@ -51,78 +44,6 @@ const nodes = {
     return concat([trim, "__END__", literalline, body]);
   },
   access_ctrl: first,
-  arg_paren: (path, opts, print) => {
-    if (path.getValue().body[0] === null) {
-      return "";
-    }
-
-    const { addTrailingCommas } = opts;
-    const { args, heredocs } = makeArgs(path, opts, print, 0);
-
-    const argsNode = path.getValue().body[0];
-    const hasBlock = argsNode.type === "args_add_block" && argsNode.body[1];
-
-    if (heredocs.length > 1) {
-      return concat(["(", join(", ", args), ")"].concat(heredocs));
-    }
-
-    const parenDoc = group(
-      concat([
-        "(",
-        indent(
-          concat([
-            softline,
-            join(concat([",", line]), args),
-            addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
-          ])
-        ),
-        concat([softline, ")"])
-      ])
-    );
-
-    if (heredocs.length === 1) {
-      return group(concat([parenDoc].concat(heredocs)));
-    }
-
-    return parenDoc;
-  },
-  args: (path, opts, print) => {
-    const args = path.map(print, "body");
-    let blockNode = null;
-
-    [1, 2, 3].find(parent => {
-      const parentNode = path.getParentNode(parent);
-      blockNode =
-        parentNode &&
-        parentNode.type === "method_add_block" &&
-        parentNode.body[1];
-      return blockNode;
-    });
-
-    const proc = blockNode && toProc(blockNode);
-    if (proc) {
-      args.push(proc);
-    }
-
-    return args;
-  },
-  args_add_block: (path, opts, print) => {
-    const parts = path.call(print, "body", 0);
-
-    if (path.getValue().body[1]) {
-      parts.push(concat(["&", path.call(print, "body", 1)]));
-    }
-
-    return parts;
-  },
-  args_add_star: (path, opts, print) => {
-    const printed = path.map(print, "body");
-    const parts = printed[0]
-      .concat([concat(["*", printed[1]])])
-      .concat(printed.slice(2));
-
-    return parts;
-  },
   binary: (path, opts, print) => {
     const operator = path.getValue().body[1];
     const useNoSpace = operator === "**";
@@ -137,7 +58,6 @@ const nodes = {
       ])
     );
   },
-  blockarg: (path, opts, print) => concat(["&", path.call(print, "body", 0)]),
   bodystmt: (path, opts, print) => {
     const [_statements, rescue, elseClause, ensure] = path.getValue().body;
     const parts = [path.call(print, "body", 0)];
@@ -391,6 +311,7 @@ const nodes = {
 module.exports = Object.assign(
   {},
   require("./nodes/alias"),
+  require("./nodes/args"),
   require("./nodes/arrays"),
   require("./nodes/assign"),
   require("./nodes/blocks"),

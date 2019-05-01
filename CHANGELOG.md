@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Move assign nodes into their own file.
 - [INTERNAL] Move constant nodes into their own file.
 - [INTERNAL] Move `number_arg` nodes into the blocks file.
+- [INTERNAL] Move arg nodes into their own files.
 
 ## [0.12.2] - 2019-04-30
 
