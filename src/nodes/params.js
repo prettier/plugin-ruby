@@ -1,4 +1,4 @@
-const { concat, group, join, line } = require("../builders");
+const { concat, group, join, line, softline } = require("../builders");
 
 const printGenericRestParam = symbol => (path, opts, print) =>
   path.getValue().body[0]
@@ -15,7 +15,9 @@ const printParams = (path, opts, print) => {
     kwargRest,
     block
   ] = path.getValue().body;
+
   let parts = [];
+  let excessedComma = false;
 
   if (reqs) {
     parts = parts.concat(path.map(print, "body", 0));
@@ -34,6 +36,9 @@ const printParams = (path, opts, print) => {
   }
 
   if (rest) {
+    if (rest.type === "excessed_comma") {
+      excessedComma = true;
+    }
     parts.push(path.call(print, "body", 2));
   }
 
@@ -60,7 +65,7 @@ const printParams = (path, opts, print) => {
     parts.push(path.call(print, "body", 6));
   }
 
-  return group(join(concat([",", line]), parts));
+  return group(join(concat([",", excessedComma ? softline : line]), parts));
 };
 
 const paramError = () => {

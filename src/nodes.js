@@ -58,7 +58,6 @@ const nodes = {
       "...",
       path.getValue().body[1] ? path.call(print, "body", 1) : ""
     ]),
-  excessed_comma: empty,
   unary: (path, opts, print) => {
     const operator = path.getValue().body[0];
 
