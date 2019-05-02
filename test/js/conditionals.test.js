@@ -52,7 +52,7 @@ describe("conditionals", () => {
         return expect(content).toMatchFormat();
       });
 
-      test.skip("comment in body", () => {
+      test("comment in body", () => {
         const content = ruby(`
           ${keyword} a
             # comment
@@ -62,7 +62,7 @@ describe("conditionals", () => {
         return expect(content).toMatchFormat();
       });
 
-      test.skip("comment on node in body", () => {
+      test("comment on node in body", () => {
         const content = ruby(`
           ${keyword} a
             break # comment

@@ -37,12 +37,6 @@ const noTernary = [
   "zsuper"
 ];
 
-// Certain expressions cannot be shortened into a ternary within significant
-// obfuscation of the code. In that case, we just default to breaking out a
-// multi line if/else statement.
-const canTernary = stmts =>
-  stmts.body.length === 1 && !noTernary.includes(stmts.body[0].type);
-
 const printWithAddition = (keyword, path, print, { breaking = false } = {}) =>
   concat([
     `${keyword} `,
@@ -56,69 +50,111 @@ const printWithAddition = (keyword, path, print, { breaking = false } = {}) =>
 // For the unary `not` operator, we need to explicitly add parentheses to it in
 // order for it to be valid from within a ternary. Otherwise if the clause of
 // the ternary isn't a unary `not`, we can just pass it along.
-const printTernaryClauseDoc = clauseDoc => {
-  if (clauseDoc.type === "concat") {
-    const [clausePart] = clauseDoc.parts;
+const printTernaryClause = clause => {
+  if (clause.type === "concat") {
+    const [part] = clause.parts;
 
-    if (clausePart.type === "concat" && clausePart.parts[0] === "not") {
+    if (part.type === "concat" && part.parts[0] === "not") {
       // We are inside of a statements list and the statement is a unary `not`.
-      return concat(["not(", clausePart.parts[2], ")"]);
+      return concat(["not(", part.parts[2], ")"]);
     }
 
-    if (clauseDoc.parts[0] === "not") {
+    if (clause.parts[0] === "not") {
       // We are inside a ternary condition and the clause is a unary `not`.
-      return concat(["not(", clauseDoc.parts[2], ")"]);
+      return concat(["not(", clause.parts[2], ")"]);
     }
   }
 
-  return clauseDoc;
+  return clause;
 };
 
-const printTernaryConditions = (keyword, truthyClauseDoc, falsyClauseDoc) => {
+// The conditions for a ternary look like `foo : bar` where `foo` represents
+// the truthy clause and `bar` represents the falsy clause. In the case that the
+// parent node is an `unless`, these have to flip in order.
+const printTernaryClauses = (keyword, truthyClause, falsyClause) => {
   const parts = [
-    printTernaryClauseDoc(truthyClauseDoc),
+    printTernaryClause(truthyClause),
     " : ",
-    printTernaryClauseDoc(falsyClauseDoc)
+    printTernaryClause(falsyClause)
   ];
 
   return keyword === "if" ? parts : parts.reverse();
 };
 
-const printConditional = keyword => (path, { inlineConditionals }, print) => {
-  const [_predicate, stmts, addition] = path.getValue().body;
+// Handles ternary nodes. If it does not fit on one line, then we break out into
+// an if/else statement. Otherwise we remain as a ternary.
+const printTernary = (path, _opts, print) => {
+  const [predicate, truthyClause, falsyClause] = path.map(print, "body");
+  const ternaryClauses = printTernaryClauses("if", truthyClause, falsyClause);
 
-  // If the addition is not an elsif or an else, then it's the second half of a
-  // ternary expression
-  if (addition && addition.type !== "elsif" && addition.type !== "else") {
-    const parts = [path.call(print, "body", 0), " ? "];
-    const truthyValue = path.call(print, "body", 1);
-    const falsyValue = path.call(print, "body", 2);
+  return group(
+    ifBreak(
+      concat([
+        "if ",
+        predicate,
+        indent(concat([softline, truthyClause])),
+        concat([softline, "else"]),
+        indent(concat([softline, falsyClause])),
+        concat([softline, "end"])
+      ]),
+      concat([predicate, " ? "].concat(ternaryClauses))
+    )
+  );
+};
 
-    return group(
-      ifBreak(
-        concat([
-          `${keyword} `,
-          path.call(print, "body", 0),
-          indent(concat([softline, path.call(print, "body", 1)])),
-          concat([softline, "else"]),
-          indent(concat([softline, path.call(print, "body", 2)])),
-          concat([softline, "end"])
-        ]),
-        concat(
-          parts.concat(printTernaryConditions(keyword, truthyValue, falsyValue))
-        )
-      )
-    );
+// Prints an `if_mod` or `unless_mod` node. Because it was previously in the
+// modifier form, we're guaranteed to not have an additional node, so we can
+// just work with the predicate and the body.
+const printSingle = keyword => (path, { inlineConditionals }, print) => {
+  const multiline = concat([
+    `${keyword} `,
+    align(keyword.length - 1, path.call(print, "body", 0)),
+    indent(concat([softline, path.call(print, "body", 1)])),
+    concat([softline, "end"])
+  ]);
+
+  const stmts = path.getValue().body[1];
+  const hasComments =
+    stmts.type === "stmts" && stmts.body.some(stmt => stmt.type === "@comment");
+
+  if (!inlineConditionals || hasComments) {
+    return multiline;
   }
 
-  // If there is an else and only an else, attempt to shorten to a ternary
-  if (
+  const inline = concat([
+    path.call(print, "body", 1),
+    ` ${keyword} `,
+    path.call(print, "body", 0)
+  ]);
+
+  return group(ifBreak(multiline, inline));
+};
+
+// Certain expressions cannot be reduced to a ternary without adding parens
+// around them. In this case we say they cannot be ternaried and default instead
+// to breaking them into multiple lines.
+const canTernaryStmts = stmts =>
+  stmts.body.length === 1 && !noTernary.includes(stmts.body[0].type);
+
+// In order for an `if` or `unless` expression to be shortened to a ternary,
+// there has to be one and only one "addition" (another clause attached) which
+// is of the "else" type. Both the body of the main node and the body of the
+// additional node must have only one statement, and that statement list must
+// pass the `canTernaryStmts` check.
+const canTernary = path => {
+  const [_pred, stmts, addition] = path.getValue().body;
+
+  return (
     addition &&
     addition.type === "else" &&
-    canTernary(stmts) &&
-    canTernary(addition.body[0])
-  ) {
-    const ternary = printTernaryConditions(
+    [stmts, addition.body[0]].every(canTernaryStmts)
+  );
+};
+
+// A normalized print function for both `if` and `unless` nodes.
+const printConditional = keyword => (path, { inlineConditionals }, print) => {
+  if (canTernary(path)) {
+    const ternaryConditions = printTernaryClauses(
       keyword,
       path.call(print, "body", 1),
       path.call(print, "body", 2, "body", 0)
@@ -127,33 +163,18 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
     return group(
       ifBreak(
         printWithAddition(keyword, path, print),
-        concat([path.call(print, "body", 0), " ? "].concat(ternary))
+        concat([path.call(print, "body", 0), " ? "].concat(ternaryConditions))
       )
     );
   }
 
-  // If there's an additional clause, we know we can't go for the inline option
-  if (addition) {
+  // If there's an additional clause that wasn't matched earlier, we know we
+  // can't go for the inline option.
+  if (path.getValue().body[2]) {
     return group(printWithAddition(keyword, path, print, { breaking: true }));
   }
 
-  // If it's short enough, favor the inline conditional
-  return group(
-    ifBreak(
-      concat([
-        `${keyword} `,
-        align(keyword.length - 1, path.call(print, "body", 0)),
-        indent(concat([softline, path.call(print, "body", 1)])),
-        concat([softline, "end"])
-      ]),
-      concat([
-        inlineConditionals ? "" : breakParent,
-        path.call(print, "body", 1),
-        ` ${keyword} `,
-        path.call(print, "body", 0)
-      ])
-    )
-  );
+  return printSingle(keyword)(path, { inlineConditionals }, print);
 };
 
 module.exports = {
@@ -187,8 +208,8 @@ module.exports = {
     return group(concat(parts));
   },
   if: printConditional("if"),
-  ifop: printConditional("if"),
-  if_mod: printConditional("if"),
+  ifop: printTernary,
+  if_mod: printSingle("if"),
   unless: printConditional("unless"),
-  unless_mod: printConditional("unless")
+  unless_mod: printSingle("unless")
 };
