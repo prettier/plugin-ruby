@@ -13,6 +13,24 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Better support for excessed commas in block args. Previously `proc { |x,| }` would add an extra space, but now it does not.
 - [INTERNAL] Add a lot more documentation to the parser.
 - Previously, the unary `not` operator inside a ternary (e.g., `a ? not(b) : c`) would break because it wouldn't add parentheses, but now it adds them. (Thanks to @glejeune for the report.)
+- `if` and `unless` nodes used to not be able to handle if a comment was the only statement in the body. For example,
+
+<!-- prettier-ignore -->
+```ruby
+if foo
+  # comment
+end
+```
+
+would get printed as
+
+<!-- prettier-ignore -->
+```ruby
+# comment if foo
+end
+```
+
+Now the `if` and `unless` printers check for the presence of single comments.
 
 ## [0.12.2] - 2019-04-30
 

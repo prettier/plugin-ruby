@@ -106,7 +106,7 @@ class RipperJS < Ripper
   # embed block comments into the right kind of node.
   prepend(
     Module.new do
-      events = %i[begin else elsif ensure rescue until while]
+      events = %i[begin else elsif ensure if rescue until while]
 
       def initialize(*args)
         super(*args)
@@ -183,8 +183,8 @@ class RipperJS < Ripper
 
       SPECIAL_LITERALS = %i[qsymbols qwords symbols words].freeze
 
-      # Special array literals are handled in different ways and so their comments
-      # need to be passed up to their parent array node.
+      # Special array literals are handled in different ways and so their
+      # comments need to be passed up to their parent array node.
       def on_array(*body)
         @last_sexp =
           super(*body).tap do |sexp|
