@@ -83,7 +83,7 @@ const printTernaryClauses = (keyword, truthyClause, falsyClause) => {
 
 // Handles ternary nodes. If it does not fit on one line, then we break out into
 // an if/else statement. Otherwise we remain as a ternary.
-const printTernary = (path, { inlineConditionals }, print) => {
+const printTernary = (path, _opts, print) => {
   const [predicate, truthyClause, falsyClause] = path.map(print, "body");
   const ternaryClauses = printTernaryClauses("if", truthyClause, falsyClause);
 
@@ -153,8 +153,6 @@ const canTernary = path => {
 
 // A normalized print function for both `if` and `unless` nodes.
 const printConditional = keyword => (path, { inlineConditionals }, print) => {
-  const [_predicate, stmts, addition] = path.getValue().body;
-
   if (canTernary(path)) {
     const ternaryConditions = printTernaryClauses(
       keyword,
@@ -171,8 +169,8 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
   }
 
   // If there's an additional clause that wasn't matched earlier, we know we
-  // can't go for the inline option
-  if (addition) {
+  // can't go for the inline option.
+  if (path.getValue().body[2]) {
     return group(printWithAddition(keyword, path, print, { breaking: true }));
   }
 

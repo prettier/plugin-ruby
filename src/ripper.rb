@@ -586,6 +586,7 @@ end
 # If this is the main file we're executing, then most likely this is being
 # executed from the parse.js spawn. In that case, read the ruby source from
 # stdin and report back the AST over stdout.
+
 if $0 == __FILE__
   builder = RipperJS.new($stdin.read)
   response = builder.parse
