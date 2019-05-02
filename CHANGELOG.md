@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Move arg, assign, constant, flow, massign, operator, scope, and statement nodes into their own files.
 - [INTERNAL] Move `@int`, `access_ctrl`, `assocsplat`, `block_var`, `else`, `number_arg`, `super`, `undef`, `var_ref`, and `var_ref` as well as various call and symbol nodes into appropriate files.
 - Better support for excessed commas in block args. Previously `proc { |x,| }` would add an extra space, but now it does not.
+- [INTERNAL] Add a lot more documentation to the parser.
 
 ## [0.12.2] - 2019-04-30
 
