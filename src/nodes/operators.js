@@ -28,11 +28,17 @@ module.exports = {
       path.getValue().body[1] ? path.call(print, "body", 1) : ""
     ]),
   unary: (path, opts, print) => {
-    const operator = path.getValue().body[0];
+    const oper = path.getValue().body[0];
+    const doc = path.call(print, "body", 1);
 
-    return concat([
-      operator === "not" ? "not " : operator[0],
-      path.call(print, "body", 1)
-    ]);
+    if (oper === "not") {
+      // For the `not` operator, we're explicitly making the space character
+      // another element in the `concat` because there are some circumstances
+      // where we need to force parentheses (e.g., ternaries). In that case the
+      // printer for those nodes can just take out the space and put in parens.
+      return concat(["not", " ", doc]);
+    }
+
+    return concat([oper[0], doc]);
   }
 };

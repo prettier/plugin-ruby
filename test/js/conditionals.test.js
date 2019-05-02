@@ -1,9 +1,27 @@
 const { long, ruby } = require("./utils");
 
 describe("conditionals", () => {
-  // from ruby test/ruby/test_not.rb
-  test("not operator, empty parens", () =>
-    expect("assert_equal(true, (not ()))").toMatchFormat());
+  describe("not operator", () => {
+    // from ruby test/ruby/test_not.rb
+    test("not operator, empty parens", () =>
+      expect("assert_equal(true, (not ()))").toMatchFormat());
+
+    test("not operator from within a ternary adds parens", () => {
+      return expect("a ? not(b) : c").toMatchFormat();
+    });
+
+    test("not operator from within an if/else adds parens", () => {
+      const content = ruby(`
+        if a
+          not b
+        else
+          c
+        end
+      `);
+
+      return expect(content).toChangeFormat("a ? not(b) : c");
+    });
+  });
 
   describe("when inline allowed", () => {
     describe.each(["if", "unless"])("%s keyword", keyword => {

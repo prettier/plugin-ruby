@@ -37,6 +37,12 @@ const noTernary = [
   "zsuper"
 ];
 
+// Certain expressions cannot be shortened into a ternary within significant
+// obfuscation of the code. In that case, we just default to breaking out a
+// multi line if/else statement.
+const canTernary = stmts =>
+  stmts.body.length === 1 && !noTernary.includes(stmts.body[0].type);
+
 const printWithAddition = (keyword, path, print, { breaking = false } = {}) =>
   concat([
     `${keyword} `,
@@ -47,13 +53,36 @@ const printWithAddition = (keyword, path, print, { breaking = false } = {}) =>
     breaking ? breakParent : ""
   ]);
 
-const printTernaryConditions = (keyword, truthyValue, falsyValue) => {
-  const parts = [truthyValue, " : ", falsyValue];
-  return keyword === "if" ? parts : parts.reverse();
+// For the unary `not` operator, we need to explicitly add parentheses to it in
+// order for it to be valid from within a ternary. Otherwise if the clause of
+// the ternary isn't a unary `not`, we can just pass it along.
+const printTernaryClauseDoc = clauseDoc => {
+  if (clauseDoc.type === "concat") {
+    const [clausePart] = clauseDoc.parts;
+
+    if (clausePart.type === "concat" && clausePart.parts[0] === "not") {
+      // We are inside of a statements list and the statement is a unary `not`.
+      return concat(["not(", clausePart.parts[2], ")"]);
+    }
+
+    if (clauseDoc.parts[0] === "not") {
+      // We are inside a ternary condition and the clause is a unary `not`.
+      return concat(["not(", clauseDoc.parts[2], ")"]);
+    }
+  }
+
+  return clauseDoc;
 };
 
-const canTernary = stmts =>
-  stmts.body.length === 1 && !noTernary.includes(stmts.body[0].type);
+const printTernaryConditions = (keyword, truthyClauseDoc, falsyClauseDoc) => {
+  const parts = [
+    printTernaryClauseDoc(truthyClauseDoc),
+    " : ",
+    printTernaryClauseDoc(falsyClauseDoc)
+  ];
+
+  return keyword === "if" ? parts : parts.reverse();
+};
 
 const printConditional = keyword => (path, { inlineConditionals }, print) => {
   const [_predicate, stmts, addition] = path.getValue().body;

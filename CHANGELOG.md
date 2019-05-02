@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [INTERNAL] Move `@int`, `access_ctrl`, `assocsplat`, `block_var`, `else`, `number_arg`, `super`, `undef`, `var_ref`, and `var_ref` as well as various call and symbol nodes into appropriate files.
 - Better support for excessed commas in block args. Previously `proc { |x,| }` would add an extra space, but now it does not.
 - [INTERNAL] Add a lot more documentation to the parser.
+- Previously, the unary `not` operator inside a ternary (e.g., `a ? not(b) : c`) would break because it wouldn't add parentheses, but now it adds them. (Thanks to @glejeune for the report.)
 
 ## [0.12.2] - 2019-04-30
 
