@@ -218,22 +218,19 @@ class RipperJS < Ripper
       # We need to know exactly where the comment is, switching off the current
       # lexer state. In Ruby 2.7.0-dev, that's defined as:
       #
-      # enum lex_state_bits {
-      #     EXPR_BEG_bit,     /* ignore newline, +/- is a sign. */
-      #     EXPR_END_bit,     /* newline significant, +/- is an operator. */
-      #     EXPR_ENDARG_bit,  /* ditto, and unbound braces. */
-      #     EXPR_ENDFN_bit,   /* ditto, and unbound braces. */
-      #     EXPR_ARG_bit,     /* newline significant, +/- is an operator. */
-      #     EXPR_CMDARG_bit,  /* newline significant, +/- is an operator. */
-      #     EXPR_MID_bit,     /* newline significant, +/- is an operator. */
-      #     EXPR_FNAME_bit,   /* ignore newline, no reserved words. */
-      #     EXPR_DOT_bit,     /* right after `.' or `::', no reserved words. */
-      #     EXPR_CLASS_bit,   /* immediate after `class', no here document. */
-      #     EXPR_LABEL_bit,   /* flag bit, label is allowed. */
-      #     EXPR_LABELED_bit, /* flag bit, just after a label. */
-      #     EXPR_FITEM_bit,   /* symbol literal as FNAME. */
-      #     EXPR_MAX_STATE
-      # };
+      # EXPR_BEG_bit,     /* ignore newline, +/- is a sign. */
+      # EXPR_END_bit,     /* newline significant, +/- is an operator. */
+      # EXPR_ENDARG_bit,  /* ditto, and unbound braces. */
+      # EXPR_ENDFN_bit,   /* ditto, and unbound braces. */
+      # EXPR_ARG_bit,     /* newline significant, +/- is an operator. */
+      # EXPR_CMDARG_bit,  /* newline significant, +/- is an operator. */
+      # EXPR_MID_bit,     /* newline significant, +/- is an operator. */
+      # EXPR_FNAME_bit,   /* ignore newline, no reserved words. */
+      # EXPR_DOT_bit,     /* right after `.' or `::', no reserved words. */
+      # EXPR_CLASS_bit,   /* immediate after `class', no here document. */
+      # EXPR_LABEL_bit,   /* flag bit, label is allowed. */
+      # EXPR_LABELED_bit, /* flag bit, just after a label. */
+      # EXPR_FITEM_bit,   /* symbol literal as FNAME. */
       def on_comment(body)
         sexp = { type: :@comment, body: body.chomp, start: lineno, end: lineno }
 
@@ -243,7 +240,7 @@ class RipperJS < Ripper
         when 'EXPR_CMDARG', 'EXPR_END|EXPR_ENDARG', 'EXPR_ENDARG', 'EXPR_ARG',
              'EXPR_FNAME|EXPR_FITEM', 'EXPR_CLASS', 'EXPR_END|EXPR_LABEL'
           inline_comments << sexp
-        when 'EXPR_BEG|EXPR_LABEL', 'EXPR_MID'
+        when 'EXPR_MID'
           inline_comments << sexp.merge!(break: true)
         when 'EXPR_DOT'
           last_sexp.merge!(comments: [sexp.merge!(break: true)])
@@ -326,7 +323,8 @@ class RipperJS < Ripper
 
       def on_comment(body)
         super(body).tap do |sexp|
-          block_comments << sexp if RipperJS.lex_state_name(state) == 'EXPR_BEG'
+          lex_state = RipperJS.lex_state_name(state)
+          block_comments << sexp if lex_state.start_with?('EXPR_BEG')
         end
       end
 

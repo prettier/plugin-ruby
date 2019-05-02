@@ -13,6 +13,29 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Better support for excessed commas in block args. Previously `proc { |x,| }` would add an extra space, but now it does not.
 - [INTERNAL] Add a lot more documentation to the parser.
 - Previously, the unary `not` operator inside a ternary (e.g., `a ? not(b) : c`) would break because it wouldn't add parentheses, but now it adds them. (Thanks to @glejeune for the report.)
+- Previously lex states that had other bits flipped besides `EXPR_BEG` would not get handled as block comments, so they would be attached to random nodes that they shouldn't. For example, previously:
+
+<!-- prettier-ignore -->
+```ruby
+list.each do |item|
+  # Some comment
+  puts item[0]
+end
+```
+
+would get printed as
+
+<!-- prettier-ignore -->
+```ruby
+list.each do |item|
+  puts # Some comment
+       item[
+         0
+       ]
+end
+```
+
+but now gets printed correctly (matching the initial format). (Thanks to @AlanFoster for the report.)
 
 ## [0.12.2] - 2019-04-30
 
