@@ -27,7 +27,6 @@ would get printed as
 <!-- prettier-ignore -->
 ```ruby
 # comment if foo
-end
 ```
 
 Now the `if` and `unless` printers check for the presence of single comments.
