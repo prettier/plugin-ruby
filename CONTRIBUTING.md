@@ -6,7 +6,7 @@ Want to contribute? There's a few moving parts that you'll need to know about:
 - Prettier - Provides building blocks for formatting documents in a stylistic way
 - Testing - Ensuring that there are no formatting or semantic regressions
 
-Your input Ruby code is parsed by Ripper, and pretty printed using the building blocks provided by Prettier. To ensure there are no regressions, Jest snapshots are used to keep track of the formatting before and after. Additionally there are Ruby tests written with Minitest to ensure there are no semantic regressions after the code has been tidied up.
+Your input Ruby code is parsed by Ripper, and pretty printed using the building blocks provided by Prettier. Jest tests are used to protect against regressions and allow for test driving the development.
 
 ## Ripper
 
