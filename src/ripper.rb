@@ -544,6 +544,36 @@ class RipperJS < Ripper
       end
     end
   )
+
+  # For each node, we need to attach where it came from in order to be able to
+  # support placing the cursor correctly before and after formatting.
+  prepend(
+    Module.new do
+      def initialize(source, *args)
+        super(source, *args)
+
+        @line_counts = [0]
+
+        source.split("\n").each do |line|
+          line_counts << line_counts.last + line.size + 1
+        end
+      end
+
+      def self.prepended(base)
+        base.attr_reader :line_counts
+      end
+
+      private
+
+      PARSER_EVENTS.each do |event|
+        define_method(:"on_#{event}") do |*body|
+          super(*body).tap do |sexp|
+            sexp.merge!(char_end: line_counts[lineno - 1] + column)
+          end
+        end
+      end
+    end
+  )
 end
 
 # If this is the main file we're executing, then most likely this is being
