@@ -80,7 +80,7 @@ class MetadataTest < Minitest::Test
 
     assert_node_metadata(
       parse(content).dig(:body, 2),
-      # char_start: 13,
+      char_start: 13,
       char_end: 27
     )
   end
@@ -96,7 +96,7 @@ class MetadataTest < Minitest::Test
 
     assert_node_metadata(
       parse(content).dig(:body, 2),
-      # char_start: 13,
+      char_start: 13,
       char_end: 32
     )
   end
@@ -112,7 +112,7 @@ class MetadataTest < Minitest::Test
 
     assert_node_metadata(
       parse(content).dig(:body, 0, :body, 3),
-      # char_start: 12,
+      char_start: 12,
       char_end: 28
     )
   end
@@ -179,7 +179,7 @@ class MetadataTest < Minitest::Test
   def assert_metadata(ruby)
     assert_node_metadata(
       parse(ruby),
-      # char_start: 0,
+      char_start: 0,
       char_end: ruby.length - 1
     )
   end

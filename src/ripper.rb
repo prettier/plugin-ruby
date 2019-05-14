@@ -547,11 +547,17 @@ class RipperJS < Ripper
 
   # For each node, we need to attach where it came from in order to be able to
   # support placing the cursor correctly before and after formatting.
+  #
+  # For most nodes, it's enough to look at the child nodes to determine the
+  # start of the parent node. However, for some nodes it's necessary to keep
+  # track of the keywords as they come in from the lexer and to modify the start
+  # node once we have it.
   prepend(
     Module.new do
       def initialize(source, *args)
         super(source, *args)
 
+        @last_keywords = []
         @line_counts = [0]
 
         source.split("\n").each do |line|
@@ -560,15 +566,80 @@ class RipperJS < Ripper
       end
 
       def self.prepended(base)
-        base.attr_reader :line_counts
+        base.attr_reader :last_keywords, :line_counts
       end
 
       private
 
-      PARSER_EVENTS.each do |event|
+      def find_keyword(body)
+        index = last_keywords.rindex { |keyword| keyword[:body] == body }
+        last_keywords.delete_at(index)
+      end
+
+      def on_kw(body)
+        super(body).tap do |node|
+          node.merge!(
+            char_start: line_counts[lineno - 1] + column,
+            char_end: line_counts[lineno - 1] + column + body.size
+          )
+
+          last_keywords << node
+        end
+      end
+
+      events = {
+        BEGIN: 'BEGIN',
+        END: 'END',
+        begin: 'begin',
+        case: 'case',
+        class: 'class',
+        def: 'def',
+        defs: 'def',
+        defined: 'defined?',
+        else: 'else',
+        elsif: 'elsif',
+        ensure: 'ensure',
+        for: 'for',
+        if: 'if',
+        module: 'module',
+        rescue: 'rescue',
+        sclass: 'class',
+        unless: 'unless',
+        until: 'until',
+        while: 'while'
+      }
+
+      events.each do |event, keyword|
         define_method(:"on_#{event}") do |*body|
-          super(*body).tap do |sexp|
-            sexp.merge!(char_end: line_counts[lineno - 1] + column)
+          super(*body).tap do |node|
+            node.merge!(
+              char_start: find_keyword(keyword)[:char_start],
+              char_end: line_counts[lineno - 1] + column
+            )
+          end
+        end
+      end
+
+      defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
+
+      (SCANNER_EVENTS - defined).each do |event|
+        define_method(:"on_#{event}") do |body|
+          char_start = line_counts[lineno - 1] + column
+
+          super(body).merge!(
+            char_start: char_start,
+            char_end: char_start + body.size
+          )
+        end
+      end
+
+      (PARSER_EVENTS - defined).each do |event|
+        define_method(:"on_#{event}") do |*body|
+          char_end = line_counts[lineno - 1] + column
+          char_start = body.map { |part| part[:char_start] if part.is_a?(Hash) }.compact.min || char_end
+
+          super(*body).tap do |node|
+            node.merge!(char_start: char_start, char_end: char_end)
           end
         end
       end
