@@ -541,8 +541,7 @@ class RipperJS < Ripper
       end
 
       # Handles __END__ syntax, which allows individual scripts to keep content
-      # after the main ruby code that can be read through DATA. Which looks
-      # like:
+      # after the main ruby code that can be read through DATA. It looks like:
       #
       # foo.bar
       #
@@ -553,7 +552,7 @@ class RipperJS < Ripper
       end
 
       def on_program(*body)
-        super(*body).tap { |sexp| sexp[:body][0][:body] << __end__ if __end__ }
+        super(*body).tap { |node| node[:body][0][:body] << __end__ if __end__ }
       end
 
       # Adds the used quote type onto string nodes. This is necessary because
@@ -568,19 +567,19 @@ class RipperJS < Ripper
         last_sexp.merge!(quote: quote[0]) # quote is ": or ':
       end
 
-      # Normally access controls are reported as vcall nodes. This method
-      # creates a new node type to explicitly track those nodes instead, so
-      # that the printer can add new lines as necessary.
-      ACCESS_CONTROLS = %w[private protected public].freeze
-
+      # Normally access controls are reported as vcall nodes. This creates a
+      # new node type to explicitly track those nodes instead, so that the
+      # printer can add new lines as necessary.
       def on_vcall(ident)
-        super(ident).tap do |sexp|
-          if !ACCESS_CONTROLS.include?(ident[:body]) ||
+        @access_controls ||= %w[private protected public].freeze
+
+        super(ident).tap do |node|
+          if !@access_controls.include?(ident[:body]) ||
              ident[:body] != lines[lineno - 1].strip
             next
           end
 
-          sexp.merge!(type: :access_ctrl)
+          node.merge!(type: :access_ctrl)
         end
       end
 
