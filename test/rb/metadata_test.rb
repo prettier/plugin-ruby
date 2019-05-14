@@ -35,6 +35,33 @@ class MetadataTest < Minitest::Test
     )
   end
 
+  def test_args
+    assert_node_metadata(
+      :args,
+      parse('foo bar, baz').dig(:body, 1, :body, 0),
+      char_start: 4,
+      char_end: 12
+    )
+  end
+
+  def test_args_add_block
+    assert_node_metadata(
+      :args_add_block,
+      parse('foo bar, baz').dig(:body, 1),
+      char_start: 4,
+      char_end: 12
+    )
+  end
+
+  def test_args_add_star
+    assert_node_metadata(
+      :args_add_star,
+      parse('foo *bar').dig(:body, 1, :body, 0),
+      char_start: 4,
+      char_end: 8
+    )
+  end
+
   def test_assign
     assert_metadata :assign, 'foo = bar'
   end
@@ -45,6 +72,15 @@ class MetadataTest < Minitest::Test
       parse('{ foo: bar, bar: baz }').dig(:body, 0, :body, 0, 0),
       char_start: 2,
       char_end: 11
+    )
+  end
+
+  def test_assoc_splat
+    assert_node_metadata(
+      :assoc_splat,
+      parse('foo **bar').dig(:body, 1, :body, 0, :body, 0, :body, 0, 0),
+      char_start: 4,
+      char_end: 9
     )
   end
 
@@ -240,6 +276,15 @@ class MetadataTest < Minitest::Test
     )
   end
 
+  def test_fcall
+    assert_node_metadata(
+      :fcall,
+      parse('foo(bar)').dig(:body, 0),
+      char_start: 0,
+      char_end: 8
+    )
+  end
+
   def test_field
     assert_node_metadata(
       :field,
@@ -272,6 +317,24 @@ class MetadataTest < Minitest::Test
 
   def test_if_mod
     assert_metadata :if_mod, 'foo if bar'
+  end
+
+  def test_kwrest_param
+    assert_node_metadata(
+      :kwrest_param,
+      parse('def foo(**bar); end').dig(:body, 1, :body, 0, :body, 5),
+      char_start: 8,
+      char_end: 13
+    )
+  end
+
+  def test_rest_param
+    assert_node_metadata(
+      :rest_param,
+      parse('def foo(*bar); end').dig(:body, 1, :body, 0, :body, 2),
+      char_start: 8,
+      char_end: 12
+    )
   end
 
   def test_massign
@@ -330,12 +393,34 @@ class MetadataTest < Minitest::Test
     RUBY
   end
 
+  def test_mrhs_add_star
+    assert_node_metadata(
+      :mrhs_add_star,
+      parse('foo, bar = *baz').dig(:body, 1),
+      char_start: 11,
+      char_end: 15
+    )
+  end
+
+  def test_mrhs_new_from_args
+    assert_node_metadata(
+      :mrhs_new_from_args,
+      parse('foo, bar, baz = 1, 2, 3').dig(:body, 1),
+      char_start: 16,
+      char_end: 23
+    )
+  end
+
   def test_next
     assert_metadata :next, 'next foo'
   end
 
   def test_opassign
     assert_metadata :opassign, 'foo ||= bar'
+  end
+
+  def test_paren
+    assert_metadata :paren, '()'
   end
 
   def test_qsymbols
@@ -396,6 +481,24 @@ class MetadataTest < Minitest::Test
         class << Bar; end
       end
     RUBY
+  end
+
+  def test_string_dvar
+    assert_node_metadata(
+      :string_dvar,
+      parse('"#$foo"').dig(:body, 0, :body, 0),
+      char_start: 1,
+      char_end: 6
+    )
+  end
+
+  def test_string_embexpr
+    assert_node_metadata(
+      :string_embexpr,
+      parse('"foo #{bar} baz"').dig(:body, 0, :body, 1),
+      char_start: 5,
+      char_end: 11
+    )
   end
 
   def test_super
@@ -536,37 +639,20 @@ end
 
 __END__
 arg_paren
-args_add
-args_add_block
-args_add_star
-args_new
 array
-assoc_splat
 assoclist_from_args
 block_var
 blockarg
 bodystmt
-fcall
 hash
-kwrest_param
 lambda
-magic_comment
-mrhs_add
-mrhs_add_star
-mrhs_new
-mrhs_new_from_args
 params
-paren
-rest_param
 stmts_add
 stmts_new
 string_add
 string_concat
 string_content
-string_dvar
-string_embexpr
 string_literal
-symbol
 unary
 var_field
 void_stmt
