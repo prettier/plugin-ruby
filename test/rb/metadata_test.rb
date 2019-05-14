@@ -35,6 +35,10 @@ class MetadataTest < Minitest::Test
     )
   end
 
+  def test_assign
+    assert_metadata :assign, 'foo = bar'
+  end
+
   def test_begin
     assert_metadata :begin, <<~RUBY
       begin
@@ -45,6 +49,15 @@ class MetadataTest < Minitest::Test
 
   def test_binary
     assert_metadata :binary, 'foo + bar'
+  end
+
+  def test_brace_block
+    assert_node_metadata(
+      :brace_block,
+      parse('foo { bar }').dig(:body, 1),
+      char_start: 5,
+      char_end: 11
+    )
   end
 
   def test_break
@@ -82,6 +95,28 @@ class MetadataTest < Minitest::Test
     assert_metadata :command_call, 'foo.bar baz'
   end
 
+  def test_const_ref
+    assert_node_metadata(
+      :const_ref,
+      parse('class Foo; end').dig(:body, 0),
+      char_start: 6,
+      char_end: 10
+    )
+  end
+
+  def test_const_path_field
+    assert_node_metadata(
+      :const_path_field,
+      parse('Foo::Bar = baz').dig(:body, 0),
+      char_start: 0,
+      char_end: 10
+    )
+  end
+
+  def test_const_path_ref
+    assert_metadata :const_path_ref, 'Foo::Bar'
+  end
+
   def test_def
     assert_metadata :def, <<~RUBY
       def foo
@@ -112,6 +147,10 @@ class MetadataTest < Minitest::Test
 
   def test_dot3
     assert_metadata :dot3, 'foo...bar'
+  end
+
+  def test_dyna_symbol
+    assert_metadata :dyna_symbol, ':"foo #{bar} baz"'
   end
 
   def test_else
@@ -190,6 +229,46 @@ class MetadataTest < Minitest::Test
     assert_metadata :if_mod, 'foo if bar'
   end
 
+  def test_massign
+    assert_metadata :massign, 'foo, bar, baz = 1, 2, 3'
+  end
+
+  def test_mlhs
+    assert_node_metadata(
+      :mlhs,
+      parse('foo, bar, baz = 1, 2, 3').dig(:body, 0),
+      char_start: 0,
+      char_end: 15
+    )
+  end
+
+  def test_mlhs_add_post
+    assert_node_metadata(
+      :mlhs_add_post,
+      parse('foo, *bar, baz = 1, 2, 3').dig(:body, 0),
+      char_start: 0,
+      char_end: 16
+    )
+  end
+
+  def test_mlhs_add_star
+    assert_node_metadata(
+      :mlhs_add_star,
+      parse('foo, *bar = 1, 2, 3').dig(:body, 0),
+      char_start: 0,
+      char_end: 11
+    )
+  end
+
+  def test_mlhs_paren
+    assert_node_metadata(
+      :mlhs_paren,
+      parse('(foo, bar) = baz').dig(:body, 0),
+      char_start: 0,
+      char_end: 12
+    )
+  end
+
   def test_module
     assert_metadata :module, <<~RUBY
       module Foo
@@ -202,8 +281,35 @@ class MetadataTest < Minitest::Test
     assert_metadata :next, 'next foo'
   end
 
+  def test_qsymbols
+    assert_node_metadata(
+      :qsymbols,
+      parse('%i[foo bar baz]').dig(:body, 0),
+      char_start: 0,
+      char_end: 14
+    )
+  end
+
+  def test_qwords
+    assert_node_metadata(
+      :qwords,
+      parse('%w[foo bar baz]').dig(:body, 0),
+      char_start: 0,
+      char_end: 14
+    )
+  end
+
   def test_redo
     assert_metadata :redo, 'redo'
+  end
+
+  def test_rescue
+    assert_node_metadata(
+      :rescue,
+      parse('begin; foo; rescue => bar; baz; end').dig(:body, 0, :body, 1),
+      char_start: 12,
+      char_end: 35
+    )
   end
 
   def test_rescue_mod
@@ -236,6 +342,15 @@ class MetadataTest < Minitest::Test
 
   def test_symbol_literal
     assert_metadata :symbol_literal, ':foo'
+  end
+
+  def test_symbols
+    assert_node_metadata(
+      :symbols,
+      parse('%I[f#{o}o b#{a}r b#{a}z]').dig(:body, 0),
+      char_start: 0,
+      char_end: 23
+    )
   end
 
   def test_top_const_field
@@ -291,6 +406,15 @@ class MetadataTest < Minitest::Test
     assert_metadata :while_mod, 'foo while bar'
   end
 
+  def test_words
+    assert_node_metadata(
+      :words,
+      parse('%W[f#{o}o b#{a}r b#{a}z]').dig(:body, 0),
+      char_start: 0,
+      char_end: 23
+    )
+  end
+
   def test_yield
     assert_metadata :yield, 'yield foo'
   end
@@ -334,8 +458,6 @@ args_add_block
 args_add_star
 args_new
 array
-assign
-assign_error
 assoc_new
 assoc_splat
 assoclist_from_args
@@ -343,12 +465,7 @@ bare_assoc_hash
 block_var
 blockarg
 bodystmt
-brace_block
-const_path_field
-const_path_ref
-const_ref
 do_block
-dyna_symbol
 excessed_comma
 fcall
 field
@@ -356,14 +473,8 @@ hash
 kwrest_param
 lambda
 magic_comment
-massign
 method_add_arg
 method_add_block
-mlhs_add
-mlhs_add_post
-mlhs_add_star
-mlhs_new
-mlhs_paren
 mrhs_add
 mrhs_add_star
 mrhs_new
@@ -371,14 +482,9 @@ mrhs_new_from_args
 opassign
 params
 paren
-qsymbols_add
-qsymbols_new
-qwords_add
-qwords_new
 regexp_add
 regexp_literal
 regexp_new
-rescue
 rest_param
 stmts_add
 stmts_new
@@ -389,9 +495,6 @@ string_dvar
 string_embexpr
 string_literal
 symbol
-symbol_literal
-symbols_add
-symbols_new
 unary
 var_alias
 var_field
@@ -399,10 +502,6 @@ var_ref
 vcall
 void_stmt
 when
-word_add
-word_new
-words_add
-words_new
 xstring_add
 xstring_literal
 xstring_new

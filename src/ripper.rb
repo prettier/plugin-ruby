@@ -204,31 +204,32 @@ class RipperJS < Ripper
         end
       end
 
+      events = {
+        brace_block: -1,
+        dyna_symbol: -2,
+        mlhs_paren: -1,
+        qsymbols_new: -3,
+        qwords_new: -3,
+        symbol_literal: -1,
+        top_const_field: -2,
+        top_const_ref: -2,
+        symbols_new: -3,
+        words_new: -3
+      }
+
+      events.each do |event, offset|
+        define_method(:"on_#{event}") do |*body|
+          super(*body).merge!(
+            char_start: char_start_for(body) + offset,
+            char_end: char_pos
+          )
+        end
+      end
+
       def on_program(*body)
         super(*body).merge!(
           start: 1,
           char_start: 0,
-          char_end: char_pos
-        )
-      end
-
-      def on_symbol_literal(*body)
-        super(*body).merge!(
-          char_start: char_start_for(body) - 1,
-          char_end: char_pos
-        )
-      end
-
-      def on_top_const_ref(*body)
-        super(*body).merge!(
-          char_start: char_start_for(body) - 2,
-          char_end: char_pos
-        )
-      end
-
-      def on_top_const_field(*body)
-        super(*body).merge!(
-          char_start: char_start_for(body) - 2,
           char_end: char_pos
         )
       end
