@@ -39,6 +39,15 @@ class MetadataTest < Minitest::Test
     assert_metadata :assign, 'foo = bar'
   end
 
+  def test_assoc_new
+    assert_node_metadata(
+      :assoc_new,
+      parse('{ foo: bar, bar: baz }').dig(:body, 0, :body, 0, 0),
+      char_start: 2,
+      char_end: 11
+    )
+  end
+
   def test_bare_assoc_hash
     assert_node_metadata(
       :bare_assoc_hash,
@@ -433,12 +442,25 @@ class MetadataTest < Minitest::Test
     RUBY
   end
 
+  def test_var_alias
+    assert_metadata :var_alias, 'alias $foo $bar'
+  end
+
   def test_var_ref
     assert_metadata :var_ref, 'true'
   end
 
   def test_vcall
     assert_metadata :vcall, 'foo'
+  end
+
+  def test_when
+    assert_node_metadata(
+      :when,
+      parse('case foo; when bar; baz; end').dig(:body, 1),
+      char_start: 10,
+      char_end: 28
+    )
   end
 
   def test_while_mod
@@ -497,7 +519,6 @@ args_add_block
 args_add_star
 args_new
 array
-assoc_new
 assoc_splat
 assoclist_from_args
 block_var
@@ -531,10 +552,8 @@ string_embexpr
 string_literal
 symbol
 unary
-var_alias
 var_field
 void_stmt
-when
 xstring_add
 xstring_literal
 xstring_new

@@ -181,6 +181,8 @@ class RipperJS < Ripper
         undef: 'undef',
         unless: 'unless',
         until: 'until',
+        var_alias: 'alias',
+        when: 'when',
         while: 'while',
         yield: 'yield',
         yield0: 'yield',
