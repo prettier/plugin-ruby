@@ -39,6 +39,15 @@ class MetadataTest < Minitest::Test
     assert_metadata :assign, 'foo = bar'
   end
 
+  # def test_bare_assoc_hash
+  #   assert_node_metadata(
+  #     :bare_assoc_hash,
+  #     parse('foo(bar: baz)').dig(:body, 1, :body, 0, :body, 0, :body, 0),
+  #     char_start: 4,
+  #     char_end: 13
+  #   )
+  # end
+
   def test_begin
     assert_metadata :begin, <<~RUBY
       begin
@@ -55,7 +64,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :brace_block,
       parse('foo { bar }').dig(:body, 1),
-      char_start: 5,
+      char_start: 4,
       char_end: 11
     )
   end
@@ -208,8 +217,17 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :excessed_comma,
       parse('foo { |bar,| }').dig(:body, 1, :body, 0, :body, 0, :body, 2),
-      char_start: 11,
+      char_start: 10,
       char_end: 12
+    )
+  end
+
+  def test_field
+    assert_node_metadata(
+      :field,
+      parse('foo.bar = baz').dig(:body, 0),
+      char_start: 0,
+      char_end: 9
     )
   end
 
@@ -288,6 +306,10 @@ class MetadataTest < Minitest::Test
 
   def test_next
     assert_metadata :next, 'next foo'
+  end
+
+  def test_opassign
+    assert_metadata :opassign, 'foo ||= bar'
   end
 
   def test_qsymbols
@@ -411,6 +433,14 @@ class MetadataTest < Minitest::Test
     RUBY
   end
 
+  def test_var_ref
+    assert_metadata :var_ref, 'true'
+  end
+
+  def test_vcall
+    assert_metadata :vcall, 'foo'
+  end
+
   def test_while_mod
     assert_metadata :while_mod, 'foo while bar'
   end
@@ -476,7 +506,6 @@ blockarg
 bodystmt
 do_block
 fcall
-field
 hash
 kwrest_param
 lambda
@@ -487,7 +516,6 @@ mrhs_add
 mrhs_add_star
 mrhs_new
 mrhs_new_from_args
-opassign
 params
 paren
 regexp_add
@@ -506,8 +534,6 @@ symbol
 unary
 var_alias
 var_field
-var_ref
-vcall
 void_stmt
 when
 xstring_add

@@ -120,7 +120,7 @@ class RipperJS < Ripper
       def initialize(source, *args)
         super(source, *args)
 
-        @last_keywords = []
+        @scanner_events = []
         @line_counts = [0]
 
         source.split("\n").each do |line|
@@ -129,7 +129,7 @@ class RipperJS < Ripper
       end
 
       def self.prepended(base)
-        base.attr_reader :last_keywords, :line_counts
+        base.attr_reader :scanner_events, :line_counts
       end
 
       private
@@ -142,20 +142,14 @@ class RipperJS < Ripper
         body.map { |part| part[:char_start] if part.is_a?(Hash) }.compact.min || char_pos
       end
 
-      def find_keyword(body)
-        index = last_keywords.rindex { |keyword| keyword[:body] == body }
-        last_keywords.delete_at(index)
-      end
+      def find_scanner_event(type, body = nil)
+        index =
+          scanner_events.rindex do |scanner_event|
+            scanner_event[:type] == type &&
+              (!body || (scanner_event[:body] == body))
+          end
 
-      def on_kw(body)
-        super(body).tap do |node|
-          node.merge!(
-            char_start: char_pos,
-            char_end: char_pos + body.size
-          )
-
-          last_keywords << node
-        end
+        scanner_events.delete_at(index)
       end
 
       events = {
@@ -194,7 +188,7 @@ class RipperJS < Ripper
 
       events.each do |event, keyword|
         define_method(:"on_#{event}") do |*body|
-          node = find_keyword(keyword)
+          node = find_scanner_event(:@kw, keyword)
 
           super(*body).merge!(
             start: node[:start],
@@ -204,26 +198,45 @@ class RipperJS < Ripper
         end
       end
 
+      # :backref, :backtick :const, :embdoc, :embdoc_beg, :embdoc_end, :embexpr_beg, :embexpr_end, :embvar, :heredoc_beg, :heredoc_end, :ident, :lbrace, :lbracket, :lparen, :op, :period, :regexp_beg, :regexp_end, :rparen, :sp, :symbeg, :symbols_beg, :tlambda, :tlambeg, :tstring_beg, :tstring_content, :tstring_end
+
       events = {
-        brace_block: -1,
-        dyna_symbol: -2,
-        excessed_comma: -1,
-        mlhs_paren: -1,
-        qsymbols_new: -3,
-        qwords_new: -3,
-        symbol_literal: -1,
-        top_const_field: -2,
-        top_const_ref: -2,
-        symbols_new: -3,
-        words_new: -3
+        brace_block: :@lbrace,
+        excessed_comma: :@comma,
+        mlhs_paren: :@lparen,
+        qsymbols_new: :@qsymbols_beg,
+        qwords_new: :@qwords_beg,
+        symbols_new: :@symbols_beg,
+        top_const_field: [:@op, '::'],
+        top_const_ref: [:@op, '::'],
+        words_new: :@words_beg
       }
 
-      events.each do |event, offset|
+      events.each do |event, (type, scanned)|
         define_method(:"on_#{event}") do |*body|
           super(*body).merge!(
-            char_start: char_start_for(body) + offset,
+            char_start: find_scanner_event(type, scanned)[:char_start],
             char_end: char_pos
           )
+        end
+      end
+
+      # Symbols don't necessarily have to have a @symbeg event fired before they
+      # start. For example, you can have symbol literals inside an `alias` node
+      # if you're just using bare words, as in: `alias foo bar`. So this is a
+      # special case in which if there is a `:@symbeg` event we can hook on to
+      # then we use it, otherwise we just look at the beginning of the first
+      # child node.
+      %i[dyna_symbol symbol_literal].each do |event|
+        define_method(:"on_#{event}") do |*body|
+          char_start =
+            if scanner_events.any? { |event| event[:type] == :@symbeg }
+              find_scanner_event(:@symbeg)[:char_start]
+            else
+              char_start_for(body)
+            end
+
+          super(*body).merge!(char_start: char_start, char_end: char_pos)
         end
       end
 
@@ -239,10 +252,14 @@ class RipperJS < Ripper
 
       (SCANNER_EVENTS - defined - %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end]).each do |event|
         define_method(:"on_#{event}") do |body|
-          super(body).merge!(
-            char_start: char_pos,
-            char_end: char_pos + body.size
-          )
+          super(body).tap do |node|
+            node.merge!(
+              char_start: char_pos,
+              char_end: char_pos + body.size
+            )
+
+            scanner_events << node
+          end
         end
       end
 
