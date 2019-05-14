@@ -571,6 +571,14 @@ class RipperJS < Ripper
 
       private
 
+      def char_pos
+        line_counts[lineno - 1] + column
+      end
+
+      def char_start_for(body)
+        body.map { |part| part[:char_start] if part.is_a?(Hash) }.compact.min || char_pos
+      end
+
       def find_keyword(body)
         index = last_keywords.rindex { |keyword| keyword[:body] == body }
         last_keywords.delete_at(index)
@@ -579,8 +587,8 @@ class RipperJS < Ripper
       def on_kw(body)
         super(body).tap do |node|
           node.merge!(
-            char_start: line_counts[lineno - 1] + column,
-            char_end: line_counts[lineno - 1] + column + body.size
+            char_start: char_pos,
+            char_end: char_pos + body.size
           )
 
           last_keywords << node
@@ -590,7 +598,9 @@ class RipperJS < Ripper
       events = {
         BEGIN: 'BEGIN',
         END: 'END',
+        alias: 'alias',
         begin: 'begin',
+        break: 'break',
         case: 'case',
         class: 'class',
         def: 'def',
@@ -602,11 +612,21 @@ class RipperJS < Ripper
         for: 'for',
         if: 'if',
         module: 'module',
+        next: 'next',
+        redo: 'redo',
         rescue: 'rescue',
+        retry: 'retry',
+        return: 'return',
+        return0: 'return',
         sclass: 'class',
+        super: 'super',
+        undef: 'undef',
         unless: 'unless',
         until: 'until',
-        while: 'while'
+        while: 'while',
+        yield: 'yield',
+        yield0: 'yield',
+        zsuper: 'super'
       }
 
       events.each do |event, keyword|
@@ -614,33 +634,50 @@ class RipperJS < Ripper
           super(*body).tap do |node|
             node.merge!(
               char_start: find_keyword(keyword)[:char_start],
-              char_end: line_counts[lineno - 1] + column
+              char_end: char_pos
             )
           end
         end
       end
 
+      def on_symbol_literal(*body)
+        super(*body).merge!(
+          char_start: char_start_for(body) - 1,
+          char_end: char_pos
+        )
+      end
+
+      def on_top_const_ref(*body)
+        super(*body).merge!(
+          char_start: char_start_for(body) - 2,
+          char_end: char_pos
+        )
+      end
+
+      def on_top_const_field(*body)
+        super(*body).merge!(
+          char_start: char_start_for(body) - 2,
+          char_end: char_pos
+        )
+      end
+
       defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
 
-      (SCANNER_EVENTS - defined).each do |event|
+      (SCANNER_EVENTS - defined - %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end]).each do |event|
         define_method(:"on_#{event}") do |body|
-          char_start = line_counts[lineno - 1] + column
-
           super(body).merge!(
-            char_start: char_start,
-            char_end: char_start + body.size
+            char_start: char_pos,
+            char_end: char_pos + body.size
           )
         end
       end
 
       (PARSER_EVENTS - defined).each do |event|
         define_method(:"on_#{event}") do |*body|
-          char_end = line_counts[lineno - 1] + column
-          char_start = body.map { |part| part[:char_start] if part.is_a?(Hash) }.compact.min || char_end
-
-          super(*body).tap do |node|
-            node.merge!(char_start: char_start, char_end: char_end)
-          end
+          super(*body).merge!(
+            char_start: char_start_for(body),
+            char_end: char_pos
+          )
         end
       end
     end
