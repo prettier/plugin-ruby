@@ -143,11 +143,11 @@ class RipperJS < Ripper
         children.map { |part| part[:char_start] if part.is_a?(Hash) }.compact.min || char_pos
       end
 
-      def find_scanner_event(type, body = nil)
+      def find_scanner_event(type, body = :any)
         index =
           scanner_events.rindex do |scanner_event|
             scanner_event[:type] == type &&
-              (!body || (scanner_event[:body] == body))
+              (body == :any || (scanner_event[:body] == body))
           end
 
         scanner_events.delete_at(index)
@@ -203,7 +203,7 @@ class RipperJS < Ripper
 
       events.each do |event, (type, scanned)|
         define_method(:"on_#{event}") do |*body|
-          node = find_scanner_event(type, scanned)
+          node = find_scanner_event(type, scanned || :any)
 
           super(*body).merge!(
             start: node[:start],
@@ -240,9 +240,11 @@ class RipperJS < Ripper
         )
       end
 
-      defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
+      defined =
+        private_instance_methods(false).grep(/\Aon_/) { $'.to_sym } +
+          %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end]
 
-      (SCANNER_EVENTS - defined - %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end]).each do |event|
+      (SCANNER_EVENTS - defined).each do |event|
         define_method(:"on_#{event}") do |body|
           super(body).tap do |node|
             node.merge!(
