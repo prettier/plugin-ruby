@@ -139,7 +139,8 @@ class RipperJS < Ripper
       end
 
       def char_start_for(body)
-        body.map { |part| part[:char_start] if part.is_a?(Hash) }.compact.min || char_pos
+        children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
+        children.map { |part| part[:char_start] if part.is_a?(Hash) }.compact.min || char_pos
       end
 
       def find_scanner_event(type, body = nil)

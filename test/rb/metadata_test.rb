@@ -39,14 +39,14 @@ class MetadataTest < Minitest::Test
     assert_metadata :assign, 'foo = bar'
   end
 
-  # def test_bare_assoc_hash
-  #   assert_node_metadata(
-  #     :bare_assoc_hash,
-  #     parse('foo(bar: baz)').dig(:body, 1, :body, 0, :body, 0, :body, 0),
-  #     char_start: 4,
-  #     char_end: 13
-  #   )
-  # end
+  def test_bare_assoc_hash
+    assert_node_metadata(
+      :bare_assoc_hash,
+      parse('foo(bar: baz)').dig(:body, 1, :body, 0, :body, 0, :body, 0),
+      char_start: 4,
+      char_end: 13
+    )
+  end
 
   def test_begin
     assert_metadata :begin, <<~RUBY
@@ -500,7 +500,6 @@ array
 assoc_new
 assoc_splat
 assoclist_from_args
-bare_assoc_hash
 block_var
 blockarg
 bodystmt
