@@ -207,6 +207,7 @@ class RipperJS < Ripper
       events = {
         brace_block: -1,
         dyna_symbol: -2,
+        excessed_comma: -1,
         mlhs_paren: -1,
         qsymbols_new: -3,
         qwords_new: -3,

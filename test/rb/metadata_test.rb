@@ -204,6 +204,15 @@ class MetadataTest < Minitest::Test
     )
   end
 
+  def test_excessed_comma
+    assert_node_metadata(
+      :excessed_comma,
+      parse('foo { |bar,| }').dig(:body, 1, :body, 0, :body, 0, :body, 2),
+      char_start: 11,
+      char_end: 12
+    )
+  end
+
   def test_for
     assert_metadata :for, <<~RUBY
       for foo in bar do
@@ -466,7 +475,6 @@ block_var
 blockarg
 bodystmt
 do_block
-excessed_comma
 fcall
 field
 hash
