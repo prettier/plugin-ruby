@@ -108,44 +108,149 @@ class RipperJS < Ripper
     end
   )
 
+  # For each node, we need to attach where it came from in order to be able to
+  # support placing the cursor correctly before and after formatting.
+  #
   # For most nodes, it's enough to look at the child nodes to determine the
   # start of the parent node. However, for some nodes it's necessary to keep
   # track of the keywords as they come in from the lexer and to modify the start
-  # node once we have it. We need accurate start and end lines so that we can
-  # embed block comments into the right kind of node.
+  # node once we have it.
   prepend(
     Module.new do
-      events = %i[begin else elsif ensure if rescue until while]
+      def initialize(source, *args)
+        super(source, *args)
 
-      def initialize(*args)
-        super(*args)
-        @keywords = []
+        @last_keywords = []
+        @line_counts = [0]
+
+        source.split("\n").each do |line|
+          line_counts << line_counts.last + line.size + 1
+        end
       end
 
       def self.prepended(base)
-        base.attr_reader :keywords
+        base.attr_reader :last_keywords, :line_counts
       end
 
       private
 
-      def find_start(body)
-        keywords[keywords.rindex { |keyword| keyword[:body] == body }][:start]
+      def char_pos
+        line_counts[lineno - 1] + column
       end
 
-      events.each do |event|
-        keyword = event.to_s
+      def char_start_for(body)
+        body.map { |part| part[:char_start] if part.is_a?(Hash) }.compact.min || char_pos
+      end
 
-        define_method(:"on_#{event}") do |*body|
-          super(*body).tap { |sexp| sexp.merge!(start: find_start(keyword)) }
-        end
+      def find_keyword(body)
+        index = last_keywords.rindex { |keyword| keyword[:body] == body }
+        last_keywords.delete_at(index)
       end
 
       def on_kw(body)
-        super(body).tap { |sexp| keywords << sexp }
+        super(body).tap do |node|
+          node.merge!(
+            char_start: char_pos,
+            char_end: char_pos + body.size
+          )
+
+          last_keywords << node
+        end
+      end
+
+      events = {
+        BEGIN: 'BEGIN',
+        END: 'END',
+        alias: 'alias',
+        begin: 'begin',
+        break: 'break',
+        case: 'case',
+        class: 'class',
+        def: 'def',
+        defs: 'def',
+        defined: 'defined?',
+        else: 'else',
+        elsif: 'elsif',
+        ensure: 'ensure',
+        for: 'for',
+        if: 'if',
+        module: 'module',
+        next: 'next',
+        redo: 'redo',
+        rescue: 'rescue',
+        retry: 'retry',
+        return: 'return',
+        return0: 'return',
+        sclass: 'class',
+        super: 'super',
+        undef: 'undef',
+        unless: 'unless',
+        until: 'until',
+        while: 'while',
+        yield: 'yield',
+        yield0: 'yield',
+        zsuper: 'super'
+      }
+
+      events.each do |event, keyword|
+        define_method(:"on_#{event}") do |*body|
+          node = find_keyword(keyword)
+
+          super(*body).merge!(
+            start: node[:start],
+            char_start: node[:char_start],
+            char_end: char_pos
+          )
+        end
       end
 
       def on_program(*body)
-        super(*body).tap { |sexp| sexp.merge!(start: 1) }
+        super(*body).merge!(
+          start: 1,
+          char_start: 0,
+          char_end: char_pos
+        )
+      end
+
+      def on_symbol_literal(*body)
+        super(*body).merge!(
+          char_start: char_start_for(body) - 1,
+          char_end: char_pos
+        )
+      end
+
+      def on_top_const_ref(*body)
+        super(*body).merge!(
+          char_start: char_start_for(body) - 2,
+          char_end: char_pos
+        )
+      end
+
+      def on_top_const_field(*body)
+        super(*body).merge!(
+          char_start: char_start_for(body) - 2,
+          char_end: char_pos
+        )
+      end
+
+      defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
+
+      (SCANNER_EVENTS - defined - %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end]).each do |event|
+        define_method(:"on_#{event}") do |body|
+          super(body).merge!(
+            char_start: char_pos,
+            char_end: char_pos + body.size
+          )
+        end
+      end
+
+      (PARSER_EVENTS - defined).each do |event|
+        define_method(:"on_#{event}") do |*body|
+          super(*body).merge!(
+            char_start: char_start_for(body),
+            char_end: char_pos
+          )
+        end
       end
     end
   )
@@ -540,144 +645,6 @@ class RipperJS < Ripper
           params ||= { type: :params, body: [] }
 
           sexp.merge!(type: :lambda, body: [params, stmts])
-        end
-      end
-    end
-  )
-
-  # For each node, we need to attach where it came from in order to be able to
-  # support placing the cursor correctly before and after formatting.
-  #
-  # For most nodes, it's enough to look at the child nodes to determine the
-  # start of the parent node. However, for some nodes it's necessary to keep
-  # track of the keywords as they come in from the lexer and to modify the start
-  # node once we have it.
-  prepend(
-    Module.new do
-      def initialize(source, *args)
-        super(source, *args)
-
-        @last_keywords = []
-        @line_counts = [0]
-
-        source.split("\n").each do |line|
-          line_counts << line_counts.last + line.size + 1
-        end
-      end
-
-      def self.prepended(base)
-        base.attr_reader :last_keywords, :line_counts
-      end
-
-      private
-
-      def char_pos
-        line_counts[lineno - 1] + column
-      end
-
-      def char_start_for(body)
-        body.map { |part| part[:char_start] if part.is_a?(Hash) }.compact.min || char_pos
-      end
-
-      def find_keyword(body)
-        index = last_keywords.rindex { |keyword| keyword[:body] == body }
-        last_keywords.delete_at(index)
-      end
-
-      def on_kw(body)
-        super(body).tap do |node|
-          node.merge!(
-            char_start: char_pos,
-            char_end: char_pos + body.size
-          )
-
-          last_keywords << node
-        end
-      end
-
-      events = {
-        BEGIN: 'BEGIN',
-        END: 'END',
-        alias: 'alias',
-        begin: 'begin',
-        break: 'break',
-        case: 'case',
-        class: 'class',
-        def: 'def',
-        defs: 'def',
-        defined: 'defined?',
-        else: 'else',
-        elsif: 'elsif',
-        ensure: 'ensure',
-        for: 'for',
-        if: 'if',
-        module: 'module',
-        next: 'next',
-        redo: 'redo',
-        rescue: 'rescue',
-        retry: 'retry',
-        return: 'return',
-        return0: 'return',
-        sclass: 'class',
-        super: 'super',
-        undef: 'undef',
-        unless: 'unless',
-        until: 'until',
-        while: 'while',
-        yield: 'yield',
-        yield0: 'yield',
-        zsuper: 'super'
-      }
-
-      events.each do |event, keyword|
-        define_method(:"on_#{event}") do |*body|
-          super(*body).tap do |node|
-            node.merge!(
-              char_start: find_keyword(keyword)[:char_start],
-              char_end: char_pos
-            )
-          end
-        end
-      end
-
-      def on_symbol_literal(*body)
-        super(*body).merge!(
-          char_start: char_start_for(body) - 1,
-          char_end: char_pos
-        )
-      end
-
-      def on_top_const_ref(*body)
-        super(*body).merge!(
-          char_start: char_start_for(body) - 2,
-          char_end: char_pos
-        )
-      end
-
-      def on_top_const_field(*body)
-        super(*body).merge!(
-          char_start: char_start_for(body) - 2,
-          char_end: char_pos
-        )
-      end
-
-      defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
-
-      (SCANNER_EVENTS - defined - %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end]).each do |event|
-        define_method(:"on_#{event}") do |body|
-          super(body).merge!(
-            char_start: char_pos,
-            char_end: char_pos + body.size
-          )
-        end
-      end
-
-      (PARSER_EVENTS - defined).each do |event|
-        define_method(:"on_#{event}") do |*body|
-          super(*body).merge!(
-            char_start: char_start_for(body),
-            char_end: char_pos
-          )
         end
       end
     end
