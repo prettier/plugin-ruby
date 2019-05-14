@@ -278,6 +278,14 @@ class MetadataTest < Minitest::Test
     assert_metadata :massign, 'foo, bar, baz = 1, 2, 3'
   end
 
+  def test_method_add_arg
+    assert_metadata :method_add_arg, 'foo(bar)'
+  end
+
+  def test_method_add_block
+    assert_metadata :method_add_block, 'foo { bar }'
+  end
+
   def test_mlhs
     assert_node_metadata(
       :mlhs,
@@ -350,6 +358,11 @@ class MetadataTest < Minitest::Test
 
   def test_redo
     assert_metadata :redo, 'redo'
+  end
+
+  def test_regexp_literal
+    assert_metadata :regexp_literal, '/foo/'
+    assert_metadata :regexp_literal, '%r{foo}'
   end
 
   def test_rescue
@@ -538,17 +551,12 @@ hash
 kwrest_param
 lambda
 magic_comment
-method_add_arg
-method_add_block
 mrhs_add
 mrhs_add_star
 mrhs_new
 mrhs_new_from_args
 params
 paren
-regexp_add
-regexp_literal
-regexp_new
 rest_param
 stmts_add
 stmts_new

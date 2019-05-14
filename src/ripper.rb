@@ -180,6 +180,7 @@ class RipperJS < Ripper
         qsymbols_new: :@qsymbols_beg,
         qwords_new: :@qwords_beg,
         redo: [:@kw, 'redo'],
+        regexp_literal: :@regexp_beg,
         rescue: [:@kw, 'rescue'],
         retry: [:@kw, 'retry'],
         return0: [:@kw, 'return'],
