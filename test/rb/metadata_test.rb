@@ -159,6 +159,15 @@ class MetadataTest < Minitest::Test
     RUBY
   end
 
+  def test_do_block
+    assert_node_metadata(
+      :do_block,
+      parse('foo do; bar; end').dig(:body, 1),
+      char_start: 4,
+      char_end: 16
+    )
+  end
+
   def test_dot2
     assert_metadata :dot2, 'foo..bar'
   end
@@ -524,7 +533,6 @@ assoclist_from_args
 block_var
 blockarg
 bodystmt
-do_block
 fcall
 hash
 kwrest_param

@@ -153,72 +153,61 @@ class RipperJS < Ripper
         scanner_events.delete_at(index)
       end
 
-      events = {
-        BEGIN: 'BEGIN',
-        END: 'END',
-        alias: 'alias',
-        begin: 'begin',
-        break: 'break',
-        case: 'case',
-        class: 'class',
-        def: 'def',
-        defs: 'def',
-        defined: 'defined?',
-        else: 'else',
-        elsif: 'elsif',
-        ensure: 'ensure',
-        for: 'for',
-        if: 'if',
-        module: 'module',
-        next: 'next',
-        redo: 'redo',
-        rescue: 'rescue',
-        retry: 'retry',
-        return: 'return',
-        return0: 'return',
-        sclass: 'class',
-        super: 'super',
-        undef: 'undef',
-        unless: 'unless',
-        until: 'until',
-        var_alias: 'alias',
-        when: 'when',
-        while: 'while',
-        yield: 'yield',
-        yield0: 'yield',
-        zsuper: 'super'
-      }
-
-      events.each do |event, keyword|
-        define_method(:"on_#{event}") do |*body|
-          node = find_scanner_event(:@kw, keyword)
-
-          super(*body).merge!(
-            start: node[:start],
-            char_start: node[:char_start],
-            char_end: char_pos
-          )
-        end
-      end
-
       # :backref, :backtick :const, :embdoc, :embdoc_beg, :embdoc_end, :embexpr_beg, :embexpr_end, :embvar, :heredoc_beg, :heredoc_end, :ident, :lbrace, :lbracket, :lparen, :op, :period, :regexp_beg, :regexp_end, :rparen, :sp, :symbeg, :symbols_beg, :tlambda, :tlambeg, :tstring_beg, :tstring_content, :tstring_end
 
       events = {
+        BEGIN: [:@kw, 'BEGIN'],
+        END: [:@kw, 'END'],
+        alias: [:@kw, 'alias'],
+        begin: [:@kw, 'begin'],
         brace_block: :@lbrace,
+        break: [:@kw, 'break'],
+        case: [:@kw, 'case'],
+        class: [:@kw, 'class'],
+        def: [:@kw, 'def'],
+        defined: [:@kw, 'defined?'],
+        defs: [:@kw, 'def'],
+        do_block: [:@kw, 'do'],
+        else: [:@kw, 'else'],
+        elsif: [:@kw, 'elsif'],
+        ensure: [:@kw, 'ensure'],
         excessed_comma: :@comma,
+        for: [:@kw, 'for'],
+        if: [:@kw, 'if'],
         mlhs_paren: :@lparen,
+        module: [:@kw, 'module'],
+        next: [:@kw, 'next'],
         qsymbols_new: :@qsymbols_beg,
         qwords_new: :@qwords_beg,
+        redo: [:@kw, 'redo'],
+        rescue: [:@kw, 'rescue'],
+        retry: [:@kw, 'retry'],
+        return0: [:@kw, 'return'],
+        return: [:@kw, 'return'],
+        sclass: [:@kw, 'class'],
+        super: [:@kw, 'super'],
         symbols_new: :@symbols_beg,
         top_const_field: [:@op, '::'],
         top_const_ref: [:@op, '::'],
-        words_new: :@words_beg
+        undef: [:@kw, 'undef'],
+        unless: [:@kw, 'unless'],
+        until: [:@kw, 'until'],
+        var_alias: [:@kw, 'alias'],
+        when: [:@kw, 'when'],
+        while: [:@kw, 'while'],
+        words_new: :@words_beg,
+        yield0: [:@kw, 'yield'],
+        yield: [:@kw, 'yield'],
+        zsuper: [:@kw, 'super']
       }
 
       events.each do |event, (type, scanned)|
         define_method(:"on_#{event}") do |*body|
+          node = find_scanner_event(type, scanned)
+
           super(*body).merge!(
-            char_start: find_scanner_event(type, scanned)[:char_start],
+            start: node[:start],
+            char_start: node[:char_start],
             char_end: char_pos
           )
         end
