@@ -115,6 +115,16 @@ describe("method", () => {
 
         return expect(content).toMatchFormat();
       });
+
+      test("just block", () => {
+        const content = ruby(`
+          def curry(&block)
+            new &block
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
     });
 
     describe("single splat", () => {
