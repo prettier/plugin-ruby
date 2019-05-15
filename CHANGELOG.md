@@ -31,6 +31,17 @@ would get printed as
 
 Now the `if` and `unless` printers check for the presence of single comments.
 
+- Fixes an error where `command` nodes within `def` nodes would fail to format if it was only a single block argument. For example,
+
+<!-- prettier-ignore -->
+```ruby
+def curry(&block)
+  new &block
+end
+```
+
+would fail, but now works. (Thanks to @JoshuaKGoldberg for the report.)
+
 ## [0.12.2] - 2019-04-30
 
 ### Changed
