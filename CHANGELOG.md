@@ -42,6 +42,15 @@ end
 
 would fail, but now works. (Thanks to @JoshuaKGoldberg for the report.)
 
+- Comments on lines with array references were previously deleting the array references entirely. For example,
+
+<!-- prettier-ignore -->
+```ruby
+array[index] # comment
+```
+
+would previously result in `array[]`, but now prints properly. (Thanks to @xipgroc for the report.)
+
 ## [0.12.2] - 2019-04-30
 
 ### Changed
