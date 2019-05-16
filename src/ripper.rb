@@ -150,6 +150,7 @@ class RipperJS < Ripper
       # Certain events needs to steal the comments from their children in order
       # for them to display properly.
       events = {
+        aref: [:body, 1],
         args_add_block: [:body, 0],
         break: [:body, 0],
         command: [:body, 1],
