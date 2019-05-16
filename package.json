@@ -1,6 +1,6 @@
 {
   "name": "@prettier/plugin-ruby",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "prettier plugin for the Ruby programming language",
   "main": "src/ruby.js",
   "scripts": {
@@ -26,7 +26,7 @@
     "all-contributors-cli": "^6.1.2",
     "eslint": "^5.15.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-config-prettier": "^4.1.0",
+    "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-import": "^2.16.0",
     "jest": "^24.0.0"
   },

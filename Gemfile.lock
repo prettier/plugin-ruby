@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    prettier (0.12.2)
+    prettier (0.12.3)
 
 GEM
   remote: https://rubygems.org/
@@ -31,10 +31,10 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 2.0)
-  minitest
+  minitest (~> 5.11)
   prettier!
   rake (~> 12.3)
-  rubocop
+  rubocop (~> 0.67)
 
 BUNDLED WITH
    2.0.1
