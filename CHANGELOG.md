@@ -19,7 +19,7 @@ foo.each do |bar|
 end
 ```
 
-would get printed as 
+would get printed as
 
 <!-- prettier-ignore -->
 ```ruby
@@ -31,7 +31,7 @@ foo.each do |bar|
 end
 ```
 
-but now gets printed correctly.
+but now gets printed correctly. (Thanks to @xipgroc for the report.)
 
 ## [0.12.3] - 2019-05-16
 
