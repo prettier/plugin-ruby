@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- Comments inside of `do...end` blocks that preceeded `call` nodes were associating the comment with the `var_ref` instead of the `call` itself. For example,
+
+<!-- prettier-ignore -->
+```ruby
+foo.each do |bar|
+  # comment
+  bar.baz
+  bar.baz
+end
+```
+
+would get printed as
+
+<!-- prettier-ignore -->
+```ruby
+foo.each do |bar|
+  # comment
+  bar
+    .baz
+  bar.baz
+end
+```
+
+but now gets printed correctly. (Thanks to @xipgroc for the report.)
+
 ## [0.12.3] - 2019-05-16
 
 ### Changed

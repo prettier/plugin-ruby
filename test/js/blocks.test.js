@@ -50,6 +50,18 @@ describe("blocks", () => {
     return expect(content).toMatchFormat();
   });
 
+  test("doesn't do weird things with comments", () => {
+    const content = ruby(`
+      foo.each do |bar|
+        # comment
+        bar.baz
+        bar.baz
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
   test("for loops get changed", () => {
     const content = ruby(`
       for i in [1, 2, 3] do
@@ -128,6 +140,17 @@ describe("blocks", () => {
       `);
 
       return expect(content).toChangeFormat("list.each(&:print)");
+    });
+
+    test.skip("multi-line with comment", () => {
+      const content = ruby(`
+        foo.each do |bar|
+          # comment
+          bar.baz
+        end
+      `);
+
+      return expect(content).toMatchFormat();
     });
 
     test("happens for command nodes", () => {

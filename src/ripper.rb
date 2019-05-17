@@ -153,6 +153,7 @@ class RipperJS < Ripper
         aref: [:body, 1],
         args_add_block: [:body, 0],
         break: [:body, 0],
+        call: [:body, 0],
         command: [:body, 1],
         command_call: [:body, 3],
         regexp_literal: [:body, 0],
@@ -255,7 +256,7 @@ class RipperJS < Ripper
 
       defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
 
-      (Ripper::PARSER_EVENTS - defined).each do |event|
+      (PARSER_EVENTS - defined).each do |event|
         define_method(:"on_#{event}") do |*body|
           super(*body).tap do |sexp|
             @last_sexp = sexp
