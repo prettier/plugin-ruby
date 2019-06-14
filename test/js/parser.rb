@@ -4,7 +4,15 @@ require_relative '../../src/ripper'
 
 loop do
   lines, line = [], nil
-  lines << line while (line = gets) != "---\n"
+
+  i = 0
+  while (line = gets) != "---\n" do
+    lines << line
+    i += 1
+    if i > 100
+      break
+    end
+  end
 
   parser = RipperJS.new(lines.join)
 
