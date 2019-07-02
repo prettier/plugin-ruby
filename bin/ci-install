@@ -6,7 +6,7 @@ gem update --system
 gem install bundler
 
 source ~/.nvm/nvm.sh
-nvm install 10
-nvm use 10
+nvm install 11
+nvm use 11
 
-yarn --ignore-engines install
+yarn install
