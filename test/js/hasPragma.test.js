@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const { hasPragma } = require("../../src/ruby").parsers.ruby;
 
 describe("hasPragma", () => {

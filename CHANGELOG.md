@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- Added `locStart` and `locEnd` placeholders until we can get the functionality built. In the meantime it will stop breaking integrations.
+
 ### Changed
 
 - Comments inside of `do...end` blocks that preceeded `call` nodes were associating the comment with the `var_ref` instead of the `call` itself. For example,

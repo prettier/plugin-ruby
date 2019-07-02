@@ -4,6 +4,11 @@ const print = require("./print");
 const pragmaPattern = /#\s*@(prettier|format)/;
 const hasPragma = text => pragmaPattern.test(text);
 
+// This is a placeholder until we have been node location reporting coming from
+// the ripper parser.
+const locStart = node => 0;
+const locEnd = node => 0;
+
 /*
  * metadata mostly pulled from linguist and rubocop:
  * https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
@@ -75,7 +80,9 @@ module.exports = {
     ruby: {
       parse,
       astFormat: "ruby",
-      hasPragma
+      hasPragma,
+      locStart,
+      locEnd
     }
   },
   printers: {
