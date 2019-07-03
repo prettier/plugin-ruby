@@ -202,7 +202,6 @@ class RipperJS < Ripper
         sclass: [:@kw, 'class'],
         string_dvar: :@embvar,
         string_embexpr: :@embexpr_beg,
-        string_literal: :@tstring_beg,
         super: [:@kw, 'super'],
         symbols_new: :@symbols_beg,
         top_const_field: [:@op, '::'],
@@ -236,7 +235,7 @@ class RipperJS < Ripper
       # array literal syntax like %w and %i. As a result, we may be looking for
       # an left bracket, or we may be just looking at the children.
       def on_array(*body)
-        if %i[args args_add_star].include?(body[0][:type])
+        if body[0] && %i[args args_add_star].include?(body[0][:type])
           node = find_scanner_event(:@lbracket)
 
           super(*body).merge!(
@@ -261,6 +260,26 @@ class RipperJS < Ripper
           char_start: char_start_for(body.flatten(1)),
           char_end: char_pos
         )
+      end
+
+      # String literals and either contain string parts or a heredoc. If it
+      # contains a heredoc we can just go directly to the child nodes, otherwise
+      # we need to look for a `tstring_beg`.
+      def on_string_literal(*body)
+        if body[0][:type] == :heredoc
+          super(*body).merge!(
+            char_start: char_start_for(body),
+            char_end: char_pos
+          )
+        else
+          node = find_scanner_event(:@tstring_beg)
+
+          super(*body).merge!(
+            start: node[:start],
+            char_start: node[:char_start],
+            char_end: char_pos
+          )
+        end
       end
 
       # Technically, the `not` operator is a unary operator but is reported as
