@@ -17,11 +17,11 @@ about: Issues for ugly or incorrect code
 ## Current output
 
 ```ruby
-# Code snippet, or crash details
+# Code snippet
 ```
 
 ## Expected output
 
 ```ruby
-# code snippet
+# Code snippet
 ```
