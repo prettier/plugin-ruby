@@ -320,6 +320,14 @@ class MetadataTest < Minitest::Test
     RUBY
   end
 
+  def test_hash
+    assert_metadata :hash, <<~RUBY
+      {
+        foo: 'bar'
+      }
+    RUBY
+  end
+
   def test_if
     assert_metadata :if, <<~RUBY
       if foo
@@ -660,7 +668,6 @@ assoclist_from_args
 block_var
 blockarg
 bodystmt
-hash
 lambda
 params
 stmts_add

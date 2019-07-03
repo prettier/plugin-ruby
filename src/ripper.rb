@@ -153,7 +153,11 @@ class RipperJS < Ripper
         scanner_events.delete_at(index)
       end
 
-      # :backref, :backtick :const, :embdoc, :embdoc_beg, :embdoc_end, :embexpr_beg, :embexpr_end, :embvar, :heredoc_beg, :heredoc_end, :ident, :lbrace, :lbracket, :lparen, :op, :period, :regexp_beg, :regexp_end, :rparen, :sp, :symbeg, :symbols_beg, :tlambda, :tlambeg, :tstring_beg, :tstring_content, :tstring_end
+      # :backref, :backtick, :const, :embdoc, :embdoc_beg, :embdoc_end,
+      # :embexpr_beg, :embexpr_end, :embvar, :heredoc_beg, :heredoc_end,
+      # :ident, :lbrace, :lbracket, :lparen, :op, :period, :regexp_beg,
+      # :regexp_end, :rparen, :sp, :symbeg, :symbols_beg, :tlambda, :tlambeg,
+      # :tstring_beg, :tstring_content, :tstring_end
 
       events = {
         BEGIN: [:@kw, 'BEGIN'],
@@ -176,6 +180,7 @@ class RipperJS < Ripper
         ensure: [:@kw, 'ensure'],
         excessed_comma: :@comma,
         for: [:@kw, 'for'],
+        hash: :@lbrace,
         if: [:@kw, 'if'],
         kwrest_param: [:@op, '**'],
         mlhs_paren: :@lparen,
