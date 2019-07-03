@@ -449,6 +449,22 @@ class MetadataTest < Minitest::Test
     assert_metadata :opassign, 'foo ||= bar'
   end
 
+  def test_params
+    content = <<~RUBY
+      def foo(
+        bar,
+        baz
+      ); end
+    RUBY
+
+    assert_node_metadata(
+      :params,
+      parse(content).dig(:body, 1, :body, 0),
+      char_start: 11,
+      char_end: 23
+    )
+  end
+
   def test_paren
     assert_metadata :paren, '()'
   end
@@ -691,7 +707,6 @@ assoclist_from_args
 block_var
 blockarg
 bodystmt
-params
 stmts_add
 stmts_new
 string_add

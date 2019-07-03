@@ -230,6 +230,19 @@ class RipperJS < Ripper
         end
       end
 
+      # Params have a somewhat interesting structure in that they are an array
+      # of arrays where the position in the top-level array indicates the type
+      # of param and the subarray is the list of parameters of that type. We
+      # therefore have to flatten them down to get to the location.
+      def on_params(*body)
+        body.compact.flatten(1)
+
+        super(*body).merge!(
+          char_start: char_start_for(body.flatten(1)),
+          char_end: char_pos
+        )
+      end
+
       # Symbols don't necessarily have to have a @symbeg event fired before they
       # start. For example, you can have symbol literals inside an `alias` node
       # if you're just using bare words, as in: `alias foo bar`. So this is a
