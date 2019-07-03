@@ -160,6 +160,7 @@ class RipperJS < Ripper
         END: [:@kw, 'END'],
         alias: [:@kw, 'alias'],
         assoc_splat: [:@op, '**'],
+        arg_paren: :@lparen,
         args_add_star: [:@op, '*'],
         begin: [:@kw, 'begin'],
         brace_block: :@lbrace,

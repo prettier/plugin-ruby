@@ -62,6 +62,23 @@ class MetadataTest < Minitest::Test
     )
   end
 
+  def test_arg_paren
+    content = <<~RUBY
+      foo(
+        a,
+        b,
+        c
+      )
+    RUBY
+
+    assert_node_metadata(
+      :arg_paren,
+      parse(content).dig(:body, 1),
+      char_start: 3,
+      char_end: 20
+    )
+  end
+
   def test_assign
     assert_metadata :assign, 'foo = bar'
   end
@@ -638,7 +655,6 @@ class MetadataTest < Minitest::Test
 end
 
 __END__
-arg_paren
 array
 assoclist_from_args
 block_var
