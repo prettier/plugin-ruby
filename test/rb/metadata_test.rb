@@ -624,6 +624,11 @@ class MetadataTest < Minitest::Test
     assert_metadata :top_const_ref, '::Foo'
   end
 
+  def test_unary
+    assert_metadata :unary, '-foo'
+    assert_metadata :unary, 'not foo'
+  end
+
   def test_undef
     assert_metadata :undef, 'undef foo, bar'
   end
@@ -762,4 +767,3 @@ array
 bodystmt
 stmts_add
 stmts_new
-unary

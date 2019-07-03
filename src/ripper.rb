@@ -245,6 +245,24 @@ class RipperJS < Ripper
         )
       end
 
+      # Technically, the `not` operator is a unary operator but is reported as
+      # a keyword and not an operator. Because of the inconsistency, we have to
+      # manually look for the correct scanner event here.
+      def on_unary(*body)
+        node =
+          if body[0] == :not
+            find_scanner_event(:@kw, 'not')
+          else
+            find_scanner_event(:@op)
+          end
+
+        super(*body).merge!(
+          start: node[:start],
+          char_start: node[:char_start],
+          char_end: char_pos
+        )
+      end
+
       # Symbols don't necessarily have to have a @symbeg event fired before they
       # start. For example, you can have symbol literals inside an `alias` node
       # if you're just using bare words, as in: `alias foo bar`. So this is a
