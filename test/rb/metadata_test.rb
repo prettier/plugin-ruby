@@ -547,6 +547,13 @@ class MetadataTest < Minitest::Test
     RUBY
   end
 
+  def test_string_concat
+    assert_metadata :string_concat, <<~RUBY
+      'foo' \
+        'bar'
+    RUBY
+  end
+
   def test_string_dvar
     assert_node_metadata(
       :string_dvar,
@@ -721,7 +728,6 @@ blockarg
 bodystmt
 stmts_add
 stmts_new
-string_concat
 unary
 var_field
 void_stmt
