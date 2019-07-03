@@ -179,6 +179,15 @@ class MetadataTest < Minitest::Test
     )
   end
 
+  def test_bodystmt
+    assert_node_metadata(
+      :bodystmt,
+      parse('class Foo; def foo; end; end').dig(:body, 2),
+      char_start: 10,
+      char_end: 28
+    )
+  end
+
   def test_brace_block
     assert_node_metadata(
       :brace_block,
@@ -793,6 +802,5 @@ class MetadataTest < Minitest::Test
 end
 
 __END__
-bodystmt
 stmts_add
 stmts_new
