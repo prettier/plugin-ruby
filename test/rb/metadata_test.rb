@@ -800,7 +800,3 @@ class MetadataTest < Minitest::Test
     RipperJS.parse(ruby).dig(:body, 0, :body, 0)
   end
 end
-
-__END__
-stmts_add
-stmts_new
