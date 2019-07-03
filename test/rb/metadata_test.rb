@@ -654,6 +654,15 @@ class MetadataTest < Minitest::Test
     assert_metadata :vcall, 'foo'
   end
 
+  def test_void_stmt
+    assert_node_metadata(
+      :void_stmt,
+      parse('; ;'),
+      char_start: 1,
+      char_end: 1
+    )
+  end
+
   def test_when
     assert_node_metadata(
       :when,
@@ -730,4 +739,3 @@ stmts_add
 stmts_new
 unary
 var_field
-void_stmt
