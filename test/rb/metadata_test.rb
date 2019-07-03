@@ -626,6 +626,15 @@ class MetadataTest < Minitest::Test
     )
   end
 
+  def test_xstring
+    assert_metadata :xstring_literal, <<~RUBY
+      `
+        foo
+        bar
+      `
+    RUBY
+  end
+
   def test_yield
     assert_metadata :yield, 'yield foo'
   end
@@ -679,6 +688,3 @@ string_literal
 unary
 var_field
 void_stmt
-xstring_add
-xstring_literal
-xstring_new

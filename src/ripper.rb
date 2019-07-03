@@ -211,6 +211,7 @@ class RipperJS < Ripper
         when: [:@kw, 'when'],
         while: [:@kw, 'while'],
         words_new: :@words_beg,
+        xstring_literal: :@backtick,
         yield0: [:@kw, 'yield'],
         yield: [:@kw, 'yield'],
         zsuper: [:@kw, 'super']
