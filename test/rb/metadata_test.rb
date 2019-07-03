@@ -646,6 +646,15 @@ class MetadataTest < Minitest::Test
     assert_metadata :var_alias, 'alias $foo $bar'
   end
 
+  def test_var_field
+    assert_node_metadata(
+      :var_field,
+      parse('foo = 1').dig(:body, 0),
+      char_start: 0,
+      char_end: 5
+    )
+  end
+
   def test_var_ref
     assert_metadata :var_ref, 'true'
   end
@@ -738,4 +747,3 @@ bodystmt
 stmts_add
 stmts_new
 unary
-var_field
