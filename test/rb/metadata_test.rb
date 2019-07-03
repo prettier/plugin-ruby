@@ -101,6 +101,15 @@ class MetadataTest < Minitest::Test
     )
   end
 
+  def test_assoclist_from_args
+    assert_node_metadata(
+      :assoclist_from_args,
+      parse('{ foo => bar }').dig(:body, 0),
+      char_start: 2,
+      char_end: 14
+    )
+  end
+
   def test_bare_assoc_hash
     assert_node_metadata(
       :bare_assoc_hash,
@@ -703,7 +712,6 @@ end
 
 __END__
 array
-assoclist_from_args
 block_var
 blockarg
 bodystmt
