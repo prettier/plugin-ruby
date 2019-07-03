@@ -131,6 +131,15 @@ class MetadataTest < Minitest::Test
     assert_metadata :binary, 'foo + bar'
   end
 
+  def test_block_var
+    assert_node_metadata(
+      :block_var,
+      parse('foo { |bar| }').dig(:body, 1, :body, 0),
+      char_start: 7,
+      char_end: 11
+    )
+  end
+
   def test_brace_block
     assert_node_metadata(
       :brace_block,
@@ -741,7 +750,6 @@ end
 
 __END__
 array
-block_var
 blockarg
 bodystmt
 stmts_add
