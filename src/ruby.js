@@ -6,8 +6,8 @@ const hasPragma = text => pragmaPattern.test(text);
 
 // This is a placeholder until we have been node location reporting coming from
 // the ripper parser.
-const locStart = node => 0;
-const locEnd = node => 0;
+const locStart = () => 0;
+const locEnd = () => 0;
 
 /*
  * metadata mostly pulled from linguist and rubocop:
