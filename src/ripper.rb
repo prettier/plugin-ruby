@@ -10,6 +10,15 @@ require 'json' unless defined?(JSON)
 require 'ripper'
 
 class RipperJS < Ripper
+  attr_reader :lines, :__end__
+
+  def initialize(source, *args)
+    super(source, *args)
+
+    @lines = source.split("\n")
+    @__end__ = nil
+  end
+
   private
 
   # Scanner events occur when the lexer hits a new token, like a keyword or an
@@ -411,62 +420,41 @@ class RipperJS < Ripper
     end
   )
 
-  # These are the event types that contain _actual_ string content. If there is
-  # an encoding magic comment at the top of the file, ripper will actually
-  # change into that encoding for the storage of the string. This will break
-  # everything, so we need to force the encoding back into UTF-8 so that
-  # the JSON library won't break.
   prepend(
     Module.new do
       private
 
+      # These are the event types that contain _actual_ string content. If
+      # there is an encoding magic comment at the top of the file, ripper will
+      # actually change into that encoding for the storage of the string. This
+      # will break everything, so we need to force the encoding back into UTF-8
+      # so that the JSON library won't break.
       %w[comment ident tstring_content].each do |event|
         define_method(:"on_#{event}") do |body|
           super(body.force_encoding('UTF-8'))
         end
       end
-    end
-  )
 
-  # Handles __END__ syntax, which allows individual scripts to keep content
-  # after the main ruby code that can be read through DATA. Which looks like:
-  #
-  # foo.bar
-  #
-  # __END__
-  # some other content that isn't read by ripper normally
-  prepend(
-    Module.new do
-      def initialize(source, *args)
-        super(source, *args)
-        @source = source
-        @ending = nil
-      end
-
-      def self.prepended(base)
-        base.attr_reader :source, :ending
-      end
-
-      private
-
+      # Handles __END__ syntax, which allows individual scripts to keep content
+      # after the main ruby code that can be read through DATA. Which looks
+      # like:
+      #
+      # foo.bar
+      #
+      # __END__
+      # some other content that isn't normally read by ripper
       def on___end__(body)
-        @ending = super(source.split("\n")[lineno..-1].join("\n"))
+        @__end__ = super(lines[lineno..-1].join("\n"))
       end
 
       def on_program(*body)
-        super(*body).tap { |sexp| sexp[:body][0][:body] << ending if ending }
+        super(*body).tap { |sexp| sexp[:body][0][:body] << __end__ if __end__ }
       end
-    end
-  )
 
-  # Adds the used quote type onto string nodes. This is necessary because we're
-  # going to have to stick to whatever quote the user chose if there are escape
-  # sequences within the string. For example, if you have '\n' we can't switch
-  # to double quotes without changing what it means.
-  prepend(
-    Module.new do
-      private
-
+      # Adds the used quote type onto string nodes. This is necessary because
+      # we're going to have to stick to whatever quote the user chose if there
+      # are escape sequences within the string. For example, if you have '\n'
+      # we can't switch to double quotes without changing what it means.
       def on_tstring_end(quote)
         last_sexp.merge!(quote: quote)
       end
@@ -474,30 +462,15 @@ class RipperJS < Ripper
       def on_label_end(quote)
         last_sexp.merge!(quote: quote[0]) # quote is ": or ':
       end
-    end
-  )
 
-  # Normally access controls are reported as vcall nodes. This module creates a
-  # new node type to explicitly track those nodes instead, so that the printer
-  # can add new lines as necessary.
-  prepend(
-    Module.new do
-      KEYWORDS = %w[private protected public].freeze
-
-      def initialize(source, *args)
-        super(source, *args)
-        @lines = source.split("\n")
-      end
-
-      def self.prepended(base)
-        base.attr_reader :lines
-      end
-
-      private
+      # Normally access controls are reported as vcall nodes. This method
+      # creates a new node type to explicitly track those nodes instead, so
+      # that the printer can add new lines as necessary.
+      ACCESS_CONTROLS = %w[private protected public].freeze
 
       def on_vcall(ident)
         super(ident).tap do |sexp|
-          if !KEYWORDS.include?(ident[:body]) ||
+          if !ACCESS_CONTROLS.include?(ident[:body]) ||
              ident[:body] != lines[lineno - 1].strip
             next
           end
@@ -505,35 +478,29 @@ class RipperJS < Ripper
           sexp.merge!(type: :access_ctrl)
         end
       end
-    end
-  )
 
-  # When the only statement inside of a `def` node is a `begin` node, then you
-  # can safely replace the body of the `def` with the body of the `begin`. For
-  # example:
-  #
-  # def foo
-  #   begin
-  #     try_something
-  #   rescue SomeError => error
-  #     handle_error(error)
-  #   end
-  # end
-  #
-  # can get transformed into:
-  #
-  # def foo
-  #   try_something
-  # rescue SomeError => error
-  #   handle_error(error)
-  # end
-  #
-  # This module handles this by hoisting up the `bodystmt` node from the inner
-  # `begin` up to the `def`.
-  prepend(
-    Module.new do
-      private
-
+      # When the only statement inside of a `def` node is a `begin` node, then
+      # you can safely replace the body of the `def` with the body of the
+      # `begin`. For example:
+      #
+      # def foo
+      #   begin
+      #     try_something
+      #   rescue SomeError => error
+      #     handle_error(error)
+      #   end
+      # end
+      #
+      # can get transformed into:
+      #
+      # def foo
+      #   try_something
+      # rescue SomeError => error
+      #   handle_error(error)
+      # end
+      #
+      # This module handles this by hoisting up the `bodystmt` node from the
+      # inner `begin` up to the `def`.
       def on_def(ident, params, bodystmt)
         def_bodystmt = bodystmt
         stmts, *other_parts = bodystmt[:body]
@@ -545,17 +512,11 @@ class RipperJS < Ripper
 
         super(ident, params, def_bodystmt)
       end
-    end
-  )
 
-  # By default, Ripper parses the expression `lambda { foo }` as a
-  # `method_add_block` node, so we can't turn it back into `-> { foo }`. This
-  # module overrides that behavior and reports it back as a `lambda` node
-  # instead.
-  prepend(
-    Module.new do
-      private
-
+      # By default, Ripper parses the expression `lambda { foo }` as a
+      # `method_add_block` node, so we can't turn it back into `-> { foo }`.
+      # This module overrides that behavior and reports it back as a `lambda`
+      # node instead.
       def on_method_add_block(invocation, block)
         # It's possible to hit a `method_add_block` node without going through
         # `method_add_arg` node, ex: `super {}`. In that case we're definitely
