@@ -183,6 +183,7 @@ class RipperJS < Ripper
         hash: :@lbrace,
         if: [:@kw, 'if'],
         kwrest_param: [:@op, '**'],
+        lambda: :@tlambda,
         mlhs_paren: :@lparen,
         mrhs_add_star: [:@op, '*'],
         module: [:@kw, 'module'],

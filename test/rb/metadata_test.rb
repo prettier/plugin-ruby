@@ -353,13 +353,18 @@ class MetadataTest < Minitest::Test
     )
   end
 
-  def test_rest_param
-    assert_node_metadata(
-      :rest_param,
-      parse('def foo(*bar); end').dig(:body, 1, :body, 0, :body, 2),
-      char_start: 8,
-      char_end: 12
-    )
+  def test_lambda
+    assert_metadata :lambda, <<~RUBY
+      -> (foo, bar) {
+        foo + bar
+      }
+    RUBY
+
+    assert_metadata :lambda, <<~RUBY
+      lambda do |foo, bar|
+        foo + bar
+      end
+    RUBY
   end
 
   def test_massign
@@ -486,6 +491,15 @@ class MetadataTest < Minitest::Test
 
   def test_rescue_mod
     assert_metadata :rescue_mod, 'foo rescue bar'
+  end
+
+  def test_rest_param
+    assert_node_metadata(
+      :rest_param,
+      parse('def foo(*bar); end').dig(:body, 1, :body, 0, :body, 2),
+      char_start: 8,
+      char_end: 12
+    )
   end
 
   def test_retry
@@ -677,7 +691,6 @@ assoclist_from_args
 block_var
 blockarg
 bodystmt
-lambda
 params
 stmts_add
 stmts_new
