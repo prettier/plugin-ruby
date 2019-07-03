@@ -22,6 +22,36 @@ class MetadataTest < Minitest::Test
     assert_metadata :alias, 'alias foo bar'
   end
 
+  def test_array_args
+    assert_metadata :array, <<~RUBY
+      [
+        foo,
+        bar,
+        baz
+      ]
+    RUBY
+  end
+
+  def test_array_args_add_star
+    assert_metadata :array, <<~RUBY
+      [
+        foo,
+        *bar,
+        baz
+      ]
+    RUBY
+  end
+
+  def test_array_qwords
+    assert_metadata :array, <<~RUBY
+      %w[
+        foo
+        bar
+        baz
+      ]
+    RUBY
+  end
+
   def test_aref
     assert_metadata :aref, 'foo[bar]'
   end
@@ -763,7 +793,6 @@ class MetadataTest < Minitest::Test
 end
 
 __END__
-array
 bodystmt
 stmts_add
 stmts_new

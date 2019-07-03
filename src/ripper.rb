@@ -232,13 +232,31 @@ class RipperJS < Ripper
         end
       end
 
+      # Array nodes can contain a myriad of subnodes because of the special
+      # array literal syntax like %w and %i. As a result, we may be looking for
+      # an left bracket, or we may be just looking at the children.
+      def on_array(*body)
+        if %i[args args_add_star].include?(body[0][:type])
+          node = find_scanner_event(:@lbracket)
+
+          super(*body).merge!(
+            start: node[:start],
+            char_start: node[:char_start],
+            char_end: char_pos
+          )
+        else
+          super(*body).merge!(
+            char_start: char_start_for(body),
+            char_end: char_pos
+          )
+        end
+      end
+
       # Params have a somewhat interesting structure in that they are an array
       # of arrays where the position in the top-level array indicates the type
       # of param and the subarray is the list of parameters of that type. We
       # therefore have to flatten them down to get to the location.
       def on_params(*body)
-        body.compact.flatten(1)
-
         super(*body).merge!(
           char_start: char_start_for(body.flatten(1)),
           char_end: char_pos
