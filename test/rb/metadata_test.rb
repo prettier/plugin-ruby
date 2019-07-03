@@ -565,6 +565,10 @@ class MetadataTest < Minitest::Test
     )
   end
 
+  def test_string_literal
+    assert_metadata :string_literal, '"foo"'
+  end
+
   def test_super
     assert_metadata :super, 'super foo'
   end
@@ -717,10 +721,7 @@ blockarg
 bodystmt
 stmts_add
 stmts_new
-string_add
 string_concat
-string_content
-string_literal
 unary
 var_field
 void_stmt

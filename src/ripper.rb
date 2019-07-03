@@ -153,10 +153,10 @@ class RipperJS < Ripper
         scanner_events.delete_at(index)
       end
 
-      # :backref, :backtick, :const, :embdoc, :embdoc_beg, :embdoc_end,
+      # :backref, :const, :embdoc, :embdoc_beg, :embdoc_end,
       # :embexpr_beg, :embexpr_end, :embvar, :heredoc_beg, :heredoc_end,
       # :ident, :lbrace, :lbracket, :lparen, :op, :period, :regexp_beg,
-      # :regexp_end, :rparen, :sp, :symbeg, :symbols_beg, :tlambda, :tlambeg,
+      # :regexp_end, :rparen, :symbeg, :symbols_beg, :tlambda, :tlambeg,
       # :tstring_beg, :tstring_content, :tstring_end
 
       events = {
@@ -201,6 +201,7 @@ class RipperJS < Ripper
         sclass: [:@kw, 'class'],
         string_dvar: :@embvar,
         string_embexpr: :@embexpr_beg,
+        string_literal: :@tstring_beg,
         super: [:@kw, 'super'],
         symbols_new: :@symbols_beg,
         top_const_field: [:@op, '::'],
