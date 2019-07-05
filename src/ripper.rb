@@ -443,15 +443,15 @@ class RipperJS < Ripper
       def on_comment(body)
         sexp = { type: :@comment, body: body.chomp, start: lineno, end: lineno }
 
-        case RipperJS.lex_state_name(state)
-        when 'EXPR_END', 'EXPR_ARG|EXPR_LABELED', 'EXPR_ENDFN'
+        case RipperJS.lex_state_name(state).gsub('EXPR_', '')
+        when 'END', 'ARG|LABELED', 'ENDFN'
           last_sexp.merge!(comments: [sexp])
-        when 'EXPR_CMDARG', 'EXPR_END|EXPR_ENDARG', 'EXPR_ENDARG', 'EXPR_ARG',
-             'EXPR_FNAME|EXPR_FITEM', 'EXPR_CLASS', 'EXPR_END|EXPR_LABEL'
+        when 'CMDARG', 'END|ENDARG', 'ENDARG', 'ARG', 'FNAME|FITEM', 'CLASS',
+             'END|LABEL'
           inline_comments << sexp
-        when 'EXPR_BEG|EXPR_LABEL', 'EXPR_MID'
+        when 'BEG|LABEL', 'MID'
           inline_comments << sexp.merge!(break: true)
-        when 'EXPR_DOT'
+        when 'DOT'
           last_sexp.merge!(comments: [sexp.merge!(break: true)])
         end
 
@@ -532,7 +532,8 @@ class RipperJS < Ripper
 
       def on_comment(body)
         super(body).tap do |sexp|
-          block_comments << sexp if RipperJS.lex_state_name(state) == 'EXPR_BEG'
+          lex_state = RipperJS.lex_state_name(state).gsub('EXPR_', '')
+          block_comments << sexp if lex_state == 'BEG'
         end
       end
 
