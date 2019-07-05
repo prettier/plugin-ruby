@@ -177,6 +177,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://lejeun.es"><img src="https://avatars1.githubusercontent.com/u/15168?v=4" width="100px;" alt="Gregoire Lejeune"/><br /><sub><b>Gregoire Lejeune</b></sub></a><br /><a href="https://github.com/kddeisz/plugin-ruby/issues?q=author%3Aglejeune" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/petevk"><img src="https://avatars3.githubusercontent.com/u/5108627?v=4" width="100px;" alt="Pete Van Klaveren"/><br /><sub><b>Pete Van Klaveren</b></sub></a><br /><a href="https://github.com/kddeisz/plugin-ruby/issues?q=author%3Apetevk" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/meleyal"><img src="https://avatars3.githubusercontent.com/u/15045?v=4" width="100px;" alt="meleyal"/><br /><sub><b>meleyal</b></sub></a><br /><a href="https://github.com/kddeisz/plugin-ruby/commits?author=meleyal" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://lip.is"><img src="https://avatars1.githubusercontent.com/u/125676?v=4" width="100px;" alt="Lipis"/><br /><sub><b>Lipis</b></sub></a><br /><a href="https://github.com/kddeisz/plugin-ruby/commits?author=lipis" title="Documentation">📖</a></td>
   </tr>
 </table>
 

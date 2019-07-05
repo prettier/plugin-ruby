@@ -133,6 +133,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "lipis",
+      "name": "Lipis",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/125676?v=4",
+      "profile": "https://lip.is",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
