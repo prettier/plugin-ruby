@@ -37,6 +37,15 @@ end
 
 but now gets printed correctly. (Thanks to @xipgroc for the report.)
 
+- Double splats inside a hash were previously failing to print. For example,
+
+<!-- prettier-ignore -->
+```ruby
+{ foo: "bar", **baz }
+```
+
+would fail to print, but now works. (Thanks to @petevk for the report.)
+
 ## [0.12.3] - 2019-05-16
 
 ### Changed
