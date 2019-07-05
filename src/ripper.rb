@@ -108,44 +108,239 @@ class RipperJS < Ripper
     end
   )
 
+  # For each node, we need to attach where it came from in order to be able to
+  # support placing the cursor correctly before and after formatting.
+  #
   # For most nodes, it's enough to look at the child nodes to determine the
   # start of the parent node. However, for some nodes it's necessary to keep
   # track of the keywords as they come in from the lexer and to modify the start
-  # node once we have it. We need accurate start and end lines so that we can
-  # embed block comments into the right kind of node.
+  # node once we have it.
   prepend(
     Module.new do
-      events = %i[begin else elsif ensure if rescue until while]
+      def initialize(source, *args)
+        super(source, *args)
 
-      def initialize(*args)
-        super(*args)
-        @keywords = []
+        @scanner_events = []
+        @line_counts = [0]
+
+        source.split("\n").each do |line|
+          line_counts << line_counts.last + line.size + 1
+        end
       end
 
       def self.prepended(base)
-        base.attr_reader :keywords
+        base.attr_reader :scanner_events, :line_counts
       end
 
       private
 
-      def find_start(body)
-        keywords[keywords.rindex { |keyword| keyword[:body] == body }][:start]
+      def char_pos
+        line_counts[lineno - 1] + column
       end
 
-      events.each do |event|
-        keyword = event.to_s
+      def char_start_for(body)
+        children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
+        char_starts =
+          children.map { |part| part[:char_start] if part.is_a?(Hash) }.compact
 
+        char_starts.min || char_pos
+      end
+
+      def find_scanner_event(type, body = :any)
+        index =
+          scanner_events.rindex do |scanner_event|
+            scanner_event[:type] == type &&
+              (body == :any || (scanner_event[:body] == body))
+          end
+
+        scanner_events.delete_at(index)
+      end
+
+      # :backref, :const, :embdoc, :embdoc_beg, :embdoc_end,
+      # :embexpr_beg, :embexpr_end, :embvar, :heredoc_beg, :heredoc_end,
+      # :ident, :lbrace, :lbracket, :lparen, :op, :period, :regexp_beg,
+      # :regexp_end, :rparen, :symbeg, :symbols_beg, :tlambda, :tlambeg,
+      # :tstring_beg, :tstring_content, :tstring_end
+
+      events = {
+        BEGIN: [:@kw, 'BEGIN'],
+        END: [:@kw, 'END'],
+        alias: [:@kw, 'alias'],
+        assoc_splat: [:@op, '**'],
+        arg_paren: :@lparen,
+        args_add_star: [:@op, '*'],
+        begin: [:@kw, 'begin'],
+        blockarg: [:@op, '&'],
+        brace_block: :@lbrace,
+        break: [:@kw, 'break'],
+        case: [:@kw, 'case'],
+        class: [:@kw, 'class'],
+        def: [:@kw, 'def'],
+        defined: [:@kw, 'defined?'],
+        defs: [:@kw, 'def'],
+        do_block: [:@kw, 'do'],
+        else: [:@kw, 'else'],
+        elsif: [:@kw, 'elsif'],
+        ensure: [:@kw, 'ensure'],
+        excessed_comma: :@comma,
+        for: [:@kw, 'for'],
+        hash: :@lbrace,
+        if: [:@kw, 'if'],
+        kwrest_param: [:@op, '**'],
+        lambda: :@tlambda,
+        mlhs_paren: :@lparen,
+        mrhs_add_star: [:@op, '*'],
+        module: [:@kw, 'module'],
+        next: [:@kw, 'next'],
+        paren: :@lparen,
+        qsymbols_new: :@qsymbols_beg,
+        qwords_new: :@qwords_beg,
+        redo: [:@kw, 'redo'],
+        regexp_literal: :@regexp_beg,
+        rescue: [:@kw, 'rescue'],
+        rest_param: [:@op, '*'],
+        retry: [:@kw, 'retry'],
+        return0: [:@kw, 'return'],
+        return: [:@kw, 'return'],
+        sclass: [:@kw, 'class'],
+        string_dvar: :@embvar,
+        string_embexpr: :@embexpr_beg,
+        super: [:@kw, 'super'],
+        symbols_new: :@symbols_beg,
+        top_const_field: [:@op, '::'],
+        top_const_ref: [:@op, '::'],
+        undef: [:@kw, 'undef'],
+        unless: [:@kw, 'unless'],
+        until: [:@kw, 'until'],
+        var_alias: [:@kw, 'alias'],
+        when: [:@kw, 'when'],
+        while: [:@kw, 'while'],
+        words_new: :@words_beg,
+        xstring_literal: :@backtick,
+        yield0: [:@kw, 'yield'],
+        yield: [:@kw, 'yield'],
+        zsuper: [:@kw, 'super']
+      }
+
+      events.each do |event, (type, scanned)|
         define_method(:"on_#{event}") do |*body|
-          super(*body).tap { |sexp| sexp.merge!(start: find_start(keyword)) }
+          node = find_scanner_event(type, scanned || :any)
+
+          super(*body).merge!(
+            start: node[:start],
+            char_start: node[:char_start],
+            char_end: char_pos
+          )
         end
       end
 
-      def on_kw(body)
-        super(body).tap { |sexp| keywords << sexp }
+      # Array nodes can contain a myriad of subnodes because of the special
+      # array literal syntax like %w and %i. As a result, we may be looking for
+      # an left bracket, or we may be just looking at the children.
+      def on_array(*body)
+        if body[0] && %i[args args_add_star].include?(body[0][:type])
+          node = find_scanner_event(:@lbracket)
+
+          super(*body).merge!(
+            start: node[:start],
+            char_start: node[:char_start],
+            char_end: char_pos
+          )
+        else
+          super(*body).merge!(
+            char_start: char_start_for(body), char_end: char_pos
+          )
+        end
+      end
+
+      # Params have a somewhat interesting structure in that they are an array
+      # of arrays where the position in the top-level array indicates the type
+      # of param and the subarray is the list of parameters of that type. We
+      # therefore have to flatten them down to get to the location.
+      def on_params(*body)
+        super(*body).merge!(
+          char_start: char_start_for(body.flatten(1)), char_end: char_pos
+        )
+      end
+
+      # String literals and either contain string parts or a heredoc. If it
+      # contains a heredoc we can just go directly to the child nodes, otherwise
+      # we need to look for a `tstring_beg`.
+      def on_string_literal(*body)
+        if body[0][:type] == :heredoc
+          super(*body).merge!(
+            char_start: char_start_for(body), char_end: char_pos
+          )
+        else
+          node = find_scanner_event(:@tstring_beg)
+
+          super(*body).merge!(
+            start: node[:start],
+            char_start: node[:char_start],
+            char_end: char_pos
+          )
+        end
+      end
+
+      # Technically, the `not` operator is a unary operator but is reported as
+      # a keyword and not an operator. Because of the inconsistency, we have to
+      # manually look for the correct scanner event here.
+      def on_unary(*body)
+        node =
+          if body[0] == :not
+            find_scanner_event(:@kw, 'not')
+          else
+            find_scanner_event(:@op)
+          end
+
+        super(*body).merge!(
+          start: node[:start], char_start: node[:char_start], char_end: char_pos
+        )
+      end
+
+      # Symbols don't necessarily have to have a @symbeg event fired before they
+      # start. For example, you can have symbol literals inside an `alias` node
+      # if you're just using bare words, as in: `alias foo bar`. So this is a
+      # special case in which if there is a `:@symbeg` event we can hook on to
+      # then we use it, otherwise we just look at the beginning of the first
+      # child node.
+      %i[dyna_symbol symbol_literal].each do |event|
+        define_method(:"on_#{event}") do |*body|
+          char_start =
+            if scanner_events.any? { |sevent| sevent[:type] == :@symbeg }
+              find_scanner_event(:@symbeg)[:char_start]
+            else
+              char_start_for(body)
+            end
+
+          super(*body).merge!(char_start: char_start, char_end: char_pos)
+        end
       end
 
       def on_program(*body)
-        super(*body).tap { |sexp| sexp.merge!(start: 1) }
+        super(*body).merge!(start: 1, char_start: 0, char_end: char_pos)
+      end
+
+      defined =
+        private_instance_methods(false).grep(/\Aon_/) { $'.to_sym } +
+          %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end]
+
+      (SCANNER_EVENTS - defined).each do |event|
+        define_method(:"on_#{event}") do |body|
+          super(body).tap do |node|
+            node.merge!(char_start: char_pos, char_end: char_pos + body.size)
+
+            scanner_events << node
+          end
+        end
+      end
+
+      (PARSER_EVENTS - defined).each do |event|
+        define_method(:"on_#{event}") do |*body|
+          super(*body).merge!(
+            char_start: char_start_for(body), char_end: char_pos
+          )
+        end
       end
     end
   )
@@ -436,8 +631,7 @@ class RipperJS < Ripper
       end
 
       # Handles __END__ syntax, which allows individual scripts to keep content
-      # after the main ruby code that can be read through DATA. Which looks
-      # like:
+      # after the main ruby code that can be read through DATA. It looks like:
       #
       # foo.bar
       #
@@ -448,7 +642,7 @@ class RipperJS < Ripper
       end
 
       def on_program(*body)
-        super(*body).tap { |sexp| sexp[:body][0][:body] << __end__ if __end__ }
+        super(*body).tap { |node| node[:body][0][:body] << __end__ if __end__ }
       end
 
       # Adds the used quote type onto string nodes. This is necessary because
@@ -463,19 +657,19 @@ class RipperJS < Ripper
         last_sexp.merge!(quote: quote[0]) # quote is ": or ':
       end
 
-      # Normally access controls are reported as vcall nodes. This method
-      # creates a new node type to explicitly track those nodes instead, so
-      # that the printer can add new lines as necessary.
-      ACCESS_CONTROLS = %w[private protected public].freeze
-
+      # Normally access controls are reported as vcall nodes. This creates a
+      # new node type to explicitly track those nodes instead, so that the
+      # printer can add new lines as necessary.
       def on_vcall(ident)
-        super(ident).tap do |sexp|
-          if !ACCESS_CONTROLS.include?(ident[:body]) ||
+        @access_controls ||= %w[private protected public].freeze
+
+        super(ident).tap do |node|
+          if !@access_controls.include?(ident[:body]) ||
              ident[:body] != lines[lineno - 1].strip
             next
           end
 
-          sexp.merge!(type: :access_ctrl)
+          node.merge!(type: :access_ctrl)
         end
       end
 
