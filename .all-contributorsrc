@@ -116,6 +116,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "petevk",
+      "name": "Pete Van Klaveren",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/5108627?v=4",
+      "profile": "https://github.com/petevk",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
