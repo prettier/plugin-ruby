@@ -78,8 +78,9 @@ module.exports = {
       const isInner = index !== assocNodes.length - 1;
       const valueNode = assocNode.body[1];
 
-      const isStraightHeredoc = valueNode.type === "heredoc";
+      const isStraightHeredoc = valueNode && valueNode.type === "heredoc";
       const isSquigglyHeredoc =
+        valueNode &&
         valueNode.type === "string_literal" &&
         valueNode.body[0].type === "heredoc";
 
