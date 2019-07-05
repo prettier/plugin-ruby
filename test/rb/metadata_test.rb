@@ -331,12 +331,14 @@ class MetadataTest < Minitest::Test
     )
   end
 
-  def test_excessed_comma
-    assert_node_metadata(
-      :excessed_comma,
-      parse('foo { |bar,| }').dig(:body, 1, :body, 0, :body, 0, :body, 2),
-      char_start: 10, char_end: 12
-    )
+  if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.6')
+    def test_excessed_comma
+      assert_node_metadata(
+        :excessed_comma,
+        parse('foo { |bar,| }').dig(:body, 1, :body, 0, :body, 0, :body, 2),
+        char_start: 10, char_end: 12
+      )
+    end
   end
 
   def test_fcall

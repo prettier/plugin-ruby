@@ -307,7 +307,7 @@ class RipperJS < Ripper
       %i[dyna_symbol symbol_literal].each do |event|
         define_method(:"on_#{event}") do |*body|
           char_start =
-            if scanner_events.any? { |event| event[:type] == :@symbeg }
+            if scanner_events.any? { |sevent| sevent[:type] == :@symbeg }
               find_scanner_event(:@symbeg)[:char_start]
             else
               char_start_for(body)
