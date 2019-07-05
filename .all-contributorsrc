@@ -151,6 +151,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "andyw8",
+      "name": "Andy Waite",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/13400?v=4",
+      "profile": "https://www.andywaite.com",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
