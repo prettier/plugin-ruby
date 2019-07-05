@@ -4,10 +4,8 @@ const print = require("./print");
 const pragmaPattern = /#\s*@(prettier|format)/;
 const hasPragma = text => pragmaPattern.test(text);
 
-// This is a placeholder until we have been node location reporting coming from
-// the ripper parser.
-const locStart = () => 0;
-const locEnd = () => 0;
+const locStart = node => node.char_start;
+const locEnd = node => node.char_end;
 
 /*
  * metadata mostly pulled from linguist and rubocop:
