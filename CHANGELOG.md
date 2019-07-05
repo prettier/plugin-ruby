@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ### Added
 
-- Added `locStart` and `locEnd` placeholders until we can get the functionality built. In the meantime it will stop breaking integrations.
+- Added `locStart` and `locEnd` functions to support `--cursor-offset`.
 
 ### Changed
 
