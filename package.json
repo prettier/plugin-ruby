@@ -6,7 +6,6 @@
   "scripts": {
     "lint": "eslint --cache .",
     "print": "prettier --plugin=.",
-    "rubocop": "run() { prettier --plugin=. $@ | bundle exec rubocop --stdin $1; }; run",
     "test": "jest"
   },
   "repository": {
