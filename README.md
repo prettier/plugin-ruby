@@ -179,6 +179,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/meleyal"><img src="https://avatars3.githubusercontent.com/u/15045?v=4" width="100px;" alt="meleyal"/><br /><sub><b>meleyal</b></sub></a><br /><a href="https://github.com/kddeisz/plugin-ruby/commits?author=meleyal" title="Documentation">📖</a></td>
     <td align="center"><a href="https://lip.is"><img src="https://avatars1.githubusercontent.com/u/125676?v=4" width="100px;" alt="Lipis"/><br /><sub><b>Lipis</b></sub></a><br /><a href="https://github.com/kddeisz/plugin-ruby/commits?author=lipis" title="Documentation">📖</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://janpiotrowski.de"><img src="https://avatars0.githubusercontent.com/u/183673?v=4" width="100px;" alt="Jan Piotrowski"/><br /><sub><b>Jan Piotrowski</b></sub></a><br /><a href="https://github.com/kddeisz/plugin-ruby/commits?author=janpio" title="Documentation">📖</a></td>
+  </tr>
 </table>
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->

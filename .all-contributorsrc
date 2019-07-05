@@ -142,6 +142,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "janpio",
+      "name": "Jan Piotrowski",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/183673?v=4",
+      "profile": "https://janpiotrowski.de",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
