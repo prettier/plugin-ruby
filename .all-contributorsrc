@@ -29,7 +29,6 @@
       "contributions": [
         "code",
         "doc",
-        "review",
         "test",
         "bug"
       ]
