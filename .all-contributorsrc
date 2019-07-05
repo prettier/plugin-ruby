@@ -29,7 +29,8 @@
         "code",
         "doc",
         "review",
-        "test"
+        "test",
+        "bug"
       ]
     },
     {
