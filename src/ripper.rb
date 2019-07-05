@@ -140,7 +140,10 @@ class RipperJS < Ripper
 
       def char_start_for(body)
         children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
-        children.map { |part| part[:char_start] if part.is_a?(Hash) }.compact.min || char_pos
+        char_starts =
+          children.map { |part| part[:char_start] if part.is_a?(Hash) }.compact
+
+        char_starts.min || char_pos
       end
 
       def find_scanner_event(type, body = :any)
@@ -245,8 +248,7 @@ class RipperJS < Ripper
           )
         else
           super(*body).merge!(
-            char_start: char_start_for(body),
-            char_end: char_pos
+            char_start: char_start_for(body), char_end: char_pos
           )
         end
       end
@@ -257,8 +259,7 @@ class RipperJS < Ripper
       # therefore have to flatten them down to get to the location.
       def on_params(*body)
         super(*body).merge!(
-          char_start: char_start_for(body.flatten(1)),
-          char_end: char_pos
+          char_start: char_start_for(body.flatten(1)), char_end: char_pos
         )
       end
 
@@ -268,8 +269,7 @@ class RipperJS < Ripper
       def on_string_literal(*body)
         if body[0][:type] == :heredoc
           super(*body).merge!(
-            char_start: char_start_for(body),
-            char_end: char_pos
+            char_start: char_start_for(body), char_end: char_pos
           )
         else
           node = find_scanner_event(:@tstring_beg)
@@ -294,9 +294,7 @@ class RipperJS < Ripper
           end
 
         super(*body).merge!(
-          start: node[:start],
-          char_start: node[:char_start],
-          char_end: char_pos
+          start: node[:start], char_start: node[:char_start], char_end: char_pos
         )
       end
 
@@ -320,11 +318,7 @@ class RipperJS < Ripper
       end
 
       def on_program(*body)
-        super(*body).merge!(
-          start: 1,
-          char_start: 0,
-          char_end: char_pos
-        )
+        super(*body).merge!(start: 1, char_start: 0, char_end: char_pos)
       end
 
       defined =
@@ -334,10 +328,7 @@ class RipperJS < Ripper
       (SCANNER_EVENTS - defined).each do |event|
         define_method(:"on_#{event}") do |body|
           super(body).tap do |node|
-            node.merge!(
-              char_start: char_pos,
-              char_end: char_pos + body.size
-            )
+            node.merge!(char_start: char_pos, char_end: char_pos + body.size)
 
             scanner_events << node
           end
@@ -347,8 +338,7 @@ class RipperJS < Ripper
       (PARSER_EVENTS - defined).each do |event|
         define_method(:"on_#{event}") do |*body|
           super(*body).merge!(
-            char_start: char_start_for(body),
-            char_end: char_pos
+            char_start: char_start_for(body), char_end: char_pos
           )
         end
       end
