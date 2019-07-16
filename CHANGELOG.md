@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- if/else blocks that had method calls on the end of them that were also transformed into ternaries need to have parens added to them. For example,
+
+<!-- prettier-ignore -->
+```ruby
+if foo
+  1
+else
+  2
+end.to_s
+```
+
+now correctly gets transformed into:
+
+<!-- prettier-ignore -->
+```ruby
+(foo ? 1 : 2).to_s
+```
+
+(Thanks to @jviney for the report.)
+
 ## [0.13.0] - 2019-07-05
 
 ### Added

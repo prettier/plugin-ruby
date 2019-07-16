@@ -2,7 +2,7 @@ const { concat, group, indent, softline } = require("../prettier");
 const toProc = require("../toProc");
 const { concatBody, first, makeCall } = require("../utils");
 
-const noIndent = ["array", "hash", "method_add_block", "xstring_literal"];
+const noIndent = ["array", "hash", "if", "method_add_block", "xstring_literal"];
 
 module.exports = {
   call: (path, opts, print) => {

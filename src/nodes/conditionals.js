@@ -154,17 +154,20 @@ const canTernary = path => {
 // A normalized print function for both `if` and `unless` nodes.
 const printConditional = keyword => (path, { inlineConditionals }, print) => {
   if (canTernary(path)) {
-    const ternaryConditions = printTernaryClauses(
-      keyword,
-      path.call(print, "body", 1),
-      path.call(print, "body", 2, "body", 0)
+    let ternaryParts = [path.call(print, "body", 0), " ? "].concat(
+      printTernaryClauses(
+        keyword,
+        path.call(print, "body", 1),
+        path.call(print, "body", 2, "body", 0)
+      )
     );
 
+    if (["binary", "call"].includes(path.getParentNode().type)) {
+      ternaryParts = ["("].concat(ternaryParts).concat(")");
+    }
+
     return group(
-      ifBreak(
-        printWithAddition(keyword, path, print),
-        concat([path.call(print, "body", 0), " ? "].concat(ternaryConditions))
-      )
+      ifBreak(printWithAddition(keyword, path, print), concat(ternaryParts))
     );
   }
 
