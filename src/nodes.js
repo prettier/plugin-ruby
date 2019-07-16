@@ -20,6 +20,7 @@ module.exports = Object.assign(
   require("./nodes/methods"),
   require("./nodes/operators"),
   require("./nodes/params"),
+  require("./nodes/patterns"),
   require("./nodes/regexp"),
   require("./nodes/rescue"),
   require("./nodes/scopes"),
