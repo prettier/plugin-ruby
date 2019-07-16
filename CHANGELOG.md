@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- Support for pattern matching for variables and array patterns. Currently waiting on Ripper support for hash patterns. For examples, check out the [test/js/patterns.test.js](test/js/patterns.test.js) file.
+
 ### Changed
 
 - if/else blocks that had method calls on the end of them that were also transformed into ternaries need to have parens added to them. For example,
