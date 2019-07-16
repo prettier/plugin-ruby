@@ -1,6 +1,15 @@
 const { ruby } = require("./utils");
 
 describe("patterns", () => {
+  if (process.env.RUBY_VERSION <= "2.7") {
+    test("pattern matching does not exist before ruby 2.7", () => {
+      // this is here because test files must contain at least one test, so for
+      // earlier versions of ruby this is just going to chill here
+    });
+
+    return;
+  }
+
   describe("value pattern", () => {
     const cases = [
       "0",
