@@ -174,6 +174,42 @@ describe("conditionals", () => {
       return expect(content).toChangeFormat("a ? 2 : 1");
     });
 
+    test("adds parens if inside of a call", () => {
+      const content = ruby(`
+        if a
+          1
+        else
+          2
+        end.to_s
+      `);
+
+      return expect(content).toChangeFormat("(a ? 1 : 2).to_s");
+    });
+
+    test("does not add parens if it breaks", () => {
+      const content = ruby(`
+        if a
+          ${long}
+        else
+          2
+        end.to_s
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("adds parens if inside of a binary", () => {
+      const content = ruby(`
+        if a
+          1
+        else
+          2
+        end + 1
+      `);
+
+      return expect(content).toChangeFormat("(a ? 1 : 2) + 1");
+    });
+
     describe("unable to transform", () => {
       test("breaking", () => {
         const content = ruby(`
