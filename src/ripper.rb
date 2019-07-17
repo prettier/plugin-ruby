@@ -123,9 +123,7 @@ class RipperJS < Ripper
         @scanner_events = []
         @line_counts = [0]
 
-        source.split("\n").each do |line|
-          line_counts << line_counts.last + line.size + 1
-        end
+        source.lines.each { |line| line_counts << line_counts.last + line.size }
       end
 
       def self.prepended(base)
