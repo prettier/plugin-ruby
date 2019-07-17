@@ -733,6 +733,38 @@ class MetadataTest < Minitest::Test
     assert_metadata :zsuper, 'super'
   end
 
+  if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
+    def test_aryptn
+      content = <<~RUBY
+        case foo
+        in bar, baz
+          qux
+        end
+      RUBY
+
+      assert_node_metadata(
+        :aryptn,
+        parse(content).dig(:body, 1, :body, 0),
+        char_start: 12, char_end: 20
+      )
+    end
+
+    def test_in
+      content = <<~RUBY
+        case foo
+        in bar
+          baz
+        end
+      RUBY
+
+      assert_node_metadata(
+        :in,
+        parse(content).dig(:body, 1),
+        char_start: 9, char_end: 25
+      )
+    end
+  end
+
   private
 
   def assert_metadata(type, ruby)
