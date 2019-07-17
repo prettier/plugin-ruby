@@ -7,4 +7,7 @@ describe("layout", () => {
 
   test("maintains semicolons from within interpolation", () =>
     expect(`"a#{b; c}"`).toMatchFormat());
+
+  test("handles multiple newlines at the end of the file", () =>
+    expect("foo\n\n\n").toChangeFormat("foo"));
 });
