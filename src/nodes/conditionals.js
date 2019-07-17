@@ -113,11 +113,11 @@ const printSingle = keyword => (path, { inlineConditionals }, print) => {
     concat([softline, "end"])
   ]);
 
-  const stmts = path.getValue().body[1];
+  const [predicate, stmts] = path.getValue().body;
   const hasComments =
     stmts.type === "stmts" && stmts.body.some(stmt => stmt.type === "@comment");
 
-  if (!inlineConditionals || hasComments) {
+  if (!inlineConditionals || hasComments || predicate.type === "assign") {
     return multiline;
   }
 
