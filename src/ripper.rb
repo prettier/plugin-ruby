@@ -154,12 +154,6 @@ class RipperJS < Ripper
         scanner_events.delete_at(index)
       end
 
-      # :backref, :const, :embdoc, :embdoc_beg, :embdoc_end,
-      # :embexpr_beg, :embexpr_end, :embvar, :heredoc_beg, :heredoc_end,
-      # :ident, :lbrace, :lbracket, :lparen, :op, :period, :regexp_beg,
-      # :regexp_end, :rparen, :symbeg, :symbols_beg, :tlambda, :tlambeg,
-      # :tstring_beg, :tstring_content, :tstring_end
-
       events = {
         BEGIN: [:@kw, 'BEGIN'],
         END: [:@kw, 'END'],
@@ -184,6 +178,7 @@ class RipperJS < Ripper
         for: [:@kw, 'for'],
         hash: :@lbrace,
         if: [:@kw, 'if'],
+        in: [:@kw, 'in'],
         kwrest_param: [:@op, '**'],
         lambda: :@tlambda,
         mlhs_paren: :@lparen,
@@ -249,6 +244,21 @@ class RipperJS < Ripper
             char_start: char_start_for(body), char_end: char_pos
           )
         end
+      end
+
+      # Array pattern nodes contain an odd mix of potential child nodes based on
+      # which kind of pattern is being used.
+      def on_aryptn(*body)
+        char_start, char_end = char_pos, char_pos
+
+        body.flatten(1).each do |part|
+          next unless part
+
+          char_start = [char_start, part[:char_start]].min
+          char_end = [char_end, part[:char_end]].max
+        end
+
+        super(*body).merge!(char_start: char_start, char_end: char_end)
       end
 
       # Params have a somewhat interesting structure in that they are an array
