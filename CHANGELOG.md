@@ -32,6 +32,18 @@ now correctly gets transformed into:
 
 (Thanks to @jviney for the report.)
 
+- Fixed a bug where multiple newlines at the end of the file would cause a crash. (Thanks to @acrewdson for the report.)
+- If a variable is assigned inside of the predicate of a conditional, then we can't change it into the single-line version as this breaks. For example,
+
+<!-- prettier-ignore -->
+```ruby
+if foo = 1
+  foo
+end
+```
+
+must stay the same. (Thanks to @jviney for the report.)
+
 ## [0.13.0] - 2019-07-05
 
 ### Added

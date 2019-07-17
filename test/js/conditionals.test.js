@@ -71,6 +71,16 @@ describe("conditionals", () => {
 
         return expect(content).toMatchFormat();
       });
+
+      test("breaks if the predicate is an assignment", () => {
+        const content = ruby(`
+          ${keyword} a = 1
+            a
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
     });
   });
 
