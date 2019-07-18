@@ -143,12 +143,12 @@ module.exports = {
     const parts = path.call(print, "body", 0);
 
     if (typeof parts[0] === "string") {
-      parts[0] = parts[0].trimStart();
+      parts[0] = parts[0].replace(/^\s+/, "");
     }
 
     const lastIndex = parts.length - 1;
     if (typeof parts[lastIndex] === "string") {
-      parts[lastIndex] = parts[lastIndex].trimEnd();
+      parts[lastIndex] = parts[lastIndex].replace(/\s+$/, "");
     }
 
     return group(
