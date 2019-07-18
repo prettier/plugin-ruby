@@ -139,12 +139,24 @@ module.exports = {
   word_add: concatBody,
   word_new: empty,
   xstring: makeList,
-  xstring_literal: (path, opts, print) =>
-    group(
+  xstring_literal: (path, opts, print) => {
+    const parts = path.call(print, "body", 0);
+
+    if (typeof parts[0] === "string") {
+      parts[0] = parts[0].replace(/^\s+/, "");
+    }
+
+    const lastIndex = parts.length - 1;
+    if (typeof parts[lastIndex] === "string") {
+      parts[lastIndex] = parts[lastIndex].replace(/\s+$/, "");
+    }
+
+    return group(
       concat([
         "`",
-        indent(concat([softline, join(softline, path.call(print, "body", 0))])),
+        indent(concat([softline, join(softline, parts)])),
         concat([softline, "`"])
       ])
-    )
+    );
+  }
 };

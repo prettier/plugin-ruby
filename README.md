@@ -159,7 +159,8 @@ The package is available as open source under the terms of the [MIT License](htt
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
 <table>
   <tr>
     <td align="center"><a href="https://kevindeisz.com"><img src="https://avatars2.githubusercontent.com/u/5093358?v=4" width="100px;" alt="Kevin Deisz"/><br /><sub><b>Kevin Deisz</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/commits?author=kddeisz" title="Code">💻</a> <a href="https://github.com/prettier/plugin-ruby/commits?author=kddeisz" title="Documentation">📖</a> <a href="https://github.com/prettier/plugin-ruby/commits?author=kddeisz" title="Tests">⚠️</a> <a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Akddeisz" title="Bug reports">🐛</a></td>
@@ -184,8 +185,12 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://www.andywaite.com"><img src="https://avatars1.githubusercontent.com/u/13400?v=4" width="100px;" alt="Andy Waite"/><br /><sub><b>Andy Waite</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/commits?author=andyw8" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/jviney"><img src="https://avatars3.githubusercontent.com/u/7051?v=4" width="100px;" alt="Jonathan Viney"/><br /><sub><b>Jonathan Viney</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ajviney" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/acrewdson"><img src="https://avatars0.githubusercontent.com/u/10353074?v=4" width="100px;" alt="acrewdson"/><br /><sub><b>acrewdson</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Aacrewdson" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://orleans.io"><img src="https://avatars0.githubusercontent.com/u/1683595?v=4" width="100px;" alt="Louis Orleans"/><br /><sub><b>Louis Orleans</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Adudeofawesome" title="Bug reports">🐛</a></td>
   </tr>
 </table>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
