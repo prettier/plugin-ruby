@@ -2,8 +2,12 @@
 
 REQUIRED_VERSION = Gem::Version.new('2.5')
 if Gem::Version.new(RUBY_VERSION) < REQUIRED_VERSION
-  raise "Ruby version #{RUBY_VERSION} not supported. " \
-          "Please upgrade to #{REQUIRED_VERSION} or above."
+  warn(
+    "Ruby version #{RUBY_VERSION} not supported. " \
+      "Please upgrade to #{REQUIRED_VERSION} or above."
+  )
+
+  exit 1
 end
 
 require 'json' unless defined?(JSON)
@@ -757,8 +761,13 @@ if $0 == __FILE__
   builder = RipperJS.new($stdin.read)
   response = builder.parse
 
-  if !response && builder.error?
-    STDERR.puts 'Invalid ruby'
+  if !response || builder.error?
+    warn(
+      '@prettier/plugin-ruby encountered an error when attempting to parse ' \
+        'the ruby source. This usually means there was a syntax error in the ' \
+        'file in question. You can verify by running `ruby -i [path/to/file]`.'
+    )
+
     exit 1
   end
 

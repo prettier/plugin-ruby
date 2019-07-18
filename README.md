@@ -186,6 +186,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/jviney"><img src="https://avatars3.githubusercontent.com/u/7051?v=4" width="100px;" alt="Jonathan Viney"/><br /><sub><b>Jonathan Viney</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ajviney" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/acrewdson"><img src="https://avatars0.githubusercontent.com/u/10353074?v=4" width="100px;" alt="acrewdson"/><br /><sub><b>acrewdson</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Aacrewdson" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://orleans.io"><img src="https://avatars0.githubusercontent.com/u/1683595?v=4" width="100px;" alt="Louis Orleans"/><br /><sub><b>Louis Orleans</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Adudeofawesome" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/cvoege"><img src="https://avatars2.githubusercontent.com/u/6777709?v=4" width="100px;" alt="Colton Voege"/><br /><sub><b>Colton Voege</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Acvoege" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
