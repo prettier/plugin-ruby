@@ -111,6 +111,9 @@ describe("strings", () => {
 
     test("breaking %x literals with method chains", () =>
       expect(`%x[${long}].to_s`).toChangeFormat(`\`\n  ${long}\n\`.to_s`));
+
+    test("trims the start and end appropriately", () =>
+      expect(`\`\n\n${long}\n\n\``).toChangeFormat(`\`\n  ${long}\n\``));
   });
 
   describe("dynamic symbols", () => {
