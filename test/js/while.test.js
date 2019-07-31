@@ -1,4 +1,4 @@
-const { long } = require("./utils");
+const { long, ruby } = require("./utils");
 
 describe.each(["while", "until"])("%s", keyword => {
   describe("inlines allowed", () => {
@@ -14,6 +14,16 @@ describe.each(["while", "until"])("%s", keyword => {
       expect(`1 ${keyword} ${long}`).toChangeFormat(
         `${keyword} ${long}\n  1\nend`
       ));
+
+    test("does not break into block when modifying a begin", () => {
+      const content = ruby(`
+        begin
+          foo
+        end ${keyword} bar
+      `);
+
+      return expect(content).toMatchFormat();
+    });
   });
 
   describe("inlines not allowed", () => {
@@ -32,7 +42,18 @@ describe.each(["while", "until"])("%s", keyword => {
 
     test("breaks inlines on large predicates", () =>
       expect(`1 ${keyword} ${long}`).toChangeFormat(
-        `${keyword} ${long}\n  1\nend`
+        `${keyword} ${long}\n  1\nend`,
+        { inlineLoops: false }
       ));
+
+    test("does not break into block when modifying a begin", () => {
+      const content = ruby(`
+        begin
+          foo
+        end ${keyword} bar
+      `);
+
+      return expect(content).toMatchFormat({ inlineLoops: false });
+    });
   });
 });

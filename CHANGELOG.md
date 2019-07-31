@@ -9,6 +9,25 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - If xstring literals (command line calls surrounded by backticks) break, then we indent and place the command on a new line. Previously, this was resulting in new lines getting added each time the code was formatted. Now this happens correctly. (Thanks to @dudeofawesome for the report.)
+- When a `while` or `until` loop modifies a `begin...end` statement, it must remain in the modifier form or else it changes sematic meaning. For example,
+
+<!-- prettier-ignore -->
+```ruby
+begin
+  foo
+end while bar
+```
+
+cannot be transformed into:
+
+<!-- prettier-ignore -->
+```ruby
+while bar
+  foo
+end
+```
+
+because that would never execute `foo` if `bar` is falsy, whereas in the initial example it would have.
 
 ## [0.14.0] - 2019-07-17
 
