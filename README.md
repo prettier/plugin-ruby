@@ -189,6 +189,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/cvoege"><img src="https://avatars2.githubusercontent.com/u/6777709?v=4" width="100px;" alt="Colton Voege"/><br /><sub><b>Colton Voege</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Acvoege" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://stefankracht.de"><img src="https://avatars1.githubusercontent.com/u/529711?v=4" width="100px;" alt="Stefan Kracht"/><br /><sub><b>Stefan Kracht</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Akrachtstefan" title="Bug reports">🐛</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/jakeprime"><img src="https://avatars1.githubusercontent.com/u/1019036?v=4" width="100px;" alt="jakeprime"/><br /><sub><b>jakeprime</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ajakeprime" title="Bug reports">🐛</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-enable -->
