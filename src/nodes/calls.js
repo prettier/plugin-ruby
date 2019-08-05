@@ -53,9 +53,11 @@ module.exports = {
         ])
       );
     }
+
     if (proc) {
       return path.call(print, "body", 0);
     }
+
     return concat(path.map(print, "body"));
   },
   vcall: first

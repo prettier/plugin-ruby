@@ -212,5 +212,10 @@ describe("blocks", () => {
 
     test("does not happen when there are multiple args", () =>
       expect("loop { |i, j| i.to_s }").toMatchFormat());
+
+    test("does not duplicate when inside of an aref node", () =>
+      expect("foo[:bar].each { |baz| baz.to_s }").toChangeFormat(
+        "foo[:bar].each(&:to_s)"
+      ));
   });
 });
