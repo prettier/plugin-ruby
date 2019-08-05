@@ -1,3 +1,5 @@
+const { long } = require("./utils");
+
 describe("return", () => {
   test("bare", () => expect("return").toMatchFormat());
 
@@ -9,4 +11,7 @@ describe("return", () => {
   test("multiple args", () => expect("return 1, 2").toMatchFormat());
 
   test("return method call", () => expect("return foo :bar").toMatchFormat());
+
+  test("return with breaking", () =>
+    expect(`return ${long}`).toChangeFormat(`return(\n  ${long}\n)`));
 });
