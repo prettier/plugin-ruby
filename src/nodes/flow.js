@@ -1,4 +1,4 @@
-const { concat, join } = require("../prettier");
+const { concat, group, ifBreak, indent, join, softline } = require("../prettier");
 const { literal } = require("../utils");
 
 module.exports = {
@@ -42,15 +42,21 @@ module.exports = {
       return "return";
     }
 
+    let value = join(", ", path.call(print, "body", 0));
+
+    // If the body of the return contains parens, then just skip directly to the
+    // content of the parens so that we can skip printing parens if we don't
+    // want them.
     if (args.body[0] && args.body[0].type === "paren") {
-      // Ignoring the parens node and just going straight to the content
-      return concat([
-        "return ",
-        path.call(print, "body", 0, "body", 0, "body", 0, "body", 0)
-      ]);
+      value = path.call(print, "body", 0, "body", 0, "body", 0, "body", 0);
     }
 
-    return concat(["return ", join(", ", path.call(print, "body", 0))]);
+    return group(concat([
+      "return",
+      ifBreak("(", " "),
+      indent(concat([softline, value])),
+      concat([softline, ifBreak(")", "")])
+    ]));
   },
   return0: literal("return"),
   yield: (path, opts, print) => {
