@@ -27,7 +27,9 @@ while bar
 end
 ```
 
-because that would never execute `foo` if `bar` is falsy, whereas in the initial example it would have.
+because that would never execute `foo` if `bar` is falsy, whereas in the initial example it would have. (Thanks to @krachtstefan for the report.)
+
+- When transforming a block into the `Symbol#to_proc` syntax from within a list of arguments inside of an `aref` node (i.e., `foo[:bar].each`), we can't put the block syntax inside the brackets. (Thanks to @jviney for the report.)
 
 ## [0.14.0] - 2019-07-17
 
