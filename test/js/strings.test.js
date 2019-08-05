@@ -26,6 +26,9 @@ describe("strings", () => {
 
       test("interpolation within double quotes stay", () =>
         expect(`"#{"\\n"}"`).toMatchFormat());
+
+      test("escaped double quotes are unquoted", () =>
+        expect("'abc \\\"def\\\" ghi'").toChangeFormat("'abc \"def\" ghi'"));
     });
   });
 
