@@ -1,4 +1,11 @@
-const { concat, group, ifBreak, indent, join, softline } = require("../prettier");
+const {
+  concat,
+  group,
+  ifBreak,
+  indent,
+  join,
+  softline
+} = require("../prettier");
 const { literal } = require("../utils");
 
 module.exports = {
@@ -51,12 +58,14 @@ module.exports = {
       value = path.call(print, "body", 0, "body", 0, "body", 0, "body", 0);
     }
 
-    return group(concat([
-      "return",
-      ifBreak("(", " "),
-      indent(concat([softline, value])),
-      concat([softline, ifBreak(")", "")])
-    ]));
+    return group(
+      concat([
+        "return",
+        ifBreak("(", " "),
+        indent(concat([softline, value])),
+        concat([softline, ifBreak(")", "")])
+      ])
+    );
   },
   return0: literal("return"),
   yield: (path, opts, print) => {
