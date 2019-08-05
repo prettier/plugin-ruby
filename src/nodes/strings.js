@@ -40,7 +40,7 @@ const getStringQuote = (string, preferSingleQuotes) => {
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
 
 const makeString = (content, enclosingQuote) => {
-  const otherQuote = enclosingQuote === '"' ? "'" : enclosingQuote;
+  const otherQuote = enclosingQuote === '"' ? "'" : '"';
 
   // Escape and unescape single and double quotes as needed to be able to
   // enclose `content` with `enclosingQuote`.

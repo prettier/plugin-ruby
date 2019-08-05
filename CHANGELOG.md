@@ -63,6 +63,29 @@ return(
 
 (Thanks to @jakeprime for the report.)
 
+- When switching from a double-quoted string to a single-quoted string that contained escaped double quotes, the backslashes would stay in the string. As in:
+
+<!-- prettier-ignore -->
+```ruby
+"Foo \"Bar\" Baz"
+```
+
+would get formatted as:
+
+<!-- prettier-ignore -->
+```ruby
+'Foo \"Bar\" Baz'
+```
+
+but now gets formatted as:
+
+<!-- prettier-ignore -->
+```ruby
+'Foo "Bar" Baz'
+```
+
+(Thanks to @jakeprime for the report.)
+
 ## [0.14.0] - 2019-07-17
 
 ### Added
