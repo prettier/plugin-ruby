@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [0.15.0] - 2019-08-06
+
 ### Changed
 
 - If xstring literals (command line calls surrounded by backticks) break, then we indent and place the command on a new line. Previously, this was resulting in new lines getting added each time the code was formatted. Now this happens correctly. (Thanks to @dudeofawesome for the report.)
@@ -543,7 +545,8 @@ would previously result in `array[]`, but now prints properly. (Thanks to @xipgr
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.14.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/prettier/plugin-ruby/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/prettier/plugin-ruby/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/prettier/plugin-ruby/compare/v0.12.3...v0.13.0
 [0.12.3]: https://github.com/prettier/plugin-ruby/compare/v0.12.2...v0.12.3
