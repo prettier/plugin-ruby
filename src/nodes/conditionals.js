@@ -40,7 +40,7 @@ const noTernary = [
 const printWithAddition = (keyword, path, print, { breaking = false } = {}) =>
   concat([
     `${keyword} `,
-    align(keyword.length - 1, path.call(print, "body", 0)),
+    align(keyword.length + 1, path.call(print, "body", 0)),
     indent(concat([softline, path.call(print, "body", 1)])),
     concat([softline, path.call(print, "body", 2)]),
     concat([softline, "end"]),
@@ -91,7 +91,7 @@ const printTernary = (path, _opts, print) => {
     ifBreak(
       concat([
         "if ",
-        predicate,
+        align(3, predicate),
         indent(concat([softline, truthyClause])),
         concat([softline, "else"]),
         indent(concat([softline, falsyClause])),
@@ -108,7 +108,7 @@ const printTernary = (path, _opts, print) => {
 const printSingle = keyword => (path, { inlineConditionals }, print) => {
   const multiline = concat([
     `${keyword} `,
-    align(keyword.length - 1, path.call(print, "body", 0)),
+    align(keyword.length + 1, path.call(print, "body", 0)),
     indent(concat([softline, path.call(print, "body", 1)])),
     concat([softline, "end"])
   ]);

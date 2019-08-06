@@ -81,6 +81,18 @@ describe("conditionals", () => {
 
         return expect(content).toMatchFormat();
       });
+
+      test("align long predicates", () =>
+        expect(`foo ${keyword} ${long} || ${long}a`).toChangeFormat(
+          ruby(`
+          ${keyword} ${long} ||
+              ${Array(keyword.length)
+                .fill()
+                .join(" ")}${long}a
+            foo
+          end
+        `)
+        ));
     });
   });
 
@@ -143,6 +155,18 @@ describe("conditionals", () => {
 
         return expect(content).toMatchFormat({ inlineConditionals: false });
       });
+
+      test("align long predicates", () =>
+        expect(`foo ${keyword} ${long} || ${long}a`).toChangeFormat(
+          ruby(`
+          ${keyword} ${long} ||
+              ${Array(keyword.length)
+                .fill()
+                .join(" ")}${long}a
+            foo
+          end
+        `)
+        ));
     });
   });
 
@@ -280,6 +304,18 @@ describe("conditionals", () => {
 
         return expect(content).toMatchFormat();
       });
+
+      test("align long predicates", () =>
+        expect(`${long} || ${long}a ? foo : bar`).toChangeFormat(
+          ruby(`
+          if ${long} ||
+               ${long}a
+            foo
+          else
+            bar
+          end
+        `)
+        ));
     });
   });
 
