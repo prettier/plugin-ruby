@@ -678,7 +678,7 @@ class RipperJS < Ripper
 
         super(ident).tap do |node|
           if !@access_controls.include?(ident[:body]) ||
-             ident[:body] != lines[lineno - 1].strip
+               ident[:body] != lines[lineno - 1].strip
             next
           end
 
@@ -713,7 +713,7 @@ class RipperJS < Ripper
         stmts, *other_parts = bodystmt[:body]
 
         if !other_parts.any? && stmts[:body].length == 1 &&
-           stmts.dig(:body, 0, :type) == :begin
+             stmts.dig(:body, 0, :type) == :begin
           def_bodystmt = stmts.dig(:body, 0, :body, 0)
         end
 

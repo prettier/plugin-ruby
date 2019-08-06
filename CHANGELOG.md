@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- When predicates from within an `if`, `unless`, `while`, or `until` loop break the line, they should be aligned together. For example,
+
+<!-- prettier-ignore -->
+```ruby
+if foooooo || barrrrrr
+  baz
+end
+```
+
+If the line was set to very short, the binary node should be aligned to 3 spaces from the left of the file (which aligns with the `if`, it would be more for `unless`). So it would look like:
+
+<!-- prettier-ignore -->
+```ruby
+if foooooo ||
+     barrrrrr
+  baz
+end
+```
+
+(Thanks to @jakeprime for the report.)
+
 ## [0.15.0] - 2019-08-06
 
 ### Changed

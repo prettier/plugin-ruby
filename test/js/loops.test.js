@@ -1,6 +1,18 @@
 const { long, ruby } = require("./utils");
 
 describe.each(["while", "until"])("%s", keyword => {
+  test("aligns predicates", () =>
+    expect(`foo ${keyword} ${long} || ${long}`).toChangeFormat(
+      ruby(`
+      ${keyword} ${long} ||
+          ${Array(keyword.length)
+            .fill()
+            .join(" ")}${long}
+        foo
+      end
+    `)
+    ));
+
   describe("inlines allowed", () => {
     test("transforms to inline", () =>
       expect(`${keyword} a\n  1\nend`).toChangeFormat(`1 ${keyword} a`));

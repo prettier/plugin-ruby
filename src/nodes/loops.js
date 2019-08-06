@@ -1,4 +1,5 @@
 const {
+  align,
   concat,
   group,
   hardline,
@@ -28,7 +29,10 @@ const printLoop = (keyword, modifier) => (path, { inlineLoops }, print) => {
   }
 
   const blockLoop = concat([
-    concat([`${keyword} `, path.call(print, "body", 0)]),
+    concat([
+      `${keyword} `,
+      align(keyword.length + 1, path.call(print, "body", 0))
+    ]),
     indent(concat([softline, path.call(print, "body", 1)])),
     concat([softline, "end"])
   ]);
