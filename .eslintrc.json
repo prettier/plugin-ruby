@@ -12,6 +12,7 @@
         "varsIgnorePattern": "^_"
       }
     ],
+    "prefer-object-spread": "off",
     "prefer-spread": "off"
   }
 }
