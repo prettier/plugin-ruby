@@ -12,11 +12,16 @@ process.env.RUBY_VERSION = spawnSync("ruby", ["-e", "puts RUBY_VERSION"])
 const { formatAST } = prettier.__debug;
 
 const parser = spawn("ruby", ["./test/js/parser.rb"]);
-afterAll(() => parser.kill());
 
 const rl = readline.createInterface({
   input: parser.stdout,
   output: parser.stdin
+});
+
+afterAll(() => {
+  rl.close();
+  parser.stdin.pause();
+  parser.kill("SIGINT");
 });
 
 const checkFormat = (before, after, config) =>
