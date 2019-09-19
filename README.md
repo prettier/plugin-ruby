@@ -70,6 +70,8 @@ end
 
 To run `prettier` with the Ruby plugin, you're going to need [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) (version `2.5` or newer) and [`node`](https://nodejs.org/en/download/) (version `8.3` or newer). If you're integrating with a project that is not already using `prettier`, you should use the ruby gem. Otherwise you can use the `npm` package directly.
 
+**Editor Integration**: Install via `npm` or `yarn`
+
 ### Ruby gem
 
 Add this line to your application's Gemfile:
