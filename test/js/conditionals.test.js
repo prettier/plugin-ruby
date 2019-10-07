@@ -43,6 +43,15 @@ describe("conditionals", () => {
       test("empty first body", () => {
         const content = ruby(`
           ${keyword} a
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("empty first body with present second body", () => {
+        const content = ruby(`
+          ${keyword} a
 
           else
             b
@@ -125,6 +134,15 @@ describe("conditionals", () => {
         }));
 
       test("empty first body", () => {
+        const content = ruby(`
+          ${keyword} a
+          end
+        `);
+
+        return expect(content).toMatchFormat({ inlineConditionals: false });
+      });
+
+      test("empty first body with present second body", () => {
         const content = ruby(`
           ${keyword} a
 

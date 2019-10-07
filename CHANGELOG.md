@@ -29,6 +29,16 @@ end
 
 (Thanks to @jakeprime for the report.)
 
+- Empty `if`, and `unless` conditionals are now handled gracefully:
+
+<!-- prettier-ignore -->
+```ruby
+if foo?
+end
+```
+
+(Thanks to @AlanFoster for the fix, and @jamescostian for the report.)
+
 ## [0.15.0] - 2019-08-06
 
 ### Changed
