@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ### Changed
 
+- [INTERNAL] Add `bin/lex` for viewing the tokenized result of Ripper on Ruby code (Thanks to @AlanFoster.)
 - When predicates from within an `if`, `unless`, `while`, or `until` loop break the line, they should be aligned together. For example,
 
 <!-- prettier-ignore -->

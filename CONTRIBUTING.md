@@ -118,6 +118,18 @@ yarn run test
 yarn run test -u
 ```
 
+**Viewing the tokenized result of Ripper on code**
+
+```
+bin/lex 'your_ruby_code(1, 2, 3)'
+```
+
+**Viewing the tokenized result of Ripper on a file**
+
+```
+bin/lex file.rb
+```
+
 **Viewing the output of RipperJS on a file**
 
 ```
