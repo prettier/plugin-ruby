@@ -177,6 +177,20 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
     return group(printWithAddition(keyword, path, print, { breaking: true }));
   }
 
+  // Explicitly handling the scenario of an empty conditional body, which can't be inlined
+  // as it produces invalid ruby code
+  const [_predicate, stmts] = path.getValue().body;
+  const isEmptyConditionalBody =
+    stmts.type === "stmts" && stmts.body[0].type === "void_stmt";
+
+  if (isEmptyConditionalBody) {
+    return concat([
+      `${keyword} `,
+      align(keyword.length + 1, path.call(print, "body", 0)),
+      concat([hardline, "end"])
+    ]);
+  }
+
   return printSingle(keyword)(path, { inlineConditionals }, print);
 };
 
