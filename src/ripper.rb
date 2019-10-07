@@ -340,7 +340,9 @@ class RipperJS < Ripper
       (SCANNER_EVENTS - defined).each do |event|
         define_method(:"on_#{event}") do |body|
           super(body).tap do |node|
-            node.merge!(char_start: char_pos, char_end: char_pos + body.size)
+            node.merge!(
+              char_start: char_pos, char_end: char_pos + body.to_s.size
+            )
 
             scanner_events << node
           end

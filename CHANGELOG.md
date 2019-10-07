@@ -39,6 +39,8 @@ end
 
 (Thanks to @AlanFoster for the fix, and @jamescostian for the report.)
 
+- Fix nil body edge case when handling ruby's internal `ignored_nl` scanner event. (Thanks to @AlanFoster.)
+
 ## [0.15.0] - 2019-08-06
 
 ### Changed

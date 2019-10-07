@@ -159,6 +159,16 @@ describe("comments", () => {
 
     test("command calls", () =>
       expect("command.call 'foo' # this is an inline comment").toMatchFormat());
+
+    test("chained command calls with comments", () => {
+      const content = ruby(`
+        puts foo
+          .bar # comment
+          .baz
+      `);
+
+      return expect(content).not.toFailFormat();
+    });
   });
 
   describe("arrays", () => {
