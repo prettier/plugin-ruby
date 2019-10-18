@@ -20,6 +20,9 @@
   <a href="https://twitter.com/PrettierCode">
     <img alt="Follow+Prettier+on+Twitter" src="https://img.shields.io/twitter/follow/prettiercode.svg?label=follow+prettier&style=flat-square">
   </a>
+    <a href="https://opencollective.com/prettier-ruby">
+    <img alt="Financial Contributors on Open Collective" src="https://opencollective.com/prettier-ruby/all/badge.svg?label=financial+contributors&style=flat-square">
+  </a>
 </p>
 
 `@prettier/plugin-ruby` is a [prettier](https://prettier.io/) plugin for the Ruby programming language (versions `2.5` and above). `prettier` is an opinionated code formatter that supports multiple languages and integrates with most editors. The idea is to eliminate discussions of style in code review and allow developers to get back to thinking about code design instead.
@@ -149,6 +152,36 @@ prettier --prefer-single-quotes false --write '**/*.rb'
 ## Contributing
 
 Check out our [contributing guide](CONTRIBUTING.md). Bug reports and pull requests are welcome on GitHub at https://github.com/prettier/plugin-ruby.
+
+## Contributors
+
+### Code Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/prettier/plugin-ruby/graphs/contributors"><img src="https://opencollective.com/prettier-ruby/contributors.svg?width=890&button=false" /></a>
+
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/prettier-ruby/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/prettier-ruby"><img src="https://opencollective.com/prettier-ruby/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/prettier-ruby/contribute)]
+
+<a href="https://opencollective.com/prettier-ruby/organization/0/website"><img src="https://opencollective.com/prettier-ruby/organization/0/avatar.svg"></a>
+<a href="https://opencollective.com/prettier-ruby/organization/1/website"><img src="https://opencollective.com/prettier-ruby/organization/1/avatar.svg"></a>
+<a href="https://opencollective.com/prettier-ruby/organization/2/website"><img src="https://opencollective.com/prettier-ruby/organization/2/avatar.svg"></a>
+<a href="https://opencollective.com/prettier-ruby/organization/3/website"><img src="https://opencollective.com/prettier-ruby/organization/3/avatar.svg"></a>
+<a href="https://opencollective.com/prettier-ruby/organization/4/website"><img src="https://opencollective.com/prettier-ruby/organization/4/avatar.svg"></a>
+<a href="https://opencollective.com/prettier-ruby/organization/5/website"><img src="https://opencollective.com/prettier-ruby/organization/5/avatar.svg"></a>
+<a href="https://opencollective.com/prettier-ruby/organization/6/website"><img src="https://opencollective.com/prettier-ruby/organization/6/avatar.svg"></a>
+<a href="https://opencollective.com/prettier-ruby/organization/7/website"><img src="https://opencollective.com/prettier-ruby/organization/7/avatar.svg"></a>
+<a href="https://opencollective.com/prettier-ruby/organization/8/website"><img src="https://opencollective.com/prettier-ruby/organization/8/avatar.svg"></a>
+<a href="https://opencollective.com/prettier-ruby/organization/9/website"><img src="https://opencollective.com/prettier-ruby/organization/9/avatar.svg"></a>
 
 ## License
 
