@@ -39,6 +39,15 @@ end
 
 (Thanks to @AlanFoster for the fix, and @jamescostian for the report.)
 
+- Hash keys are not converted to keyword syntax if they would make invalid symbols. For example,
+
+<!-- prettier-ignore -->
+```ruby
+{ :[] => nil }
+```
+
+cannot be translated into `[]:` as that is an invalid symbol. Instead, it stays with the hash rocket syntax. (Thanks to @mmainz for the report.)
+
 ## [0.15.0] - 2019-08-06
 
 ### Changed

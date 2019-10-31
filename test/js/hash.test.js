@@ -146,6 +146,12 @@ describe("hash", () => {
 
     test("ending in equals stays", () =>
       expect("{ :foo= => 'bar' }").toMatchFormat());
+
+    test("starting with non-letter/non-underscore stays", () =>
+      expect("{ :@foo => 'bar' }").toMatchFormat());
+
+    test("starting with underscore converts", () =>
+      expect("{ :_foo => 'bar' }").toChangeFormat("{ _foo: 'bar' }"));
   });
 
   describe("when hash labels disallowed", () => {
@@ -166,6 +172,18 @@ describe("hash", () => {
       }));
 
     test("ending in equals stays", () =>
-      expect("{ :foo= => 'bar' }").toMatchFormat());
+      expect("{ :foo= => 'bar' }").toMatchFormat({
+        preferHashLabels: false
+      }));
+
+    test("starting with non-letter/non-underscore stays", () =>
+      expect("{ :@foo => 'bar' }").toMatchFormat({
+        preferHashLabels: false
+      }));
+
+    test("starting with underscore stays", () =>
+      expect("{ :_foo => 'bar' }").toMatchFormat({
+        preferHashLabels: false
+      }));
   });
 });

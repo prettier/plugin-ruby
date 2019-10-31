@@ -19,6 +19,21 @@ const nodeDive = (node, steps) => {
   return current;
 };
 
+// When attempting to convert a hash rocket into a hash label, you need to take
+// care because only certain patterns are allowed. Ruby source says that they
+// have to match keyword arguments to methods, but don't specify what that is.
+// After some experimentation, it looks like it's:
+//
+// * Starts with a letter (either case) or an underscore
+// * Does not end in equal
+//
+// This function represents that check, as it determines if it can convert the
+// symbol node into a hash label.
+const isValidHashLabel = symbolLiteral => {
+  const label = symbolLiteral.body[0].body[0].body;
+  return label.match(/^[_A-Za-z]/) && !label.endsWith("=");
+};
+
 const makeLabel = (path, { preferHashLabels }, print, steps) => {
   const labelNode = nodeDive(path.getValue(), steps);
   const labelDoc = path.call.apply(path, [print].concat(steps));
@@ -30,11 +45,7 @@ const makeLabel = (path, { preferHashLabels }, print, steps) => {
       }
       return `:${labelDoc.slice(0, labelDoc.length - 1)} =>`;
     case "symbol_literal": {
-      // You can have a symbol literal as a key in a hash that ends with an =
-      // character, which breaks when you use hash labels.
-      const endsInEquals = labelNode.body[0].body[0].body.endsWith("=");
-
-      if (preferHashLabels && labelNode.body.length === 1 && !endsInEquals) {
+      if (preferHashLabels && isValidHashLabel(labelNode)) {
         const symbolSteps = steps.concat("body", 0, "body", 0);
 
         return concat([
