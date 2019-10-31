@@ -48,6 +48,8 @@ end
 
 cannot be translated into `[]:` as that is an invalid symbol. Instead, it stays with the hash rocket syntax. (Thanks to @mmainz for the report.)
 
+- Do not attempt to format the insides of xstring literals (string that get sent to the command line surrounded by backticks or `%x`). (Thanks to @cldevs for the report.)
+
 ## [0.15.0] - 2019-08-06
 
 ### Changed

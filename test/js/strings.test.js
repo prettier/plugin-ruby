@@ -102,21 +102,18 @@ describe("strings", () => {
     test("backtick literals", () => expect("`abc`").toMatchFormat());
 
     test("breaking backtick literals", () =>
-      expect(`\`${long}\``).toChangeFormat(`\`\n  ${long}\n\``));
+      expect(`\`${long}\``).toChangeFormat(`\`${long}\``));
 
     test("breaking backtick literals with method chains", () =>
-      expect(`\`${long}\`.to_s`).toChangeFormat(`\`\n  ${long}\n\`.to_s`));
+      expect(`\`${long}\`.to_s`).toChangeFormat(`\`${long}\`.to_s`));
 
     test("%x literals", () => expect("%x[abc]").toChangeFormat("`abc`"));
 
     test("breaking %x literals", () =>
-      expect(`%x[${long}]`).toChangeFormat(`\`\n  ${long}\n\``));
+      expect(`%x[${long}]`).toChangeFormat(`\`${long}\``));
 
     test("breaking %x literals with method chains", () =>
-      expect(`%x[${long}].to_s`).toChangeFormat(`\`\n  ${long}\n\`.to_s`));
-
-    test("trims the start and end appropriately", () =>
-      expect(`\`\n\n${long}\n\n\``).toChangeFormat(`\`\n  ${long}\n\``));
+      expect(`%x[${long}].to_s`).toChangeFormat(`\`${long}\`.to_s`));
   });
 
   describe("dynamic symbols", () => {

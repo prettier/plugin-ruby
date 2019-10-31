@@ -96,14 +96,24 @@ module.exports = {
       ])
     ),
   string_dvar: surround("#{", "}"),
-  string_embexpr: (path, opts, print) =>
-    group(
+  string_embexpr: (path, opts, print) => {
+    const parts = path.call(print, "body", 0);
+
+    // If the interpolated expression is inside of an xstring literal (a string
+    // that gets sent to the command line) then we don't want to automatically
+    // indent, as this can lead to some very odd looking expressions
+    if (path.getParentNode().type === "xstring") {
+      return concat(["#{", parts, "}"]);
+    }
+
+    return group(
       concat([
         "#{",
-        indent(concat([softline, path.call(print, "body", 0)])),
+        indent(concat([softline, parts])),
         concat([softline, "}"])
       ])
-    ),
+    );
+  },
   string_literal: (path, { preferSingleQuotes }, print) => {
     const string = path.getValue().body[0];
 
@@ -142,21 +152,6 @@ module.exports = {
   xstring_literal: (path, opts, print) => {
     const parts = path.call(print, "body", 0);
 
-    if (typeof parts[0] === "string") {
-      parts[0] = parts[0].replace(/^\s+/, "");
-    }
-
-    const lastIndex = parts.length - 1;
-    if (typeof parts[lastIndex] === "string") {
-      parts[lastIndex] = parts[lastIndex].replace(/\s+$/, "");
-    }
-
-    return group(
-      concat([
-        "`",
-        indent(concat([softline, join(softline, parts)])),
-        concat([softline, "`"])
-      ])
-    );
+    return concat(["`"].concat(parts).concat("`"));
   }
 };
