@@ -192,6 +192,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/jakeprime"><img src="https://avatars1.githubusercontent.com/u/1019036?v=4" width="100px;" alt="jakeprime"/><br /><sub><b>jakeprime</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ajakeprime" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://mmainz.github.io"><img src="https://avatars2.githubusercontent.com/u/5417714?v=4" width="100px;" alt="Mario Mainz"/><br /><sub><b>Mario Mainz</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ammainz" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://www.cldevs.com"><img src="https://avatars3.githubusercontent.com/u/38632061?v=4" width="100px;" alt="CL Web Developers"/><br /><sub><b>CL Web Developers</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Acldevs" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
