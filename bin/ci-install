@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-gem update --system
+gem update --system --force
 gem install bundler
 
 source ~/.nvm/nvm.sh
