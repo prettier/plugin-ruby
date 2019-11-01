@@ -107,11 +107,7 @@ module.exports = {
     }
 
     return group(
-      concat([
-        "#{",
-        indent(concat([softline, parts])),
-        concat([softline, "}"])
-      ])
+      concat(["#{", indent(concat([softline, parts])), concat([softline, "}"])])
     );
   },
   string_literal: (path, { preferSingleQuotes }, print) => {

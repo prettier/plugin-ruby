@@ -223,6 +223,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "cldevs",
+      "name": "CL Web Developers",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/38632061?v=4",
+      "profile": "http://www.cldevs.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
