@@ -36,6 +36,26 @@ describe.each(["while", "until"])("%s", keyword => {
 
       return expect(content).toMatchFormat();
     });
+
+    test("breaks when an assignment is in the predicate", () => {
+      const content = ruby(`
+        ${keyword} (a = 1)
+          a
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("breaks when a multi assignment is in the predicate", () => {
+      const content = ruby(`
+        ${keyword} (a, b = 1, 2)
+          a
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
   });
 
   describe("inlines not allowed", () => {

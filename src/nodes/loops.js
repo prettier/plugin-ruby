@@ -7,6 +7,7 @@ const {
   indent,
   softline
 } = require("../prettier");
+const { containsAssignment } = require("../utils");
 
 const printLoop = (keyword, modifier) => (path, { inlineLoops }, print) => {
   const inlineLoop = concat([
@@ -37,7 +38,11 @@ const printLoop = (keyword, modifier) => (path, { inlineLoops }, print) => {
     concat([softline, "end"])
   ]);
 
-  if (!inlineLoops) {
+  // If we're disallowing inline loops or if the predicate of the loop contains
+  // an assignment (in which case we can't know for certain that that
+  // assignment doesn't impact the statements inside the loop) then we can't
+  // use the modifier form and we must use the block form.
+  if (!inlineLoops || containsAssignment(path.getValue().body[0])) {
     return blockLoop;
   }
 
