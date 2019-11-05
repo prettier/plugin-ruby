@@ -50,6 +50,22 @@ cannot be translated into `[]:` as that is an invalid symbol. Instead, it stays 
 
 - Do not attempt to format the insides of xstring literals (string that get sent to the command line surrounded by backticks or `%x`). (Thanks to @cldevs for the report.)
 - When predicates for `if`, `unless`, `while`, or `until` nodes contain an assignment, we can't know for sure that it doesn't modify the body. In this case we need to always break and form a multi-line block. (Thanks to @cldevs for the report.)
+- When the return value of `if`, `unless`, `while`, or `until` nodes are assigned to anything other than a local variable, we need to wrap them in parentheses if we're changing to the modifier form. This is because the following expressions have different semantic meaning:
+
+<!-- prettier-ignore -->
+```ruby
+hash[:key] = break :value while false
+hash[:key] = while false do break :value end
+```
+
+The first one will not result in an empty hash, whereas the second one will result in `{ key: nil }`. In this case what we need to do for the first expression to align is wrap it in parens, as in:
+
+<!-- prettier-ignore -->
+```ruby
+hash[:key] = (break :value while false)
+```
+
+That will guarantee that the expressions are equivalent. (Thanks to @MarcManiez for the report.)
 
 ## [0.15.0] - 2019-08-06
 

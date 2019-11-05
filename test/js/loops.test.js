@@ -56,6 +56,11 @@ describe.each(["while", "until"])("%s", keyword => {
 
       return expect(content).toMatchFormat();
     });
+
+    test("wraps single lines in parens when assigning", () =>
+      expect(
+        `hash[:key] = ${keyword} false do break :value end`
+      ).toChangeFormat(`hash[:key] = (break :value ${keyword} false)`));
   });
 
   describe("inlines not allowed", () => {
