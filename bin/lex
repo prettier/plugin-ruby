@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'ripper'
+
+source = File.file?(ARGV[0]) ? File.read(ARGV[0]) : ARGV[0].gsub('\\n', "\n")
+pp Ripper.lex(source)
