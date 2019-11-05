@@ -201,7 +201,7 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 
 ## Financial
 
-You can support `prettier/plugin-ruby` on OpenCollective. Your organization's logo will show up here with a link to your website. [[Contribute](https://opencollective.com/prettier-ruby/contribute)]
+You can support `prettier/plugin-ruby` [on OpenCollective](https://opencollective.com/prettier-ruby/contribute). Your organization's logo will show up here with a link to your website.
 
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
