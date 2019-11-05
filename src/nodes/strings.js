@@ -38,13 +38,14 @@ const getStringQuote = (string, preferSingleQuotes) => {
 
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
 
-const makeString = (content, enclosingQuote) => {
+const makeString = (content, enclosingQuote, originalQuote) => {
+  const replaceOther = ["'", '"'].includes(originalQuote);
   const otherQuote = enclosingQuote === '"' ? "'" : '"';
 
   // Escape and unescape single and double quotes as needed to be able to
   // enclose `content` with `enclosingQuote`.
   return content.replace(quotePattern, (match, escaped, quote) => {
-    if (escaped === otherQuote) {
+    if (replaceOther && escaped === otherQuote) {
       return escaped;
     }
 
@@ -130,7 +131,7 @@ module.exports = {
     string.body.forEach((part, index) => {
       if (part.type === "@tstring_content") {
         // In this case, the part of the string is just regular string content
-        parts.push(makeString(part.body, quote));
+        parts.push(makeString(part.body, quote, string.quote));
       } else {
         // In this case, the part of the string is an embedded expression
         parts.push(path.call(print, "body", 0, "body", index));
