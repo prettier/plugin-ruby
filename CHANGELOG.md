@@ -67,6 +67,8 @@ hash[:key] = (break :value while false)
 
 That will guarantee that the expressions are equivalent. (Thanks to @MarcManiez for the report.)
 
+- Fix crashes that were happening with `ignored_nl` nodes. (Thanks to @AlanFoster.)
+
 ## [0.15.0] - 2019-08-06
 
 ### Changed
