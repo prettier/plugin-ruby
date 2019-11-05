@@ -208,4 +208,13 @@ describe("comments", () => {
       return expect(content).toMatchFormat();
     });
   });
+
+  test.skip("causing ignored_nl", () => {
+    const content = ruby(`
+      foo.bar # comment
+         .baz
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });
