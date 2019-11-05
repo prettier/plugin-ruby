@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- Support proper string escaping when the original string in the source is wrapped in `%q|...|`. For example, `%q|\'|` should get printed as `"\'"`, where previously it was dropping the backslash. (Thanks to @github0013 for the report.)
+
 ## [0.15.1] - 2019-11-05
 
 ### Changed
