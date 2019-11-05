@@ -10,11 +10,30 @@ const {
 const { containsAssignment } = require("../utils");
 
 const printLoop = (keyword, modifier) => (path, { inlineLoops }, print) => {
-  const inlineLoop = concat([
+  let inlineParts = [
     path.call(print, "body", 1),
     ` ${keyword} `,
     path.call(print, "body", 0)
-  ]);
+  ];
+
+  // If the return value of this loop expression is being assigned to anything
+  // besides a local variable then we can't inline the entire expression
+  // without wrapping it in parentheses. This is because the following
+  // expressions have different semantic meaning:
+  //
+  //     hash[:key] = break :value while false
+  //     hash[:key] = while false do break :value end
+  //
+  // The first one will not result in an empty hash, whereas the second one
+  // will result in `{ key: nil }`. In this case what we need to do for the
+  // first expression to align is wrap it in parens, as in:
+  //
+  //     hash[:key] = (break :value while false)
+  if (["assign", "massign"].includes(path.getParentNode().type)) {
+    inlineParts = ["("].concat(inlineParts).concat(")");
+  }
+
+  const inlineLoop = concat(inlineParts);
 
   // If we're in the modifier form and we're modifying a `begin`, then this is a
   // special case where we need to explicitly use the modifier form because

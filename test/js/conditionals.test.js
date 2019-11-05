@@ -94,13 +94,18 @@ describe("conditionals", () => {
       test("align long predicates", () =>
         expect(`foo ${keyword} ${long} || ${long}a`).toChangeFormat(
           ruby(`
-          ${keyword} ${long} ||
-              ${Array(keyword.length)
-                .fill()
-                .join(" ")}${long}a
-            foo
-          end
-        `)
+            ${keyword} ${long} ||
+                ${Array(keyword.length)
+                  .fill()
+                  .join(" ")}${long}a
+              foo
+            end
+          `)
+        ));
+
+      test("wraps single lines in parens when assigning", () =>
+        expect(`hash[:key] = ${keyword} false then :value end`).toChangeFormat(
+          `hash[:key] = (:value ${keyword} false)`
         ));
     });
   });
