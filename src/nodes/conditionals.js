@@ -8,6 +8,7 @@ const {
   indent,
   softline
 } = require("../prettier");
+const { containsAssignment } = require("../utils");
 
 const noTernary = [
   "@comment",
@@ -102,16 +103,19 @@ const printTernary = (path, _opts, print) => {
   );
 };
 
-// Prints an `if_mod` or `unless_mod` node. Because it was previously in the
-// modifier form, we're guaranteed to not have an additional node, so we can
-// just work with the predicate and the body.
-const printSingle = keyword => (path, { inlineConditionals }, print) => {
-  const multiline = concat([
+const makeSingleBlockForm = (keyword, path, print) =>
+  concat([
     `${keyword} `,
     align(keyword.length + 1, path.call(print, "body", 0)),
     indent(concat([softline, path.call(print, "body", 1)])),
     concat([softline, "end"])
   ]);
+
+// Prints an `if_mod` or `unless_mod` node. Because it was previously in the
+// modifier form, we're guaranteed to not have an additional node, so we can
+// just work with the predicate and the body.
+const printSingle = keyword => (path, { inlineConditionals }, print) => {
+  const multiline = makeSingleBlockForm(keyword, path, print);
 
   const [predicate, stmts] = path.getValue().body;
   const hasComments =
@@ -171,24 +175,29 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
     );
   }
 
+  const [predicate, statements, addition] = path.getValue().body;
+
   // If there's an additional clause that wasn't matched earlier, we know we
   // can't go for the inline option.
-  if (path.getValue().body[2]) {
+  if (addition) {
     return group(printWithAddition(keyword, path, print, { breaking: true }));
   }
 
-  // Explicitly handling the scenario of an empty conditional body, which can't be inlined
-  // as it produces invalid ruby code
-  const [_predicate, stmts] = path.getValue().body;
-  const isEmptyConditionalBody =
-    stmts.type === "stmts" && stmts.body[0].type === "void_stmt";
-
-  if (isEmptyConditionalBody) {
+  // If the body of the conditional is empty, then we explicitly have to use the
+  // block form.
+  if (statements.type === "stmts" && statements.body[0].type === "void_stmt") {
     return concat([
       `${keyword} `,
       align(keyword.length + 1, path.call(print, "body", 0)),
       concat([hardline, "end"])
     ]);
+  }
+
+  // If the predicate of the conditional contains an assignment, then we can't
+  // know for sure that it doesn't impact the body of the conditional, so we
+  // have to default to the block form.
+  if (containsAssignment(predicate)) {
+    return makeSingleBlockForm(keyword, path, print);
   }
 
   return printSingle(keyword)(path, { inlineConditionals }, print);

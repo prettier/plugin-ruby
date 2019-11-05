@@ -49,6 +49,7 @@ end
 cannot be translated into `[]:` as that is an invalid symbol. Instead, it stays with the hash rocket syntax. (Thanks to @mmainz for the report.)
 
 - Do not attempt to format the insides of xstring literals (string that get sent to the command line surrounded by backticks or `%x`). (Thanks to @cldevs for the report.)
+- When predicates for `if`, `unless`, `while`, or `until` nodes contain an assignment, we can't know for sure that it doesn't modify the body. In this case we need to always break and form a multi-line block. (Thanks to @cldevs for the report.)
 
 ## [0.15.0] - 2019-08-06
 
