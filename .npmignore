@@ -4,6 +4,7 @@
 /node_modules/
 /lib/
 /pkg/
+/playground/
 /test/
 
 /Gemfile*

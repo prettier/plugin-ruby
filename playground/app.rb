@@ -7,7 +7,7 @@
 require 'bundler/setup'
 require 'sinatra'
 
-require_relative '../src/ripper'
+require_relative 'ripper'
 
 class App < Sinatra::Base
   get '/' do
@@ -25,5 +25,3 @@ class App < Sinatra::Base
     end
   end
 end
-
-App.run!

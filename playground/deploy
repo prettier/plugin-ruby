@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+diff src/ripper.rb playground/ripper.rb > /dev/null
+
+if [ $? -eq 1 ]; then
+  echo "playground/ripper.rb out of sync with src/ripper.rb"
+  exit 1
+fi
+
+git subtree push --prefix playground heroku master
