@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    prettier (0.15.0)
+    prettier (0.15.1)
 
 GEM
   remote: https://rubygems.org/

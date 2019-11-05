@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [0.15.1] - 2019-11-05
+
 ### Changed
 
 - [INTERNAL] Add `bin/lex` for viewing the tokenized result of Ripper on Ruby code (Thanks to @AlanFoster.)
@@ -609,7 +611,8 @@ would previously result in `array[]`, but now prints properly. (Thanks to @xipgr
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.15.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.15.1...HEAD
+[0.15.1]: https://github.com/prettier/plugin-ruby/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/prettier/plugin-ruby/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/prettier/plugin-ruby/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/prettier/plugin-ruby/compare/v0.12.3...v0.13.0
