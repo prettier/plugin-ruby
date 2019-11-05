@@ -1,7 +1,7 @@
 const { long, ruby } = require("./utils");
 
 describe("strings", () => {
-  test("with %q escaping", () => expect("%q|\\'|").toChangeFormat("\"\\\'\""));
+  test("with %q escaping", () => expect("%q|\\'|").toChangeFormat('"\\\'"'));
 
   describe("with single quotes", () => {
     test("empty single quote strings stay", () => expect("''").toMatchFormat());
