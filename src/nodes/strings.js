@@ -5,7 +5,6 @@ const {
   indent,
   literalline,
   softline,
-  line,
   join
 } = require("../prettier");
 const { concatBody, empty, makeList, prefix, surround } = require("../utils");
@@ -130,7 +129,13 @@ module.exports = {
     const { beging, ending } = path.getValue();
     const lines = makeHeredocLines(path.map(print, "body"));
 
-    return concat([beging, literalline, join(literalline, lines), literalline, ending]);
+    return concat([
+      beging,
+      literalline,
+      join(literalline, lines),
+      literalline,
+      ending
+    ]);
   },
   string: makeList,
   string_concat: (path, opts, print) =>
