@@ -192,6 +192,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://twitter.com/github0013"><img src="https://avatars0.githubusercontent.com/u/809378?v=4" width="100px;" alt="github0013"/><br /><sub><b>github0013</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Agithub0013" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://jami.am"><img src="https://avatars1.githubusercontent.com/u/1456118?v=4" width="100px;" alt="James Costian"/><br /><sub><b>James Costian</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ajamescostian" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/joeyjoejoejr"><img src="https://avatars0.githubusercontent.com/u/1141502?v=4" width="100px;" alt="Joe Jackson"/><br /><sub><b>Joe Jackson</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ajoeyjoejoejr" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://178.is"><img src="https://avatars3.githubusercontent.com/u/134942?v=4" width="100px;" alt="Max Albrecht"/><br /><sub><b>Max Albrecht</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Aeins78" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

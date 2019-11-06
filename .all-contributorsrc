@@ -259,6 +259,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "eins78",
+      "name": "Max Albrecht",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/134942?v=4",
+      "profile": "http://178.is",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
