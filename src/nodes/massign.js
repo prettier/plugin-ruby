@@ -13,12 +13,13 @@ module.exports = {
       right = group(join(concat([",", line]), right));
     }
 
+    const parts = [join(concat([",", line]), path.call(print, "body", 0))];
+    if (path.getValue().body[0].comma) {
+      parts.push(",");
+    }
+
     return group(
-      concat([
-        group(join(concat([",", line]), path.call(print, "body", 0))),
-        " =",
-        indent(concat([line, right]))
-      ])
+      concat([group(concat(parts)), " =", indent(concat([line, right]))])
     );
   },
   mlhs: makeList,
@@ -40,18 +41,16 @@ module.exports = {
       return path.call(print, "body", 0);
     }
 
-    return group(
-      concat([
-        "(",
-        indent(
-          concat([
-            softline,
-            join(concat([",", line]), path.call(print, "body", 0))
-          ])
-        ),
-        concat([softline, ")"])
-      ])
-    );
+    const parts = [
+      softline,
+      join(concat([",", line]), path.call(print, "body", 0))
+    ];
+
+    if (path.getValue().body[0].comma) {
+      parts.push(",");
+    }
+
+    return group(concat(["(", indent(concat(parts)), concat([softline, ")"])]));
   },
   mrhs: makeList,
   mrhs_add_star: (path, opts, print) =>

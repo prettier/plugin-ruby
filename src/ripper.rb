@@ -14,11 +14,12 @@ require 'json' unless defined?(JSON)
 require 'ripper'
 
 class RipperJS < Ripper
-  attr_reader :lines, :__end__
+  attr_reader :source, :lines, :__end__
 
   def initialize(source, *args)
     super(source, *args)
 
+    @source = source
     @lines = source.split("\n")
     @__end__ = nil
   end
@@ -748,6 +749,31 @@ class RipperJS < Ripper
           params ||= { type: :params, body: [] }
 
           sexp.merge!(type: :lambda, body: [params, stmts])
+        end
+      end
+
+      # We need to track for `mlhs_paren` and `massign` nodes whether or not
+      # there was an extra comma at the end of the expression. For some reason
+      # it's not showing up in the AST in an obvious way. In this case we're
+      # just simplifying everything by adding an additional field to `mlhs`
+      # nodes called `comma` that indicates whether or not there was an extra.
+      def on_mlhs_paren(body)
+        super.tap do |node|
+          next unless body[:type] == :mlhs
+
+          ending = source.rindex(')', char_pos)
+          buffer = source[(node[:char_start] + 1)...ending]
+
+          body[:comma] = buffer.strip.end_with?(',')
+        end
+      end
+
+      def on_massign(left, right)
+        super.tap do
+          next unless left[:type] == :mlhs
+
+          range = left[:char_start]..left[:char_end]
+          left[:comma] = source[range].strip.end_with?(',')
         end
       end
     end
