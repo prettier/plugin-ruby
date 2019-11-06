@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- Support for extra commas in multiple assignment, as it changes the meaning. For example,
+
+<!-- prettier-ignore -->
+```ruby
+a, = [1, 2, 3]
+```
+
+would previously get printed as `a = [1, 2, 3]`, which changes the value of `a` from `1` to the value of the entire array. (Thanks to @mmainz for the report.)
+
 ### Changed
 
 - Support proper string escaping when the original string in the source is wrapped in `%q|...|`. For example, `%q|\'|` should get printed as `"\'"`, where previously it was dropping the backslash. (Thanks to @github0013 for the report.)

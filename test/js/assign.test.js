@@ -36,6 +36,17 @@ describe("assign", () => {
 
     test("parens on some of left, multi on right", () =>
       expect("(a, b), c = [1, 2], 3").toMatchFormat());
+
+    test("extra commas at the end", () => expect("a, = 1").toMatchFormat());
+
+    test("extra commas at the end with multiple", () =>
+      expect("a, b, c, = 1").toMatchFormat());
+
+    test("extra commas with parens", () =>
+      expect("(a, b,), c, = 1").toMatchFormat());
+
+    test("extra commas with doubled parens", () =>
+      expect("((a, b,), c,), = 1").toMatchFormat());
   });
 
   describe("multiple assignment with splat", () => {
