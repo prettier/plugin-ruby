@@ -22,6 +22,18 @@ end
 
 the previous expression was being transformed into a ternary which was invalid ruby. Instead it now stays broken out into an if/else block. (Thanks to @jamescostian for the report.)
 
+- Better support for embedded expressions inside heredocs. For example,
+
+<!-- prettier-ignore -->
+```ruby
+<<-HERE
+  foo bar baz
+  #{qux}
+  foo bar baz
+HERE
+
+should remain formatted as it is. Whereas previously due to the way the lines were split, you would sometimes end up with it breaking after `#{`. (Thanks to @localhostdotdev, @joeyjoejoejr, and @eins78 for the reports.)
+
 ## [0.15.1] - 2019-11-05
 
 ### Changed

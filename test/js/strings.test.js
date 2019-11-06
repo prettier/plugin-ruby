@@ -178,6 +178,20 @@ describe("strings", () => {
 
         return expect(content).toMatchFormat();
       });
+
+      test("with embedded expressions", () => {
+        const content = ruby(`
+          <<-HERE
+            ${long}
+            ${long}
+            #{id}
+            ${long}
+            ${long}
+          HERE
+        `);
+
+        return expect(content).toMatchFormat();
+      });
     });
 
     describe("squiggly heredocs", () => {
