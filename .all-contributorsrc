@@ -250,6 +250,24 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "joeyjoejoejr",
+      "name": "Joe Jackson",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/1141502?v=4",
+      "profile": "https://github.com/joeyjoejoejr",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "eins78",
+      "name": "Max Albrecht",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/134942?v=4",
+      "profile": "http://178.is",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
