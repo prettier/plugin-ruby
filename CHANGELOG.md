@@ -9,6 +9,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - Support proper string escaping when the original string in the source is wrapped in `%q|...|`. For example, `%q|\'|` should get printed as `"\'"`, where previously it was dropping the backslash. (Thanks to @github0013 for the report.)
+- Force ternary breaking when using the lower-precendence operators `and` and `or`. For example,
+
+<!-- prettier-ignore -->
+```ruby
+if x.nil?
+  puts 'nil' and return
+else
+  x
+end
+```
+
+the previous expression was being transformed into a ternary which was invalid ruby. Instead it now stays broken out into an if/else block. (Thanks to @jamescostian for the report.)
 
 ## [0.15.1] - 2019-11-05
 

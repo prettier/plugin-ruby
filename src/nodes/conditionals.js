@@ -10,34 +10,6 @@ const {
 } = require("../prettier");
 const { containsAssignment } = require("../utils");
 
-const noTernary = [
-  "@comment",
-  "alias",
-  "assign",
-  "break",
-  "command",
-  "command_call",
-  "if_mod",
-  "ifop",
-  "lambda",
-  "massign",
-  "next",
-  "opassign",
-  "rescue_mod",
-  "return",
-  "return0",
-  "super",
-  "undef",
-  "unless_mod",
-  "until_mod",
-  "var_alias",
-  "void_stmt",
-  "while_mod",
-  "yield",
-  "yield0",
-  "zsuper"
-];
-
 const printWithAddition = (keyword, path, print, { breaking = false } = {}) =>
   concat([
     `${keyword} `,
@@ -152,11 +124,54 @@ const printSingle = keyword => (path, { inlineConditionals }, print) => {
   return group(ifBreak(multiline, inline));
 };
 
+const noTernary = [
+  "@comment",
+  "alias",
+  "assign",
+  "break",
+  "command",
+  "command_call",
+  "if_mod",
+  "ifop",
+  "lambda",
+  "massign",
+  "next",
+  "opassign",
+  "rescue_mod",
+  "return",
+  "return0",
+  "super",
+  "undef",
+  "unless_mod",
+  "until_mod",
+  "var_alias",
+  "void_stmt",
+  "while_mod",
+  "yield",
+  "yield0",
+  "zsuper"
+];
+
 // Certain expressions cannot be reduced to a ternary without adding parens
 // around them. In this case we say they cannot be ternaried and default instead
 // to breaking them into multiple lines.
-const canTernaryStmts = stmts =>
-  stmts.body.length === 1 && !noTernary.includes(stmts.body[0].type);
+const canTernaryStmts = stmts => {
+  if (stmts.body.length !== 1) {
+    return false;
+  }
+
+  const stmt = stmts.body[0];
+
+  // If the user is using one of the lower precedence "and" or "or" operators,
+  // then we can't use a ternary expression as it would break the flow control.
+  if (stmt.type === "binary" && ["and", "or"].includes(stmt.body[1])) {
+    return false;
+  }
+
+  // Check against the blocklist of statement types that are not allowed to be
+  // a part of a ternary expression.
+  return !noTernary.includes(stmt.type);
+};
 
 // In order for an `if` or `unless` expression to be shortened to a ternary,
 // there has to be one and only one "addition" (another clause attached) which

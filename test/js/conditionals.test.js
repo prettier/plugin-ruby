@@ -339,6 +339,18 @@ describe("conditionals", () => {
           end
         `)
         ));
+
+      test("lower precendence operators", () => {
+        const content = ruby(`
+          if x.nil?
+            puts 'nil' and return
+          else
+            x
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
     });
   });
 
