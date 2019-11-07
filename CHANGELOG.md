@@ -45,6 +45,8 @@ HERE
 
 should remain formatted as it is. Whereas previously due to the way the lines were split, you would sometimes end up with it breaking after `#{`. (Thanks to @localhostdotdev, @joeyjoejoejr, and @eins78 for the reports.)
 
+- Fix up `return` node printing. When returning multiple values, you need to return an array literal as opposed to using parentheses. (Thanks to @jamescostian for the report.)
+
 ## [0.15.1] - 2019-11-05
 
 ### Changed
