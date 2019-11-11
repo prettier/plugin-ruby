@@ -1,5 +1,6 @@
 const comment = require("./nodes/comment");
 const doctype = require("./nodes/doctype");
+const hamlComment = require("./nodes/hamlComment");
 
 const { align, concat, fill, group, hardline, indent, join, line, markAsRoot } = require("../prettier");
 
@@ -84,22 +85,7 @@ const nodes = {
       ]))
     ]));
   },
-  haml_comment: (path, opts, _print) => {
-    const node = path.getValue();
-    const parts = ["-#"];
-
-    if (node.value.text) {
-      if (opts.originalText.split("\n")[node.line - 1].trim() === "-#") {
-        const lines = node.value.text.trim().replace("\n", "\n  ");
-
-        parts.push(indent(concat([hardline, lines])));
-      } else {
-        parts.push(" ", node.value.text.trim());
-      }
-    }
-
-    return concat(parts);
-  },
+  haml_comment: hamlComment,
   plain: (path, _opts, _print) => path.getValue().value.text,
   root: (path, opts, print) => markAsRoot(concat([
     join(hardline, path.map(print, "children")), hardline
