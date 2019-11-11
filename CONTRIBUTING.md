@@ -78,15 +78,14 @@ As the nodes are printing themselves and their children, they're additionally bu
 ```javascript
 const { concat, group, indent, line } = require("prettier").doc.builders;
 
-const printBinary = (path, opts, print) => (
+const printBinary = (path, opts, print) =>
   group(
     concat([
       concat([path.call(print, "body", 0), " "]),
       path.getValue().body[1],
       indent(concat([line, path.call(print, "body", 2)]))
     ])
-  )
-);
+  );
 ```
 
 Recall that the `binary` node looks like this:
@@ -99,10 +98,10 @@ This means that there is a node in the `0` position of the array that represents
 
 So, the `printBinary` function is going to use the following `prettier` builders to build up the intermediate represention:
 
-* `concat` - puts multiple nodes together and prints them without breaking them apart
-* `group` - marks places where `prettier` could split text if the line gets too long; if the max line length is hit, `prettier` will break apart the outermost `group` node first
-* `indent` - increases the current print indent for the contents of the node if the parent node is broken, e.g., if the `binary` node is too long to fit on one line, it will indent the right-hand operand
-* `line` - puts a space if the group is not broken, otherwise puts a newline
+- `concat` - puts multiple nodes together and prints them without breaking them apart
+- `group` - marks places where `prettier` could split text if the line gets too long; if the max line length is hit, `prettier` will break apart the outermost `group` node first
+- `indent` - increases the current print indent for the contents of the node if the parent node is broken, e.g., if the `binary` node is too long to fit on one line, it will indent the right-hand operand
+- `line` - puts a space if the group is not broken, otherwise puts a newline
 
 Once every node has been printed like the `binary` node above, the `print` node returns the intermediate representation to `prettier`.
 
