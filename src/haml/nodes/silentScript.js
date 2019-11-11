@@ -1,4 +1,4 @@
-const { align, concat, fill, group, hardline, indent, join, line, markAsRoot } = require("../../prettier");
+const { concat, group, hardline, indent, join } = require("../../prettier");
 
 // http://haml.info/docs/yardoc/file.REFERENCE.html#running-ruby--
 const silentScript = (path, opts, print) => {

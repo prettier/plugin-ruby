@@ -1,77 +1,12 @@
+const { concat, hardline, join, markAsRoot } = require("../prettier");
+
 const comment = require("./nodes/comment");
 const doctype = require("./nodes/doctype");
 const filter = require("./nodes/filter");
 const hamlComment = require("./nodes/hamlComment");
 const script = require("./nodes/script");
 const silentScript = require("./nodes/silentScript");
-
-const { align, concat, fill, group, hardline, indent, join, line, markAsRoot } = require("../prettier");
-
-const getAttributesKeyPair = (key, value) => `"${key}" => "${value}"`;
-
-const getAttributesHash = (header, attributes) => {
-  const keys = Object.keys(attributes).filter(name => !["class", "id"].includes(name));
-  const parts = [getAttributesKeyPair(keys[0], attributes[keys[0]])];
-
-  keys.slice(1).forEach(key => {
-    parts.push(",", line, getAttributesKeyPair(key, attributes[key]));
-  });
-
-  return group(concat(["{", align(header, fill(parts)), "}"]));
-};
-
-const getTagHeader = value => {
-  const { attributes } = value;
-  const parts = [];
-
-  if (value.name !== "div") {
-    parts.push(`%${value.name}`);
-  }
-
-  if (attributes.class) {
-    parts.push(`.${attributes.class.replace(" ", ".")}`);
-  }
-
-  if (attributes.id) {
-    parts.push(`#${attributes.id}`);
-  }
-
-  if (Object.keys(attributes).some(name => name !== "class" && name !== "id")) {
-    parts.push(getAttributesHash(parts.join("").length + 1, attributes));
-  }
-
-  if (value.nuke_outer_whitespace) {
-    parts.push(">");
-  }
-
-  if (value.nuke_inner_whitespace) {
-    parts.push("<");
-  }
-
-  if (value.self_closing) {
-    parts.push("/");
-  }
-
-  if (value.value) {
-    const prefix = value.parse ? "=" : "";
-    parts.push(`${prefix} ${value.value}`);
-  } else if (value.dynamic_attributes.old) {
-    parts.push(value.dynamic_attributes.old);
-  } else if (value.object_ref) {
-    if (parts.length === 0) {
-      parts.push("%div");
-    }
-    parts.push(value.object_ref);
-  }
-
-  // In case none of the other if statements have matched and we're printing a
-  // div, we need to explicitly add it back into the array.
-  if (parts.length === 0 && value.name === "div") {
-    parts.push("%div");
-  }
-
-  return group(concat(parts));
-};
+const tag = require("./nodes/tag");
 
 const nodes = {
   comment,
@@ -85,22 +20,7 @@ const nodes = {
   ])),
   script,
   silent_script: silentScript,
-  tag: (path, opts, print) => {
-    const { children, value } = path.getValue();
-    const tagHeader = getTagHeader(value);
-
-    if (children.length === 0) {
-      return tagHeader;
-    }
-
-    return group(concat([
-      tagHeader,
-      indent(concat([
-        hardline,
-        join(hardline, path.map(print, "children"))
-      ]))
-    ]));
-  }
+  tag
 };
 
 const genericPrint = (path, opts, print) => {
