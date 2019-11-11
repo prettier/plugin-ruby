@@ -6,7 +6,7 @@ require 'haml'
 class Haml::Parser::ParseNode
   def as_json
     case type
-    when :doctype, :plain, :script, :silent_script
+    when :comment, :doctype, :plain, :script, :silent_script
       to_h.tap do |json|
         json.delete(:parent)
         json[:children] = children.map(&:as_json)
@@ -18,6 +18,14 @@ class Haml::Parser::ParseNode
     when :tag
       to_h.tap do |json|
         json.delete(:parent)
+
+        # For some reason this is actually using a symbol to represent a null
+        # object ref instead of nil itself, so just replacing it here for
+        # simplicity in the printer
+        if json[:value][:object_ref] == :nil
+          json[:value][:object_ref] = nil
+        end
+
         json.merge!(
           children: children.map(&:as_json),
           value: value.merge(dynamic_attributes: value[:dynamic_attributes].to_h)

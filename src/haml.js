@@ -95,6 +95,29 @@ const doctypes = {
 };
 
 const nodes = {
+  comment: (path, opts, print) => {
+    const { children, value } = path.getValue();
+    const parts = ["/"];
+
+    if (value.revealed) {
+      parts.push("!");
+    }
+
+    if (value.conditional) {
+      parts.push(value.conditional);
+    } else if (value.text) {
+      parts.push(" ", value.text);
+    }
+
+    if (children.length > 0) {
+      parts.push(indent(concat([
+        hardline,
+        join(hardline, path.map(print, "children"))
+      ])));
+    }
+
+    return group(concat(parts));
+  },
   doctype: (path, opts, print) => {
     const { value } = path.getValue();
     const parts = ["!!!"];
@@ -112,9 +135,9 @@ const nodes = {
     return join(" ", parts);
   },
   plain: (path, opts, print) => path.getValue().value.text,
-  root: (path, opts, print) => markAsRoot(
-    concat([join(hardline, path.map(print, "children")), hardline])
-  ),
+  root: (path, opts, print) => markAsRoot(concat([
+    join(hardline, path.map(print, "children")), hardline
+  ])),
   script: (path, opts, print) => `=${path.getValue().value.text}`,
   silent_script: (path, opts, print) => `-${path.getValue().value.text}`,
   tag: (path, opts, print) => {
