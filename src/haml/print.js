@@ -3,6 +3,7 @@ const doctype = require("./nodes/doctype");
 const filter = require("./nodes/filter");
 const hamlComment = require("./nodes/hamlComment");
 const script = require("./nodes/script");
+const silentScript = require("./nodes/silentScript");
 
 const { align, concat, fill, group, hardline, indent, join, line, markAsRoot } = require("../prettier");
 
@@ -83,29 +84,7 @@ const nodes = {
     hardline
   ])),
   script,
-  silent_script: (path, opts, print) => {
-    const { children, value } = path.getValue();
-    const parts = [`- ${value.text.trim()}`];
-
-    if (children.length > 0) {
-      const silentScripts = path.map(print, "children");
-
-      if (value.keyword === "case") {
-        parts.push(join("", silentScripts.map((silentScript, index) => {
-          const concated = concat([hardline, silentScript]);
-
-          return index % 2 === 0 ? concated : indent(concated);
-        })));
-      } else {
-        parts.push(indent(concat([
-          hardline,
-          join(hardline, silentScripts)
-        ])));
-      }
-    }
-
-    return group(concat(parts));
-  },
+  silent_script: silentScript,
   tag: (path, opts, print) => {
     const { children, value } = path.getValue();
     const tagHeader = getTagHeader(value);
