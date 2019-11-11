@@ -125,7 +125,9 @@ describe("conditionals", () => {
       test("inline breaking changes", () =>
         expect(`${long} ${keyword} ${long}`).toChangeFormat(
           `${keyword} ${long}\n  ${long}\nend`,
-          { inlineConditionals: false }
+          {
+            inlineConditionals: false
+          }
         ));
 
       test("multi line breaking stays", () =>

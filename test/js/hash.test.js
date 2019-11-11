@@ -158,7 +158,9 @@ describe("hash", () => {
     test("hash labels get replaced", () =>
       expect("{ a: 'a', b: 'b', c: 'c' }").toChangeFormat(
         "{ :a => 'a', :b => 'b', :c => 'c' }",
-        { preferHashLabels: false }
+        {
+          preferHashLabels: false
+        }
       ));
 
     test("hash rockets stay", () =>

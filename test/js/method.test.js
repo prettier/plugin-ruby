@@ -206,19 +206,25 @@ describe("method", () => {
         test("starting with no trailing comma changes", () =>
           expect(`foo(${long}, a${long})`).toChangeFormat(
             `foo(\n  ${long},\n  a${long},\n)`,
-            { addTrailingCommas: true }
+            {
+              addTrailingCommas: true
+            }
           ));
 
         test("starting with trailing comma stays", () =>
           expect(`foo(${long}, a${long},)`).toChangeFormat(
             `foo(\n  ${long},\n  a${long},\n)`,
-            { addTrailingCommas: true }
+            {
+              addTrailingCommas: true
+            }
           ));
 
         test("with block on the end", () =>
           expect(`foo(${long}, &block)`).toChangeFormat(
             `foo(\n  ${long},\n  &block\n)`,
-            { addTrailingCommas: true }
+            {
+              addTrailingCommas: true
+            }
           ));
 
         test("on commands", () =>

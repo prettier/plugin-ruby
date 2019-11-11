@@ -78,10 +78,9 @@ describe.each(["while", "until"])("%s", keyword => {
       }));
 
     test("breaks inlines on large predicates", () =>
-      expect(`1 ${keyword} ${long}`).toChangeFormat(
-        `${keyword} ${long}\n  1\nend`,
-        { inlineLoops: false }
-      ));
+      expect(
+        `1 ${keyword} ${long}`
+      ).toChangeFormat(`${keyword} ${long}\n  1\nend`, { inlineLoops: false }));
 
     test("does not break into block when modifying a begin", () => {
       const content = ruby(`

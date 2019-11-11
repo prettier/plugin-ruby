@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/prettier/plugin-ruby#readme",
   "dependencies": {
-    "prettier": "^1.16.4"
+    "prettier": ">=1.10"
   },
   "devDependencies": {
     "all-contributors-cli": "^6.1.2",
