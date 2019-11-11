@@ -1,5 +1,6 @@
 const comment = require("./nodes/comment");
 const doctype = require("./nodes/doctype");
+const filter = require("./nodes/filter");
 const hamlComment = require("./nodes/hamlComment");
 
 const { align, concat, fill, group, hardline, indent, join, line, markAsRoot } = require("../prettier");
@@ -73,22 +74,12 @@ const getTagHeader = value => {
 const nodes = {
   comment,
   doctype,
-  filter: (path, _opts, _print) => {
-    const { value } = path.getValue();
-
-    return group(concat([
-      ":",
-      value.name,
-      indent(concat([
-        hardline,
-        join(hardline, value.text.trim().split("\n"))
-      ]))
-    ]));
-  },
+  filter,
   haml_comment: hamlComment,
   plain: (path, _opts, _print) => path.getValue().value.text,
   root: (path, opts, print) => markAsRoot(concat([
-    join(hardline, path.map(print, "children")), hardline
+    join(hardline, path.map(print, "children")),
+    hardline
   ])),
   script: (path, opts, print) => {
     const { children, value } = path.getValue();
@@ -151,7 +142,7 @@ const nodes = {
   }
 };
 
-const print = (path, opts, _print) => {
+const genericPrint = (path, opts, print) => {
   const { type } = path.getValue();
 
   if (!(type in nodes)) {
@@ -161,4 +152,4 @@ const print = (path, opts, _print) => {
   return nodes[type](path, opts, print);
 };
 
-module.exports = print;
+module.exports = genericPrint;

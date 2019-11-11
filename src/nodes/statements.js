@@ -64,9 +64,9 @@ module.exports = {
       ])
     );
   },
-  program: (path, opts, print) => concat([
+  program: (path, opts, print) => markAsRoot(concat([
     join(hardline, path.map(print, "body")), hardline
-  ]),
+  ])),
   stmts: (path, opts, print) => {
     const stmts = path.getValue().body;
     const parts = [];
