@@ -1,3 +1,5 @@
+const doctype = require("./nodes/doctype");
+
 const { align, concat, fill, group, hardline, indent, join, line, markAsRoot } = require("../prettier");
 
 const getAttributesKeyPair = (key, value) => `"${key}" => "${value}"`;
@@ -66,17 +68,6 @@ const getTagHeader = value => {
   return group(concat(parts));
 };
 
-const doctypes = {
-  "1.1": "1.1",
-  "5": "5",
-  basic: "Basic",
-  frameset: "Frameset",
-  mobile: "Mobile",
-  rdfa: "RDFa",
-  strict: "Strict",
-  xml: "XML"
-};
-
 const nodes = {
   comment: (path, opts, print) => {
     const { children, value } = path.getValue();
@@ -101,22 +92,7 @@ const nodes = {
 
     return group(concat(parts));
   },
-  doctype: (path, _opts, _print) => {
-    const { value } = path.getValue();
-    const parts = ["!!!"];
-
-    if (value.type in doctypes) {
-      parts.push(doctypes[value.type]);
-    } else if (value.version in doctypes) {
-      parts.push(doctypes[value.version]);
-    }
-
-    if (value.encoding) {
-      parts.push(value.encoding);
-    }
-
-    return join(" ", parts);
-  },
+  doctype,
   filter: (path, _opts, _print) => {
     const { value } = path.getValue();
 
