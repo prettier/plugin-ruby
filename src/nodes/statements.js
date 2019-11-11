@@ -7,7 +7,6 @@ const {
   join,
   line,
   literalline,
-  markAsRoot,
   softline,
   trim
 } = require("../prettier");
@@ -65,10 +64,9 @@ module.exports = {
       ])
     );
   },
-  program: (path, opts, print) =>
-    markAsRoot(
-      concat([join(literalline, path.map(print, "body")), literalline])
-    ),
+  program: (path, opts, print) => concat([
+    join(hardline, path.map(print, "body")), hardline
+  ]),
   stmts: (path, opts, print) => {
     const stmts = path.getValue().body;
     const parts = [];

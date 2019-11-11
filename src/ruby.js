@@ -99,6 +99,7 @@ module.exports = {
       print
     },
     haml: {
+      embed: haml.embed,
       print: haml.print
     }
   },
