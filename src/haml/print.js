@@ -1,3 +1,4 @@
+const comment = require("./nodes/comment");
 const doctype = require("./nodes/doctype");
 
 const { align, concat, fill, group, hardline, indent, join, line, markAsRoot } = require("../prettier");
@@ -69,29 +70,7 @@ const getTagHeader = value => {
 };
 
 const nodes = {
-  comment: (path, opts, print) => {
-    const { children, value } = path.getValue();
-    const parts = ["/"];
-
-    if (value.revealed) {
-      parts.push("!");
-    }
-
-    if (value.conditional) {
-      parts.push(value.conditional);
-    } else if (value.text) {
-      parts.push(" ", value.text);
-    }
-
-    if (children.length > 0) {
-      parts.push(indent(concat([
-        hardline,
-        join(hardline, path.map(print, "children"))
-      ])));
-    }
-
-    return group(concat(parts));
-  },
+  comment,
   doctype,
   filter: (path, _opts, _print) => {
     const { value } = path.getValue();
