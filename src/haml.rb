@@ -11,6 +11,10 @@ class Haml::Parser::ParseNode
         json.delete(:parent)
         json[:children] = children.map(&:as_json)
       end
+    when :haml_comment
+      to_h.tap do |json|
+        json.delete(:parent)
+      end
     when :root
       to_h.tap do |json|
         json[:children] = children.map(&:as_json)

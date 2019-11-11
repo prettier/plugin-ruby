@@ -134,12 +134,59 @@ const nodes = {
 
     return join(" ", parts);
   },
+  haml_comment: (path, opts, print) => {
+    const { children, line, value } = path.getValue();
+    const parts = ["-#"];
+
+    if (value.text) {
+      if (opts.originalText.split("\n")[line - 1].trim() === "-#") {
+        const lines = value.text.trim().replace("\n", "\n  ");
+
+        parts.push(indent(concat([hardline, lines])));
+      } else {
+        parts.push(" ", value.text.trim());
+      }
+    }
+
+    return concat(parts);
+  },
   plain: (path, opts, print) => path.getValue().value.text,
   root: (path, opts, print) => markAsRoot(concat([
     join(hardline, path.map(print, "children")), hardline
   ])),
-  script: (path, opts, print) => `=${path.getValue().value.text}`,
-  silent_script: (path, opts, print) => `-${path.getValue().value.text}`,
+  script: (path, opts, print) => {
+    const { children, value } = path.getValue();
+    const parts = [`=${value.text}`];
+
+    if (children.length > 0) {
+      parts.push(indent(concat([
+        hardline,
+        join(hardline, path.map(print, "children"))
+      ])));
+    }
+
+    return group(concat(parts));
+  },
+  silent_script: (path, opts, print) => {
+    const { children, value } = path.getValue();
+    const parts = [`-${value.text}`];
+
+    if (children.length > 0) {
+      const lines = path.map(print, "children");
+
+      if (value.keyword === "case") {
+        parts.push(join("", lines.map((line, index) => {
+          const concated = concat([hardline, line]);
+
+          return index % 2 === 0 ? concated : indent(concated);
+        })));
+      } else {
+        parts.push(indent(concat([hardline, join(hardline, printed)])));
+      }
+    }
+
+    return group(concat(parts));
+  },
   tag: (path, opts, print) => {
     const { children, value } = path.getValue();
     const tagHeader = getTagHeader(value);
