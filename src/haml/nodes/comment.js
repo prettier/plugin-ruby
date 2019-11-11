@@ -1,6 +1,6 @@
 const { concat, group, hardline, indent, join } = require("../../prettier");
 
-// http://haml.info/docs/yardoc/file.REFERENCE.html#comments
+// http://haml.info/docs/yardoc/file.REFERENCE.html#html-comments-
 const comment = (path, opts, print) => {
   const { children, value } = path.getValue();
   const parts = ["/"];

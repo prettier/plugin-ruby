@@ -1,6 +1,6 @@
 const { concat, hardline, indent } = require("../../prettier");
 
-// http://haml.info/docs/yardoc/file.REFERENCE.html#comments
+// http://haml.info/docs/yardoc/file.REFERENCE.html#haml-comments--
 const hamlComment = (path, opts, _print) => {
   const node = path.getValue();
   const parts = ["-#"];
