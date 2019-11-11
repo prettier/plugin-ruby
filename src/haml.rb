@@ -6,6 +6,11 @@ require 'haml'
 class Haml::Parser::ParseNode
   def as_json
     case type
+    when :doctype, :plain, :script, :silent_script
+      to_h.tap do |json|
+        json.delete(:parent)
+        json[:children] = children.map(&:as_json)
+      end
     when :root
       to_h.tap do |json|
         json[:children] = children.map(&:as_json)
@@ -17,11 +22,6 @@ class Haml::Parser::ParseNode
           children: children.map(&:as_json),
           value: value.merge(dynamic_attributes: value[:dynamic_attributes].to_h)
         )
-      end
-    when :script, :silent_script
-      to_h.tap do |json|
-        json.delete(:parent)
-        json[:children] = children.map(&:as_json)
       end
     else
       raise ArgumentError, "Unsupported type: #{type}"

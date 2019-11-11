@@ -50,17 +50,68 @@ const getTagHeader = value => {
     parts.push(getAttributesHash(parts.join("").length + 1, attributes));
   }
 
+  if (value.nuke_outer_whitespace) {
+    parts.push(">");
+  }
+
+  if (value.nuke_inner_whitespace) {
+    parts.push("<");
+  }
+
+  if (value.self_closing) {
+    parts.push("/");
+  }
+
   if (value.value) {
     const prefix = value.parse ? "=" : "";
     parts.push(`${prefix} ${value.value}`);
   } else if (value.dynamic_attributes.old) {
     parts.push(value.dynamic_attributes.old);
+  } else if (value.object_ref) {
+    if (parts.length === 0) {
+      parts.push("%div");
+    }
+    parts.push(value.object_ref);
+  }
+
+  // In case none of the other if statements have matched and we're printing a
+  // div, we need to explicitly add it back into the array.
+  if (parts.length === 0 && value.name === "div") {
+    parts.push("%div");
   }
 
   return group(concat(parts));
 };
 
+const doctypes = {
+  "1.1": "1.1",
+  "5": "5",
+  basic: "Basic",
+  frameset: "Frameset",
+  mobile: "Mobile",
+  rdfa: "RDFa",
+  strict: "Strict",
+  xml: "XML"
+};
+
 const nodes = {
+  doctype: (path, opts, print) => {
+    const { value } = path.getValue();
+    const parts = ["!!!"];
+
+    if (value.type in doctypes) {
+      parts.push(doctypes[value.type]);
+    } else if (value.version in doctypes) {
+      parts.push(doctypes[value.version]);
+    }
+
+    if (value.encoding) {
+      parts.push(value.encoding);
+    }
+
+    return join(" ", parts);
+  },
+  plain: (path, opts, print) => path.getValue().value.text,
   root: (path, opts, print) => markAsRoot(
     concat([join(hardline, path.map(print, "children")), hardline])
   ),
