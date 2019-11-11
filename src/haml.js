@@ -134,6 +134,18 @@ const nodes = {
 
     return join(" ", parts);
   },
+  filter: (path, opts, print) => {
+    const { value } = path.getValue();
+
+    return group(concat([
+      ":",
+      value.name,
+      indent(concat([
+        hardline,
+        join(hardline, value.text.trim().split("\n"))
+      ]))
+    ]));
+  },
   haml_comment: (path, opts, print) => {
     const { children, line, value } = path.getValue();
     const parts = ["-#"];

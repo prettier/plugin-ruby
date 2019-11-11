@@ -13,7 +13,7 @@ class Haml::Parser::ParseNode
         json.delete(:parent)
         json[:children] = children.map(&:as_json)
       end
-    when :haml_comment
+    when :filter, :haml_comment
       to_h.tap do |json|
         json.delete(:parent)
       end
@@ -44,7 +44,9 @@ class Haml::Parser::ParseNode
 
         json.merge!(
           children: children.map(&:as_json),
-          value: value.merge(dynamic_attributes: value[:dynamic_attributes].to_h)
+          value: value.merge(
+            dynamic_attributes: value[:dynamic_attributes].to_h
+          )
         )
       end
     else
