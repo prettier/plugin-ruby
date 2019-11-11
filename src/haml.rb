@@ -4,9 +4,11 @@ require 'json'
 require 'haml'
 
 class Haml::Parser::ParseNode
+  ESCAPE = /Haml::Helpers.html_escape\(\((.+)\)\)/.freeze
+
   def as_json
     case type
-    when :comment, :doctype, :plain, :script, :silent_script
+    when :comment, :doctype, :plain, :silent_script
       to_h.tap do |json|
         json.delete(:parent)
         json[:children] = children.map(&:as_json)
@@ -18,6 +20,16 @@ class Haml::Parser::ParseNode
     when :root
       to_h.tap do |json|
         json[:children] = children.map(&:as_json)
+      end
+    when :script
+      to_h.tap do |json|
+        json.delete(:parent)
+        json[:children] = children.map(&:as_json)
+
+        if json[:value][:text].match?(ESCAPE)
+          json[:value][:text].gsub!(ESCAPE) { $1 }
+          json[:value].merge!(escape_html: 'escape_html', interpolate: true)
+        end
       end
     when :tag
       to_h.tap do |json|

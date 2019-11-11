@@ -156,7 +156,17 @@ const nodes = {
   ])),
   script: (path, opts, print) => {
     const { children, value } = path.getValue();
-    const parts = [`=${value.text}`];
+    const parts = [];
+
+    if (value.escape_html) {
+      parts.unshift("&");
+    }
+
+    if (!value.interpolate) {
+      parts.push("=");
+    }
+
+    parts.push(" ", value.text.trim());
 
     if (children.length > 0) {
       parts.push(indent(concat([
@@ -169,7 +179,7 @@ const nodes = {
   },
   silent_script: (path, opts, print) => {
     const { children, value } = path.getValue();
-    const parts = [`-${value.text}`];
+    const parts = [`- ${value.text.trim()}`];
 
     if (children.length > 0) {
       const lines = path.map(print, "children");
