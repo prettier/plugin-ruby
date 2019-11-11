@@ -15,24 +15,49 @@ const parse = (text, _parsers, _opts) => {
   return JSON.parse(response);
 };
 
-const { concat, group, hardline, indent, join, markAsRoot } = require("./prettier");
+const { align, concat, fill, group, hardline, indent, join, line, markAsRoot } = require("./prettier");
+
+const getAttributesKeyPair = (key, value) => `"${key}" => "${value}"`;
+
+const getAttributesHash = (header, attributes) => {
+  const keys = Object.keys(attributes).filter(name => !["class", "id"].includes(name));
+  const parts = [getAttributesKeyPair(keys[0], attributes[keys[0]])];
+
+  keys.slice(1).forEach((key, index) => {
+    parts.push(",", line, getAttributesKeyPair(key, attributes[key]));
+  });
+
+  return group(concat(["{", align(header, fill(parts)), "}"]));
+};
 
 const getTagHeader = value => {
-  let header = "";
+  const { attributes } = value;
+  const parts = [];
 
   if (value.name !== "div") {
-    header = `%${value.name}`;
+    parts.push(`%${value.name}`);
   }
 
-  if (value.attributes.class) {
-    header = `${header}.${value.attributes.class}`;
+  if (attributes.class) {
+    parts.push(`.${attributes.class.replace(" ", ".")}`);
+  }
+
+  if (attributes.id) {
+    parts.push(`#${attributes.id}`);
+  }
+
+  if (Object.keys(attributes).some(name => name !== "class" && name !== "id")) {
+    parts.push(getAttributesHash(parts.join("").length + 1, attributes));
   }
 
   if (value.value) {
-    header = `${header}= ${value.value}`;
+    const prefix = value.parse ? "=" : "";
+    parts.push(`${prefix} ${value.value}`);
+  } else if (value.dynamic_attributes.old) {
+    parts.push(value.dynamic_attributes.old);
   }
 
-  return header;
+  return group(concat(parts));
 };
 
 const nodes = {
@@ -40,6 +65,7 @@ const nodes = {
     concat([join(hardline, path.map(print, "children")), hardline])
   ),
   script: (path, opts, print) => `=${path.getValue().value.text}`,
+  silent_script: (path, opts, print) => `-${path.getValue().value.text}`,
   tag: (path, opts, print) => {
     const { children, value } = path.getValue();
     const tagHeader = getTagHeader(value);
