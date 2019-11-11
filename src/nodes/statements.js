@@ -7,6 +7,7 @@ const {
   join,
   line,
   literalline,
+  markAsRoot,
   softline,
   trim
 } = require("../prettier");
