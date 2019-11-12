@@ -22,4 +22,8 @@ describe("doctype", () => {
   test("xml", () => {
     expect("!!! XML").toMatchHamlFormat();
   });
+
+  test("encoding", () => {
+    expect("!!! XML iso-8859-1").toMatchHamlFormat();
+  });
 });
