@@ -1,24 +1,57 @@
-const { align, concat, fill, group, hardline, indent, join, line } = require("../../prettier");
+const { align, concat, fill, group, hardline, indent, join, line, softline } = require("../../prettier");
 
-const getKeyValuePair = (key, value) => `"${key}" => "${value}"`;
+const getDynamicAttributes = (header, attributes) => {
+  const pairs = attributes.slice(1, -2).split(',').map(pair => pair.slice(1).split('" => '));
+  const parts = [concat([pairs[0][0], "=", pairs[0][1]])];
 
-const getAttributes = (header, attributes) => {
+  pairs.slice(1).forEach(pair => {
+    parts.push(line, concat([pair[0], "=", pair[1]]));
+  });
+
+  return group(concat(["(", align(header + 1, fill(parts)), ")"]));
+};
+
+const getHashValue = (value, opts) => {
+  if (typeof value === "string") {
+    const quote = opts.preferSingleQuotes ? "'" : '"';
+    return `${quote}${value}${quote}`;
+  }
+
+  return value;
+};
+
+const getHashRocket = (key, value, opts) => {
+  const quote = opts.preferSingleQuotes ? "'" : '"';
+  const leftSide = key.includes(":") ? `:${quote}${key}${quote}` : `:${key}`;
+
+  return `${leftSide} => ${getHashValue(value, opts)}`;
+};
+
+const getHashLabel = (key, value, opts) => {
+  const quote = opts.preferSingleQuotes ? "'" : '"';
+  const leftSide = key.includes(":") ? `${quote}${key}${quote}` : key;
+
+  return `${leftSide}: ${getHashValue(value, opts)}`;
+};
+
+const getStaticAttributes = (header, attributes, opts) => {
   const keys = Object.keys(attributes).filter(name => (
     !["class", "id"].includes(name)
   ));
 
+  const getKeyValuePair = opts.preferHashLabels ? getHashLabel : getHashRocket;
   const parts = [
-    getKeyValuePair(keys[0], attributes[keys[0]])
+    getKeyValuePair(keys[0], attributes[keys[0]], opts)
   ];
 
   keys.slice(1).forEach(key => {
-    parts.push(",", line, getKeyValuePair(key, attributes[key]));
+    parts.push(",", line, getKeyValuePair(key, attributes[key], opts));
   });
 
-  return group(concat(["{", align(header, fill(parts)), "}"]));
+  return group(concat(["{", align(header + 1, fill(parts)), "}"]));
 };
 
-const getHeader = value => {
+const getHeader = (value, opts) => {
   const { attributes } = value;
   const parts = [];
 
@@ -34,8 +67,15 @@ const getHeader = value => {
     parts.push(`#${attributes.id}`);
   }
 
+  if (value.dynamic_attributes.new) {
+    parts.push(getDynamicAttributes(
+      parts.join("").length,
+      value.dynamic_attributes.new
+    ));
+  }
+
   if (Object.keys(attributes).some(name => name !== "class" && name !== "id")) {
-    parts.push(getAttributes(parts.join("").length + 1, attributes));
+    parts.push(getStaticAttributes(parts.join("").length, attributes, opts));
   }
 
   if (value.nuke_outer_whitespace) {
@@ -50,16 +90,27 @@ const getHeader = value => {
     parts.push("/");
   }
 
-  if (value.value) {
-    const prefix = value.parse ? "=" : "";
-    parts.push(`${prefix} ${value.value}`);
-  } else if (value.dynamic_attributes.old) {
+  if (value.dynamic_attributes.old) {
     parts.push(value.dynamic_attributes.old);
-  } else if (value.object_ref) {
+  }
+
+  if (value.object_ref) {
     if (parts.length === 0) {
       parts.push("%div");
     }
     parts.push(value.object_ref);
+  }
+
+  if (value.value) {
+    const prefix = value.parse ? "=" : "";
+ 
+    return group(concat([
+      group(concat(parts)),
+      indent(concat([
+        softline,
+        `${prefix} ${value.value}`
+      ]))
+    ]));
   }
 
   // In case none of the other if statements have matched and we're printing a
@@ -74,7 +125,7 @@ const getHeader = value => {
 // http://haml.info/docs/yardoc/file.REFERENCE.html#element-name-
 const tag = (path, opts, print) => {
   const { children, value } = path.getValue();
-  const header = getHeader(value);
+  const header = getHeader(value, opts);
 
   if (children.length === 0) {
     return header;
