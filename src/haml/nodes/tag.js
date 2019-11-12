@@ -78,6 +78,17 @@ const getHeader = (value, opts) => {
     parts.push(getStaticAttributes(parts.join("").length, attributes, opts));
   }
 
+  if (value.dynamic_attributes.old) {
+    parts.push(value.dynamic_attributes.old);
+  }
+
+  if (value.object_ref) {
+    if (parts.length === 0) {
+      parts.push("%div");
+    }
+    parts.push(value.object_ref);
+  }
+
   if (value.nuke_outer_whitespace) {
     parts.push(">");
   }
@@ -88,17 +99,6 @@ const getHeader = (value, opts) => {
 
   if (value.self_closing) {
     parts.push("/");
-  }
-
-  if (value.dynamic_attributes.old) {
-    parts.push(value.dynamic_attributes.old);
-  }
-
-  if (value.object_ref) {
-    if (parts.length === 0) {
-      parts.push("%div");
-    }
-    parts.push(value.object_ref);
   }
 
   if (value.value) {
