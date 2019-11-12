@@ -19,7 +19,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 2.0)
-  haml
+  haml (~> 5.1)
   minitest (~> 5.11)
   prettier!
   rake (~> 12.3)

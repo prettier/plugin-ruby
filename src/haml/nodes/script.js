@@ -9,7 +9,9 @@ const script = (path, opts, print) => {
     parts.unshift("&");
   }
 
-  if (!value.interpolate) {
+  if (value.preserve) {
+    parts.push("~");
+  } else if (!value.interpolate) {
     parts.push("=");
   }
 

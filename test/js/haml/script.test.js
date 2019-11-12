@@ -14,4 +14,8 @@ describe("script", () => {
 
     expect(content).toMatchHamlFormat();
   });
+
+  test("preserve", () => {
+    expect("~ \"Foo\\n<pre>Bar\\nBaz</pre>\"").toMatchHamlFormat();
+  });
 });
