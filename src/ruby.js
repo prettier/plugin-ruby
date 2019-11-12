@@ -91,7 +91,10 @@ module.exports = {
     },
     haml: {
       parse: haml.parse,
-      astFormat: "haml"
+      astFormat: "haml",
+      hasPragma: haml.hasPragma,
+      locStart: haml.locStart,
+      locEnd: haml.locEnd
     }
   },
   printers: {
