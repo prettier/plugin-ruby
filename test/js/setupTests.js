@@ -80,3 +80,21 @@ expect.extend({
       }));
   }
 });
+
+const checkHamlFormat = (before, after, config) => {
+  const formatted = prettier.format(before, { parser: "haml", plugins: ["."] });
+
+  return {
+    pass: formatted === `${after}\n`,
+    message: () => `Expected:\n${after}\nReceived:\n${formatted}`
+  };
+};
+
+expect.extend({
+  toChangeHamlFormat(before, after, config = {}) {
+    return checkHamlFormat(before, after, config);
+  },
+  toMatchHamlFormat(before, config = {}) {
+    return checkHamlFormat(before, before, config);
+  }
+});
