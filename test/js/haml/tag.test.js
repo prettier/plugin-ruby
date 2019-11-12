@@ -22,7 +22,7 @@ describe("tag", () => {
   });
 
   test("whitespace removal right single line", () => {
-    expect("%p<= \"Foo\\nBar\"").toMatchHamlFormat();
+    expect('%p<= "Foo\\nBar"').toMatchHamlFormat();
   });
 
   test("whitespace removal right multi line", () => {

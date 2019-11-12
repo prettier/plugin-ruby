@@ -1,7 +1,20 @@
-const { align, concat, fill, group, hardline, indent, join, line, softline } = require("../../prettier");
+const {
+  align,
+  concat,
+  fill,
+  group,
+  hardline,
+  indent,
+  join,
+  line,
+  softline
+} = require("../../prettier");
 
 const getDynamicAttributes = (header, attributes) => {
-  const pairs = attributes.slice(1, -2).split(',').map(pair => pair.slice(1).split('" => '));
+  const pairs = attributes
+    .slice(1, -2)
+    .split(",")
+    .map(pair => pair.slice(1).split('" => '));
   const parts = [concat([pairs[0][0], "=", pairs[0][1]])];
 
   pairs.slice(1).forEach(pair => {
@@ -35,14 +48,12 @@ const getHashLabel = (key, value, opts) => {
 };
 
 const getStaticAttributes = (header, attributes, opts) => {
-  const keys = Object.keys(attributes).filter(name => (
-    !["class", "id"].includes(name)
-  ));
+  const keys = Object.keys(attributes).filter(
+    name => !["class", "id"].includes(name)
+  );
 
   const getKeyValuePair = opts.preferHashLabels ? getHashLabel : getHashRocket;
-  const parts = [
-    getKeyValuePair(keys[0], attributes[keys[0]], opts)
-  ];
+  const parts = [getKeyValuePair(keys[0], attributes[keys[0]], opts)];
 
   keys.slice(1).forEach(key => {
     parts.push(",", line, getKeyValuePair(key, attributes[key], opts));
@@ -68,10 +79,9 @@ const getHeader = (value, opts) => {
   }
 
   if (value.dynamic_attributes.new) {
-    parts.push(getDynamicAttributes(
-      parts.join("").length,
-      value.dynamic_attributes.new
-    ));
+    parts.push(
+      getDynamicAttributes(parts.join("").length, value.dynamic_attributes.new)
+    );
   }
 
   if (Object.keys(attributes).some(name => name !== "class" && name !== "id")) {
@@ -103,14 +113,13 @@ const getHeader = (value, opts) => {
 
   if (value.value) {
     const prefix = value.parse ? "=" : "";
- 
-    return group(concat([
-      group(concat(parts)),
-      indent(concat([
-        softline,
-        `${prefix} ${value.value}`
-      ]))
-    ]));
+
+    return group(
+      concat([
+        group(concat(parts)),
+        indent(concat([softline, `${prefix} ${value.value}`]))
+      ])
+    );
   }
 
   // In case none of the other if statements have matched and we're printing a
@@ -131,13 +140,12 @@ const tag = (path, opts, print) => {
     return header;
   }
 
-  return group(concat([
-    header,
-    indent(concat([
-      hardline,
-      join(hardline, path.map(print, "children"))
-    ]))
-  ]));
+  return group(
+    concat([
+      header,
+      indent(concat([hardline, join(hardline, path.map(print, "children"))]))
+    ])
+  );
 };
 
 module.exports = tag;

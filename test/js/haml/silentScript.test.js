@@ -1,5 +1,5 @@
 describe("silent script", () => {
   test("single line", () => {
-    expect("- foo = \"hello\"").toMatchHamlFormat();
+    expect('- foo = "hello"').toMatchHamlFormat();
   });
 });

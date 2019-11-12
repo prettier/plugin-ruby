@@ -9,16 +9,18 @@ const silentScript = (path, opts, print) => {
     const scripts = path.map(print, "children");
 
     if (value.keyword === "case") {
-      parts.push(join("", scripts.map((script, index) => {
-        const concated = concat([hardline, script]);
+      parts.push(
+        join(
+          "",
+          scripts.map((script, index) => {
+            const concated = concat([hardline, script]);
 
-        return index % 2 === 0 ? concated : indent(concated);
-      })));
+            return index % 2 === 0 ? concated : indent(concated);
+          })
+        )
+      );
     } else {
-      parts.push(indent(concat([
-        hardline,
-        join(hardline, scripts)
-      ])));
+      parts.push(indent(concat([hardline, join(hardline, scripts)])));
     }
   }
 

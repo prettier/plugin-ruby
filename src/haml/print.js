@@ -18,10 +18,8 @@ const nodes = {
 
     return value.text.startsWith("=") ? `\\${value.text}` : value.text;
   },
-  root: (path, opts, print) => markAsRoot(concat([
-    join(hardline, path.map(print, "children")),
-    hardline
-  ])),
+  root: (path, opts, print) =>
+    markAsRoot(concat([join(hardline, path.map(print, "children")), hardline])),
   script,
   silent_script: silentScript,
   tag

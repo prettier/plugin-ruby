@@ -9,10 +9,7 @@ const types = {
   xml: "XML"
 };
 
-const versions = [
-  "1.1",
-  "5"
-];
+const versions = ["1.1", "5"];
 
 // http://haml.info/docs/yardoc/file.REFERENCE.html#doctype-
 const doctype = (path, _opts, _print) => {

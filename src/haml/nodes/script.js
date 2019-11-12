@@ -18,10 +18,9 @@ const script = (path, opts, print) => {
   parts.push(" ", value.text.trim());
 
   if (children.length > 0) {
-    parts.push(indent(concat([
-      hardline,
-      join(hardline, path.map(print, "children"))
-    ])));
+    parts.push(
+      indent(concat([hardline, join(hardline, path.map(print, "children"))]))
+    );
   }
 
   return group(concat(parts));

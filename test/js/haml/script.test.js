@@ -2,7 +2,7 @@ const { ruby } = require("../utils");
 
 describe("script", () => {
   test("single line", () => {
-    expect("%p= \"hello\"").toMatchHamlFormat();
+    expect('%p= "hello"').toMatchHamlFormat();
   });
 
   test("multi line", () => {
@@ -16,6 +16,6 @@ describe("script", () => {
   });
 
   test("preserve", () => {
-    expect("~ \"Foo\\n<pre>Bar\\nBaz</pre>\"").toMatchHamlFormat();
+    expect('~ "Foo\\n<pre>Bar\\nBaz</pre>"').toMatchHamlFormat();
   });
 });

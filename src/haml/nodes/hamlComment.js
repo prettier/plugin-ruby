@@ -9,10 +9,7 @@ const hamlComment = (path, opts, _print) => {
     if (opts.originalText.split("\n")[node.line - 1].trim() === "-#") {
       const lines = node.value.text.trim().split("\n");
 
-      parts.push(indent(concat([
-        hardline,
-        join(hardline, lines)
-      ])));
+      parts.push(indent(concat([hardline, join(hardline, lines)])));
     } else {
       parts.push(" ", node.value.text.trim());
     }

@@ -16,10 +16,9 @@ const comment = (path, opts, print) => {
   }
 
   if (children.length > 0) {
-    parts.push(indent(concat([
-      hardline,
-      join(hardline, path.map(print, "children"))
-    ])));
+    parts.push(
+      indent(concat([hardline, join(hardline, path.map(print, "children"))]))
+    );
   }
 
   return group(concat(parts));

@@ -17,12 +17,14 @@ describe("filter", () => {
         .foo { height: 100px; }
     `);
 
-    expect(content).toChangeHamlFormat(ruby(`
-      :css
-        .foo {
-          height: 100px;
-        }
-    `));
+    expect(content).toChangeHamlFormat(
+      ruby(`
+        :css
+          .foo {
+            height: 100px;
+          }
+      `)
+    );
   });
 
   test("javascript", () => {
@@ -31,10 +33,12 @@ describe("filter", () => {
         1+1
     `);
 
-    expect(content).toChangeHamlFormat(ruby(`
-      :javascript
-        1 + 1;
-    `));
+    expect(content).toChangeHamlFormat(
+      ruby(`
+        :javascript
+          1 + 1;
+      `)
+    );
   });
 
   test("less", () => {
@@ -43,14 +47,16 @@ describe("filter", () => {
         .foo { .bar { height: 100px; } }
     `);
 
-    expect(content).toChangeHamlFormat(ruby(`
-      :less
-        .foo {
-          .bar {
-            height: 100px;
+    expect(content).toChangeHamlFormat(
+      ruby(`
+        :less
+          .foo {
+            .bar {
+              height: 100px;
+            }
           }
-        }
-    `));
+      `)
+    );
   });
 
   test("markdown", () => {
@@ -59,10 +65,12 @@ describe("filter", () => {
         *Hello, world!*
     `);
 
-    expect(content).toChangeHamlFormat(ruby(`
-      :markdown
-        _Hello, world!_
-    `));
+    expect(content).toChangeHamlFormat(
+      ruby(`
+        :markdown
+          _Hello, world!_
+      `)
+    );
   });
 
   test("ruby", () => {
@@ -71,10 +79,12 @@ describe("filter", () => {
         1+1
     `);
 
-    expect(content).toChangeHamlFormat(ruby(`
-      :ruby
-        1 + 1
-    `));
+    expect(content).toChangeHamlFormat(
+      ruby(`
+        :ruby
+          1 + 1
+      `)
+    );
   });
 
   test("scss", () => {
@@ -83,13 +93,15 @@ describe("filter", () => {
         .foo { .bar { height: 100px; } }
     `);
 
-    expect(content).toChangeHamlFormat(ruby(`
-      :scss
-        .foo {
-          .bar {
-            height: 100px;
+    expect(content).toChangeHamlFormat(
+      ruby(`
+        :scss
+          .foo {
+            .bar {
+              height: 100px;
+            }
           }
-        }
-    `));
+      `)
+    );
   });
 });

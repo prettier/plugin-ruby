@@ -82,9 +82,10 @@ expect.extend({
 });
 
 const checkHamlFormat = (before, after, config) => {
-  const formatted = prettier.format(before, Object.assign(
-    {}, config, { parser: "haml", plugins: ["."] }
-  ));
+  const formatted = prettier.format(
+    before,
+    Object.assign({}, config, { parser: "haml", plugins: ["."] })
+  );
 
   return {
     pass: formatted === `${after}\n`,

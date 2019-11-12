@@ -14,13 +14,9 @@ class Haml::Parser::ParseNode
         json[:children] = children.map(&:as_json)
       end
     when :filter, :haml_comment
-      to_h.tap do |json|
-        json.delete(:parent)
-      end
+      to_h.tap { |json| json.delete(:parent) }
     when :root
-      to_h.tap do |json|
-        json[:children] = children.map(&:as_json)
-      end
+      to_h.tap { |json| json[:children] = children.map(&:as_json) }
     when :script
       to_h.tap do |json|
         json.delete(:parent)
@@ -38,15 +34,12 @@ class Haml::Parser::ParseNode
         # For some reason this is actually using a symbol to represent a null
         # object ref instead of nil itself, so just replacing it here for
         # simplicity in the printer
-        if json[:value][:object_ref] == :nil
-          json[:value][:object_ref] = nil
-        end
+        json[:value][:object_ref] = nil if json[:value][:object_ref] == :nil
 
         json.merge!(
           children: children.map(&:as_json),
-          value: value.merge(
-            dynamic_attributes: value[:dynamic_attributes].to_h
-          )
+          value:
+            value.merge(dynamic_attributes: value[:dynamic_attributes].to_h)
         )
       end
     else

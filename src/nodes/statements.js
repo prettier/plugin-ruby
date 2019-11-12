@@ -64,9 +64,8 @@ module.exports = {
       ])
     );
   },
-  program: (path, opts, print) => concat([
-    join(hardline, path.map(print, "body")), hardline
-  ]),
+  program: (path, opts, print) =>
+    concat([join(hardline, path.map(print, "body")), hardline]),
   stmts: (path, opts, print) => {
     const stmts = path.getValue().body;
     const parts = [];

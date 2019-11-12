@@ -4,14 +4,13 @@ const { concat, group, hardline, indent, join } = require("../../prettier");
 const filter = (path, _opts, _print) => {
   const { value } = path.getValue();
 
-  return group(concat([
-    ":",
-    value.name,
-    indent(concat([
-      hardline,
-      join(hardline, value.text.trim().split("\n"))
-    ]))
-  ]));
+  return group(
+    concat([
+      ":",
+      value.name,
+      indent(concat([hardline, join(hardline, value.text.trim().split("\n"))]))
+    ])
+  );
 };
 
 module.exports = filter;

@@ -1,4 +1,12 @@
-const { concat, hardline, indent, literalline, mapDoc, markAsRoot, stripTrailingHardline } = require("../prettier");
+const {
+  concat,
+  hardline,
+  indent,
+  literalline,
+  mapDoc,
+  markAsRoot,
+  stripTrailingHardline
+} = require("../prettier");
 
 const parsers = {
   css: "css",
@@ -9,15 +17,16 @@ const parsers = {
   scss: "scss"
 };
 
-const replaceNewlines = doc => mapDoc(doc, currentDoc => (
-  typeof currentDoc === "string" && currentDoc.includes("\n")
-    ? concat(
-        currentDoc
-          .split(/(\n)/g)
-          .map((v, i) => (i % 2 === 0 ? v : literalline))
-      )
-    : currentDoc
-));
+const replaceNewlines = doc =>
+  mapDoc(doc, currentDoc =>
+    typeof currentDoc === "string" && currentDoc.includes("\n")
+      ? concat(
+          currentDoc
+            .split(/(\n)/g)
+            .map((v, i) => (i % 2 === 0 ? v : literalline))
+        )
+      : currentDoc
+  );
 
 const embed = (path, print, textToDoc, _opts) => {
   const node = path.getValue();
@@ -34,14 +43,14 @@ const embed = (path, print, textToDoc, _opts) => {
     concat([
       ":",
       node.value.name,
-      indent(concat([
-        hardline,
-        replaceNewlines(
-          stripTrailingHardline(
-            textToDoc(node.value.text, { parser })
+      indent(
+        concat([
+          hardline,
+          replaceNewlines(
+            stripTrailingHardline(textToDoc(node.value.text, { parser }))
           )
-        )
-      ]))
+        ])
+      )
     ])
   );
 };
