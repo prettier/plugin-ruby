@@ -6,14 +6,20 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    haml (5.1.2)
+      temple (>= 0.8.0)
+      tilt
     minitest (5.11.3)
     rake (12.3.2)
+    temple (0.8.2)
+    tilt (2.0.10)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   bundler (~> 2.0)
+  haml (~> 5.1)
   minitest (~> 5.11)
   prettier!
   rake (~> 12.3)

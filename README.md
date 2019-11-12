@@ -22,7 +22,7 @@
   </a>
 </p>
 
-`@prettier/plugin-ruby` is a [prettier](https://prettier.io/) plugin for the Ruby programming language (versions `2.5` and above). `prettier` is an opinionated code formatter that supports multiple languages and integrates with most editors. The idea is to eliminate discussions of style in code review and allow developers to get back to thinking about code design instead.
+`@prettier/plugin-ruby` is a [prettier](https://prettier.io/) plugin for the Ruby programming language and its ecosystem. `prettier` is an opinionated code formatter that supports multiple languages and integrates with most editors. The idea is to eliminate discussions of style in code review and allow developers to get back to thinking about code design instead.
 
 For example, the below [code segment](http://www.rubyinside.com/advent2006/4-ruby-obfuscation.html):
 
@@ -68,7 +68,7 @@ end
 
 ## Getting started
 
-To run `prettier` with the Ruby plugin, you're going to need [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) (version `2.5` or newer) and [`node`](https://nodejs.org/en/download/) (version `8.3` or newer). If you're integrating with a project that is not already using `prettier`, you should use the ruby gem. Otherwise you can use the `npm` package directly.
+To run `prettier` with the Ruby plugin, you're going to need [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) (version `2.5` or newer) and [`node`](https://nodejs.org/en/download/) (version `8.3` or newer). If you're integrating with a project that is not already using `prettier`, you should use the Ruby gem. Otherwise you can use the `npm` package directly.
 
 ### Ruby gem
 
