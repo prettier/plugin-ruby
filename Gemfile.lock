@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    prettier (0.15.1)
+    prettier (0.16.0)
 
 GEM
   remote: https://rubygems.org/
@@ -9,8 +9,8 @@ GEM
     haml (5.1.2)
       temple (>= 0.8.0)
       tilt
-    minitest (5.11.3)
-    rake (12.3.2)
+    minitest (5.13.0)
+    rake (13.0.1)
     temple (0.8.2)
     tilt (2.0.10)
 
@@ -20,9 +20,9 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 2.0)
   haml (~> 5.1)
-  minitest (~> 5.11)
+  minitest (~> 5.13)
   prettier!
-  rake (~> 12.3)
+  rake (~> 13.0)
 
 BUNDLED WITH
-   2.1.0.pre.1
+   2.0.2
