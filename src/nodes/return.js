@@ -25,12 +25,14 @@ const printReturn = (path, opts, print) => {
     steps = steps.concat("body", 0, "body", 0);
   }
 
-  // If we're returning an array literal that isn't a special array, then we
-  // want to grab the arguments so that we can print them out as if they were
-  // normal return arguments.
+  // If we're returning an array literal that isn't a special array, single
+  // element array, or an empty array, then we want to grab the arguments so
+  // that we can print them out as if they were normal return arguments.
   if (
     args.body[0] &&
     args.body[0].type === "array" &&
+    args.body[0].body[0] &&
+    args.body[0].body[0].body.length > 1 &&
     ["args", "args_add_star"].includes(args.body[0].body[0].type)
   ) {
     steps = steps.concat("body", 0, "body", 0);

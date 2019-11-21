@@ -18,6 +18,11 @@ describe("return", () => {
   test("returning an array", () =>
     expect("return [1, 2, 3]").toChangeFormat("return 1, 2, 3"));
 
+  test("returning an empty array", () => expect("return []").toMatchFormat());
+
+  test("returning a single element array", () =>
+    expect("return [1]").toMatchFormat());
+
   test("returning a list that breaks", () =>
     expect(`return ${long}, ${long}`).toChangeFormat(
       `return [\n  ${long},\n  ${long}\n]`
