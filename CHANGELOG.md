@@ -46,6 +46,7 @@ the previous expression was being transformed into a ternary which was invalid r
   #{qux}
   foo bar baz
 HERE
+```
 
 should remain formatted as it is. Whereas previously due to the way the lines were split, you would sometimes end up with it breaking after `#{`. (Thanks to @localhostdotdev, @joeyjoejoejr, and @eins78 for the reports.)
 
