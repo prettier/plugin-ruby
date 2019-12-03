@@ -196,6 +196,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/matt-wratt"><img src="https://avatars0.githubusercontent.com/u/570030?v=4" width="100px;" alt=""/><br /><sub><b>Matt</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Amatt-wratt" title="Bug reports">🐛</a> <a href="https://github.com/prettier/plugin-ruby/commits?author=matt-wratt" title="Code">💻</a></td>
+    <td align="center"><a href="http://vesalaakso.com"><img src="https://avatars2.githubusercontent.com/u/482561?v=4" width="100px;" alt=""/><br /><sub><b>Vesa Laakso</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/commits?author=valscion" title="Documentation">📖</a></td>
   </tr>
 </table>
 

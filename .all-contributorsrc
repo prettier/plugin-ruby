@@ -278,6 +278,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "valscion",
+      "name": "Vesa Laakso",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/482561?v=4",
+      "profile": "http://vesalaakso.com",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
