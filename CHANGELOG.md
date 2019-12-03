@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- Better support for explicit `return` nodes with empty arrays or arrays with a single element. (Thanks to @matt-wratt.)
+
 ## [0.16.0] - 2019-11-14
 
 ### Added
