@@ -7,6 +7,22 @@ const hasDef = node =>
   node.body[1].body[0].body[0] &&
   node.body[1].body[0].body[0].type === "def";
 
+// Very special handling case for rspec matchers. In general with rspec matchers
+// you expect to see something like:
+//
+//     expect(foo).to receive(:bar).with(
+//       'one',
+//       'two',
+//       'three',
+//       'four',
+//       'five'
+//     )
+//
+// In this case the arguments are aligned to the left side as opposed to being
+// aligned with the `receive` call.
+const skipArgsAlign = path =>
+  ["to", "not_to"].includes(path.getValue().body[2].body);
+
 module.exports = {
   command: (path, opts, print) => {
     const command = path.call(print, "body", 0);
@@ -53,10 +69,9 @@ module.exports = {
     }
 
     const joinedArgs = join(concat([",", line]), args);
-    const breakArgs =
-      path.getValue().body[2].body === "to"
-        ? joinedArgs
-        : align(docLength(concat(parts)), joinedArgs);
+    const breakArgs = skipArgsAlign(path)
+      ? joinedArgs
+      : align(docLength(concat(parts)), joinedArgs);
 
     const commandDoc = group(
       ifBreak(concat(parts.concat(breakArgs)), concat(parts.concat(joinedArgs)))
