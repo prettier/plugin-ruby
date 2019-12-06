@@ -116,6 +116,16 @@ describe("method", () => {
         return expect(content).toMatchFormat();
       });
 
+      test("alignment for `not_to`", () => {
+        const content = ruby(`
+          expect(value).not_to matcher(
+            ${long}
+          )
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
       test("just block", () => {
         const content = ruby(`
           def curry(&block)
