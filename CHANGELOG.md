@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - Better support for explicit `return` nodes with empty arrays or arrays with a single element. (Thanks to @matt-wratt.)
 - Alignment of `to` is explicitly allowed to not indent to better support rspec. (Thanks to @jrdioko for the report.)
 
+### Changed
+
+- The max buffer being passed into the Ruby process is now up to 10MB. (Thanks to @gin0606.)
+
 ## [0.16.0] - 2019-11-14
 
 ### Added
