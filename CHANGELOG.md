@@ -6,10 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [0.17.0] - 2019-12-12
+
 ### Added
 
 - Better support for explicit `return` nodes with empty arrays or arrays with a single element. (Thanks to @matt-wratt.)
-- Alignment of `to` is explicitly allowed to not indent to better support rspec. (Thanks to @jrdioko for the report.)
+- Alignment of `not_to` is explicitly allowed to not indent to better support rspec. (Thanks to @jrdioko for the report.)
 
 ### Changed
 
@@ -666,7 +668,8 @@ would previously result in `array[]`, but now prints properly. (Thanks to @xipgr
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.16.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/prettier/plugin-ruby/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/prettier/plugin-ruby/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/prettier/plugin-ruby/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/prettier/plugin-ruby/compare/v0.14.0...v0.15.0
