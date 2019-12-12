@@ -198,12 +198,12 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/matt-wratt"><img src="https://avatars0.githubusercontent.com/u/570030?v=4" width="100px;" alt=""/><br /><sub><b>Matt</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Amatt-wratt" title="Bug reports">🐛</a> <a href="https://github.com/prettier/plugin-ruby/commits?author=matt-wratt" title="Code">💻</a></td>
     <td align="center"><a href="http://vesalaakso.com"><img src="https://avatars2.githubusercontent.com/u/482561?v=4" width="100px;" alt=""/><br /><sub><b>Vesa Laakso</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/commits?author=valscion" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/jrdioko"><img src="https://avatars0.githubusercontent.com/u/405288?v=4" width="100px;" alt=""/><br /><sub><b>jrdioko</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ajrdioko" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://gin0606.hatenablog.com"><img src="https://avatars2.githubusercontent.com/u/795891?v=4" width="100px;" alt=""/><br /><sub><b>gin0606</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Agin0606" title="Bug reports">🐛</a> <a href="https://github.com/prettier/plugin-ruby/commits?author=gin0606" title="Code">💻</a></td>
   </tr>
 </table>
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
-
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
