@@ -8,7 +8,7 @@ const {
   removeLines,
   softline
 } = require("../prettier");
-const { empty, first, hasAncestor } = require("../utils");
+const { empty, hasAncestor } = require("../utils");
 
 const printBlock = (path, opts, print) => {
   const [variables, statements] = path.getValue().body;
@@ -76,6 +76,5 @@ module.exports = {
   },
   brace_block: printBlock,
   do_block: printBlock,
-  excessed_comma: empty,
-  number_arg: first
+  excessed_comma: empty
 };

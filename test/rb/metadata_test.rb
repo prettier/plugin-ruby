@@ -734,6 +734,20 @@ class MetadataTest < Minitest::Test
   end
 
   if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
+    def test_args_forward
+      content = <<~RUBY
+        def foo(...)
+          bar(...)
+        end
+      RUBY
+
+      assert_node_metadata(
+        :args_forward,
+        parse(content).dig(:body, 1, :body, 0, :body, 2),
+        char_start: 8, char_end: 11
+      )
+    end
+
     def test_aryptn
       content = <<~RUBY
         case foo

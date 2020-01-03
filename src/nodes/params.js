@@ -1,4 +1,5 @@
 const { concat, group, join, line } = require("../prettier");
+const { literal } = require("../utils");
 
 const printGenericRestParam = symbol => (path, opts, print) =>
   path.getValue().body[0]
@@ -53,7 +54,7 @@ const printParams = (path, opts, print) => {
   }
 
   if (kwargRest) {
-    parts.push(path.call(print, "body", 5));
+    parts.push(kwargRest === "nil" ? "**nil" : path.call(print, "body", 5));
   }
 
   if (block) {
@@ -79,6 +80,7 @@ const paramError = () => {
 };
 
 module.exports = {
+  args_forward: literal("..."),
   kwrest_param: printGenericRestParam("**"),
   rest_param: printGenericRestParam("*"),
   params: printParams,

@@ -17,6 +17,13 @@ module.exports = {
       return "";
     }
 
+    // Here we can skip the entire rest of the method by just checking if it's
+    // an args_forward node, as we're guaranteed that there are no other arg
+    // nodes.
+    if (path.getValue().body[0].type === "args_forward") {
+      return "(...)";
+    }
+
     const { addTrailingCommas } = opts;
     const { args, heredocs } = makeArgs(path, opts, print, 0);
 
