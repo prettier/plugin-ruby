@@ -49,6 +49,20 @@ describe("method", () => {
       return expect(content).toMatchFormat();
     });
 
+    if (process.env.RUBY_VERSION >= "2.7") {
+      test("nokw_param", () => expect("def foo(**nil); end").toMatchFormat());
+
+      test("args_forward", () => {
+        const content = ruby(`
+          def foo(...)
+            bar(...)
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+    }
+
     test("breaking", () =>
       expect(`def foo(${long}:, a${long}:); end`).toChangeFormat(
         ruby(`
@@ -171,11 +185,6 @@ describe("method", () => {
         expect("Foo::foo").toChangeFormat("Foo.foo"));
 
       test("lonely operator", () => expect("foo&.foo").toMatchFormat());
-
-      if (process.env.RUBY_VERSION >= "2.7") {
-        test("method reference operator", () =>
-          expect("foo.:foo").toMatchFormat());
-      }
     });
 
     describe("breaking", () => {

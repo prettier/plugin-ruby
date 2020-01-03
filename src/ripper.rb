@@ -166,6 +166,7 @@ class RipperJS < Ripper
         assoc_splat: [:@op, '**'],
         arg_paren: :@lparen,
         args_add_star: [:@op, '*'],
+        args_forward: [:@op, '...'],
         begin: [:@kw, 'begin'],
         blockarg: [:@op, '&'],
         brace_block: :@lbrace,

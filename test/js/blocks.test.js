@@ -122,10 +122,6 @@ describe("blocks", () => {
 
     test("does not split up args inside pipes", () =>
       expect(`loop do |${long} = 1, a${long} = 2|\nend`).toMatchFormat());
-
-    if (process.env.RUBY_VERSION >= "2.7") {
-      test("number args", () => expect("loop { @1 * 2 }").toMatchFormat());
-    }
   });
 
   describe("to_proc transform", () => {

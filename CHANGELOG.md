@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- Support for the `nokw_param` node for specifying when methods should no accept keywords, as in:
+
+```ruby
+def foo(**nil); end
+```
+
+- Support for the `args_forward` node for forwarding all types of arguments, as in:
+
+```ruby
+def foo(...)
+  bar(...)
+end
+```
+
 ## [0.17.0] - 2019-12-12
 
 ### Added
