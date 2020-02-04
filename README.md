@@ -120,16 +120,16 @@ The `prettier` executable is now installed and ready for use:
 
 Below are the options (from [`src/ruby.js`](src/ruby.js)) that `@prettier/plugin-ruby` currently supports:
 
-| Name                 | Default | Description                                                                                                   |
-| -------------------- | :-----: | ------------------------------------------------------------------------------------------------------------- |
-| `printWidth`         |  `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).              |
-| `requirePragma`      | `false` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#require-pragma)).           |
-| `tabWidth`           |   `2`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).                |
-| `addTrailingCommas`  | `false` | Adds a trailing comma to array literals, hash literals, and method calls.                                     |
-| `inlineConditionals` | `true`  | When it fits on one line, allows if and unless statements to use the modifier form.                           |
-| `inlineLoops`        | `true`  | When it fits on one line, allows while and until statements to use the modifier form.                         |
-| `preferHashLabels`   | `true`  | When possible, uses the shortened hash key syntax, as opposed to hash rockets.                                |
-| `preferSingleQuotes` | `true`  | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals. |
+| API Option           | CLI Option               | Default | Description                                                                                                   |
+| -------------------- | ------------------------ | :-----: | ------------------------------------------------------------------------------------------------------------- |
+| `printWidth`         | `--print-width`          |  `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).              |
+| `requirePragma`      | `--require-pragma`       | `false` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#require-pragma)).           |
+| `tabWidth`           | `--tab-width`            |   `2`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).                |
+| `addTrailingCommas`  | `--add-trailing-commas`  | `false` | Adds a trailing comma to array literals, hash literals, and method calls.                                     |
+| `inlineConditionals` | `--inline-conditionals`  | `true`  | When it fits on one line, allows if and unless statements to use the modifier form.                           |
+| `inlineLoops`        | `--inline-loops`         | `true`  | When it fits on one line, allows while and until statements to use the modifier form.                         |
+| `preferHashLabels`   | `--prefer-hash-labels`   | `true`  | When possible, uses the shortened hash key syntax, as opposed to hash rockets.                                |
+| `preferSingleQuotes` | `--prefer-single-quotes` | `true`  | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals. |
 
 Any of these can be added to your existing [prettier configuration
 file](https://prettier.io/docs/en/configuration.html). For example:
