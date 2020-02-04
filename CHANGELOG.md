@@ -22,6 +22,28 @@ def foo(...)
 end
 ```
 
+### Changed
+
+- Handled 3 or more classes on a node in HAML, as in:
+
+```haml
+%table.table.is-striped.is-hoverable
+```
+
+(Thanks to @ftes for the report.)
+
+- Better handling of indentation of `if/elsif/else`, `unless/elsif/else`, and `case/when` branches, as in:
+
+```haml
+.column.is-12
+  - if true
+    TRUE
+  - else
+    FALSE
+```
+
+(Thanks to @ftes for the report.)
+
 ## [0.17.0] - 2019-12-12
 
 ### Added
