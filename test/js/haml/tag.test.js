@@ -6,7 +6,7 @@ describe("tag", () => {
   });
 
   test("class multiple", () => {
-    expect("%p.foo.bar").toMatchHamlFormat();
+    expect("%p.foo.bar.baz").toMatchHamlFormat();
   });
 
   test("id", () => {

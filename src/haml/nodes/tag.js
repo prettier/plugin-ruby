@@ -71,7 +71,7 @@ const getHeader = (value, opts) => {
   }
 
   if (attributes.class) {
-    parts.push(`.${attributes.class.replace(" ", ".")}`);
+    parts.push(`.${attributes.class.replace(/ /g, ".")}`);
   }
 
   if (attributes.id) {
