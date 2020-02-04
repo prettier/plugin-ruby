@@ -44,7 +44,7 @@ end
 
 ### Added
 
-- [@matt]-wratt - Better support for explicit `return` nodes with empty arrays or arrays with a single element.
+- [@matt-wratt] - Better support for explicit `return` nodes with empty arrays or arrays with a single element.
 - [@jrdioko], [@kddeisz] - Alignment of `not_to` is explicitly allowed to not indent to better support rspec.
 
 ### Changed
@@ -766,7 +766,7 @@ would previously result in `array[]`, but now prints properly.
 [@kmcq]: https://github.com/kmcq
 [@krachtstefan]: https://github.com/krachtstefan
 [@localhostdotdev]: https://github.com/localhostdotdev
-[@matt]: https://github.com/matt
+[@matt-wratt]: https://github.com/matt-wratt
 [@meleyal]: https://github.com/meleyal
 [@mmainz]: https://github.com/mmainz
 [@petevk]: https://github.com/petevk
