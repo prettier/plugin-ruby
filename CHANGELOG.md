@@ -40,6 +40,8 @@ end
     FALSE
 ```
 
+- [@tobyndockerill] - Format numbers with underscores after 4 digits, as opposed to 3.
+
 ## [0.17.0] - 2019-12-12
 
 ### Added
@@ -769,7 +771,7 @@ would previously result in `array[]`, but now prints properly.
 [@meleyal]: https://github.com/meleyal
 [@mmainz]: https://github.com/mmainz
 [@petevk]: https://github.com/petevk
-[@prettier]: https://github.com/prettier
+[@tobyndockerill]: https://github.com/tobyndockerill
 [@uri]: https://github.com/uri
 [@xipgroc]: https://github.com/xipgroc
 [@yuki24]: https://github.com/yuki24
