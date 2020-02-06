@@ -2,7 +2,7 @@
 /.github/
 /coverage/
 /pkg/
-/playgruond/
+/playground/
 /vendor/
 
 /.all-contributorsrc

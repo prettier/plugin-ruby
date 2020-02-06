@@ -731,15 +731,14 @@ would previously result in `array[]`, but now prints properly.
 [0.1.2]: https://github.com/prettier/plugin-ruby/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/prettier/plugin-ruby/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/prettier/plugin-ruby/compare/61f675...v0.1.0
-
-[@AlanFoster]: https://github.com/AlanFoster
-[@AndrewRayCode]: https://github.com/AndrewRayCode
-[@CodingItWrong]: https://github.com/CodingItWrong
-[@JoshuaKGoldberg]: https://github.com/JoshuaKGoldberg
-[@MarcManiez]: https://github.com/MarcManiez
-[@NoahTheDuke]: https://github.com/NoahTheDuke
-[@Overload119]: https://github.com/Overload119
-[@RossKinsella]: https://github.com/RossKinsella
+[@alanfoster]: https://github.com/AlanFoster
+[@andrewraycode]: https://github.com/AndrewRayCode
+[@codingitwrong]: https://github.com/CodingItWrong
+[@joshuakgoldberg]: https://github.com/JoshuaKGoldberg
+[@marcmaniez]: https://github.com/MarcManiez
+[@noahtheduke]: https://github.com/NoahTheDuke
+[@overload119]: https://github.com/Overload119
+[@rosskinsella]: https://github.com/RossKinsella
 [@aaronjensen]: https://github.com/aaronjensen
 [@acrewdson]: https://github.com/acrewdson
 [@ashfurrow]: https://github.com/ashfurrow
