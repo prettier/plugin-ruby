@@ -6,6 +6,9 @@ describe("numbers", () => {
   test("auto adds o for octal numbers", () =>
     expect("0123").toChangeFormat("0o123"));
 
+  test("does not consider numbers large until they have more than 4 digits", () =>
+    expect("1234").toMatchFormat());
+
   test("for large numbers adds underscores (mod 3 ==== 0)", () =>
     expect("123456").toChangeFormat("123_456"));
 
