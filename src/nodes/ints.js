@@ -11,7 +11,7 @@ module.exports = {
     // If the number is a base 10 number, is sufficiently large, and is not
     // already formatted with underscores, then add them in in between the
     // numbers every three characters starting from the right.
-    if (!body.startsWith("0") && body.length >= 4 && !body.includes("_")) {
+    if (!body.startsWith("0") && body.length >= 5 && !body.includes("_")) {
       return `  ${body}`
         .slice((body.length + 2) % 3)
         .match(/.{3}/g)
