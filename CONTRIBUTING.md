@@ -107,7 +107,7 @@ Once every node has been printed like the `binary` node above, the `print` node 
 
 ### Doc to text
 
-At this point, this is where `prettier`'s printer takes over. Because the remainder of the process is language-agnostic and `prettier` knows how to handle its own `Doc` representation, the Ruby plugin now longer has a job to do. `prettier` will walk its own `Doc` nodes and print them out according to the rules established by the structure.
+At this point, this is where `prettier`'s printer takes over. Because the remainder of the process is language-agnostic and `prettier` knows how to handle its own `Doc` representation, the Ruby plugin no longer has a job to do. `prettier` will walk its own `Doc` nodes and print them out according to the rules established by the structure.
 
 ## FAQ
 
