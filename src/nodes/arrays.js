@@ -34,13 +34,8 @@ const printAref = (path, opts, print) =>
     concat([
       path.call(print, "body", 0),
       "[",
-      indent(
-        concat([
-          softline,
-          join(concat([",", line]), path.call(print, "body", 1))
-        ])
-      ),
-      concat([softline, "]"])
+      join(concat([",", line]), path.call(print, "body", 1)),
+      "]"
     ])
   );
 
