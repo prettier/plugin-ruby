@@ -8,6 +8,9 @@ describe("array", () => {
   test("transforms basic string arrays", () =>
     expect("['a', 'b', 'c', 'd', 'e']").toChangeFormat("%w[a b c d e]"));
 
+  test("does not transform single element arrays", () =>
+    expect("['a']").toMatchFormat());
+
   test("does not transform string arrays with spaces", () =>
     expect("['a', 'b c', 'd', 'e']").toMatchFormat());
 
@@ -16,6 +19,9 @@ describe("array", () => {
 
   test("transforms basic symbol arrays", () =>
     expect("[:a, :b, :c]").toChangeFormat("%i[a b c]"));
+
+  test("does not transforms single element arrays", () =>
+    expect("[:a]").toMatchFormat());
 
   test("does not transform symbol arrays with dynamic symbols", () =>
     expect("[:'a + b']").toMatchFormat());

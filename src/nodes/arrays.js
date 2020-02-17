@@ -21,6 +21,8 @@ const isStringArray = args =>
 const isSymbolArray = args =>
   args.body.every(arg => arg.type === "symbol_literal");
 
+const isMultiElementsArray = args => args.body.length > 1;
+
 const makeArray = start => (path, opts, print) =>
   [start].concat(path.map(print, "body"));
 
@@ -89,13 +91,13 @@ module.exports = {
       return "[]";
     }
 
-    if (isStringArray(args)) {
+    if (isStringArray(args) && isMultiElementsArray(args)) {
       return printSpecialArray(
         ["%w"].concat(getSpecialArrayParts(path, print, args))
       );
     }
 
-    if (isSymbolArray(args)) {
+    if (isSymbolArray(args) && isMultiElementsArray(args)) {
       return printSpecialArray(
         ["%i"].concat(getSpecialArrayParts(path, print, args))
       );
