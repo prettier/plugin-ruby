@@ -37,6 +37,7 @@ const expectedUnhandledNodes = [
 
 const possibleNodes = () => {
   const child = spawnSync("ruby", [
+    "--disable-gems",
     "-rripper",
     "-e",
     "puts Ripper::PARSER_EVENTS"
