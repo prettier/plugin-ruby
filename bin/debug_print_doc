@@ -10,5 +10,8 @@ const code = fs.existsSync(process.argv[2])
       .join(" ")
       .replace(/\\n/g, "\n");
 
-const doc = prettier.__debug.printToDoc(code, { parser: "ruby", plugins: ["."] });
+const doc = prettier.__debug.printToDoc(code, {
+  parser: "ruby",
+  plugins: ["."]
+});
 console.log(prettier.__debug.formatDoc(doc));
