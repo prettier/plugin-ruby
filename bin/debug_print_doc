@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+const prettier = require("prettier");
+
+const code = fs.existsSync(process.argv[2])
+  ? fs.readFileSync(process.argv[2], "utf-8")
+  : process.argv
+      .slice(2)
+      .join(" ")
+      .replace(/\\n/g, "\n");
+
+const doc = prettier.__debug.printToDoc(code, { parser: "ruby", plugins: ["."] });
+console.log(prettier.__debug.formatDoc(doc));
