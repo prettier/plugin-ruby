@@ -23,7 +23,7 @@ module.exports = {
     }
 
     return group(
-      concat([receiver, indent(concat([softline, operator, name]))])
+      concat([receiver, group(indent(concat([softline, operator, name])))])
     );
   },
   fcall: concatBody,
