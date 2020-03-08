@@ -9,7 +9,7 @@ describe("blocks", () => {
     expect(`loop { ${long} }`).toChangeFormat(`loop do\n  ${long}\nend`));
 
   test("multi line non-breaking", () =>
-    expect("loop do\n  1\nend").toChangeFormat("loop { 1 }"));
+    expect("loop do\n  1\nend").toMatchFormat());
 
   test("multi-line breaking", () =>
     expect(`loop do\n  ${long}\nend`).toMatchFormat());
@@ -84,9 +84,8 @@ describe("blocks", () => {
       ruby(`
       assert_nil(
         (
-          'a'.sub! 'b' {
-          }&.foo do
-          end
+          'a'.sub! 'b' do
+          end&.foo {}
         )
       )
     `)
@@ -106,7 +105,7 @@ describe("blocks", () => {
       ));
 
     test("multi-line non-breaking", () =>
-      expect("loop do |i|\n  i\nend").toChangeFormat("loop { |i| i }"));
+      expect("loop do |i|\n  i\nend").toMatchFormat());
 
     test("multi-line breaking", () =>
       expect(`loop do |i|\n  ${long}\nend`).toMatchFormat());
