@@ -1,14 +1,7 @@
 #!/usr/bin/env ruby
 
-REQUIRED_VERSION = Gem::Version.new('2.5')
-if Gem::Version.new(RUBY_VERSION) < REQUIRED_VERSION
-  warn(
-    "Ruby version #{RUBY_VERSION} not supported. " \
-      "Please upgrade to #{REQUIRED_VERSION} or above."
-  )
-
-  exit 1
-end
+require_relative './utils'
+Prettier::PluginRuby::Utils.ensure_compatible_ruby_version!
 
 require 'json' unless defined?(JSON)
 require 'ripper'
