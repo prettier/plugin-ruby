@@ -75,19 +75,16 @@ const printTernary = (path, _opts, print) => {
   );
 };
 
-const makeSingleBlockForm = (keyword, path, print) =>
-  concat([
+// Prints an `if_mod` or `unless_mod` node. Because it was previously in the
+// modifier form, we're guaranteed to not have an additional node, so we can
+// just work with the predicate and the body.
+const printSingle = keyword => (path, { inlineConditionals }, print) => {
+  const multiline = concat([
     `${keyword} `,
     align(keyword.length + 1, path.call(print, "body", 0)),
     indent(concat([softline, path.call(print, "body", 1)])),
     concat([softline, "end"])
   ]);
-
-// Prints an `if_mod` or `unless_mod` node. Because it was previously in the
-// modifier form, we're guaranteed to not have an additional node, so we can
-// just work with the predicate and the body.
-const printSingle = keyword => (path, { inlineConditionals }, print) => {
-  const multiline = makeSingleBlockForm(keyword, path, print);
 
   const [_predicate, stmts] = path.getValue().body;
   const hasComments =
@@ -230,7 +227,12 @@ const printConditional = keyword => (path, { inlineConditionals }, print) => {
   // know for sure that it doesn't impact the body of the conditional, so we
   // have to default to the block form.
   if (containsAssignment(predicate)) {
-    return makeSingleBlockForm(keyword, path, print);
+    return concat([
+      `${keyword} `,
+      align(keyword.length + 1, path.call(print, "body", 0)),
+      indent(concat([hardline, path.call(print, "body", 1)])),
+      concat([hardline, "end"])
+    ]);
   }
 
   return printSingle(keyword)(path, { inlineConditionals }, print);

@@ -80,6 +80,16 @@ private def self.foo
 end
 ```
 
+- [@masqita], [@kddeisz] - Inline variable assignment within a predicate should force the conditional to break, as in:
+
+```ruby
+array.each do |element|
+  if index = difference.index(element)
+    difference.delete_at(index)
+  end
+end
+```
+
 ## [0.17.0] - 2019-12-12
 
 ### Added
