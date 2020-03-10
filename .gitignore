@@ -3,4 +3,5 @@
 /node_modules/
 /yarn-error.log
 /pkg/
+/test.rb
 *.gem
