@@ -324,6 +324,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "flyerhzm",
+      "name": "Richard Huang",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/66836?v=4",
+      "profile": "https://huangzhimin.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
