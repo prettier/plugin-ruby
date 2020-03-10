@@ -5,7 +5,7 @@ const hasDef = node =>
   node.body[1].type === "args_add_block" &&
   node.body[1].body[0].type === "args" &&
   node.body[1].body[0].body[0] &&
-  node.body[1].body[0].body[0].type === "def";
+  ["def", "defs"].includes(node.body[1].body[0].body[0].type);
 
 // Very special handling case for rspec matchers. In general with rspec matchers
 // you expect to see something like:

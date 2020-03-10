@@ -62,6 +62,24 @@ Config::Download.new(
 ).perform
 ```
 
+- [@pje], [@kddeisz] - Method definition bodies (on `defs` nodes) should dedent if a helper method is called. As in:
+
+<!-- prettier-ignore -->
+```ruby
+private def self.foo
+          'bar'
+        end
+```
+
+should instead be indented as:
+
+<!-- prettier-ignore -->
+```ruby
+private def self.foo
+  'bar'
+end
+```
+
 ## [0.17.0] - 2019-12-12
 
 ### Added
@@ -792,6 +810,7 @@ would previously result in `array[]`, but now prints properly.
 [@noahtheduke]: https://github.com/NoahTheDuke
 [@overload119]: https://github.com/Overload119
 [@petevk]: https://github.com/petevk
+[@pje]: https://github.com/pje
 [@rosskinsella]: https://github.com/RossKinsella
 [@tobyndockerill]: https://github.com/tobyndockerill
 [@uri]: https://github.com/uri
