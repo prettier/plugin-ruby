@@ -63,6 +63,11 @@ describe("strings", () => {
     });
   });
 
+  describe("with %{} quotes", () => {
+    test("matches correctly", () =>
+      expect("%{foo\\n#{bar}\\nbaz}").toMatchFormat());
+  });
+
   test("concatenation", () =>
     expect(`'abc' \\\n  'def' \\\n  'ghi'`).toMatchFormat());
 

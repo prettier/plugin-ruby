@@ -7,6 +7,7 @@ const {
   softline,
   join
 } = require("../prettier");
+
 const { concatBody, empty, makeList, prefix, surround } = require("../utils");
 const escapePattern = require("../escapePattern");
 
@@ -29,15 +30,12 @@ const isSingleQuotable = string =>
     part => part.type === "@tstring_content" && !part.body.includes("'")
   );
 
-const getStringQuote = (string, preferSingleQuotes) => {
-  if (isQuoteLocked(string)) {
-    return string.quote;
-  }
-
-  return preferSingleQuotes && isSingleQuotable(string) ? "'" : '"';
-};
-
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
+const quotePairs = {
+  '"': '"',
+  "'": "'",
+  '%{': '}'
+};
 
 const makeString = (content, enclosingQuote, originalQuote) => {
   const replaceOther = ["'", '"'].includes(originalQuote);
@@ -121,7 +119,7 @@ module.exports = {
     return body.length === 2 ? concat([quote, body.slice(1), quote]) : body;
   },
   dyna_symbol: (path, opts, print) => {
-    const { quote } = path.getValue().body[0];
+    const { quote } = path.getValue();
 
     return concat([":", quote, concat(path.call(print, "body", 0)), quote]);
   },
@@ -162,7 +160,8 @@ module.exports = {
     );
   },
   string_literal: (path, { preferSingleQuotes }, print) => {
-    const string = path.getValue().body[0];
+    const stringLiteral = path.getValue();
+    const string = stringLiteral.body[0];
 
     // If this string is actually a heredoc, bail out and return to the print
     // function for heredocs
@@ -176,20 +175,24 @@ module.exports = {
       return preferSingleQuotes ? "''" : '""';
     }
 
-    const quote = getStringQuote(string, preferSingleQuotes);
-    const parts = [];
+    // Determine the quote that should enclose the new string
+    let quote;
+    if (isQuoteLocked(string)) {
+      ({ quote } = stringLiteral);
+    } else {
+      quote = preferSingleQuotes && isSingleQuotable(string) ? "'" : '"';
+    }
 
-    string.body.forEach((part, index) => {
+    const parts = string.body.map((part, index) => {
       if (part.type === "@tstring_content") {
         // In this case, the part of the string is just regular string content
-        parts.push(makeString(part.body, quote, string.quote));
-      } else {
-        // In this case, the part of the string is an embedded expression
-        parts.push(path.call(print, "body", 0, "body", index));
+        return makeString(part.body, quote, stringLiteral.quote);
       }
+      // In this case, the part of the string is an embedded expression
+      return path.call(print, "body", 0, "body", index);
     });
 
-    return concat([quote].concat(parts).concat([quote]));
+    return concat([quote].concat(parts).concat([quotePairs[quote]]));
   },
   symbol: prefix(":"),
   symbol_literal: concatBody,
