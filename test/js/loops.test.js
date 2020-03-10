@@ -61,6 +61,24 @@ describe.each(["while", "until"])("%s", keyword => {
       expect(
         `hash[:key] = ${keyword} false do break :value end`
       ).toChangeFormat(`hash[:key] = (break :value ${keyword} false)`));
+
+    test("empty body", () => {
+      const content = ruby(`
+        while foo
+        end
+      `);
+
+      return expect(content).toChangeFormat("while foo; end");
+    });
+
+    test("empty body, long predicate", () => {
+      const content = ruby(`
+        while ${long}
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
   });
 
   describe("inlines not allowed", () => {
@@ -87,6 +105,26 @@ describe.each(["while", "until"])("%s", keyword => {
         begin
           foo
         end ${keyword} bar
+      `);
+
+      return expect(content).toMatchFormat({ inlineLoops: false });
+    });
+
+    test("empty body", () => {
+      const content = ruby(`
+        while foo
+        end
+      `);
+
+      return expect(content).toChangeFormat("while foo; end", {
+        inlineLoops: false
+      });
+    });
+
+    test("empty body, long predicate", () => {
+      const content = ruby(`
+        while ${long}
+        end
       `);
 
       return expect(content).toMatchFormat({ inlineLoops: false });
