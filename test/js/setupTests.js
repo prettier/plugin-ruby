@@ -4,7 +4,8 @@ const prettier = require("prettier");
 const readline = require("readline");
 
 // Set RUBY_VERSION so certain tests only run for certain versions
-process.env.RUBY_VERSION = spawnSync("ruby", ["--disable-gems", "-e", "puts RUBY_VERSION"])
+const args = ["--disable-gems", "-e", "puts RUBY_VERSION"];
+process.env.RUBY_VERSION = spawnSync("ruby", args)
   .stdout.toString()
   .trim();
 
