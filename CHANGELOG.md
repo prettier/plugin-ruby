@@ -41,6 +41,7 @@ end
 ```
 
 - [@tobyndockerill] - Format numbers with underscores after 4 digits, as opposed to 3.
+- [@ianks] - Improve performance by using `--disable-gems`.
 
 ## [0.17.0] - 2019-12-12
 
@@ -756,6 +757,7 @@ would previously result in `array[]`, but now prints properly.
 [@gin0606]: https://github.com/gin0606
 [@github0013]: https://github.com/github0013
 [@glejeune]: https://github.com/glejeune
+[@ianks]: https://github.com/ianks
 [@jakeprime]: https://github.com/jakeprime
 [@jamescostian]: https://github.com/jamescostian
 [@joeyjoejoejr]: https://github.com/joeyjoejoejr

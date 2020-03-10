@@ -1,7 +1,16 @@
 #!/usr/bin/env ruby
 
-require_relative './utils'
-Prettier::PluginRuby::Utils.ensure_compatible_ruby_version!
+# We implement our own version checking here instead of using Gem::Version so
+# that we can use the --disable-gems flag.
+major, minor, * = RUBY_VERSION.split('.').map(&:to_i)
+if (major < 2) || ((major == 2) && (minor < 5))
+  warn(
+    "Ruby version #{current_version} not supported. " \
+      "Please upgrade to #{required_version} or above."
+  )
+
+  exit 1
+end
 
 require 'json' unless defined?(JSON)
 require 'ripper'
