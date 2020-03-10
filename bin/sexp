@@ -2,5 +2,23 @@
 
 require File.expand_path(File.join('..', 'src', 'ripper.rb'), __dir__)
 
+require 'pp'
+
+PP.prepend(
+  Module.new do
+    def pp_hash(obj)
+      pairs = obj.slice(*(obj.keys - %i[type char_start char_end start end]))
+
+      group(1, '{', '}') do
+        text obj[:type]
+        group(1) do
+          breakable ' '
+          pp obj[:body]
+        end
+      end
+    end
+  end
+)
+
 source = File.file?(ARGV[0]) ? File.read(ARGV[0]) : ARGV[0].gsub('\\n', "\n")
 pp RipperJS.new(source).parse
