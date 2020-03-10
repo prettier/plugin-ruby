@@ -83,8 +83,10 @@ describe("conditionals", () => {
 
       test("breaks if the predicate is an assignment", () => {
         const content = ruby(`
-          ${keyword} a = 1
-            a
+          array.each do |element|
+            ${keyword} index = difference.index(element)
+              difference.delete_at(index)
+            end
           end
         `);
 
