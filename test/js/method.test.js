@@ -39,6 +39,26 @@ describe("method", () => {
     test("double splat arg with no name", () =>
       expect("def foo(**); end").toMatchFormat());
 
+    test("with helper method", () => {
+      const content = ruby(`
+        private def foo
+          'bar'
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("with helper method on defs", () => {
+      const content = ruby(`
+        private def self.foo
+          'bar'
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
     test("every single arg type", () => {
       const content = ruby(`
         def method(req, *rest, post, kwarg:, kwarg_opt: 1, **kwarg_rest, &block)
