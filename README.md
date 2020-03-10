@@ -203,6 +203,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://ianks.com"><img src="https://avatars0.githubusercontent.com/u/3303032?v=4" width="100px;" alt=""/><br /><sub><b>Ian Ker-Seymer</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/commits?author=ianks" title="Code">💻</a></td>
     <td align="center"><a href="https://huangzhimin.com"><img src="https://avatars2.githubusercontent.com/u/66836?v=4" width="100px;" alt=""/><br /><sub><b>Richard Huang</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/commits?author=flyerhzm" title="Code">💻</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/pje"><img src="https://avatars1.githubusercontent.com/u/319655?v=4" width="100px;" alt=""/><br /><sub><b>Patrick Ellis</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Apje" title="Bug reports">🐛</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-enable -->
