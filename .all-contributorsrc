@@ -315,6 +315,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "ianks",
+      "name": "Ian Ker-Seymer",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/3303032?v=4",
+      "profile": "http://ianks.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
