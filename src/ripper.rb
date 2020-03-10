@@ -293,7 +293,8 @@ class RipperJS < Ripper
           super(*body).merge!(
             start: node[:start],
             char_start: node[:char_start],
-            char_end: char_pos
+            char_end: char_pos,
+            quote: node[:body]
           )
         end
       end
@@ -329,7 +330,17 @@ class RipperJS < Ripper
               char_start_for(body)
             end
 
-          super(*body).merge!(char_start: char_start, char_end: char_pos)
+          opts = { char_start: char_start, char_end: char_pos }
+          if event == :dyna_symbol
+            index =
+              scanner_events.rindex do |scanner_event|
+                %i[@tstring_beg @tstring_end].include?(scanner_event[:type])
+              end
+
+            opts[:quote] = scanner_events.delete_at(index)[:body]
+          end
+
+          super(*body).merge!(opts)
         end
       end
 
@@ -661,14 +672,6 @@ class RipperJS < Ripper
 
       def on_program(*body)
         super(*body).tap { |node| node[:body][0][:body] << __end__ if __end__ }
-      end
-
-      # Adds the used quote type onto string nodes. This is necessary because
-      # we're going to have to stick to whatever quote the user chose if there
-      # are escape sequences within the string. For example, if you have '\n'
-      # we can't switch to double quotes without changing what it means.
-      def on_tstring_end(quote)
-        last_sexp.merge!(quote: quote)
       end
 
       def on_label_end(quote)

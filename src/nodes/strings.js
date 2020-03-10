@@ -7,6 +7,7 @@ const {
   softline,
   join
 } = require("../prettier");
+
 const { concatBody, empty, makeList, prefix, surround } = require("../utils");
 const escapePattern = require("../escapePattern");
 
@@ -29,17 +30,9 @@ const isSingleQuotable = string =>
     part => part.type === "@tstring_content" && !part.body.includes("'")
   );
 
-const getStringQuote = (string, preferSingleQuotes) => {
-  if (isQuoteLocked(string)) {
-    return string.quote;
-  }
-
-  return preferSingleQuotes && isSingleQuotable(string) ? "'" : '"';
-};
-
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
 
-const makeString = (content, enclosingQuote, originalQuote) => {
+const normalizeQuotes = (content, enclosingQuote, originalQuote) => {
   const replaceOther = ["'", '"'].includes(originalQuote);
   const otherQuote = enclosingQuote === '"' ? "'" : '"';
 
@@ -62,53 +55,6 @@ const makeString = (content, enclosingQuote, originalQuote) => {
   });
 };
 
-// The `parts` argument that comes into this function is an array of either
-// printed embedded expressions or plain strings (that themselves can contain
-// newlines). What we want to return is an array where each element represents a
-// line in the original text. So we end up tracking every line as we go and
-// pushing onto a `currentLine` variable, then when we hit a new line we push
-// the current line onto the `lines` variable until we've used up every part.
-const makeHeredocLines = parts => {
-  let lines = [];
-  let currentLine = [];
-
-  parts.forEach(part => {
-    if (part.type === "group" || !part.includes("\n")) {
-      // In this case we've either hit an embedded expression or the piece of
-      // the current line that we're looking at is in the middle of two of them,
-      // so we just push onto the current line and continue on.
-      currentLine.push(part);
-      return;
-    }
-
-    let splits = part.split("\n");
-    if (splits[splits.length - 1] === "") {
-      // If a line ends with a newline, then we end up with an empty string at
-      // the end of the splits, we just pop it off here since we'll handle the
-      // newlines later.
-      splits = splits.slice(0, -1);
-    }
-
-    if (currentLine.length > 0) {
-      lines.push(concat(currentLine.concat(splits[0])));
-      currentLine = [];
-    } else {
-      lines.push(splits[0]);
-    }
-
-    if (splits.length > 1) {
-      lines = lines.concat(splits.slice(1, -1));
-      currentLine.push(splits[splits.length - 1]);
-    }
-  });
-
-  if (currentLine.length > 0) {
-    lines = lines.concat(currentLine);
-  }
-
-  return lines;
-};
-
 module.exports = {
   "@CHAR": (path, { preferSingleQuotes }, _print) => {
     const { body } = path.getValue();
@@ -121,21 +67,24 @@ module.exports = {
     return body.length === 2 ? concat([quote, body.slice(1), quote]) : body;
   },
   dyna_symbol: (path, opts, print) => {
-    const { quote } = path.getValue().body[0];
+    const { quote } = path.getValue();
 
     return concat([":", quote, concat(path.call(print, "body", 0)), quote]);
   },
   heredoc: (path, opts, print) => {
-    const { beging, ending } = path.getValue();
-    const lines = makeHeredocLines(path.map(print, "body"));
+    const { beging, body, ending } = path.getValue();
 
-    return concat([
-      beging,
-      literalline,
-      join(literalline, lines),
-      literalline,
-      ending
-    ]);
+    const parts = body.map((part, index) => {
+      if (part.type !== "@tstring_content") {
+        // In this case, the part of the string is an embedded expression
+        return path.call(print, "body", index);
+      }
+
+      // In this case, the part of the string is just regular string content
+      return join(literalline, part.body.split("\n"));
+    });
+
+    return concat([beging, literalline, concat(parts), ending]);
   },
   string: makeList,
   string_concat: (path, opts, print) =>
@@ -162,7 +111,8 @@ module.exports = {
     );
   },
   string_literal: (path, { preferSingleQuotes }, print) => {
-    const string = path.getValue().body[0];
+    const stringLiteral = path.getValue();
+    const string = stringLiteral.body[0];
 
     // If this string is actually a heredoc, bail out and return to the print
     // function for heredocs
@@ -176,20 +126,29 @@ module.exports = {
       return preferSingleQuotes ? "''" : '""';
     }
 
-    const quote = getStringQuote(string, preferSingleQuotes);
-    const parts = [];
+    // Determine the quote that should enclose the new string
+    let quote;
+    if (isQuoteLocked(string)) {
+      ({ quote } = stringLiteral);
+    } else {
+      quote = preferSingleQuotes && isSingleQuotable(string) ? "'" : '"';
+    }
 
-    string.body.forEach((part, index) => {
-      if (part.type === "@tstring_content") {
-        // In this case, the part of the string is just regular string content
-        parts.push(makeString(part.body, quote, string.quote));
-      } else {
+    const parts = string.body.map((part, index) => {
+      if (part.type !== "@tstring_content") {
         // In this case, the part of the string is an embedded expression
-        parts.push(path.call(print, "body", 0, "body", index));
+        return path.call(print, "body", 0, "body", index);
       }
+
+      // In this case, the part of the string is just regular string content
+      return join(
+        literalline,
+        normalizeQuotes(part.body, quote, stringLiteral.quote).split("\n")
+      );
     });
 
-    return concat([quote].concat(parts).concat([quote]));
+    const closingQuote = quote === "%{" ? "}" : quote;
+    return concat([quote].concat(parts).concat(closingQuote));
   },
   symbol: prefix(":"),
   symbol_literal: concatBody,

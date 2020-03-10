@@ -63,6 +63,11 @@ describe("strings", () => {
     });
   });
 
+  describe("with %{} quotes", () => {
+    test("matches correctly", () =>
+      expect("%{foo\\n#{bar}\\nbaz}").toMatchFormat());
+  });
+
   test("concatenation", () =>
     expect(`'abc' \\\n  'def' \\\n  'ghi'`).toMatchFormat());
 
@@ -208,9 +213,9 @@ describe("strings", () => {
       test("with interpolation", () => {
         const content = ruby(`
           <<~HERE
-              This is a squiggly heredoc
-              #{interpolation}
-              with interpolation
+            This is a squiggly heredoc
+            #{interpolation}
+            with interpolation
           HERE
         `);
 
