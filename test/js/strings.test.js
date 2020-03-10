@@ -213,9 +213,9 @@ describe("strings", () => {
       test("with interpolation", () => {
         const content = ruby(`
           <<~HERE
-              This is a squiggly heredoc
-              #{interpolation}
-              with interpolation
+            This is a squiggly heredoc
+            #{interpolation}
+            with interpolation
           HERE
         `);
 

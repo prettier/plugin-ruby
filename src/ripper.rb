@@ -332,7 +332,12 @@ class RipperJS < Ripper
 
           opts = { char_start: char_start, char_end: char_pos }
           if event == :dyna_symbol
-            opts[:quote] = find_scanner_event(:@tstring_end)[:body]
+            index =
+              scanner_events.rindex do |scanner_event|
+                %i[@tstring_beg @tstring_end].include?(scanner_event[:type])
+              end
+
+            opts[:quote] = scanner_events.delete_at(index)[:body]
           end
 
           super(*body).merge!(opts)
