@@ -351,6 +351,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "hafley66",
+      "name": "Chris Hafley",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/6750483?v=4",
+      "profile": "https://github.com/hafley66",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -90,6 +90,8 @@ array.each do |element|
 end
 ```
 
+- [@hafley66], [@kddeisz] - Handle empty `while` and `until` blocks.
+
 ## [0.17.0] - 2019-12-12
 
 ### Added
@@ -800,6 +802,7 @@ would previously result in `array[]`, but now prints properly.
 [@gin0606]: https://github.com/gin0606
 [@github0013]: https://github.com/github0013
 [@glejeune]: https://github.com/glejeune
+[@hafley66]: https://github.com/hafley66
 [@ianks]: https://github.com/ianks
 [@jakeprime]: https://github.com/jakeprime
 [@jamescostian]: https://github.com/jamescostian
