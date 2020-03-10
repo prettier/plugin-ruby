@@ -42,6 +42,25 @@ end
 
 - [@tobyndockerill] - Format numbers with underscores after 4 digits, as opposed to 3.
 - [@ianks] - Improve performance by using `--disable-gems`.
+- [@flyerhzm] - Calls are grouped such that after an end parenthesis the following call will not be indented, as in:
+
+<!-- prettier-ignore -->
+```ruby
+Config::Download.new(
+  'prettier',
+  filename: 'prettier.yml', url: 'https://raw.githubusercontent.com/...'
+)
+  .perform
+```
+
+will now be printed as:
+
+```ruby
+Config::Download.new(
+  'prettier',
+  filename: 'prettier.yml', url: 'https://raw.githubusercontent.com/...'
+).perform
+```
 
 ## [0.17.0] - 2019-12-12
 
@@ -734,26 +753,22 @@ would previously result in `array[]`, but now prints properly.
 [0.1.2]: https://github.com/prettier/plugin-ruby/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/prettier/plugin-ruby/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/prettier/plugin-ruby/compare/61f675...v0.1.0
-[@alanfoster]: https://github.com/AlanFoster
-[@andrewraycode]: https://github.com/AndrewRayCode
-[@codingitwrong]: https://github.com/CodingItWrong
-[@joshuakgoldberg]: https://github.com/JoshuaKGoldberg
-[@marcmaniez]: https://github.com/MarcManiez
-[@noahtheduke]: https://github.com/NoahTheDuke
-[@overload119]: https://github.com/Overload119
-[@rosskinsella]: https://github.com/RossKinsella
 [@aaronjensen]: https://github.com/aaronjensen
 [@acrewdson]: https://github.com/acrewdson
+[@alanfoster]: https://github.com/AlanFoster
+[@andrewraycode]: https://github.com/AndrewRayCode
 [@ashfurrow]: https://github.com/ashfurrow
 [@awinograd]: https://github.com/awinograd
 [@bugthing]: https://github.com/bugthing
 [@cbothner]: https://github.com/cbothner
 [@christoomey]: https://github.com/christoomey
 [@cldevs]: https://github.com/cldevs
+[@codingitwrong]: https://github.com/CodingItWrong
 [@deecewan]: https://github.com/deecewan
 [@dudeofawesome]: https://github.com/dudeofawesome
 [@eins78]: https://github.com/eins78
 [@ftes]: https://github.com/ftes
+[@flyerhzm]: https://github.com/flyerhzm
 [@gin0606]: https://github.com/gin0606
 [@github0013]: https://github.com/github0013
 [@glejeune]: https://github.com/glejeune
@@ -762,6 +777,7 @@ would previously result in `array[]`, but now prints properly.
 [@jamescostian]: https://github.com/jamescostian
 [@joeyjoejoejr]: https://github.com/joeyjoejoejr
 [@johnschoeman]: https://github.com/johnschoeman
+[@joshuakgoldberg]: https://github.com/JoshuaKGoldberg
 [@jpickwell]: https://github.com/jpickwell
 [@jrdioko]: https://github.com/jrdioko
 [@jviney]: https://github.com/jviney
@@ -769,10 +785,14 @@ would previously result in `array[]`, but now prints properly.
 [@kmcq]: https://github.com/kmcq
 [@krachtstefan]: https://github.com/krachtstefan
 [@localhostdotdev]: https://github.com/localhostdotdev
+[@marcmaniez]: https://github.com/MarcManiez
 [@matt-wratt]: https://github.com/matt-wratt
 [@meleyal]: https://github.com/meleyal
 [@mmainz]: https://github.com/mmainz
+[@noahtheduke]: https://github.com/NoahTheDuke
+[@overload119]: https://github.com/Overload119
 [@petevk]: https://github.com/petevk
+[@rosskinsella]: https://github.com/RossKinsella
 [@tobyndockerill]: https://github.com/tobyndockerill
 [@uri]: https://github.com/uri
 [@xipgroc]: https://github.com/xipgroc
