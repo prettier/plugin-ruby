@@ -205,6 +205,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/pje"><img src="https://avatars1.githubusercontent.com/u/319655?v=4" width="100px;" alt=""/><br /><sub><b>Patrick Ellis</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Apje" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://www.piesync.com/"><img src="https://avatars0.githubusercontent.com/u/161271?v=4" width="100px;" alt=""/><br /><sub><b>Peter De Berdt</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Amasqita" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
