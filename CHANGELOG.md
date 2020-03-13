@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [0.18.0]
+
+This version includes support for Ruby 2.7
+
 ### Added
 
 - [@kddeisz] - Support for the `nokw_param` node for specifying when methods should no accept keywords, as in:

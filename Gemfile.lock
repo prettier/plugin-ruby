@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    prettier (0.17.0)
+    prettier (0.18.0)
 
 GEM
   remote: https://rubygems.org/
@@ -25,4 +25,4 @@ DEPENDENCIES
   rake (~> 13.0)
 
 BUNDLED WITH
-   2.0.2
+   2.1.4
