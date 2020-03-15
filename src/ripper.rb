@@ -333,7 +333,7 @@ class RipperJS < Ripper
           opts = { char_start: char_start, char_end: char_pos }
           if event == :dyna_symbol
             index =
-              scanner_events.rindex do |scanner_event|
+              scanner_events.index do |scanner_event|
                 %i[@tstring_beg @tstring_end].include?(scanner_event[:type])
               end
 
