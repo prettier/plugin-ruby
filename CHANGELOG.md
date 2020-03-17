@@ -92,6 +92,7 @@ end
 
 - [@hafley66], [@kddeisz] - Handle empty `while` and `until` blocks.
 - [@Fruetel], [@kddeisz] - Simplify string escape pattern by locking on any escape sequence.
+- [@flyerhzm], [@kddeisz] - Properly handle string quotes on symbols in hash keys.
 
 ## [0.17.0] - 2019-12-12
 

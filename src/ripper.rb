@@ -323,24 +323,28 @@ class RipperJS < Ripper
       # child node.
       %i[dyna_symbol symbol_literal].each do |event|
         define_method(:"on_#{event}") do |*body|
-          char_start =
+          options =
             if scanner_events.any? { |sevent| sevent[:type] == :@symbeg }
-              find_scanner_event(:@symbeg)[:char_start]
+              symbeg = find_scanner_event(:@symbeg)
+
+              {
+                char_start: symbeg[:char_start],
+                char_end: char_pos,
+                quote: symbeg[:body][1]
+              }
+            elsif scanner_events.any? { |sevent| sevent[:type] == :@label_end }
+              label_end = find_scanner_event(:@label_end)
+
+              {
+                char_start: char_start_for(body),
+                char_end: char_pos,
+                quote: label_end[:body][0]
+              }
             else
-              char_start_for(body)
+              { char_start: char_start_for(body), char_end: char_pos }
             end
 
-          opts = { char_start: char_start, char_end: char_pos }
-          if event == :dyna_symbol
-            index =
-              scanner_events.rindex do |scanner_event|
-                %i[@tstring_beg @tstring_end].include?(scanner_event[:type])
-              end
-
-            opts[:quote] = scanner_events.delete_at(index)[:body]
-          end
-
-          super(*body).merge!(opts)
+          super(*body).merge!(options)
         end
       end
 
@@ -674,10 +678,6 @@ class RipperJS < Ripper
 
       def on_program(*body)
         super(*body).tap { |node| node[:body][0][:body] << __end__ if __end__ }
-      end
-
-      def on_label_end(quote)
-        last_sexp.merge!(quote: quote[0]) # quote is ": or ':
       end
 
       # Normally access controls are reported as vcall nodes. This creates a
