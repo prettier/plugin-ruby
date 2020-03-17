@@ -2,8 +2,6 @@ const { concat, group, indent, softline } = require("../prettier");
 const toProc = require("../toProc");
 const { concatBody, first, makeCall } = require("../utils");
 
-const noIndent = ["array", "hash", "if", "method_add_block", "xstring_literal"];
-
 module.exports = {
   call: (path, opts, print) => {
     const receiver = path.call(print, "body", 0);
@@ -14,12 +12,6 @@ module.exports = {
     // In this case, "call" is returned for the 3rd child node.
     if (name !== "call") {
       name = path.call(print, "body", 2);
-    }
-
-    // For certain left sides of the call nodes, we want to attach directly to
-    // the } or end.
-    if (noIndent.includes(path.getValue().body[0].type)) {
-      return concat([receiver, operator, name]);
     }
 
     return group(
