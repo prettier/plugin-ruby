@@ -1,7 +1,23 @@
 const { long, ruby } = require("./utils");
 
 describe("strings", () => {
-  test("with %q escaping", () => expect("%q|\\'|").toChangeFormat('"\\\'"'));
+  describe("%-literals with escape sequences in the middle", () => {
+    const cases = [
+      ["(", ")"],
+      ["[", "]"],
+      ["{", "}"],
+      ["<", ">"],
+      ["|", "|"]
+    ];
+
+    test.each(cases)("%%%s%s", (stringStart, stringEnd) => (
+      expect(`%${stringStart}a\\bc${stringEnd}`).toMatchFormat()
+    ));
+
+    test.each(cases)("%q%s%s", (stringStart, stringEnd) => (
+      expect(`%q${stringStart}a\\bc${stringEnd}`).toMatchFormat()
+    ));
+  });
 
   describe("with single quotes", () => {
     test("empty single quote strings stay", () => expect("''").toMatchFormat());
