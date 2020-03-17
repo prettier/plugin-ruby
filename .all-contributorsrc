@@ -360,6 +360,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "Fruetel",
+      "name": "Thomas Frütel",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/8015212?v=4",
+      "profile": "http://fruetel.de",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
