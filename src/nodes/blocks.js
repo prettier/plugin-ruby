@@ -10,7 +10,7 @@ const {
 } = require("../prettier");
 const { empty, hasAncestor } = require("../utils");
 
-const printBlock = (path, opts, print) => {
+const printBlock = braces => (path, opts, print) => {
   const [variables, statements] = path.getValue().body;
   const stmts =
     statements.type === "stmts" ? statements.body : statements.body[0].body;
@@ -25,7 +25,7 @@ const printBlock = (path, opts, print) => {
   // as opposed to the current node (because of the difference in operator
   // precedence). Instead, we still use a multi-line format but switch to using
   // braces instead.
-  const useBraces = hasAncestor(path, ["command", "command_call"]);
+  const useBraces = braces && hasAncestor(path, ["command", "command_call"]);
 
   const doBlock = concat([
     useBraces ? " {" : " do",
@@ -74,7 +74,7 @@ module.exports = {
     parts.push("| ");
     return concat(parts);
   },
-  brace_block: printBlock,
-  do_block: printBlock,
+  brace_block: printBlock(true),
+  do_block: printBlock(false),
   excessed_comma: empty
 };

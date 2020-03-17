@@ -84,8 +84,8 @@ describe("blocks", () => {
       ruby(`
       assert_nil(
         (
-          'a'.sub! 'b' {
-          }&.foo do
+          'a'.sub! 'b' do
+          end&.foo do
           end
         )
       )
