@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 
 require 'json'
+
+require 'bundler/setup' if ENV['CI']
 require 'haml'
 
 class Haml::Parser::ParseNode
