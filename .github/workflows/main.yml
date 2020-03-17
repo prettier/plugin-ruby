@@ -23,7 +23,8 @@ jobs:
         key: ${{ runner.os }}-${{ matrix.ruby }}-${{ hashFiles('**/Gemfile.lock') }}
         restore-keys: |
           ${{ runner.os }}-${{ matrix.ruby }}-
-    - run: |
+    - name: bundle install
+      run: |
         bundle config path vendor/bundle
         bundle install --jobs 4 --retry 3
 
