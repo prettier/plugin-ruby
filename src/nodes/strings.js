@@ -9,7 +9,6 @@ const {
 } = require("../prettier");
 
 const { concatBody, empty, makeList, prefix, surround } = require("../utils");
-const escapePattern = require("../escapePattern");
 
 // If there is some part of this string that matches an escape sequence or that
 // contains the interpolation pattern ("#{"), then we are locked into whichever
@@ -20,7 +19,7 @@ const isQuoteLocked = string =>
   string.body.some(
     part =>
       part.type === "@tstring_content" &&
-      (escapePattern.test(part.body) || part.body.includes("#{"))
+      (part.body.includes("#{") || part.body.includes("\\"))
   );
 
 // A string is considered to be able to use single quotes if it contains only
@@ -53,6 +52,26 @@ const normalizeQuotes = (content, enclosingQuote, originalQuote) => {
 
     return `\\${escaped}`;
   });
+};
+
+const quotePairs = {
+  "(": ")",
+  "[": "]",
+  "{": "}",
+  "<": ">"
+};
+
+const getClosingQuote = quote => {
+  if (!quote.startsWith("%")) {
+    return quote;
+  }
+
+  const boundary = /%q?(.)/.exec(quote)[1];
+  if (boundary in quotePairs) {
+    return quotePairs[boundary];
+  }
+
+  return boundary;
 };
 
 module.exports = {
@@ -147,8 +166,7 @@ module.exports = {
       );
     });
 
-    const closingQuote = quote === "%{" ? "}" : quote;
-    return concat([quote].concat(parts).concat(closingQuote));
+    return concat([quote].concat(parts).concat(getClosingQuote(quote)));
   },
   symbol: prefix(":"),
   symbol_literal: concatBody,

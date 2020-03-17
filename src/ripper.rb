@@ -644,6 +644,8 @@ class RipperJS < Ripper
     end
   )
 
+  # This module contains miscellaneous fixes required to get the right
+  # structure.
   prepend(
     Module.new do
       private
