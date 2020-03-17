@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [@petevk], [@kddeisz] - Use braces for block format iff it was originally a brace block, otherwise you could be changing precedence. For example:
+
+<!-- prettier-ignore -->
+```ruby
+expect do
+  field 1 do
+    "foo"
+  end
+end.to raise_error
+```
+
+should maintain its `do...end` and not switch to inline braces otherwise the brace might get associated with the `1`.
+
 ## [0.18.0] - 2020-03-17
 
 ### Added
