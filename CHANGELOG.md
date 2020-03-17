@@ -91,6 +91,7 @@ end
 ```
 
 - [@hafley66], [@kddeisz] - Handle empty `while` and `until` blocks.
+- [@Fruetel], [@kddeisz] - Simplify string escape pattern by locking on any escape sequence.
 
 ## [0.17.0] - 2019-12-12
 
@@ -799,6 +800,7 @@ would previously result in `array[]`, but now prints properly.
 [@eins78]: https://github.com/eins78
 [@ftes]: https://github.com/ftes
 [@flyerhzm]: https://github.com/flyerhzm
+[@fruetel]: https://github.com/Fruetel
 [@gin0606]: https://github.com/gin0606
 [@github0013]: https://github.com/github0013
 [@glejeune]: https://github.com/glejeune

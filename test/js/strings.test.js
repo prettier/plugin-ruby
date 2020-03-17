@@ -10,13 +10,13 @@ describe("strings", () => {
       ["|", "|"]
     ];
 
-    test.each(cases)("%%%s%s", (stringStart, stringEnd) => (
+    test.each(cases)("%%%s%s", (stringStart, stringEnd) =>
       expect(`%${stringStart}a\\bc${stringEnd}`).toMatchFormat()
-    ));
+    );
 
-    test.each(cases)("%q%s%s", (stringStart, stringEnd) => (
+    test.each(cases)("%q%s%s", (stringStart, stringEnd) =>
       expect(`%q${stringStart}a\\bc${stringEnd}`).toMatchFormat()
-    ));
+    );
   });
 
   describe("with single quotes", () => {
