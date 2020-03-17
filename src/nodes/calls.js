@@ -22,9 +22,16 @@ module.exports = {
       return concat([receiver, operator, name]);
     }
 
-    return group(
-      concat([receiver, group(indent(concat([softline, operator, name])))])
-    );
+    const call = concat([receiver, indent(concat([softline, operator, name]))]);
+
+    // If the parent node containing this call is itself a call, then don't
+    // explicitly group this node, as we want to break the whole parent and not
+    // just individual calls.
+    if (["call", "method_add_arg"].includes(path.getParentNode().type)) {
+      return call;
+    }
+
+    return group(call);
   },
   fcall: concatBody,
   method_add_arg: (path, opts, print) => {
@@ -37,7 +44,16 @@ module.exports = {
       return concat([method, "("].concat(args).concat(")"));
     }
 
-    return concat([method, args]);
+    const call = concat([method, args]);
+
+    // If the parent node containing this call is itself a call, then don't
+    // explicitly group this node, as we want to break the whole parent and not
+    // just individual calls.
+    if (["call", "method_add_arg"].includes(path.getParentNode().type)) {
+      return call;
+    }
+
+    return group(call);
   },
   method_add_block: (path, opts, print) => {
     const [method, block] = path.getValue().body;

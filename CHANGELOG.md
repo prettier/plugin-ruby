@@ -21,6 +21,18 @@ end.to raise_error
 
 should maintain its `do...end` and not switch to inline braces otherwise the brace might get associated with the `1`.
 
+- [@cbothner], [@kddeisz] - Long chains of method calls should be formatted one per line. For example:
+
+<!-- prettier-ignore -->
+```ruby
+Person
+  .select('people.id, people.name, comments.text')
+  .joins(:comments)
+  .where('comments.created_at > ?', 1.week.ago)
+```
+
+should maintain its formatting.
+
 ## [0.18.0] - 2020-03-17
 
 ### Added

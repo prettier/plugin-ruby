@@ -208,6 +208,17 @@ describe("method", () => {
     });
 
     describe("breaking", () => {
+      test("multiple calls get printed nicely", () => {
+        const content = ruby(`
+          Person
+            .select('people.id, people.name, comments.text')
+            .joins(:comments)
+            .where('comments.created_at > ?', 1.week.ago)
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
       describe("without trailing commas", () => {
         test("starting with no trailing comma stays", () =>
           expect(`foo(${long}, a${long})`).toChangeFormat(
