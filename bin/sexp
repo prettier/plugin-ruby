@@ -7,8 +7,6 @@ require 'pp'
 PP.prepend(
   Module.new do
     def pp_hash(obj)
-      pairs = obj.slice(*(obj.keys - %i[type char_start char_end start end]))
-
       group(1, '{', '}') do
         text obj[:type]
         group(1) do

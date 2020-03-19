@@ -1,5 +1,6 @@
 const parse = require("./parse");
 const print = require("./print");
+const comments = require("./comments");
 
 const haml = require("./haml");
 
@@ -99,7 +100,8 @@ module.exports = {
   },
   printers: {
     ruby: {
-      print
+      print,
+      handleComments: comments
     },
     haml: {
       embed: haml.embed,
