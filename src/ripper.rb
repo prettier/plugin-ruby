@@ -400,7 +400,11 @@ class RipperJS < Ripper
       end
 
       def on_comment(value)
-        @comments << { value: value[1..-1], char_start: char_pos, char_end: char_pos + value.length - 1 }
+        @comments << {
+          value: value[1..-1],
+          char_start: char_pos,
+          char_end: char_pos + value.length - 1
+        }
       end
 
       def on_embdoc_beg(value)
@@ -412,7 +416,12 @@ class RipperJS < Ripper
       end
 
       def on_embdoc_end(value)
-        @comments << @embdoc.merge!(value: @embdoc[:value] << value.chomp, char_end: char_pos + value.length - 1)
+        @comments <<
+          @embdoc.merge!(
+            value: @embdoc[:value] << value.chomp,
+            char_end: char_pos + value.length - 1
+          )
+
         @embdoc = nil
       end
 

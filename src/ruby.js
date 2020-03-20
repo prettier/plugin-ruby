@@ -101,7 +101,13 @@ module.exports = {
   printers: {
     ruby: {
       print,
-      handleComments: comments
+      handleComments: comments,
+      canAttachComment: () => true,
+      getCommentChildNodes: node => node.body,
+      printComment: (path, opts) => {
+        const { value } = path.getValue();
+        return `#${value}`;
+      }
     },
     haml: {
       embed: haml.embed,

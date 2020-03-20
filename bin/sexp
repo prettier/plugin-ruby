@@ -9,6 +9,7 @@ PP.prepend(
     def pp_hash(obj)
       group(1, '{', '}') do
         text obj[:type]
+        text "@#{obj[:char_start]}-#{obj[:char_end]}"
         group(1) do
           breakable ' '
           pp obj[:body]
