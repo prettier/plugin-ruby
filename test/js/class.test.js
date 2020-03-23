@@ -80,7 +80,7 @@ describe("class", () => {
 
   describe.each(["public", "protected", "private"])(
     "%s access control",
-    keyword => {
+    (keyword) => {
       test("basic", () => {
         const content = ruby(`
         class Prettier

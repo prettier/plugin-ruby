@@ -17,8 +17,8 @@ const parsers = {
   scss: "scss"
 };
 
-const replaceNewlines = doc =>
-  mapDoc(doc, currentDoc =>
+const replaceNewlines = (doc) =>
+  mapDoc(doc, (currentDoc) =>
     typeof currentDoc === "string" && currentDoc.includes("\n")
       ? concat(
           currentDoc

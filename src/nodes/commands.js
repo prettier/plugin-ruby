@@ -1,7 +1,7 @@
 const { align, concat, group, ifBreak, join, line } = require("../prettier");
 const { docLength, makeArgs, makeCall } = require("../utils");
 
-const hasDef = node =>
+const hasDef = (node) =>
   node.body[1].type === "args_add_block" &&
   node.body[1].body[0].type === "args" &&
   node.body[1].body[0].body[0] &&
@@ -20,7 +20,7 @@ const hasDef = node =>
 //
 // In this case the arguments are aligned to the left side as opposed to being
 // aligned with the `receive` call.
-const skipArgsAlign = path =>
+const skipArgsAlign = (path) =>
   ["to", "not_to"].includes(path.getValue().body[2].body);
 
 module.exports = {

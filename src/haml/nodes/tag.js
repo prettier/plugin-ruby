@@ -14,10 +14,10 @@ const getDynamicAttributes = (header, attributes) => {
   const pairs = attributes
     .slice(1, -2)
     .split(",")
-    .map(pair => pair.slice(1).split('" => '));
+    .map((pair) => pair.slice(1).split('" => '));
   const parts = [concat([pairs[0][0], "=", pairs[0][1]])];
 
-  pairs.slice(1).forEach(pair => {
+  pairs.slice(1).forEach((pair) => {
     parts.push(line, concat([pair[0], "=", pair[1]]));
   });
 
@@ -49,13 +49,13 @@ const getHashLabel = (key, value, opts) => {
 
 const getStaticAttributes = (header, attributes, opts) => {
   const keys = Object.keys(attributes).filter(
-    name => !["class", "id"].includes(name)
+    (name) => !["class", "id"].includes(name)
   );
 
   const getKeyValuePair = opts.preferHashLabels ? getHashLabel : getHashRocket;
   const parts = [getKeyValuePair(keys[0], attributes[keys[0]], opts)];
 
-  keys.slice(1).forEach(key => {
+  keys.slice(1).forEach((key) => {
     parts.push(",", line, getKeyValuePair(key, attributes[key], opts));
   });
 
@@ -84,7 +84,9 @@ const getHeader = (value, opts) => {
     );
   }
 
-  if (Object.keys(attributes).some(name => name !== "class" && name !== "id")) {
+  if (
+    Object.keys(attributes).some((name) => name !== "class" && name !== "id")
+  ) {
     parts.push(getStaticAttributes(parts.join("").length, attributes, opts));
   }
 

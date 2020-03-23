@@ -52,5 +52,8 @@
       "./test/js/setupTests.js"
     ],
     "testRegex": ".test.js$"
+  },
+  "prettier": {
+    "trailingComma": "none"
   }
 }

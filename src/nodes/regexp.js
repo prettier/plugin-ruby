@@ -7,7 +7,7 @@ module.exports = {
     const [contents, ending] = path.map(print, "body");
 
     const useBraces = contents.some(
-      content => typeof content === "string" && content.includes("/")
+      (content) => typeof content === "string" && content.includes("/")
     );
     const parts = [useBraces ? "%r{" : "/"]
       .concat(contents)

@@ -24,7 +24,7 @@ describe("patterns", () => {
       "0, [1, _] => bar"
     ];
 
-    test.each(cases)("%s", pattern => {
+    test.each(cases)("%s", (pattern) => {
       const content = ruby(`
         case foo
         in ${pattern}

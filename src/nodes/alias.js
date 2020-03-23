@@ -1,7 +1,7 @@
 const { concat, join } = require("../prettier");
 
-const usingSymbols = path => {
-  const [left, right] = path.getValue().body.map(node => node.body[0].type);
+const usingSymbols = (path) => {
+  const [left, right] = path.getValue().body.map((node) => node.body[0].type);
   return left === "symbol" && right === "symbol";
 };
 

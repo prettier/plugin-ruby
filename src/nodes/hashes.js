@@ -12,7 +12,7 @@ const { prefix, skipAssignIndent } = require("../utils");
 const nodeDive = (node, steps) => {
   let current = node;
 
-  steps.forEach(step => {
+  steps.forEach((step) => {
     current = current[step];
   });
 
@@ -29,7 +29,7 @@ const nodeDive = (node, steps) => {
 //
 // This function represents that check, as it determines if it can convert the
 // symbol node into a hash label.
-const isValidHashLabel = symbolLiteral => {
+const isValidHashLabel = (symbolLiteral) => {
   const label = symbolLiteral.body[0].body[0].body;
   return label.match(/^[_A-Za-z]/) && !label.endsWith("=");
 };

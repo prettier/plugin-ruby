@@ -1,13 +1,11 @@
 const { long, ruby } = require("./utils");
 
-describe.each(["while", "until"])("%s", keyword => {
+describe.each(["while", "until"])("%s", (keyword) => {
   test("aligns predicates", () =>
     expect(`foo ${keyword} ${long} || ${long}`).toChangeFormat(
       ruby(`
       ${keyword} ${long} ||
-          ${Array(keyword.length)
-            .fill()
-            .join(" ")}${long}
+          ${Array(keyword.length).fill().join(" ")}${long}
         foo
       end
     `)

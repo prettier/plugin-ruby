@@ -42,7 +42,7 @@ module.exports = {
 
     // It's possible in a when to just have empty void statements, in which case
     // we would skip adding the body.
-    if (!stmts.parts.every(part => !part)) {
+    if (!stmts.parts.every((part) => !part)) {
       parts.push(indent(concat([hardline, stmts])));
     }
 

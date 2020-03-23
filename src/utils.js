@@ -10,11 +10,11 @@ const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
 // If the node is a type of assignment or if the node is a paren and nested
 // inside that paren is a node that is a type of assignment.
-const containsAssignment = node =>
+const containsAssignment = (node) =>
   ["assign", "massign"].includes(node.type) ||
   (node.type === "paren" && node.body[0].body.some(containsAssignment));
 
-const docLength = doc => {
+const docLength = (doc) => {
   if (doc.length) {
     return doc.length;
   }
@@ -50,7 +50,7 @@ const hasAncestor = (path, types) => {
   return false;
 };
 
-const literal = value => () => value;
+const literal = (value) => () => value;
 
 const makeArgs = (path, opts, print, argsIndex) => {
   let argNodes = path.getValue().body[argsIndex];
@@ -103,13 +103,13 @@ const makeCall = (path, opts, print) => {
 
 const makeList = (path, opts, print) => path.map(print, "body");
 
-const prefix = value => (path, opts, print) =>
+const prefix = (value) => (path, opts, print) =>
   concat([value, path.call(print, "body", 0)]);
 
 const printComments = (printed, start, comments) => {
   let node = printed;
 
-  comments.forEach(comment => {
+  comments.forEach((comment) => {
     if (comment.start < start) {
       node = concat([
         comment.break ? breakParent : "",
@@ -129,7 +129,7 @@ const printComments = (printed, start, comments) => {
   return node;
 };
 
-const skipAssignIndent = node =>
+const skipAssignIndent = (node) =>
   ["array", "hash", "heredoc", "lambda", "regexp_literal"].includes(
     node.type
   ) ||

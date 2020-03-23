@@ -1,6 +1,6 @@
 const { concat, group, indent, line } = require("../prettier");
 
-const printHook = name => (path, opts, print) =>
+const printHook = (name) => (path, opts, print) =>
   group(
     concat([
       `${name} {`,

@@ -1,7 +1,7 @@
 const { concat, group, join, line } = require("../prettier");
 const { literal } = require("../utils");
 
-const printGenericRestParam = symbol => (path, opts, print) =>
+const printGenericRestParam = (symbol) => (path, opts, print) =>
   path.getValue().body[0]
     ? concat([symbol, path.call(print, "body", 0)])
     : symbol;

@@ -1,4 +1,4 @@
-const isCall = node => ["::", "."].includes(node) || node.type === "@period";
+const isCall = (node) => ["::", "."].includes(node) || node.type === "@period";
 
 // If you have a simple block that only calls a method on the single required
 // parameter that is passed to it, then you can replace that block with the
@@ -11,7 +11,7 @@ const isCall = node => ["::", "."].includes(node) || node.type === "@period";
 //     [1, 2, 3].map(&:to_s)
 //
 // This works with `do` blocks as well.
-const toProc = node => {
+const toProc = (node) => {
   if (!node) {
     return null;
   }

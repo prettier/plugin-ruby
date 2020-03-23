@@ -9,19 +9,19 @@ const {
   softline
 } = require("../prettier");
 
-const isStringArray = args =>
+const isStringArray = (args) =>
   args.body.every(
-    arg =>
+    (arg) =>
       arg.type === "string_literal" &&
       arg.body[0].body.length === 1 &&
       arg.body[0].body[0].type === "@tstring_content" &&
       !arg.body[0].body[0].body.includes(" ")
   );
 
-const isSymbolArray = args =>
-  args.body.every(arg => arg.type === "symbol_literal");
+const isSymbolArray = (args) =>
+  args.body.every((arg) => arg.type === "symbol_literal");
 
-const makeArray = start => (path, opts, print) =>
+const makeArray = (start) => (path, opts, print) =>
   [start].concat(path.map(print, "body"));
 
 const getSpecialArrayParts = (path, print, args) =>
@@ -44,7 +44,7 @@ const printAref = (path, opts, print) =>
     ])
   );
 
-const printSpecialArray = parts =>
+const printSpecialArray = (parts) =>
   group(
     concat([
       parts[0],

@@ -15,18 +15,18 @@ const { concatBody, empty, makeList, prefix, surround } = require("../utils");
 // quote the user chose. (If they chose single quotes, then double quoting
 // would activate the escape sequence, and if they chose double quotes, then
 // single quotes would deactivate it.)
-const isQuoteLocked = string =>
+const isQuoteLocked = (string) =>
   string.body.some(
-    part =>
+    (part) =>
       part.type === "@tstring_content" &&
       (part.body.includes("#{") || part.body.includes("\\"))
   );
 
 // A string is considered to be able to use single quotes if it contains only
 // plain string content and that content does not contain a single quote.
-const isSingleQuotable = string =>
+const isSingleQuotable = (string) =>
   string.body.every(
-    part => part.type === "@tstring_content" && !part.body.includes("'")
+    (part) => part.type === "@tstring_content" && !part.body.includes("'")
   );
 
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
@@ -61,7 +61,7 @@ const quotePairs = {
   "<": ">"
 };
 
-const getClosingQuote = quote => {
+const getClosingQuote = (quote) => {
   if (!quote.startsWith("%")) {
     return quote;
   }

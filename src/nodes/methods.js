@@ -9,7 +9,7 @@ const {
 } = require("../prettier");
 const { first, literal } = require("../utils");
 
-const printMethod = offset => (path, opts, print) => {
+const printMethod = (offset) => (path, opts, print) => {
   const [_name, params, body] = path.getValue().body.slice(offset);
   const declaration = ["def "];
 
@@ -21,7 +21,7 @@ const printMethod = offset => (path, opts, print) => {
 
   // In case there are no parens but there are arguments
   const parens =
-    params.type === "params" && params.body.some(paramType => paramType);
+    params.type === "params" && params.body.some((paramType) => paramType);
 
   declaration.push(
     path.call(print, "body", offset),

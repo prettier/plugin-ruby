@@ -37,7 +37,7 @@ describe("comments", () => {
       "until foo"
     ];
 
-    describe.each(commentBlocks)("%s blocks", start => {
+    describe.each(commentBlocks)("%s blocks", (start) => {
       test("as the only statement", () => {
         const content = ruby(`
           ${start}

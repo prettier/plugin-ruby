@@ -10,7 +10,7 @@ const {
 } = require("../prettier");
 const { empty, hasAncestor } = require("../utils");
 
-const printBlock = braces => (path, opts, print) => {
+const printBlock = (braces) => (path, opts, print) => {
   const [variables, statements] = path.getValue().body;
   const stmts =
     statements.type === "stmts" ? statements.body : statements.body[0].body;
@@ -38,7 +38,7 @@ const printBlock = braces => (path, opts, print) => {
   // comment.
   if (
     stmts.length > 1 &&
-    stmts.filter(stmt => stmt.type !== "@comment").length === 1
+    stmts.filter((stmt) => stmt.type !== "@comment").length === 1
   ) {
     return concat([breakParent, doBlock]);
   }

@@ -31,7 +31,7 @@ describe("hash", () => {
     });
   });
 
-  describe.each(["<<-HERE", "<<~HERE"])("%s heredocs as values", start => {
+  describe.each(["<<-HERE", "<<~HERE"])("%s heredocs as values", (start) => {
     test("as the first value", () => {
       const content = ruby(`
         {

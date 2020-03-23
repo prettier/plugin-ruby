@@ -71,7 +71,7 @@ describe("array", () => {
   test("breaking maintains calls on the end", () =>
     expect(`[${long}].freeze`).toChangeFormat(`[\n  ${long}\n].freeze`));
 
-  describe.each(["<<-HERE", "<<~HERE"])("%s heredocs as elements", start => {
+  describe.each(["<<-HERE", "<<~HERE"])("%s heredocs as elements", (start) => {
     test("as the first value", () => {
       const content = ruby(`
         [

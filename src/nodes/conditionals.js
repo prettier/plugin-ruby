@@ -23,7 +23,7 @@ const printWithAddition = (keyword, path, print, { breaking = false } = {}) =>
 // For the unary `not` operator, we need to explicitly add parentheses to it in
 // order for it to be valid from within a ternary. Otherwise if the clause of
 // the ternary isn't a unary `not`, we can just pass it along.
-const printTernaryClause = clause => {
+const printTernaryClause = (clause) => {
   if (clause.type === "concat") {
     const [part] = clause.parts;
 
@@ -78,7 +78,7 @@ const printTernary = (path, _opts, print) => {
 // Prints an `if_mod` or `unless_mod` node. Because it was previously in the
 // modifier form, we're guaranteed to not have an additional node, so we can
 // just work with the predicate and the body.
-const printSingle = keyword => (path, { inlineConditionals }, print) => {
+const printSingle = (keyword) => (path, { inlineConditionals }, print) => {
   const multiline = concat([
     `${keyword} `,
     align(keyword.length + 1, path.call(print, "body", 0)),
@@ -88,7 +88,8 @@ const printSingle = keyword => (path, { inlineConditionals }, print) => {
 
   const [_predicate, stmts] = path.getValue().body;
   const hasComments =
-    stmts.type === "stmts" && stmts.body.some(stmt => stmt.type === "@comment");
+    stmts.type === "stmts" &&
+    stmts.body.some((stmt) => stmt.type === "@comment");
 
   if (!inlineConditionals || hasComments) {
     return multiline;
@@ -152,7 +153,7 @@ const noTernary = [
 // Certain expressions cannot be reduced to a ternary without adding parens
 // around them. In this case we say they cannot be ternaried and default instead
 // to breaking them into multiple lines.
-const canTernaryStmts = stmts => {
+const canTernaryStmts = (stmts) => {
   if (stmts.body.length !== 1) {
     return false;
   }
@@ -175,7 +176,7 @@ const canTernaryStmts = stmts => {
 // is of the "else" type. Both the body of the main node and the body of the
 // additional node must have only one statement, and that statement list must
 // pass the `canTernaryStmts` check.
-const canTernary = path => {
+const canTernary = (path) => {
   const [_pred, stmts, addition] = path.getValue().body;
 
   return (
@@ -186,7 +187,7 @@ const canTernary = path => {
 };
 
 // A normalized print function for both `if` and `unless` nodes.
-const printConditional = keyword => (path, { inlineConditionals }, print) => {
+const printConditional = (keyword) => (path, { inlineConditionals }, print) => {
   if (canTernary(path)) {
     let ternaryParts = [path.call(print, "body", 0), " ? "].concat(
       printTernaryClauses(

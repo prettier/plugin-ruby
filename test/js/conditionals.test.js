@@ -24,7 +24,7 @@ describe("conditionals", () => {
   });
 
   describe("when inline allowed", () => {
-    describe.each(["if", "unless"])("%s keyword", keyword => {
+    describe.each(["if", "unless"])("%s keyword", (keyword) => {
       test("inline stays", () => expect(`1 ${keyword} a`).toMatchFormat());
 
       test("multi line changes", () =>
@@ -97,9 +97,7 @@ describe("conditionals", () => {
         expect(`foo ${keyword} ${long} || ${long}a`).toChangeFormat(
           ruby(`
             ${keyword} ${long} ||
-                ${Array(keyword.length)
-                  .fill()
-                  .join(" ")}${long}a
+                ${Array(keyword.length).fill().join(" ")}${long}a
               foo
             end
           `)
@@ -113,7 +111,7 @@ describe("conditionals", () => {
   });
 
   describe("when inline not allowed", () => {
-    describe.each(["if", "unless"])("%s keyword", keyword => {
+    describe.each(["if", "unless"])("%s keyword", (keyword) => {
       test("inline changes", () =>
         expect(`1 ${keyword} a`).toChangeFormat(`${keyword} a\n  1\nend`, {
           inlineConditionals: false
@@ -187,9 +185,7 @@ describe("conditionals", () => {
         expect(`foo ${keyword} ${long} || ${long}a`).toChangeFormat(
           ruby(`
           ${keyword} ${long} ||
-              ${Array(keyword.length)
-                .fill()
-                .join(" ")}${long}a
+              ${Array(keyword.length).fill().join(" ")}${long}a
             foo
           end
         `)

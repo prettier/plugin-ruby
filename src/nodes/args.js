@@ -62,7 +62,7 @@ module.exports = {
     // method_add_block node, and if they are that that node has a block
     // associated with it. If it does, we're going to attempt to transform it
     // into the to_proc shorthand and add it to the list of arguments.
-    [1, 2, 3].find(parent => {
+    [1, 2, 3].find((parent) => {
       const parentNode = path.getParentNode(parent);
       blockNode =
         parentNode &&

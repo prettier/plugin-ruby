@@ -21,7 +21,7 @@ module.exports = {
       paramsConcat = path.call(print, "body", 0, "body", 0);
     }
 
-    const noParams = params.body.every(type => !type);
+    const noParams = params.body.every((type) => !type);
     const inlineLambda = concat([
       "->",
       noParams ? "" : concat(["(", paramsConcat, ")"]),

@@ -5,9 +5,7 @@ const readline = require("readline");
 
 // Set RUBY_VERSION so certain tests only run for certain versions
 const args = ["--disable-gems", "-e", "puts RUBY_VERSION"];
-process.env.RUBY_VERSION = spawnSync("ruby", args)
-  .stdout.toString()
-  .trim();
+process.env.RUBY_VERSION = spawnSync("ruby", args).stdout.toString().trim();
 
 // eslint-disable-next-line no-underscore-dangle
 const { formatAST } = prettier.__debug;
@@ -21,10 +19,10 @@ const rl = readline.createInterface({
 });
 
 const checkFormat = (before, after, config) =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     const opts = Object.assign({ parser: "ruby", plugins: ["."] }, config);
 
-    rl.question(`${before}\n---\n`, response => {
+    rl.question(`${before}\n---\n`, (response) => {
       const { formatted } = formatAST(JSON.parse(response), opts);
 
       resolve({
@@ -34,7 +32,7 @@ const checkFormat = (before, after, config) =>
     });
   });
 
-const realFormat = content =>
+const realFormat = (content) =>
   prettier.format(content, {
     parser: "ruby",
     plugins: ["."]
