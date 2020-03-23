@@ -3,7 +3,6 @@
 // directly, as it's been shipped with the gem.
 const source = process.env.RBPRETTIER ? "../node_modules/prettier" : "prettier";
 
-// eslint-disable-next-line import/no-dynamic-require
 const prettier = require(source);
 
 // Just combine all the things into one big object so that we can import
