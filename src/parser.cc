@@ -2,6 +2,8 @@
 #include <ruby.h>
 
 namespace parser {
+  using node::AddEnvironmentCleanupHook;
+
   using v8::Context;
   using v8::Isolate;
   using v8::Local;
@@ -20,7 +22,7 @@ namespace parser {
   VALUE rb_cParser;
   ID rb_parse;
 
-  Local<Value> translate(Isolate *isolate, Local<Context> context, VALUE value) {
+  Local<Value> Translate(Isolate *isolate, Local<Context> context, VALUE value) {
     switch (TYPE(value)) {
       case T_SYMBOL:
         return String::NewFromUtf8(isolate, rb_id2name(SYM2ID(value)), NewStringType::kNormal).ToLocalChecked();
@@ -41,7 +43,7 @@ namespace parser {
           (void) array->Set(
             context,
             idx,
-            translate(isolate, context, rb_ary_entry(value, idx))
+            Translate(isolate, context, rb_ary_entry(value, idx))
           );
         }
 
@@ -61,8 +63,8 @@ namespace parser {
 
           (void) object->Set(
             context,
-            translate(isolate, context, key),
-            translate(isolate, context, rb_hash_aref(value, key))
+            Translate(isolate, context, key),
+            Translate(isolate, context, rb_hash_aref(value, key))
           );
         }
 
@@ -73,26 +75,23 @@ namespace parser {
     return Null(isolate);
   }
 
-  void throwException(Isolate *isolate, const char *message) {
+  void ThrowException(Isolate *isolate, const char *message) {
     isolate->ThrowException(
       Exception::TypeError(String::NewFromUtf8(isolate, message, NewStringType::kNormal).ToLocalChecked())
     );
   }
 
-  void setup(const FunctionCallbackInfo<Value>& args) {
+  void Setup(const FunctionCallbackInfo<Value>& args) {
     Isolate* isolate = args.GetIsolate();
     Local<Context> context = isolate->GetCurrentContext();
 
     if (args.Length() != 1) {
-      return throwException(isolate, "Wrong number of arguments");
+      return ThrowException(isolate, "Wrong number of arguments");
     }
 
     if (!args[0]->IsString()) {
-      return throwException(isolate, "Filepath must be a string");
+      return ThrowException(isolate, "Filepath must be a string");
     }
-
-    ruby_init();
-    ruby_init_loadpath();
 
     String::Utf8Value filepath(isolate, args[0]->ToString(context).ToLocalChecked());
     rb_require(*filepath);
@@ -101,37 +100,44 @@ namespace parser {
     rb_parse = rb_intern("parse");
   }
 
-  void teardown(const FunctionCallbackInfo<Value>& args) {
+  void Teardown(void *) {
     ruby_cleanup(0);
   }
 
-  void parse(const FunctionCallbackInfo<Value>& args) {
+  void Parse(const FunctionCallbackInfo<Value>& args) {
     Isolate* isolate = args.GetIsolate();
     Local<Context> context = isolate->GetCurrentContext();
 
     if (args.Length() != 1) {
-      return throwException(isolate, "Wrong number of arguments");
+      return ThrowException(isolate, "Wrong number of arguments");
     }
 
     if (!args[0]->IsString()) {
-      return throwException(isolate, "Code must be a string");
+      return ThrowException(isolate, "Code must be a string");
     }
 
     String::Utf8Value code(isolate, args[0]->ToString(context).ToLocalChecked());
     VALUE root = rb_funcall(rb_cParser, rb_parse, 1, rb_str_new2(*code));
 
     if (root == Qnil) {
-      return throwException(isolate, "Invalid Ruby code");
+      return ThrowException(isolate, "Invalid Ruby code");
     }
 
-    args.GetReturnValue().Set(translate(isolate, context, root));
+    args.GetReturnValue().Set(Translate(isolate, context, root));
   }
 
-  void init(Local<Object> exports) {
-    NODE_SET_METHOD(exports, "setup", setup);
-    NODE_SET_METHOD(exports, "teardown", teardown);
-    NODE_SET_METHOD(exports, "parse", parse);
+  void Initialize(Local<Object> exports) {
+    Isolate* isolate = exports->GetIsolate();
+
+    NODE_SET_METHOD(exports, "setup", Setup);
+    NODE_SET_METHOD(exports, "parse", Parse);
+
+    ruby_init();
+    ruby_script("prettier-ruby-parser");
+    ruby_init_loadpath();
+
+    AddEnvironmentCleanupHook(isolate, Teardown, NULL);
   }
 
-  NODE_MODULE(NODE_GYP_MODULE_NAME, init);
+   NODE_MODULE(NODE_GYP_MODULE_NAME, Initialize)
 }

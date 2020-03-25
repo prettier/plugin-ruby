@@ -1,7 +1,6 @@
 const { spawnSync } = require("child_process");
 const path = require("path");
 const prettier = require("prettier");
-const { teardown } = require("../../build/Release/parser");
 
 // Set RUBY_VERSION so certain tests only run for certain versions
 const args = ["--disable-gems", "-e", "puts RUBY_VERSION"];
@@ -9,18 +8,16 @@ process.env.RUBY_VERSION = spawnSync("ruby", args).stdout.toString().trim();
 
 const checkFormat = (before, after, config) =>
   new Promise((resolve) => {
-    const opts = Object.assign({ parser: "ruby", plugins: ["."] }, config);
-    const formatted = prettier.format(before, opts);
+    const formatted = prettier.format(
+      before,
+      Object.assign({ parser: "ruby", plugins: ["."] }, config)
+    );
 
     resolve({
       pass: formatted === `${after}\n`,
       message: () => `Expected:\n${after}\nReceived:\n${formatted}`
     });
   });
-
-afterAll(() => {
-  teardown();
-});
 
 const realFormat = (content) =>
   prettier.format(content, {
