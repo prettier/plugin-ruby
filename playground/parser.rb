@@ -12,10 +12,9 @@ if (major < 2) || ((major == 2) && (minor < 5))
   exit 1
 end
 
-require 'json' unless defined?(JSON)
 require 'ripper'
 
-class RipperJS < Ripper
+class Parser < Ripper
   attr_reader :source, :lines, :__end__
 
   def initialize(source, *args)
@@ -24,6 +23,10 @@ class RipperJS < Ripper
     @source = source
     @lines = source.split("\n")
     @__end__ = nil
+  end
+
+  def self.parse(source)
+    new(source).parse
   end
 
   private
@@ -475,7 +478,7 @@ class RipperJS < Ripper
       def on_comment(body)
         sexp = { type: :@comment, body: body.chomp, start: lineno, end: lineno }
 
-        case RipperJS.lex_state_name(state).gsub('EXPR_', '')
+        case Parser.lex_state_name(state).gsub('EXPR_', '')
         when 'END', 'ARG|LABELED', 'ENDFN'
           last_sexp.merge!(comments: [sexp])
         when 'CMDARG', 'END|ENDARG', 'ENDARG', 'ARG', 'FNAME|FITEM', 'CLASS',
@@ -564,7 +567,7 @@ class RipperJS < Ripper
 
       def on_comment(body)
         super(body).tap do |sexp|
-          lex_state = RipperJS.lex_state_name(state).gsub('EXPR_', '')
+          lex_state = Parser.lex_state_name(state).gsub('EXPR_', '')
           block_comments << sexp if lex_state == 'BEG'
         end
       end
@@ -793,7 +796,7 @@ end
 # stdin and report back the AST over stdout.
 
 if $0 == __FILE__
-  builder = RipperJS.new($stdin.read)
+  builder = Parser.new($stdin.read)
   response = builder.parse
 
   if !response || builder.error?
@@ -806,5 +809,6 @@ if $0 == __FILE__
     exit 1
   end
 
+  require 'json' unless defined?(JSON)
   puts JSON.fast_generate(response)
 end

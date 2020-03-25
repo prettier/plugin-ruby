@@ -1,4 +1,5 @@
 /.eslintcache
+/build/
 /coverage/
 /node_modules/
 /yarn-error.log

@@ -12,10 +12,9 @@ if (major < 2) || ((major == 2) && (minor < 5))
   exit 1
 end
 
-require 'json' unless defined?(JSON)
 require 'ripper'
 
-class RipperJS < Ripper
+class Parser < Ripper
   attr_reader :source, :lines, :__end__
 
   def initialize(source, *args)
@@ -24,6 +23,10 @@ class RipperJS < Ripper
     @source = source
     @lines = source.split("\n")
     @__end__ = nil
+  end
+
+  def self.parse(source)
+    new(source).parse
   end
 
   private
@@ -293,7 +296,8 @@ class RipperJS < Ripper
           super(*body).merge!(
             start: node[:start],
             char_start: node[:char_start],
-            char_end: char_pos
+            char_end: char_pos,
+            quote: node[:body]
           )
         end
       end
@@ -322,14 +326,28 @@ class RipperJS < Ripper
       # child node.
       %i[dyna_symbol symbol_literal].each do |event|
         define_method(:"on_#{event}") do |*body|
-          char_start =
+          options =
             if scanner_events.any? { |sevent| sevent[:type] == :@symbeg }
-              find_scanner_event(:@symbeg)[:char_start]
+              symbeg = find_scanner_event(:@symbeg)
+
+              {
+                char_start: symbeg[:char_start],
+                char_end: char_pos,
+                quote: symbeg[:body][1]
+              }
+            elsif scanner_events.any? { |sevent| sevent[:type] == :@label_end }
+              label_end = find_scanner_event(:@label_end)
+
+              {
+                char_start: char_start_for(body),
+                char_end: char_pos,
+                quote: label_end[:body][0]
+              }
             else
-              char_start_for(body)
+              { char_start: char_start_for(body), char_end: char_pos }
             end
 
-          super(*body).merge!(char_start: char_start, char_end: char_pos)
+          super(*body).merge!(options)
         end
       end
 
@@ -460,7 +478,7 @@ class RipperJS < Ripper
       def on_comment(body)
         sexp = { type: :@comment, body: body.chomp, start: lineno, end: lineno }
 
-        case RipperJS.lex_state_name(state).gsub('EXPR_', '')
+        case Parser.lex_state_name(state).gsub('EXPR_', '')
         when 'END', 'ARG|LABELED', 'ENDFN'
           last_sexp.merge!(comments: [sexp])
         when 'CMDARG', 'END|ENDARG', 'ENDARG', 'ARG', 'FNAME|FITEM', 'CLASS',
@@ -549,7 +567,7 @@ class RipperJS < Ripper
 
       def on_comment(body)
         super(body).tap do |sexp|
-          lex_state = RipperJS.lex_state_name(state).gsub('EXPR_', '')
+          lex_state = Parser.lex_state_name(state).gsub('EXPR_', '')
           block_comments << sexp if lex_state == 'BEG'
         end
       end
@@ -633,6 +651,8 @@ class RipperJS < Ripper
     end
   )
 
+  # This module contains miscellaneous fixes required to get the right
+  # structure.
   prepend(
     Module.new do
       private
@@ -661,18 +681,6 @@ class RipperJS < Ripper
 
       def on_program(*body)
         super(*body).tap { |node| node[:body][0][:body] << __end__ if __end__ }
-      end
-
-      # Adds the used quote type onto string nodes. This is necessary because
-      # we're going to have to stick to whatever quote the user chose if there
-      # are escape sequences within the string. For example, if you have '\n'
-      # we can't switch to double quotes without changing what it means.
-      def on_tstring_end(quote)
-        last_sexp.merge!(quote: quote)
-      end
-
-      def on_label_end(quote)
-        last_sexp.merge!(quote: quote[0]) # quote is ": or ':
       end
 
       # Normally access controls are reported as vcall nodes. This creates a
@@ -788,7 +796,7 @@ end
 # stdin and report back the AST over stdout.
 
 if $0 == __FILE__
-  builder = RipperJS.new($stdin.read)
+  builder = Parser.new($stdin.read)
   response = builder.parse
 
   if !response || builder.error?
@@ -801,5 +809,6 @@ if $0 == __FILE__
     exit 1
   end
 
+  require 'json' unless defined?(JSON)
   puts JSON.fast_generate(response)
 end

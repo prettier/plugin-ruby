@@ -1,1 +1,6 @@
+/.bundle/
+/.github/
+/build/
 /coverage/
+/exe/
+/pkg/

@@ -1,9 +1,11 @@
 /.bundle/
 /.github/
+/build/
 /coverage/
 /pkg/
 /playground/
 /vendor/
+/test.rb
 
 /.all-contributorsrc
 /.eslintcache

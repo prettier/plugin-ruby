@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-diff src/ripper.rb playground/ripper.rb > /dev/null
+diff src/parser.rb playground/parser.rb > /dev/null
 
 if [ $? -eq 1 ]; then
-  echo "playground/ripper.rb out of sync with src/ripper.rb"
+  echo "playground/parser.rb out of sync with src/parser.rb"
   exit 1
 fi
 

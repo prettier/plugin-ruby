@@ -1,34 +1,19 @@
 const { spawn, spawnSync } = require("child_process");
 const path = require("path");
 const prettier = require("prettier");
-const readline = require("readline");
 
 // Set RUBY_VERSION so certain tests only run for certain versions
 const args = ["--disable-gems", "-e", "puts RUBY_VERSION"];
 process.env.RUBY_VERSION = spawnSync("ruby", args).stdout.toString().trim();
 
-// eslint-disable-next-line no-underscore-dangle
-const { formatAST } = prettier.__debug;
-
-const parser = spawn("ruby", ["./test/js/parser.rb"]);
-afterAll(() => parser.kill());
-
-const rl = readline.createInterface({
-  input: parser.stdout,
-  output: parser.stdin
-});
-
 const checkFormat = (before, after, config) =>
   new Promise((resolve) => {
     const opts = Object.assign({ parser: "ruby", plugins: ["."] }, config);
+    const formatted = prettier.format(before, opts);
 
-    rl.question(`${before}\n---\n`, (response) => {
-      const { formatted } = formatAST(JSON.parse(response), opts);
-
-      resolve({
-        pass: formatted === `${after}\n`,
-        message: () => `Expected:\n${after}\nReceived:\n${formatted}`
-      });
+    resolve({
+      pass: formatted === `${after}\n`,
+      message: () => `Expected:\n${after}\nReceived:\n${formatted}`
     });
   });
 

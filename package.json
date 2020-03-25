@@ -4,6 +4,8 @@
   "description": "prettier plugin for the Ruby programming language",
   "main": "src/ruby.js",
   "scripts": {
+    "build": "node-gyp rebuild",
+    "clean": "node-gyp clean",
     "lint": "eslint --cache .",
     "print": "prettier --plugin=.",
     "test": "jest"
@@ -25,7 +27,8 @@
     "all-contributors-cli": "^6.12.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.9.0",
-    "jest": "^25.1.0"
+    "jest": "^25.1.0",
+    "node-gyp": "^6.1.0"
   },
   "eslintConfig": {
     "extends": [

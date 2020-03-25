@@ -27,4 +27,4 @@ curl -X POST -d 'foo' https://prettier-ruby.herokuapp.com
 
 ## Deploy
 
-To deploy this app to heroku, use the `playground/deploy` bash script. Basically it just `git push`s to heroku using the `playground` subtree, provided the `playground/ripper.rb` file is synced up with the one from `src/ripper.rb`.
+To deploy this app to heroku, use the `playground/deploy` bash script. Basically it just `git push`s to heroku using the `playground` subtree, provided the `playground/parser.rb` file is synced up with the one from `src/parser.rb`.

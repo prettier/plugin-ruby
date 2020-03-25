@@ -1,4 +1,6 @@
+/.bundle/
 /.github/
+/build/
 /coverage/
 /exe/
 /node_modules/
@@ -6,6 +8,7 @@
 /pkg/
 /playground/
 /test/
+/test.rb
 
 /Gemfile*
 /Rakefile

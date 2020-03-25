@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require File.expand_path(File.join('..', 'src', 'ripper.rb'), __dir__)
+require File.expand_path(File.join('..', 'src', 'parser.rb'), __dir__)
 
 require 'pp'
 
@@ -21,4 +21,4 @@ PP.prepend(
 )
 
 source = File.file?(ARGV[0]) ? File.read(ARGV[0]) : ARGV[0].gsub('\\n', "\n")
-pp RipperJS.new(source).parse
+pp Parser.parse(source)

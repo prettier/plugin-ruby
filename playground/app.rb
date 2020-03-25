@@ -7,7 +7,7 @@
 require 'bundler/setup'
 require 'sinatra'
 
-require_relative 'ripper'
+require_relative 'parser'
 
 class App < Sinatra::Base
   get '/' do
@@ -15,7 +15,7 @@ class App < Sinatra::Base
   end
 
   post '/' do
-    builder = RipperJS.new(request.body.read)
+    builder = Parser.new(request.body.read)
     response = builder.parse
 
     if !response || builder.error?
