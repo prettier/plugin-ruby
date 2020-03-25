@@ -101,6 +101,10 @@ namespace parser {
     rb_parse = rb_intern("parse");
   }
 
+  void teardown(const FunctionCallbackInfo<Value>& args) {
+    ruby_cleanup(0);
+  }
+
   void parse(const FunctionCallbackInfo<Value>& args) {
     Isolate* isolate = args.GetIsolate();
     Local<Context> context = isolate->GetCurrentContext();
@@ -125,6 +129,7 @@ namespace parser {
 
   void init(Local<Object> exports) {
     NODE_SET_METHOD(exports, "setup", setup);
+    NODE_SET_METHOD(exports, "teardown", teardown);
     NODE_SET_METHOD(exports, "parse", parse);
   }
 

@@ -1,6 +1,7 @@
-const { spawn, spawnSync } = require("child_process");
+const { spawnSync } = require("child_process");
 const path = require("path");
 const prettier = require("prettier");
+const { teardown } = require("../../build/Release/parser");
 
 // Set RUBY_VERSION so certain tests only run for certain versions
 const args = ["--disable-gems", "-e", "puts RUBY_VERSION"];
@@ -16,6 +17,10 @@ const checkFormat = (before, after, config) =>
       message: () => `Expected:\n${after}\nReceived:\n${formatted}`
     });
   });
+
+afterAll(() => {
+  teardown();
+});
 
 const realFormat = (content) =>
   prettier.format(content, {
