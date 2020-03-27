@@ -18,25 +18,32 @@ const rl = readline.createInterface({
   output: parser.stdin
 });
 
+const realFormat = (content, config = {}) => prettier.format(
+  content,
+  Object.assign({ parser: "ruby", plugins: ["."] }, config)
+);
+
 const checkFormat = (before, after, config) =>
   new Promise((resolve) => {
-    const opts = Object.assign({ parser: "ruby", plugins: ["."] }, config);
+    if (before.includes("#")) {
+      // If the source includes an #, then this test has a comment in it.
+      // Unfortunately, formatAST ignores comments and doesn't print them at
+      // all, so we can't call it and check against the output. In this case,
+      // we need to instead go through the normal format function and spawn a
+      // process.
+      resolve(realFormat(before, config));
+    } else {
+      const opts = Object.assign({ parser: "ruby", plugins: ["."] }, config);
 
-    rl.question(`${before}\n---\n`, (response) => {
-      const { formatted } = formatAST(JSON.parse(response), opts);
-
-      resolve({
-        pass: formatted === `${after}\n`,
-        message: () => `Expected:\n${after}\nReceived:\n${formatted}`
+      rl.question(`${before}\n---\n`, (response) => {
+        const { formatted } = formatAST(JSON.parse(response), opts);
+        resolve(formatted);
       });
-    });
-  });
-
-const realFormat = (content) =>
-  prettier.format(content, {
-    parser: "ruby",
-    plugins: ["."]
-  });
+    }
+  }).then((formatted) => ({
+    pass: formatted === `${after}\n`,
+    message: () => `Expected:\n${after}\nReceived:\n${formatted}`
+  }));
 
 expect.extend({
   toChangeFormat(before, after, config = {}) {
