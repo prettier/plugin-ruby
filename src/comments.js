@@ -1,13 +1,14 @@
-const { addLeadingComment } = require("./prettier");
-
-const isEmptyStmts = (node) =>
-  node.type === "stmts" &&
-  node.body.length === 1 &&
-  node.body[0].type === "void_stmt";
+const { addTrailingComment } = require("./prettier");
+const { isEmptyStmts } = require("./utils");
 
 const handleOwnLineComment = (comment, text, opts, ast, isLastComment) => {
   if (isEmptyStmts(comment.precedingNode)) {
-    addLeadingComment(comment.precedingNode, comment);
+    addTrailingComment(comment.precedingNode, comment);
+    return true;
+  }
+
+  if (isEmptyStmts(comment.followingNode)) {
+    addTrailingComment(comment.followingNode, comment);
     return true;
   }
 

@@ -8,7 +8,7 @@ const {
   indent,
   softline
 } = require("../prettier");
-const { containsAssignment } = require("../utils");
+const { containsAssignment, isEmptyStmts } = require("../utils");
 
 const printWithAddition = (keyword, path, print, { breaking = false } = {}) =>
   concat([
@@ -79,27 +79,31 @@ const printTernary = (path, _opts, print) => {
 // modifier form, we're guaranteed to not have an additional node, so we can
 // just work with the predicate and the body.
 const printSingle = (keyword) => (path, { inlineConditionals }, print) => {
-  const multiline = concat([
+  const [_predicate, statements] = path.getValue().body;
+  const printedPredicate = path.call(print, "body", 0);
+  const printedStatements = path.call(print, "body", 1);
+
+  const multilineParts = [
     `${keyword} `,
-    align(keyword.length + 1, path.call(print, "body", 0)),
-    indent(concat([softline, path.call(print, "body", 1)])),
+    align(keyword.length + 1, printedPredicate),
+    indent(concat([softline, printedStatements])),
     concat([softline, "end"])
-  ]);
+  ];
 
-  const [_predicate, stmts] = path.getValue().body;
-  const hasComments =
-    stmts.type === "stmts" &&
-    stmts.body.some((stmt) => stmt.type === "@comment");
-
-  if (!inlineConditionals || hasComments) {
-    return multiline;
+  // If the body of the conditional is empty but it has comments, then we don't
+  // want to print a newline before we print the comments, because it will
+  // result in an extra line in the body.
+  if (isEmptyStmts(statements) && statements.comments) {
+    multilineParts[2] = indent(printedStatements);
   }
 
-  let inlineParts = [
-    path.call(print, "body", 1),
-    ` ${keyword} `,
-    path.call(print, "body", 0)
-  ];
+  // If we do not allow modifier form conditionals or there are comments inside
+  // of the body of the conditional, then we must print in the multiline form.
+  if (!inlineConditionals || statements.comments) {
+    return concat(multilineParts);
+  }
+
+  let inlineParts = [printedStatements, ` ${keyword} `, printedPredicate];
 
   // If the return value of this conditional expression is being assigned to
   // anything besides a local variable then we can't inline the entire
@@ -118,8 +122,7 @@ const printSingle = (keyword) => (path, { inlineConditionals }, print) => {
     inlineParts = ["("].concat(inlineParts).concat(")");
   }
 
-  const inline = concat(inlineParts);
-  return group(ifBreak(multiline, inline));
+  return group(ifBreak(concat(multilineParts), concat(inlineParts)));
 };
 
 const noTernary = [
@@ -206,7 +209,7 @@ const printConditional = (keyword) => (path, { inlineConditionals }, print) => {
     );
   }
 
-  const [predicate, statements, addition] = path.getValue().body;
+  const [predicate, stmts, addition] = path.getValue().body;
 
   // If there's an additional clause that wasn't matched earlier, we know we
   // can't go for the inline option.
@@ -216,7 +219,7 @@ const printConditional = (keyword) => (path, { inlineConditionals }, print) => {
 
   // If the body of the conditional is empty, then we explicitly have to use the
   // block form.
-  if (statements.type === "stmts" && statements.body[0].type === "void_stmt") {
+  if (isEmptyStmts(stmts) && !stmts.comments) {
     return concat([
       `${keyword} `,
       align(keyword.length + 1, path.call(print, "body", 0)),

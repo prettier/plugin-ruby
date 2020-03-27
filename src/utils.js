@@ -50,6 +50,11 @@ const hasAncestor = (path, types) => {
   return false;
 };
 
+const isEmptyStmts = node =>
+  node.type === "stmts" &&
+  node.body.length === 1 &&
+  node.body[0].type === "void_stmt";
+
 const literal = (value) => () => value;
 
 const makeArgs = (path, opts, print, argsIndex) => {
@@ -146,6 +151,7 @@ module.exports = {
   empty,
   first,
   hasAncestor,
+  isEmptyStmts,
   literal,
   makeArgs,
   makeCall,
