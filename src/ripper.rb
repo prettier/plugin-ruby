@@ -150,6 +150,14 @@ class RipperJS < Ripper
         char_starts.min || char_pos
       end
 
+      def char_end_for(body)
+        children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
+        char_ends =
+          children.map { |part| part[:char_end] if part.is_a?(Hash) }.compact
+
+        char_ends.max || char_pos
+      end
+
       def find_scanner_event(type, body = :any)
         index =
           scanner_events.rindex do |scanner_event|
@@ -351,6 +359,13 @@ class RipperJS < Ripper
         super(*body).merge!(start: 1, char_start: 0, char_end: char_pos)
       end
 
+      def on_vcall(*body)
+        super(*body).merge!(
+          char_start: char_start_for(body),
+          char_end: char_end_for(body)
+        )
+      end
+
       defined =
         private_instance_methods(false).grep(/\Aon_/) { $'.to_sym } +
           %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end]
@@ -401,7 +416,7 @@ class RipperJS < Ripper
 
       def on_comment(value)
         @comments << {
-          value: value[1..-1],
+          value: value[1..-1].chomp,
           char_start: char_pos,
           char_end: char_pos + value.length - 1
         }
