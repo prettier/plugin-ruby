@@ -40,7 +40,7 @@ namespace parser {
 
         long idx;
         for (idx = 0; idx < size; idx++) {
-          (void) array->Set(
+          array->Set(
             context,
             idx,
             Translate(isolate, context, rb_ary_entry(value, idx))
@@ -61,7 +61,7 @@ namespace parser {
         for (idx = 0; idx < size; idx++) {
           key = rb_ary_entry(keys, idx);
 
-          (void) object->Set(
+          object->Set(
             context,
             Translate(isolate, context, key),
             Translate(isolate, context, rb_hash_aref(value, key))
