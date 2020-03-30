@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ### Changed
 
-- [@petevk], [@kddeisz] - Use braces for block format iff it was originally a brace block, otherwise you could be changing precedence. For example:
+- [@petevk], [@kddeisz] - Use braces for block format if it was originally a brace block, otherwise you could be changing precedence. For example:
 
 <!-- prettier-ignore -->
 ```ruby
