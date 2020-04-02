@@ -21,6 +21,17 @@ end.to raise_error
 
 should maintain its `do...end` and not switch to inline braces otherwise the brace might get associated with the `1`.
 
+- [@flyerhzm] - Rewrite operators binary parser, as in:
+
+<!-- prettier-ignore -->
+```ruby
+[
+  '1111111111111111111111111111111111111111111111111111111111111111111111111',
+  222
+] +
+  [1]
+```
+
 ## [0.18.0] - 2020-03-17
 
 ### Added
