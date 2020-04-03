@@ -7,10 +7,18 @@ module.exports = {
 
     return group(
       concat([
-        concat([path.call(print, "body", 0), useNoSpace ? "" : " "]),
-        operator,
+        group(path.call(print, "body", 0)),
         indent(
-          concat([useNoSpace ? softline : line, path.call(print, "body", 2)])
+          concat([
+            useNoSpace ? "" : " ",
+            group(
+              concat([
+                operator,
+                useNoSpace ? softline : line,
+                path.call(print, "body", 2)
+              ])
+            )
+          ])
         )
       ])
     );
