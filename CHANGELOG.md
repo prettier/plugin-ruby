@@ -33,6 +33,8 @@ should maintain its `do...end` and not switch to inline braces otherwise the bra
 ```
 
 - [@ftes], [@kddeisz] - When old-form dynamic attributes are added to a `div` tag in HAML, it was previously skipping printing the `%div`, which led to it being incorrectly displayed.
+- [@ftes], [@kddeisz] - Previously if you had a long tag declaration with attributes that made it hit the line limit, then the content of the tag would be pushed to the next line but indented one character too many.
+- [@ftes], [@kddeisz] - Don't explicitly require JSON if it has already been loaed, as this can lead to rubygems activation errors.
 
 ## [0.18.0] - 2020-03-17
 
