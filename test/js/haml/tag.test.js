@@ -35,6 +35,12 @@ describe("tag", () => {
     expect(content).toMatchHamlFormat();
   });
 
+  test("dynamic attributes", () => {
+    const content = "%div{ data: { controller: 'lesson-evaluation' } }";
+
+    expect(content).toMatchHamlFormat();
+  });
+
   test("object reference", () => {
     const content = ruby(`
       %div[@user, :greeting]

@@ -91,6 +91,9 @@ const getHeader = (value, opts) => {
   }
 
   if (value.dynamic_attributes.old) {
+    if (parts.length === 0) {
+      parts.push("%div");
+    }
     parts.push(value.dynamic_attributes.old);
   }
 

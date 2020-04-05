@@ -32,6 +32,8 @@ should maintain its `do...end` and not switch to inline braces otherwise the bra
   [1]
 ```
 
+- [@ftes], [@kddeisz] - When old-form dynamic attributes are added to a `div` tag in HAML, it was previously skipping printing the `%div`, which led to it being incorrectly displayed.
+
 ## [0.18.0] - 2020-03-17
 
 ### Added
