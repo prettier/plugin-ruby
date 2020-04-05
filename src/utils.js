@@ -1,10 +1,4 @@
-const {
-  breakParent,
-  concat,
-  hardline,
-  lineSuffix,
-  literalline
-} = require("./prettier");
+const { concat, literalline } = require("./prettier");
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
@@ -50,7 +44,7 @@ const hasAncestor = (path, types) => {
   return false;
 };
 
-const isEmptyStmts = node =>
+const isEmptyStmts = (node) =>
   node.type === "stmts" &&
   node.body.length === 1 &&
   node.body[0].type === "void_stmt";
@@ -111,29 +105,6 @@ const makeList = (path, opts, print) => path.map(print, "body");
 const prefix = (value) => (path, opts, print) =>
   concat([value, path.call(print, "body", 0)]);
 
-const printComments = (printed, start, comments) => {
-  let node = printed;
-
-  comments.forEach((comment) => {
-    if (comment.start < start) {
-      node = concat([
-        comment.break ? breakParent : "",
-        comment.body,
-        hardline,
-        node
-      ]);
-    } else {
-      node = concat([
-        node,
-        comment.break ? breakParent : "",
-        lineSuffix(` ${comment.body}`)
-      ]);
-    }
-  });
-
-  return node;
-};
-
 const skipAssignIndent = (node) =>
   ["array", "hash", "heredoc", "lambda", "regexp_literal"].includes(
     node.type
@@ -157,7 +128,6 @@ module.exports = {
   makeCall,
   makeList,
   prefix,
-  printComments,
   skipAssignIndent,
   surround
 };

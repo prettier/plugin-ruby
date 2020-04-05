@@ -1,7 +1,7 @@
 const { addTrailingComment } = require("./prettier");
 const { isEmptyStmts } = require("./utils");
 
-const handleOwnLineComment = (comment, text, opts, ast, isLastComment) => {
+const ownLine = (comment, _text, _opts, _ast, _isLastComment) => {
   if (isEmptyStmts(comment.precedingNode)) {
     addTrailingComment(comment.precedingNode, comment);
     return true;
@@ -15,16 +15,16 @@ const handleOwnLineComment = (comment, text, opts, ast, isLastComment) => {
   return false;
 };
 
-const handleEndOfLineComment = (comment, text, opts, ast, isLastComment) => {
+const endOfLine = (_comment, _text, _opts, _ast, _isLastComment) => {
   return false;
 };
 
-const handleRemainingComment = (comment, text, opts, ast, isLastComment) => {
+const remaining = (_comment, _text, _opts, _ast, _isLastComment) => {
   return false;
 };
 
 module.exports = {
-  ownLine: handleOwnLineComment,
-  endOfLine: handleEndOfLineComment,
-  remaining: handleRemainingComment
+  ownLine,
+  endOfLine,
+  remaining
 };

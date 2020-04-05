@@ -1,4 +1,3 @@
-const { printComments } = require("./utils");
 const nodes = require("./nodes");
 
 module.exports = (path, opts, print) => {
