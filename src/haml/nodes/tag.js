@@ -4,6 +4,7 @@ const {
   fill,
   group,
   hardline,
+  ifBreak,
   indent,
   join,
   line,
@@ -117,12 +118,12 @@ const getHeader = (value, opts) => {
   }
 
   if (value.value) {
-    const prefix = value.parse ? "=" : "";
+    const prefix = value.parse ? "= " : ifBreak("", " ");
 
     return group(
       concat([
         group(concat(parts)),
-        indent(concat([softline, `${prefix} ${value.value}`]))
+        indent(concat([softline, prefix, value.value]))
       ])
     );
   }

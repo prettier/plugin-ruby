@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'json'
-
 require 'bundler/setup' if ENV['CI']
 require 'haml'
 
@@ -48,18 +46,17 @@ class Haml::Parser::ParseNode
       raise ArgumentError, "Unsupported type: #{type}"
     end
   end
-
-  def self.to_json(template)
-    parser = Haml::Parser.new({})
-    JSON.fast_generate(parser.call(template).as_json)
-  end
 end
 
 # If this is the main file we're executing, then most likely this is being
 # executed from the haml.js spawn. In that case, read the ruby source from
 # stdin and report back the AST over stdout.
-
 if $0 == __FILE__
+  # Don't explicitly require JSON if there is already as JSON loaded, as this
+  # can lead to all kinds of trouble where one version of it was already
+  # "activated" by rubygems.
+  require 'json' unless defined?(JSON)
+
   parser = Haml::Parser.new({})
   template = $stdin.read
 
