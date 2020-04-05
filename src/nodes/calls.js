@@ -22,8 +22,13 @@ module.exports = {
   call: (path, opts, print) => {
     const [receiverNode, _operatorNode, messageNode] = path.getValue().body;
 
-    const [printedReceiver, _, printedMessage] = path.map(print, "body");
+    const printedReceiver = path.call(print, "body", 0);
     const printedOperator = makeCall(path, opts, print);
+
+    // You can call lambdas with a special syntax that looks like func.(*args).
+    // In this case, "call" is returned for the 3rd child node.
+    const printedMessage =
+      messageNode === "call" ? messageNode : path.call(print, "body", 2);
 
     // If we have a heredoc as a receiver, then we need to move the operator and
     // the message up to start of the heredoc declaration, as in:
@@ -43,20 +48,16 @@ module.exports = {
       ]);
     }
 
-    // You can call lambdas with a special syntax that looks like func.(*args).
-    // In this case, "call" is returned for the 3rd child node.
-    const message = messageNode === "call" ? messageNode : printedMessage;
-
     // For certain left sides of the call nodes, we want to attach directly to
     // the } or end.
     if (noIndent.includes(receiverNode.type)) {
-      return concat([printedReceiver, printedOperator, message]);
+      return concat([printedReceiver, printedOperator, printedMessage]);
     }
 
     return group(
       concat([
         printedReceiver,
-        group(indent(concat([softline, printedOperator, message])))
+        group(indent(concat([softline, printedOperator, printedMessage])))
       ])
     );
   },
