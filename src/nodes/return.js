@@ -12,9 +12,11 @@ const { literal } = require("../utils");
 // You can't skip the parentheses if you have the `and` or `or` operator,
 // because they have low enough operator precedence that you need to explicitly
 // keep them in there.
-const canSkipParens = args => {
+const canSkipParens = (args) => {
   const statement = args.body[0].body[0].body[0];
-  return statement.type !== "binary" || !["and", "or"].includes(statement.body[1]);
+  return (
+    statement.type !== "binary" || !["and", "or"].includes(statement.body[1])
+  );
 };
 
 const printReturn = (path, opts, print) => {
