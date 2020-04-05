@@ -44,6 +44,13 @@ foo = <<~TEXT.strip
 TEXT
 ```
 
+- [@github0013], [@kddeisz] - Leave parentheses in place if the value of a return node contains a binary with low operator precedence, as in:
+
+<!-- prettier-ignore -->
+```ruby
+return (a or b) if c?
+```
+
 ## [0.18.0] - 2020-03-17
 
 ### Added
@@ -710,7 +717,7 @@ would previously result in `array[]`, but now prints properly.
 
 - [@kddeisz] - Don't define duplicated methods in the parser.
 - [@kddeisz] - Let prettier know about `.rb` and `.rake` files so you don't have to specify the parser when running.
-- [@kddeisz] - Renamed the package to [@prettier]/plugin-ruby.
+- [@kddeisz] - Renamed the package to @prettier/plugin-ruby.
 
 ## [0.3.1] - 2019-02-07
 
@@ -861,6 +868,7 @@ would previously result in `array[]`, but now prints properly.
 [@krachtstefan]: https://github.com/krachtstefan
 [@localhostdotdev]: https://github.com/localhostdotdev
 [@marcmaniez]: https://github.com/MarcManiez
+[@masqita]: https://github.com/masqita
 [@matt-wratt]: https://github.com/matt-wratt
 [@meleyal]: https://github.com/meleyal
 [@mmainz]: https://github.com/mmainz
