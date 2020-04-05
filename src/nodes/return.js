@@ -9,6 +9,14 @@ const {
 } = require("../prettier");
 const { literal } = require("../utils");
 
+// You can't skip the parentheses if you have the `and` or `or` operator,
+// because they have low enough operator precedence that you need to explicitly
+// keep them in there.
+const canSkipParens = args => {
+  const statement = args.body[0].body[0].body[0];
+  return statement.type !== "binary" || !["and", "or"].includes(statement.body[1]);
+};
+
 const printReturn = (path, opts, print) => {
   let args = path.getValue().body[0].body[0];
   let steps = ["body", 0, "body", 0];
@@ -20,7 +28,7 @@ const printReturn = (path, opts, print) => {
   // If the body of the return contains parens, then just skip directly to the
   // content of the parens so that we can skip printing parens if we don't
   // want them.
-  if (args.body[0] && args.body[0].type === "paren") {
+  if (args.body[0] && args.body[0].type === "paren" && canSkipParens(args)) {
     args = args.body[0].body[0];
     steps = steps.concat("body", 0, "body", 0);
   }
