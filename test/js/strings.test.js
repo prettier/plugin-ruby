@@ -337,5 +337,37 @@ describe("strings", () => {
         return expect(content).toMatchFormat();
       });
     });
+
+    describe("with a call attached", () => {
+      test("squiggly no indent", () => {
+        const content = ruby(`
+          foo = <<~TEXT.strip
+          bar
+          TEXT
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("squiggly indent", () => {
+        const content = ruby(`
+          foo = <<~TEXT.strip
+            bar
+          TEXT
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("straight no indent", () => {
+        const content = ruby(`
+          foo = <<-TEXT.strip
+          bar
+          TEXT
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+    });
   });
 });
