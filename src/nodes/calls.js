@@ -1,29 +1,63 @@
-const { concat, group, indent, softline } = require("../prettier");
+const { concat, group, indent, hardline, softline } = require("../prettier");
 const toProc = require("../toProc");
 const { concatBody, first, makeCall } = require("../utils");
 
 const noIndent = ["array", "hash", "if", "method_add_block", "xstring_literal"];
 
+const getHeredoc = (path, print, node) => {
+  if (node.type === "heredoc") {
+    const { beging, ending } = node;
+    return { beging, ending, content: ["body", 0, "body"] };
+  }
+
+  if (node.type === "string_literal" && node.body[0].type === "heredoc") {
+    const { beging, ending } = node.body[0];
+    return { beging, ending, content: ["body", 0, "body", 0, "body"] };
+  }
+
+  return null;
+};
+
 module.exports = {
   call: (path, opts, print) => {
-    const receiver = path.call(print, "body", 0);
-    const operator = makeCall(path, opts, print);
-    let name = path.getValue().body[2];
+    const [receiverNode, _operatorNode, messageNode] = path.getValue().body;
+
+    const [printedReceiver, _, printedMessage] = path.map(print, "body");
+    const printedOperator = makeCall(path, opts, print);
+
+    // If we have a heredoc as a receiver, then we need to move the operator and
+    // the message up to start of the heredoc declaration, as in:
+    //
+    //     <<~TEXT.strip
+    //       content
+    //     TEXT
+    const heredoc = getHeredoc(path, print, receiverNode);
+    if (heredoc) {
+      return concat([
+        heredoc.beging,
+        printedOperator,
+        printedMessage,
+        hardline,
+        concat(path.map.apply(path, [print].concat(heredoc.content))),
+        heredoc.ending
+      ]);
+    }
 
     // You can call lambdas with a special syntax that looks like func.(*args).
     // In this case, "call" is returned for the 3rd child node.
-    if (name !== "call") {
-      name = path.call(print, "body", 2);
-    }
+    const message = messageNode === "call" ? messageNode : printedMessage;
 
     // For certain left sides of the call nodes, we want to attach directly to
     // the } or end.
-    if (noIndent.includes(path.getValue().body[0].type)) {
-      return concat([receiver, operator, name]);
+    if (noIndent.includes(receiverNode.type)) {
+      return concat([printedReceiver, printedOperator, message]);
     }
 
     return group(
-      concat([receiver, group(indent(concat([softline, operator, name])))])
+      concat([
+        printedReceiver,
+        group(indent(concat([softline, printedOperator, message])))
+      ])
     );
   },
   fcall: concatBody,
