@@ -63,15 +63,18 @@ module.exports = {
 
     return group(concat(parts));
   },
-  rescue_mod: (path, opts, print) =>
-    concat([
+  rescue_mod: (path, opts, print) => {
+    const [printedExpression, printedRescueValue] = path.map(print, "body");
+
+    return concat([
       "begin",
-      indent(concat([hardline, path.call(print, "body", 0)])),
+      indent(concat([hardline, printedExpression])),
       hardline,
       "rescue StandardError",
-      indent(concat([hardline, path.call(print, "body", 1)])),
+      indent(concat([hardline, printedRescueValue])),
       hardline,
       "end"
-    ]),
+    ]);
+  },
   retry: literal("retry")
 };
