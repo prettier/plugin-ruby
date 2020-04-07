@@ -4,13 +4,11 @@ const { concat, group, indent, join, line, softline } = require("../prettier");
  * specific index. Put another way, it's any time you're calling the method
  * `#[]`.
  *
- * The nodes can contain two children, the array and the index. So in the
- * following example, `foo` is the array and `bar is the index.
- *
- *     foo[bar]
- *
- * In some cases, you don't necessarily have the second child node, because you
- * can call procs with a pretty esoteric syntax:
+ * The nodes usually contains two children, details below in the
+ * `printArefField` function. In some cases, you don't necessarily have the
+ * second child node, because you can call procs with a pretty esoteric syntax.
+ * In the following example, you wouldn't have a second child, and `"foo"` would
+ * be the first child.
  *
  *     foo[]
  */
@@ -29,8 +27,12 @@ const printAref = (path, opts, print) => {
  * The `aref_field` node itself is just the left side of the assignment, and
  * they're always wrapped in `assign` nodes.
  *
- * The nodes always contain two children, the array and the index. So in the
- * following example, `foo` is the array and `bar` is the index.
+ * The nodes always contain two children, the name of the array (usually a
+ * `vcall` node and the index (usually an `args_add_block` node). The
+ * `args_add_block` is one of a couple nodes that has special handling where its
+ * printed form is actually an array to make joining easier.
+ *
+ * So in the following example, `"foo"` is the array and `["bar"]` is the index.
  *
  *     foo[bar] = baz
  */

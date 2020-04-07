@@ -15,7 +15,22 @@ const ownLine = (comment, _text, _opts, _ast, _isLastComment) => {
   return false;
 };
 
-const endOfLine = (_comment, _text, _opts, _ast, _isLastComment) => {
+const endOfLine = (comment, _text, _opts, _ast, _isLastComment) => {
+  const { enclosingNode } = comment;
+
+  if (enclosingNode.type === "aref") {
+    addTrailingComment(enclosingNode, comment);
+    return true;
+  }
+
+  if (
+    enclosingNode.type === "assign" &&
+    enclosingNode.body[0].type === "aref_field"
+  ) {
+    addTrailingComment(enclosingNode, comment);
+    return true;
+  }
+
   return false;
 };
 
