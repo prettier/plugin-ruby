@@ -1,6 +1,7 @@
 module.exports = Object.assign(
   {},
   require("./nodes/alias"),
+  require("./nodes/aref"),
   require("./nodes/args"),
   require("./nodes/arrays"),
   require("./nodes/assign"),

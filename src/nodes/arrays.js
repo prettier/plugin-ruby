@@ -29,21 +29,6 @@ const getSpecialArrayParts = (path, print, args) =>
     path.call(print, "body", 0, "body", index, "body", 0, "body", 0)
   );
 
-const printAref = (path, opts, print) =>
-  group(
-    concat([
-      path.call(print, "body", 0),
-      "[",
-      indent(
-        concat([
-          softline,
-          join(concat([",", line]), path.call(print, "body", 1))
-        ])
-      ),
-      concat([softline, "]"])
-    ])
-  );
-
 const printSpecialArray = (parts) =>
   group(
     concat([
@@ -74,14 +59,6 @@ const getElements = (node, elementPath) => {
 };
 
 module.exports = {
-  aref: (path, opts, print) => {
-    if (!path.getValue().body[1]) {
-      return concat([path.call(print, "body", 0), "[]"]);
-    }
-
-    return printAref(path, opts, print);
-  },
-  aref_field: printAref,
   array: (path, { addTrailingCommas }, print) => {
     const args = path.getValue().body[0];
 

@@ -1,4 +1,4 @@
-const printInt = (path, _opts, print) => {
+const printInt = (path, _opts, _print) => {
   const { body } = path.getValue();
 
   // If the number is octal and does not contain the optional "o" character
