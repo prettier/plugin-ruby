@@ -31,6 +31,11 @@ const endOfLine = (comment, _text, _opts, _ast, _isLastComment) => {
     return true;
   }
 
+  if (enclosingNode.type === "args_forward") {
+    addTrailingComment(enclosingNode, comment);
+    return true;
+  }
+
   return false;
 };
 

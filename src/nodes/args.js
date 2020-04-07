@@ -13,21 +13,29 @@ const { makeArgs } = require("../utils");
 
 module.exports = {
   arg_paren: (path, opts, print) => {
-    if (path.getValue().body[0] === null) {
+    const argsNode = path.getValue().body[0];
+
+    // If you don't have any arguments within the parentheses, then you receive
+    // a `null` for the value of the arguments. In general we don't want to
+    // print extraneous parentheses, so we're going to skip right by them.
+    if (argsNode === null) {
       return "";
     }
 
     // Here we can skip the entire rest of the method by just checking if it's
     // an args_forward node, as we're guaranteed that there are no other arg
     // nodes.
-    if (path.getValue().body[0].type === "args_forward") {
-      return "(...)";
+    if (argsNode.type === "args_forward") {
+      return group(concat([
+        "(",
+        indent(concat([softline, path.call(print, "body", 0)])),
+        softline,
+        ")"
+      ]));
     }
 
     const { addTrailingCommas } = opts;
     const { args, heredocs } = makeArgs(path, opts, print, 0);
-
-    const argsNode = path.getValue().body[0];
     const hasBlock = argsNode.type === "args_add_block" && argsNode.body[1];
 
     if (heredocs.length > 1) {
