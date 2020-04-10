@@ -17,6 +17,9 @@ const ownLine = (comment, _text, _opts, _ast, _isLastComment) => {
 
 const endOfLine = (comment, _text, _opts, _ast, _isLastComment) => {
   const { enclosingNode } = comment;
+  if (!enclosingNode) {
+    return false;
+  }
 
   if (enclosingNode.type === "aref") {
     addTrailingComment(enclosingNode, comment);

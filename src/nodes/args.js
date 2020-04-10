@@ -26,12 +26,14 @@ module.exports = {
     // an args_forward node, as we're guaranteed that there are no other arg
     // nodes.
     if (argsNode.type === "args_forward") {
-      return group(concat([
-        "(",
-        indent(concat([softline, path.call(print, "body", 0)])),
-        softline,
-        ")"
-      ]));
+      return group(
+        concat([
+          "(",
+          indent(concat([softline, path.call(print, "body", 0)])),
+          softline,
+          ")"
+        ])
+      );
     }
 
     const { addTrailingCommas } = opts;

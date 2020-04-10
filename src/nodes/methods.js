@@ -1,12 +1,4 @@
-const {
-  align,
-  concat,
-  group,
-  hardline,
-  indent,
-  join,
-  line
-} = require("../prettier");
+const { concat, group, hardline, indent, join } = require("../prettier");
 const { first, literal } = require("../utils");
 
 const printMethod = (offset) => (path, opts, print) => {
@@ -66,15 +58,5 @@ module.exports = {
 
     return concat(["super ", join(", ", path.call(print, "body", 0))]);
   },
-  undef: (path, opts, print) =>
-    group(
-      concat([
-        "undef ",
-        align(
-          "undef ".length,
-          join(concat([",", line]), path.map(print, "body", 0))
-        )
-      ])
-    ),
   zsuper: literal("super")
 };

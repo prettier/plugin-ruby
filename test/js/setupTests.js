@@ -18,10 +18,11 @@ const rl = readline.createInterface({
   output: parser.stdin
 });
 
-const realFormat = (content, config = {}) => prettier.format(
-  content,
-  Object.assign({ parser: "ruby", plugins: ["."] }, config)
-);
+const realFormat = (content, config = {}) =>
+  prettier.format(
+    content,
+    Object.assign({ parser: "ruby", plugins: ["."] }, config)
+  );
 
 const checkFormat = (before, after, config) =>
   new Promise((resolve) => {
