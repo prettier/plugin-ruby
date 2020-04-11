@@ -52,6 +52,35 @@ const hasAncestor = (path, types) => {
 
 const literal = (value) => () => value;
 
+const getAncestorCount = (path, types) => {
+  let parent = 0;
+  let parentNode = path.getParentNode();
+  let ancestorCount = 0;
+
+  while (parentNode) {
+    if (types.includes(parentNode.type)) {
+      ancestorCount += 1;
+    }
+    parent += 1;
+    parentNode = path.getParentNode(parent);
+  }
+
+  return ancestorCount;
+};
+
+const markAncestorsBreak = (path, types) => {
+  let parent = 0;
+  let parentNode = path.getParentNode();
+
+  while (parentNode) {
+    if (types.includes(parentNode.type)) {
+      parentNode["break"] = true;
+    }
+    parent += 1;
+    parentNode = path.getParentNode(parent);
+  }
+};
+
 const makeArgs = (path, opts, print, argsIndex) => {
   let argNodes = path.getValue().body[argsIndex];
   const argPattern = [print, "body", argsIndex, "body"];
@@ -146,6 +175,8 @@ module.exports = {
   empty,
   first,
   hasAncestor,
+  getAncestorCount,
+  markAncestorsBreak,
   literal,
   makeArgs,
   makeCall,

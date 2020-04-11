@@ -1,6 +1,20 @@
-const { concat, group, indent, hardline, softline } = require("../prettier");
+const {
+  breakParent,
+  concat,
+  group,
+  indent,
+  hardline,
+  softline
+} = require("../prettier");
 const toProc = require("../toProc");
-const { concatBody, first, makeCall } = require("../utils");
+const {
+  concatBody,
+  first,
+  getAncestorCount,
+  hasAncestor,
+  markAncestorsBreak,
+  makeCall
+} = require("../utils");
 
 const noIndent = ["array", "hash", "if", "method_add_block", "xstring_literal"];
 
@@ -20,7 +34,8 @@ const getHeredoc = (path, print, node) => {
 
 module.exports = {
   call: (path, opts, print) => {
-    const [receiverNode, _operatorNode, messageNode] = path.getValue().body;
+    const value = path.getValue();
+    const [receiverNode, _operatorNode, messageNode] = value.body;
 
     const printedReceiver = path.call(print, "body", 0);
     const printedOperator = makeCall(path, opts, print);
@@ -54,10 +69,23 @@ module.exports = {
       return concat([printedReceiver, printedOperator, printedMessage]);
     }
 
+    if (getAncestorCount(path, ["call"]) > 2 && !hasAncestor(path, ["args"])) {
+      markAncestorsBreak(path, ["call"]);
+      return group(
+        concat([
+          breakParent,
+          printedReceiver,
+          indent(concat([softline, printedOperator, printedMessage]))
+        ])
+      );
+    }
+
     return group(
       concat([
         printedReceiver,
-        group(indent(concat([softline, printedOperator, printedMessage])))
+        value["break"]
+          ? indent(concat([softline, printedOperator, printedMessage]))
+          : group(indent(concat([softline, printedOperator, printedMessage])))
       ])
     );
   },
