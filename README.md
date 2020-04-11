@@ -208,6 +208,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://www.piesync.com/"><img src="https://avatars0.githubusercontent.com/u/161271?v=4" width="100px;" alt=""/><br /><sub><b>Peter De Berdt</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Amasqita" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/hafley66"><img src="https://avatars0.githubusercontent.com/u/6750483?v=4" width="100px;" alt=""/><br /><sub><b>Chris Hafley</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ahafley66" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://fruetel.de"><img src="https://avatars1.githubusercontent.com/u/8015212?v=4" width="100px;" alt=""/><br /><sub><b>Thomas Frütel</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3AFruetel" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/alse"><img src="https://avatars1.githubusercontent.com/u/1160249?v=4" width="100px;" alt=""/><br /><sub><b>Alex Serban</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/commits?author=alse" title="Code">💻</a></td>
   </tr>
 </table>
 
