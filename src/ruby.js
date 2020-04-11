@@ -78,7 +78,8 @@ module.exports = {
     {
       name: "HAML",
       parsers: ["haml"],
-      extensions: [".haml"]
+      extensions: [".haml"],
+      vscodeLanguageIds: ["haml"]
     }
   ],
   parsers: {

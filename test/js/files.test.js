@@ -7,4 +7,7 @@ describe("files", () => {
 
   test("handles extensions that match", () =>
     expect("files/test.rake").toInferRubyParser());
+
+  test("handles extensions that match haml", () =>
+    expect("files/test.haml").toInferHamlParser());
 });

@@ -38,6 +38,20 @@ const realFormat = (content) =>
     plugins: ["."]
   });
 
+const toInferParser = (filename, parser) => {
+  const filepath = path.join(__dirname, filename);
+  const plugin = path.join(__dirname, "..", "..", "src", "ruby");
+  return prettier.getFileInfo(filepath, { plugins: [plugin] }).then((props) => {
+    return {
+      pass: props.inferredParser === parser,
+      message: () => `
+          Expected prettier to infer the ${parser} parser for ${filename},
+          but got ${props.inferredParser} instead
+        `
+    };
+  });
+};
+
 expect.extend({
   toChangeFormat(before, after, config = {}) {
     return checkFormat(before, after, config);
@@ -65,18 +79,10 @@ expect.extend({
     };
   },
   toInferRubyParser(filename) {
-    const filepath = path.join(__dirname, filename);
-    const plugin = path.join(__dirname, "..", "..", "src", "ruby");
-
-    return prettier
-      .getFileInfo(filepath, { plugins: [plugin] })
-      .then(({ inferredParser }) => ({
-        pass: inferredParser === "ruby",
-        message: () => `
-          Expected prettier to infer the ruby parser for ${filename},
-          but got ${inferredParser} instead
-        `
-      }));
+    return toInferParser(filename, "ruby");
+  },
+  toInferHamlParser(filename) {
+    return toInferParser(filename, "haml");
   }
 });
 
