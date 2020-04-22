@@ -11,6 +11,10 @@ const {
 const toProc = require("../toProc");
 const { makeArgs } = require("../utils");
 
+const shouldNotWrapLine = (args) =>
+  args.length === 0 ||
+  (args.length === 1 && typeof args[0] === "string" && args[0].length < 10);
+
 module.exports = {
   arg_paren: (path, opts, print) => {
     if (path.getValue().body[0] === null) {
@@ -34,19 +38,35 @@ module.exports = {
       return concat(["(", join(", ", args), ")"].concat(heredocs));
     }
 
-    const parenDoc = group(
-      concat([
-        "(",
-        indent(
-          concat([
-            softline,
-            join(concat([",", line]), args),
-            addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
-          ])
-        ),
-        concat([softline, ")"])
-      ])
-    );
+    let parenDoc;
+    if (shouldNotWrapLine(args)) {
+      parenDoc = group(
+        concat([
+          "(",
+          indent(
+            concat([
+              join(concat([",", line]), args),
+              addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
+            ])
+          ),
+          ")"
+        ])
+      );
+    } else {
+      parenDoc = group(
+        concat([
+          "(",
+          indent(
+            concat([
+              softline,
+              join(concat([",", line]), args),
+              addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
+            ])
+          ),
+          concat([softline, ")"])
+        ])
+      );
+    }
 
     if (heredocs.length === 1) {
       return group(concat([parenDoc].concat(heredocs)));
