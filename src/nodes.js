@@ -28,5 +28,6 @@ module.exports = Object.assign(
   require("./nodes/scopes"),
   require("./nodes/statements"),
   require("./nodes/strings"),
+  require("./nodes/super"),
   require("./nodes/undef")
 );
