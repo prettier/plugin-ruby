@@ -11,10 +11,15 @@ const {
 const toProc = require("../toProc");
 const { docLength, makeArgs } = require("../utils");
 
-const MAX_NOT_WRAP_ARGS_LENGTH = 20;
-const shouldNotWrapLine = (args) =>
-  (args.length == 1 && args[0].type !== 'group' && docLength(args[0]) < MAX_NOT_WRAP_ARGS_LENGTH) ||
-    args.reduce((sum, arg) => sum + docLength(arg), 0) < MAX_NOT_WRAP_ARGS_LENGTH;
+const MAX_NOT_WRAP_LINE_ARGS_LENGTH = 20;
+const shouldWrapLine = (args) =>
+  args.reduce((sum, arg) => sum + docLength(arg), 0) >
+    MAX_NOT_WRAP_LINE_ARGS_LENGTH ||
+  (args.length == 1 &&
+    args[0].type === "group" &&
+    docLength(args[0]) > MAX_NOT_WRAP_LINE_ARGS_LENGTH) ||
+  (args[0].type === "concat" &&
+    args[0].parts.some((part) => part.type === "group"));
 
 module.exports = {
   arg_paren: (path, opts, print) => {
@@ -40,20 +45,7 @@ module.exports = {
     }
 
     let parenDoc;
-    if (shouldNotWrapLine(args)) {
-      parenDoc = group(
-        concat([
-          "(",
-          indent(
-            concat([
-              join(concat([",", line]), args),
-              addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
-            ])
-          ),
-          ")"
-        ])
-      );
-    } else {
+    if (shouldWrapLine(args)) {
       parenDoc = group(
         concat([
           "(",
@@ -65,6 +57,19 @@ module.exports = {
             ])
           ),
           concat([softline, ")"])
+        ])
+      );
+    } else {
+      parenDoc = group(
+        concat([
+          "(",
+          indent(
+            concat([
+              join(concat([",", line]), args),
+              addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
+            ])
+          ),
+          ")"
         ])
       );
     }
