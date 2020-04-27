@@ -11,9 +11,10 @@ const {
 const toProc = require("../toProc");
 const { docLength, makeArgs } = require("../utils");
 
-const MAX_NOT_WRAP_ARGS_LENGTH = 10;
+const MAX_NOT_WRAP_ARGS_LENGTH = 20;
 const shouldNotWrapLine = (args) =>
-  args.reduce((sum, arg) => sum + docLength(arg), 0) < MAX_NOT_WRAP_ARGS_LENGTH;
+  (args.length == 1 && args[0].type !== 'group' && docLength(args[0]) < MAX_NOT_WRAP_ARGS_LENGTH) ||
+    args.reduce((sum, arg) => sum + docLength(arg), 0) < MAX_NOT_WRAP_ARGS_LENGTH;
 
 module.exports = {
   arg_paren: (path, opts, print) => {
