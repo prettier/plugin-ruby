@@ -210,6 +210,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://fruetel.de"><img src="https://avatars1.githubusercontent.com/u/8015212?v=4" width="100px;" alt=""/><br /><sub><b>Thomas Frütel</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3AFruetel" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/alse"><img src="https://avatars1.githubusercontent.com/u/1160249?v=4" width="100px;" alt=""/><br /><sub><b>Alex Serban</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/commits?author=alse" title="Code">💻</a></td>
     <td align="center"><a href="http://sviccari.github.io"><img src="https://avatars3.githubusercontent.com/u/4016985?v=4" width="100px;" alt=""/><br /><sub><b>Stephanie</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/commits?author=SViccari" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/ShayDavidson"><img src="https://avatars1.githubusercontent.com/u/1366521?v=4" width="100px;" alt=""/><br /><sub><b>Shay Davidson</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3AShayDavidson" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

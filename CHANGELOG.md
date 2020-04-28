@@ -886,7 +886,7 @@ would previously result in `array[]`, but now prints properly.
 [@petevk]: https://github.com/petevk
 [@pje]: https://github.com/pje
 [@rosskinsella]: https://github.com/RossKinsella
-[@ShayDavidson]: https://github.com/ShayDavidson
+[@shaydavidson]: https://github.com/ShayDavidson
 [@tobyndockerill]: https://github.com/tobyndockerill
 [@uri]: https://github.com/uri
 [@xipgroc]: https://github.com/xipgroc
