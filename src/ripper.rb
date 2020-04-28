@@ -226,8 +226,7 @@ class RipperJS < Ripper
         words_new: :@words_beg,
         xstring_literal: :@backtick,
         yield0: [:@kw, 'yield'],
-        yield: [:@kw, 'yield'],
-        zsuper: [:@kw, 'super']
+        yield: [:@kw, 'yield']
       }
 
       events.each do |event, (type, scanned)|
@@ -240,6 +239,16 @@ class RipperJS < Ripper
             char_end: char_pos
           )
         end
+      end
+
+      def on_zsuper(*body)
+        node = find_scanner_event(:@kw, "super")
+
+        super(*body).merge!(
+          start: node[:start],
+          char_start: node[:char_start],
+          char_end: node[:char_end]
+        )
       end
 
       # Array nodes can contain a myriad of subnodes because of the special

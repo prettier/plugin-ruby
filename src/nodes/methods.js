@@ -1,5 +1,5 @@
 const { concat, group, hardline, indent, join } = require("../prettier");
-const { first, literal } = require("../utils");
+const { first } = require("../utils");
 
 const printMethod = (offset) => (path, opts, print) => {
   const [_name, params, body] = path.getValue().body.slice(offset);
@@ -42,21 +42,4 @@ module.exports = {
   def: printMethod(0),
   defs: printMethod(2),
   methref: (path, opts, print) => join(".:", path.map(print, "body")),
-  super: (path, opts, print) => {
-    const args = path.getValue().body[0];
-
-    if (args.type === "arg_paren") {
-      // In case there are explicitly no arguments but they are using parens,
-      // we assume they are attempting to override the initializer and pass no
-      // arguments up.
-      if (args.body[0] === null) {
-        return "super()";
-      }
-
-      return concat(["super", path.call(print, "body", 0)]);
-    }
-
-    return concat(["super ", join(", ", path.call(print, "body", 0))]);
-  },
-  zsuper: literal("super")
-};
+}
