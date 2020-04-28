@@ -396,6 +396,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "ryan-hunter-pc",
+      "name": "Ryan Hunter",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/13044512?v=4",
+      "profile": "https://github.com/ryan-hunter-pc",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
