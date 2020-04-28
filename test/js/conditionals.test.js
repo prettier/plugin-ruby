@@ -351,6 +351,30 @@ describe("conditionals", () => {
 
         return expect(content).toMatchFormat();
       });
+
+      test("assign nodes in predicate", () => {
+        const content = ruby(`
+          if x = 1
+            y
+          else
+            z
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("opassign nodes in predicate", () => {
+        const content = ruby(`
+          if x ||= 1
+            y
+          else
+            z
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
     });
   });
 
