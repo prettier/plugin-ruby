@@ -34,6 +34,7 @@ Let's assume you have the following code:
 
 First, `Ripper` will tokenize:
 
+<!-- prettier-ignore -->
 ```ruby
 require 'ripper'
 
@@ -50,6 +51,7 @@ pp Ripper.lex('1 + 1')
 
 You can see it has location metadata (row and column), the token type, the value associated with that token type, and the lexer state when that token was encountered. Then, it will convert those tokens into s-expressions:
 
+<!-- prettier-ignore -->
 ```ruby
 require 'ripper'
 

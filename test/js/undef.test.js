@@ -16,20 +16,25 @@ describe("undef", () => {
 
   test("single with comment", () => expect("undef foo # bar").toMatchFormat());
 
-  test("multiple inline with comment", () => expect("undef foo, bar # baz").toMatchFormat());
+  test("multiple inline with comment", () =>
+    expect("undef foo, bar # baz").toMatchFormat());
 
   test("multiple lines comment on first", () => {
-    return expect(ruby(`
+    const content = ruby(`
       undef foo, # baz
             bar
-    `)).toMatchFormat();
+    `);
+
+    return expect(content).toMatchFormat();
   });
 
   test("multiple lines comment on each", () => {
-    return expect(ruby(`
+    const content = ruby(`
       undef foo, # baz
             bar # bam
-    `)).toMatchFormat();
+    `);
+
+    return expect(content).toMatchFormat();
   });
 
   test("multiple breaking with comment", () => {

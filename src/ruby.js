@@ -104,7 +104,7 @@ module.exports = {
       handleComments: comments,
       canAttachComment: () => true,
       getCommentChildNodes: (node) => {
-        if (node.type === 'undef') {
+        if (node.type === "undef") {
           return node.body[0];
         }
 

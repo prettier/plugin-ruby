@@ -241,7 +241,7 @@ class RipperJS < Ripper
       end
 
       def on_zsuper(*body)
-        node = find_scanner_event(:@kw, "super")
+        node = find_scanner_event(:@kw, 'super')
 
         super(*body).merge!(
           start: node[:start],
@@ -257,9 +257,9 @@ class RipperJS < Ripper
         node = find_scanner_event(:@kw, 'undef')
 
         super(*body).merge!(
-            start: node[:start],
-            char_start: node[:char_start],
-            char_end: char_end_for(body)
+          start: node[:start],
+          char_start: node[:char_start],
+          char_end: char_end_for(body)
         )
       end
 
@@ -382,8 +382,7 @@ class RipperJS < Ripper
 
       def on_vcall(*body)
         super(*body).merge!(
-          char_start: char_start_for(body),
-          char_end: char_end_for(body)
+          char_start: char_start_for(body), char_end: char_end_for(body)
         )
       end
 
@@ -436,13 +435,14 @@ class RipperJS < Ripper
       end
 
       def on_comment(value)
-        @comments << {
-          value: value[1..-1].chomp,
-          start: lineno,
-          end: lineno,
-          char_start: char_pos,
-          char_end: char_pos + value.length - 1
-        }
+        @comments <<
+          {
+            value: value[1..-1].chomp,
+            start: lineno,
+            end: lineno,
+            char_start: char_pos,
+            char_end: char_pos + value.length - 1
+          }
       end
 
       def on_embdoc_beg(value)
