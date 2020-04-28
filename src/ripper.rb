@@ -217,7 +217,6 @@ class RipperJS < Ripper
         symbols_new: :@symbols_beg,
         top_const_field: [:@op, '::'],
         top_const_ref: [:@op, '::'],
-        undef: [:@kw, 'undef'],
         unless: [:@kw, 'unless'],
         until: [:@kw, 'until'],
         var_alias: [:@kw, 'alias'],
@@ -248,6 +247,19 @@ class RipperJS < Ripper
           start: node[:start],
           char_start: node[:char_start],
           char_end: node[:char_end]
+        )
+      end
+
+      # This is mostly identical to the method that is dynamically defined for all `events` (above),
+      # except that `char_pos` was causing problems because it was factoring comments into the char pos,
+      # so we replaced it with `char_end_for(body)`
+      def on_undef(*body)
+        node = find_scanner_event(:@kw, 'undef')
+
+        super(*body).merge!(
+            start: node[:start],
+            char_start: node[:char_start],
+            char_end: char_end_for(body)
         )
       end
 

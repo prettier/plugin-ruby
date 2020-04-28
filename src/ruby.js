@@ -103,7 +103,13 @@ module.exports = {
       print,
       handleComments: comments,
       canAttachComment: () => true,
-      getCommentChildNodes: (node) => node.body,
+      getCommentChildNodes: (node) => {
+        if (node.type === 'undef') {
+          return node.body[0];
+        }
+
+        return node.body;
+      },
       printComment: (path, _opts) => {
         const { value } = path.getValue();
         return `#${value}`;
