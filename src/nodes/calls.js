@@ -69,7 +69,11 @@ module.exports = {
       return concat([printedReceiver, printedOperator, printedMessage]);
     }
 
-    if (getAncestorCount(path, ["call"]) > 2 && !hasAncestor(path, ["args"])) {
+    // If it has more than 2 ancestors of call node, including itself,
+    // it has more than 3 method calls in chain.
+    const more_than_three_method_calls_in_chain =
+      getAncestorCount(path, ["call"]) > 2;
+    if (more_than_three_method_calls_in_chain && !hasAncestor(path, ["args"])) {
       markAncestorsBreak(path, ["call"]);
       return group(
         concat([
