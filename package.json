@@ -25,7 +25,9 @@
     "all-contributors-cli": "^6.14.1",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
-    "jest": "^25.2.7"
+    "husky": "^4.2.5",
+    "jest": "^25.2.7",
+    "pretty-quick": "^2.0.1"
   },
   "eslintConfig": {
     "extends": [
@@ -52,6 +54,11 @@
       "./test/js/setupTests.js"
     ],
     "testRegex": ".test.js$"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   },
   "prettier": {
     "trailingComma": "none"
