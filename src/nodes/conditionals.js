@@ -177,9 +177,10 @@ const canTernaryStmts = (stmts) => {
 // additional node must have only one statement, and that statement list must
 // pass the `canTernaryStmts` check.
 const canTernary = (path) => {
-  const [_pred, stmts, addition] = path.getValue().body;
+  const [predicate, stmts, addition] = path.getValue().body;
 
   return (
+    !["assign", "opassign"].includes(predicate.type) &&
     addition &&
     addition.type === "else" &&
     [stmts, addition.body[0]].every(canTernaryStmts)

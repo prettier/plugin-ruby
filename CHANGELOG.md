@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [@alse] - Support `vscodeLanguageIds` for HAML.
+- [@ShayDavidson], [@kddeisz] - Don't allow replacing if/else with ternary if there's an assignment in the predicate.
 
 ## [0.18.1] - 2020-04-05
 
@@ -843,6 +844,7 @@ would previously result in `array[]`, but now prints properly.
 [@aaronjensen]: https://github.com/aaronjensen
 [@acrewdson]: https://github.com/acrewdson
 [@alanfoster]: https://github.com/AlanFoster
+[@alse]: https://github.com/alse
 [@andrewraycode]: https://github.com/AndrewRayCode
 [@ashfurrow]: https://github.com/ashfurrow
 [@awinograd]: https://github.com/awinograd
@@ -884,6 +886,7 @@ would previously result in `array[]`, but now prints properly.
 [@petevk]: https://github.com/petevk
 [@pje]: https://github.com/pje
 [@rosskinsella]: https://github.com/RossKinsella
+[@ShayDavidson]: https://github.com/ShayDavidson
 [@tobyndockerill]: https://github.com/tobyndockerill
 [@uri]: https://github.com/uri
 [@xipgroc]: https://github.com/xipgroc
