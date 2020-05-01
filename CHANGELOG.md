@@ -6,13 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [0.18.2] - 2020-05-01
+
 ### Changed
 
 - [@alse] - Support `vscodeLanguageIds` for HAML.
 - [@ShayDavidson], [@kddeisz] - Don't allow replacing if/else with ternary if there's an assignment in the predicate.
-
-### Fixed
-
 - [@janklimo] - Do not add an empty line after `rescue` when the block is empty.
 
 ## [0.18.1] - 2020-04-05
@@ -804,7 +803,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.18.1...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.18.2...HEAD
+[0.18.2]: https://github.com/prettier/plugin-ruby/compare/v0.18.1...v0.18.2
 [0.18.1]: https://github.com/prettier/plugin-ruby/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/prettier/plugin-ruby/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/prettier/plugin-ruby/compare/v0.16.0...v0.17.0
