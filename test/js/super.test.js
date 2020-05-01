@@ -1,3 +1,5 @@
+const { ruby } = require("./utils");
+
 describe("super", () => {
   test("bare", () => expect("super").toMatchFormat());
 
@@ -26,7 +28,27 @@ describe("super", () => {
     test("multiple args, no parens", () =>
       expect("super 1, 2 # comment").toMatchFormat());
 
+    test("multiple args, multiple lines, no parens", () => {
+      const content = ruby(`
+        super 1, # first comment
+              2 # second comment
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
     test("multiple args, with parens", () =>
       expect("super(1, 2) # comment").toMatchFormat());
+
+    test("multiple args, multiple lines, no parens", () => {
+      const content = ruby(`
+        super(
+          1, # first comment
+          2 # second comment
+        )
+      `);
+
+      return expect(content).toMatchFormat();
+    });
   });
 });
