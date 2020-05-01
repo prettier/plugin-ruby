@@ -53,7 +53,11 @@ module.exports = {
       parts.push(" StandardError");
     }
 
-    parts.push(indent(concat([hardline, path.call(print, "body", 2)])));
+    const rescueBody = path.call(print, "body", 2);
+
+    if (rescueBody.parts.length > 0) {
+      parts.push(indent(concat([hardline, rescueBody])));
+    }
 
     // This is the next clause on the `begin` statement, either another
     // `rescue`, and `ensure`, or an `else` clause.

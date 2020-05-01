@@ -73,4 +73,15 @@ describe("rescue", () => {
     `)
     );
   });
+
+  test("empty rescue body", () => {
+    const content = ruby(`
+      begin
+        1
+      rescue NoMethodError
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });
