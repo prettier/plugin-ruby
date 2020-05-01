@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@alse] - Support `vscodeLanguageIds` for HAML.
 - [@ShayDavidson], [@kddeisz] - Don't allow replacing if/else with ternary if there's an assignment in the predicate.
 
+### Fixed
+
+- [@janklimo] - Do not add an empty line after `rescue` when the block is empty.
+
 ## [0.18.1] - 2020-04-05
 
 ### Changed
@@ -41,7 +45,7 @@ should maintain its `do...end` and not switch to inline braces otherwise the bra
 
 - [@ftes], [@kddeisz] - When old-form dynamic attributes are added to a `div` tag in HAML, it was previously skipping printing the `%div`, which led to it being incorrectly displayed.
 - [@ftes], [@kddeisz] - Previously if you had a long tag declaration with attributes that made it hit the line limit, then the content of the tag would be pushed to the next line but indented one character too many.
-- [@ftes], [@kddeisz] - Don't explicitly require JSON if it has already been loaed, as this can lead to rubygems activation errors.
+- [@ftes], [@kddeisz] - Don't explicitly require JSON if it has already been loaded, as this can lead to rubygems activation errors.
 - [@mmainz], [@kddeisz] - Handle heredocs as the receivers of call nodes, as in:
 
 <!-- prettier-ignore -->
@@ -866,6 +870,7 @@ would previously result in `array[]`, but now prints properly.
 [@ianks]: https://github.com/ianks
 [@jakeprime]: https://github.com/jakeprime
 [@jamescostian]: https://github.com/jamescostian
+[@janklimo]: https://github.com/janklimo
 [@joeyjoejoejr]: https://github.com/joeyjoejoejr
 [@johnschoeman]: https://github.com/johnschoeman
 [@joshuakgoldberg]: https://github.com/JoshuaKGoldberg
