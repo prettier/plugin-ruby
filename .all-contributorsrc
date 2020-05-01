@@ -405,6 +405,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "janklimo",
+      "name": "Jan Klimo",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/7811733?v=4",
+      "profile": "https://www.locksteplabs.com/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
