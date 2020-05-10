@@ -16,16 +16,222 @@ require 'json' unless defined?(JSON)
 require 'ripper'
 
 class RipperJS < Ripper
+  using(
+    Module.new do
+      refine Array do
+        def rfind(&block)
+          reverse_each.find(&block)
+        end
+      end
+    end
+  )
+
   attr_reader :source, :lines
 
   def initialize(source, *args)
     super(source, *args)
 
+    @scanner_events = []
     @source = source
+
     @lines = source.split("\n")
+    @line_counts = [0]
+
+    source.lines.each { |line| line_counts << line_counts.last + line.size }
   end
 
   private
+
+  def char_pos
+    line_counts[lineno - 1] + column
+  end
+
+  # Scanner events occur when the lexer hits a new token, like a keyword or an
+  # end. These nodes always contain just one argument which is a string
+  # representing the content. For the most part these can just be printed
+  # directly, which very few exceptions.
+  SCANNER_EVENTS.each do |event|
+    define_method(:"on_#{event}") do |body|
+      char_start = char_pos
+
+      scanner_event = {
+        type: :"@#{event}",
+        body: body,
+        start: lineno,
+        end: lineno,
+        char_start: char_start,
+        char_end: char_start + (body ? body.size : 0)
+      }
+
+      @scanner_events << scanner_event
+      scanner_event
+    end
+  end
+
+  # BEGIN nodes are hooks into when the interpreter starts, and look like:
+  #
+  #     BEGIN {
+  #       # content here
+  #     }
+  def on_BEGIN(*body)
+    start_node =
+      scanner_events.rfind do |event|
+        event[:type] == :@kw && event[:body] == 'BEGIN'
+      end
+
+    end_node =
+      scanner_events.rfind do |event|
+        event[:type] == :@rbrace
+      end
+
+    {
+      type: :BEGIN,
+      body: body,
+      start: start_node[:start],
+      end: end_node[:end],
+      char_start: start_node[:char_start],
+      char_end: end_node[:char_end]
+    }
+  end
+
+=begin
+  END
+  alias
+  alias_error
+  aref
+  aref_field
+  arg_ambiguous
+  arg_paren
+  args_add
+  args_add_block
+  args_add_star
+  args_forward
+  args_new
+  array
+  aryptn
+  assign
+  assign_error
+  assoc_new
+  assoc_splat
+  assoclist_from_args
+  bare_assoc_hash
+  begin
+  binary
+  block_var
+  blockarg
+  bodystmt
+  brace_block
+  break
+  call
+  case
+  class
+  class_name_error
+  command
+  command_call
+  const_path_field
+  const_path_ref
+  const_ref
+  def
+  defined
+  defs
+  do_block
+  dot2
+  dot3
+  dyna_symbol
+  else
+  elsif
+  ensure
+  excessed_comma
+  fcall
+  field
+  for
+  hash
+  heredoc_dedent
+  hshptn
+  if
+  if_mod
+  ifop
+  in
+  kwrest_param
+  lambda
+  magic_comment
+  massign
+  method_add_arg
+  method_add_block
+  mlhs_add
+  mlhs_add_post
+  mlhs_add_star
+  mlhs_new
+  mlhs_paren
+  module
+  mrhs_add
+  mrhs_add_star
+  mrhs_new
+  mrhs_new_from_args
+  next
+  nokw_param
+  opassign
+  operator_ambiguous
+  param_error
+  params
+  paren
+  parse_error
+  program
+  qsymbols_add
+  qsymbols_new
+  qwords_add
+  qwords_new
+  redo
+  regexp_add
+  regexp_literal
+  regexp_new
+  rescue
+  rescue_mod
+  rest_param
+  retry
+  return
+  return0
+  sclass
+  stmts_add
+  stmts_new
+  string_add
+  string_concat
+  string_content
+  string_dvar
+  string_embexpr
+  string_literal
+  super
+  symbol
+  symbol_literal
+  symbols_add
+  symbols_new
+  top_const_field
+  top_const_ref
+  unary
+  undef
+  unless
+  unless_mod
+  until
+  until_mod
+  var_alias
+  var_field
+  var_ref
+  vcall
+  void_stmt
+  when
+  while
+  while_mod
+  word_add
+  word_new
+  words_add
+  words_new
+  xstring_add
+  xstring_literal
+  xstring_new
+  yield
+  yield0
+  zsuper
+=end
 
   # Scanner events occur when the lexer hits a new token, like a keyword or an
   # end. These nodes always contain just one argument which is a string
@@ -39,7 +245,9 @@ class RipperJS < Ripper
 
   # Parser events represent nodes in the ripper abstract syntax tree. The event
   # is reported after the children of the node have already been built.
-  PARSER_EVENTS.each do |event|
+  events = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
+
+  (PARSER_EVENTS - events).each do |event|
     define_method(:"on_#{event}") do |*body|
       min = body.map { |part| part.is_a?(Hash) ? part[:start] : lineno }.min
       { type: event, body: body, start: min || lineno, end: lineno }
@@ -169,7 +377,6 @@ class RipperJS < Ripper
       end
 
       events = {
-        BEGIN: [:@kw, 'BEGIN'],
         END: [:@kw, 'END'],
         alias: [:@kw, 'alias'],
         assoc_splat: [:@op, '**'],
