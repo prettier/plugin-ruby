@@ -2,8 +2,11 @@
 
 # We implement our own version checking here instead of using Gem::Version so
 # that we can use the --disable-gems flag.
-major, minor, * = RUBY_VERSION.split('.').map(&:to_i)
-if (major < 2) || ((major == 2) && (minor < 5))
+current_version = RUBY_VERSION
+required_version = '2.5.0'
+major, minor, * = current_version.split('.').map(&:to_i)
+required_major, required_minor, * = required_version.split('.').map(&:to_i)
+if (major < required_major) || ((major == required_major) && (minor < required_minor))
   warn(
     "Ruby version #{current_version} not supported. " \
       "Please upgrade to #{required_version} or above."
