@@ -49,6 +49,7 @@ module.exports = {
       filenames: [
         ".irbrc",
         ".pryrc",
+        ".simplecov",
         "Appraisals",
         "Berksfile",
         "Brewfile",
