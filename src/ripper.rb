@@ -26,7 +26,7 @@ class RipperJS < Ripper
     end
   )
 
-  attr_reader :source, :lines
+  attr_reader :scanner_events, :source, :lines, :line_counts
 
   def initialize(source, *args)
     super(source, *args)
@@ -233,16 +233,6 @@ class RipperJS < Ripper
   zsuper
 =end
 
-  # Scanner events occur when the lexer hits a new token, like a keyword or an
-  # end. These nodes always contain just one argument which is a string
-  # representing the content. For the most part these can just be printed
-  # directly, which very few exceptions.
-  SCANNER_EVENTS.each do |event|
-    define_method(:"on_#{event}") do |body|
-      { type: :"@#{event}", body: body, start: lineno, end: lineno }
-    end
-  end
-
   # Parser events represent nodes in the ripper abstract syntax tree. The event
   # is reported after the children of the node have already been built.
   events = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
@@ -331,24 +321,7 @@ class RipperJS < Ripper
   # node once we have it.
   prepend(
     Module.new do
-      def initialize(source, *args)
-        super(source, *args)
-
-        @scanner_events = []
-        @line_counts = [0]
-
-        source.lines.each { |line| line_counts << line_counts.last + line.size }
-      end
-
-      def self.prepended(base)
-        base.attr_reader :scanner_events, :line_counts
-      end
-
       private
-
-      def char_pos
-        line_counts[lineno - 1] + column
-      end
 
       def char_start_for(body)
         children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
@@ -595,18 +568,7 @@ class RipperJS < Ripper
 
       defined =
         private_instance_methods(false).grep(/\Aon_/) { $'.to_sym } +
-          %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end]
-
-      (SCANNER_EVENTS - defined).each do |event|
-        define_method(:"on_#{event}") do |body|
-          super(body).tap do |node|
-            char_end = char_pos + (body ? body.size : 0)
-            node.merge!(char_start: char_pos, char_end: char_end)
-
-            scanner_events << node
-          end
-        end
-      end
+          %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end BEGIN]
 
       (PARSER_EVENTS - defined).each do |event|
         define_method(:"on_#{event}") do |*body|
