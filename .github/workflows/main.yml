@@ -29,9 +29,9 @@ jobs:
         bundle install --jobs 4 --retry 3
 
     # Setup node dependencies
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v2-beta
       with:
-        node-version: 11.x
+        node-version: 12.x
     - id: yarn-cache
       run: echo "::set-output name=directory::$(yarn cache dir)"
     - uses: actions/cache@v1
@@ -43,7 +43,8 @@ jobs:
     - run: yarn install --frozen-lockfile
 
     # Actually run tests and lint
-    - run: yarn lint
-    - run: yarn print --check '**/*'
-    - run: yarn test
-    - run: bundle exec rake test
+    - run: |
+        yarn lint
+        yarn print --check '**/*'
+        yarn test
+        bundle exec rake test
