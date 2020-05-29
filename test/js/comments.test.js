@@ -207,6 +207,17 @@ describe("comments", () => {
 
       return expect(content).toMatchFormat();
     });
+    test.skip("with trailing comma", () => {
+      const content = ruby(`
+        foo.bar(
+          bar: baz,
+          # this is a comment at the end of the method call
+        )
+      `);
+      // returns `foo.bar()`
+
+      return expect(content).toMatchFormat();
+    });
   });
 
   test.skip("causing ignored_nl", () => {
