@@ -49,7 +49,7 @@ class RipperJS < Ripper
   # Scanner events occur when the lexer hits a new token, like a keyword or an
   # end. These nodes always contain just one argument which is a string
   # representing the content. For the most part these can just be printed
-  # directly, which very few exceptions.
+  # directly, with very few exceptions.
   SCANNER_EVENTS.each do |event|
     define_method(:"on_#{event}") do |body|
       char_start = char_pos
@@ -68,7 +68,7 @@ class RipperJS < Ripper
     end
   end
 
-  # BEGIN nodes are hooks into when the interpreter starts, and look like:
+  # BEGIN nodes hook into when the interpreter starts, and look like:
   #
   #     BEGIN {
   #       # content here
@@ -94,8 +94,33 @@ class RipperJS < Ripper
     }
   end
 
+  # END nodes hooks into when the interpreter ends, and look like:
+  #
+  #     END {
+  #       # content here
+  #     }
+  def on_END(*body)
+    start_node =
+      scanner_events.rfind do |event|
+        event[:type] == :@kw && event[:body] == 'END'
+      end
+
+    end_node =
+      scanner_events.rfind do |event|
+        event[:type] == :@rbrace
+      end
+
+    {
+      type: :END,
+      body: body,
+      start: start_node[:start],
+      end: end_node[:end],
+      char_start: start_node[:char_start],
+      char_end: end_node[:char_end]
+    }
+  end
+
 =begin
-  END
   alias
   alias_error
   aref
@@ -350,7 +375,6 @@ class RipperJS < Ripper
       end
 
       events = {
-        END: [:@kw, 'END'],
         alias: [:@kw, 'alias'],
         assoc_splat: [:@op, '**'],
         arg_paren: :@lparen,
