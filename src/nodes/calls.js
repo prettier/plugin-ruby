@@ -76,7 +76,7 @@ module.exports = {
   },
   method_add_block: (path, opts, print) => {
     const [method, block] = path.getValue().body;
-    const proc = toProc(block);
+    const proc = toProc(path, block);
 
     if (proc && method.type === "call") {
       return group(
