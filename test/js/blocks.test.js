@@ -213,5 +213,23 @@ describe("blocks", () => {
       expect("foo[:bar].each { |baz| baz.to_s }").toChangeFormat(
         "foo[:bar].each(&:to_s)"
       ));
+
+    describe.each(["if", "unless"])(
+      "does not transform when used inside hash with %s",
+      (keyword) => {
+        test(`hash literal with :${keyword} key`, () =>
+          expect(`{ ${keyword}: ->(foo) { foo.to_s } }`).toMatchFormat());
+        test(`hash literal with hashrocket :${keyword} key`, () =>
+          expect(`{ :${keyword} => ->(foo) { foo.to_s } }`).toMatchFormat({
+            preferHashLabels: false
+          }));
+        test(`method arguments with :${keyword} key`, () =>
+          expect(`bar ${keyword}: ->(foo) { foo.to_s }`).toMatchFormat());
+        test(`method arguments with hashrocket :${keyword} key`, () =>
+          expect(`bar :${keyword} => ->(foo) { foo.to_s }`).toMatchFormat({
+            preferHashLabels: false
+          }));
+      }
+    );
   });
 });

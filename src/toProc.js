@@ -95,7 +95,10 @@ const toProc = (path, node) => {
       return null;
     }
 
-    if (key.type === "symbol_literal" && ["if", "unless"].includes(key.body[0].body[0].body)) {
+    if (
+      key.type === "symbol_literal" &&
+      ["if", "unless"].includes(key.body[0].body[0].body)
+    ) {
       return null;
     }
   }
