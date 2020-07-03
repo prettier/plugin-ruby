@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [0.19.0] - 2020-07-03
+
+### Added
+
+- [@ryan-hunter-pc] - Add the option to disable the `Symbol#to_proc` transform.
+- [@ryan-hunter-pc], [@SViccari], [@kddeisz] - Disable `Symbol#to_proc` transform when used as a key inside of a hash where the key is either `:if` or `:unless`.
+
 ## [0.18.2] - 2020-05-01
 
 ### Changed
@@ -803,7 +810,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.18.2...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/prettier/plugin-ruby/compare/v0.18.2...v0.19.0
 [0.18.2]: https://github.com/prettier/plugin-ruby/compare/v0.18.1...v0.18.2
 [0.18.1]: https://github.com/prettier/plugin-ruby/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/prettier/plugin-ruby/compare/v0.17.0...v0.18.0
