@@ -128,6 +128,9 @@ describe("blocks", () => {
     test("basic inline", () =>
       expect("loop { |i| i.to_s }").toChangeFormat("loop(&:to_s)"));
 
+    test("basic inline with option turned off", () =>
+      expect("loop { |i| i.to_s }").toMatchFormat({ toProcTransform: false }));
+
     test("basic multi-line", () => {
       const content = ruby(`
         list.each do |node|

@@ -11,8 +11,8 @@ const isCall = (node) => ["::", "."].includes(node) || node.type === "@period";
 //     [1, 2, 3].map(&:to_s)
 //
 // This works with `do` blocks as well.
-const toProc = (path, node) => {
-  if (!node) {
+const toProc = (path, opts, node) => {
+  if (!node || !opts.toProcTransform) {
     return null;
   }
 
