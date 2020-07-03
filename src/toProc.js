@@ -11,8 +11,8 @@ const isCall = (node) => ["::", "."].includes(node) || node.type === "@period";
 //     [1, 2, 3].map(&:to_s)
 //
 // This works with `do` blocks as well.
-const toProc = (node) => {
-  if (!node) {
+const toProc = (path, opts, node) => {
+  if (!node || !opts.toProcTransform) {
     return null;
   }
 
@@ -74,6 +74,33 @@ const toProc = (node) => {
     args
   ) {
     return null;
+  }
+
+  // Ensure that we're not inside of a hash that is being passed to a key that
+  // corresponds to `:if` or `:unless` to avoid problems with callbacks with
+  // Rails. For more context, see:
+  // https://github.com/prettier/plugin-ruby/issues/449
+  let assocNode = null;
+
+  if (path.getValue().type === "method_add_block") {
+    assocNode = path.getParentNode();
+  } else if (path.getValue().type === "args") {
+    assocNode = path.getParentNode(2);
+  }
+
+  if (assocNode && assocNode.type === "assoc_new") {
+    const [key] = assocNode.body;
+
+    if (key.type === "@label" && ["if:", "unless:"].includes(key.body)) {
+      return null;
+    }
+
+    if (
+      key.type === "symbol_literal" &&
+      ["if", "unless"].includes(key.body[0].body[0].body)
+    ) {
+      return null;
+    }
   }
 
   return `&:${method.body}`;

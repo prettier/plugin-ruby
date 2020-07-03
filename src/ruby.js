@@ -142,6 +142,13 @@ module.exports = {
       default: true,
       description:
         "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals."
+    },
+    toProcTransform: {
+      type: "boolean",
+      category: "Global",
+      default: true,
+      description:
+        "When possible, convert blocks to the more concise Symbol#to_proc syntax."
     }
   },
   defaultOptions: {

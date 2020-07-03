@@ -72,7 +72,7 @@ module.exports = {
       return blockNode;
     });
 
-    const proc = blockNode && toProc(blockNode);
+    const proc = blockNode && toProc(path, opts, blockNode);
 
     // If we have a successful to_proc transformation, but we're part of an aref
     // node, that means it's something to the effect of
