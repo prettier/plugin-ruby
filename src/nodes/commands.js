@@ -1,4 +1,13 @@
-const { align, concat, group, ifBreak, join, line } = require("../prettier");
+const {
+  align,
+  concat,
+  group,
+  ifBreak,
+  indent,
+  join,
+  line,
+  softline
+} = require("../prettier");
 const { docLength, makeArgs, makeCall } = require("../utils");
 
 const hasDef = (node) =>
@@ -23,6 +32,14 @@ const hasDef = (node) =>
 const skipArgsAlign = (path) =>
   ["to", "not_to"].includes(path.getValue().body[2].body);
 
+const startsWithIf = (argNodes) =>
+  argNodes &&
+  argNodes.body[0] &&
+  argNodes.body[0].body[0] &&
+  argNodes.body[0].body[0].type === "ifop";
+
+const startsWithIfArg = (path) => startsWithIf(path.getValue().body[1]);
+
 module.exports = {
   command: (path, opts, print) => {
     const command = path.call(print, "body", 0);
@@ -32,14 +49,26 @@ module.exports = {
       return concat([command, " ", join(", ", args)].concat(heredocs));
     }
 
+    const addParensOnBreak = startsWithIfArg(path);
+
     const joinedArgs = join(concat([",", line]), args);
-    const breakArgs = hasDef(path.getValue())
-      ? joinedArgs
-      : align(command.length + 1, joinedArgs);
+    let breakArgs;
+    if (addParensOnBreak) {
+      breakArgs = indent(concat([softline, joinedArgs]));
+    } else if (hasDef(path.getValue())) {
+      breakArgs = joinedArgs;
+    } else {
+      breakArgs = align(command.length + 1, joinedArgs);
+    }
 
     const commandDoc = group(
       ifBreak(
-        concat([command, " ", breakArgs]),
+        concat([
+          command,
+          addParensOnBreak ? "(" : " ",
+          breakArgs,
+          addParensOnBreak ? concat([softline, ")"]) : ""
+        ]),
         concat([command, " ", joinedArgs])
       )
     );
