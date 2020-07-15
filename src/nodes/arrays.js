@@ -9,7 +9,7 @@ const {
   softline
 } = require("../prettier");
 
-const whitespaceLiterals = [" ", "\\t", "\\n", "\\r"];
+const preserveArraySubstrings = [" ", "\\"];
 
 const isStringArray = (args) =>
   args.body.every(
@@ -17,8 +17,8 @@ const isStringArray = (args) =>
       arg.type === "string_literal" &&
       arg.body[0].body.length === 1 &&
       arg.body[0].body[0].type === "@tstring_content" &&
-      !whitespaceLiterals.some((whitespace) =>
-        arg.body[0].body[0].body.includes(whitespace)
+      !preserveArraySubstrings.some((str) =>
+        arg.body[0].body[0].body.includes(str)
       )
   );
 
