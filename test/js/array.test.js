@@ -11,6 +11,15 @@ describe("array", () => {
   test("does not transform string arrays with spaces", () =>
     expect("['a', 'b c', 'd', 'e']").toMatchFormat());
 
+  test("does not transform string arrays with tabs", () =>
+    expect(`['a', "b\\tc", 'd', 'e']`).toMatchFormat());
+
+  test("does not transform string arrays with newlines", () =>
+    expect(`['a', "b\\nc", 'd', 'e']`).toMatchFormat());
+
+  test("does not transform string arrays with carriage returns", () =>
+    expect(`['a', "b\\rc", 'd', 'e']`).toMatchFormat());
+
   test("does not transform string arrays with interpolation", () =>
     expect(`['a', "b#{c}d", 'e']`).toMatchFormat());
 
