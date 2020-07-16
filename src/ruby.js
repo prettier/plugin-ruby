@@ -115,6 +115,12 @@ module.exports = {
       description:
         "Adds a trailing comma to array literals, hash literals, and method calls."
     },
+    alignArguments: {
+      type: "boolean",
+      category: "Global",
+      default: true,
+      description: "Align method call arguments when split over lines"
+    },
     inlineConditionals: {
       type: "boolean",
       category: "Global",

@@ -140,6 +140,24 @@ describe("method", () => {
         return expect(content).toMatchFormat();
       });
 
+      test("no alignment", () => {
+        const content = ruby(`
+          command.call some_method(
+                         ${long}
+                       )
+        `);
+
+        const expected = ruby(`
+          command.call some_method(
+              ${long}
+            )
+        `);
+
+        return expect(content).toChangeFormat(expected, {
+          alignArguments: false
+        });
+      });
+
       test("alignment for `to`", () => {
         const content = ruby(`
           expect(value).to matcher(
@@ -208,6 +226,31 @@ describe("method", () => {
     });
 
     describe("breaking", () => {
+      describe("without argument align", () => {
+        test("with block on the end", () =>
+          expect(`foo(${long}, &block)`).toChangeFormat(
+            `foo(\n  ${long},\n  &block\n)`
+          ));
+
+        test("on commands", () =>
+          expect(`command ${long}, a${long}`).toChangeFormat(
+            ruby(`
+            command ${long},
+              a${long}
+          `),
+            { alignArguments: false }
+          ));
+
+        test("on command calls", () =>
+          expect(`command.call ${long}, a${long}`).toChangeFormat(
+            ruby(`
+            command.call ${long},
+              a${long}
+          `),
+            { alignArguments: false }
+          ));
+      });
+
       describe("without trailing commas", () => {
         test("starting with no trailing comma stays", () =>
           expect(`foo(${long}, a${long})`).toChangeFormat(

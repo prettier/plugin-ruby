@@ -1,4 +1,12 @@
-const { align, concat, group, ifBreak, join, line } = require("../prettier");
+const {
+  align,
+  concat,
+  group,
+  ifBreak,
+  join,
+  line,
+  indent
+} = require("../prettier");
 const { docLength, makeArgs, makeCall } = require("../utils");
 
 const hasDef = (node) =>
@@ -32,10 +40,14 @@ module.exports = {
       return concat([command, " ", join(", ", args)].concat(heredocs));
     }
 
+    const { alignArguments } = opts;
+
     const joinedArgs = join(concat([",", line]), args);
     const breakArgs = hasDef(path.getValue())
       ? joinedArgs
-      : align(command.length + 1, joinedArgs);
+      : alignArguments
+      ? align(command.length + 1, joinedArgs)
+      : indent(joinedArgs);
 
     const commandDoc = group(
       ifBreak(
@@ -68,10 +80,14 @@ module.exports = {
       return concat(parts.concat([join(", ", args)]).concat(heredocs));
     }
 
+    const { alignArguments } = opts;
+
     const joinedArgs = join(concat([",", line]), args);
     const breakArgs = skipArgsAlign(path)
       ? joinedArgs
-      : align(docLength(concat(parts)), joinedArgs);
+      : alignArguments
+      ? align(docLength(concat(parts)), joinedArgs)
+      : indent(joinedArgs);
 
     const commandDoc = group(
       ifBreak(concat(parts.concat(breakArgs)), concat(parts.concat(joinedArgs)))
