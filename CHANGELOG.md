@@ -908,4 +908,4 @@ would previously result in `array[]`, but now prints properly.
 [@uri]: https://github.com/uri
 [@xipgroc]: https://github.com/xipgroc
 [@yuki24]: https://github.com/yuki24
-[@Rsullivan00]: https://github.com/Rsullivan00
+[@rsullivan00]: https://github.com/Rsullivan00
