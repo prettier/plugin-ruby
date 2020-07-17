@@ -1,5 +1,5 @@
 name: Main
-on: push
+on: [push, pull_request]
 jobs:
   ci:
     name: CI
