@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [@Rsullivan00] - Do not tranform word-literal arrays when there is an escape sequence.
+
 ## [0.19.0] - 2020-07-03
 
 ### Added
@@ -904,3 +908,4 @@ would previously result in `array[]`, but now prints properly.
 [@uri]: https://github.com/uri
 [@xipgroc]: https://github.com/xipgroc
 [@yuki24]: https://github.com/yuki24
+[@Rsullivan00]: https://github.com/Rsullivan00
