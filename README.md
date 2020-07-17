@@ -217,6 +217,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/ryan-hunter-pc"><img src="https://avatars2.githubusercontent.com/u/13044512?v=4" width="100px;" alt=""/><br /><sub><b>Ryan Hunter</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/commits?author=ryan-hunter-pc" title="Code">💻</a></td>
     <td align="center"><a href="https://www.locksteplabs.com/"><img src="https://avatars1.githubusercontent.com/u/7811733?v=4" width="100px;" alt=""/><br /><sub><b>Jan Klimo</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/commits?author=janklimo" title="Code">💻</a></td>
+    <td align="center"><a href="http://ricksullivan.net"><img src="https://avatars0.githubusercontent.com/u/3654176?v=4" width="100px;" alt=""/><br /><sub><b>Rick Sullivan</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3ARsullivan00" title="Bug reports">🐛</a> <a href="https://github.com/prettier/plugin-ruby/commits?author=Rsullivan00" title="Code">💻</a></td>
   </tr>
 </table>
 
