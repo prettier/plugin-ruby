@@ -9,13 +9,17 @@ const {
   softline
 } = require("../prettier");
 
+const preserveArraySubstrings = [" ", "\\"];
+
 const isStringArray = (args) =>
   args.body.every(
     (arg) =>
       arg.type === "string_literal" &&
       arg.body[0].body.length === 1 &&
       arg.body[0].body[0].type === "@tstring_content" &&
-      !arg.body[0].body[0].body.includes(" ")
+      !preserveArraySubstrings.some((str) =>
+        arg.body[0].body[0].body.includes(str)
+      )
   );
 
 const isSymbolArray = (args) =>
