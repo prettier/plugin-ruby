@@ -14,6 +14,7 @@ end
 
 require 'json' unless defined?(JSON)
 require 'ripper'
+require 'kconv'
 
 class RipperJS < Ripper
   attr_reader :source, :lines, :__end__
@@ -21,7 +22,7 @@ class RipperJS < Ripper
   def initialize(source, *args)
     super(source, *args)
 
-    @source = source
+    @source = source.force_encoding(Kconv.guess(source))
     @lines = source.split("\n")
     @__end__ = nil
   end
