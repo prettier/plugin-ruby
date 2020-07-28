@@ -328,7 +328,19 @@ describe("conditionals", () => {
         return expect(content).toMatchFormat();
       });
 
-      test("command call condition", () => {
+      test("command with argument predicate", () => {
+        const content = ruby(`
+          if a b
+            1
+          else
+            2
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("command call with argument predicate", () => {
         const content = ruby(`
           if a.foo? bar
             1
