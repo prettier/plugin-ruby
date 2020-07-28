@@ -180,7 +180,7 @@ const canTernary = (path) => {
   const [predicate, stmts, addition] = path.getValue().body;
 
   return (
-    !["assign", "opassign"].includes(predicate.type) &&
+    !["assign", "opassign", "command_call"].includes(predicate.type) &&
     addition &&
     addition.type === "else" &&
     [stmts, addition.body[0]].every(canTernaryStmts)
