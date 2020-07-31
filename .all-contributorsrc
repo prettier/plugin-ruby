@@ -424,6 +424,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "steobrien",
+      "name": "Stephen O'Brien",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/1694410?v=4",
+      "profile": "https://twitter.com/steobrien",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
