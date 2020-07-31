@@ -433,6 +433,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "nimish-mehta",
+      "name": "Nimish Mehta",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/2488470?v=4",
+      "profile": "https://github.com/nimish-mehta",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
