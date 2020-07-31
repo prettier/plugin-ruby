@@ -219,6 +219,18 @@ describe("strings", () => {
 
         return expect(content).toMatchFormat();
       });
+
+      test("with a call and indented", () => {
+        const content = ruby(`
+          def foo
+            <<-HERE.strip
+              bar
+            HERE
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
     });
 
     describe("squiggly heredocs", () => {
@@ -264,6 +276,18 @@ describe("strings", () => {
               CHILD
           }
           PARENT
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("with a call and indented", () => {
+        const content = ruby(`
+          def foo
+            <<~HERE.strip
+              bar
+            HERE
+          end
         `);
 
         return expect(content).toMatchFormat();

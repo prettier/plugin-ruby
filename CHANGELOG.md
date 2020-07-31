@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [@Rsullivan00] - Do not tranform word-literal arrays when there is an escape sequence.
+- [@steobrien], [@kddeisz] - Do not indent heredocs with calls more than they should be.
 
 ## [0.19.0] - 2020-07-03
 
@@ -909,3 +910,4 @@ would previously result in `array[]`, but now prints properly.
 [@xipgroc]: https://github.com/xipgroc
 [@yuki24]: https://github.com/yuki24
 [@rsullivan00]: https://github.com/Rsullivan00
+[@steobrien]: https://github.com/steobrien
