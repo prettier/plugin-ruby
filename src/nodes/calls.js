@@ -1,4 +1,4 @@
-const { concat, group, indent, hardline, softline } = require("../prettier");
+const { concat, group, indent, literalline, softline } = require("../prettier");
 const toProc = require("../toProc");
 const { concatBody, first, makeCall } = require("../utils");
 
@@ -42,7 +42,7 @@ module.exports = {
         heredoc.beging,
         printedOperator,
         printedMessage,
-        hardline,
+        literalline,
         concat(path.map.apply(path, [print].concat(heredoc.content))),
         heredoc.ending
       ]);
