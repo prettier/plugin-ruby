@@ -22,10 +22,7 @@ module.exports = {
     return group(
       concat([
         keyword,
-        align(
-          keyword.length,
-          group(join(concat([",", line]), printedArgs)),
-        )
+        align(keyword.length, group(join(concat([",", line]), printedArgs)))
       ])
     );
   },
