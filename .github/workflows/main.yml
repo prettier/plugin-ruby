@@ -43,7 +43,8 @@ jobs:
     - run: yarn install --frozen-lockfile
 
     # Actually run tests and lint
-    - run: |
+    - name: Lint and test
+      run: |
         yarn lint
         yarn print --check '**/*'
         yarn test
