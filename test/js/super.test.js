@@ -1,4 +1,4 @@
-const { ruby } = require("./utils");
+const { long, ruby } = require("./utils");
 
 describe("super", () => {
   test("bare", () => expect("super").toMatchFormat());
@@ -13,6 +13,15 @@ describe("super", () => {
 
   test("multiple args, with parens", () =>
     expect("super(1, 2)").toMatchFormat());
+
+  test("multiple args, breaking", () => {
+    const expected = ruby(`
+      super ${long},
+            a${long}
+    `);
+
+    return expect(`super ${long}, a${long}`).toChangeFormat(expected);
+  });
 
   describe("with comment", () => {
     test("bare", () => expect("super # comment").toMatchFormat());
@@ -40,7 +49,7 @@ describe("super", () => {
     test("multiple args, with parens", () =>
       expect("super(1, 2) # comment").toMatchFormat());
 
-    test("multiple args, multiple lines, no parens", () => {
+    test("multiple args, multiple lines, with parens", () => {
       const content = ruby(`
         super(
           1, # first comment

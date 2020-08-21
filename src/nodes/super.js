@@ -1,4 +1,4 @@
-const { concat, join } = require("../prettier");
+const { concat, join, line, align, group } = require("../prettier");
 const { literal } = require("../utils");
 
 module.exports = {
@@ -16,7 +16,18 @@ module.exports = {
       return concat(["super", path.call(print, "body", 0)]);
     }
 
-    return concat(["super ", join(", ", path.call(print, "body", 0))]);
+    const keyword = "super ";
+    const printedArgs = path.call(print, "body", 0);
+
+    return group(
+      concat([
+        keyword,
+        align(
+          keyword.length,
+          group(join(concat([",", line]), printedArgs)),
+        )
+      ])
+    );
   },
   // version of super without any parens or args.
   zsuper: literal("super")

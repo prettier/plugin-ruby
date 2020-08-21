@@ -15,7 +15,7 @@ const ownLine = (comment, _text, _opts, _ast, _isLastComment) => {
   return false;
 };
 
-const endOfLine = (comment, _text, _opts, _ast, _isLastComment) => {
+const endOfLine = (comment, _text, _opts, _ast, isLastComment) => {
   const { enclosingNode } = comment;
   if (!enclosingNode) {
     return false;
@@ -39,10 +39,27 @@ const endOfLine = (comment, _text, _opts, _ast, _isLastComment) => {
     return true;
   }
 
+  // prevent `super 1, 2 # comment` from breaking the args bc of the comment
+  if (enclosingNode.type === "super" && isLastComment) {
+    addTrailingComment(enclosingNode, comment);
+    return true;
+  }
+
   return false;
 };
 
-const remaining = (_comment, _text, _opts, _ast, _isLastComment) => {
+const remaining = (comment, _text, _opts, _ast, isLastComment) => {
+  const { enclosingNode } = comment;
+  if (!enclosingNode) {
+    return false;
+  }
+
+  // prevent `super 1, 2 # comment` from breaking the args bc of the comment
+  if (enclosingNode.type === "super" && isLastComment) {
+    addTrailingComment(enclosingNode, comment);
+    return true;
+  }
+
   return false;
 };
 

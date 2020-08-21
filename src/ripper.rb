@@ -213,7 +213,6 @@ class RipperJS < Ripper
         sclass: [:@kw, 'class'],
         string_dvar: :@embvar,
         string_embexpr: :@embexpr_beg,
-        super: [:@kw, 'super'],
         symbols_new: :@symbols_beg,
         top_const_field: [:@op, '::'],
         top_const_ref: [:@op, '::'],
@@ -238,16 +237,6 @@ class RipperJS < Ripper
             char_end: char_pos
           )
         end
-      end
-
-      def on_zsuper(*body)
-        node = find_scanner_event(:@kw, 'super')
-
-        super(*body).merge!(
-          start: node[:start],
-          char_start: node[:char_start],
-          char_end: node[:char_end]
-        )
       end
 
       # This is mostly identical to the method that is dynamically defined for all `events` (above),
@@ -327,6 +316,16 @@ class RipperJS < Ripper
         end
       end
 
+      def on_super(*body)
+        node = find_scanner_event(:@kw, 'super')
+
+        super(*body).merge!(
+          start: node[:start],
+          char_start: node[:char_start],
+          char_end: char_end_for(body)
+        )
+      end
+
       # Technically, the `not` operator is a unary operator but is reported as
       # a keyword and not an operator. Because of the inconsistency, we have to
       # manually look for the correct scanner event here.
@@ -340,6 +339,16 @@ class RipperJS < Ripper
 
         super(*body).merge!(
           start: node[:start], char_start: node[:char_start], char_end: char_pos
+        )
+      end
+
+      def on_zsuper(*body)
+        node = find_scanner_event(:@kw, 'super')
+
+        super(*body).merge!(
+          start: node[:start],
+          char_start: node[:char_start],
+          char_end: node[:char_end]
         )
       end
 

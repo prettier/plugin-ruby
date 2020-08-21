@@ -102,7 +102,10 @@ module.exports = {
     ruby: {
       print,
       handleComments: comments,
-      canAttachComment: () => true,
+      canAttachComment: (node) => {
+        // don't attach comments to nodes which expect an array body
+        return !["args_add_block", "args"].includes(node.type);
+      },
       getCommentChildNodes: (node) => {
         if (node.type === "undef") {
           return node.body[0];
