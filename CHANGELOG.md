@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [0.19.1] - 2020-08-21
+
 ### Changed
 
 - [@Rsullivan00] - Do not tranform word-literal arrays when there is an escape sequence.
@@ -817,7 +819,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.19.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.19.1...HEAD
+[0.19.1]: https://github.com/prettier/plugin-ruby/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/prettier/plugin-ruby/compare/v0.18.2...v0.19.0
 [0.18.2]: https://github.com/prettier/plugin-ruby/compare/v0.18.1...v0.18.2
 [0.18.1]: https://github.com/prettier/plugin-ruby/compare/v0.18.0...v0.18.1
