@@ -27,7 +27,7 @@
     "eslint-config-prettier": "^6.10.1",
     "husky": "^4.2.5",
     "jest": "^26.0.0",
-    "pretty-quick": "^2.0.1"
+    "pretty-quick": "^3.0.0"
   },
   "eslintConfig": {
     "extends": [
