@@ -5,17 +5,17 @@ require_relative '../../src/ripper'
 
 class MetadataTest < Minitest::Test
   def test_BEGIN
-    assert_metadata :BEGIN, <<~RUBY
+    assert_metadata :BEGIN, <<~SOURCE
       BEGIN {
       }
-    RUBY
+    SOURCE
   end
 
   def test_END
-    assert_metadata :END, <<~RUBY
+    assert_metadata :END, <<~SOURCE
       END {
       }
-    RUBY
+    SOURCE
   end
 
   def test_alias
@@ -23,33 +23,33 @@ class MetadataTest < Minitest::Test
   end
 
   def test_array_args
-    assert_metadata :array, <<~RUBY
+    assert_metadata :array, <<~SOURCE
       [
         foo,
         bar,
         baz
       ]
-    RUBY
+    SOURCE
   end
 
   def test_array_args_add_star
-    assert_metadata :array, <<~RUBY
+    assert_metadata :array, <<~SOURCE
       [
         foo,
         *bar,
         baz
       ]
-    RUBY
+    SOURCE
   end
 
   def test_array_qwords
-    assert_metadata :array, <<~RUBY
+    assert_metadata :array, <<~SOURCE
       %w[
         foo
         bar
         baz
       ]
-    RUBY
+    SOURCE
   end
 
   def test_aref
@@ -89,13 +89,13 @@ class MetadataTest < Minitest::Test
   end
 
   def test_arg_paren
-    content = <<~RUBY
+    content = <<~SOURCE
       foo(
         a,
         b,
         c
       )
-    RUBY
+    SOURCE
 
     assert_node_metadata(
       :arg_paren,
@@ -141,11 +141,11 @@ class MetadataTest < Minitest::Test
   end
 
   def test_begin
-    assert_metadata :begin, <<~RUBY
+    assert_metadata :begin, <<~SOURCE
       begin
         begin; end
       end
-    RUBY
+    SOURCE
   end
 
   def test_binary
@@ -193,22 +193,22 @@ class MetadataTest < Minitest::Test
   end
 
   def test_case
-    assert_metadata :case, <<~RUBY
+    assert_metadata :case, <<~SOURCE
       case foo
       when bar
         case baz
         when qux
         end
       end
-    RUBY
+    SOURCE
   end
 
   def test_class
-    assert_metadata :class, <<~RUBY
+    assert_metadata :class, <<~SOURCE
       class Foo
         class Bar; end
       end
-    RUBY
+    SOURCE
   end
 
   def test_command
@@ -240,27 +240,27 @@ class MetadataTest < Minitest::Test
   end
 
   def test_def
-    assert_metadata :def, <<~RUBY
+    assert_metadata :def, <<~SOURCE
       def foo
         def bar; end
       end
-    RUBY
+    SOURCE
   end
 
   def test_defined
-    assert_metadata :defined, <<~RUBY
+    assert_metadata :defined, <<~SOURCE
       defined?(
         Foo
       )
-    RUBY
+    SOURCE
   end
 
   def test_defs
-    assert_metadata :defs, <<~RUBY
+    assert_metadata :defs, <<~SOURCE
       def Object.foo
         def Object.bar; end
       end
-    RUBY
+    SOURCE
   end
 
   def test_do_block
@@ -284,13 +284,13 @@ class MetadataTest < Minitest::Test
   end
 
   def test_else
-    content = <<~RUBY
+    content = <<~SOURCE
       if foo
         bar
       else
         baz
       end
-    RUBY
+    SOURCE
 
     assert_node_metadata(
       :else,
@@ -300,13 +300,13 @@ class MetadataTest < Minitest::Test
   end
 
   def test_elsif
-    content = <<~RUBY
+    content = <<~SOURCE
       if foo
         bar
       elsif bar
         qux
       end
-    RUBY
+    SOURCE
 
     assert_node_metadata(
       :elsif,
@@ -316,13 +316,13 @@ class MetadataTest < Minitest::Test
   end
 
   def test_ensure
-    content = <<~RUBY
+    content = <<~SOURCE
       begin
         foo
       ensure
         bar
       end
-    RUBY
+    SOURCE
 
     assert_node_metadata(
       :ensure,
@@ -358,28 +358,28 @@ class MetadataTest < Minitest::Test
   end
 
   def test_for
-    assert_metadata :for, <<~RUBY
+    assert_metadata :for, <<~SOURCE
       for foo in bar do
         for baz in qux do
         end
       end
-    RUBY
+    SOURCE
   end
 
   def test_hash
-    assert_metadata :hash, <<~RUBY
+    assert_metadata :hash, <<~SOURCE
       {
         foo: 'bar'
       }
-    RUBY
+    SOURCE
   end
 
   def test_if
-    assert_metadata :if, <<~RUBY
+    assert_metadata :if, <<~SOURCE
       if foo
         if bar; end
       end
-    RUBY
+    SOURCE
   end
 
   def test_ifop
@@ -399,17 +399,17 @@ class MetadataTest < Minitest::Test
   end
 
   def test_lambda
-    assert_metadata :lambda, <<~RUBY
+    assert_metadata :lambda, <<~SOURCE
       -> (foo, bar) {
         foo + bar
       }
-    RUBY
+    SOURCE
 
-    assert_metadata :lambda, <<~RUBY
+    assert_metadata :lambda, <<~SOURCE
       lambda do |foo, bar|
         foo + bar
       end
-    RUBY
+    SOURCE
   end
 
   def test_massign
@@ -457,11 +457,11 @@ class MetadataTest < Minitest::Test
   end
 
   def test_module
-    assert_metadata :module, <<~RUBY
+    assert_metadata :module, <<~SOURCE
       module Foo
         module Bar; end
       end
-    RUBY
+    SOURCE
   end
 
   def test_mrhs_add_star
@@ -489,12 +489,12 @@ class MetadataTest < Minitest::Test
   end
 
   def test_params
-    content = <<~RUBY
+    content = <<~SOURCE
       def foo(
         bar,
         baz
       ); end
-    RUBY
+    SOURCE
 
     assert_node_metadata(
       :params,
@@ -565,18 +565,18 @@ class MetadataTest < Minitest::Test
   end
 
   def test_sclass
-    assert_metadata :sclass, <<~RUBY
+    assert_metadata :sclass, <<~SOURCE
       class << Foo
         class << Bar; end
       end
-    RUBY
+    SOURCE
   end
 
   def test_string_concat
-    assert_metadata :string_concat, <<~RUBY
+    assert_metadata :string_concat, <<~SOURCE
       'foo' \
         'bar'
-    RUBY
+    SOURCE
   end
 
   def test_string_dvar
@@ -637,11 +637,11 @@ class MetadataTest < Minitest::Test
   end
 
   def test_unless
-    assert_metadata :unless, <<~RUBY
+    assert_metadata :unless, <<~SOURCE
       unless foo
         unless bar; end
       end
-    RUBY
+    SOURCE
   end
 
   def test_unless_mod
@@ -649,11 +649,11 @@ class MetadataTest < Minitest::Test
   end
 
   def test_until
-    assert_metadata :until, <<~RUBY
+    assert_metadata :until, <<~SOURCE
       until foo
         until bar; end
       end
-    RUBY
+    SOURCE
   end
 
   def test_until_mod
@@ -661,11 +661,11 @@ class MetadataTest < Minitest::Test
   end
 
   def test_while
-    assert_metadata :while, <<~RUBY
+    assert_metadata :while, <<~SOURCE
       while foo
         while bar; end
       end
-    RUBY
+    SOURCE
   end
 
   def test_var_alias
@@ -713,12 +713,12 @@ class MetadataTest < Minitest::Test
   end
 
   def test_xstring
-    assert_metadata :xstring_literal, <<~RUBY
+    assert_metadata :xstring_literal, <<~SOURCE
       `
         foo
         bar
       `
-    RUBY
+    SOURCE
   end
 
   def test_yield
@@ -735,11 +735,11 @@ class MetadataTest < Minitest::Test
 
   if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
     def test_args_forward
-      content = <<~RUBY
+      content = <<~SOURCE
         def foo(...)
           bar(...)
         end
-      RUBY
+      SOURCE
 
       assert_node_metadata(
         :args_forward,
@@ -749,12 +749,12 @@ class MetadataTest < Minitest::Test
     end
 
     def test_aryptn
-      content = <<~RUBY
+      content = <<~SOURCE
         case foo
         in bar, baz
           qux
         end
-      RUBY
+      SOURCE
 
       assert_node_metadata(
         :aryptn,
@@ -764,12 +764,12 @@ class MetadataTest < Minitest::Test
     end
 
     def test_in
-      content = <<~RUBY
+      content = <<~SOURCE
         case foo
         in bar
           baz
         end
-      RUBY
+      SOURCE
 
       assert_node_metadata(
         :in,

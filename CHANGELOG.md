@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- [@kddeisz] - Allow embedded formatting on heredocs by the name placed at the start. For example,
+
+<!-- prettier-ignore -->
+```ruby
+javascript = <<~JAVASCRIPT
+  const a=1;
+  const b=2;
+  return a+b;
+JAVASCRIPT
+```
+
 ## [0.19.1] - 2020-08-21
 
 ### Changed
