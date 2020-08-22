@@ -1,3 +1,4 @@
+const embed = require("./embed");
 const parse = require("./parse");
 const print = require("./print");
 
@@ -101,6 +102,7 @@ module.exports = {
   },
   printers: {
     ruby: {
+      embed,
       print
     },
     haml: {
