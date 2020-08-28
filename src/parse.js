@@ -21,7 +21,7 @@ module.exports = (text, _parsers, _opts) => {
     "ruby",
     ["--disable-gems", path.join(__dirname, "./ripper.rb")],
     {
-      env: { LANG },
+      env: Object.assign({}, process.env, { LANG }),
       input: text,
       maxBuffer: 10 * 1024 * 1024 // 10MB
     }
