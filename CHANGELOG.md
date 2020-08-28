@@ -19,6 +19,10 @@ javascript = <<~JAVASCRIPT
 JAVASCRIPT
 ```
 
+### Changed
+
+- [@mmainz] - Fix the encoding setting such that we're not overwriting the entire set of environment variables.
+
 ## [0.19.1] - 2020-08-21
 
 ### Changed
