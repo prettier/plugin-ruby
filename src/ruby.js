@@ -2,8 +2,6 @@ const embed = require("./embed");
 const parse = require("./parse");
 const print = require("./print");
 
-const haml = require("./haml");
-
 const pragmaPattern = /#\s*@(prettier|format)/;
 const hasPragma = (text) => pragmaPattern.test(text);
 
@@ -76,12 +74,6 @@ module.exports = {
       interpreters: ["jruby", "macruby", "rake", "rbx", "ruby"],
       linguistLanguageId: 326,
       vscodeLanguageIds: ["ruby"]
-    },
-    {
-      name: "HAML",
-      parsers: ["haml"],
-      extensions: [".haml"],
-      vscodeLanguageIds: ["haml"]
     }
   ],
   parsers: {
@@ -91,23 +83,12 @@ module.exports = {
       hasPragma,
       locStart,
       locEnd
-    },
-    haml: {
-      parse: haml.parse,
-      astFormat: "haml",
-      hasPragma: haml.hasPragma,
-      locStart: haml.locStart,
-      locEnd: haml.locEnd
     }
   },
   printers: {
     ruby: {
       embed,
       print
-    },
-    haml: {
-      embed: haml.embed,
-      print: haml.print
     }
   },
   options: {

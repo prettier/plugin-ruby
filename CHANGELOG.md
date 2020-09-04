@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - [@ftes], [@kddeisz] - Properly escape HAML plain text statements that start with special HAML characters.
 
+### Removed
+
+- [@kddeisz] - I'm stripping out the HAML plugin and putting it into its own package (`@prettier/plugin-haml`). It's become too difficult to maintain within this repo, and it's confusing for contributors because there are some things that work with Ruby and some things that don't. This is going to simplify maintenance. This should probably be a major version bump but since we're still pre `1.0` I'm going to leave it as a patch.
+
 ## [0.20.0] - 2020-08-28
 
 ### Added

@@ -43,20 +43,6 @@ const realFormat = (content) =>
     plugins: ["."]
   });
 
-const toInferParser = (filename, parser) => {
-  const filepath = path.join(__dirname, filename);
-  const plugin = path.join(__dirname, "..", "..", "src", "ruby");
-  return prettier.getFileInfo(filepath, { plugins: [plugin] }).then((props) => {
-    return {
-      pass: props.inferredParser === parser,
-      message: () => `
-          Expected prettier to infer the ${parser} parser for ${filename},
-          but got ${props.inferredParser} instead
-        `
-    };
-  });
-};
-
 expect.extend({
   toChangeFormat(before, after, config = {}) {
     return checkFormat(before, after, config);
@@ -83,31 +69,16 @@ expect.extend({
       `
     };
   },
-  toInferRubyParser(filename) {
-    return toInferParser(filename, "ruby");
-  },
-  toInferHamlParser(filename) {
-    return toInferParser(filename, "haml");
-  }
-});
+  toInferParser(filename) {
+    const filepath = path.join(__dirname, filename);
+    const plugin = path.join(__dirname, "..", "..", "src", "ruby");
 
-const checkHamlFormat = (before, after, config) => {
-  const formatted = prettier.format(
-    before,
-    Object.assign({}, config, { parser: "haml", plugins: ["."] })
-  );
-
-  return {
-    pass: formatted === `${after}\n`,
-    message: () => `Expected:\n${after}\nReceived:\n${formatted}`
-  };
-};
-
-expect.extend({
-  toChangeHamlFormat(before, after, config = {}) {
-    return checkHamlFormat(before, after, config);
-  },
-  toMatchHamlFormat(before, config = {}) {
-    return checkHamlFormat(before, before, config);
+    return prettier
+      .getFileInfo(filepath, { plugins: [plugin] })
+      .then((props) => ({
+        pass: props.inferredParser === "ruby",
+        message: () =>
+          `Expected prettier to infer the ruby parser for ${filename}, but got ${props.inferredParser} instead`
+      }));
   }
 });
