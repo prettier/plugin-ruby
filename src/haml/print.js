@@ -1,4 +1,4 @@
-const { concat, hardline, join, markAsRoot } = require("../prettier");
+const { concat, hardline, join } = require("../prettier");
 
 const comment = require("./nodes/comment");
 const doctype = require("./nodes/doctype");
@@ -18,8 +18,8 @@ const nodes = {
 
     return value.text.startsWith("=") ? `\\${value.text}` : value.text;
   },
-  root: (path, opts, print) =>
-    markAsRoot(concat([join(hardline, path.map(print, "children")), hardline])),
+  root: (path, _opts, print) =>
+    concat([join(hardline, path.map(print, "children")), hardline]),
   script,
   silent_script: silentScript,
   tag
