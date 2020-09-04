@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [@ftes], [@kddeisz] - Properly escape HAML plain text statements that start with special HAML characters.
+
 ## [0.20.0] - 2020-08-28
 
 ### Added
