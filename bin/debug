@@ -1,0 +1,170 @@
+#!/usr/bin/env ruby
+
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'sinatra', require: 'sinatra/base'
+end
+
+require_relative '../src/ripper'
+
+class App < Sinatra::Base
+  HTML = DATA.read
+
+  get '/' do
+    HTML
+  end
+
+  post '/ast' do
+    builder = RipperJS.new(request.body.read)
+    response = builder.parse
+
+    if !response || builder.error?
+      halt 422
+    else
+      JSON.fast_generate(response)
+    end
+  end
+
+  start!
+end
+
+__END__
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@prettier/plugin-ruby</title>
+    <style>
+h1 {
+  text-align: center;
+}
+
+textarea {
+  box-sizing: border-box;
+  font-family: monospace;
+  font-size: inherit;
+  height: 10em;
+  padding: 0.5em;
+  width: 100%;
+}
+
+code {
+  border: solid 1px gray;
+  display: block;
+  font-size: 2em;
+  white-space: pre;
+}
+
+em {
+  background-color: yellow;
+  font-variant: normal;
+}
+    </style>
+  </head>
+  <body>
+    <h1>@prettier/plugin-ruby</h1>
+    <textarea aria-label="Input" id="input"></textarea>
+    <code id="output"></code>
+    <ul id="ast"></ul>
+    <script>
+const clearElement = element => {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+};
+
+const input = document.querySelector("#input");
+const output = document.querySelector("#output");
+const ast = document.querySelector("#ast");
+
+const highlight = event => {
+  const string = input.value;
+
+  const charStart = event.target.getAttribute("data-char-start");
+  const charEnd = event.target.getAttribute("data-char-end");
+
+  const left = string.slice(0, charStart);
+  const middle = string.slice(charStart, charEnd);
+  const right = string.slice(charEnd);
+
+  clearElement(output);
+
+  if (charStart !== 0) {
+    output.appendChild(document.createTextNode(string.slice(0, charStart)));
+  }
+
+  const em = document.createElement("em");
+  em.appendChild(document.createTextNode(middle));
+  output.appendChild(em);
+
+  if (charEnd !== string.length - 1) {
+    output.appendChild(document.createTextNode(string.slice(charEnd)));
+  }
+};
+
+const createTree = (parent, node) => {
+  if (!node) {
+    return;
+  }
+
+  const li = document.createElement("li");
+
+  if (typeof node === "string") {
+    li.appendChild(document.createTextNode(`"${node}"`));
+    parent.appendChild(li);
+    return;
+  }
+
+  const button = document.createElement("button");
+
+  button.onclick = highlight;
+  button.setAttribute("data-char-start", node.char_start);
+  button.setAttribute("data-char-end", node.char_end);
+
+  const label = `${node.type} (${node.char_start}-${node.char_end})`;
+
+  if (node.type.startsWith("@")) {
+    button.appendChild(document.createTextNode(`${label} = ${node.body}`));
+    li.appendChild(button);
+    parent.appendChild(li);
+  } else if (Array.isArray(node.body)) {
+    const ul = document.createElement("ul");
+    node.body.forEach(child => {
+      createTree(ul, child);
+    });
+
+    button.appendChild(document.createTextNode(label));
+    li.appendChild(button);
+    parent.appendChild(li);
+    parent.appendChild(ul);
+  }
+};
+
+input.addEventListener("keyup", event => {
+  output.innerText = event.target.value;
+
+  fetch("/ast", { method: "post", body: event.target.value })
+    .then(response => {
+      if (response.status === 422) {
+        throw new Error("syntax");
+      }
+
+      return response.json();
+    })
+    .then(node => {
+      clearElement(ast);
+      createTree(ast, node);
+    })
+    .catch(error => {
+      if (error.message !== "syntax") {
+        console.error(error);
+      }
+    });
+});
+    </script>
+  </body>
+</html>
