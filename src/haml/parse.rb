@@ -6,15 +6,32 @@ require 'haml'
 class Haml::Parser::ParseNode
   ESCAPE = /Haml::Helpers.html_escape\(\((.+)\)\)/.freeze
 
+  # If a node comes in as the plain type but starts with one of the special
+  # characters that haml parses, then we need to escape it with a \ when
+  # printing. So here we make a regexp pattern to check if the node needs to be
+  # escaped.
+  special_chars =
+    Haml::Parser::SPECIAL_CHARACTERS.map { |char| Regexp.escape(char) }
+
+  SPECIAL_START = /\A(?:#{special_chars.join('|')})/
+
   def as_json
     case type
-    when :comment, :doctype, :plain, :silent_script
+    when :comment, :doctype, :silent_script
       to_h.tap do |json|
         json.delete(:parent)
         json[:children] = children.map(&:as_json)
       end
     when :filter, :haml_comment
       to_h.tap { |json| json.delete(:parent) }
+    when :plain
+      to_h.tap do |json|
+        json.delete(:parent)
+        json[:children] = children.map(&:as_json)
+
+        text = json[:value][:text]
+        json[:value][:text] = "\\#{text}" if text.match?(SPECIAL_START)
+      end
     when :root
       to_h.tap { |json| json[:children] = children.map(&:as_json) }
     when :script
