@@ -13,11 +13,7 @@ const nodes = {
   doctype,
   filter,
   haml_comment: hamlComment,
-  plain: (path, _opts, _print) => {
-    const { value } = path.getValue();
-
-    return value.text.startsWith("=") ? `\\${value.text}` : value.text;
-  },
+  plain: (path, _opts, _print) => path.getValue().value.text,
   root: (path, _opts, print) =>
     concat([join(hardline, path.map(print, "children")), hardline]),
   script,
