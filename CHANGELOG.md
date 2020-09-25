@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [@kddeisz], [@ryan-hunter-pc] - Explicitly handle `break` and `next` keyword parentheses.
+
 ## [0.20.1] - 2020-09-04
 
 ### Changed

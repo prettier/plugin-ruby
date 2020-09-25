@@ -1,3 +1,5 @@
+const { ruby } = require("./utils");
+
 describe("break", () => {
   test("empty break", () => expect("break").toMatchFormat());
 
@@ -9,4 +11,18 @@ describe("break", () => {
 
   test("break with multiple arguments", () =>
     expect("break 1, 2, 3").toMatchFormat());
+
+  test("keeps parens for multiple statements", () => {
+    const expected = ruby(`
+      break(
+        a = 1
+        a == 1
+      )
+    `);
+
+    return expect("break(a = 1; a == 1)").toChangeFormat(expected);
+  });
+
+  test("keeps parens for _mod nodes", () =>
+    expect("break(1 if true)").toMatchFormat());
 });

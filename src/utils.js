@@ -103,6 +103,16 @@ const makeCall = (path, opts, print) => {
 
 const makeList = (path, opts, print) => path.map(print, "body");
 
+const nodeDive = (node, steps) => {
+  let current = node;
+
+  steps.forEach((step) => {
+    current = current[step];
+  });
+
+  return current;
+};
+
 const prefix = (value) => (path, opts, print) =>
   concat([value, path.call(print, "body", 0)]);
 
@@ -150,6 +160,7 @@ module.exports = {
   makeArgs,
   makeCall,
   makeList,
+  nodeDive,
   prefix,
   printComments,
   skipAssignIndent,

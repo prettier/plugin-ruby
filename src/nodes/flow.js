@@ -1,5 +1,30 @@
 const { concat, join } = require("../prettier");
-const { literal } = require("../utils");
+const { literal, nodeDive } = require("../utils");
+
+const unskippableParens = [
+  "if_mod",
+  "rescue_mod",
+  "unless_mod",
+  "until_mod",
+  "while_mod"
+];
+
+const maybeHandleParens = (path, print, keyword, steps) => {
+  const node = nodeDive(path.getValue(), steps);
+  if (node.type !== "paren") {
+    return null;
+  }
+
+  const stmts = node.body[0].body;
+  if (stmts.length === 1 && !unskippableParens.includes(stmts[0].type)) {
+    return concat([
+      `${keyword} `,
+      path.call.apply(path, [print].concat(steps).concat("body", 0))
+    ]);
+  }
+
+  return concat([keyword, path.call.apply(path, [print].concat(steps))]);
+};
 
 module.exports = {
   break: (path, opts, print) => {
@@ -9,14 +34,11 @@ module.exports = {
       return "break";
     }
 
-    if (content.body[0].body[0].type === "paren") {
-      return concat([
-        "break ",
-        path.call(print, "body", 0, "body", 0, "body", 0, "body", 0)
-      ]);
-    }
-
-    return concat(["break ", join(", ", path.call(print, "body", 0))]);
+    const steps = ["body", 0, "body", 0, "body", 0];
+    return (
+      maybeHandleParens(path, print, "break", steps) ||
+      concat(["break ", join(", ", path.call(print, "body", 0))])
+    );
   },
   next: (path, opts, print) => {
     const args = path.getValue().body[0].body[0];
@@ -25,15 +47,11 @@ module.exports = {
       return "next";
     }
 
-    if (args.body[0].type === "paren") {
-      // Ignoring the parens node and just going straight to the content
-      return concat([
-        "next ",
-        path.call(print, "body", 0, "body", 0, "body", 0, "body", 0)
-      ]);
-    }
-
-    return concat(["next ", join(", ", path.call(print, "body", 0))]);
+    const steps = ["body", 0, "body", 0, "body", 0];
+    return (
+      maybeHandleParens(path, print, "next", steps) ||
+      concat(["next ", join(", ", path.call(print, "body", 0))])
+    );
   },
   yield: (path, opts, print) => {
     if (path.getValue().body[0].type === "paren") {
