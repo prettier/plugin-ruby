@@ -7,17 +7,7 @@ const {
   line,
   literalline
 } = require("../prettier");
-const { prefix, skipAssignIndent } = require("../utils");
-
-const nodeDive = (node, steps) => {
-  let current = node;
-
-  steps.forEach((step) => {
-    current = current[step];
-  });
-
-  return current;
-};
+const { nodeDive, prefix, skipAssignIndent } = require("../utils");
 
 // When attempting to convert a hash rocket into a hash label, you need to take
 // care because only certain patterns are allowed. Ruby source says that they
