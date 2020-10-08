@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint --cache .",
     "print": "prettier --plugin=.",
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "repository": {
     "type": "git",

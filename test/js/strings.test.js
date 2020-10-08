@@ -181,6 +181,54 @@ describe("strings", () => {
         return expect(content).toMatchFormat();
       });
 
+      test("with a method call", () => {
+        const content = ruby(`
+          <<-HERE.strip.chomp
+            This is a straight heredoc
+            with two method calls
+          HERE
+        `);
+
+        return expect(content).toChangeFormat(
+          ruby(`
+            (
+            <<-HERE
+              This is a straight heredoc
+              with two method calls
+            HERE
+            ).strip.chomp
+          `)
+        );
+      });
+
+      test("#586", () => {
+        const content = ruby(`
+          p <<-BAR, ['value', 'value', 'value', 'value', 'value', 'value', 'value', 'value', 125484, 024024103]
+            text
+          BAR
+        `);
+
+        return expect(content).toChangeFormat(
+          ruby(`
+            p <<-BAR,
+              text
+            BAR
+            [
+              'value',
+              'value',
+              'value',
+              'value',
+              'value',
+              'value',
+              'value',
+              'value',
+              125_484,
+              0o24024103
+            ]
+          `)
+        );
+      });
+
       test("on an assignment", () => {
         const content = ruby(`
           abc = <<-HERE
@@ -281,10 +329,10 @@ describe("strings", () => {
         return expect(content).toMatchFormat();
       });
 
-      test("with a call and indented", () => {
+      test("with two calls and indented", () => {
         const content = ruby(`
           def foo
-            <<~HERE.strip
+            <<~HERE.strip.chomp
               bar
             HERE
           end
@@ -300,6 +348,38 @@ describe("strings", () => {
           call(1, 2, 3, <<-HERE)
             foo
           HERE
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("on calls with trailing arguments", () => {
+        const content = ruby(`
+          call(1, <<-HERE, 2)
+            foo
+          HERE
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("in parens args with trailing args after", () => {
+        const content = ruby(`
+          Foo.new(<<-ARG1, 'test2')
+            test1 line 1
+            test1 line 2
+          ARG1
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("in paren args with a call", () => {
+        const content = ruby(`
+          Foo.new(<<~ARG1.upcase.chomp, 'test2')
+            test1 line 1
+            test1 line 2
+          ARG1
         `);
 
         return expect(content).toMatchFormat();
@@ -375,12 +455,22 @@ describe("strings", () => {
 
       test("squiggly indent", () => {
         const content = ruby(`
-          foo = <<~TEXT.strip
+          foo = (<<~TEXT
             bar
           TEXT
+          ).strip
         `);
 
-        return expect(content).toMatchFormat();
+        return expect(content).toChangeFormat(
+          ruby(`
+            foo =
+              (
+                <<~TEXT
+              bar
+            TEXT
+              ).strip
+          `)
+        );
       });
 
       test("straight no indent", () => {
