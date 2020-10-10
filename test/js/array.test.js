@@ -91,7 +91,13 @@ describe("array", () => {
         ]
       `);
 
-      return expect(content).toMatchFormat();
+      return expect(content).toChangeFormat(
+        ruby(`
+          [${start}, foo]
+              this is the heredoc
+            HERE
+        `)
+      );
     });
 
     test("as the last value", () => {
@@ -104,7 +110,13 @@ describe("array", () => {
         ]
       `);
 
-      return expect(content).toMatchFormat();
+      return expect(content).toChangeFormat(
+        ruby(`
+          [foo, ${start}]
+              this is the heredoc
+            HERE
+        `)
+      );
     });
 
     test("with splats in the array", () => {
@@ -119,7 +131,13 @@ describe("array", () => {
         ]
       `);
 
-      return expect(content).toMatchFormat();
+      return expect(content).toChangeFormat(
+        ruby(`
+          [foo, *bar, baz, ${start}]
+              this is the heredoc
+            HERE
+        `)
+      );
     });
 
     test("with trailing commas", () => {
@@ -131,7 +149,13 @@ describe("array", () => {
         ]
       `);
 
-      return expect(content).toMatchFormat({ addTrailingCommas: true });
+      return expect(content).toChangeFormat(
+        ruby(`
+          [${start}]
+              this is the heredoc
+            HERE
+        `)
+      );
     });
   });
 });

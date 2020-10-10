@@ -4,11 +4,19 @@ const {
   hardline,
   indent,
   literalline,
+  lineSuffix,
   softline,
   join
 } = require("../prettier");
 
-const { concatBody, empty, makeList, prefix, surround } = require("../utils");
+const {
+  concatBody,
+  empty,
+  makeList,
+  prefix,
+  surround,
+  literallineWithoutBreakParent
+} = require("../utils");
 
 // If there is some part of this string that matches an escape sequence or that
 // contains the interpolation pattern ("#{"), then we are locked into whichever
@@ -100,10 +108,23 @@ module.exports = {
       }
 
       // In this case, the part of the string is just regular string content
-      return join(literalline, part.body.split("\n"));
+      return join(literallineWithoutBreakParent, part.body.split("\n"));
     });
 
-    return concat([beging, literalline, concat(parts), ending]);
+    // we use a literalline break because matching indentation is required
+    // for the heredoc contents and ending.
+    // If the line suffix contains a break-parent, all ancestral groups are broken,
+    // and heredocs automatically break lines in groups they appear in. We prefer
+    // them to appear in-line if possible, so we use a literalline without the
+    // break-parent
+    return group(
+      concat([
+        beging,
+        lineSuffix(
+          group(concat([literallineWithoutBreakParent, ...parts, ending]))
+        )
+      ])
+    );
   },
   string: makeList,
   string_concat: (path, opts, print) =>

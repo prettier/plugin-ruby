@@ -4,6 +4,16 @@ describe("assign", () => {
   describe("single assignment", () => {
     test("basic", () => expect("a = 1").toMatchFormat());
 
+    test("heredoc", () => {
+      const content = ruby(`
+        text = <<-TEXT
+          abcd
+        TEXT
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
     test("multiline", () => {
       const content = ruby(`
         a =

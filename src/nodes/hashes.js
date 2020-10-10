@@ -1,12 +1,4 @@
-const {
-  concat,
-  group,
-  ifBreak,
-  indent,
-  join,
-  line,
-  literalline
-} = require("../prettier");
+const { concat, group, ifBreak, indent, join, line } = require("../prettier");
 const { nodeDive, prefix, skipAssignIndent } = require("../utils");
 
 // When attempting to convert a hash rocket into a hash label, you need to take
@@ -77,43 +69,13 @@ module.exports = {
 
     assocNodes.forEach((assocNode, index) => {
       const isInner = index !== assocNodes.length - 1;
-      const valueNode = assocNode.body[1];
 
-      const isStraightHeredoc = valueNode && valueNode.type === "heredoc";
-      const isSquigglyHeredoc =
-        valueNode &&
-        valueNode.type === "string_literal" &&
-        valueNode.body[0].type === "heredoc";
+      assocDocs.push(path.call(print, "body", 0, index));
 
-      if (isStraightHeredoc || isSquigglyHeredoc) {
-        const heredocSteps = isStraightHeredoc
-          ? ["body", 1]
-          : ["body", 1, "body", 0];
-        const { beging, ending } = nodeDive(assocNode, heredocSteps);
-
-        assocDocs.push(
-          makeLabel(path, opts, print, ["body", 0, index, "body", 0]),
-          " ",
-          beging,
-          isInner || addTrailingCommas ? "," : "",
-          literalline,
-          concat(
-            path.map.apply(
-              path,
-              [print, "body", 0, index].concat(heredocSteps).concat("body")
-            )
-          ),
-          ending,
-          isInner ? line : ""
-        );
-      } else {
-        assocDocs.push(path.call(print, "body", 0, index));
-
-        if (isInner) {
-          assocDocs.push(concat([",", line]));
-        } else if (addTrailingCommas) {
-          assocDocs.push(ifBreak(",", ""));
-        }
+      if (isInner) {
+        assocDocs.push(concat([",", line]));
+      } else if (addTrailingCommas) {
+        assocDocs.push(ifBreak(",", ""));
       }
     });
 

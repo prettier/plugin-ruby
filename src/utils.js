@@ -1,10 +1,4 @@
-const {
-  breakParent,
-  concat,
-  hardline,
-  lineSuffix,
-  literalline
-} = require("./prettier");
+const { breakParent, concat, hardline, lineSuffix } = require("./prettier");
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
@@ -51,45 +45,6 @@ const hasAncestor = (path, types) => {
 };
 
 const literal = (value) => () => value;
-
-const makeArgs = (path, opts, print, argsIndex) => {
-  let argNodes = path.getValue().body[argsIndex];
-  const argPattern = [print, "body", argsIndex, "body"];
-
-  if (argNodes.type === "args_add_block") {
-    [argNodes] = argNodes.body;
-    argPattern.push(0, "body");
-  }
-
-  const args = path.call(print, "body", argsIndex);
-  const heredocs = [];
-
-  argNodes.body.forEach((argNode, index) => {
-    let pattern;
-    let heredoc;
-
-    if (argNode.type === "heredoc") {
-      pattern = [index, "body"];
-      heredoc = argNode;
-    } else if (
-      argNode.type === "string_literal" &&
-      argNode.body[0].type === "heredoc"
-    ) {
-      pattern = [index, "body", 0, "body"];
-      [heredoc] = argNode.body;
-    } else {
-      return;
-    }
-
-    const content = path.map.apply(path, argPattern.slice().concat(pattern));
-    heredocs.push(
-      concat([literalline].concat(content).concat([heredoc.ending]))
-    );
-    args[index] = heredoc.beging;
-  });
-
-  return { args, heredocs };
-};
 
 const makeCall = (path, opts, print) => {
   const operation = path.getValue().body[1];
@@ -149,6 +104,12 @@ const skipAssignIndent = (node) =>
 const surround = (left, right) => (path, opts, print) =>
   concat([left, path.call(print, "body", 0), right]);
 
+const literallineWithoutBreakParent = {
+  type: "line",
+  hard: true,
+  literal: true
+};
+
 module.exports = {
   concatBody,
   containsAssignment,
@@ -157,7 +118,7 @@ module.exports = {
   first,
   hasAncestor,
   literal,
-  makeArgs,
+  literallineWithoutBreakParent,
   makeCall,
   makeList,
   nodeDive,

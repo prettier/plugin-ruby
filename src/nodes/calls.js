@@ -1,22 +1,8 @@
-const { concat, group, indent, literalline, softline } = require("../prettier");
+const { concat, group, indent, softline } = require("../prettier");
 const toProc = require("../toProc");
 const { concatBody, first, makeCall } = require("../utils");
 
 const noIndent = ["array", "hash", "if", "method_add_block", "xstring_literal"];
-
-const getHeredoc = (path, print, node) => {
-  if (node.type === "heredoc") {
-    const { beging, ending } = node;
-    return { beging, ending, content: ["body", 0, "body"] };
-  }
-
-  if (node.type === "string_literal" && node.body[0].type === "heredoc") {
-    const { beging, ending } = node.body[0];
-    return { beging, ending, content: ["body", 0, "body", 0, "body"] };
-  }
-
-  return null;
-};
 
 module.exports = {
   call: (path, opts, print) => {
@@ -29,24 +15,6 @@ module.exports = {
     // In this case, "call" is returned for the 3rd child node.
     const printedMessage =
       messageNode === "call" ? messageNode : path.call(print, "body", 2);
-
-    // If we have a heredoc as a receiver, then we need to move the operator and
-    // the message up to start of the heredoc declaration, as in:
-    //
-    //     <<~TEXT.strip
-    //       content
-    //     TEXT
-    const heredoc = getHeredoc(path, print, receiverNode);
-    if (heredoc) {
-      return concat([
-        heredoc.beging,
-        printedOperator,
-        printedMessage,
-        literalline,
-        concat(path.map.apply(path, [print].concat(heredoc.content))),
-        heredoc.ending
-      ]);
-    }
 
     // For certain left sides of the call nodes, we want to attach directly to
     // the } or end.

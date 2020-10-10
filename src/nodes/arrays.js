@@ -5,7 +5,6 @@ const {
   indent,
   join,
   line,
-  literalline,
   softline
 } = require("../prettier");
 
@@ -114,40 +113,15 @@ module.exports = {
     const elementDocs = path.call(print, "body", 0);
     const elements = getElements(path.getValue().body[0], ["body", 0]);
 
-    // We need to manually loop through the elements in the array in order to
-    // take care of heredocs printing (their commas go after the opening, as
-    // opposed to at the end).
-    elements.forEach(({ element, elementPath }, index) => {
+    elements.forEach((_, index) => {
       const isInner = index !== elements.length - 1;
 
-      const isStraightHeredoc = element.type === "heredoc";
-      const isSquigglyHeredoc =
-        element.type === "string_literal" && element.body[0].type === "heredoc";
+      normalDocs.push(elementDocs[index]);
 
-      if (isStraightHeredoc || isSquigglyHeredoc) {
-        const heredocNode = isStraightHeredoc ? element : element.body[0];
-        const heredocPath = [print].concat(elementPath);
-
-        if (isSquigglyHeredoc) {
-          heredocPath.push("body", 0);
-        }
-
-        normalDocs.push(
-          heredocNode.beging,
-          isInner || addTrailingCommas ? "," : "",
-          literalline,
-          concat(path.map.apply(path, heredocPath.concat("body"))),
-          heredocNode.ending,
-          isInner ? line : ""
-        );
-      } else {
-        normalDocs.push(elementDocs[index]);
-
-        if (isInner) {
-          normalDocs.push(concat([",", line]));
-        } else if (addTrailingCommas) {
-          normalDocs.push(ifBreak(",", ""));
-        }
+      if (isInner) {
+        normalDocs.push(concat([",", line]));
+      } else if (addTrailingCommas) {
+        normalDocs.push(ifBreak(",", ""));
       }
     });
 
