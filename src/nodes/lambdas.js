@@ -4,7 +4,6 @@ const {
   ifBreak,
   indent,
   line,
-  removeLines,
   softline
 } = require("../prettier");
 const { hasAncestor } = require("../utils");
@@ -22,6 +21,7 @@ module.exports = {
     }
 
     const noParams = params.body.every((type) => !type);
+    const needsBracePrededence = hasAncestor(path, ["command", "command_call"]);
     const inlineLambda = concat([
       "->",
       noParams ? "" : concat(["(", paramsConcat, ")"]),
@@ -30,27 +30,31 @@ module.exports = {
       " }"
     ]);
 
-    if (hasAncestor(path, ["command", "command_call"])) {
-      return group(
-        ifBreak(
-          concat([
-            "lambda {",
-            noParams ? "" : concat([" |", removeLines(paramsConcat), "|"]),
-            indent(concat([line, path.call(print, "body", 1)])),
-            concat([line, "}"])
-          ]),
-          inlineLambda
-        )
-      );
-    }
+    const beggingFitToPrint = needsBracePrededence ? " {" : " do";
+    const endingFitToPrint = needsBracePrededence ? "}" : "end";
 
     return group(
       ifBreak(
         concat([
-          "lambda do",
-          noParams ? "" : concat([" |", removeLines(paramsConcat), "|"]),
-          indent(concat([softline, path.call(print, "body", 1)])),
-          concat([softline, "end"])
+          "->",
+          noParams
+            ? ""
+            : group(
+                concat([
+                  "(",
+                  indent(concat([softline, paramsConcat])),
+                  softline,
+                  ")"
+                ])
+              ),
+          beggingFitToPrint,
+          group(
+            concat([
+              indent(concat([line, path.call(print, "body", 1)])),
+              line,
+              endingFitToPrint
+            ])
+          )
         ]),
         inlineLambda
       )

@@ -13,11 +13,11 @@ describe("lambda", () => {
     expect("-> () { 1 }").toChangeFormat("-> { 1 }"));
 
   test("breaking stabby lambda literal", () =>
-    expect(`-> { ${long} }`).toChangeFormat(`lambda do\n  ${long}\nend`));
+    expect(`-> { ${long} }`).toChangeFormat(`-> do\n  ${long}\nend`));
 
   test("breaking stabby lambda literal with args", () => {
     const content = `->(a) { a + ${long} }`;
-    const expected = `lambda do |a|\n  a +\n    ${long}\nend`;
+    const expected = `->(a) do\n  a +\n    ${long}\nend`;
 
     return expect(content).toChangeFormat(expected);
   });
@@ -29,7 +29,7 @@ describe("lambda", () => {
     expect(`command :foo, -> { ${long} }`).toChangeFormat(
       ruby(`
       command :foo,
-              lambda {
+              -> {
                 ${long}
               }
     `)
@@ -42,7 +42,7 @@ describe("lambda", () => {
     expect(`command.call :foo, -> { ${long} }`).toChangeFormat(
       ruby(`
       command.call :foo,
-                   lambda {
+                   -> {
                      ${long}
                    }
     `)
@@ -52,21 +52,35 @@ describe("lambda", () => {
     expect(`command :foo, bar: -> { ${long} }`).toChangeFormat(
       ruby(`
       command :foo,
-              bar: lambda {
+              bar: -> {
                 ${long}
               }
     `)
     ));
 
-  test("very long arguments list doesn't break within pipes", () => {
+  test("stabby lambda literal that breaks deeply within a command node", () =>
+    expect(
+      `command :named_scope, ->(true_or_false = !is_something?) { where(enabled_or_something: true_or_false) }`
+    ).toChangeFormat(
+      ruby(`
+      command :named_scope,
+              ->(true_or_false = !is_something?) {
+                where(enabled_or_something: true_or_false)
+              }
+      `)
+    ));
+
+  test("very long arguments list breaks", () => {
     const content = `command :foo, ->(${long}, a${long}, aa${long}) { true }`;
 
     return expect(content).toChangeFormat(
       ruby(`
       command :foo,
-              lambda { |${long}, a${long}, aa${long}|
-                true
-              }
+              ->(
+                ${long},
+                a${long},
+                aa${long}
+              ) { true }
     `)
     );
   });
