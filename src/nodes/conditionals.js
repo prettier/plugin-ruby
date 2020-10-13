@@ -78,7 +78,11 @@ const printTernary = (path, _opts, print) => {
 // Prints an `if_mod` or `unless_mod` node. Because it was previously in the
 // modifier form, we're guaranteed to not have an additional node, so we can
 // just work with the predicate and the body.
-const printSingle = (keyword) => (path, { inlineConditionals }, print) => {
+const printSingle = (keyword, modifier = false) => (
+  path,
+  { inlineConditionals },
+  print
+) => {
   const multiline = concat([
     `${keyword} `,
     align(keyword.length + 1, path.call(print, "body", 0)),
@@ -119,6 +123,17 @@ const printSingle = (keyword) => (path, { inlineConditionals }, print) => {
   }
 
   const inline = concat(inlineParts);
+
+  // an expression with a conditional modifier (expression if true), the conditional body
+  // is parsed before the predicate expression, meaning that if the parser encountered
+  // a variable declaration, it would initialize that variable first before evaluating
+  // the predicate expression. That parse order means the difference between a NameError
+  // or not. #591
+  // https://docs.ruby-lang.org/en/2.0.0/syntax/control_expressions_rdoc.html#label-Modifier+if+and+unless
+  if (modifier && containsAssignment(stmts)) {
+    return inline;
+  }
+
   return group(ifBreak(multiline, inline));
 };
 
@@ -272,7 +287,7 @@ module.exports = {
   },
   if: printConditional("if"),
   ifop: printTernary,
-  if_mod: printSingle("if"),
+  if_mod: printSingle("if", true),
   unless: printConditional("unless"),
-  unless_mod: printSingle("unless")
+  unless_mod: printSingle("unless", true)
 };

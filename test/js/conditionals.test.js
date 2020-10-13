@@ -23,6 +23,53 @@ describe("conditionals", () => {
     });
   });
 
+  describe("modifiers", () => {
+    describe.each(["if", "unless"])("%s keyword", (keyword) => {
+      describe("when modifying an assignment expression", () => {
+        test("#591", () => {
+          const content = ruby(`
+            text = '${long}' ${keyword} text
+          `);
+          return expect(content).toChangeFormat(
+            ruby(`
+              text =
+                '${long}' ${keyword} text
+            `)
+          );
+        });
+      });
+      describe("when modifying an abbreviated assignment expression", () => {
+        test("#591", () => {
+          const content = ruby(`
+            text ||= '${long}' ${keyword} text
+          `);
+          return expect(content).toChangeFormat(
+            ruby(`
+              text ||=
+                '${long}' ${keyword} text
+            `)
+          );
+        });
+      });
+      describe("when modifying an expression with an assignment descendant", () => {
+        test("#591", () => {
+          const content = ruby(`
+            true && (text = '${long}') ${keyword} text
+          `);
+          return expect(content).toChangeFormat(
+            ruby(`
+              true &&
+                (
+                  text =
+                    '${long}'
+                ) ${keyword} text
+            `)
+          );
+        });
+      });
+    });
+  });
+
   describe("when inline allowed", () => {
     describe.each(["if", "unless"])("%s keyword", (keyword) => {
       test("inline stays", () => expect(`1 ${keyword} a`).toMatchFormat());
@@ -85,6 +132,18 @@ describe("conditionals", () => {
         const content = ruby(`
           array.each do |element|
             ${keyword} index = difference.index(element)
+              difference.delete_at(index)
+            end
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("breaks if the predicate is an op assignment", () => {
+        const content = ruby(`
+          array.each do |element|
+            ${keyword} index ||= difference.index(element)
               difference.delete_at(index)
             end
           end
