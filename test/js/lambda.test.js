@@ -13,11 +13,11 @@ describe("lambda", () => {
     expect("-> () { 1 }").toChangeFormat("-> { 1 }"));
 
   test("breaking stabby lambda literal", () =>
-    expect(`-> { ${long} }`).toChangeFormat(`lambda do\n  ${long}\nend`));
+    expect(`-> { ${long} }`).toChangeFormat(`-> do\n  ${long}\nend`));
 
   test("breaking stabby lambda literal with args", () => {
     const content = `->(a) { a + ${long} }`;
-    const expected = `lambda do |a|\n  a +\n    ${long}\nend`;
+    const expected = `->(a) do\n  a +\n    ${long}\nend`;
 
     return expect(content).toChangeFormat(expected);
   });
@@ -29,7 +29,7 @@ describe("lambda", () => {
     expect(`command :foo, -> { ${long} }`).toChangeFormat(
       ruby(`
       command :foo,
-              lambda {
+              -> {
                 ${long}
               }
     `)
@@ -42,7 +42,7 @@ describe("lambda", () => {
     expect(`command.call :foo, -> { ${long} }`).toChangeFormat(
       ruby(`
       command.call :foo,
-                   lambda {
+                   -> {
                      ${long}
                    }
     `)
@@ -52,7 +52,7 @@ describe("lambda", () => {
     expect(`command :foo, bar: -> { ${long} }`).toChangeFormat(
       ruby(`
       command :foo,
-              bar: lambda {
+              bar: -> {
                 ${long}
               }
     `)
@@ -64,7 +64,11 @@ describe("lambda", () => {
     return expect(content).toChangeFormat(
       ruby(`
       command :foo,
-              lambda { |${long}, a${long}, aa${long}|
+              ->(
+                ${long},
+                a${long},
+                aa${long}
+              ) {
                 true
               }
     `)
@@ -80,16 +84,4 @@ describe("lambda", () => {
 
   test("brackets with multiple args", () =>
     expect("a[1, 2, 3]").toMatchFormat());
-
-  describe("lambda method to stabby lambda literal", () => {
-    test("basic", () => expect("lambda { foo }").toChangeFormat("-> { foo }"));
-
-    test("with args", () =>
-      expect("lambda { |foo| foo }").toChangeFormat("->(foo) { foo }"));
-
-    test("does not transform overridden lambda", () =>
-      expect("lambda(foo) { foo }").toMatchFormat());
-
-    test("does not break on super", () => expect("super {}").toMatchFormat());
-  });
 });
