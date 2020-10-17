@@ -443,6 +443,16 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "jbielick",
+      "name": "Josh Bielick",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/1413330?v=4",
+      "profile": "https://joshbielick.com/",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -952,3 +952,4 @@ would previously result in `array[]`, but now prints properly.
 [@yuki24]: https://github.com/yuki24
 [@rsullivan00]: https://github.com/Rsullivan00
 [@steobrien]: https://github.com/steobrien
+[@jbielick]: https://github.com/jbielick
