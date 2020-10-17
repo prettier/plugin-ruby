@@ -731,36 +731,6 @@ class RipperJS < Ripper
         super(ident, params, def_bodystmt)
       end
 
-      # By default, Ripper parses the expression `lambda { foo }` as a
-      # `method_add_block` node, so we can't turn it back into `-> { foo }`.
-      # This module overrides that behavior and reports it back as a `lambda`
-      # node instead.
-      def on_method_add_block(invocation, block)
-        # It's possible to hit a `method_add_block` node without going through
-        # `method_add_arg` node, ex: `super {}`. In that case we're definitely
-        # not going to transform into a lambda.
-        return super if invocation[:type] != :method_add_arg
-
-        fcall, args = invocation[:body]
-
-        # If there are arguments to the `lambda`, that means `lambda` has been
-        # overridden as a function so we cannot transform it into a `lambda`
-        # node.
-        if fcall[:type] != :fcall || args[:type] != :args || args[:body].any?
-          return super
-        end
-
-        ident = fcall.dig(:body, 0)
-        return super if ident[:type] != :@ident || ident[:body] != 'lambda'
-
-        super.tap do |sexp|
-          params, stmts = block[:body]
-          params ||= { type: :params, body: [] }
-
-          sexp.merge!(type: :lambda, body: [params, stmts])
-        end
-      end
-
       # We need to track for `mlhs_paren` and `massign` nodes whether or not
       # there was an extra comma at the end of the expression. For some reason
       # it's not showing up in the AST in an obvious way. In this case we're

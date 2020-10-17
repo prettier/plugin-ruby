@@ -404,12 +404,6 @@ class MetadataTest < Minitest::Test
         foo + bar
       }
     SOURCE
-
-    assert_metadata :lambda, <<~SOURCE
-      lambda do |foo, bar|
-        foo + bar
-      end
-    SOURCE
   end
 
   def test_massign

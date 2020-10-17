@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [@kddeisz], [@ryan-hunter-pc] - Explicitly handle `break` and `next` keyword parentheses.
+- [@jbielick], [@kddeisz] - Don't convert between `lambda {}` and `-> {}`. Technically it's breaking the semantics of the program. Also because lambda method call arguments can't handle everything that stabby lambda can.
 
 ## [0.20.1] - 2020-09-04
 
