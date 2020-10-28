@@ -48,6 +48,11 @@ jobs:
 
     # Actually run tests and lint
     - name: Lint and test
+      run: |
+        yarn lint
+        yarn print --check '**/*'
+        yarn test
+        bundle exec rake test
 
   automerge:
     name: AutoMerge
