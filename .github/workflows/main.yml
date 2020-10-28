@@ -1,5 +1,7 @@
 name: Main
-on: [push, pull_request]
+on:
+- push
+- pull_request
 jobs:
   ci:
     name: CI
@@ -7,7 +9,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: [2.5, 2.6]
+        ruby:
+        - "2.5"
+        - "2.6"
     env: 
       CI: true
     steps:
@@ -44,8 +48,19 @@ jobs:
 
     # Actually run tests and lint
     - name: Lint and test
-      run: |
-        yarn lint
-        yarn print --check '**/*'
-        yarn test
-        bundle exec rake test
+
+  automerge:
+    name: AutoMerge
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
+    steps:
+      - uses: actions/github-script@v3
+        with:
+          script: |
+            github.pulls.merge({
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
+              pull_number: context.payload.pull_request.number
+            })
+  
