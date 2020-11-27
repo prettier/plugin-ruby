@@ -130,7 +130,7 @@ module.exports = {
     toProcTransform: {
       type: "boolean",
       category: "Global",
-      default: true,
+      default: false,
       description:
         "When possible, convert blocks to the more concise Symbol#to_proc syntax."
     }
