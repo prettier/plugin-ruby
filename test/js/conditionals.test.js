@@ -407,4 +407,31 @@ describe("conditionals", () => {
       return expect(content).toMatchFormat();
     });
   });
+
+  describe.each(["if", "unless"])("add parens when necessary %s", (keyword) => {
+    test("args", () =>
+      expect(`[${keyword} foo? then bar end]`).toChangeFormat(
+        `[(bar ${keyword} foo?)]`
+      ));
+
+    test("assign", () =>
+      expect(`foo = ${keyword} bar? then baz end`).toChangeFormat(
+        `foo = (baz ${keyword} bar?)`
+      ));
+
+    test("assoc_new", () =>
+      expect(`{ foo: ${keyword} bar? then baz end }`).toChangeFormat(
+        `{ foo: (baz ${keyword} bar?) }`
+      ));
+
+    test("massign", () =>
+      expect(`f, o, o = ${keyword} bar? then baz end`).toChangeFormat(
+        `f, o, o = (baz ${keyword} bar?)`
+      ));
+
+    test("opassign", () =>
+      expect(`foo ||= ${keyword} bar? then baz end`).toChangeFormat(
+        `foo ||= (baz ${keyword} bar?)`
+      ));
+  });
 });

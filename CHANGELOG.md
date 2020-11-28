@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@jbielick], [@kddeisz] - Don't convert between `lambda {}` and `-> {}`. Technically it's breaking the semantics of the program. Also because lambda method call arguments can't handle everything that stabby lambda can.
 - [@kddeisz] - Turn off the `Symbol#to_proc` transform by default.
 - [@janklimo], [@kddeisz] - Properly handle trailing commas on hash arguments.
+- [@coiti], [@kddeisz] - Properly handle parentheses when necessary on if/unless statements and while/until loops.
 
 ## [0.20.1] - 2020-09-04
 
@@ -955,3 +956,4 @@ would previously result in `array[]`, but now prints properly.
 [@rsullivan00]: https://github.com/Rsullivan00
 [@steobrien]: https://github.com/steobrien
 [@jbielick]: https://github.com/jbielick
+[@coiti]: https://github.com/coiti
