@@ -128,4 +128,34 @@ describe.each(["while", "until"])("%s", (keyword) => {
       return expect(content).toMatchFormat({ inlineLoops: false });
     });
   });
+
+  describe.each(["while", "until"])(
+    "add parens when necessary %s",
+    (keyword) => {
+      test("args", () =>
+        expect(`[${keyword} foo? do bar end]`).toChangeFormat(
+          `[(bar ${keyword} foo?)]`
+        ));
+
+      test("assign", () =>
+        expect(`foo = ${keyword} bar? do baz end`).toChangeFormat(
+          `foo = (baz ${keyword} bar?)`
+        ));
+
+      test("assoc_new", () =>
+        expect(`{ foo: ${keyword} bar? do baz end }`).toChangeFormat(
+          `{ foo: (baz ${keyword} bar?) }`
+        ));
+
+      test("massign", () =>
+        expect(`f, o, o = ${keyword} bar? do baz end`).toChangeFormat(
+          `f, o, o = (baz ${keyword} bar?)`
+        ));
+
+      test("opassign", () =>
+        expect(`foo ||= ${keyword} bar? do baz end`).toChangeFormat(
+          `foo ||= (baz ${keyword} bar?)`
+        ));
+    }
+  );
 });

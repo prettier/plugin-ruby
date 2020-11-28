@@ -8,7 +8,9 @@ const {
   indent,
   softline
 } = require("../prettier");
+
 const { containsAssignment } = require("../utils");
+const inlineEnsureParens = require("../utils/inlineEnsureParens");
 
 const printWithAddition = (keyword, path, print, { breaking = false } = {}) =>
   concat([
@@ -95,30 +97,14 @@ const printSingle = (keyword) => (path, { inlineConditionals }, print) => {
     return multiline;
   }
 
-  let inlineParts = [
-    path.call(print, "body", 1),
-    ` ${keyword} `,
-    path.call(print, "body", 0)
-  ];
+  const inline = concat(
+    inlineEnsureParens(path, [
+      path.call(print, "body", 1),
+      ` ${keyword} `,
+      path.call(print, "body", 0)
+    ])
+  );
 
-  // If the return value of this conditional expression is being assigned to
-  // anything besides a local variable then we can't inline the entire
-  // expression without wrapping it in parentheses. This is because the
-  // following expressions have different semantic meaning:
-  //
-  //     hash[:key] = :value if false
-  //     hash[:key] = if false then :value end
-  //
-  // The first one will not result in an empty hash, whereas the second one
-  // will result in `{ key: nil }`. In this case what we need to do for the
-  // first expression to align is wrap it in parens, as in:
-  //
-  //     hash[:key] = (:value if false)
-  if (["assign", "massign"].includes(path.getParentNode().type)) {
-    inlineParts = ["("].concat(inlineParts).concat(")");
-  }
-
-  const inline = concat(inlineParts);
   return group(ifBreak(multiline, inline));
 };
 
