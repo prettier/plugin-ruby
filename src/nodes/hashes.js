@@ -7,6 +7,7 @@ const {
   line,
   literalline
 } = require("../prettier");
+
 const { nodeDive, prefix, skipAssignIndent } = require("../utils");
 
 // When attempting to convert a hash rocket into a hash label, you need to take
@@ -54,6 +55,49 @@ const makeLabel = (path, { preferHashLabels }, print, steps) => {
       return concat([labelDoc, " =>"]);
   }
 };
+
+const isHeredoc = (node) =>
+  node.type === "heredoc" ||
+  (node.type === "string_literal" && node.body[0].type === "heredoc");
+
+function printHash(path, { addTrailingCommas }, print) {
+  const hashNode = path.getValue();
+
+  // Hashes normally have a single assoclist_from_args child node. If it's
+  // missing, then it means we're dealing with an empty hash, so we can just
+  // exit here and print.
+  if (hashNode.body[0] === null) {
+    return "{}";
+  }
+
+  // Here we get a reference to the printed assoclist_from_args child node,
+  // which handles printing all of the key-value pairs of the hash. We're
+  // wrapping it in an array in case we need to append a trailing comma.
+  const assocDocs = [path.call(print, "body", 0)];
+
+  // Here we get a reference to the last key-value pair's value node, in order
+  // to check if we're dealing with a heredoc. If we are, then the trailing
+  // comma printing is handled from within the assoclist_from_args node
+  // printing, because the trailing comma has to go after the heredoc
+  // declaration.
+  const assocNodes = hashNode.body[0].body[0];
+  const lastAssocValueNode = assocNodes[assocNodes.length - 1].body[1];
+
+  // If we're adding a trailing comma and the last key-value pair's value node
+  // is not a heredoc node, then we can safely append the extra comma if the
+  // hash ends up getting printed on multiple lines.
+  if (addTrailingCommas && !isHeredoc(lastAssocValueNode)) {
+    assocDocs.push(ifBreak(",", ""));
+  }
+
+  return group(
+    concat([
+      "{",
+      indent(concat([line, concat(assocDocs)])),
+      concat([line, "}"])
+    ])
+  );
+}
 
 module.exports = {
   assoc_new: (path, opts, print) => {
@@ -111,8 +155,6 @@ module.exports = {
 
         if (isInner) {
           assocDocs.push(concat([",", line]));
-        } else if (addTrailingCommas) {
-          assocDocs.push(ifBreak(",", ""));
         }
       }
     });
@@ -121,17 +163,5 @@ module.exports = {
   },
   bare_assoc_hash: (path, opts, print) =>
     group(join(concat([",", line]), path.map(print, "body", 0))),
-  hash: (path, opts, print) => {
-    if (path.getValue().body[0] === null) {
-      return "{}";
-    }
-
-    return group(
-      concat([
-        "{",
-        indent(concat([line, concat(path.map(print, "body"))])),
-        concat([line, "}"])
-      ])
-    );
-  }
+  hash: printHash
 };

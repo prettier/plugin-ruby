@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@kddeisz], [@ryan-hunter-pc] - Explicitly handle `break` and `next` keyword parentheses.
 - [@jbielick], [@kddeisz] - Don't convert between `lambda {}` and `-> {}`. Technically it's breaking the semantics of the program. Also because lambda method call arguments can't handle everything that stabby lambda can.
 - [@kddeisz] - Turn off the `Symbol#to_proc` transform by default.
+- [@janklimo], [@kddeisz] - Properly handle trailing commas on hash arguments.
 
 ## [0.20.1] - 2020-09-04
 
