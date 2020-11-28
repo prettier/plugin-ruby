@@ -132,6 +132,7 @@ Below are the options (from [`src/ruby.js`](src/ruby.js)) that `@prettier/plugin
 | `inlineLoops`        | `--inline-loops`         | `true`  | When it fits on one line, allows while and until statements to use the modifier form.                         |
 | `preferHashLabels`   | `--prefer-hash-labels`   | `true`  | When possible, uses the shortened hash key syntax, as opposed to hash rockets.                                |
 | `preferSingleQuotes` | `--prefer-single-quotes` | `true`  | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals. |
+| `toProcTransform`    | `--to-proc-transform`    | `false` | When possible, convert blocks to the more concise `Symbol#to_proc` syntax.                                    |
 
 Any of these can be added to your existing [prettier configuration
 file](https://prettier.io/docs/en/configuration.html). For example:
