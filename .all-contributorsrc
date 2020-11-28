@@ -453,6 +453,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "coiti",
+      "name": "Román Coitiño",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/27384706?v=4",
+      "profile": "https://github.com/coiti",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
