@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@kddeisz] - Turn off the `Symbol#to_proc` transform by default.
 - [@janklimo], [@kddeisz] - Properly handle trailing commas on hash arguments.
 - [@coiti], [@kddeisz] - Properly handle parentheses when necessary on if/unless statements and while/until loops.
+- [@Rsullivan00] - Prevent `command` and `command_call` nodes from being turned into ternaries.
 
 ## [0.20.1] - 2020-09-04
 
