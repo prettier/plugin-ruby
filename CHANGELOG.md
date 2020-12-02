@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [@flyerhzm] - Print method chains by one indentation.
+
 ## [0.21.0] - 2020-12-02
 
 ### Changed
