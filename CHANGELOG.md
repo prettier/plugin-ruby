@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [@flyerhzm] - Print method chains by one indentation.
+- [@mmcnl], [@kddeisz] - Handle heredocs and blocks being passed to the same method.
 
 ## [0.21.0] - 2020-12-02
 
