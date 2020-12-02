@@ -56,10 +56,6 @@ const makeLabel = (path, { preferHashLabels }, print, steps) => {
   }
 };
 
-const isHeredoc = (node) =>
-  node.type === "heredoc" ||
-  (node.type === "string_literal" && node.body[0].type === "heredoc");
-
 function printHash(path, { addTrailingCommas }, print) {
   const hashNode = path.getValue();
 
@@ -86,7 +82,7 @@ function printHash(path, { addTrailingCommas }, print) {
   // If we're adding a trailing comma and the last key-value pair's value node
   // is not a heredoc node, then we can safely append the extra comma if the
   // hash ends up getting printed on multiple lines.
-  if (addTrailingCommas && !isHeredoc(lastAssocValueNode)) {
+  if (addTrailingCommas && lastAssocValueNode.type !== "heredoc") {
     assocDocs.push(ifBreak(",", ""));
   }
 
@@ -123,31 +119,15 @@ module.exports = {
       const isInner = index !== assocNodes.length - 1;
       const valueNode = assocNode.body[1];
 
-      const isStraightHeredoc = valueNode && valueNode.type === "heredoc";
-      const isSquigglyHeredoc =
-        valueNode &&
-        valueNode.type === "string_literal" &&
-        valueNode.body[0].type === "heredoc";
-
-      if (isStraightHeredoc || isSquigglyHeredoc) {
-        const heredocSteps = isStraightHeredoc
-          ? ["body", 1]
-          : ["body", 1, "body", 0];
-        const { beging, ending } = nodeDive(assocNode, heredocSteps);
-
+      if (valueNode && valueNode.type === "heredoc") {
         assocDocs.push(
           makeLabel(path, opts, print, ["body", 0, index, "body", 0]),
           " ",
-          beging,
+          valueNode.beging,
           isInner || addTrailingCommas ? "," : "",
           literalline,
-          concat(
-            path.map.apply(
-              path,
-              [print, "body", 0, index].concat(heredocSteps).concat("body")
-            )
-          ),
-          ending,
+          concat(path.map(print, "body", 0, index, "body", 1, "body")),
+          valueNode.ending,
           isInner ? line : ""
         );
       } else {

@@ -133,12 +133,6 @@ module.exports = {
     const stringLiteral = path.getValue();
     const string = stringLiteral.body[0];
 
-    // If this string is actually a heredoc, bail out and return to the print
-    // function for heredocs
-    if (string.type === "heredoc") {
-      return path.call(print, "body", 0);
-    }
-
     // If the string is empty, it will not have any parts, so just print out the
     // quotes corresponding to the config
     if (string.body.length === 0) {
