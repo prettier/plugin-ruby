@@ -7,7 +7,7 @@ gemfile do
   gem 'sinatra', require: 'sinatra/base'
 end
 
-require_relative '../src/ripper'
+require_relative '../src/parser'
 
 class App < Sinatra::Base
   HTML = DATA.read
@@ -17,7 +17,7 @@ class App < Sinatra::Base
   end
 
   post '/ast' do
-    builder = RipperJS.new(request.body.read)
+    builder = Prettier::Parser.new(request.body.read)
     response = builder.parse
 
     if !response || builder.error?

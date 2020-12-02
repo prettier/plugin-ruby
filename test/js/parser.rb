@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../src/ripper'
+require_relative '../../src/parser'
 
 # This function will poll $stdin for 2 seconds and attempt to gather up every
 # line until it hits a "---" line. At that point it will return everything
@@ -15,12 +15,12 @@ def gather
 end
 
 # This process will loop infinitely, gathering up lines from stdin, parsing them
-# with RipperJS, and then returning the parsed AST over stdout.
+# with Prettier::Parser, and then returning the parsed AST over stdout.
 loop do
   gathered = gather
   next unless gathered
 
-  parser = RipperJS.new(gathered)
+  parser = Prettier::Parser.new(gathered)
 
   STDOUT.puts JSON.fast_generate(parser.parse)
   STDOUT.flush

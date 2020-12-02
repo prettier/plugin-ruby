@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'test_helper'
-require_relative '../../src/ripper'
+require_relative '../../src/parser'
 
 class MetadataTest < Minitest::Test
   def test_BEGIN
@@ -790,6 +790,6 @@ class MetadataTest < Minitest::Test
   end
 
   def parse(ruby)
-    RipperJS.parse(ruby).dig(:body, 0, :body, 0)
+    Prettier::Parser.parse(ruby).dig(:body, 0, :body, 0)
   end
 end

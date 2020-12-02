@@ -19,7 +19,7 @@ const LANG = {
 module.exports = (text, _parsers, _opts) => {
   const child = spawnSync(
     "ruby",
-    ["--disable-gems", path.join(__dirname, "./ripper.rb")],
+    ["--disable-gems", path.join(__dirname, "./parser.rb")],
     {
       env: Object.assign({}, process.env, { LANG }),
       input: text,

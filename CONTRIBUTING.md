@@ -22,9 +22,9 @@ In order to get printed, the code goes through a couple of transformations. The 
 
 ### Text to AST
 
-When the prettier process first spins up, it examines which files it's going to print and selects an appropriate plugin for each one. Once selected, it runs that plugin's `parse` function, seen [here](src/parse.js). For the case of the Ruby plugin, that entails spawning a Ruby process that runs [ripper.rb](src/ripper.rb) with the input code preloaded on stdin.
+When the prettier process first spins up, it examines which files it's going to print and selects an appropriate plugin for each one. Once selected, it runs that plugin's `parse` function, seen [here](src/parse.js). For the case of the Ruby plugin, that entails spawning a Ruby process that runs [parser.rb](src/parser.rb) with the input code preloaded on stdin.
 
-`ripper.rb` will read the text off of stdin and then feed it to a new `Ripper` instance, which is a Ruby standard library recursive-descent parser. Briefly, the way that `Ripper` works is by tokenizing the input and then matching those tokens against a grammar to form s-expressions. To extend `Ripper`, you overwrite the methods that control how those s-expressions are formed, e.g., to modify the s-expression that is formed when `Ripper` encounters a string literal, you would override the `#on_string_literal` method. Below is an example for seeing that in action.
+`parser.rb` will read the text off of stdin and then feed it to a new `Ripper` instance, which is a Ruby standard library recursive-descent parser. Briefly, the way that `Ripper` works is by tokenizing the input and then matching those tokens against a grammar to form s-expressions. To extend `Ripper`, you overwrite the methods that control how those s-expressions are formed, e.g., to modify the s-expression that is formed when `Ripper` encounters a string literal, you would override the `#on_string_literal` method. Below is an example for seeing that in action.
 
 Let's assume you have the following code:
 
@@ -67,7 +67,7 @@ pp Ripper.sexp_raw('1 + 1')
 
 As you can see above, the resulting s-expressions will call the following methods in order on the instantiated `Ripper` instance: `on_int`, `on_int`, `on_stmts_new`, `on_binary`, `on_stmts_add`, `on_program`. You can hook into any part of this process by overriding any of those methods (we override all of them).
 
-Now that the text has been transformed into an AST that we can work with, `ripper.rb` will serialize the result to JSON, write it back to stdout, and exit. The `parse` function will then parse that JSON by reading off the child process once it has exited, and return that value back to prettier.
+Now that the text has been transformed into an AST that we can work with, `parser.rb` will serialize the result to JSON, write it back to stdout, and exit. The `parse` function will then parse that JSON by reading off the child process once it has exited, and return that value back to prettier.
 
 ### AST to Doc
 
