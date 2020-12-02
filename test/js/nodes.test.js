@@ -4,6 +4,7 @@ const nodes = require("../../src/nodes");
 const print = require("../../src/print");
 
 const expectedUnhandledNodes = [
+  "alias_error",
   "arg_ambiguous",
   "args_add",
   "args_new",
