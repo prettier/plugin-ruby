@@ -616,34 +616,39 @@ class Prettier::Parser < Ripper
 
       private
 
-      def on_embexpr_beg(body)
-        super(body).tap { |sexp| heredoc_stack << sexp }
-      end
-
-      def on_embexpr_end(body)
-        super(body).tap { heredoc_stack.pop }
-      end
-
+      # This is a scanner event that represents the beginning of the heredoc.
       def on_heredoc_beg(beging)
-        heredoc = { type: :heredoc, beging: beging, start: lineno, end: lineno }
-        heredoc_stack << heredoc
+        {
+          type: :heredoc,
+          beging: beging,
+          start: lineno,
+          end: lineno,
+          char_start: char_pos - beging.length + 1,
+          char_end: char_pos
+        }.tap { |node| heredoc_stack << node }
       end
 
+      # This is a scanner event that represents the end of the heredoc.
       def on_heredoc_end(ending)
-        heredoc_stack[-1].merge!(ending: ending.chomp, end: lineno)
+        heredoc_stack[-1].merge!(
+          ending: ending.chomp, end: lineno, char_end: char_pos
+        )
       end
 
+      # This is a parser event that occurs when you're using a heredoc with a
+      # tilde. These are considered `heredoc_dedent` nodes, whereas the hyphen
+      # heredocs show up as string literals.
       def on_heredoc_dedent(string, _width)
-        heredoc = heredoc_stack.pop
-        string.merge!(heredoc.slice(:type, :beging, :ending, :start, :end))
+        heredoc_stack[-1].merge!(string.slice(:body))
       end
 
+      # String literals are either going to be a normal string or they're going
+      # to be a heredoc with a hyphen.
       def on_string_literal(string)
         heredoc = heredoc_stack[-1]
 
-        if heredoc && string[:type] != :heredoc && heredoc[:type] == :heredoc
-          heredoc_stack.pop
-          string.merge!(heredoc.slice(:type, :beging, :ending, :start, :end))
+        if heredoc && heredoc[:ending]
+          heredoc_stack.pop.merge!(string.slice(:body))
         else
           super
         end

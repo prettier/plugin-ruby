@@ -66,27 +66,16 @@ const makeArgs = (path, opts, print, argsIndex) => {
   const heredocs = [];
 
   argNodes.body.forEach((argNode, index) => {
-    let pattern;
-    let heredoc;
-
     if (argNode.type === "heredoc") {
-      pattern = [index, "body"];
-      heredoc = argNode;
-    } else if (
-      argNode.type === "string_literal" &&
-      argNode.body[0].type === "heredoc"
-    ) {
-      pattern = [index, "body", 0, "body"];
-      [heredoc] = argNode.body;
-    } else {
-      return;
+      const content = path.map.apply(
+        path,
+        argPattern.slice().concat([index, "body"])
+      );
+      heredocs.push(
+        concat([literalline].concat(content).concat([argNode.ending]))
+      );
+      args[index] = argNode.beging;
     }
-
-    const content = path.map.apply(path, argPattern.slice().concat(pattern));
-    heredocs.push(
-      concat([literalline].concat(content).concat([heredoc.ending]))
-    );
-    args[index] = heredoc.beging;
   });
 
   return { args, heredocs };

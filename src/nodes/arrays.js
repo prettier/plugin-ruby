@@ -97,24 +97,15 @@ module.exports = {
     elements.forEach(({ element, elementPath }, index) => {
       const isInner = index !== elements.length - 1;
 
-      const isStraightHeredoc = element.type === "heredoc";
-      const isSquigglyHeredoc =
-        element.type === "string_literal" && element.body[0].type === "heredoc";
-
-      if (isStraightHeredoc || isSquigglyHeredoc) {
-        const heredocNode = isStraightHeredoc ? element : element.body[0];
-        const heredocPath = [print].concat(elementPath);
-
-        if (isSquigglyHeredoc) {
-          heredocPath.push("body", 0);
-        }
-
+      if (element.type === "heredoc") {
         normalDocs.push(
-          heredocNode.beging,
+          element.beging,
           isInner || addTrailingCommas ? "," : "",
           literalline,
-          concat(path.map.apply(path, heredocPath.concat("body"))),
-          heredocNode.ending,
+          concat(
+            path.map.apply(path, [print].concat(elementPath).concat("body"))
+          ),
+          element.ending,
           isInner ? line : ""
         );
       } else {
