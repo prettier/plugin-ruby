@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@coiti], [@kddeisz] - Properly handle parentheses when necessary on if/unless statements and while/until loops.
 - [@Rsullivan00] - Prevent `command` and `command_call` nodes from being turned into ternaries.
 - [@kddeisz] - Better handling of the `alias` node with and without comments.
+- [@kddeisz] - Better handling of the `BEGIN` and `END` nodes with and without comments.
 
 ## [0.20.1] - 2020-09-04
 

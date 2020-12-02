@@ -5,6 +5,7 @@ const {
   lineSuffix,
   literalline
 } = require("./prettier");
+const isEmptyStmts = require("./utils/isEmptyStmts");
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
@@ -156,6 +157,7 @@ module.exports = {
   empty,
   first,
   hasAncestor,
+  isEmptyStmts,
   literal,
   makeArgs,
   makeCall,
