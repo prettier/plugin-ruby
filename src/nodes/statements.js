@@ -40,7 +40,6 @@ module.exports = {
 
     return group(concat(parts));
   },
-  embdoc: (path, _opts, _print) => concat([trim, path.getValue().body]),
   paren: (path, opts, print) => {
     if (!path.getValue().body[0]) {
       return "()";

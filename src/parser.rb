@@ -466,6 +466,7 @@ class Prettier::Parser < Ripper
 
       def on_comment(value)
         @comments << {
+          type: :comment,
           value: value[1..-1].chomp,
           start: lineno,
           end: lineno,
@@ -484,6 +485,7 @@ class Prettier::Parser < Ripper
 
       def on_embdoc_end(value)
         @comments << @embdoc.merge!(
+          type: :embdoc,
           value: @embdoc[:value] << value.chomp,
           end: lineno,
           char_end: char_pos + value.length - 1

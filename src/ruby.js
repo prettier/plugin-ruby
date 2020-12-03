@@ -1,3 +1,5 @@
+const { concat, trim } = require("./prettier");
+
 const comments = require("./comments");
 const embed = require("./embed");
 const parse = require("./parse");
@@ -98,8 +100,15 @@ module.exports = {
         return node.type === "undef" ? node.body[0] : node.body;
       },
       printComment(path, _opts) {
-        const { value } = path.getValue();
-        return `#${value}`;
+        const comment = path.getValue();
+
+        if (comment.type === "comment") {
+          return `#${comment.value}`;
+        }
+        return concat([trim, comment.value]);
+      },
+      isBlockComment(comment) {
+        return comment.type === "embdoc";
       }
     }
   },
