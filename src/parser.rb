@@ -25,7 +25,7 @@ class Prettier::Parser < Ripper
     super(source, *args)
 
     @source = source
-    @lines = source.lines
+    @lines = source.split("\n")
 
     @comments = []
     @embdoc = nil
@@ -36,7 +36,7 @@ class Prettier::Parser < Ripper
     @scanner_events = []
     @line_counts = [0]
 
-    @lines.each { |line| @line_counts << @line_counts.last + line.size }
+    @source.lines.each { |line| @line_counts << @line_counts.last + line.size }
   end
 
   private
