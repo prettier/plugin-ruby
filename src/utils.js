@@ -12,8 +12,9 @@ const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 // If the node is a type of assignment or if the node is a paren and nested
 // inside that paren is a node that is a type of assignment.
 const containsAssignment = (node) =>
-  ["assign", "massign"].includes(node.type) ||
-  (node.type === "paren" && node.body[0].body.some(containsAssignment));
+  node &&
+  (["assign", "massign", "opassign"].includes(node.type) ||
+    (Array.isArray(node.body) && node.body.some(containsAssignment)));
 
 const docLength = (doc) => {
   if (doc.length) {

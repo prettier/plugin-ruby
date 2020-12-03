@@ -80,33 +80,47 @@ const printTernary = (path, _opts, print) => {
 // Prints an `if_mod` or `unless_mod` node. Because it was previously in the
 // modifier form, we're guaranteed to not have an additional node, so we can
 // just work with the predicate and the body.
-const printSingle = (keyword) => (path, { inlineConditionals }, print) => {
-  const multiline = concat([
-    `${keyword} `,
-    align(keyword.length + 1, path.call(print, "body", 0)),
-    indent(concat([softline, path.call(print, "body", 1)])),
-    concat([softline, "end"])
-  ]);
+function printSingle(keyword, modifier = false) {
+  function printSingleWithKeyword(path, { inlineConditionals }, print) {
+    const multiline = concat([
+      `${keyword} `,
+      align(keyword.length + 1, path.call(print, "body", 0)),
+      indent(concat([softline, path.call(print, "body", 1)])),
+      concat([softline, "end"])
+    ]);
 
-  const [_predicate, stmts] = path.getValue().body;
-  const hasComments =
-    stmts.type === "stmts" &&
-    stmts.body.some((stmt) => stmt.type === "@comment");
+    const [_predicate, stmts] = path.getValue().body;
+    const hasComments =
+      stmts.type === "stmts" &&
+      stmts.body.some((stmt) => stmt.type === "@comment");
 
-  if (!inlineConditionals || hasComments) {
-    return concat([multiline, breakParent]);
+    if (!inlineConditionals || hasComments) {
+      return concat([multiline, breakParent]);
+    }
+
+    const inline = concat(
+      inlineEnsureParens(path, [
+        path.call(print, "body", 1),
+        ` ${keyword} `,
+        path.call(print, "body", 0)
+      ])
+    );
+
+    // an expression with a conditional modifier (expression if true), the
+    // conditional body is parsed before the predicate expression, meaning that
+    // if the parser encountered a variable declaration, it would initialize
+    // that variable first before evaluating the predicate expression. That
+    // parse order means the difference between a NameError or not. #591
+    // https://docs.ruby-lang.org/en/2.0.0/syntax/control_expressions_rdoc.html#label-Modifier+if+and+unless
+    if (modifier && containsAssignment(stmts)) {
+      return inline;
+    }
+
+    return group(ifBreak(multiline, inline));
   }
 
-  const inline = concat(
-    inlineEnsureParens(path, [
-      path.call(print, "body", 1),
-      ` ${keyword} `,
-      path.call(print, "body", 0)
-    ])
-  );
-
-  return group(ifBreak(multiline, inline));
-};
+  return printSingleWithKeyword;
+}
 
 const noTernary = [
   "@comment",
@@ -260,7 +274,7 @@ module.exports = {
   },
   if: printConditional("if"),
   ifop: printTernary,
-  if_mod: printSingle("if"),
+  if_mod: printSingle("if", true),
   unless: printConditional("unless"),
-  unless_mod: printSingle("unless")
+  unless_mod: printSingle("unless", true)
 };

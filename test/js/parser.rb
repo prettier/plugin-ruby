@@ -10,7 +10,9 @@ def gather
   return unless select([$stdin], nil, nil, 2)
 
   lines, line = [], nil
-  lines << line while (line = gets) != "---\n"
+  while (line = gets) != "---\n"
+    lines << line
+  end
   lines.join
 end
 
