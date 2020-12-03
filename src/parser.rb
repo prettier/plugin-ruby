@@ -19,14 +19,24 @@ require 'ripper'
 module Prettier; end
 
 class Prettier::Parser < Ripper
-  attr_reader :source, :lines, :__end__
+  attr_reader :source, :lines, :scanner_events, :line_counts
 
   def initialize(source, *args)
     super(source, *args)
 
     @source = source
-    @lines = source.split("\n")
+    @lines = source.lines
+
+    @comments = []
+    @embdoc = nil
     @__end__ = nil
+
+    @heredoc_stack = []
+  
+    @scanner_events = []
+    @line_counts = [0]
+
+    @lines.each { |line| @line_counts << @line_counts.last + line.size }
   end
 
   private
@@ -85,6 +95,8 @@ class Prettier::Parser < Ripper
   # they previously had single nodes.
   prepend(
     Module.new do
+      private
+
       events = %i[
         args
         mlhs
@@ -98,8 +110,6 @@ class Prettier::Parser < Ripper
         words
         xstring
       ]
-
-      private
 
       events.each do |event|
         suffix = event == :string ? 'content' : 'new'
@@ -127,19 +137,6 @@ class Prettier::Parser < Ripper
   # node once we have it.
   prepend(
     Module.new do
-      def initialize(source, *args)
-        super(source, *args)
-
-        @scanner_events = []
-        @line_counts = [0]
-
-        source.lines.each { |line| line_counts << line_counts.last + line.size }
-      end
-
-      def self.prepended(base)
-        base.attr_reader :scanner_events, :line_counts
-      end
-
       private
 
       def char_pos
@@ -152,6 +149,14 @@ class Prettier::Parser < Ripper
           children.map { |part| part[:char_start] if part.is_a?(Hash) }.compact
 
         char_starts.min || char_pos
+      end
+
+      def char_end_for(body)
+        children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
+        char_ends =
+          children.map { |part| part[:char_end] if part.is_a?(Hash) }.compact
+
+        char_ends.max || char_pos
       end
 
       def find_scanner_event(type, body = :any)
@@ -209,11 +214,9 @@ class Prettier::Parser < Ripper
         sclass: [:@kw, 'class'],
         string_dvar: :@embvar,
         string_embexpr: :@embexpr_beg,
-        super: [:@kw, 'super'],
         symbols_new: :@symbols_beg,
         top_const_field: [:@op, '::'],
         top_const_ref: [:@op, '::'],
-        undef: [:@kw, 'undef'],
         unless: [:@kw, 'unless'],
         until: [:@kw, 'until'],
         var_alias: [:@kw, 'alias'],
@@ -221,8 +224,7 @@ class Prettier::Parser < Ripper
         while: [:@kw, 'while'],
         words_new: :@words_beg,
         yield0: [:@kw, 'yield'],
-        yield: [:@kw, 'yield'],
-        zsuper: [:@kw, 'super']
+        yield: [:@kw, 'yield']
       }
 
       events.each do |event, (type, scanned)|
@@ -235,6 +237,40 @@ class Prettier::Parser < Ripper
             char_end: char_pos
           )
         end
+      end
+
+      def on_super(*body)
+        node = find_scanner_event(:@kw, 'super')
+
+        super(*body).merge!(
+          start: node[:start],
+          char_start: node[:char_start],
+          char_end: char_end_for(body)
+        )
+      end
+
+      def on_zsuper(*body)
+        node = find_scanner_event(:@kw, 'super')
+
+        super(*body).merge!(
+          start: node[:start],
+          char_start: node[:char_start],
+          char_end: node[:char_end]
+        )
+      end
+
+      # This is mostly identical to the method that is dynamically defined for
+      # all `events` (above), except that `char_pos` was causing problems
+      # because it was factoring comments into the char pos, so we replaced it
+      # with `char_end_for(body)`
+      def on_undef(*body)
+        node = find_scanner_event(:@kw, 'undef')
+
+        super(*body).merge!(
+          start: node[:start],
+          char_start: node[:char_start],
+          char_end: char_end_for(body)
+        )
       end
 
       # Array nodes can contain a myriad of subnodes because of the special
@@ -330,7 +366,7 @@ class Prettier::Parser < Ripper
       # In this case we need to change the node type to be a heredoc instead of
       # an xstring_literal in order to get the right formatting.
       def on_xstring_literal(*body)
-        heredoc = heredoc_stack[-1]
+        heredoc = @heredoc_stack[-1]
 
         if heredoc && heredoc[:beging][3] = '`'
           heredoc.merge!(body[0].slice(:body))
@@ -382,6 +418,12 @@ class Prettier::Parser < Ripper
         super(*body).merge!(start: 1, char_start: 0, char_end: char_pos)
       end
 
+      def on_vcall(*body)
+        super(*body).merge!(
+          char_start: char_start_for(body), char_end: char_end_for(body)
+        )
+      end
+
       defined =
         private_instance_methods(false).grep(/\Aon_/) { $'.to_sym } +
           %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end]
@@ -407,220 +449,52 @@ class Prettier::Parser < Ripper
     end
   )
 
-  # This layer keeps track of inline comments as they come in. Ripper itself
-  # doesn't attach comments to the AST, so we need to do it manually. In this
-  # case, inline comments are defined as any comments wherein the lexer state is
-  # not equal to EXPR_BEG (tracked in the BlockComments layer).
   prepend(
     Module.new do
-      # Certain events needs to steal the comments from their children in order
-      # for them to display properly.
-      events = {
-        aref: [:body, 1],
-        args_add_block: [:body, 0],
-        break: [:body, 0],
-        call: [:body, 0],
-        command: [:body, 1],
-        command_call: [:body, 3],
-        regexp_literal: [:body, 0],
-        string_literal: [:body, 0],
-        symbol_literal: [:body, 0]
-      }
-
-      def initialize(*args)
-        super(*args)
-        @inline_comments = []
-        @last_sexp = nil
-      end
-
-      def self.prepended(base)
-        base.attr_reader :inline_comments, :last_sexp
-      end
-
       private
 
-      events.each do |event, path|
-        define_method(:"on_#{event}") do |*body|
-          @last_sexp =
-            super(*body).tap do |sexp|
-              comments = (sexp.dig(*path) || {}).delete(:comments)
-              sexp.merge!(comments: comments) if comments
-            end
-        end
-      end
-
-      SPECIAL_LITERALS = %i[qsymbols qwords symbols words].freeze
-
-      # Special array literals are handled in different ways and so their
-      # comments need to be passed up to their parent array node.
-      def on_array(*body)
-        @last_sexp =
-          super(*body).tap do |sexp|
-            next unless SPECIAL_LITERALS.include?(body.dig(0, :type))
-
-            comments = sexp.dig(:body, 0).delete(:comments)
-            sexp.merge!(comments: comments) if comments
-          end
-      end
-
-      # Handling this specially because we want to pull the comments out of both
-      # child nodes.
-      def on_assoc_new(*body)
-        @last_sexp =
-          super(*body).tap do |sexp|
-            comments =
-              (sexp.dig(:body, 0).delete(:comments) || []) +
-                (sexp.dig(:body, 1).delete(:comments) || [])
-
-            sexp.merge!(comments: comments) if comments.any?
-          end
-      end
-
-      # Most scanner events don't stand on their own as s-expressions, but the
-      # CHAR scanner event is effectively just a string, so we need to track it
-      # as a s-expression.
-      def on_CHAR(body)
-        @last_sexp = super(body)
-      end
-
-      # We need to know exactly where the comment is, switching off the current
-      # lexer state. In Ruby 2.7.0-dev, that's defined as:
+      # Handles __END__ syntax, which allows individual scripts to keep content
+      # after the main ruby code that can be read through DATA. It looks like:
       #
-      # enum lex_state_bits {
-      #     EXPR_BEG_bit,     /* ignore newline, +/- is a sign. */
-      #     EXPR_END_bit,     /* newline significant, +/- is an operator. */
-      #     EXPR_ENDARG_bit,  /* ditto, and unbound braces. */
-      #     EXPR_ENDFN_bit,   /* ditto, and unbound braces. */
-      #     EXPR_ARG_bit,     /* newline significant, +/- is an operator. */
-      #     EXPR_CMDARG_bit,  /* newline significant, +/- is an operator. */
-      #     EXPR_MID_bit,     /* newline significant, +/- is an operator. */
-      #     EXPR_FNAME_bit,   /* ignore newline, no reserved words. */
-      #     EXPR_DOT_bit,     /* right after `.' or `::', no reserved words. */
-      #     EXPR_CLASS_bit,   /* immediate after `class', no here document. */
-      #     EXPR_LABEL_bit,   /* flag bit, label is allowed. */
-      #     EXPR_LABELED_bit, /* flag bit, just after a label. */
-      #     EXPR_FITEM_bit,   /* symbol literal as FNAME. */
-      #     EXPR_MAX_STATE
-      # };
-      def on_comment(body)
-        sexp = { type: :@comment, body: body.chomp, start: lineno, end: lineno }
-
-        case Prettier::Parser.lex_state_name(state).gsub('EXPR_', '')
-        when 'END', 'ARG|LABELED', 'ENDFN'
-          last_sexp.merge!(comments: [sexp])
-        when 'CMDARG', 'END|ENDARG', 'ENDARG', 'ARG', 'FNAME|FITEM', 'CLASS',
-             'END|LABEL'
-          inline_comments << sexp
-        when 'BEG|LABEL', 'MID'
-          inline_comments << sexp.merge!(break: true)
-        when 'DOT'
-          last_sexp.merge!(comments: [sexp.merge!(break: true)])
-        end
-
-        sexp
+      # foo.bar
+      #
+      # __END__
+      # some other content that isn't normally read by ripper
+      def on___end__(*)
+        @__end__ = super(lines[lineno..-1].join("\n"))
       end
 
-      defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
-
-      (PARSER_EVENTS - defined).each do |event|
-        define_method(:"on_#{event}") do |*body|
-          super(*body).tap do |sexp|
-            @last_sexp = sexp
-            next if inline_comments.empty?
-
-            sexp[:comments] = inline_comments.reverse
-            @inline_comments = []
-          end
-        end
-      end
-    end
-  )
-
-  # Nodes that are always on their own line occur when the lexer is in the
-  # EXPR_BEG state. Those comments are tracked within the @block_comments
-  # instance variable. Then for each node that could contain them, we attach
-  # them after the node has been built.
-  prepend(
-    Module.new do
-      events = {
-        begin: [0, :body, 0],
-        bodystmt: [0],
-        class: [2, :body, 0],
-        def: [2, :body, 0],
-        defs: [4, :body, 0],
-        else: [0],
-        elsif: [1],
-        ensure: [0],
-        if: [1],
-        program: [0],
-        rescue: [2],
-        sclass: [1, :body, 0],
-        unless: [1],
-        until: [1],
-        when: [1],
-        while: [1]
-      }
-
-      def initialize(*args)
-        super(*args)
-        @block_comments = []
-        @current_embdoc = nil
-      end
-
-      def self.prepended(base)
-        base.attr_reader :block_comments, :current_embdoc
-      end
-
-      private
-
-      def attach_comments(sexp, stmts)
-        range = sexp[:start]..sexp[:end]
-        comments =
-          block_comments.group_by { |comment| range.include?(comment[:start]) }
-
-        if comments[true]
-          stmts[:body] =
-            (stmts[:body] + comments[true]).sort_by { |node| node[:start] }
-
-          @block_comments = comments.fetch(false) { [] }
-        end
-      end
-
-      events.each do |event, path|
-        define_method(:"on_#{event}") do |*body|
-          super(*body).tap { |sexp| attach_comments(sexp, body.dig(*path)) }
-        end
-      end
-
-      def on_comment(body)
-        super(body).tap do |sexp|
-          lex_state = Prettier::Parser.lex_state_name(state).gsub('EXPR_', '')
-          block_comments << sexp if lex_state == 'BEG'
-        end
-      end
-
-      def on_embdoc_beg(comment)
-        @current_embdoc = {
-          type: :embdoc, body: comment, start: lineno, end: lineno
+      def on_comment(value)
+        @comments << {
+          value: value[1..-1].chomp,
+          start: lineno,
+          end: lineno,
+          char_start: char_pos,
+          char_end: char_pos + value.length - 1
         }
       end
 
-      def on_embdoc(comment)
-        @current_embdoc[:body] << comment
+      def on_embdoc_beg(value)
+        @embdoc = { value: value, start: lineno, char_start: char_pos }
       end
 
-      def on_embdoc_end(comment)
-        @current_embdoc[:body] << comment.chomp
-        @block_comments << @current_embdoc
-        @current_embdoc = nil
+      def on_embdoc(value)
+        @embdoc[:value] << value
       end
 
-      def on_method_add_block(*body)
-        super(*body).tap do |sexp|
-          stmts = body[1][:body][1]
-          stmts = stmts[:type] == :stmts ? stmts : body[1][:body][1][:body][0]
+      def on_embdoc_end(value)
+        @comments << @embdoc.merge!(
+          value: @embdoc[:value] << value.chomp,
+          end: lineno,
+          char_end: char_pos + value.length - 1
+        )
 
-          attach_comments(sexp, stmts)
+        @embdoc = nil
+      end
+
+      def on_program(*body)
+        super(*body).merge!(comments: @comments).tap do |node|
+          node[:body][0][:body] << @__end__ if @__end__
         end
       end
     end
@@ -632,15 +506,6 @@ class Prettier::Parser < Ripper
   # "ending" respectively.
   prepend(
     Module.new do
-      def initialize(*args)
-        super(*args)
-        @heredoc_stack = []
-      end
-
-      def self.prepended(base)
-        base.attr_reader :heredoc_stack
-      end
-
       private
 
       # This is a scanner event that represents the beginning of the heredoc.
@@ -652,12 +517,12 @@ class Prettier::Parser < Ripper
           end: lineno,
           char_start: char_pos - beging.length + 1,
           char_end: char_pos
-        }.tap { |node| heredoc_stack << node }
+        }.tap { |node| @heredoc_stack << node }
       end
 
       # This is a scanner event that represents the end of the heredoc.
       def on_heredoc_end(ending)
-        heredoc_stack[-1].merge!(
+        @heredoc_stack[-1].merge!(
           ending: ending.chomp, end: lineno, char_end: char_pos
         )
       end
@@ -666,16 +531,16 @@ class Prettier::Parser < Ripper
       # tilde. These are considered `heredoc_dedent` nodes, whereas the hyphen
       # heredocs show up as string literals.
       def on_heredoc_dedent(string, _width)
-        heredoc_stack[-1].merge!(string.slice(:body))
+        @heredoc_stack[-1].merge!(string.slice(:body))
       end
 
       # String literals are either going to be a normal string or they're going
       # to be a heredoc with a hyphen.
       def on_string_literal(string)
-        heredoc = heredoc_stack[-1]
+        heredoc = @heredoc_stack[-1]
 
         if heredoc && heredoc[:ending]
-          heredoc_stack.pop.merge!(string.slice(:body))
+          @heredoc_stack.pop.merge!(string.slice(:body))
         else
           super
         end
@@ -698,21 +563,6 @@ class Prettier::Parser < Ripper
         define_method(:"on_#{event}") do |body|
           super(body.force_encoding('UTF-8'))
         end
-      end
-
-      # Handles __END__ syntax, which allows individual scripts to keep content
-      # after the main ruby code that can be read through DATA. It looks like:
-      #
-      # foo.bar
-      #
-      # __END__
-      # some other content that isn't normally read by ripper
-      def on___end__(body)
-        @__end__ = super(lines[lineno..-1].join("\n"))
-      end
-
-      def on_program(*body)
-        super(*body).tap { |node| node[:body][0][:body] << __end__ if __end__ }
       end
 
       # Normally access controls are reported as vcall nodes. This creates a

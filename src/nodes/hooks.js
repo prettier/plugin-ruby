@@ -17,7 +17,7 @@ const { isEmptyStmts } = require("../utils");
  * nodes contain one child which is a `stmts` node.
  */
 function printHook(name) {
-  function printHookWithName(path, opts, print) {
+  return function printHookWithName(path, opts, print) {
     const stmtsNode = path.getValue().body[0];
     const printedStmts = path.call(print, "body", 0);
 
@@ -34,9 +34,7 @@ function printHook(name) {
     }
 
     return group(concat(parts));
-  }
-
-  return printHookWithName;
+  };
 }
 
 module.exports = {

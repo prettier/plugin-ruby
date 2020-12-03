@@ -109,20 +109,6 @@ describe("class", () => {
     }
   );
 
-  describe("undef", () => {
-    test("single inline", () => expect("undef foo").toMatchFormat());
-
-    test("multiple inline", () => expect("undef foo, bar").toMatchFormat());
-
-    test("multiple breaking", () =>
-      expect(`undef ${long}, a${long}`).toChangeFormat(
-        ruby(`
-        undef ${long},
-              a${long}
-      `)
-      ));
-  });
-
   describe("constant reference", () => {
     test("regular", () => expect("Pret::Tier::Ruby").toMatchFormat());
 

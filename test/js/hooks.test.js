@@ -1,4 +1,4 @@
-const { long } = require("./utils");
+const { long, ruby } = require("./utils");
 
 describe.each(["BEGIN", "END"])("%s hook", (hook) => {
   test("shortens to one line", () =>
@@ -12,4 +12,14 @@ describe.each(["BEGIN", "END"])("%s hook", (hook) => {
 
   test("expands to multi line", () =>
     expect(`${hook} { ${long} }`).toChangeFormat(`${hook} {\n  ${long}\n}`));
+
+  test("works for comments in the body", () => {
+    const content = ruby(`
+      ${hook} {
+        # this is the comment
+      }
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });

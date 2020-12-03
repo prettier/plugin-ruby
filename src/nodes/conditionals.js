@@ -9,7 +9,7 @@ const {
   softline
 } = require("../prettier");
 
-const { containsAssignment } = require("../utils");
+const { containsAssignment, isEmptyStmts } = require("../utils");
 const inlineEnsureParens = require("../utils/inlineEnsureParens");
 
 const printWithAddition = (keyword, path, print, { breaking = false } = {}) =>
@@ -81,21 +81,30 @@ const printTernary = (path, _opts, print) => {
 // modifier form, we're guaranteed to not have an additional node, so we can
 // just work with the predicate and the body.
 function printSingle(keyword, modifier = false) {
-  function printSingleWithKeyword(path, { inlineConditionals }, print) {
-    const multiline = concat([
+  return function printSingleWithKeyword(path, { inlineConditionals }, print) {
+    const [_predicateNode, statementsNode] = path.getValue().body;
+    const predicateDoc = path.call(print, "body", 0);
+    const statementsDoc = path.call(print, "body", 1);
+
+    const multilineParts = [
       `${keyword} `,
-      align(keyword.length + 1, path.call(print, "body", 0)),
-      indent(concat([softline, path.call(print, "body", 1)])),
+      align(keyword.length + 1, predicateDoc),
+      indent(concat([softline, statementsDoc])),
       concat([softline, "end"])
-    ]);
+    ];
 
-    const [_predicate, stmts] = path.getValue().body;
-    const hasComments =
-      stmts.type === "stmts" &&
-      stmts.body.some((stmt) => stmt.type === "@comment");
+    // If the body of the conditional is empty but it has comments, then we
+    // don't want to print a newline before we print the comments, because it
+    // will result in an extra line in the body.
+    if (isEmptyStmts(statementsNode) && statementsNode.comments) {
+      multilineParts[2] = indent(statementsDoc);
+    }
 
-    if (!inlineConditionals || hasComments) {
-      return concat([multiline, breakParent]);
+    // If we do not allow modifier form conditionals or there are comments
+    // inside of the body of the conditional, then we must print in the
+    // multiline form.
+    if (!inlineConditionals || statementsNode.comments) {
+      return concat([multilineParts].concat(breakParent));
     }
 
     const inline = concat(
@@ -106,20 +115,18 @@ function printSingle(keyword, modifier = false) {
       ])
     );
 
-    // an expression with a conditional modifier (expression if true), the
+    // An expression with a conditional modifier (expression if true), the
     // conditional body is parsed before the predicate expression, meaning that
     // if the parser encountered a variable declaration, it would initialize
     // that variable first before evaluating the predicate expression. That
     // parse order means the difference between a NameError or not. #591
     // https://docs.ruby-lang.org/en/2.0.0/syntax/control_expressions_rdoc.html#label-Modifier+if+and+unless
-    if (modifier && containsAssignment(stmts)) {
+    if (modifier && containsAssignment(statementsNode)) {
       return inline;
     }
 
-    return group(ifBreak(multiline, inline));
-  }
-
-  return printSingleWithKeyword;
+    return group(ifBreak(concat(multilineParts), inline));
+  };
 }
 
 const noTernary = [
@@ -219,7 +226,7 @@ const printConditional = (keyword) => (path, { inlineConditionals }, print) => {
 
   // If the body of the conditional is empty, then we explicitly have to use the
   // block form.
-  if (statements.type === "stmts" && statements.body[0].type === "void_stmt") {
+  if (isEmptyStmts(statements) && !statements.comments) {
     return concat([
       `${keyword} `,
       align(keyword.length + 1, path.call(print, "body", 0)),
