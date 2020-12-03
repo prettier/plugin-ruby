@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@jbielick] - Maintain parse order during if/unless modifier expressions
 - [@flyerhzm] - Slight prettifying of wrapped args if doc length is under a certain value.
 - [@github0013], [@kddeisz] - Ensure `not` keeps parentheses if they are being used.
+- [@jbielick] - Print heredocs consistently.
 
 ## [0.21.0] - 2020-12-02
 

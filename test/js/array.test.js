@@ -80,15 +80,12 @@ describe("array", () => {
   test("breaking maintains calls on the end", () =>
     expect(`[${long}].freeze`).toChangeFormat(`[\n  ${long}\n].freeze`));
 
-  describe.each(["<<-HERE", "<<~HERE"])("%s heredocs as elements", (start) => {
+  describe("heredocs as elements", () => {
     test("as the first value", () => {
       const content = ruby(`
-        [
-          ${start},
-            this is the heredoc
-          HERE
-          foo
-        ]
+        [<<~HERE, foo]
+          this is the heredoc
+        HERE
       `);
 
       return expect(content).toMatchFormat();
@@ -96,12 +93,9 @@ describe("array", () => {
 
     test("as the last value", () => {
       const content = ruby(`
-        [
-          foo,
-          ${start}
-            this is the heredoc
-          HERE
-        ]
+        [foo, <<~HERE]
+          this is the heredoc
+        HERE
       `);
 
       return expect(content).toMatchFormat();
@@ -109,14 +103,9 @@ describe("array", () => {
 
     test("with splats in the array", () => {
       const content = ruby(`
-        [
-          foo,
-          *bar,
-          baz,
-          ${start}
-            this is the heredoc
-          HERE
-        ]
+        [foo, *bar, baz, <<~HERE]
+          this is the heredoc
+        HERE
       `);
 
       return expect(content).toMatchFormat();
@@ -125,7 +114,8 @@ describe("array", () => {
     test("with trailing commas", () => {
       const content = ruby(`
         [
-          ${start},
+          ${long},
+          <<~HERE,
             this is the heredoc
           HERE
         ]

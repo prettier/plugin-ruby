@@ -3,7 +3,7 @@ const { ruby } = require("./utils");
 describe("embed", () => {
   test("formats correctly on straight heredocs", () => {
     const content = ruby(`
-      <<-JS
+      <<-JS.squish
       const a=1;
       const b=2;
       return a+b;
@@ -11,7 +11,7 @@ describe("embed", () => {
     `);
 
     const expected = ruby(`
-      <<-JS
+      <<-JS.squish
       const a = 1;
       const b = 2;
       return a + b;
@@ -23,7 +23,7 @@ describe("embed", () => {
 
   test("formats correctly on squiggly heredocs", () => {
     const content = ruby(`
-      <<~JS
+      <<~JS.squish
         const a=1;
         const b=2;
         return a+b;
@@ -31,7 +31,7 @@ describe("embed", () => {
     `);
 
     const expected = ruby(`
-      <<~JS
+      <<~JS.squish
         const a = 1;
         const b = 2;
         return a + b;
@@ -43,7 +43,7 @@ describe("embed", () => {
 
   test("does not format if the heredoc has an interpolation", () => {
     const content = ruby(`
-      <<~JS
+      <<~JS.squish
         const a=1;
         const b=#{2};
         return a+b;

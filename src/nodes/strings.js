@@ -90,21 +90,6 @@ module.exports = {
 
     return concat([":", quote, concat(path.call(print, "body", 0)), quote]);
   },
-  heredoc: (path, opts, print) => {
-    const { beging, body, ending } = path.getValue();
-
-    const parts = body.map((part, index) => {
-      if (part.type !== "@tstring_content") {
-        // In this case, the part of the string is an embedded expression
-        return path.call(print, "body", index);
-      }
-
-      // In this case, the part of the string is just regular string content
-      return join(literalline, part.body.split("\n"));
-    });
-
-    return concat([beging, literalline, concat(parts), ending]);
-  },
   string: makeList,
   string_concat: (path, opts, print) =>
     group(

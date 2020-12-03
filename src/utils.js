@@ -1,11 +1,6 @@
-const {
-  breakParent,
-  concat,
-  hardline,
-  lineSuffix,
-  literalline
-} = require("./prettier");
+const { breakParent, concat, hardline, lineSuffix } = require("./prettier");
 const isEmptyStmts = require("./utils/isEmptyStmts");
+const literalLineNoBreak = require("./utils/literalLineNoBreak");
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
@@ -53,34 +48,6 @@ const hasAncestor = (path, types) => {
 };
 
 const literal = (value) => () => value;
-
-const makeArgs = (path, opts, print, argsIndex) => {
-  let argNodes = path.getValue().body[argsIndex];
-  const argPattern = [print, "body", argsIndex, "body"];
-
-  if (argNodes.type === "args_add_block") {
-    [argNodes] = argNodes.body;
-    argPattern.push(0, "body");
-  }
-
-  const args = path.call(print, "body", argsIndex);
-  const heredocs = [];
-
-  argNodes.body.forEach((argNode, index) => {
-    if (argNode.type === "heredoc") {
-      const content = path.map.apply(
-        path,
-        argPattern.slice().concat([index, "body"])
-      );
-      heredocs.push(
-        concat([literalline].concat(content).concat([argNode.ending]))
-      );
-      args[index] = argNode.beging;
-    }
-  });
-
-  return { args, heredocs };
-};
 
 const makeCall = (path, opts, print) => {
   const operation = path.getValue().body[1];
@@ -130,12 +97,10 @@ const printComments = (printed, start, comments) => {
   return node;
 };
 
+const skippable = ["array", "hash", "heredoc", "lambda", "regexp_literal"];
 const skipAssignIndent = (node) =>
-  ["array", "hash", "heredoc", "lambda", "regexp_literal"].includes(
-    node.type
-  ) ||
-  (node.type === "call" && skipAssignIndent(node.body[0])) ||
-  (node.type === "string_literal" && node.body[0].type === "heredoc");
+  skippable.includes(node.type) ||
+  (node.type === "call" && skipAssignIndent(node.body[0]));
 
 const surround = (left, right) => (path, opts, print) =>
   concat([left, path.call(print, "body", 0), right]);
@@ -149,7 +114,7 @@ module.exports = {
   hasAncestor,
   isEmptyStmts,
   literal,
-  makeArgs,
+  literalLineNoBreak,
   makeCall,
   makeList,
   nodeDive,

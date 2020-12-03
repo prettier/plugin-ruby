@@ -31,15 +31,12 @@ describe("hash", () => {
     });
   });
 
-  describe.each(["<<-HERE", "<<~HERE"])("%s heredocs as values", (start) => {
+  describe("heredocs as values", () => {
     test("as the first value", () => {
       const content = ruby(`
-        {
-          foo: ${start},
-            this is the heredoc
-          HERE
-          bar: 'bar'
-        }
+        { foo: <<~HERE, bar: 'bar' }
+          this is the heredoc
+        HERE
       `);
 
       return expect(content).toMatchFormat();
@@ -47,12 +44,9 @@ describe("hash", () => {
 
     test("as the last value", () => {
       const content = ruby(`
-        {
-          foo: 'foo',
-          bar: ${start}
-            this is the heredoc
-          HERE
-        }
+        { foo: 'foo', bar: <<~HERE }
+          this is the heredoc
+        HERE
       `);
 
       return expect(content).toMatchFormat();
@@ -61,13 +55,35 @@ describe("hash", () => {
     test("with trailing commas", () => {
       const content = ruby(`
         {
-          foo: ${start},
+          foo:
+            ${long},
+          bar: <<~HERE,
             this is the heredoc
           HERE
         }
       `);
 
       return expect(content).toMatchFormat({ addTrailingCommas: true });
+    });
+
+    test("when exceeding line length", () => {
+      const content = ruby(`
+        { foo: '${long}', bar: <<~HERE }
+          this is the heredoc
+        HERE
+      `);
+
+      const expected = ruby(`
+        {
+          foo:
+            '${long}',
+          bar: <<~HERE
+          this is the heredoc
+        HERE
+        }
+      `);
+
+      return expect(content).toChangeFormat(expected);
     });
   });
 

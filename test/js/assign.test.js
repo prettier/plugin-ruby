@@ -18,6 +18,16 @@ describe("assign", () => {
     test("other operator", () => expect("a ||= b").toMatchFormat());
   });
 
+  test("heredoc", () => {
+    const content = ruby(`
+      text = <<-TEXT
+        abcd
+      TEXT
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
   describe("multiple assignment", () => {
     test("multi on left, multi on right", () =>
       expect("a, b, c = 1, 2, 3").toMatchFormat());

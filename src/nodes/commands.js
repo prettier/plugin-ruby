@@ -8,7 +8,7 @@ const {
   line,
   softline
 } = require("../prettier");
-const { docLength, makeArgs, makeCall } = require("../utils");
+const { docLength, makeCall } = require("../utils");
 
 const hasDef = (node) =>
   node.body[1].type === "args_add_block" &&
@@ -41,14 +41,9 @@ const hasTernaryArg = (path) =>
 module.exports = {
   command: (path, opts, print) => {
     const command = path.call(print, "body", 0);
-    const { args, heredocs } = makeArgs(path, opts, print, 1);
-
-    if (heredocs.length > 1) {
-      return concat([command, " ", join(", ", args)].concat(heredocs));
-    }
+    const joinedArgs = join(concat([",", line]), path.call(print, "body", 1));
 
     const hasTernary = hasTernaryArg(path);
-    const joinedArgs = join(concat([",", line]), args);
     let breakArgs;
 
     if (hasTernary) {
@@ -59,7 +54,7 @@ module.exports = {
       breakArgs = align(command.length + 1, joinedArgs);
     }
 
-    const commandDoc = group(
+    return group(
       ifBreak(
         concat([
           command,
@@ -70,12 +65,6 @@ module.exports = {
         concat([command, " ", joinedArgs])
       )
     );
-
-    if (heredocs.length === 1) {
-      return group(concat([commandDoc].concat(heredocs)));
-    }
-
-    return commandDoc;
   },
   command_call: (path, opts, print) => {
     const parts = [
@@ -89,25 +78,14 @@ module.exports = {
     }
 
     parts.push(" ");
-    const { args, heredocs } = makeArgs(path, opts, print, 3);
 
-    if (heredocs.length > 1) {
-      return concat(parts.concat([join(", ", args)]).concat(heredocs));
-    }
-
-    const joinedArgs = join(concat([",", line]), args);
+    const joinedArgs = join(concat([",", line]), path.call(print, "body", 3));
     const breakArgs = skipArgsAlign(path)
       ? joinedArgs
       : align(docLength(concat(parts)), joinedArgs);
 
-    const commandDoc = group(
+    return group(
       ifBreak(concat(parts.concat(breakArgs)), concat(parts.concat(joinedArgs)))
     );
-
-    if (heredocs.length === 1) {
-      return group(concat([commandDoc].concat(heredocs)));
-    }
-
-    return commandDoc;
   }
 };

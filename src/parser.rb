@@ -220,7 +220,6 @@ class Prettier::Parser < Ripper
         when: [:@kw, 'when'],
         while: [:@kw, 'while'],
         words_new: :@words_beg,
-        xstring_literal: :@backtick,
         yield0: [:@kw, 'yield'],
         yield: [:@kw, 'yield'],
         zsuper: [:@kw, 'super']
@@ -319,6 +318,31 @@ class Prettier::Parser < Ripper
           char_end: char_pos,
           paren: source[node[:char_end]...body[1][:char_start]].include?('(')
         )
+      end
+
+      # xstring_literal nodes can actually use heredocs to present themselves,
+      # as in the example:
+      #
+      # <<-`SHELL`
+      #   ls
+      # SHELL
+      #
+      # In this case we need to change the node type to be a heredoc instead of
+      # an xstring_literal in order to get the right formatting.
+      def on_xstring_literal(*body)
+        heredoc = heredoc_stack[-1]
+
+        if heredoc && heredoc[:beging][3] = '`'
+          heredoc.merge!(body[0].slice(:body))
+        else
+          node = find_scanner_event(:@backtick)
+
+          super(*body).merge!(
+            start: node[:start],
+            char_start: node[:char_start],
+            char_end: char_pos
+          )
+        end
       end
 
       # Symbols don't necessarily have to have a @symbeg event fired before they
