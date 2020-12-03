@@ -64,7 +64,7 @@ function printAlias(path, opts, print) {
     concat([
       keyword,
       printAliasArgument(path, opts, print, 0),
-      group(align(keyword, rightSide))
+      group(align(keyword.length, rightSide))
     ])
   );
 }
