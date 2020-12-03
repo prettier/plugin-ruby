@@ -471,6 +471,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "johncsnyder",
+      "name": "John Snyder",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/9882099?v=4",
+      "profile": "https://github.com/johncsnyder",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
