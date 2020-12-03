@@ -1,5 +1,6 @@
 const { breakParent, concat, hardline, lineSuffix } = require("./prettier");
 const isEmptyStmts = require("./utils/isEmptyStmts");
+const literalLineNoBreak = require("./utils/literalLineNoBreak");
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
 
@@ -96,12 +97,10 @@ const printComments = (printed, start, comments) => {
   return node;
 };
 
+const skippable = ["array", "hash", "heredoc", "lambda", "regexp_literal"];
 const skipAssignIndent = (node) =>
-  ["array", "hash", "heredoc", "lambda", "regexp_literal"].includes(
-    node.type
-  ) ||
-  (node.type === "call" && skipAssignIndent(node.body[0])) ||
-  (node.type === "string_literal" && node.body[0].type === "heredoc");
+  skippable.includes(node.type) ||
+  (node.type === "call" && skipAssignIndent(node.body[0]));
 
 const surround = (left, right) => (path, opts, print) =>
   concat([left, path.call(print, "body", 0), right]);
@@ -115,6 +114,7 @@ module.exports = {
   hasAncestor,
   isEmptyStmts,
   literal,
+  literalLineNoBreak,
   makeCall,
   makeList,
   nodeDive,

@@ -1,10 +1,5 @@
 const { concat, group, lineSuffix, join } = require("../prettier");
-
-const literallineWithoutBreakParent = {
-  type: "line",
-  hard: true,
-  literal: true
-};
+const { literalLineNoBreak } = require("../utils");
 
 function printHeredoc(path, opts, print) {
   const { beging, body, ending } = path.getValue();
@@ -16,10 +11,10 @@ function printHeredoc(path, opts, print) {
     }
 
     // In this case, the part of the string is just regular string content
-    return join(literallineWithoutBreakParent, part.body.split("\n"));
+    return join(literalLineNoBreak, part.body.split("\n"));
   });
 
-  // we use a literalline break because matching indentation is required
+  // We use a literalline break because matching indentation is required
   // for the heredoc contents and ending. If the line suffix contains a
   // break-parent, all ancestral groups are broken, and heredocs automatically
   // break lines in groups they appear in. We prefer them to appear in-line if
@@ -28,9 +23,7 @@ function printHeredoc(path, opts, print) {
     concat([
       beging,
       lineSuffix(
-        group(
-          concat([literallineWithoutBreakParent].concat(parts).concat(ending))
-        )
+        group(concat([literalLineNoBreak].concat(parts).concat(ending)))
       )
     ])
   );

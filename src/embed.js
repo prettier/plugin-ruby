@@ -1,11 +1,14 @@
 const {
   concat,
+  group,
   indent,
-  literalline,
+  lineSuffix,
   mapDoc,
   markAsRoot,
   stripTrailingHardline
 } = require("./prettier");
+
+const { literalLineNoBreak } = require("./utils");
 
 const parsers = {
   css: "css",
@@ -23,7 +26,7 @@ const replaceNewlines = (doc) =>
       ? concat(
           currentDoc
             .split(/(\n)/g)
-            .map((v, i) => (i % 2 === 0 ? v : literalline))
+            .map((v, i) => (i % 2 === 0 ? v : literalLineNoBreak))
         )
       : currentDoc
   );
@@ -53,19 +56,31 @@ const embed = (path, _print, textToDoc, _opts) => {
   // into the embedded parser. Get back the doc node.
   const content = body.map((part) => part.body).join("");
   const formatted = concat([
-    literalline,
+    literalLineNoBreak,
     replaceNewlines(stripTrailingHardline(textToDoc(content, { parser })))
   ]);
 
   // If we're using a squiggly heredoc, then we can properly handle indentation
   // ourselves.
   if (beging[2] === "~") {
-    return concat([beging, indent(markAsRoot(formatted)), literalline, ending]);
+    return concat([
+      beging,
+      lineSuffix(
+        group(
+          concat([indent(markAsRoot(formatted)), literalLineNoBreak, ending])
+        )
+      )
+    ]);
   }
 
   // Otherwise, we need to just assume it's formatted correctly and return the
   // content as it is.
-  return markAsRoot(concat([beging, formatted, literalline, ending]));
+  return markAsRoot(
+    concat([
+      beging,
+      lineSuffix(group(concat([formatted, literalLineNoBreak, ending])))
+    ])
+  );
 };
 
 module.exports = embed;

@@ -71,23 +71,18 @@ function printHash(path, { addTrailingCommas }, print) {
     return "{}";
   }
 
-  // Here we get a reference to the printed assoclist_from_args child node,
-  // which handles printing all of the key-value pairs of the hash. We're
-  // wrapping it in an array in case we need to append a trailing comma.
-  const assocDocs = [path.call(print, "body", 0)];
-
-  // If we're adding a trailing comma and the last key-value pair's value node
-  // is not a heredoc node, then we can safely append the extra comma if the
-  // hash ends up getting printed on multiple lines.
-  if (addTrailingCommas) {
-    assocDocs.push(ifBreak(",", ""));
-  }
-
   return group(
     concat([
       "{",
-      indent(concat([line, concat(assocDocs)])),
-      concat([line, "}"])
+      indent(
+        concat([
+          line,
+          path.call(print, "body", 0),
+          addTrailingCommas ? ifBreak(",", "") : ""
+        ])
+      ),
+      line,
+      "}"
     ])
   );
 }
