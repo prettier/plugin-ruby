@@ -93,11 +93,17 @@ module.exports = {
       embed,
       print,
       handleComments: comments,
-      canAttachComment() {
-        return true;
+      canAttachComment(node) {
+        const noComments = ["args", "args_add_block"];
+        return !noComments.includes(node.type);
       },
       getCommentChildNodes(node) {
-        return node.type === "undef" ? node.body[0] : node.body;
+        const nestedContents = [
+          "assoclist_from_args",
+          "bare_assoc_hash",
+          "undef"
+        ];
+        return nestedContents.includes(node.type) ? node.body[0] : node.body;
       },
       printComment(path, _opts) {
         const comment = path.getValue();
