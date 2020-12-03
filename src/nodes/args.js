@@ -12,16 +12,6 @@ const {
 const toProc = require("../toProc");
 const { docLength, makeArgs } = require("../utils");
 
-const MAX_NOT_WRAP_LINE_ARGS_LENGTH = 15;
-const shouldWrapLine = (args) =>
-  args.reduce((sum, arg) => sum + docLength(arg), 0) >
-    MAX_NOT_WRAP_LINE_ARGS_LENGTH ||
-  (args.length == 1 &&
-    args[0].type === "group" &&
-    docLength(args[0]) > MAX_NOT_WRAP_LINE_ARGS_LENGTH) ||
-  (args[0].type === "concat" &&
-    args[0].parts.some((part) => part.type === "group"));
-
 // This handles a stupidly specific case where you have heredocs as arguments in
 // addition to have a block being passed. In that case we can't do anything
 // fancy with the heredoc beginnings because we need to have the braces or
@@ -116,35 +106,50 @@ module.exports = {
       return concat(["(", join(", ", args), ")"].concat(heredocs));
     }
 
-    let parenDoc;
-    if (shouldWrapLine(args)) {
-      parenDoc = group(
-        concat([
-          "(",
-          indent(
-            concat([
-              softline,
-              join(concat([",", line]), args),
-              addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
-            ])
-          ),
-          concat([softline, ")"])
-        ])
-      );
+    // These are the docs representing the actual arguments, without any
+    // parentheses or surrounding lines yet added.
+    let argsDocs = [
+      join(concat([",", line]), args),
+      addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
+    ];
+
+    // Here we're going to make a determination on whether or not we should put
+    // a newline before the first argument. In some cases this makes the
+    // appearance a little better. For example, instead of taking this input:
+    //
+    //     foo(arg1, arg2).bar(arg1, arg2).baz(arg1)
+    //
+    // and transforming it into this:
+    //
+    //     foo(arg1, arg2).bar(arg1, arg2).baz(
+    //       arg1
+    //     )
+    //
+    // it instead gets transformed into this:
+    //
+    //     foo(arg1, arg2).bar(arg1, arg2)
+    //       .baz(arg1)
+    //
+    const maxDocLength = 15;
+    const firstArgDoc = args[0];
+
+    // prettier-ignore
+    const shouldWrapLine =
+      (args.reduce((sum, arg) => sum + docLength(arg), 0) > maxDocLength) ||
+      (args.length == 1 && firstArgDoc.type === "group" && docLength(firstArgDoc) > maxDocLength) ||
+      (firstArgDoc.type === "concat" && firstArgDoc.parts.some((part) => part.type === "group"));
+
+    // Here we're going to get all of the docs representing the doc that's
+    // inside the parentheses.
+    if (shouldWrapLine) {
+      argsDocs = [indent(concat([softline].concat(argsDocs))), softline];
     } else {
-      parenDoc = group(
-        concat([
-          "(",
-          indent(
-            concat([
-              join(concat([",", line]), args),
-              addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
-            ])
-          ),
-          ")"
-        ])
-      );
+      argsDocs = [indent(concat(argsDocs))];
     }
+
+    // Now here we get a doc that represents the whole grouped expression,
+    // including the surrouding parentheses.
+    const parenDoc = group(concat(["("].concat(argsDocs).concat(")")));
 
     if (heredocs.length === 1) {
       return group(concat([parenDoc].concat(heredocs)));
