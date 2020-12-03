@@ -1,3 +1,4 @@
+const comments = require("./comments");
 const embed = require("./embed");
 const parse = require("./parse");
 const print = require("./print");
@@ -88,7 +89,14 @@ module.exports = {
   printers: {
     ruby: {
       embed,
-      print
+      print,
+      handleComments: comments,
+      canAttachComment: () => true,
+      getCommentChildNodes: (node) => node.body,
+      printComment: (path, _opts) => {
+        const { value } = path.getValue();
+        return `#${value}`;
+      }
     }
   },
   options: {
