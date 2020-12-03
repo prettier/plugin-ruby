@@ -17,8 +17,8 @@ const {
 function isStringArray(args) {
   return args.body.every((arg) => {
     // We want to verify that every node inside of this array is a string
-    // literal.
-    if (arg.type !== "string_literal") {
+    // literal. We also want to make sure none of them have comments attached.
+    if (arg.type !== "string_literal" || arg.comments) {
       return false;
     }
 
@@ -51,7 +51,9 @@ function isStringArray(args) {
 //     [:a, :b, :c]
 //
 function isSymbolArray(args) {
-  return args.body.every((arg) => arg.type === "symbol_literal");
+  return args.body.every(
+    (arg) => arg.type === "symbol_literal" && !arg.comments
+  );
 }
 
 // Returns a list of docs for each element in a special array. These are
