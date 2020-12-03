@@ -7,6 +7,13 @@ about: Issues with prettier crashing
 
 * Ruby version: ...
 * @prettier/plugin-ruby version: ...
+* Options:
+  * [ ] `addTrailingCommas`
+  * [x] `inlineConditionals`
+  * [x] `inlineLoops`
+  * [x] `preferHashLabels`
+  * [x] `preferSingleQuotes`
+  * [ ] `toProcTransform`
 
 ## Input
 
