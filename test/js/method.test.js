@@ -214,6 +214,11 @@ describe("method", () => {
             `foo(\n  ${long},\n  a${long}\n)`
           ));
 
+        test("with breaking ternary as first argument", () =>
+          expect(`foo bar ? ${long} : a${long}`).toChangeFormat(
+            `foo(\n  if bar\n    ${long}\n  else\n    a${long}\n  end\n)`
+          ));
+
         test("starting with trailing comma changes", () =>
           expect(`foo(${long}, a${long},)`).toChangeFormat(
             `foo(\n  ${long},\n  a${long}\n)`
