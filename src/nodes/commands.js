@@ -32,13 +32,11 @@ const hasDef = (node) =>
 const skipArgsAlign = (path) =>
   ["to", "not_to"].includes(path.getValue().body[2].body);
 
-const startsWithIf = (argNodes) =>
-  argNodes &&
-  argNodes.body[0] &&
-  argNodes.body[0].body[0] &&
-  argNodes.body[0].body[0].type === "ifop";
-
-const startsWithIfArg = (path) => startsWithIf(path.getValue().body[1]);
+// If there is a ternary argument to a command and it's going to get broken
+// into multiple lines, then we're going to have to use parentheses around the
+// command in order to make sure operator precedence doesn't get messed up.
+const hasTernaryArg = (path) =>
+  path.getValue().body[1].body[0].body.some((node) => node.type === "ifop");
 
 module.exports = {
   command: (path, opts, print) => {
@@ -49,11 +47,11 @@ module.exports = {
       return concat([command, " ", join(", ", args)].concat(heredocs));
     }
 
-    const addParensOnBreak = startsWithIfArg(path);
-
+    const hasTernary = hasTernaryArg(path);
     const joinedArgs = join(concat([",", line]), args);
     let breakArgs;
-    if (addParensOnBreak) {
+
+    if (hasTernary) {
       breakArgs = indent(concat([softline, joinedArgs]));
     } else if (hasDef(path.getValue())) {
       breakArgs = joinedArgs;
@@ -65,9 +63,9 @@ module.exports = {
       ifBreak(
         concat([
           command,
-          addParensOnBreak ? "(" : " ",
+          hasTernary ? "(" : " ",
           breakArgs,
-          addParensOnBreak ? concat([softline, ")"]) : ""
+          hasTernary ? concat([softline, ")"]) : ""
         ]),
         concat([command, " ", joinedArgs])
       )

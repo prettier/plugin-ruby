@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@flyerhzm] - Print method chains by one indentation.
 - [@mmcnl], [@kddeisz] - Handle heredocs and blocks being passed to the same method.
 - [@johncsnyder], [@kddeisz] - Ensure correct formatting when breaking up conditionals with `inlineConditionals: false`.
+- [@Rsullivan00] - Ensure that when ternaries as command arguments get broken into multiple lines we add the necessary parentheses.
 
 ## [0.21.0] - 2020-12-02
 
