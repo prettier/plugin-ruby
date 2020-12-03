@@ -94,7 +94,7 @@ const printSingle = (keyword) => (path, { inlineConditionals }, print) => {
     stmts.body.some((stmt) => stmt.type === "@comment");
 
   if (!inlineConditionals || hasComments) {
-    return multiline;
+    return concat([multiline, breakParent]);
   }
 
   const inline = concat(

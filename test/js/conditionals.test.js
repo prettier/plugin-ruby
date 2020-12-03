@@ -184,12 +184,26 @@ describe("conditionals", () => {
       test("align long predicates", () =>
         expect(`foo ${keyword} ${long} || ${long}a`).toChangeFormat(
           ruby(`
-          ${keyword} ${long} ||
-              ${Array(keyword.length).fill().join(" ")}${long}a
-            foo
-          end
-        `)
+            ${keyword} ${long} ||
+                ${Array(keyword.length).fill().join(" ")}${long}a
+              foo
+            end
+          `)
         ));
+
+      test("single line should break up", () => {
+        const content = "foo = if bar? then baz end";
+        const expected = ruby(`
+          foo =
+            if bar?
+              baz
+            end
+        `);
+
+        return expect(content).toChangeFormat(expected, {
+          inlineConditionals: false
+        });
+      });
     });
   });
 
