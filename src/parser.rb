@@ -314,7 +314,10 @@ class Prettier::Parser < Ripper
           end
 
         super(*body).merge!(
-          start: node[:start], char_start: node[:char_start], char_end: char_pos
+          start: node[:start],
+          char_start: node[:char_start],
+          char_end: char_pos,
+          paren: source[node[:char_end]...body[1][:char_start]].include?('(')
         )
       end
 
