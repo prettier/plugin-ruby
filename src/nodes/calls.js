@@ -116,6 +116,12 @@ module.exports = {
     const [method, args] = path.map(print, "body");
     const argNode = path.getValue().body[1];
 
+    // You can end up here if you have a method with a ? ending, presumably
+    // because the parser knows that it cannot be a local variable.
+    if (args.length === 0) {
+      return method;
+    }
+
     // This case will ONLY be hit if we can successfully turn the block into a
     // to_proc call. In that case, we just explicitly add the parens around it.
     if (argNode.type === "args" && args.length > 0) {
