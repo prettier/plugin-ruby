@@ -168,8 +168,8 @@ While developing, we've built a couple of small utilities for debugging the `pre
 
 - `bin/lex [file|source]` - outputs the tokens as ripper sees them
 - `bin/sexp [file|source]` - outputs the AST that ripper builds before it gets passed back to `prettier`
+- `bin/pragma [file]` - runs the `hasPragma` function against the given input file
 - `bin/print [file|source]` - outputs the printed source of a Ruby file after running it through `prettier`
-- `bin/has-pragma [file]` - runs the `hasPragma` function against the given input file
 
 ## Testing
 
