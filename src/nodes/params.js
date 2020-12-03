@@ -1,12 +1,15 @@
 const { concat, group, join, line } = require("../prettier");
 const { literal } = require("../utils");
 
-const printGenericRestParam = (symbol) => (path, opts, print) =>
-  path.getValue().body[0]
-    ? concat([symbol, path.call(print, "body", 0)])
-    : symbol;
+function printRestParam(symbol) {
+  return function printRestParamWithSymbol(path, opts, print) {
+    return path.getValue().body[0]
+      ? concat([symbol, path.call(print, "body", 0)])
+      : symbol;
+  };
+}
 
-const printParams = (path, opts, print) => {
+function printParams(path, opts, print) {
   const [
     reqs,
     optls,
@@ -73,16 +76,11 @@ const printParams = (path, opts, print) => {
   const comma = rest === 0 || (rest && rest.type === "excessed_comma");
 
   return group(concat([join(concat([",", line]), parts), comma ? "," : ""]));
-};
-
-const paramError = () => {
-  throw new Error("formal argument cannot be a global variable");
-};
+}
 
 module.exports = {
   args_forward: literal("..."),
-  kwrest_param: printGenericRestParam("**"),
-  rest_param: printGenericRestParam("*"),
-  params: printParams,
-  param_error: paramError
+  kwrest_param: printRestParam("**"),
+  rest_param: printRestParam("*"),
+  params: printParams
 };

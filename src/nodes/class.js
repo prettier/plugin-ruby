@@ -69,9 +69,6 @@ function printSClass(path, opts, print) {
 
 module.exports = {
   class: printClass,
-  class_name_error: (_path, _opts, _print) => {
-    throw new Error("class/module name must be CONSTANT");
-  },
   module: printModule,
   sclass: printSClass
 };
