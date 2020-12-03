@@ -189,6 +189,8 @@ describe("conditionals", () => {
           inlineConditionals: false
         }));
 
+      test("not operator parens", () => expect("not(true)").toMatchFormat());
+
       test("empty first body", () => {
         const content = ruby(`
           ${keyword} a
