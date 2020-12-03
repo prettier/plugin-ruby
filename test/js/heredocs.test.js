@@ -494,7 +494,7 @@ describe("heredocs", () => {
     return expect(content).toMatchFormat();
   });
 
-  test.skip("xstring", () => {
+  test("xstring", () => {
     const content = ruby(`
       <<-\`SHELL\`
         ls
