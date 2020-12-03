@@ -23,6 +23,43 @@ describe("conditionals", () => {
     });
   });
 
+  describe("modifiers", () => {
+    describe.each(["if", "unless"])("%s keyword", (keyword) => {
+      test("when modifying an assignment expression", () => {
+        const content = `text = '${long}' ${keyword} text`;
+        const expected = ruby(`
+          text =
+            '${long}' ${keyword} text
+        `);
+
+        return expect(content).toChangeFormat(expected);
+      });
+
+      test("when modifying an abbreviated assignment expression", () => {
+        const content = `text ||= '${long}' ${keyword} text`;
+        const expected = ruby(`
+          text ||=
+            '${long}' ${keyword} text
+        `);
+
+        return expect(content).toChangeFormat(expected);
+      });
+
+      test("when modifying an expression with an assignment descendant", () => {
+        const content = `true && (text = '${long}') ${keyword} text`;
+        const expected = ruby(`
+          true &&
+            (
+              text =
+                '${long}'
+            ) ${keyword} text
+        `);
+
+        return expect(content).toChangeFormat(expected);
+      });
+    });
+  });
+
   describe("when inline allowed", () => {
     describe.each(["if", "unless"])("%s keyword", (keyword) => {
       test("inline stays", () => expect(`1 ${keyword} a`).toMatchFormat());
@@ -85,6 +122,18 @@ describe("conditionals", () => {
         const content = ruby(`
           array.each do |element|
             ${keyword} index = difference.index(element)
+              difference.delete_at(index)
+            end
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("breaks if the predicate is an op assignment", () => {
+        const content = ruby(`
+          array.each do |element|
+            ${keyword} index ||= difference.index(element)
               difference.delete_at(index)
             end
           end
