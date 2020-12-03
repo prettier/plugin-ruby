@@ -1,15 +1,5 @@
-const { concat, trim } = require("./prettier");
-
-const comments = require("./comments");
-const embed = require("./embed");
-const parse = require("./parse");
-const print = require("./print");
-
-const pragmaPattern = /#\s*@(prettier|format)/;
-const hasPragma = (text) => pragmaPattern.test(text);
-
-const locStart = (node) => node.char_start;
-const locEnd = (node) => node.char_end;
+const printer = require("./printer");
+const parser = require("./parser");
 
 /*
  * metadata mostly pulled from linguist and rubocop:
@@ -80,43 +70,10 @@ module.exports = {
     }
   ],
   parsers: {
-    ruby: {
-      parse,
-      astFormat: "ruby",
-      hasPragma,
-      locStart,
-      locEnd
-    }
+    ruby: parser
   },
   printers: {
-    ruby: {
-      embed,
-      print,
-      handleComments: comments,
-      canAttachComment(node) {
-        const noComments = ["args", "args_add_block"];
-        return !noComments.includes(node.type);
-      },
-      getCommentChildNodes(node) {
-        const nestedContents = [
-          "assoclist_from_args",
-          "bare_assoc_hash",
-          "undef"
-        ];
-        return nestedContents.includes(node.type) ? node.body[0] : node.body;
-      },
-      printComment(path, _opts) {
-        const comment = path.getValue();
-
-        if (comment.type === "comment") {
-          return `#${comment.value}`;
-        }
-        return concat([trim, comment.value]);
-      },
-      isBlockComment(comment) {
-        return comment.type === "embdoc";
-      }
-    }
+    ruby: printer
   },
   options: {
     addTrailingCommas: {
