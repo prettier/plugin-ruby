@@ -91,8 +91,8 @@ module.exports = {
       embed,
       print,
       handleComments: comments,
-      canAttachComment(node) {
-        return !["args_add_block", "args"].includes(node.type);
+      canAttachComment() {
+        return true;
       },
       getCommentChildNodes(node) {
         return node.type === "undef" ? node.body[0] : node.body;
