@@ -65,6 +65,26 @@ describe("hash", () => {
 
       return expect(content).toMatchFormat({ addTrailingCommas: true });
     });
+
+    test("when exceeding line length", () => {
+      const content = ruby(`
+        { foo: '${long}', bar: <<~HERE }
+          this is the heredoc
+        HERE
+      `);
+
+      const expected = ruby(`
+        {
+          foo:
+            '${long}',
+          bar: <<~HERE
+          this is the heredoc
+        HERE
+        }
+      `);
+
+      return expect(content).toChangeFormat(expected);
+    });
   });
 
   describe("dynamic string keys", () => {
