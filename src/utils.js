@@ -1,10 +1,4 @@
-const {
-  breakParent,
-  concat,
-  hardline,
-  lineSuffix,
-  literalline
-} = require("./prettier");
+const { breakParent, concat, hardline, lineSuffix } = require("./prettier");
 const isEmptyStmts = require("./utils/isEmptyStmts");
 
 const concatBody = (path, opts, print) => concat(path.map(print, "body"));
@@ -53,34 +47,6 @@ const hasAncestor = (path, types) => {
 };
 
 const literal = (value) => () => value;
-
-const makeArgs = (path, opts, print, argsIndex) => {
-  let argNodes = path.getValue().body[argsIndex];
-  const argPattern = [print, "body", argsIndex, "body"];
-
-  if (argNodes.type === "args_add_block") {
-    [argNodes] = argNodes.body;
-    argPattern.push(0, "body");
-  }
-
-  const args = path.call(print, "body", argsIndex);
-  const heredocs = [];
-
-  argNodes.body.forEach((argNode, index) => {
-    if (argNode.type === "heredoc") {
-      const content = path.map.apply(
-        path,
-        argPattern.slice().concat([index, "body"])
-      );
-      heredocs.push(
-        concat([literalline].concat(content).concat([argNode.ending]))
-      );
-      args[index] = argNode.beging;
-    }
-  });
-
-  return { args, heredocs };
-};
 
 const makeCall = (path, opts, print) => {
   const operation = path.getValue().body[1];
@@ -149,7 +115,6 @@ module.exports = {
   hasAncestor,
   isEmptyStmts,
   literal,
-  makeArgs,
   makeCall,
   makeList,
   nodeDive,

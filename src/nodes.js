@@ -13,6 +13,7 @@ module.exports = Object.assign(
   require("./nodes/constants"),
   require("./nodes/flow"),
   require("./nodes/hashes"),
+  require("./nodes/heredocs"),
   require("./nodes/hooks"),
   require("./nodes/ints"),
   require("./nodes/lambdas"),
