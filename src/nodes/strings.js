@@ -148,6 +148,12 @@ function printSymbolLiteral(path, opts, print) {
   return concat([":", path.call(print, "body", 0)]);
 }
 
+// Prints out an xstring literal. Its child is an array of string parts,
+// including plain string content and interpolated content.
+function printXStringLiteral(path, opts, print) {
+  return concat(["`"].concat(path.map(print, "body")).concat("`"));
+}
+
 module.exports = {
   "@CHAR": printChar,
   dyna_symbol: printDynaSymbol,
@@ -166,7 +172,7 @@ module.exports = {
     // If the interpolated expression is inside of an xstring literal (a string
     // that gets sent to the command line) then we don't want to automatically
     // indent, as this can lead to some very odd looking expressions
-    if (path.getParentNode().type === "xstring") {
+    if (path.getParentNode().type === "xstring_literal") {
       return concat(["#{", parts, "}"]);
     }
 
@@ -176,10 +182,5 @@ module.exports = {
   },
   string_literal: printStringLiteral,
   symbol_literal: printSymbolLiteral,
-  xstring: makeList,
-  xstring_literal: (path, opts, print) => {
-    const parts = path.call(print, "body", 0);
-
-    return concat(["`"].concat(parts).concat("`"));
-  }
+  xstring_literal: printXStringLiteral
 };

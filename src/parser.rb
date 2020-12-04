@@ -139,10 +139,8 @@ class Prettier::Parser < Ripper
     Module.new do
       private
 
-      %i[args mlhs mrhs regexp stmts xstring].each do |event|
-        suffix = event == :string ? 'content' : 'new'
-
-        define_method(:"on_#{event}_#{suffix}") do
+      %i[args mlhs mrhs regexp stmts].each do |event|
+        define_method(:"on_#{event}_new") do
           { type: event, body: [], start: lineno, end: lineno }
         end
 
@@ -314,31 +312,6 @@ class Prettier::Parser < Ripper
           char_end: char_pos,
           paren: source[node[:char_end]...body[1][:char_start]].include?('(')
         )
-      end
-
-      # xstring_literal nodes can actually use heredocs to present themselves,
-      # as in the example:
-      #
-      # <<-`SHELL`
-      #   ls
-      # SHELL
-      #
-      # In this case we need to change the node type to be a heredoc instead of
-      # an xstring_literal in order to get the right formatting.
-      def on_xstring_literal(*body)
-        heredoc = @heredocs[-1]
-
-        if heredoc && heredoc[:beging][3] = '`'
-          heredoc.merge!(body[0].slice(:body))
-        else
-          node = find_scanner_event(:@backtick)
-
-          super(*body).merge!(
-            start: node[:start],
-            char_start: node[:char_start],
-            char_end: char_pos
-          )
-        end
       end
 
       defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
@@ -846,6 +819,67 @@ class Prettier::Parser < Ripper
           end: word_add[:end],
           char_end: word_add[:char_end]
         )
+      end
+
+      # xstring_new is a parser event that represents the beginning of a string
+      # of commands that gets sent out to the terminal, like `ls`. It can
+      # optionally include interpolation much like a regular string, so we're
+      # going to build up an array body.
+      #
+      # If the xstring actually starts with a heredoc declaration, then we're
+      # going to let heredocs continue to do their thing and instead just use
+      # its location information.
+      def on_xstring_new
+        heredoc = @heredocs[-1]
+
+        if heredoc && heredoc[:beging][3] = '`'
+          heredoc.merge(type: :xstring, body: [])
+        else
+          find_scanner_event(:@backtick).merge!(type: :xstring, body: [])
+        end
+      end
+
+      # xstring_add is a parser event that represents a piece of a string of
+      # commands that gets sent out to the terminal, like `ls`. It accepts two
+      # arguments, the parent xstring node as well as the piece that is being
+      # added to the string. Because it supports interpolation this is either a
+      # tstring_content scanner event representing bare string content or a
+      # string_embexpr representing interpolated content.
+      def on_xstring_add(xstring, piece)
+        xstring.merge!(
+          body: xstring[:body] << piece,
+          end: piece[:end],
+          char_end: piece[:char_end]
+        )
+      end
+
+      # xstring_literal is a parser event that represents a string of commands
+      # that gets sent to the terminal, like `ls`. It accepts as its only
+      # argument an xstring node that is a built up array representation of all
+      # of the parts of the string (including the plain string content and the
+      # interpolated content).
+      #
+      # They can also use heredocs to present themselves, as in the example:
+      #
+      #     <<-`SHELL`
+      #       ls
+      #     SHELL
+      #
+      # In this case we need to change the node type to be a heredoc instead of
+      # an xstring_literal in order to get the right formatting.
+      def on_xstring_literal(xstring)
+        heredoc = @heredocs[-1]
+
+        if heredoc && heredoc[:beging][3] = '`'
+          heredoc.merge!(body: xstring[:body])
+        else
+          ending = find_scanner_event(:@tstring_end)
+          xstring.merge!(
+            type: :xstring_literal,
+            end: ending[:end],
+            char_end: ending[:char_end]
+          )
+        end
       end
 
       # yield0 is a parser event that represents the bare yield keyword. It has

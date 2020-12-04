@@ -125,10 +125,10 @@ describe("strings", () => {
     test("backtick literals", () => expect("`abc`").toMatchFormat());
 
     test("breaking backtick literals", () =>
-      expect(`\`${long}\``).toChangeFormat(`\`${long}\``));
+      expect(`\`${long}\``).toMatchFormat());
 
     test("breaking backtick literals with method chains", () =>
-      expect(`\`${long}\`.to_s`).toChangeFormat(`\`${long}\`.to_s`));
+      expect(`\`${long}\`.to_s`).toMatchFormat());
 
     test("%x literals", () => expect("%x[abc]").toChangeFormat("`abc`"));
 
