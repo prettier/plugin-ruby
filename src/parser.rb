@@ -251,25 +251,6 @@ class Prettier::Parser < Ripper
         )
       end
 
-      # Array nodes can contain a myriad of subnodes because of the special
-      # array literal syntax like %w and %i. As a result, we may be looking for
-      # an left bracket, or we may be just looking at the children.
-      def on_array(*body)
-        if body[0] && %i[args args_add_star].include?(body[0][:type])
-          node = find_scanner_event(:@lbracket)
-
-          super(*body).merge!(
-            start: node[:start],
-            char_start: node[:char_start],
-            char_end: char_pos
-          )
-        else
-          super(*body).merge!(
-            char_start: char_start_for(body), char_end: char_pos
-          )
-        end
-      end
-
       # Array pattern nodes contain an odd mix of potential child nodes based on
       # which kind of pattern is being used.
       def on_aryptn(*body)
@@ -320,6 +301,36 @@ class Prettier::Parser < Ripper
       # some other content that isn't normally read by ripper
       def on___end__(*)
         @__end__ = super(lines[lineno..-1].join("\n"))
+      end
+
+      # Array nodes can contain a myriad of subnodes because of the special
+      # array literal syntax like %w and %i. As a result, we may be looking for
+      # an left bracket, or we may be just looking at the children to get the
+      # bounds.
+      def on_array(contents)
+        if !contents || %i[args args_add_star].include?(contents[:type])
+          beging = find_scanner_event(:@lbracket)
+          ending = find_scanner_event(:@rbracket)
+
+          {
+            type: :array,
+            body: [contents],
+            start: beging[:start],
+            char_start: beging[:char_start],
+            end: ending[:end],
+            char_end: ending[:char_end]
+          }
+        else
+          ending = find_scanner_event(:@tstring_end)
+          contents[:char_end] = ending[:char_end]
+
+          ending.merge!(
+            type: :array,
+            body: [contents],
+            start: contents[:start],
+            char_start: contents[:char_start]
+          )
+        end
       end
 
       # We keep track of each comment as it comes in and then eventually add
