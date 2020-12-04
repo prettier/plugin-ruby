@@ -139,21 +139,7 @@ class Prettier::Parser < Ripper
     Module.new do
       private
 
-      events = %i[
-        args
-        mlhs
-        mrhs
-        qsymbols
-        qwords
-        regexp
-        stmts
-        string
-        symbols
-        words
-        xstring
-      ]
-
-      events.each do |event|
+      %i[args mlhs mrhs regexp stmts string xstring].each do |event|
         suffix = event == :string ? 'content' : 'new'
 
         define_method(:"on_#{event}_#{suffix}") do
@@ -218,7 +204,6 @@ class Prettier::Parser < Ripper
         else: [:@kw, 'else'],
         elsif: [:@kw, 'elsif'],
         ensure: [:@kw, 'ensure'],
-        excessed_comma: :@comma,
         for: [:@kw, 'for'],
         hash: :@lbrace,
         if: [:@kw, 'if'],
@@ -230,19 +215,13 @@ class Prettier::Parser < Ripper
         module: [:@kw, 'module'],
         next: [:@kw, 'next'],
         paren: :@lparen,
-        qsymbols_new: :@qsymbols_beg,
-        qwords_new: :@qwords_beg,
-        redo: [:@kw, 'redo'],
         regexp_literal: :@regexp_beg,
         rescue: [:@kw, 'rescue'],
         rest_param: [:@op, '*'],
-        retry: [:@kw, 'retry'],
-        return0: [:@kw, 'return'],
         return: [:@kw, 'return'],
         sclass: [:@kw, 'class'],
         string_dvar: :@embvar,
         string_embexpr: :@embexpr_beg,
-        symbols_new: :@symbols_beg,
         top_const_field: [:@op, '::'],
         top_const_ref: [:@op, '::'],
         unless: [:@kw, 'unless'],
@@ -250,8 +229,6 @@ class Prettier::Parser < Ripper
         var_alias: [:@kw, 'alias'],
         when: [:@kw, 'when'],
         while: [:@kw, 'while'],
-        words_new: :@words_beg,
-        yield0: [:@kw, 'yield'],
         yield: [:@kw, 'yield']
       }
 
@@ -274,16 +251,6 @@ class Prettier::Parser < Ripper
           start: node[:start],
           char_start: node[:char_start],
           char_end: char_end_for(body)
-        )
-      end
-
-      def on_zsuper(*body)
-        node = find_scanner_event(:@kw, 'super')
-
-        super(*body).merge!(
-          start: node[:start],
-          char_start: node[:char_start],
-          char_end: node[:char_end]
         )
       end
 
@@ -570,6 +537,10 @@ class Prettier::Parser < Ripper
         @embdoc = nil
       end
 
+      def on_excessed_comma
+        find_scanner_event(:@comma).merge!(type: :excessed_comma)
+      end
+
       # This is a scanner event that represents the beginning of the heredoc. It
       # includes the declaration (which we call beging here, which is just short
       # for beginning). The declaration looks something like <<-HERE or <<~HERE.
@@ -641,6 +612,64 @@ class Prettier::Parser < Ripper
         end
       end
 
+      # qsymbols_new is a parser event that represents the beginning of a symbol
+      # literal array, like %i[one two three]. It can be followed by any number
+      # of qsymbols_add events, which we'll append onto an array body.
+      def on_qsymbols_new
+        find_scanner_event(:@qsymbols_beg).merge!(type: :qsymbols, body: [])
+      end
+
+      # qsymbols_add is a parser event that represents an element inside of a
+      # symbol literal array like %i[one two three]. It accepts as arguments the
+      # parent qsymbols node as well as a tstring_content scanner event
+      # representing the bare words.
+      def on_qsymbols_add(qsymbols, tstring_content)
+        qsymbols.merge!(
+          body: qsymbols[:body] << tstring_content,
+          end: tstring_content[:end],
+          char_end: tstring_content[:char_end]
+        )
+      end
+
+      # qwords_new is a parser event that represents the beginning of a string
+      # literal array, like %w[one two three]. It can be followed by any number
+      # of qwords_add events, which we'll append onto an array body.
+      def on_qwords_new
+        find_scanner_event(:@qwords_beg).merge!(type: :qwords, body: [])
+      end
+
+      # qsymbols_add is a parser event that represents an element inside of a
+      # symbol literal array like %i[one two three]. It accepts as arguments the
+      # parent qsymbols node as well as a tstring_content scanner event
+      # representing the bare words.
+      def on_qwords_add(qwords, tstring_content)
+        qwords.merge!(
+          body: qwords[:body] << tstring_content,
+          end: tstring_content[:end],
+          char_end: tstring_content[:char_end]
+        )
+      end
+
+      # redo is a parser event that represents the bare redo keyword. It has no
+      # body as it accepts no arguments.
+      def on_redo
+        find_scanner_event(:@kw, 'redo').merge!(type: :redo)
+      end
+
+      # retry is a parser event that represents the bare retry keyword. It has
+      # no body as it accepts no arguments.
+      def on_retry
+        find_scanner_event(:@kw, 'retry').merge!(type: :retry)
+      end
+
+      # return0 is a parser event that represents the bare return keyword. It
+      # has no body as it accepts no arguments. This is as opposed to the return
+      # parser event, which is the version where you're returning one or more
+      # values.
+      def on_return0
+        find_scanner_event(:@kw, 'return').merge!(type: :return0)
+      end
+
       # String literals are either going to be a normal string or they're going
       # to be a heredoc if we've just closed a heredoc.
       def on_string_literal(string)
@@ -651,6 +680,26 @@ class Prettier::Parser < Ripper
         else
           super
         end
+      end
+
+      # symbols_new is a parser event that represents the beginning of a symbol
+      # literal array that accepts interpolation, like %I[one #{two} three]. It
+      # can be followed by any number of symbols_add events, which we'll append
+      # onto an array body.
+      def on_symbols_new
+        find_scanner_event(:@symbols_beg).merge!(type: :symbols, body: [])
+      end
+
+      # symbols_add is a parser event that represents an element inside of a
+      # symbol literal array that accepts interpolation, like
+      # %I[one #{two} three]. It accepts as arguments the parent symbols node as
+      # well as a word_add parser event.
+      def on_symbols_add(symbols, word_add)
+        symbols.merge!(
+          body: symbols[:body] << word_add,
+          end: word_add[:end],
+          char_end: word_add[:char_end]
+        )
       end
 
       # Like comments, we need to force the encoding here so JSON doesn't break.
@@ -672,6 +721,52 @@ class Prettier::Parser < Ripper
 
           node.merge!(type: :access_ctrl)
         end
+      end
+
+      def on_void_stmt
+        {
+          type: :void_stmt,
+          start: lineno,
+          end: lineno,
+          char_start: char_pos,
+          char_end: char_pos
+        }
+      end
+
+      # words_new is a parser event that represents the beginning of a string
+      # literal array that accepts interpolation, like %W[one #{two} three]. It
+      # can be followed by any number of words_add events, which we'll append
+      # onto an array body.
+      def on_words_new
+        find_scanner_event(:@words_beg).merge!(type: :words, body: [])
+      end
+
+      # words_add is a parser event that represents an element inside of a
+      # string literal array that accepts interpolation, like
+      # %W[one #{two} three]. It accepts as arguments the parent words node as
+      # well as a word_add parser event.
+      def on_words_add(words, word_add)
+        words.merge!(
+          body: words[:body] << word_add,
+          end: word_add[:end],
+          char_end: word_add[:char_end]
+        )
+      end
+
+      # yield0 is a parser event that represents the bare yield keyword. It has
+      # no body as it accepts no arguments. This is as opposed to the yield
+      # parser event, which is the version where you're yielding one or more
+      # values.
+      def on_yield0
+        find_scanner_event(:@kw, 'yield').merge!(type: :yield0)
+      end
+
+      # zsuper is a parser event that represents the bare super keyword. It has
+      # no body as it accepts no arguments. This is as opposed to the super
+      # parser event, which is the version where you're calling super with one
+      # or more values.
+      def on_zsuper
+        find_scanner_event(:@kw, 'super').merge!(type: :zsuper)
       end
     end
   )

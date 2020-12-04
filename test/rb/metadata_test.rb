@@ -336,7 +336,7 @@ class MetadataTest < Minitest::Test
       assert_node_metadata(
         :excessed_comma,
         parse('foo { |bar,| }').dig(:body, 1, :body, 0, :body, 0, :body, 2),
-        char_start: 10, char_end: 12
+        char_start: 10, char_end: 11
       )
     end
   end
