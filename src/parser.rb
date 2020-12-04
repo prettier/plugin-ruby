@@ -409,16 +409,6 @@ class Prettier::Parser < Ripper
         end
       end
 
-      def on_program(*body)
-        super(*body).merge!(start: 1, char_start: 0, char_end: char_pos)
-      end
-
-      def on_vcall(*body)
-        super(*body).merge!(
-          char_start: char_start_for(body), char_end: char_end_for(body)
-        )
-      end
-
       defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
 
       (PARSER_EVENTS - defined).each do |event|
@@ -606,10 +596,18 @@ class Prettier::Parser < Ripper
       # the comments that we've gathered up over the course of parsing the
       # source string. We'll also attach on the __END__ content if there was
       # some found at the end of the source string.
-      def on_program(*body)
-        super(*body).merge!(comments: @comments).tap do |node|
-          node[:body][0][:body] << @__end__ if @__end__
-        end
+      def on_program(statements)
+        statements[:body] << @__end__ if @__end__
+
+        {
+          type: :program,
+          body: [statements],
+          start: 1,
+          end: lines.length,
+          char_start: 0,
+          char_end: source.length,
+          comments: @comments
+        }
       end
 
       # qsymbols_new is a parser event that represents the beginning of a symbol
@@ -707,20 +705,26 @@ class Prettier::Parser < Ripper
         super(value.force_encoding('UTF-8'))
       end
 
-      # Normally access controls are reported as vcall nodes. This creates a
-      # new node type to explicitly track those nodes instead, so that the
-      # printer can add new lines as necessary.
+      # vcall nodes are any plain named thing with Ruby that could be either a
+      # local variable or a method call. They accept as an argument the ident
+      # scanner event that contains their content.
+      #
+      # Access controls like private, protected, and public are reported as
+      # vcall nodes since they're technically method calls. We want to be able
+      # add new lines around them as necessary, so here we're going to
+      # explicitly track those as a different node type.
       def on_vcall(ident)
-        @access_controls ||= %w[private protected public].freeze
+        @controls ||= %w[private protected public].freeze
 
-        super(ident).tap do |node|
-          if !@access_controls.include?(ident[:body]) ||
-               ident[:body] != lines[lineno - 1].strip
-            next
+        body = ident[:body]
+        type =
+          if @controls.include?(body) && body == lines[lineno - 1].strip
+            :access_ctrl
+          else
+            :vcall
           end
 
-          node.merge!(type: :access_ctrl)
-        end
+        ident.merge(type: type, body: [ident])
       end
 
       def on_void_stmt
