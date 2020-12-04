@@ -31,7 +31,7 @@ class Prettier::Parser < Ripper
     @embdoc = nil
     @__end__ = nil
 
-    @heredoc_stack = []
+    @heredocs = []
   
     @scanner_events = []
     @line_counts = [0]
@@ -366,7 +366,7 @@ class Prettier::Parser < Ripper
       # In this case we need to change the node type to be a heredoc instead of
       # an xstring_literal in order to get the right formatting.
       def on_xstring_literal(*body)
-        heredoc = @heredoc_stack[-1]
+        heredoc = @heredocs[-1]
 
         if heredoc && heredoc[:beging][3] = '`'
           heredoc.merge!(body[0].slice(:body))
@@ -464,123 +464,25 @@ class Prettier::Parser < Ripper
         @__end__ = super(lines[lineno..-1].join("\n"))
       end
 
+      # We keep track of each comment as it comes in and then eventually add
+      # them to the top of the generated AST so that prettier can start adding
+      # them back into the final representation. Comments come in including
+      # their starting pound sign and the newline at the end, so we also chop
+      # those off.
+      #
+      # If there is an encoding magic comment at the top of the file, ripper
+      # will actually change into that encoding for the storage of the string.
+      # This will break everything, so we need to force the encoding back into
+      # UTF-8 so that the JSON library won't break.
       def on_comment(value)
         @comments << {
           type: :comment,
-          value: value[1..-1].chomp,
+          value: value[1..-1].chomp.force_encoding('UTF-8'),
           start: lineno,
           end: lineno,
           char_start: char_pos,
           char_end: char_pos + value.length - 1
         }
-      end
-
-      def on_embdoc_beg(value)
-        @embdoc = { value: value, start: lineno, char_start: char_pos }
-      end
-
-      def on_embdoc(value)
-        @embdoc[:value] << value
-      end
-
-      def on_embdoc_end(value)
-        @comments << @embdoc.merge!(
-          type: :embdoc,
-          value: @embdoc[:value] << value.chomp,
-          end: lineno,
-          char_end: char_pos + value.length - 1
-        )
-
-        @embdoc = nil
-      end
-
-      def on_program(*body)
-        super(*body).merge!(comments: @comments).tap do |node|
-          node[:body][0][:body] << @__end__ if @__end__
-        end
-      end
-    end
-  )
-
-  # Tracking heredocs in somewhat interesting. Straight-line heredocs are
-  # reported as strings, whereas squiggly-line heredocs are reported as
-  # heredocs. We track the start and matching end of the heredoc as "beging" and
-  # "ending" respectively.
-  prepend(
-    Module.new do
-      private
-
-      # This is a scanner event that represents the beginning of the heredoc.
-      def on_heredoc_beg(beging)
-        {
-          type: :heredoc,
-          beging: beging,
-          start: lineno,
-          end: lineno,
-          char_start: char_pos - beging.length + 1,
-          char_end: char_pos
-        }.tap { |node| @heredoc_stack << node }
-      end
-
-      # This is a scanner event that represents the end of the heredoc.
-      def on_heredoc_end(ending)
-        @heredoc_stack[-1].merge!(
-          ending: ending.chomp, end: lineno, char_end: char_pos
-        )
-      end
-
-      # This is a parser event that occurs when you're using a heredoc with a
-      # tilde. These are considered `heredoc_dedent` nodes, whereas the hyphen
-      # heredocs show up as string literals.
-      def on_heredoc_dedent(string, _width)
-        @heredoc_stack[-1].merge!(string.slice(:body))
-      end
-
-      # String literals are either going to be a normal string or they're going
-      # to be a heredoc with a hyphen.
-      def on_string_literal(string)
-        heredoc = @heredoc_stack[-1]
-
-        if heredoc && heredoc[:ending]
-          @heredoc_stack.pop.merge!(string.slice(:body))
-        else
-          super
-        end
-      end
-    end
-  )
-
-  # This module contains miscellaneous fixes required to get the right
-  # structure.
-  prepend(
-    Module.new do
-      private
-
-      # These are the event types that contain _actual_ string content. If
-      # there is an encoding magic comment at the top of the file, ripper will
-      # actually change into that encoding for the storage of the string. This
-      # will break everything, so we need to force the encoding back into UTF-8
-      # so that the JSON library won't break.
-      %w[comment ident tstring_content].each do |event|
-        define_method(:"on_#{event}") do |body|
-          super(body.force_encoding('UTF-8'))
-        end
-      end
-
-      # Normally access controls are reported as vcall nodes. This creates a
-      # new node type to explicitly track those nodes instead, so that the
-      # printer can add new lines as necessary.
-      def on_vcall(ident)
-        @access_controls ||= %w[private protected public].freeze
-
-        super(ident).tap do |node|
-          if !@access_controls.include?(ident[:body]) ||
-               ident[:body] != lines[lineno - 1].strip
-            next
-          end
-
-          node.merge!(type: :access_ctrl)
-        end
       end
 
       # When the only statement inside of a `def` node is a `begin` node, then
@@ -617,11 +519,92 @@ class Prettier::Parser < Ripper
         super(ident, params, def_bodystmt)
       end
 
-      # We need to track for `mlhs_paren` and `massign` nodes whether or not
+      # embdocs are long comments that are surrounded by =begin..=end. They
+      # cannot be nested, so we don't need to worry about keeping a stack around
+      # like we do with heredocs. Instead we can just track the current embdoc
+      # and add to it as we get content. It always starts with this scanner
+      # event, so here we'll initialize the current embdoc.
+      def on_embdoc_beg(value)
+        @embdoc = {
+          type: :embdoc,
+          value: value,
+          start: lineno,
+          char_start: char_pos
+        }
+      end
+
+      # This is a scanner event that gets hit when we're inside an embdoc and
+      # receive a new line of content. Here we are guaranteed to already have
+      # initialized the @embdoc variable so we can just append the new line onto
+      # the existing content.
+      def on_embdoc(value)
+        @embdoc[:value] << value
+      end
+
+      # This is the final scanner event for embdocs. It receives the =end. Here
+      # we can finalize the embdoc with its location information and the final
+      # piece of the string. We then add it to the list of comments so that
+      # prettier can place it into the final source string.
+      def on_embdoc_end(value)
+        @comments << @embdoc.merge!(
+          value: @embdoc[:value] << value.chomp,
+          end: lineno,
+          char_end: char_pos + value.length - 1
+        )
+
+        @embdoc = nil
+      end
+
+      # This is a scanner event that represents the beginning of the heredoc. It
+      # includes the declaration (which we call beging here, which is just short
+      # for beginning). The declaration looks something like <<-HERE or <<~HERE.
+      # If the downcased version of the declaration actually matches an existing
+      # prettier parser, we'll later attempt to print it using that parser and
+      # printer through our embed function.
+      def on_heredoc_beg(beging)
+        {
+          type: :heredoc,
+          beging: beging,
+          start: lineno,
+          end: lineno,
+          char_start: char_pos - beging.length + 1,
+          char_end: char_pos
+        }.tap { |node| @heredocs << node }
+      end
+
+      # This is a parser event that occurs when you're using a heredoc with a
+      # tilde. These are considered `heredoc_dedent` nodes, whereas the hyphen
+      # heredocs show up as string literals.
+      def on_heredoc_dedent(string, _width)
+        @heredocs[-1].merge!(string.slice(:body))
+      end
+
+      # This is a scanner event that represents the end of the heredoc.
+      def on_heredoc_end(ending)
+        @heredocs[-1].merge!(
+          ending: ending.chomp, end: lineno, char_end: char_pos
+        )
+      end
+
+      # Like comments, we need to force the encoding here so JSON doesn't break.
+      def on_ident(value)
+        super(value.force_encoding('UTF-8'))
+      end
+
+      # We need to track for `massign` and `mlhs_paren` nodes whether or not
       # there was an extra comma at the end of the expression. For some reason
       # it's not showing up in the AST in an obvious way. In this case we're
       # just simplifying everything by adding an additional field to `mlhs`
       # nodes called `comma` that indicates whether or not there was an extra.
+      def on_massign(left, right)
+        super.tap do
+          next unless left[:type] == :mlhs
+
+          range = left[:char_start]..left[:char_end]
+          left[:comma] = source[range].strip.end_with?(',')
+        end
+      end
+
       def on_mlhs_paren(body)
         super.tap do |node|
           next unless body[:type] == :mlhs
@@ -633,12 +616,46 @@ class Prettier::Parser < Ripper
         end
       end
 
-      def on_massign(left, right)
-        super.tap do
-          next unless left[:type] == :mlhs
+      # The program node is the very top of the AST. Here we'll attach all of
+      # the comments that we've gathered up over the course of parsing the
+      # source string. We'll also attach on the __END__ content if there was
+      # some found at the end of the source string.
+      def on_program(*body)
+        super(*body).merge!(comments: @comments).tap do |node|
+          node[:body][0][:body] << @__end__ if @__end__
+        end
+      end
 
-          range = left[:char_start]..left[:char_end]
-          left[:comma] = source[range].strip.end_with?(',')
+      # String literals are either going to be a normal string or they're going
+      # to be a heredoc if we've just closed a heredoc.
+      def on_string_literal(string)
+        heredoc = @heredocs[-1]
+
+        if heredoc && heredoc[:ending]
+          @heredocs.pop.merge!(string.slice(:body))
+        else
+          super
+        end
+      end
+
+      # Like comments, we need to force the encoding here so JSON doesn't break.
+      def on_tstring_content(value)
+        super(value.force_encoding('UTF-8'))
+      end
+
+      # Normally access controls are reported as vcall nodes. This creates a
+      # new node type to explicitly track those nodes instead, so that the
+      # printer can add new lines as necessary.
+      def on_vcall(ident)
+        @access_controls ||= %w[private protected public].freeze
+
+        super(ident).tap do |node|
+          if !@access_controls.include?(ident[:body]) ||
+               ident[:body] != lines[lineno - 1].strip
+            next
+          end
+
+          node.merge!(type: :access_ctrl)
         end
       end
     end
