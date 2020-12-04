@@ -139,7 +139,7 @@ class Prettier::Parser < Ripper
     Module.new do
       private
 
-      %i[args mlhs mrhs regexp stmts string xstring].each do |event|
+      %i[args mlhs mrhs regexp stmts xstring].each do |event|
         suffix = event == :string ? 'content' : 'new'
 
         define_method(:"on_#{event}_#{suffix}") do
@@ -220,7 +220,6 @@ class Prettier::Parser < Ripper
         rest_param: [:@op, '*'],
         return: [:@kw, 'return'],
         sclass: [:@kw, 'class'],
-        string_dvar: :@embvar,
         string_embexpr: :@embexpr_beg,
         top_const_field: [:@op, '::'],
         top_const_ref: [:@op, '::'],
@@ -246,20 +245,6 @@ class Prettier::Parser < Ripper
 
       def on_super(*body)
         node = find_scanner_event(:@kw, 'super')
-
-        super(*body).merge!(
-          start: node[:start],
-          char_start: node[:char_start],
-          char_end: char_end_for(body)
-        )
-      end
-
-      # This is mostly identical to the method that is dynamically defined for
-      # all `events` (above), except that `char_pos` was causing problems
-      # because it was factoring comments into the char pos, so we replaced it
-      # with `char_end_for(body)`
-      def on_undef(*body)
-        node = find_scanner_event(:@kw, 'undef')
 
         super(*body).merge!(
           start: node[:start],
@@ -312,26 +297,6 @@ class Prettier::Parser < Ripper
         )
       end
 
-      # String literals and either contain string parts or a heredoc. If it
-      # contains a heredoc we can just go directly to the child nodes, otherwise
-      # we need to look for a `tstring_beg`.
-      def on_string_literal(*body)
-        if body[0][:type] == :heredoc
-          super(*body).merge!(
-            char_start: char_start_for(body), char_end: char_pos
-          )
-        else
-          node = find_scanner_event(:@tstring_beg)
-
-          super(*body).merge!(
-            start: node[:start],
-            char_start: node[:char_start],
-            char_end: char_pos,
-            quote: node[:body]
-          )
-        end
-      end
-
       # Technically, the `not` operator is a unary operator but is reported as
       # a keyword and not an operator. Because of the inconsistency, we have to
       # manually look for the correct scanner event here.
@@ -373,39 +338,6 @@ class Prettier::Parser < Ripper
             char_start: node[:char_start],
             char_end: char_pos
           )
-        end
-      end
-
-      # Symbols don't necessarily have to have a @symbeg event fired before they
-      # start. For example, you can have symbol literals inside an `alias` node
-      # if you're just using bare words, as in: `alias foo bar`. So this is a
-      # special case in which if there is a `:@symbeg` event we can hook on to
-      # then we use it, otherwise we just look at the beginning of the first
-      # child node.
-      %i[dyna_symbol symbol_literal].each do |event|
-        define_method(:"on_#{event}") do |*body|
-          options =
-            if scanner_events.any? { |sevent| sevent[:type] == :@symbeg }
-              symbeg = find_scanner_event(:@symbeg)
-
-              {
-                char_start: symbeg[:char_start],
-                char_end: char_pos,
-                quote: symbeg[:body][1]
-              }
-            elsif scanner_events.any? { |sevent| sevent[:type] == :@label_end }
-              label_end = find_scanner_event(:@label_end)
-
-              {
-                char_start: char_start_for(body),
-                char_end: char_pos,
-                quote: label_end[:body][0]
-              }
-            else
-              { char_start: char_start_for(body), char_end: char_pos }
-            end
-
-          super(*body).merge!(options)
         end
       end
 
@@ -489,6 +421,49 @@ class Prettier::Parser < Ripper
         end
 
         super(ident, params, def_bodystmt)
+      end
+
+      # A dyna_symbol is a parser event that represents a symbol literal that
+      # uses quotes to interpolate its value. For example, if you had a variable
+      # foo and you wanted a symbol that contained its value, you would write:
+      #
+      #     :"#{foo}"
+      #
+      # As such, they accept as one argument a string node, which is the same
+      # node that gets accepted into a string_literal (since we're basically
+      # talking about a string literal with a : character at the beginning).
+      #
+      # They can also come in another flavor which is a dynamic symbol as a hash
+      # key. This is kind of an interesting syntax which results in us having to
+      # look for a @label_end scanner event instead to get our bearings. That
+      # kind of code would look like:
+      #
+      #     { "#{foo}": bar }
+      #
+      # which would be the same symbol as above.
+      def on_dyna_symbol(string)
+        if scanner_events.any? { |event| event[:type] == :@symbeg }
+          # A normal dynamic symbol
+          node = find_scanner_event(:@symbeg)
+          node.merge(
+            type: :dyna_symbol,
+            quote: node[:body][1],
+            body: string[:body]
+          )
+        else
+          # A dynamic symbol as a hash key
+          beging = find_scanner_event(:@tstring_beg)
+          ending = find_scanner_event(:@label_end)
+
+          string.merge!(
+            type: :dyna_symbol,
+            quote: ending[:body][0],
+            start: beging[:start],
+            char_start: beging[:char_start],
+            end: ending[:end],
+            char_end: ending[:char_end]
+          )
+        end
       end
 
       # embdocs are long comments that are surrounded by =begin..=end. They
@@ -668,15 +643,82 @@ class Prettier::Parser < Ripper
         find_scanner_event(:@kw, 'return').merge!(type: :return0)
       end
 
+      # string_content is a parser event that represents the beginning of the
+      # contents of a string, which will either be embedded inside of a
+      # string_literal or a dyna_symbol node. It will have an array body so that
+      # we can build up a list of @tstring_content, string_embexpr, and
+      # string_dvar nodes.
+      def on_string_content
+        {
+          type: :string,
+          body: [],
+          start: lineno,
+          end: lineno,
+          char_start: char_pos,
+          char_end: char_pos
+        }
+      end
+
+      # string_add is a parser event that represents a piece of a string. It
+      # could be plain @tstring_content, string_embexpr, or string_dvar nodes.
+      # It accepts as arguments the parent string node as well as the additional
+      # piece of the string.
+      def on_string_add(string, piece)
+        string.merge!(body: string[:body] << piece)
+      end
+
+      # string_dvar is a parser event that represents a very special kind of
+      # interpolation into string. It allows you to take an instance variable,
+      # class variable, or global variable and omit the braces when
+      # interpolating. For example, if you wanted to interpolate the instance
+      # variable @foo into a string, you could do "#@foo".
+      def on_string_dvar(var_ref)
+        find_scanner_event(:@embvar).merge!(
+          type: :string_dvar,
+          body: [var_ref],
+          end: var_ref[:end],
+          char_end: var_ref[:char_end]
+        )
+      end
+
       # String literals are either going to be a normal string or they're going
       # to be a heredoc if we've just closed a heredoc.
       def on_string_literal(string)
         heredoc = @heredocs[-1]
 
         if heredoc && heredoc[:ending]
-          @heredocs.pop.merge!(string.slice(:body))
+          @heredocs.pop.merge!(body: string[:body])
         else
-          super
+          beging = find_scanner_event(:@tstring_beg)
+          ending = find_scanner_event(:@tstring_end)
+
+          {
+            type: :string_literal,
+            body: string[:body],
+            quote: beging[:body],
+            start: beging[:start],
+            char_start: beging[:char_start],
+            end: ending[:end],
+            char_end: ending[:char_end]
+          }
+        end
+      end
+
+      # A symbol is a parser event that immediately descends from a symbol
+      # literal and contains an ident representing the contents of the symbol.
+      def on_symbol(ident)
+        ident.merge(type: :symbol, body: [ident])
+      end
+
+      # A symbol_literal represents a symbol in the system with no interpolation
+      # (as opposed to a dyna_symbol). As its only argument it accepts either a
+      # symbol node (for most cases) or an ident node (in the case that we're
+      # using bare words, as in an alias node like alias foo bar).
+      def on_symbol_literal(contents)
+        if contents[:type] == :@ident
+          contents.merge(type: :symbol_literal, body: [contents])
+        else
+          contents.merge!(type: :symbol_literal)
         end
       end
 
@@ -703,6 +745,21 @@ class Prettier::Parser < Ripper
       # Like comments, we need to force the encoding here so JSON doesn't break.
       def on_tstring_content(value)
         super(value.force_encoding('UTF-8'))
+      end
+
+      # undef nodes represent using the keyword undef. It accepts as an argument
+      # an array of symbol_literal nodes that represent each message that the
+      # user is attempting to undefine. We use the keyword to get the beginning
+      # location and the last symbol to get the ending.
+      def on_undef(symbol_literals)
+        last = symbol_literals.last
+
+        find_scanner_event(:@kw, 'undef').merge!(
+          type: :undef,
+          body: symbol_literals,
+          end: last[:end],
+          char_end: last[:char_end]
+        )
       end
 
       # vcall nodes are any plain named thing with Ruby that could be either a

@@ -139,7 +139,9 @@ describe("strings", () => {
       expect(`%x[${long}].to_s`).toChangeFormat(`\`${long}\`.to_s`));
   });
 
-  describe("dynamic symbols", () => {
+  describe("symbols", () => {
+    test("basic", () => expect(":abc").toMatchFormat());
+
     test("with single quotes", () => expect(":'abc'").toMatchFormat());
 
     test("with double quotes", () => expect(`:"abc"`).toMatchFormat());

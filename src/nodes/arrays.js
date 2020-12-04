@@ -22,15 +22,13 @@ function isStringArray(args) {
       return false;
     }
 
-    const string = arg.body[0];
-
     // If the string has multiple parts (meaning plain string content but also
     // interpolated content) then we know it's not a simple string.
-    if (string.body.length !== 1) {
+    if (arg.body.length !== 1) {
       return false;
     }
 
-    const part = string.body[0];
+    const part = arg.body[0];
 
     // If the only part of this string is not @tstring_content then it's
     // interpolated, so again we can return false.
@@ -61,15 +59,6 @@ function isSymbolArray(args) {
 // expressions.
 function printSpecialArrayWord(path, opts, print) {
   return concat(path.map(print, "body"));
-}
-
-// Returns a list of docs for each element in a special array. These are
-// effectively bare words since we know they came from either string literals or
-// symbol literals.
-function printSpecialArrayArgs(path, print, args) {
-  return args.body.map((_arg, index) =>
-    path.call(print, "body", 0, "body", index, "body", 0, "body", 0)
-  );
 }
 
 // Prints out a special array literal. Accepts the parts of the array literal as
@@ -112,14 +101,18 @@ function printArray(path, { addTrailingCommas }, print) {
   // If we have an array that contains only simple string literals with no
   // spaces or interpolation, then we're going to print a %w array.
   if (isStringArray(args)) {
-    const parts = printSpecialArrayArgs(path, print, args);
+    const printString = (stringPath) => stringPath.call(print, "body", 0);
+    const parts = path.map(printString, "body", 0, "body");
+
     return printSpecialArrayParts(["%w"].concat(parts));
   }
 
   // If we have an array that contains only simple symbol literals with no
   // interpolation, then we're going to print a %i array.
   if (isSymbolArray(args)) {
-    const parts = printSpecialArrayArgs(path, print, args);
+    const printSymbol = (symbolPath) => symbolPath.call(print, "body", 0);
+    const parts = path.map(printSymbol, "body", 0, "body");
+
     return printSpecialArrayParts(["%i"].concat(parts));
   }
 

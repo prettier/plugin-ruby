@@ -61,16 +61,6 @@ const makeCall = (path, opts, print) => {
 
 const makeList = (path, opts, print) => path.map(print, "body");
 
-const nodeDive = (node, steps) => {
-  let current = node;
-
-  steps.forEach((step) => {
-    current = current[step];
-  });
-
-  return current;
-};
-
 const prefix = (value) => (path, opts, print) =>
   concat([value, path.call(print, "body", 0)]);
 
@@ -78,9 +68,6 @@ const skippable = ["array", "hash", "heredoc", "lambda", "regexp_literal"];
 const skipAssignIndent = (node) =>
   skippable.includes(node.type) ||
   (node.type === "call" && skipAssignIndent(node.body[0]));
-
-const surround = (left, right) => (path, opts, print) =>
-  concat([left, path.call(print, "body", 0), right]);
 
 module.exports = {
   concatBody,
@@ -94,8 +81,6 @@ module.exports = {
   literalLineNoBreak,
   makeCall,
   makeList,
-  nodeDive,
   prefix,
-  skipAssignIndent,
-  surround
+  skipAssignIndent
 };

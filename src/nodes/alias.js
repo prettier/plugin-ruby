@@ -10,20 +10,20 @@ const {
 // In general, return the printed doc of the argument at the provided index.
 // Special handling is given for symbol literals that are not bare words, as we
 // convert those into bare words by just pulling out the ident node.
-function printAliasArgument(path, _opts, print, argIndex) {
+function printAliasArgument(path, print, argIndex) {
   const node = path.getValue().body[argIndex];
 
-  if (node.type === "symbol_literal" && node.body[0].type === "symbol") {
+  if (node.type === "symbol_literal") {
     // If we're going to descend into the symbol literal to grab out the ident
     // node, then we need to make sure we copy over any comments as well,
     // otherwise we could accidentally skip printing them.
     if (node.comments) {
       node.comments.forEach((comment) => {
-        addTrailingComment(node.body[0].body[0], comment);
+        addTrailingComment(node.body[0], comment);
       });
     }
 
-    return path.call(print, "body", argIndex, "body", 0, "body", 0);
+    return path.call(print, "body", argIndex, "body", 0);
   }
 
   return path.call(print, "body", argIndex);
@@ -55,13 +55,13 @@ function printAlias(path, opts, print) {
     // If the left child has any comments, then we need to explicitly break this
     // into two lines
     path.getValue().body[0].comments ? hardline : line,
-    printAliasArgument(path, opts, print, 1)
+    printAliasArgument(path, print, 1)
   ]);
 
   return group(
     concat([
       keyword,
-      printAliasArgument(path, opts, print, 0),
+      printAliasArgument(path, print, 0),
       group(align(keyword.length, rightSide))
     ])
   );
