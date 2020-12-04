@@ -50,6 +50,28 @@ class Prettier::Parser < Ripper
     line_counts[lineno - 1] + column
   end
 
+  # As we build up a list of scanner events, we'll periodically need to go
+  # backwards and find the ones that we've already hit in order to determine the
+  # location information for nodes that use them. For example, if you have a
+  # module node then you'll look backward for a @module scanner event to
+  # determine your start location.
+  #
+  # This works with nesting since we're deleting scanner events from the list
+  # once they've been used up. For example if you had nested module declarations
+  # then the innermost declaration would grab the last @module event (which
+  # would happen to be the innermost keyword). Then the outer one would only be
+  # able to grab the first one. In this way all of the scanner events act as
+  # their own stack.
+  def find_scanner_event(type, body = :any)
+    index =
+      scanner_events.rindex do |scanner_event|
+        scanner_event[:type] == type &&
+          (body == :any || (scanner_event[:body] == body))
+      end
+
+    scanner_events.delete_at(index)
+  end
+
   # Scanner events occur when the lexer hits a new token, like a keyword or an
   # end. These nodes always contain just one argument which is a string
   # representing the content. For the most part these can just be printed
@@ -173,16 +195,6 @@ class Prettier::Parser < Ripper
           children.map { |part| part[:char_end] if part.is_a?(Hash) }.compact
 
         char_ends.max || char_pos
-      end
-
-      def find_scanner_event(type, body = :any)
-        index =
-          scanner_events.rindex do |scanner_event|
-            scanner_event[:type] == type &&
-              (body == :any || (scanner_event[:body] == body))
-          end
-
-        scanner_events.delete_at(index)
       end
 
       events = {
