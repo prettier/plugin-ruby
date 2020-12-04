@@ -44,7 +44,7 @@ function getCommentChildNodes(node) {
 function printComment(path, _opts) {
   const comment = path.getValue();
 
-  if (comment.type === "comment") {
+  if (comment.type === "@comment") {
     return `#${comment.value}`;
   }
 
@@ -55,7 +55,7 @@ function printComment(path, _opts) {
 // *feels* like a block comment equivalent in JavaScript so I'm going to leave
 // it in place for now.
 function isBlockComment(comment) {
-  return comment.type === "embdoc";
+  return comment.type === "@embdoc";
 }
 
 module.exports = {

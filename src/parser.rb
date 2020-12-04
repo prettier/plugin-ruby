@@ -41,13 +41,33 @@ class Prettier::Parser < Ripper
 
   private
 
+  # This represents the current place in the source string that we've gotten to
+  # so far. We have a memoized line_counts object that we can use to get the
+  # number of characters that we've had to go through to get to the beginning of
+  # this line, then we add the number of columns into this line that we've gone
+  # through.
+  def char_pos
+    line_counts[lineno - 1] + column
+  end
+
   # Scanner events occur when the lexer hits a new token, like a keyword or an
   # end. These nodes always contain just one argument which is a string
   # representing the content. For the most part these can just be printed
   # directly, which very few exceptions.
   SCANNER_EVENTS.each do |event|
-    define_method(:"on_#{event}") do |body|
-      { type: :"@#{event}", body: body, start: lineno, end: lineno }
+    define_method(:"on_#{event}") do |value|
+      char_end = char_pos + value.size
+      node = {
+        type: :"@#{event}",
+        body: value,
+        start: lineno,
+        end: lineno,
+        char_start: char_pos,
+        char_end: char_end
+      }
+
+      scanner_events << node
+      node
     end
   end
 
@@ -138,10 +158,6 @@ class Prettier::Parser < Ripper
   prepend(
     Module.new do
       private
-
-      def char_pos
-        line_counts[lineno - 1] + column
-      end
 
       def char_start_for(body)
         children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
@@ -424,20 +440,7 @@ class Prettier::Parser < Ripper
         )
       end
 
-      defined =
-        private_instance_methods(false).grep(/\Aon_/) { $'.to_sym } +
-          %i[embdoc embdoc_beg embdoc_end heredoc_beg heredoc_end]
-
-      (SCANNER_EVENTS - defined).each do |event|
-        define_method(:"on_#{event}") do |body|
-          super(body).tap do |node|
-            char_end = char_pos + (body ? body.size : 0)
-            node.merge!(char_start: char_pos, char_end: char_end)
-
-            scanner_events << node
-          end
-        end
-      end
+      defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
 
       (PARSER_EVENTS - defined).each do |event|
         define_method(:"on_#{event}") do |*body|
@@ -476,7 +479,7 @@ class Prettier::Parser < Ripper
       # UTF-8 so that the JSON library won't break.
       def on_comment(value)
         @comments << {
-          type: :comment,
+          type: :@comment,
           value: value[1..-1].chomp.force_encoding('UTF-8'),
           start: lineno,
           end: lineno,
@@ -526,7 +529,7 @@ class Prettier::Parser < Ripper
       # event, so here we'll initialize the current embdoc.
       def on_embdoc_beg(value)
         @embdoc = {
-          type: :embdoc,
+          type: :@embdoc,
           value: value,
           start: lineno,
           char_start: char_pos
