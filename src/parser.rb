@@ -295,25 +295,6 @@ class Prettier::Parser < Ripper
         )
       end
 
-      # Technically, the `not` operator is a unary operator but is reported as
-      # a keyword and not an operator. Because of the inconsistency, we have to
-      # manually look for the correct scanner event here.
-      def on_unary(*body)
-        node =
-          if body[0] == :not
-            find_scanner_event(:@kw, 'not')
-          else
-            find_scanner_event(:@op)
-          end
-
-        super(*body).merge!(
-          start: node[:start],
-          char_start: node[:char_start],
-          char_end: char_pos,
-          paren: source[node[:char_end]...body[1][:char_start]].include?('(')
-        )
-      end
-
       defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
 
       (PARSER_EVENTS - defined).each do |event|
@@ -718,6 +699,36 @@ class Prettier::Parser < Ripper
       # Like comments, we need to force the encoding here so JSON doesn't break.
       def on_tstring_content(value)
         super(value.force_encoding('UTF-8'))
+      end
+
+      # A unary node represents a unary method being called on an expression, as
+      # in !, ~, or not. We have somewhat special handling of the not operator
+      # since if it has parentheses they don't get reported as a paren node for
+      # some reason.
+      def on_unary(oper, value)
+        if oper == :not
+          node = find_scanner_event(:@kw, 'not')
+
+          paren = source[node[:char_end]...value[:char_start]].include?('(')
+          ending = paren ? find_scanner_event(:@rparen) : node
+
+          node.merge!(
+            type: :unary,
+            oper: oper,
+            body: [value],
+            end: ending[:end],
+            char_end: ending[:char_end],
+            paren: paren
+          )
+        else
+          find_scanner_event(:@op).merge!(
+            type: :unary,
+            oper: oper[0],
+            body: [value],
+            end: value[:end],
+            char_end: value[:char_end]
+          )
+        end
       end
 
       # undef nodes represent using the keyword undef. It accepts as an argument

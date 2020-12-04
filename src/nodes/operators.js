@@ -49,24 +49,19 @@ function printDot3(path, opts, print) {
 
 function printUnary(path, opts, print) {
   const node = path.getValue();
-  const oper = node.body[0];
-  const contentsDoc = path.call(print, "body", 1);
+  const contentsDoc = path.call(print, "body", 0);
 
-  if (oper === "not") {
-    const parts = ["not"];
-
+  if (node.oper === "not") {
     // Here we defer to the original source, as it's kind of difficult to
     // determine if we can actually remove the parentheses being used.
     if (node.paren) {
-      parts.push("(", contentsDoc, ")");
+      return concat(["not", "(", contentsDoc, ")"]);
     } else {
-      parts.push(" ", contentsDoc);
+      return concat(["not", " ", contentsDoc]);
     }
-
-    return concat(parts);
   }
 
-  return concat([oper[0], contentsDoc]);
+  return concat([node.oper, contentsDoc]);
 }
 
 module.exports = {
