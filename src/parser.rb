@@ -733,6 +733,40 @@ class Prettier::Parser < Ripper
         }
       end
 
+      # word_new is a parser event that represents the beginning of a word
+      # within a special array literal (either strings or symbols) that accepts
+      # interpolation. For example, in the following array, there are three
+      # word nodes:
+      #
+      #     %W[one a#{two}a three]
+      #
+      # Each word inside that array is represented as its own node, which is in
+      # terms of the parser a tree of word_new and word_add nodes. For our
+      # purposes, we're going to report this as a word node and build up an
+      # array body of our parts.
+      def on_word_new
+        { type: :word, body: [] }
+      end
+
+      # word_add is a parser event that represents a piece of a word within a
+      # special array literal that accepts interpolation. It accepts as
+      # arguments the parent word node as well as the additional piece of the
+      # word, which can be either a @tstring_content node for a plain string
+      # piece or a string_embexpr for an interpolated piece.
+      def on_word_add(word, piece)
+        if word[:body].empty?
+          # Here we're making sure we get the correct bounds by using the
+          # location information from the first piece.
+          piece.merge(type: :word, body: [piece])
+        else
+          word.merge!(
+            body: word[:body] << piece,
+            end: piece[:end],
+            char_end: piece[:char_end]
+          )
+        end
+      end
+
       # words_new is a parser event that represents the beginning of a string
       # literal array that accepts interpolation, like %W[one #{two} three]. It
       # can be followed by any number of words_add events, which we'll append

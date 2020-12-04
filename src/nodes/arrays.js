@@ -56,6 +56,13 @@ function isSymbolArray(args) {
   );
 }
 
+// Prints out a word that is a part of a special array literal that accepts
+// interpolation. The body is an array of either plain strings or interpolated
+// expressions.
+function printSpecialArrayWord(path, opts, print) {
+  return concat(path.map(print, "body"));
+}
+
 // Returns a list of docs for each element in a special array. These are
 // effectively bare words since we know they came from either string literals or
 // symbol literals.
@@ -147,5 +154,6 @@ module.exports = {
   qsymbols: printSpecialArray("%i"),
   qwords: printSpecialArray("%w"),
   symbols: printSpecialArray("%I"),
+  word: printSpecialArrayWord,
   words: printSpecialArray("%W")
 };

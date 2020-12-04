@@ -32,6 +32,8 @@ const expectedUnhandledNodes = [
   "symbols_add",
   "symbols_new",
   "void_stmt",
+  "word_add",
+  "word_new",
   "words_add",
   "words_new",
   "xstring_add",

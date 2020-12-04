@@ -8,7 +8,7 @@ const {
   join
 } = require("../prettier");
 
-const { concatBody, empty, makeList, prefix, surround } = require("../utils");
+const { concatBody, makeList, prefix, surround } = require("../utils");
 
 // If there is some part of this string that matches an escape sequence or that
 // contains the interpolation pattern ("#{"), then we are locked into whichever
@@ -149,8 +149,6 @@ module.exports = {
   },
   symbol: prefix(":"),
   symbol_literal: concatBody,
-  word_add: concatBody,
-  word_new: empty,
   xstring: makeList,
   xstring_literal: (path, opts, print) => {
     const parts = path.call(print, "body", 0);
