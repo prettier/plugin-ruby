@@ -223,7 +223,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :const_ref,
       parse('class Foo; end').dig(:body, 0),
-      char_start: 6, char_end: 10
+      char_start: 6, char_end: 9
     )
   end
 
@@ -231,7 +231,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :const_path_field,
       parse('Foo::Bar = baz').dig(:body, 0),
-      char_start: 0, char_end: 10
+      char_start: 0, char_end: 8
     )
   end
 
@@ -353,7 +353,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :field,
       parse('foo.bar = baz').dig(:body, 0),
-      char_start: 0, char_end: 9
+      char_start: 0, char_end: 7
     )
   end
 
@@ -505,7 +505,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :qsymbols,
       parse('%i[foo bar baz]').dig(:body, 0),
-      char_start: 0, char_end: 14
+      char_start: 0, char_end: 15
     )
   end
 
@@ -513,7 +513,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :qwords,
       parse('%w[foo bar baz]').dig(:body, 0),
-      char_start: 0, char_end: 14
+      char_start: 0, char_end: 15
     )
   end
 
@@ -576,7 +576,7 @@ class MetadataTest < Minitest::Test
   def test_string_dvar
     assert_node_metadata(
       :string_dvar,
-      parse('"#$foo"').dig(:body, 0, :body, 0),
+      parse('"#$foo"').dig(:body, 0),
       char_start: 1, char_end: 6
     )
   end
@@ -584,7 +584,7 @@ class MetadataTest < Minitest::Test
   def test_string_embexpr
     assert_node_metadata(
       :string_embexpr,
-      parse('"foo #{bar} baz"').dig(:body, 0, :body, 1),
+      parse('"foo #{bar} baz"').dig(:body, 1),
       char_start: 5, char_end: 11
     )
   end
@@ -605,7 +605,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :symbols,
       parse('%I[f#{o}o b#{a}r b#{a}z]').dig(:body, 0),
-      char_start: 0, char_end: 23
+      char_start: 0, char_end: 24
     )
   end
 
@@ -613,7 +613,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :top_const_field,
       parse('::Foo = bar').dig(:body, 0),
-      char_start: 0, char_end: 7
+      char_start: 0, char_end: 5
     )
   end
 
@@ -702,7 +702,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :words,
       parse('%W[f#{o}o b#{a}r b#{a}z]').dig(:body, 0),
-      char_start: 0, char_end: 23
+      char_start: 0, char_end: 24
     )
   end
 

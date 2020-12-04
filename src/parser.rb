@@ -196,7 +196,6 @@ class Prettier::Parser < Ripper
         case: [:@kw, 'case'],
         class: [:@kw, 'class'],
         def: [:@kw, 'def'],
-        defined: [:@kw, 'defined?'],
         defs: [:@kw, 'def'],
         do_block: [:@kw, 'do'],
         else: [:@kw, 'else'],
@@ -219,8 +218,6 @@ class Prettier::Parser < Ripper
         return: [:@kw, 'return'],
         sclass: [:@kw, 'class'],
         string_embexpr: :@embexpr_beg,
-        top_const_field: [:@op, '::'],
-        top_const_ref: [:@op, '::'],
         unless: [:@kw, 'unless'],
         until: [:@kw, 'until'],
         var_alias: [:@kw, 'alias'],
@@ -354,6 +351,50 @@ class Prettier::Parser < Ripper
         }
       end
 
+      # A const_path_field is a parser event that is always the child of some
+      # kind of assignment. It represents when you're assigning to a constant
+      # that is being referenced as a child of another variable. For example:
+      #
+      #     foo::X = 1
+      #
+      def on_const_path_field(left, const)
+        {
+          type: :const_path_field,
+          body: [left, const],
+          start: left[:start],
+          char_start: left[:char_start],
+          end: const[:end],
+          char_end: const[:char_end]
+        }
+      end
+
+      # A const_path_ref is a parser event that is a very similar to
+      # const_path_field except that it is not involved in an assignment. It
+      # looks like the following example:
+      #
+      #     foo::X
+      #
+      def on_const_path_ref(left, const)
+        {
+          type: :const_path_ref,
+          body: [left, const],
+          start: left[:start],
+          char_start: left[:char_start],
+          end: const[:end],
+          char_end: const[:char_end]
+        }
+      end
+
+      # A const_ref is a parser event that represents the name of the constant
+      # being used in a class or module declaration. In the following example it
+      # is the @const scanner event that has the contents of Foo.
+      #
+      #     class Foo; end
+      #
+      def on_const_ref(const)
+        const.merge(type: :const_ref, body: [const])
+      end
+
       # When the only statement inside of a `def` node is a `begin` node, then
       # you can safely replace the body of the `def` with the body of the
       # `begin`. For example:
@@ -388,6 +429,24 @@ class Prettier::Parser < Ripper
         super(ident, params, def_bodystmt)
       end
 
+      # A defined node represents the rather unique defined? operator. It can be
+      # used with and without parentheses. If they're present, we use them to
+      # determine our bounds, otherwise we use the value that's being passed to
+      # the operator.
+      def on_defined(value)
+        beging = find_scanner_event(:@kw, 'defined?')
+
+        paren = source[beging[:char_end]...value[:char_start]].include?('(')
+        ending = paren ? find_scanner_event(:@rparen) : value
+
+        beging.merge!(
+          type: :defined,
+          body: [value],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        )
+      end
+
       # A dyna_symbol is a parser event that represents a symbol literal that
       # uses quotes to interpolate its value. For example, if you had a variable
       # foo and you wanted a symbol that contained its value, you would write:
@@ -409,11 +468,15 @@ class Prettier::Parser < Ripper
       def on_dyna_symbol(string)
         if scanner_events.any? { |event| event[:type] == :@symbeg }
           # A normal dynamic symbol
-          node = find_scanner_event(:@symbeg)
-          node.merge(
+          beging = find_scanner_event(:@symbeg)
+          ending = find_scanner_event(:@tstring_end)
+
+          beging.merge(
             type: :dyna_symbol,
-            quote: node[:body][1],
-            body: string[:body]
+            quote: beging[:body][1],
+            body: string[:body],
+            end: ending[:end],
+            char_end: ending[:char_end]
           )
         else
           # A dynamic symbol as a hash key
@@ -469,6 +532,23 @@ class Prettier::Parser < Ripper
 
       def on_excessed_comma
         find_scanner_event(:@comma).merge!(type: :excessed_comma)
+      end
+
+      # A field is a parser event that is always the child of an assignment. It
+      # accepts as arguments the left side of operation, the operator (. or ::),
+      # and the right side of the operation. For example:
+      #
+      #     foo.x = 1
+      #
+      def on_field(left, oper, right)
+        {
+          type: :field,
+          body: [left, oper, right],
+          start: left[:start],
+          char_start: left[:char_start],
+          end: right[:end],
+          char_end: right[:char_end]
+        }
       end
 
       # This is a scanner event that represents the beginning of the heredoc. It
@@ -629,7 +709,11 @@ class Prettier::Parser < Ripper
       # It accepts as arguments the parent string node as well as the additional
       # piece of the string.
       def on_string_add(string, piece)
-        string.merge!(body: string[:body] << piece)
+        string.merge!(
+          body: string[:body] << piece,
+          end: piece[:end],
+          char_end: piece[:char_end]
+        )
       end
 
       # string_dvar is a parser event that represents a very special kind of
@@ -683,7 +767,11 @@ class Prettier::Parser < Ripper
         if contents[:type] == :@ident
           contents.merge(type: :symbol_literal, body: [contents])
         else
-          contents.merge!(type: :symbol_literal)
+          beging = find_scanner_event(:@symbeg)
+          contents.merge!(
+            type: :symbol_literal,
+            char_start: beging[:char_start]
+          )
         end
       end
 
@@ -707,6 +795,53 @@ class Prettier::Parser < Ripper
         )
       end
 
+      # A helper function to find a :: operator for the next two nodes. We do
+      # special handling instead of using find_scanner_event here because we
+      # don't pop off all of the :: operators so you could end up getting the
+      # wrong information if you have for instance ::X::Y::Z.
+      def find_colon2_before(const)
+        index =
+          scanner_events.rindex do |event|
+            event[:type] == :@op &&
+              event[:body] == '::' &&
+              event[:char_start] < const[:char_start]
+          end
+
+        scanner_events[index]
+      end
+
+      # A top_const_field is a parser event that is always the child of some
+      # kind of assignment. It represents when you're assigning to a constant
+      # that is being referenced at the top level. For example:
+      #
+      #     ::X = 1
+      #
+      def on_top_const_field(const)
+        beging = find_colon2_before(const)
+        const.merge(
+          type: :top_const_field,
+          body: [const],
+          start: beging[:start],
+          char_start: beging[:char_start]
+        )
+      end
+
+      # A top_const_ref is a parser event that is a very similar to
+      # top_const_field except that it is not involved in an assignment. It
+      # looks like the following example:
+      #
+      #     ::X
+      #
+      def on_top_const_ref(const)
+        beging = find_colon2_before(const)
+        const.merge(
+          type: :top_const_ref,
+          body: [const],
+          start: beging[:start],
+          char_start: beging[:char_start]
+        )
+      end
+
       # Like comments, we need to force the encoding here so JSON doesn't break.
       def on_tstring_content(value)
         super(value.force_encoding('UTF-8'))
@@ -721,7 +856,7 @@ class Prettier::Parser < Ripper
           node = find_scanner_event(:@kw, 'not')
 
           paren = source[node[:char_end]...value[:char_start]].include?('(')
-          ending = paren ? find_scanner_event(:@rparen) : node
+          ending = paren ? find_scanner_event(:@rparen) : value
 
           node.merge!(
             type: :unary,
