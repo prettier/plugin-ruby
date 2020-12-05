@@ -216,7 +216,6 @@ class Prettier::Parser < Ripper
         rest_param: [:@op, '*'],
         return: [:@kw, 'return'],
         sclass: [:@kw, 'class'],
-        string_embexpr: :@embexpr_beg,
         unless: [:@kw, 'unless'],
         until: [:@kw, 'until'],
         var_alias: [:@kw, 'alias'],
@@ -759,6 +758,29 @@ class Prettier::Parser < Ripper
           end: var_ref[:end],
           char_end: var_ref[:char_end]
         )
+      end
+
+      # string_embexpr is a parser event that represents interpolated content.
+      # It can go a bunch of different parent nodes, including regexp, strings,
+      # xstrings, heredocs, dyna_symbols, etc. Basically it's anywhere you see
+      # the #{} construct.
+      def on_string_embexpr(statements)
+        beging = find_scanner_event(:@embexpr_beg)
+        ending = find_scanner_event(:@embexpr_end)
+
+        statements.merge!(
+          char_start: beging[:char_end],
+          char_end: ending[:char_start]
+        )
+
+        {
+          type: :string_embexpr,
+          body: [statements],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
       end
 
       # String literals are either going to be a normal string or they're going
