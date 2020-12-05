@@ -139,7 +139,7 @@ class Prettier::Parser < Ripper
     Module.new do
       private
 
-      %i[args mlhs mrhs regexp stmts].each do |event|
+      %i[args mlhs mrhs stmts].each do |event|
         define_method(:"on_#{event}_new") do
           { type: event, body: [], start: lineno, end: lineno }
         end
@@ -212,7 +212,6 @@ class Prettier::Parser < Ripper
         module: [:@kw, 'module'],
         next: [:@kw, 'next'],
         paren: :@lparen,
-        regexp_literal: :@regexp_beg,
         rescue: [:@kw, 'rescue'],
         rest_param: [:@op, '*'],
         return: [:@kw, 'return'],
@@ -672,6 +671,38 @@ class Prettier::Parser < Ripper
       # body as it accepts no arguments.
       def on_redo
         find_scanner_event(:@kw, 'redo').merge!(type: :redo)
+      end
+
+      # regexp_new is a parser event that represents the beginning of a regular
+      # expression literal, like /foo/. It can be followed by any number of
+      # regexp_add events, which we'll append onto an array body.
+      def on_regexp_new
+        find_scanner_event(:@regexp_beg).merge!(type: :regexp, body: [])
+      end
+
+      # regexp_add is a parser event that represents a piece of a regular
+      # body. It accepts as arguments the parent regexp node as well as a
+      # tstring_content scanner event representing string content or a
+      # string_embexpr parser event representing interpolated content.
+      def on_regexp_add(regexp, piece)
+        regexp.merge!(
+          body: regexp[:body] << piece,
+          end: regexp[:end],
+          char_end: regexp[:char_end]
+        )
+      end
+
+      # regexp_literal is a parser event that represents a regular expression.
+      # It accepts as arguments a regexp node which is a built-up array of
+      # pieces that go into the regexp content, as well as the ending used to
+      # close out the regexp which includes any modifiers.
+      def on_regexp_literal(regexp, ending)
+        regexp.merge!(
+          type: :regexp_literal,
+          ending: ending[:body],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        )
       end
 
       # retry is a parser event that represents the bare retry keyword. It has
