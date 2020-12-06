@@ -345,7 +345,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :fcall,
       parse('foo(bar)').dig(:body, 0),
-      char_start: 0, char_end: 8
+      char_start: 0, char_end: 3
     )
   end
 
@@ -422,7 +422,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :mlhs,
       parse('foo, bar, baz = 1, 2, 3').dig(:body, 0),
-      char_start: 0, char_end: 15
+      char_start: 0, char_end: 13
     )
   end
 
@@ -430,7 +430,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :mlhs_add_post,
       parse('foo, *bar, baz = 1, 2, 3').dig(:body, 0),
-      char_start: 0, char_end: 16
+      char_start: 5, char_end: 14
     )
   end
 
@@ -438,7 +438,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :mlhs_add_star,
       parse('foo, *bar = 1, 2, 3').dig(:body, 0),
-      char_start: 0, char_end: 11
+      char_start: 5, char_end: 9
     )
   end
 
@@ -446,7 +446,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :mlhs_paren,
       parse('(foo, bar) = baz').dig(:body, 0),
-      char_start: 0, char_end: 12
+      char_start: 0, char_end: 10
     )
   end
 
@@ -670,7 +670,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :var_field,
       parse('foo = 1').dig(:body, 0),
-      char_start: 0, char_end: 5
+      char_start: 0, char_end: 3
     )
   end
 

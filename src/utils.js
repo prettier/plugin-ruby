@@ -59,8 +59,6 @@ const makeCall = (path, opts, print) => {
   return operation === "::" ? "." : path.call(print, "body", 1);
 };
 
-const makeList = (path, opts, print) => path.map(print, "body");
-
 const prefix = (value) => (path, opts, print) =>
   concat([value, path.call(print, "body", 0)]);
 
@@ -80,7 +78,6 @@ module.exports = {
   literal,
   literalLineNoBreak,
   makeCall,
-  makeList,
   prefix,
   skipAssignIndent
 };

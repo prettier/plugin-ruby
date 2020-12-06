@@ -102,58 +102,6 @@ class Prettier::Parser < Ripper
     end
   end
 
-  # Some nodes are lists that come back from the parser. They always start with
-  # a `*_new` node (or in the case of string, `*_content`) and each additional
-  # node in the list is a `*_add` node. This module takes those nodes and turns
-  # them into one node with an array body.
-  #
-  # For example, the statement `[a, b, c]` would be parsed as:
-  #
-  # [:args_add,
-  #   [:args_add,
-  #     [:args_add,
-  #       [:args_new],
-  #       [:vcall, [:@ident, "a", [1, 1]]]
-  #     ],
-  #     [:vcall, [:@ident, "b", [1, 4]]]
-  #   ],
-  #   [:vcall, [:@ident, "c", [1, 7]]]
-  # ]
-  #
-  # But after this module is applied that is instead parsed as:
-  #
-  # [:args,
-  #   [
-  #     [:vcall, [:@ident, "a", [1, 1]]],
-  #     [:vcall, [:@ident, "b", [1, 4]]],
-  #     [:vcall, [:@ident, "c", [1, 7]]]
-  #   ]
-  # ]
-  #
-  # This makes it a lot easier to join things with commas, and ends up resulting
-  # in a much flatter `prettier` tree once it has been converted. Note that
-  # because of this module some extra node types are added (the aggregate of
-  # the previous `*_add` nodes) and some nodes now have arrays in places where
-  # they previously had single nodes.
-  prepend(
-    Module.new do
-      private
-
-      %i[mlhs mrhs].each do |event|
-        define_method(:"on_#{event}_new") do
-          { type: event, body: [], start: lineno, end: lineno }
-        end
-
-        define_method(:"on_#{event}_add") do |parts, part|
-          parts.tap do |node|
-            node[:body] << part
-            node[:end] = lineno
-          end
-        end
-      end
-    end
-  )
-
   # For each node, we need to attach where it came from in order to be able to
   # support placing the cursor correctly before and after formatting.
   #
@@ -184,7 +132,6 @@ class Prettier::Parser < Ripper
       events = {
         assoc_splat: [:@op, '**'],
         arg_paren: :@lparen,
-        args_add_star: [:@op, '*'],
         args_forward: [:@op, '...'],
         begin: [:@kw, 'begin'],
         blockarg: [:@op, '&'],
@@ -204,8 +151,6 @@ class Prettier::Parser < Ripper
         in: [:@kw, 'in'],
         kwrest_param: [:@op, '**'],
         lambda: :@tlambda,
-        mlhs_paren: :@lparen,
-        mrhs_add_star: [:@op, '*'],
         module: [:@kw, 'module'],
         next: [:@kw, 'next'],
         paren: :@lparen,
@@ -405,6 +350,20 @@ class Prettier::Parser < Ripper
           end: ending[:end],
           char_end: ending[:char_end]
         )
+      end
+
+      def on_args_add_star(args, part)
+        beging = find_scanner_event(:@op, '*')
+        ending = part || beging
+
+        {
+          type: :args_add_star,
+          body: [args, part],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
       end
 
       # Array nodes can contain a myriad of subnodes because of the special
@@ -700,29 +659,177 @@ class Prettier::Parser < Ripper
         super(value.force_encoding('UTF-8'))
       end
 
-      # We need to track for `massign` and `mlhs_paren` nodes whether or not
-      # there was an extra comma at the end of the expression. For some reason
-      # it's not showing up in the AST in an obvious way. In this case we're
-      # just simplifying everything by adding an additional field to `mlhs`
-      # nodes called `comma` that indicates whether or not there was an extra.
+      # massign is a parser event that is a parent node of any kind of multiple
+      # assignment. This includes splitting out variables on the left like:
+      #
+      #     a, b, c = foo
+      #
+      # as well as splitting out variables on the right, as in:
+      #
+      #     foo = a, b, c
+      #
+      # Both sides support splats, as well as variables following them. There's
+      # also slightly odd behavior that you can achieve with the following:
+      #
+      #     a, = foo
+      #
+      # In this case a would receive only the first value of the foo enumerable,
+      # in which case we need to explicitly track the comma and add it onto the
+      # child node.
       def on_massign(left, right)
-        super.tap do
-          next unless left[:type] == :mlhs
+        if source[left[:char_end]...right[:char_start]].strip.start_with?(',')
+          left[:comma] = true
+        end
 
-          range = left[:char_start]..left[:char_end]
-          left[:comma] = source[range].strip.end_with?(',')
+        {
+          type: :massign,
+          body: [left, right],
+          start: left[:start],
+          char_start: left[:char_start],
+          end: right[:end],
+          char_end: right[:char_end]
+        }
+      end
+
+      # An mlhs_new is a parser event that represents the beginning of the left
+      # side of a multiple assignment. It is followed by any number of mlhs_add
+      # nodes that each represent another variable being assigned.
+      def on_mlhs_new
+        {
+          type: :mlhs,
+          body: [],
+          start: lineno,
+          char_start: char_pos,
+          end: lineno,
+          char_end: char_pos
+        }
+      end
+
+      # An mlhs_add is a parser event that represents adding another variable
+      # onto a list of assignments. It accepts as arguments the parent mlhs node
+      # as well as the part that is being added to the list.
+      def on_mlhs_add(mlhs, part)
+        if mlhs[:body].empty?
+          part.merge(type: :mlhs, body: [part])
+        else
+          mlhs.merge!(
+            body: mlhs[:body] << part,
+            end: part[:end],
+            char_end: part[:char_end]
+          )
         end
       end
 
-      def on_mlhs_paren(body)
-        super.tap do |node|
-          next unless body[:type] == :mlhs
+      # An mlhs_add_post is a parser event that represents adding another set of
+      # variables onto a list of assignments after a splat variable. It accepts
+      # as arguments the previous mlhs_add_star node that represented the splat
+      # as well another mlhs node that represents all of the variables after the
+      # splat.
+      def on_mlhs_add_post(mlhs_add_star, mlhs)
+        mlhs_add_star.merge(
+          type: :mlhs_add_post,
+          body: [mlhs_add_star, mlhs],
+          end: mlhs[:end],
+          char_end: mlhs[:char_end]
+        )
+      end
 
-          ending = source.rindex(')', char_pos)
-          buffer = source[(node[:char_start] + 1)...ending]
+      # An mlhs_add_star is a parser event that represents a splatted variable
+      # inside of a multiple assignment on the left hand side. It accepts as
+      # arguments the parent mlhs node as well as the part that represents the
+      # splatted variable.
+      def on_mlhs_add_star(mlhs, part)
+        beging = find_scanner_event(:@op, '*')
+        ending = part || beging
 
-          body[:comma] = buffer.strip.end_with?(',')
+        {
+          type: :mlhs_add_star,
+          body: [mlhs, part],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
+      # An mlhs_paren is a parser event that represents parentheses being used
+      # to deconstruct values in a multiple assignment on the left hand side. It
+      # accepts as arguments the contents of the inside of the parentheses,
+      # which is another mlhs node.
+      def on_mlhs_paren(contents)
+        beging = find_scanner_event(:@lparen)
+        ending = find_scanner_event(:@rparen)
+
+        if source[beging[:char_end]...ending[:char_start]].strip.end_with?(',')
+          contents[:comma] = true
         end
+
+        {
+          type: :mlhs_paren,
+          body: [contents],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
+      # An mrhs_new is a parser event that represents the beginning of a list of
+      # values that are being assigned within a multiple assignment node. It can
+      # be followed by any number of mrhs_add nodes that we'll build up into an
+      # array body.
+      def on_mrhs_new
+        {
+          type: :mrhs,
+          body: [],
+          start: lineno,
+          char_start: char_pos,
+          end: lineno,
+          char_end: char_pos
+        }
+      end
+
+      # An mrhs_add is a parser event that represents adding another value onto
+      # a list on the right hand side of a multiple assignment.
+      def on_mrhs_add(mrhs, part)
+        if mrhs[:body].empty?
+          part.merge(type: :mrhs, body: [part])
+        else
+          mrhs.merge!(
+            body: mrhs[:body] << part,
+            end: part[:end],
+            char_end: part[:char_end]
+          )
+        end
+      end
+
+      # An mrhs_add_star is a parser event that represents using the splat
+      # operator to expand out a value on the right hand side of a multiple
+      # assignment.
+      def on_mrhs_add_star(mrhs, part)
+        beging = find_scanner_event(:@op, '*')
+        ending = part || beging
+
+        {
+          type: :mrhs_add_star,
+          body: [mrhs, part],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
+      # An mrhs_new_from_args is a parser event that represents the shorthand
+      # of a multiple assignment that allows you to assign values using just
+      # commas as opposed to assigning from an array. For example, in the
+      # following segment the right hand side of the assignment would trigger
+      # this event:
+      #
+      #     foo = 1, 2, 3
+      #
+      def on_mrhs_new_from_args(args)
+        args.merge(type: :mrhs_new_from_args, body: [args])
       end
 
       # The program node is the very top of the AST. Here we'll attach all of
@@ -1125,6 +1232,16 @@ class Prettier::Parser < Ripper
           end: ending[:end],
           char_end: ending[:char_end]
         }
+      end
+
+      # var_field is a parser event that represents a variable that is being
+      # assigned a value. As such, it is always a child of an assignment type
+      # node. For example, in the following example foo is a var_field:
+      #
+      #     foo = 1
+      #
+      def on_var_field(ident)
+        ident.merge(type: :var_field, body: [ident])
       end
 
       # vcall nodes are any plain named thing with Ruby that could be either a

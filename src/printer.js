@@ -21,7 +21,14 @@ function printNode(path, opts, print) {
   throw new Error(`Unsupported node encountered: ${type}\n${ast}`);
 }
 
-const noComments = ["args", "args_add_block"];
+const noComments = [
+  "args",
+  "args_add_block",
+  "args_add_star",
+  "mlhs",
+  "mlhs_add_post",
+  "mlhs_add_star"
+];
 
 // Certain nodes are used more for organizational purposed than for actually
 // displaying content, so we tell prettier that we don't want comments attached
