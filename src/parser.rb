@@ -184,7 +184,6 @@ class Prettier::Parser < Ripper
       events = {
         BEGIN: [:@kw, 'BEGIN'],
         END: [:@kw, 'END'],
-        alias: [:@kw, 'alias'],
         assoc_splat: [:@op, '**'],
         arg_paren: :@lparen,
         args_add_star: [:@op, '*'],
@@ -218,7 +217,6 @@ class Prettier::Parser < Ripper
         sclass: [:@kw, 'class'],
         unless: [:@kw, 'unless'],
         until: [:@kw, 'until'],
-        var_alias: [:@kw, 'alias'],
         when: [:@kw, 'when'],
         while: [:@kw, 'while'],
         yield: [:@kw, 'yield']
@@ -286,6 +284,27 @@ class Prettier::Parser < Ripper
       # some other content that isn't normally read by ripper
       def on___end__(*)
         @__end__ = super(lines[lineno..-1].join("\n"))
+      end
+
+      # alias is a parser event that represents when you're using the alias
+      # keyword with regular arguments. This can be either symbol literals or
+      # bare words. You can optionally use parentheses with this keyword, so we
+      # either track the location information based on those or the final
+      # argument to the alias method.
+      def on_alias(left, right)
+        beging = find_scanner_event(:@kw, 'alias')
+
+        paren = source[beging[:char_end]...left[:char_start]].include?('(')
+        ending = paren ? find_scanner_event(:@rparen) : right
+
+        {
+          type: :alias,
+          body: [left, right],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
       end
 
       # args_new is a parser event that represents the beginning of a list of
@@ -994,6 +1013,26 @@ class Prettier::Parser < Ripper
           end: last[:end],
           char_end: last[:char_end]
         )
+      end
+
+      # var_alias is a parser event that represents when you're using the alias
+      # keyword with global variable arguments. You can optionally use
+      # parentheses with this keyword, so we either track the location
+      # information based on those or the final argument to the alias method.
+      def on_var_alias(left, right)
+        beging = find_scanner_event(:@kw, 'alias')
+
+        paren = source[beging[:char_end]...left[:char_start]].include?('(')
+        ending = paren ? find_scanner_event(:@rparen) : right
+
+        {
+          type: :var_alias,
+          body: [left, right],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
       end
 
       # vcall nodes are any plain named thing with Ruby that could be either a
