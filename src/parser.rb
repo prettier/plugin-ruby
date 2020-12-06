@@ -236,16 +236,6 @@ class Prettier::Parser < Ripper
         end
       end
 
-      def on_super(*body)
-        node = find_scanner_event(:@kw, 'super')
-
-        super(*body).merge!(
-          start: node[:start],
-          char_start: node[:char_start],
-          char_end: char_end_for(body)
-        )
-      end
-
       # Array pattern nodes contain an odd mix of potential child nodes based on
       # which kind of pattern is being used.
       def on_aryptn(*body)
@@ -808,6 +798,19 @@ class Prettier::Parser < Ripper
             char_end: ending[:char_end]
           }
         end
+      end
+
+      # A super is a parser event that represents using the super keyword with
+      # any number of arguments. It can optionally use parentheses (represented
+      # by an arg_paren node) or just skip straight to the arguments (with an
+      # args_add_block node).
+      def on_super(contents)
+        find_scanner_event(:@kw, 'super').merge!(
+          type: :super,
+          body: [contents],
+          end: contents[:end],
+          char_end: contents[:char_end]
+        )
       end
 
       # A symbol is a parser event that immediately descends from a symbol
