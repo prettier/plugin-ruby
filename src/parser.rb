@@ -182,8 +182,6 @@ class Prettier::Parser < Ripper
       end
 
       events = {
-        BEGIN: [:@kw, 'BEGIN'],
-        END: [:@kw, 'END'],
         assoc_splat: [:@op, '**'],
         arg_paren: :@lparen,
         args_add_star: [:@op, '*'],
@@ -284,6 +282,64 @@ class Prettier::Parser < Ripper
       # some other content that isn't normally read by ripper
       def on___end__(*)
         @__end__ = super(lines[lineno..-1].join("\n"))
+      end
+
+      # A BEGIN node is a parser event that represents the use of the BEGIN
+      # keyword, which hooks into the lifecycle of the interpreter. It's a bit
+      # of a legacy from the stream operating days, and gets its inspiration
+      # from tools like awk. Whatever is inside the "block" will get executed
+      # when the program starts. The syntax looks like the following:
+      #
+      #     BEGIN {
+      #       # execute stuff here
+      #     }
+      #
+      def on_BEGIN(stmts)
+        beging = find_scanner_event(:@lbrace)
+        ending = find_scanner_event(:@rbrace)
+
+        stmts.merge!(
+          start: beging[:end],
+          char_start: beging[:char_end],
+          end: ending[:start],
+          char_end: ending[:char_start]
+        )
+
+        find_scanner_event(:@kw, 'BEGIN').merge!(
+          type: :BEGIN,
+          body: [stmts],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        )
+      end
+
+      # A END node is a parser event that represents the use of the END keyword,
+      # which hooks into the lifecycle of the interpreter. It's a bit of a
+      # legacy from the stream operating days, and gets its inspiration from
+      # tools like awk. Whatever is inside the "block" will get executed when
+      # the program ends. The syntax looks like the following:
+      #
+      #     END {
+      #       # execute stuff here
+      #     }
+      #
+      def on_END(stmts)
+        beging = find_scanner_event(:@lbrace)
+        ending = find_scanner_event(:@rbrace)
+
+        stmts.merge!(
+          start: beging[:end],
+          char_start: beging[:char_end],
+          end: ending[:start],
+          char_end: ending[:char_start]
+        )
+
+        find_scanner_event(:@kw, 'END').merge!(
+          type: :END,
+          body: [stmts],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        )
       end
 
       # alias is a parser event that represents when you're using the alias
@@ -673,7 +729,7 @@ class Prettier::Parser < Ripper
       # the comments that we've gathered up over the course of parsing the
       # source string. We'll also attach on the __END__ content if there was
       # some found at the end of the source string.
-      def on_program(statements)
+      def on_program(stmts)
         range = {
           start: 1,
           end: lines.length,
@@ -681,12 +737,12 @@ class Prettier::Parser < Ripper
           char_end: source.length
         }
 
-        statements[:body] << @__end__ if @__end__
-        statements.merge!(range)
+        stmts[:body] << @__end__ if @__end__
+        stmts.merge!(range)
 
         range.merge(
           type: :program,
-          body: [statements],
+          body: [stmts],
           comments: @comments
         )
       end
@@ -857,18 +913,18 @@ class Prettier::Parser < Ripper
       # It can go a bunch of different parent nodes, including regexp, strings,
       # xstrings, heredocs, dyna_symbols, etc. Basically it's anywhere you see
       # the #{} construct.
-      def on_string_embexpr(statements)
+      def on_string_embexpr(stmts)
         beging = find_scanner_event(:@embexpr_beg)
         ending = find_scanner_event(:@embexpr_end)
 
-        statements.merge!(
+        stmts.merge!(
           char_start: beging[:char_end],
           char_end: ending[:char_start]
         )
 
         {
           type: :string_embexpr,
-          body: [statements],
+          body: [stmts],
           start: beging[:start],
           char_start: beging[:char_start],
           end: ending[:end],

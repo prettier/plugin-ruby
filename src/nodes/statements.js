@@ -1,4 +1,5 @@
 const {
+  breakParent,
   concat,
   dedent,
   group,
@@ -67,6 +68,23 @@ module.exports = {
     concat([join(hardline, path.map(print, "body")), hardline]),
   stmts: (path, opts, print) => {
     const stmts = path.getValue().body;
+
+    // This is a special case where we have only comments inside a statement
+    // list. In this case we want to avoid doing any kind of line number
+    // tracking and just print out the comments.
+    if (
+      stmts.length === 1 &&
+      stmts[0].type === "void_stmt" &&
+      stmts[0].comments
+    ) {
+      const comments = stmts[0].comments.map((comment) => {
+        comment.printed = true;
+        return `#${comment.value}`;
+      });
+
+      return concat([breakParent, join("hardline", comments)]);
+    }
+
     const parts = [];
     let lineNo = null;
 
