@@ -139,7 +139,7 @@ class Prettier::Parser < Ripper
     Module.new do
       private
 
-      %i[args mlhs mrhs stmts].each do |event|
+      %i[mlhs mrhs stmts].each do |event|
         define_method(:"on_#{event}_new") do
           { type: event, body: [], start: lineno, end: lineno }
         end
@@ -286,6 +286,50 @@ class Prettier::Parser < Ripper
       # some other content that isn't normally read by ripper
       def on___end__(*)
         @__end__ = super(lines[lineno..-1].join("\n"))
+      end
+
+      # args_new is a parser event that represents the beginning of a list of
+      # arguments to any method call or an array. It can be followed by any
+      # number of args_add events, which we'll append onto an array body.
+      def on_args_new
+        {
+          type: :args,
+          body: [],
+          start: lineno,
+          char_start: char_pos,
+          end: lineno,
+          char_end: char_pos
+        }
+      end
+
+      # args_add is a parser event that represents a single argument inside a
+      # list of arguments to any method call or an array. It accepts as
+      # arguments the parent args node as well as an arg which can be anything
+      # that could be passed as an argument.
+      def on_args_add(args, arg)
+        if args[:body].empty?
+          arg.merge(type: :args, body: [arg])
+        else
+          args.merge!(
+            body: args[:body] << arg,
+            end: arg[:end],
+            char_end: arg[:char_end]
+          )
+        end
+      end
+
+      # args_add_block is a parser event that represents a list of arguments and
+      # potentially a block argument. If no block is passed, then the second
+      # argument will be false.
+      def on_args_add_block(args, block)
+        ending = block || args
+
+        args.merge(
+          type: :args_add_block,
+          body: [args, block],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        )
       end
 
       # Array nodes can contain a myriad of subnodes because of the special
