@@ -615,17 +615,21 @@ class Prettier::Parser < Ripper
       # source string. We'll also attach on the __END__ content if there was
       # some found at the end of the source string.
       def on_program(statements)
-        statements[:body] << @__end__ if @__end__
-
-        {
-          type: :program,
-          body: [statements],
+        range = {
           start: 1,
           end: lines.length,
           char_start: 0,
-          char_end: source.length,
-          comments: @comments
+          char_end: source.length
         }
+
+        statements[:body] << @__end__ if @__end__
+        statements.merge!(range)
+
+        range.merge(
+          type: :program,
+          body: [statements],
+          comments: @comments
+        )
       end
 
       # qsymbols_new is a parser event that represents the beginning of a symbol
