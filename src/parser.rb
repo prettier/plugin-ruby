@@ -139,7 +139,7 @@ class Prettier::Parser < Ripper
     Module.new do
       private
 
-      %i[mlhs mrhs stmts].each do |event|
+      %i[mlhs mrhs].each do |event|
         define_method(:"on_#{event}_new") do
           { type: event, body: [], start: lineno, end: lineno }
         end
@@ -773,6 +773,36 @@ class Prettier::Parser < Ripper
       # values.
       def on_return0
         find_scanner_event(:@kw, 'return').merge!(type: :return0)
+      end
+
+      # stmts_new is a parser event that represents the beginning of a list of
+      # statements within any lexical block. It can be followed by any number of
+      # stmts_add events, which we'll append onto an array body.
+      def on_stmts_new
+        {
+          type: :stmts,
+          body: [],
+          start: lineno,
+          char_start: char_pos,
+          end: lineno,
+          char_end: char_pos
+        }
+      end
+
+      # stmts_add is a parser event that represents a single statement inside a
+      # list of statements within any lexical block. It accepts as arguments the 
+      # parent stmts node as well as an stmt which can be any expression in
+      # Ruby.
+      def on_stmts_add(stmts, stmt)
+        if stmts[:body].empty?
+          stmt.merge(type: :stmts, body: [stmt])
+        else
+          stmts.merge!(
+            body: stmts[:body] << stmt,
+            end: stmt[:end],
+            char_end: stmt[:char_end]
+          )
+        end
       end
 
       # string_content is a parser event that represents the beginning of the
