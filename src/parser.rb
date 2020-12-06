@@ -585,6 +585,12 @@ class Prettier::Parser < Ripper
         find_scanner_event(:@comma).merge!(type: :excessed_comma)
       end
 
+      # An fcall is a parser event that represents the piece of a method call
+      # that comes before any arguments (i.e., just the name of the method).
+      def on_fcall(ident)
+        ident.merge(type: :fcall, body: [ident])
+      end
+
       # A field is a parser event that is always the child of an assignment. It
       # accepts as arguments the left side of operation, the operator (. or ::),
       # and the right side of the operation. For example:
