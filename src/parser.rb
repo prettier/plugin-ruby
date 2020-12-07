@@ -175,21 +175,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.merge!(
-      start: beging[:end],
-      char_start: beging[:char_end],
-      end: ending[:start],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: beging[:char_end],
-        char_end: beging[:char_end]
-      )
-    end
+    stmts.bind(beging[:char_end], ending[:char_start])
 
     find_scanner_event(:@kw, 'BEGIN').merge!(
       type: :BEGIN,
@@ -213,21 +199,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.merge!(
-      start: beging[:end],
-      char_start: beging[:char_end],
-      end: ending[:start],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: beging[:char_end],
-        char_end: beging[:char_end]
-      )
-    end
+    stmts.bind(beging[:char_end], ending[:char_start])
 
     find_scanner_event(:@kw, 'END').merge!(
       type: :END,
@@ -487,7 +459,7 @@ class Prettier::Parser < Ripper
   def on_begin(bodystmt)
     stmts, *others = bodystmt[:body]
     ending =
-      if stmts[:body][0][:type] == :void_stmt && !others.any?
+      if stmts.statements[0][:type] == :void_stmt && !others.any?
         find_scanner_event(:@kw, 'end')
       else
         bodystmt
@@ -571,20 +543,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    char_start = (block_var || beging)[:char_end]
-    stmts.merge!(
-      char_start: char_start,
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: char_start,
-        char_end: char_start
-      )
-    end
+    stmts.bind((block_var || beging)[:char_end], ending[:char_start])
 
     {
       type: :brace_block,
@@ -659,19 +618,7 @@ class Prettier::Parser < Ripper
 
     bodystmt.merge!(range)
     stmts, *others = bodystmt[:body]
-
-    unless others.any?
-      stmts.merge!(range)
-
-      # If the only statement inside the list of statements is a void
-      # statement, then just shove it to the end.
-      if stmts[:body][0][:type] == :void_stmt
-        stmts[:body][0].merge!(
-          char_start: range[:char_start],
-          char_end: range[:char_start]
-        )
-      end
-    end
+    stmts.bind(range[:char_start], range[:char_end]) unless others.any?
 
     {
       type: :class,
@@ -778,23 +725,12 @@ class Prettier::Parser < Ripper
 
     beging = find_scanner_event(:@kw, 'def')
     ending = find_scanner_event(:@kw, 'end')
+
     range = { char_start: params[:char_end], char_end: ending[:char_start] }
-
     bodystmt.merge!(range)
+
     stmts, *others = bodystmt[:body]
-
-    unless others.any?
-      stmts.merge!(range)
-
-      # If the only statement inside the list of statements is a void
-      # statement, then just shove it to the end.
-      if stmts[:body][0][:type] == :void_stmt
-        stmts[:body][0].merge!(
-          char_start: ending[:char_start],
-          char_end: ending[:char_start]
-        )
-      end
-    end
+    stmts.bind(range[:char_start], range[:char_end]) unless others.any?
 
     {
       type: :def,
@@ -832,19 +768,7 @@ class Prettier::Parser < Ripper
 
     bodystmt.merge!(range)
     stmts, *others = bodystmt[:body]
-
-    unless others.any?
-      stmts.merge!(range)
-
-      # If the only statement inside the list of statements is a void
-      # statement, then just shove it to the end.
-      if stmts[:body][0][:type] == :void_stmt
-        stmts[:body][0].merge!(
-          char_start: ending[:char_start],
-          char_end: ending[:char_start]
-        )
-      end
-    end
+    stmts.bind(params[:char_end], ending[:char_start]) unless others.any?
 
     {
       type: :defs,
@@ -889,19 +813,7 @@ class Prettier::Parser < Ripper
 
     bodystmt.merge!(range)
     stmts, *others = bodystmt[:body]
-
-    unless others.any?
-      stmts.merge!(range)
-
-      # If the only statement inside the list of statements is a void
-      # statement, then just shove it to the end.
-      if stmts[:body][0][:type] == :void_stmt
-        stmts[:body][0].merge!(
-          char_start: ending[:char_start],
-          char_end: ending[:char_start]
-        )
-      end
-    end
+    stmts.bind(range[:char_start], range[:char_end]) unless others.any?
 
     {
       type: :do_block,
@@ -995,19 +907,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'else')
     ending = find_scanner_event(:@kw, 'end')
 
-    stmts.merge!(
-      char_start: beging[:char_end],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
-      )
-    end
+    stmts.bind(beging[:char_end], ending[:char_start])
 
     {
       type: :else,
@@ -1027,19 +927,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'elsif')
     ending = consequent || find_scanner_event(:@kw, 'end')
 
-    stmts.merge!(
-      char_start: predicate[:char_end],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
-      )
-    end
+    stmts.bind(predicate[:char_end], ending[:char_start])
 
     {
       type: :elsif,
@@ -1093,19 +981,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'ensure')
     ending = find_scanner_event(:@kw, 'end')
 
-    stmts.merge!(
-      char_start: beging[:char_end],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
-      )
-    end
+    stmts.bind(beging[:char_end], ending[:char_start])
 
     {
       type: :ensure,
@@ -1152,19 +1028,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'for')
     ending = find_scanner_event(:@kw, 'end')
 
-    stmts.merge!(
-      char_start: enumerable[:char_end],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
-      )
-    end
+    stmts.bind(enumerable[:char_end], ending[:char_start])
 
     {
       type: :for,
@@ -1240,19 +1104,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'if')
     ending = consequent || find_scanner_event(:@kw, 'end')
 
-    stmts.merge!(
-      char_start: predicate[:char_end],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
-      )
-    end
+    stmts.bind(predicate[:char_end], ending[:char_start])
 
     {
       type: :if,
@@ -1324,19 +1176,7 @@ class Prettier::Parser < Ripper
       closing = find_scanner_event(:@kw, 'end')
     end
 
-    stmts.merge!(
-      char_start: opening[:char_end],
-      char_end: closing[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: closing[:char_start],
-        char_end: closing[:char_start]
-      )
-    end
+    stmts.bind(opening[:char_end], closing[:char_start])
 
     {
       type: :lambda,
@@ -1503,18 +1343,7 @@ class Prettier::Parser < Ripper
     bodystmt.merge!(range)
     stmts, *others = bodystmt[:body]
 
-    unless others.any?
-      stmts.merge!(range)
-
-      # If the only statement inside the list of statements is a void
-      # statement, then just shove it to the end.
-      if stmts[:body][0][:type] == :void_stmt
-        stmts[:body][0].merge!(
-          char_start: range[:char_start],
-          char_end: range[:char_start]
-        )
-      end
-    end
+    stmts.bind(range[:char_start], range[:char_end]) unless others.any?
 
     {
       type: :module,
@@ -1663,13 +1492,7 @@ class Prettier::Parser < Ripper
     }
 
     stmts[:body] << @__end__ if @__end__
-    stmts.merge!(range)
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(char_start: 0, char_end: 0)
-    end
+    stmts.bind(0, source.length)
 
     range.merge(
       type: :program,
@@ -1760,20 +1583,10 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'rescue')
     ending = consequent || stmts
 
-    char_start = (variable || (exceptions || [])[-1] || beging)[:char_end]
-    stmts.merge!(
-      char_start: char_start,
-      char_end: ending[:char_start]
+    stmts.bind(
+      (variable || (exceptions || [])[-1] || beging)[:char_end],
+      ending[:char_start]
     )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: char_start,
-        char_end: char_start
-      )
-    end
 
     beging.merge!(
       type: :rescue,
@@ -1859,19 +1672,7 @@ class Prettier::Parser < Ripper
 
     bodystmt.merge!(range)
     stmts, *others = bodystmt[:body]
-
-    unless others.any?
-      stmts.merge!(range)
-
-      # If the only statement inside the list of statements is a void
-      # statement, then just shove it to the end.
-      if stmts[:body][0][:type] == :void_stmt
-        stmts[:body][0].merge!(
-          char_start: range[:char_start],
-          char_end: range[:char_start]
-        )
-      end
-    end
+    stmts.bind(range[:char_start], range[:char_end]) unless others.any?
 
     {
       type: :sclass,
@@ -1883,18 +1684,64 @@ class Prettier::Parser < Ripper
     }
   end
 
+  # Everything that has a block of code inside of it has a list of statements.
+  # Normally we would just track those as a node that has an array body, but we
+  # have some special handling in order to handle empty statement lists. They
+  # need to have the right location information, so all of the parent node of
+  # stmts nodes will report back down the location information. We then
+  # propagate that onto void_stmt nodes inside the stmts in order to make sure
+  # all comments get printed appropriately.
+  class Stmts
+    attr_reader :statements, :serialized
+
+    def initialize(lineno, char_pos)
+      @statements = []
+      @serialized = {
+        type: :stmts,
+        body: @statements,
+        start: lineno,
+        end: lineno,
+        char_start: char_pos,
+        char_end: char_pos
+      }
+    end
+
+    def bind(char_start, char_end)
+      serialized.merge!(char_start: char_start, char_end: char_end)
+
+      if statements[0][:type] == :void_stmt
+        statements[0].merge!(
+          char_start: char_start,
+          char_end: char_start
+        )
+      end
+    end
+
+    def <<(statement)
+      if statements.any?
+        serialized.merge!(statement.slice(:end, :char_end))
+      else
+        serialized.merge!(statement.slice(:start, :end, :char_start, :char_end))
+      end
+
+      statements << statement
+      self
+    end
+
+    def [](key)
+      serialized[key]
+    end
+
+    def to_json(*args)
+      serialized.to_json(*args)
+    end
+  end
+
   # stmts_new is a parser event that represents the beginning of a list of
   # statements within any lexical block. It can be followed by any number of
   # stmts_add events, which we'll append onto an array body.
   def on_stmts_new
-    {
-      type: :stmts,
-      body: [],
-      start: lineno,
-      char_start: char_pos,
-      end: lineno,
-      char_end: char_pos
-    }
+    Stmts.new(lineno, char_pos)
   end
 
   # stmts_add is a parser event that represents a single statement inside a
@@ -1902,15 +1749,7 @@ class Prettier::Parser < Ripper
   # parent stmts node as well as an stmt which can be any expression in
   # Ruby.
   def on_stmts_add(stmts, stmt)
-    if stmts[:body].empty?
-      stmt.merge(type: :stmts, body: [stmt])
-    else
-      stmts.merge!(
-        body: stmts[:body] << stmt,
-        end: stmt[:end],
-        char_end: stmt[:char_end]
-      )
-    end
+    stmts << stmt
   end
 
   # string_concat is a parser event that represents concatenating two
@@ -1980,19 +1819,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@embexpr_beg)
     ending = find_scanner_event(:@embexpr_end)
 
-    stmts.merge!(
-      char_start: beging[:char_end],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: beging[:char_end],
-        char_end: beging[:char_end]
-      )
-    end
+    stmts.bind(beging[:char_end], ending[:char_start])
 
     {
       type: :string_embexpr,
@@ -2182,19 +2009,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'unless')
     ending = consequent || find_scanner_event(:@kw, 'end')
 
-    stmts.merge!(
-      char_start: predicate[:char_end],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: predicate[:char_end],
-        char_end: predicate[:char_end]
-      )
-    end
+    stmts.bind(predicate[:char_end], ending[:char_start])
 
     {
       type: :unless,
@@ -2229,19 +2044,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'until')
     ending = find_scanner_event(:@kw, 'end')
 
-    stmts.merge!(
-      char_start: predicate[:char_end],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: predicate[:char_end],
-        char_end: predicate[:char_end]
-      )
-    end
+    stmts.bind(predicate[:char_end], ending[:char_start])
 
     {
       type: :until,
@@ -2327,6 +2130,9 @@ class Prettier::Parser < Ripper
     ident.merge(type: type, body: [ident])
   end
 
+  # void_stmt is a special kind of parser event that represents an empty lexical
+  # block of code. It often will have comments attached to it, so it requires
+  # some special handling.
   def on_void_stmt
     {
       type: :void_stmt,
@@ -2345,19 +2151,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'when')
     ending = consequent || find_scanner_event(:@kw, 'end')
 
-    stmts.merge!(
-      char_start: predicate[:char_end],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: predicate[:char_end],
-        char_end: predicate[:char_end]
-      )
-    end
+    stmts.bind(predicate[:char_end], ending[:char_start])
 
     {
       type: :when,
@@ -2376,19 +2170,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'while')
     ending = find_scanner_event(:@kw, 'end')
 
-    stmts.merge!(
-      char_start: predicate[:char_end],
-      char_end: ending[:char_start]
-    )
-
-    # If the only statement inside the list of statements is a void
-    # statement, then just shove it to the end.
-    if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: predicate[:char_end],
-        char_end: predicate[:char_end]
-      )
-    end
+    stmts.bind(predicate[:char_end], ending[:char_start])
 
     {
       type: :while,
