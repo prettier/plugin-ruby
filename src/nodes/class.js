@@ -21,7 +21,7 @@ function printClass(path, opts, print) {
   if (
     stmts.body.length === 1 &&
     stmts.body[0].type === "void_stmt" &&
-    !stmts.comments
+    !stmts.body[0].comments
   ) {
     return group(concat([concat(parts), ifBreak(line, "; "), "end"]));
   }
@@ -43,7 +43,7 @@ function printModule(path, opts, print) {
   if (
     stmts.body.length === 1 &&
     stmts.body[0].type === "void_stmt" &&
-    !stmts.comments
+    !stmts.body[0].comments
   ) {
     return group(concat([declaration, ifBreak(line, "; "), "end"]));
   }

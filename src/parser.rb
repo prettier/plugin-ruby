@@ -131,11 +131,9 @@ class Prettier::Parser < Ripper
 
       events = {
         begin: [:@kw, 'begin'],
-        class: [:@kw, 'class'],
         for: [:@kw, 'for'],
         in: [:@kw, 'in'],
         lambda: :@tlambda,
-        module: [:@kw, 'module'],
         rescue: [:@kw, 'rescue']
       }
 
@@ -518,6 +516,33 @@ class Prettier::Parser < Ripper
           end: consequent[:end],
           char_end: consequent[:char_end]
         )
+      end
+
+      # class is a parser event that represents defining a class. It accepts as
+      # arguments the name of the class, the optional name of the superclass,
+      # and the bodystmt event that represents the statements evaluated within
+      # the context of the class.
+      def on_class(const, superclass, bodystmt)
+        beging = find_scanner_event(:@kw, 'class')
+        ending = find_scanner_event(:@kw, 'end')
+
+        range = {
+          char_start: (superclass || const)[:char_end],
+          char_end: ending[:char_start]
+        }
+
+        bodystmt.merge!(range)
+        stmts, *others = bodystmt[:body]
+        stmts.merge!(range) unless others.any?
+
+        {
+          type: :class,
+          body: [const, superclass, bodystmt],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
       end
 
       # We keep track of each comment as it comes in and then eventually add
@@ -1105,6 +1130,29 @@ class Prettier::Parser < Ripper
         {
           type: :mlhs_paren,
           body: [contents],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
+      # module is a parser event that represents defining a module. It accepts
+      # as arguments the name of the module and the bodystmt event that
+      # represents the statements evaluated within the context of the module.
+      def on_module(const, bodystmt)
+        beging = find_scanner_event(:@kw, 'module')
+        ending = find_scanner_event(:@kw, 'end')
+
+        range = { char_start: const[:char_end], char_end: ending[:char_start] }
+
+        bodystmt.merge!(range)
+        stmts, *others = bodystmt[:body]
+        stmts.merge!(range) unless others.any?
+
+        {
+          type: :module,
+          body: [const, bodystmt],
           start: beging[:start],
           char_start: beging[:char_start],
           end: ending[:end],
