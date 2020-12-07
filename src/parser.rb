@@ -1293,6 +1293,34 @@ class Prettier::Parser < Ripper
     }
   end
 
+  # method_add_arg is a parser event that represents a method call with
+  # arguments and parentheses. It accepts as arguments the method being called
+  # and the arg_paren event that contains the arguments to the method.
+  def on_method_add_arg(fcall, arg_paren)
+    {
+      type: :method_add_arg,
+      body: [fcall, arg_paren],
+      start: fcall[:start],
+      char_start: fcall[:char_start],
+      end: arg_paren[:end],
+      char_end: arg_paren[:char_end]
+    }
+  end
+
+  # method_add_block is a parser event that represents a method call with a
+  # block argument. It accepts as arguments the method being called and the
+  # block event.
+  def on_method_add_block(method_add_arg, block)
+    {
+      type: :method_add_block,
+      body: [method_add_arg, block],
+      start: method_add_arg[:start],
+      char_start: method_add_arg[:char_start],
+      end: block[:end],
+      char_end: block[:char_end]
+    }
+  end
+
   # An mlhs_new is a parser event that represents the beginning of the left
   # side of a multiple assignment. It is followed by any number of mlhs_add
   # nodes that each represent another variable being assigned.
@@ -1640,6 +1668,22 @@ class Prettier::Parser < Ripper
       end: ending[:end],
       char_end: ending[:char_end]
     )
+  end
+
+  # rescue_mod represents the modifier form of a rescue clause. It accepts as
+  # arguments the statement that may raise an error and the value that should
+  # be used if it does.
+  def on_rescue_mod(statement, rescued)
+    find_scanner_event(:@kw, 'rescue')
+
+    {
+      type: :rescue_mod,
+      body: [statement, rescued],
+      start: statement[:start],
+      char_start: statement[:char_start],
+      end: rescued[:end],
+      char_end: rescued[:char_end]
+    }
   end
 
   # rest_param is a parser event that represents defining a parameter in a
@@ -2402,14 +2446,11 @@ class Prettier::Parser < Ripper
     find_scanner_event(:@kw, 'super').merge!(type: :zsuper)
   end
 
-  default = %i[
-    begin
-    block_var
-    bodystmt
-    method_add_arg
-    method_add_block
-    rescue
-    rescue_mod
+  default = [
+    :begin, # 1
+    :block_var, # 2
+    :bodystmt, # 4
+    :rescue, # 4
   ]
 
   default.each do |event|
