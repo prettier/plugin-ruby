@@ -162,16 +162,6 @@ class Prettier::Parser < Ripper
         super(*body).merge!(char_start: char_start, char_end: char_end)
       end
 
-      # Params have a somewhat interesting structure in that they are an array
-      # of arrays where the position in the top-level array indicates the type
-      # of param and the subarray is the list of parameters of that type. We
-      # therefore have to flatten them down to get to the location.
-      def on_params(*body)
-        super(*body).merge!(
-          char_start: char_start_for(body.flatten(1)), char_end: char_pos
-        )
-      end
-
       defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
 
       (PARSER_EVENTS - defined).each do |event|
@@ -1436,6 +1426,33 @@ class Prettier::Parser < Ripper
           end: right[:end],
           char_end: right[:char_end]
         )
+      end
+
+      # params is a parser event that represents defining parameters on a
+      # method. They have a somewhat interesting structure in that they are an
+      # array of arrays where the position in the top-level array indicates the
+      # type of param and the subarray is the list of parameters of that type.
+      # We therefore have to flatten them down to get to the location.
+      def on_params(*types)
+        flattened = types.flatten(2).select(&:itself)
+        location =
+          if flattened.any?
+            {
+              start: flattened[0][:start],
+              char_start: flattened[0][:char_start],
+              end: flattened[-1][:end],
+              char_end: flattened[-1][:char_end]
+            }
+          else
+            {
+              start: lineno,
+              char_start: char_pos,
+              end: lineno,
+              char_end: char_pos
+            }
+          end
+
+        location.merge!(type: :params, body: types)
       end
 
       # A paren is a parser event that represents using parentheses pretty much
