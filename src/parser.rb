@@ -131,7 +131,6 @@ class Prettier::Parser < Ripper
 
       events = {
         begin: [:@kw, 'begin'],
-        for: [:@kw, 'for'],
         in: [:@kw, 'in'],
         rescue: [:@kw, 'rescue']
       }
@@ -901,6 +900,29 @@ class Prettier::Parser < Ripper
           char_start: left[:char_start],
           end: right[:end],
           char_end: right[:char_end]
+        }
+      end
+
+      # for is a parser event that represents using the somewhat esoteric for
+      # loop. It accepts as arguments an ident which is the iterating variable,
+      # an enumerable for that which is being enumerated, and a stmts event that
+      # represents the statements inside the for loop.
+      def on_for(ident, enumerable, stmts)
+        beging = find_scanner_event(:@kw, 'for')
+        ending = find_scanner_event(:@kw, 'end')
+
+        stmts.merge!(
+          char_start: enumerable[:char_end],
+          char_end: ending[:char_start]
+        )
+
+        {
+          type: :for,
+          body: [ident, enumerable, stmts],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
         }
       end
 
