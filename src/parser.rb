@@ -220,6 +220,15 @@ class Prettier::Parser < Ripper
           char_end: ending[:char_start]
         )
 
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
+
         find_scanner_event(:@kw, 'BEGIN').merge!(
           type: :BEGIN,
           body: [stmts],
@@ -248,6 +257,15 @@ class Prettier::Parser < Ripper
           end: ending[:start],
           char_end: ending[:char_start]
         )
+
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
 
         find_scanner_event(:@kw, 'END').merge!(
           type: :END,
@@ -482,6 +500,15 @@ class Prettier::Parser < Ripper
           char_end: ending[:char_start]
         )
 
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
+
         {
           type: :brace_block,
           body: [block_var, stmts],
@@ -531,7 +558,19 @@ class Prettier::Parser < Ripper
 
         bodystmt.merge!(range)
         stmts, *others = bodystmt[:body]
-        stmts.merge!(range) unless others.any?
+
+        unless others.any?
+          stmts.merge!(range)
+
+          # If the only statement inside the list of statements is a void
+          # statement, then just shove it to the end.
+          if stmts[:body][0][:type] == :void_stmt
+            stmts[:body][0].merge!(
+              char_start: ending[:char_start],
+              char_end: ending[:char_start]
+            )
+          end
+        end
 
         {
           type: :class,
@@ -632,7 +671,19 @@ class Prettier::Parser < Ripper
 
         bodystmt.merge!(range)
         stmts, *others = bodystmt[:body]
-        stmts.merge!(range) unless others.any?
+
+        unless others.any?
+          stmts.merge!(range)
+
+          # If the only statement inside the list of statements is a void
+          # statement, then just shove it to the end.
+          if stmts[:body][0][:type] == :void_stmt
+            stmts[:body][0].merge!(
+              char_start: ending[:char_start],
+              char_end: ending[:char_start]
+            )
+          end
+        end
 
         {
           type: :def,
@@ -670,7 +721,19 @@ class Prettier::Parser < Ripper
 
         bodystmt.merge!(range)
         stmts, *others = bodystmt[:body]
-        stmts.merge!(range) unless others.any?
+
+        unless others.any?
+          stmts.merge!(range)
+
+          # If the only statement inside the list of statements is a void
+          # statement, then just shove it to the end.
+          if stmts[:body][0][:type] == :void_stmt
+            stmts[:body][0].merge!(
+              char_start: ending[:char_start],
+              char_end: ending[:char_start]
+            )
+          end
+        end
 
         {
           type: :defs,
@@ -715,7 +778,19 @@ class Prettier::Parser < Ripper
 
         bodystmt.merge!(range)
         stmts, *others = bodystmt[:body]
-        stmts.merge!(range) unless others.any?
+
+        unless others.any?
+          stmts.merge!(range)
+
+          # If the only statement inside the list of statements is a void
+          # statement, then just shove it to the end.
+          if stmts[:body][0][:type] == :void_stmt
+            stmts[:body][0].merge!(
+              char_start: ending[:char_start],
+              char_end: ending[:char_start]
+            )
+          end
+        end
 
         {
           type: :do_block,
@@ -786,6 +861,15 @@ class Prettier::Parser < Ripper
           char_end: ending[:char_start]
         )
 
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
+
         {
           type: :else,
           body: [stmts],
@@ -808,6 +892,15 @@ class Prettier::Parser < Ripper
           char_start: predicate[:char_end],
           char_end: ending[:char_start]
         )
+
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
 
         {
           type: :elsif,
@@ -866,6 +959,15 @@ class Prettier::Parser < Ripper
           char_end: ending[:char_start]
         )
 
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
+
         {
           type: :ensure,
           body: [stmts],
@@ -915,6 +1017,15 @@ class Prettier::Parser < Ripper
           char_start: enumerable[:char_end],
           char_end: ending[:char_start]
         )
+
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
 
         {
           type: :for,
@@ -991,6 +1102,15 @@ class Prettier::Parser < Ripper
           char_end: ending[:char_start]
         )
 
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
+
         {
           type: :if,
           body: [predicate, stmts, consequent],
@@ -1065,6 +1185,15 @@ class Prettier::Parser < Ripper
           char_start: opening[:char_end],
           char_end: closing[:char_start]
         )
+
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: closing[:char_start],
+            char_end: closing[:char_start]
+          )
+        end
 
         {
           type: :lambda,
@@ -1202,7 +1331,19 @@ class Prettier::Parser < Ripper
 
         bodystmt.merge!(range)
         stmts, *others = bodystmt[:body]
-        stmts.merge!(range) unless others.any?
+
+        unless others.any?
+          stmts.merge!(range)
+
+          # If the only statement inside the list of statements is a void
+          # statement, then just shove it to the end.
+          if stmts[:body][0][:type] == :void_stmt
+            stmts[:body][0].merge!(
+              char_start: ending[:char_start],
+              char_end: ending[:char_start]
+            )
+          end
+        end
 
         {
           type: :module,
@@ -1325,6 +1466,15 @@ class Prettier::Parser < Ripper
 
         stmts[:body] << @__end__ if @__end__
         stmts.merge!(range)
+
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: source.length,
+            char_end: source.length
+          )
+        end
 
         range.merge(
           type: :program,
@@ -1469,7 +1619,19 @@ class Prettier::Parser < Ripper
 
         bodystmt.merge!(range)
         stmts, *others = bodystmt[:body]
-        stmts.merge!(range) unless others.any?
+
+        unless others.any?
+          stmts.merge!(range)
+
+          # If the only statement inside the list of statements is a void
+          # statement, then just shove it to the end.
+          if stmts[:body][0][:type] == :void_stmt
+            stmts[:body][0].merge!(
+              char_start: ending[:char_start],
+              char_end: ending[:char_start]
+            )
+          end
+        end
 
         {
           type: :sclass,
@@ -1582,6 +1744,15 @@ class Prettier::Parser < Ripper
           char_start: beging[:char_end],
           char_end: ending[:char_start]
         )
+
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
 
         {
           type: :string_embexpr,
@@ -1781,6 +1952,15 @@ class Prettier::Parser < Ripper
           char_end: ending[:char_start]
         )
 
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
+
         {
           type: :unless,
           body: [predicate, stmts, consequent],
@@ -1818,6 +1998,15 @@ class Prettier::Parser < Ripper
           char_start: predicate[:char_end],
           char_end: ending[:char_start]
         )
+
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
 
         {
           type: :until,
@@ -1926,6 +2115,15 @@ class Prettier::Parser < Ripper
           char_end: ending[:char_start]
         )
 
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
+
         {
           type: :when,
           body: [predicate, stmts, consequent],
@@ -1947,6 +2145,15 @@ class Prettier::Parser < Ripper
           char_start: predicate[:char_end],
           char_end: ending[:char_start]
         )
+
+        # If the only statement inside the list of statements is a void
+        # statement, then just shove it to the end.
+        if stmts[:body][0][:type] == :void_stmt
+          stmts[:body][0].merge!(
+            char_start: ending[:char_start],
+            char_end: ending[:char_start]
+          )
+        end
 
         {
           type: :while,
