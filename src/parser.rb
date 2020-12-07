@@ -138,8 +138,7 @@ class Prettier::Parser < Ripper
         in: [:@kw, 'in'],
         lambda: :@tlambda,
         module: [:@kw, 'module'],
-        rescue: [:@kw, 'rescue'],
-        sclass: [:@kw, 'class']
+        rescue: [:@kw, 'rescue']
       }
 
       events.each do |event, (type, scanned)|
@@ -1300,6 +1299,36 @@ class Prettier::Parser < Ripper
       # values.
       def on_return0
         find_scanner_event(:@kw, 'return').merge!(type: :return0)
+      end
+
+      # sclass is a parser event that represents a block of statements that
+      # should be evaluated within the context of the singleton class of an
+      # object. It's frequently used to define singleton methods. It looks like
+      # the following example:
+      #
+      #     class << self do foo end
+      #               │       │
+      #               │       └> bodystmt
+      #               └> target
+      #
+      def on_sclass(target, bodystmt)
+        beging = find_scanner_event(:@kw, 'class')
+        ending = find_scanner_event(:@kw, 'end')
+
+        range = { char_start: target[:char_end], char_end: ending[:char_start] }
+
+        bodystmt.merge!(range)
+        stmts, *others = bodystmt[:body]
+        stmts.merge!(range) unless others.any?
+
+        {
+          type: :sclass,
+          body: [target, bodystmt],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
       end
 
       # stmts_new is a parser event that represents the beginning of a list of
