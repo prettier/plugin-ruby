@@ -475,6 +475,29 @@ class Prettier::Parser < Ripper
     }
   end
 
+  # block_var is a parser event that represents the parameters being passed to
+  # block. Effectively they're everything contained within the pipes.
+  def on_block_var(params, locals)
+    index =
+      scanner_events.rindex do |event|
+        event[:type] == :@op &&
+          %w[| ||].include?(event[:body]) &&
+          event[:char_start] < params[:char_start]
+      end
+
+    beging = scanner_events[index]
+    ending = scanner_events[-1]
+
+    {
+      type: :block_var,
+      body: [params, locals],
+      start: beging[:start],
+      char_start: beging[:char_start],
+      end: ending[:end],
+      char_end: ending[:char_end]
+    }
+  end
+
   # blockarg is a parser event that represents defining a block variable on
   # a method definition.
   def on_blockarg(ident)
@@ -2448,7 +2471,6 @@ class Prettier::Parser < Ripper
 
   default = [
     :begin, # 1
-    :block_var, # 2
     :bodystmt, # 4
     :rescue, # 4
   ]
