@@ -286,6 +286,50 @@ class Prettier::Parser < Ripper
         }
       end
 
+      # aref nodes are when you're pulling a value out of a collection at a
+      # specific index. Put another way, it's any time you're calling the method
+      # #[]. As an example:
+      #
+      #     foo[index]
+      #
+      # The nodes usually contains two children, the collection and the index.
+      # In some cases, you don't necessarily have the second child node, because
+      # you can call procs with a pretty esoteric syntax. In the following
+      # example, you wouldn't have a second child, and "foo" would be the first
+      # child:
+      #
+      #     foo[]
+      #
+      def on_aref(collection, index)
+        find_scanner_event(:@lbracket)
+        ending = find_scanner_event(:@rbracket)
+
+        {
+          type: :aref,
+          body: [collection, index],
+          start: collection[:start],
+          char_start: collection[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
+      # aref_field is a parser event that is very similar to aref except that it
+      # is being used inside of an assignment.
+      def on_aref_field(collection, index)
+        find_scanner_event(:@lbracket)
+        ending = find_scanner_event(:@rbracket)
+
+        {
+          type: :aref,
+          body: [collection, index],
+          start: collection[:start],
+          char_start: collection[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
       # args_new is a parser event that represents the beginning of a list of
       # arguments to any method call or an array. It can be followed by any
       # number of args_add events, which we'll append onto an array body.
@@ -463,6 +507,19 @@ class Prettier::Parser < Ripper
           char_start: assoc_news[0][:char_start],
           end: assoc_news[-1][:end],
           char_end: assoc_news[-1][:char_end]
+        }
+      end
+
+      # binary is a parser event that represents a binary operation between two
+      # values.
+      def on_binary(left, oper, right)
+        {
+          type: :binary,
+          body: [left, oper, right],
+          start: left[:start],
+          char_start: left[:char_start],
+          end: right[:end],
+          char_end: right[:char_end]
         }
       end
 
