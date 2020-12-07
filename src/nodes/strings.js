@@ -8,8 +8,6 @@ const {
   join
 } = require("../prettier");
 
-const { makeList } = require("../utils");
-
 // If there is some part of this string that matches an escape sequence or that
 // contains the interpolation pattern ("#{"), then we are locked into whichever
 // quote the user chose. (If they chose single quotes, then double quoting

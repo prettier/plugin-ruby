@@ -128,7 +128,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :assoclist_from_args,
       parse('{ foo => bar }').dig(:body, 0),
-      char_start: 2, char_end: 12
+      char_start: 1, char_end: 13
     )
   end
 
@@ -683,7 +683,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_void_stmt
-    assert_node_metadata(:void_stmt, parse('; ;'), char_start: 3, char_end: 3)
+    assert_node_metadata(:void_stmt, parse('; ;'), char_start: 0, char_end: 0)
   end
 
   def test_when

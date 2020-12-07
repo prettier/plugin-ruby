@@ -113,7 +113,7 @@ describe("comments", () => {
       return expect(content).toMatchFormat();
     });
 
-    test.skip("begin/rescue/ensure/end statements", () => {
+    test("begin/rescue/ensure/end statements", () => {
       const content = ruby(`
         begin
           # this is the only statement in this begin

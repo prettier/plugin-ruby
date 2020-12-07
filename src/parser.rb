@@ -13,6 +13,7 @@ if (major < 2) || ((major == 2) && (minor < 5))
   exit 1
 end
 
+require 'delegate'
 require 'json' unless defined?(JSON)
 require 'ripper'
 
@@ -32,7 +33,7 @@ class Prettier::Parser < Ripper
     @__end__ = nil
 
     @heredocs = []
-  
+
     @scanner_events = []
     @line_counts = [0]
 
@@ -76,7 +77,17 @@ class Prettier::Parser < Ripper
   # end. These nodes always contain just one argument which is a string
   # representing the content. For the most part these can just be printed
   # directly, which very few exceptions.
-  SCANNER_EVENTS.each do |event|
+  defined = %i[
+    comment
+    embdoc
+    embdoc_beg
+    embdoc_end
+    heredoc_beg
+    heredoc_end
+    ignored_nl
+  ]
+
+  (SCANNER_EVENTS - defined).each do |event|
     define_method(:"on_#{event}") do |value|
       char_end = char_pos + value.size
       node = {
@@ -104,14 +115,15 @@ class Prettier::Parser < Ripper
   # This will break everything, so we need to force the encoding back into
   # UTF-8 so that the JSON library won't break.
   def on_comment(value)
-    @comments << {
-      type: :@comment,
-      value: value[1..-1].chomp.force_encoding('UTF-8'),
-      start: lineno,
-      end: lineno,
-      char_start: char_pos,
-      char_end: char_pos + value.length - 1
-    }
+    @comments <<
+      {
+        type: :@comment,
+        value: value[1..-1].chomp.force_encoding('UTF-8'),
+        start: lineno,
+        end: lineno,
+        char_start: char_pos,
+        char_end: char_pos + value.length - 1
+      }
   end
 
   # ignored_nl is a special kind of scanner event that passes nil as the value,
@@ -202,10 +214,7 @@ class Prettier::Parser < Ripper
     stmts.bind(beging[:char_end], ending[:char_start])
 
     find_scanner_event(:@kw, 'END').merge!(
-      type: :END,
-      body: [stmts],
-      end: ending[:end],
-      char_end: ending[:char_end]
+      type: :END, body: [stmts], end: ending[:end], char_end: ending[:char_end]
     )
   end
 
@@ -297,9 +306,7 @@ class Prettier::Parser < Ripper
       arg.merge(type: :args, body: [arg])
     else
       args.merge!(
-        body: args[:body] << arg,
-        end: arg[:end],
-        char_end: arg[:char_end]
+        body: args[:body] << arg, end: arg[:end], char_end: arg[:char_end]
       )
     end
   end
@@ -457,15 +464,17 @@ class Prettier::Parser < Ripper
   # begin is a parser event that represents the beginning of a begin..end chain.
   # It includes a bodystmt event that has all of the consequent clauses.
   def on_begin(bodystmt)
-    stmts, *others = bodystmt[:body]
-    ending =
-      if stmts.statements[0][:type] == :void_stmt && !others.any?
-        find_scanner_event(:@kw, 'end')
+    beging = find_scanner_event(:@kw, 'begin')
+    char_end =
+      if bodystmt[:body][1..-1].any?
+        bodystmt[:char_end]
       else
-        bodystmt
+        find_scanner_event(:@kw, 'end')[:char_end]
       end
 
-    find_scanner_event(:@kw, 'begin').merge!(
+    bodystmt.bind(beging[:char_end], char_end)
+
+    beging.merge!(
       type: :begin,
       body: [bodystmt],
       end: bodystmt[:end],
@@ -491,8 +500,7 @@ class Prettier::Parser < Ripper
   def on_block_var(params, locals)
     index =
       scanner_events.rindex do |event|
-        event[:type] == :@op &&
-          %w[| ||].include?(event[:body]) &&
+        event[:type] == :@op && %w[| ||].include?(event[:body]) &&
           event[:char_start] < params[:char_start]
       end
 
@@ -520,19 +528,38 @@ class Prettier::Parser < Ripper
     )
   end
 
+  # bodystmt can't actually determine its bounds appropriately because it
+  # doesn't necessarily know where it started. So the parent node needs to
+  # report back down into this one where it goes.
+  class BodyStmt < SimpleDelegator
+    def bind(char_start, char_end)
+      merge!(char_start: char_start, char_end: char_end)
+      parts = self[:body]
+
+      # Here we're going to determine the bounds for the stmts
+      consequent = parts[1..-1].compact.first
+      self[:body][0].bind(char_start,
+        consequent ? consequent[:char_start] : char_end)
+
+      # Next we're going to determine the rescue clause if there is one
+      if parts[1]
+        consequent = parts[2..-1].compact.first
+        self[:body][1].bind(consequent ? consequent[:char_start] : char_end)
+      end
+    end
+  end
+
   # bodystmt is a parser event that represents all of the possible combinations
   # of clauses within the body of a method or block.
   def on_bodystmt(stmts, rescued, ensured, elsed)
-    pieces = [stmts, rescued, ensured, elsed].compact
-
-    {
+    BodyStmt.new(
       type: :bodystmt,
       body: [stmts, rescued, ensured, elsed],
-      start: pieces[0][:start],
-      char_start: pieces[0][:char_start],
-      end: pieces[-1][:end],
-      char_end: pieces[-1][:char_end]
-    }
+      start: lineno,
+      char_start: char_pos,
+      end: lineno,
+      char_end: char_pos
+    )
   end
 
   # brace_block is a parser event that represents passing a block to a
@@ -611,14 +638,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'class')
     ending = find_scanner_event(:@kw, 'end')
 
-    range = {
-      char_start: (superclass || const)[:char_end],
-      char_end: ending[:char_start]
-    }
-
-    bodystmt.merge!(range)
-    stmts, *others = bodystmt[:body]
-    stmts.bind(range[:char_start], range[:char_end]) unless others.any?
+    bodystmt.bind((superclass || const)[:char_end], ending[:char_start])
 
     {
       type: :class,
@@ -726,11 +746,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'def')
     ending = find_scanner_event(:@kw, 'end')
 
-    range = { char_start: params[:char_end], char_end: ending[:char_start] }
-    bodystmt.merge!(range)
-
-    stmts, *others = bodystmt[:body]
-    stmts.bind(range[:char_start], range[:char_end]) unless others.any?
+    bodystmt.bind(params[:char_end], ending[:char_start])
 
     {
       type: :def,
@@ -753,7 +769,7 @@ class Prettier::Parser < Ripper
   #          │ │ │   │       └> bodystmt
   #          │ │ │   └> params
   #          │ │ └> ident
-  #          │ └> oper 
+  #          │ └> oper
   #          └> target
   #
   def on_defs(target, oper, ident, params, bodystmt)
@@ -764,11 +780,8 @@ class Prettier::Parser < Ripper
 
     beging = find_scanner_event(:@kw, 'def')
     ending = find_scanner_event(:@kw, 'end')
-    range = { char_start: params[:char_end], char_end: ending[:char_start] }
 
-    bodystmt.merge!(range)
-    stmts, *others = bodystmt[:body]
-    stmts.bind(params[:char_end], ending[:char_start]) unless others.any?
+    bodystmt.bind(params[:char_end], ending[:char_start])
 
     {
       type: :defs,
@@ -806,14 +819,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'do')
     ending = find_scanner_event(:@kw, 'end')
 
-    range = {
-      char_start: (block_var || beging)[:char_end],
-      char_end: ending[:char_start]
-    }
-
-    bodystmt.merge!(range)
-    stmts, *others = bodystmt[:body]
-    stmts.bind(range[:char_start], range[:char_end]) unless others.any?
+    bodystmt.bind((block_var || beging)[:char_end], ending[:char_start])
 
     {
       type: :do_block,
@@ -946,10 +952,7 @@ class Prettier::Parser < Ripper
   # event, so here we'll initialize the current embdoc.
   def on_embdoc_beg(value)
     @embdoc = {
-      type: :@embdoc,
-      value: value,
-      start: lineno,
-      char_start: char_pos
+      type: :@embdoc, value: value, start: lineno, char_start: char_pos
     }
   end
 
@@ -966,11 +969,12 @@ class Prettier::Parser < Ripper
   # piece of the string. We then add it to the list of comments so that
   # prettier can place it into the final source string.
   def on_embdoc_end(value)
-    @comments << @embdoc.merge!(
-      value: @embdoc[:value] << value.chomp,
-      end: lineno,
-      char_end: char_pos + value.length - 1
-    )
+    @comments <<
+      @embdoc.merge!(
+        value: @embdoc[:value] << value.chomp,
+        end: lineno,
+        char_end: char_pos + value.length - 1
+      )
 
     @embdoc = nil
   end
@@ -1051,8 +1055,7 @@ class Prettier::Parser < Ripper
       # Here we're going to expand out the location information for the assocs
       # node so that it can grab up any remaining comments inside the hash.
       assoclist_from_args.merge!(
-        char_start: beging[:char_end],
-        char_end: ending[:char_start]
+        char_start: beging[:char_end], char_end: ending[:char_start]
       )
     end
 
@@ -1092,9 +1095,7 @@ class Prettier::Parser < Ripper
 
   # This is a scanner event that represents the end of the heredoc.
   def on_heredoc_end(ending)
-    @heredocs[-1].merge!(
-      ending: ending.chomp, end: lineno, char_end: char_pos
-    )
+    @heredocs[-1].merge!(ending: ending.chomp, end: lineno, char_end: char_pos)
   end
 
   # if is a parser event that represents the first clause in an if chain.
@@ -1270,9 +1271,7 @@ class Prettier::Parser < Ripper
       part.merge(type: :mlhs, body: [part])
     else
       mlhs.merge!(
-        body: mlhs[:body] << part,
-        end: part[:end],
-        char_end: part[:char_end]
+        body: mlhs[:body] << part, end: part[:end], char_end: part[:char_end]
       )
     end
   end
@@ -1338,12 +1337,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'module')
     ending = find_scanner_event(:@kw, 'end')
 
-    range = { char_start: const[:char_end], char_end: ending[:char_start] }
-
-    bodystmt.merge!(range)
-    stmts, *others = bodystmt[:body]
-
-    stmts.bind(range[:char_start], range[:char_end]) unless others.any?
+    bodystmt.bind(const[:char_end], ending[:char_start])
 
     {
       type: :module,
@@ -1377,9 +1371,7 @@ class Prettier::Parser < Ripper
       part.merge(type: :mrhs, body: [part])
     else
       mrhs.merge!(
-        body: mrhs[:body] << part,
-        end: part[:end],
-        char_end: part[:char_end]
+        body: mrhs[:body] << part, end: part[:end], char_end: part[:char_end]
       )
     end
   end
@@ -1454,12 +1446,7 @@ class Prettier::Parser < Ripper
           char_end: flattened[-1][:char_end]
         }
       else
-        {
-          start: lineno,
-          char_start: char_pos,
-          end: lineno,
-          char_end: char_pos
-        }
+        { start: lineno, char_start: char_pos, end: lineno, char_end: char_pos }
       end
 
     location.merge!(type: :params, body: types)
@@ -1485,20 +1472,13 @@ class Prettier::Parser < Ripper
   # some found at the end of the source string.
   def on_program(stmts)
     range = {
-      start: 1,
-      end: lines.length,
-      char_start: 0,
-      char_end: source.length
+      start: 1, end: lines.length, char_start: 0, char_end: source.length
     }
 
     stmts[:body] << @__end__ if @__end__
     stmts.bind(0, source.length)
 
-    range.merge(
-      type: :program,
-      body: [stmts],
-      comments: @comments
-    )
+    range.merge(type: :program, body: [stmts], comments: @comments)
   end
 
   # qsymbols_new is a parser event that represents the beginning of a symbol
@@ -1577,22 +1557,43 @@ class Prettier::Parser < Ripper
     )
   end
 
+  # rescue is a special kind of node where you have a rescue chain but it
+  # doesn't really have all of the information that it needs in order to
+  # determine its ending. Therefore it relies on its parent bodystmt node to
+  # report its ending to it.
+  class Rescue < SimpleDelegator
+    def bind(char_end)
+      merge!(char_end: char_end)
+
+      stmts = self[:body][2]
+      consequent = self[:body][3]
+
+      if consequent
+        consequent.bind(char_end)
+        stmts.bind(stmts[:char_start], consequent[:char_start])
+      else
+        stmts.bind(stmts[:char_start], char_end)
+      end
+    end
+  end
+
   # rescue is a parser event that represents the use of the rescue keyword
   # inside of a bodystmt.
   def on_rescue(exceptions, variable, stmts, consequent)
     beging = find_scanner_event(:@kw, 'rescue')
-    ending = consequent || stmts
 
     stmts.bind(
-      (variable || (exceptions || [])[-1] || beging)[:char_end],
-      ending[:char_start]
+      ((exceptions || [])[-1] || variable || beging)[:char_end],
+      char_pos
     )
 
-    beging.merge!(
-      type: :rescue,
-      body: [exceptions, variable, stmts, consequent],
-      end: ending[:end],
-      char_end: ending[:char_end]
+    Rescue.new(
+      beging.merge!(
+        type: :rescue,
+        body: [exceptions, variable, stmts, consequent],
+        end: lineno,
+        char_end: char_pos
+      )
     )
   end
 
@@ -1668,11 +1669,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'class')
     ending = find_scanner_event(:@kw, 'end')
 
-    range = { char_start: target[:char_end], char_end: ending[:char_start] }
-
-    bodystmt.merge!(range)
-    stmts, *others = bodystmt[:body]
-    stmts.bind(range[:char_start], range[:char_end]) unless others.any?
+    bodystmt.bind(target[:char_end], ending[:char_start])
 
     {
       type: :sclass,
@@ -1691,49 +1688,24 @@ class Prettier::Parser < Ripper
   # stmts nodes will report back down the location information. We then
   # propagate that onto void_stmt nodes inside the stmts in order to make sure
   # all comments get printed appropriately.
-  class Stmts
-    attr_reader :statements, :serialized
-
-    def initialize(lineno, char_pos)
-      @statements = []
-      @serialized = {
-        type: :stmts,
-        body: @statements,
-        start: lineno,
-        end: lineno,
-        char_start: char_pos,
-        char_end: char_pos
-      }
-    end
-
+  class Stmts < SimpleDelegator
     def bind(char_start, char_end)
-      serialized.merge!(char_start: char_start, char_end: char_end)
+      merge!(char_start: char_start, char_end: char_end)
 
-      if statements[0][:type] == :void_stmt
-        statements[0].merge!(
-          char_start: char_start,
-          char_end: char_start
-        )
+      if self[:body][0][:type] == :void_stmt
+        self[:body][0].merge!(char_start: char_start, char_end: char_start)
       end
     end
 
     def <<(statement)
-      if statements.any?
-        serialized.merge!(statement.slice(:end, :char_end))
+      if self[:body].any?
+        merge!(statement.slice(:end, :char_end))
       else
-        serialized.merge!(statement.slice(:start, :end, :char_start, :char_end))
+        merge!(statement.slice(:start, :end, :char_start, :char_end))
       end
 
-      statements << statement
+      self[:body] << statement
       self
-    end
-
-    def [](key)
-      serialized[key]
-    end
-
-    def to_json(*args)
-      serialized.to_json(*args)
     end
   end
 
@@ -1741,11 +1713,18 @@ class Prettier::Parser < Ripper
   # statements within any lexical block. It can be followed by any number of
   # stmts_add events, which we'll append onto an array body.
   def on_stmts_new
-    Stmts.new(lineno, char_pos)
+    Stmts.new(
+      type: :stmts,
+      body: [],
+      start: lineno,
+      end: lineno,
+      char_start: char_pos,
+      char_end: char_pos
+    )
   end
 
   # stmts_add is a parser event that represents a single statement inside a
-  # list of statements within any lexical block. It accepts as arguments the 
+  # list of statements within any lexical block. It accepts as arguments the
   # parent stmts node as well as an stmt which can be any expression in
   # Ruby.
   def on_stmts_add(stmts, stmt)
@@ -1791,9 +1770,7 @@ class Prettier::Parser < Ripper
   # piece of the string.
   def on_string_add(string, piece)
     string.merge!(
-      body: string[:body] << piece,
-      end: piece[:end],
-      char_end: piece[:char_end]
+      body: string[:body] << piece, end: piece[:end], char_end: piece[:char_end]
     )
   end
 
@@ -1870,6 +1847,18 @@ class Prettier::Parser < Ripper
   # A symbol is a parser event that immediately descends from a symbol
   # literal and contains an ident representing the contents of the symbol.
   def on_symbol(ident)
+    # What the heck is this here for you ask!? Turns out when Ripper is lexing
+    # source text, it turns symbols into keywords if their contents match, which
+    # will mess up the location information of all of our other nodes.
+    #
+    # So for example instead of { type: :@ident, body: "class" } you would
+    # instead get { type: :@kw, body: "class" } which is all kinds of
+    # problematic.
+    #
+    # In order to take care of this, we explicitly delete this scanner event
+    # from the stack to make sure it doesn't screw things up.
+    scanner_events.pop
+
     ident.merge(type: :symbol, body: [ident])
   end
 
@@ -1882,10 +1871,7 @@ class Prettier::Parser < Ripper
       contents.merge(type: :symbol_literal, body: [contents])
     else
       beging = find_scanner_event(:@symbeg)
-      contents.merge!(
-        type: :symbol_literal,
-        char_start: beging[:char_start]
-      )
+      contents.merge!(type: :symbol_literal, char_start: beging[:char_start])
     end
   end
 
@@ -1916,8 +1902,7 @@ class Prettier::Parser < Ripper
   def find_colon2_before(const)
     index =
       scanner_events.rindex do |event|
-        event[:type] == :@op &&
-          event[:body] == '::' &&
+        event[:type] == :@op && event[:body] == '::' &&
           event[:char_start] < const[:char_start]
       end
 
@@ -2225,9 +2210,7 @@ class Prettier::Parser < Ripper
       piece.merge(type: :word, body: [piece])
     else
       word.merge!(
-        body: word[:body] << piece,
-        end: piece[:end],
-        char_end: piece[:char_end]
+        body: word[:body] << piece, end: piece[:end], char_end: piece[:char_end]
       )
     end
   end
@@ -2306,9 +2289,7 @@ class Prettier::Parser < Ripper
     else
       ending = find_scanner_event(:@tstring_end)
       xstring.merge!(
-        type: :xstring_literal,
-        end: ending[:end],
-        char_end: ending[:char_end]
+        type: :xstring_literal, end: ending[:end], char_end: ending[:char_end]
       )
     end
   end
