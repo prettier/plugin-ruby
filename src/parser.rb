@@ -132,7 +132,6 @@ class Prettier::Parser < Ripper
       events = {
         assoc_splat: [:@op, '**'],
         arg_paren: :@lparen,
-        args_forward: [:@op, '...'],
         begin: [:@kw, 'begin'],
         blockarg: [:@op, '&'],
         brace_block: :@lbrace,
@@ -350,6 +349,9 @@ class Prettier::Parser < Ripper
         )
       end
 
+      # args_add_star is a parser event that represents adding a splat of values
+      # to a list of arguments. If accepts as arguments the parent args node as
+      # well as the part that is being splatted.
       def on_args_add_star(args, part)
         beging = find_scanner_event(:@op, '*')
         ending = part || beging
@@ -362,6 +364,12 @@ class Prettier::Parser < Ripper
           end: ending[:end],
           char_end: ending[:char_end]
         }
+      end
+
+      # args_forward is a parser event that represents forwarding all kinds of
+      # arguments onto another method call.
+      def on_args_forward
+        find_scanner_event(:@op, '...').merge!(type: :args_forward)
       end
 
       # Array nodes can contain a myriad of subnodes because of the special
