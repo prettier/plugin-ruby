@@ -139,7 +139,6 @@ class Prettier::Parser < Ripper
         case: [:@kw, 'case'],
         class: [:@kw, 'class'],
         do_block: [:@kw, 'do'],
-        ensure: [:@kw, 'ensure'],
         for: [:@kw, 'for'],
         hash: :@lbrace,
         in: [:@kw, 'in'],
@@ -153,7 +152,6 @@ class Prettier::Parser < Ripper
         return: [:@kw, 'return'],
         sclass: [:@kw, 'class'],
         until: [:@kw, 'until'],
-        when: [:@kw, 'when'],
         while: [:@kw, 'while'],
         yield: [:@kw, 'yield']
       }
@@ -681,6 +679,27 @@ class Prettier::Parser < Ripper
         )
 
         @embdoc = nil
+      end
+
+      # ensure is a parser event that represents the use of the ensure keyword
+      # and its subsequent statements.
+      def on_ensure(stmts)
+        beging = find_scanner_event(:@kw, 'ensure')
+        ending = find_scanner_event(:@kw, 'end')
+
+        stmts.merge!(
+          char_start: beging[:char_end],
+          char_end: ending[:char_start]
+        )
+
+        {
+          type: :ensure,
+          body: [stmts],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
       end
 
       def on_excessed_comma
@@ -1451,6 +1470,29 @@ class Prettier::Parser < Ripper
           end: lineno,
           char_start: char_pos,
           char_end: char_pos
+        }
+      end
+
+      # when is a parser event that represents another clause in a case chain.
+      # It accepts as arguments the predicate of the when, the statements that
+      # are contained within the else if clause, and the optional consequent
+      # clause.
+      def on_when(predicate, stmts, consequent)
+        beging = find_scanner_event(:@kw, 'when')
+        ending = consequent || find_scanner_event(:@kw, 'end')
+
+        stmts.merge!(
+          char_start: predicate[:char_end],
+          char_end: ending[:char_start]
+        )
+
+        {
+          type: :when,
+          body: [predicate, stmts, consequent],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
         }
       end
 
