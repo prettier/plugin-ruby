@@ -835,6 +835,34 @@ class Prettier::Parser < Ripper
     }
   end
 
+  # dot2 is a parser event that represents using the .. operator between two
+  # expressions. Usually this is to create a range object but sometimes it's to
+  # use the flip-flop operator.
+  def on_dot2(left, right)
+    {
+      type: :dot2,
+      body: [left, right],
+      start: left[:start],
+      char_start: left[:char_start],
+      end: right[:end],
+      char_end: right[:char_end]
+    }
+  end
+
+  # dot3 is a parser event that represents using the ... operator between two
+  # expressions. Usually this is to create a range object but sometimes it's to
+  # use the flip-flop operator.
+  def on_dot3(left, right)
+    {
+      type: :dot3,
+      body: [left, right],
+      start: left[:start],
+      char_start: left[:char_start],
+      end: right[:end],
+      char_end: right[:char_end]
+    }
+  end
+
   # A dyna_symbol is a parser event that represents a symbol literal that
   # uses quotes to interpolate its value. For example, if you had a variable
   # foo and you wanted a symbol that contained its value, you would write:
@@ -2374,11 +2402,17 @@ class Prettier::Parser < Ripper
     find_scanner_event(:@kw, 'super').merge!(type: :zsuper)
   end
 
-  defined = private_instance_methods(false).grep(/\Aon_/) {$'.to_sym}
+  default = %i[
+    begin
+    block_var
+    bodystmt
+    method_add_arg
+    method_add_block
+    rescue
+    rescue_mod
+  ]
 
-  # Parser events represent nodes in the ripper abstract syntax tree. The event
-  # is reported after the children of the node have already been built.
-  (PARSER_EVENTS - defined).each do |event|
+  default.each do |event|
     define_method(:"on_#{event}") do |*body|
       min = body.map { |part| part.is_a?(Hash) ? part[:start] : lineno }.min
       children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
