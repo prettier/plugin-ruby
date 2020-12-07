@@ -138,12 +138,10 @@ class Prettier::Parser < Ripper
         do_block: [:@kw, 'do'],
         for: [:@kw, 'for'],
         in: [:@kw, 'in'],
-        kwrest_param: [:@op, '**'],
         lambda: :@tlambda,
         module: [:@kw, 'module'],
         next: [:@kw, 'next'],
         rescue: [:@kw, 'rescue'],
-        rest_param: [:@op, '*'],
         return: [:@kw, 'return'],
         sclass: [:@kw, 'class'],
         yield: [:@kw, 'yield']
@@ -915,6 +913,20 @@ class Prettier::Parser < Ripper
         }
       end
 
+      # kwrest_param is a parser event that represents defining a parameter in a
+      # method definition that accepts all remaining keyword parameters.
+      def on_kwrest_param(ident)
+        oper = find_scanner_event(:@op, '**')
+        return oper.merge!(type: :kwrest_param, body: [nil]) unless ident
+
+        oper.merge!(
+          type: :kwrest_param,
+          body: [ident],
+          end: ident[:end],
+          char_end: ident[:char_end]
+        )
+      end
+
       # massign is a parser event that is a parent node of any kind of multiple
       # assignment. This includes splitting out variables on the left like:
       #
@@ -1210,6 +1222,22 @@ class Prettier::Parser < Ripper
           ending: ending[:body],
           end: ending[:end],
           char_end: ending[:char_end]
+        )
+      end
+
+      # rest_param is a parser event that represents defining a parameter in a
+      # method definition that accepts all remaining positional parameters. It
+      # accepts as an argument an optional identifier for the parameter. If it
+      # is omitted, then we're just using the plain operator.
+      def on_rest_param(ident)
+        oper = find_scanner_event(:@op, '*')
+        return oper.merge!(type: :rest_param, body: [nil]) unless ident
+
+        oper.merge!(
+          type: :rest_param,
+          body: [ident],
+          end: ident[:end],
+          char_end: ident[:char_end]
         )
       end
 
