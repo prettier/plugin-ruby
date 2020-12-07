@@ -74,7 +74,7 @@ describe("comments", () => {
       });
     });
 
-    test.skip("if/elsif/else/end statements", () => {
+    test("if/elsif/else/end statements", () => {
       const content = ruby(`
         if a
           # this is the only comment in this if
@@ -194,7 +194,7 @@ describe("comments", () => {
   });
 
   describe("method calls", () => {
-    test.skip("on their own lines", () => {
+    test("on their own lines", () => {
       const content = ruby(`
         foo.bar(
           # this is a comment at the beginning of the method call
