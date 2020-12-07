@@ -145,7 +145,6 @@ class Prettier::Parser < Ripper
         lambda: :@tlambda,
         module: [:@kw, 'module'],
         next: [:@kw, 'next'],
-        paren: :@lparen,
         rescue: [:@kw, 'rescue'],
         rest_param: [:@op, '*'],
         return: [:@kw, 'return'],
