@@ -462,6 +462,17 @@ class Prettier::Parser < Ripper
     }
   end
 
+  # begin is a parser event that represents the beginning of a begin..end chain.
+  # It includes a bodystmt event that has all of the consequent clauses.
+  def on_begin(bodystmt)
+    find_scanner_event(:@kw, 'begin').merge!(
+      type: :begin,
+      body: [bodystmt],
+      end: bodystmt[:end],
+      char_end: bodystmt[:char_end]
+    )
+  end
+
   # binary is a parser event that represents a binary operation between two
   # values.
   def on_binary(left, oper, right)
@@ -507,6 +518,21 @@ class Prettier::Parser < Ripper
       end: ident[:end],
       char_end: ident[:char_end]
     )
+  end
+
+  # bodystmt is a parser event that represents all of the possible combinations
+  # of clauses within the body of a method or block.
+  def on_bodystmt(stmts, rescued, ensured, elsed)
+    pieces = [stmts, rescued, ensured, elsed].compact
+
+    {
+      type: :bodystmt,
+      body: [stmts, rescued, ensured, elsed],
+      start: pieces[0][:start],
+      char_start: pieces[0][:char_start],
+      end: pieces[-1][:end],
+      char_end: pieces[-1][:char_end]
+    }
   end
 
   # brace_block is a parser event that represents passing a block to a
@@ -2469,28 +2495,20 @@ class Prettier::Parser < Ripper
     find_scanner_event(:@kw, 'super').merge!(type: :zsuper)
   end
 
-  default = [
-    :begin, # 1
-    :bodystmt, # 4
-    :rescue, # 4
-  ]
+  def on_rescue(*body)
+    min = body.map { |part| part.is_a?(Hash) ? part[:start] : lineno }.min
+    children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
+    char_starts =
+      children.map { |part| part[:char_start] if part.is_a?(Hash) }.compact
 
-  default.each do |event|
-    define_method(:"on_#{event}") do |*body|
-      min = body.map { |part| part.is_a?(Hash) ? part[:start] : lineno }.min
-      children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
-      char_starts =
-        children.map { |part| part[:char_start] if part.is_a?(Hash) }.compact
-
-      {
-        type: event,
-        body: body,
-        start: min || lineno,
-        end: lineno,
-        char_start: char_starts.min || char_pos,
-        char_end: char_pos
-      }
-    end
+    {
+      type: :rescue,
+      body: body,
+      start: min || lineno,
+      end: lineno,
+      char_start: char_starts.min || char_pos,
+      char_end: char_pos
+    }
   end
 end
 
