@@ -77,10 +77,15 @@ module.exports = {
       stmts[0].type === "void_stmt" &&
       stmts[0].comments
     ) {
-      const comments = stmts[0].comments.map((comment) => {
-        comment.printed = true;
-        return `#${comment.value}`;
-      });
+      const comments = path.map(
+        (commentPath, index) => {
+          stmts[0].comments[index].printed = true;
+          return opts.printer.printComment(commentPath);
+        },
+        "body",
+        0,
+        "comments"
+      );
 
       return concat([breakParent, join(hardline, comments)]);
     }

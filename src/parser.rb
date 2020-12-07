@@ -98,81 +98,20 @@ class Prettier::Parser < Ripper
   PARSER_EVENTS.each do |event|
     define_method(:"on_#{event}") do |*body|
       min = body.map { |part| part.is_a?(Hash) ? part[:start] : lineno }.min
-      { type: event, body: body, start: min || lineno, end: lineno }
+      children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
+      char_starts =
+        children.map { |part| part[:char_start] if part.is_a?(Hash) }.compact
+
+      {
+        type: event,
+        body: body,
+        start: min || lineno,
+        end: lineno,
+        char_start: char_starts.min || char_pos,
+        char_end: char_pos
+      }
     end
   end
-
-  # For each node, we need to attach where it came from in order to be able to
-  # support placing the cursor correctly before and after formatting.
-  #
-  # For most nodes, it's enough to look at the child nodes to determine the
-  # start of the parent node. However, for some nodes it's necessary to keep
-  # track of the keywords as they come in from the lexer and to modify the start
-  # node once we have it.
-  prepend(
-    Module.new do
-      private
-
-      def char_start_for(body)
-        children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
-        char_starts =
-          children.map { |part| part[:char_start] if part.is_a?(Hash) }.compact
-
-        char_starts.min || char_pos
-      end
-
-      def char_end_for(body)
-        children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
-        char_ends =
-          children.map { |part| part[:char_end] if part.is_a?(Hash) }.compact
-
-        char_ends.max || char_pos
-      end
-
-      events = {
-        begin: [:@kw, 'begin'],
-        in: [:@kw, 'in'],
-        rescue: [:@kw, 'rescue']
-      }
-
-      events.each do |event, (type, scanned)|
-        define_method(:"on_#{event}") do |*body|
-          node = find_scanner_event(type, scanned || :any)
-
-          super(*body).merge!(
-            start: node[:start],
-            char_start: node[:char_start],
-            char_end: char_pos
-          )
-        end
-      end
-
-      # Array pattern nodes contain an odd mix of potential child nodes based on
-      # which kind of pattern is being used.
-      def on_aryptn(*body)
-        char_start, char_end = char_pos, char_pos
-
-        body.flatten(1).each do |part|
-          next unless part
-
-          char_start = [char_start, part[:char_start]].min
-          char_end = [char_end, part[:char_end]].max
-        end
-
-        super(*body).merge!(char_start: char_start, char_end: char_end)
-      end
-
-      defined = private_instance_methods(false).grep(/\Aon_/) { $'.to_sym }
-
-      (PARSER_EVENTS - defined).each do |event|
-        define_method(:"on_#{event}") do |*body|
-          super(*body).merge!(
-            char_start: char_start_for(body), char_end: char_pos
-          )
-        end
-      end
-    end
-  )
 
   prepend(
     Module.new do
