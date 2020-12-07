@@ -394,6 +394,21 @@ class Prettier::Parser < Ripper
     end
   end
 
+  # aryptn is a parser event that represents matching against an array pattern
+  # using the Ruby 2.7+ pattern matching syntax.
+  def on_aryptn(const, preargs, splatarg, postargs)
+    pieces = [const, *preargs, splatarg, *postargs].compact
+
+    {
+      type: :aryptn,
+      body: [const, preargs, splatarg, postargs],
+      start: pieces[0][:start],
+      char_start: pieces[0][:char_start],
+      end: pieces[-1][:end],
+      char_end: pieces[-1][:char_end]
+    }
+  end
+
   # assign is a parser event that represents assigning something to a
   # variable or constant. It accepts as arguments the left side of the
   # expression before the equals sign and the right side of the expression.
@@ -843,13 +858,18 @@ class Prettier::Parser < Ripper
   # expressions. Usually this is to create a range object but sometimes it's to
   # use the flip-flop operator.
   def on_dot2(left, right)
+    operator = find_scanner_event(:@op, '..')
+
+    beging = left || operator
+    ending = right || operator
+
     {
       type: :dot2,
       body: [left, right],
-      start: left[:start],
-      char_start: left[:char_start],
-      end: right[:end],
-      char_end: right[:char_end]
+      start: beging[:start],
+      char_start: beging[:char_start],
+      end: ending[:end],
+      char_end: ending[:char_end]
     }
   end
 
@@ -857,13 +877,18 @@ class Prettier::Parser < Ripper
   # expressions. Usually this is to create a range object but sometimes it's to
   # use the flip-flop operator.
   def on_dot3(left, right)
+    operator = find_scanner_event(:@op, '...')
+
+    beging = left || operator
+    ending = right || operator
+
     {
       type: :dot3,
       body: [left, right],
-      start: left[:start],
-      char_start: left[:char_start],
-      end: right[:end],
-      char_end: right[:char_end]
+      start: beging[:start],
+      char_start: beging[:char_start],
+      end: ending[:end],
+      char_end: ending[:char_end]
     }
   end
 
@@ -1123,6 +1148,21 @@ class Prettier::Parser < Ripper
     @heredocs[-1].merge!(ending: ending.chomp, end: lineno, char_end: char_pos)
   end
 
+  # hshptn is a parser event that represents matching against a hash pattern
+  # using the Ruby 2.7+ pattern matching syntax.
+  def on_hshptn(const, kw, kwrest)
+    pieces = [const, kw, kwrest].flatten(2).compact
+
+    {
+      type: :hshptn,
+      body: [const, kw, kwrest],
+      start: pieces[0][:start],
+      char_start: pieces[0][:char_start],
+      end: pieces[-1][:end],
+      char_end: pieces[-1][:char_end]
+    }
+  end
+
   # if is a parser event that represents the first clause in an if chain.
   # It accepts as arguments the predicate of the if, the statements that are
   # contained within the if clause, and the optional consequent clause.
@@ -1168,6 +1208,22 @@ class Prettier::Parser < Ripper
       end: predicate[:end],
       char_end: predicate[:char_end]
     }
+  end
+
+  # in is a parser event that represents using the in keyword within the
+  # Ruby 2.7+ pattern matching syntax.
+  def on_in(pattern, stmts, consequent)
+    beging = find_scanner_event(:@kw, 'in')
+    ending = consequent || find_scanner_event(:@kw, 'end')
+
+    stmts.bind(beging[:char_end], ending[:char_start])
+
+    beging.merge!(
+      type: :in,
+      body: [pattern, stmts, consequent],
+      end: ending[:end],
+      char_end: ending[:char_end]
+    )
   end
 
   # kwrest_param is a parser event that represents defining a parameter in a
@@ -2115,7 +2171,13 @@ class Prettier::Parser < Ripper
   #     foo = 1
   #
   def on_var_field(ident)
-    ident.merge(type: :var_field, body: [ident])
+    if ident
+      ident.merge(type: :var_field, body: [ident])
+    else
+      # You can hit this pattern if you're assigning to a splat using pattern
+      # matching syntax in Ruby 2.7+
+      { type: :var_field, body: [] }
+    end
   end
 
   # vcall nodes are any plain named thing with Ruby that could be either a

@@ -26,7 +26,10 @@ afterAll(() => {
 const realFormat = (content, config = {}) =>
   prettier.format(
     content,
-    Object.assign({ parser: "ruby", plugins: ["."] }, config)
+    Object.assign(
+      { parser: "ruby", plugins: ["."], originalText: content },
+      config
+    )
   );
 
 const checkFormat = (before, after, config) =>
@@ -39,7 +42,10 @@ const checkFormat = (before, after, config) =>
       // process.
       resolve(realFormat(before, config));
     } else {
-      const opts = Object.assign({ parser: "ruby", plugins: ["."] }, config);
+      const opts = Object.assign(
+        { parser: "ruby", plugins: ["."], originalText: before },
+        config
+      );
 
       rl.question(`${before}\n---\n`, (response) => {
         const { formatted } = formatAST(JSON.parse(response), opts);

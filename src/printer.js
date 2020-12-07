@@ -39,10 +39,23 @@ function canAttachComment(node) {
 // This function tells prettier how to recurse down our AST so that it can find
 // where it needs to attach the comments.
 function getCommentChildNodes(node) {
-  if (node.type === "rescue") {
-    return node.body[0].concat(node.body.slice(1));
+  switch (node.type) {
+    case "rescue":
+      return node.body[0].concat(node.body.slice(1));
+    case "aryptn":
+      return [node.body[0]]
+        .concat(node.body[1])
+        .concat(node.body[2])
+        .concat(node.body[3]);
+    case "hshptn": {
+      const pairs = node.body[1];
+      const values = pairs.reduce((left, right) => left.concat(right), []);
+
+      return [node.body[0]].concat(values).concat(node.body[2]);
+    }
+    default:
+      return node.body;
   }
-  return node.body;
 }
 
 // This is the generic print function for any comment in the AST. It handles
