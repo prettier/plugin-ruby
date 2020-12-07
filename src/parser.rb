@@ -151,8 +151,6 @@ class Prettier::Parser < Ripper
         rest_param: [:@op, '*'],
         return: [:@kw, 'return'],
         sclass: [:@kw, 'class'],
-        until: [:@kw, 'until'],
-        while: [:@kw, 'while'],
         yield: [:@kw, 'yield']
       }
 
@@ -1411,6 +1409,44 @@ class Prettier::Parser < Ripper
         }
       end
 
+      # until is a parser event that represents an until loop. It accepts as
+      # arguments the predicate to the until and the statements that are
+      # contained within the until clause.
+      def on_until(predicate, stmts)
+        beging = find_scanner_event(:@kw, 'until')
+        ending = find_scanner_event(:@kw, 'end')
+
+        stmts.merge!(
+          char_start: predicate[:char_end],
+          char_end: ending[:char_start]
+        )
+
+        {
+          type: :until,
+          body: [predicate, stmts],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
+      # until_mod is a parser event that represents the modifier form of an
+      # until loop. It accepts as arguments the predicate to the until and the
+      # statement that is contained within the until loop.
+      def on_until_mod(predicate, statement)
+        find_scanner_event(:@kw, 'until')
+
+        {
+          type: :until_mod,
+          body: [predicate, statement],
+          start: statement[:start],
+          char_start: statement[:char_start],
+          end: predicate[:end],
+          char_end: predicate[:char_end]
+        }
+      end
+
       # var_alias is a parser event that represents when you're using the alias
       # keyword with global variable arguments. You can optionally use
       # parentheses with this keyword, so we either track the location
@@ -1493,6 +1529,44 @@ class Prettier::Parser < Ripper
           char_start: beging[:char_start],
           end: ending[:end],
           char_end: ending[:char_end]
+        }
+      end
+
+      # while is a parser event that represents a while loop. It accepts as
+      # arguments the predicate to the while and the statements that are
+      # contained within the while clause.
+      def on_while(predicate, stmts)
+        beging = find_scanner_event(:@kw, 'while')
+        ending = find_scanner_event(:@kw, 'end')
+
+        stmts.merge!(
+          char_start: predicate[:char_end],
+          char_end: ending[:char_start]
+        )
+
+        {
+          type: :while,
+          body: [predicate, stmts],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
+      # while_mod is a parser event that represents the modifier form of an
+      # while loop. It accepts as arguments the predicate to the while and the
+      # statement that is contained within the while loop.
+      def on_while_mod(predicate, statement)
+        find_scanner_event(:@kw, 'while')
+
+        {
+          type: :while_mod,
+          body: [predicate, statement],
+          start: statement[:start],
+          char_start: statement[:char_start],
+          end: predicate[:end],
+          char_end: predicate[:char_end]
         }
       end
 
