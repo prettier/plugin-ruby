@@ -139,12 +139,9 @@ class Prettier::Parser < Ripper
         case: [:@kw, 'case'],
         class: [:@kw, 'class'],
         do_block: [:@kw, 'do'],
-        else: [:@kw, 'else'],
-        elsif: [:@kw, 'elsif'],
         ensure: [:@kw, 'ensure'],
         for: [:@kw, 'for'],
         hash: :@lbrace,
-        if: [:@kw, 'if'],
         in: [:@kw, 'in'],
         kwrest_param: [:@op, '**'],
         lambda: :@tlambda,
@@ -155,7 +152,6 @@ class Prettier::Parser < Ripper
         rest_param: [:@op, '*'],
         return: [:@kw, 'return'],
         sclass: [:@kw, 'class'],
-        unless: [:@kw, 'unless'],
         until: [:@kw, 'until'],
         when: [:@kw, 'when'],
         while: [:@kw, 'while'],
@@ -606,6 +602,51 @@ class Prettier::Parser < Ripper
         end
       end
 
+      # else is a parser event that represents the end of a if, unless, or begin
+      # chain. It accepts as an argument the statements that are contained
+      # within the else clause.
+      def on_else(stmts)
+        beging = find_scanner_event(:@kw, 'else')
+        ending = find_scanner_event(:@kw, 'end')
+
+        stmts.merge!(
+          char_start: beging[:char_end],
+          char_end: ending[:char_start]
+        )
+
+        {
+          type: :else,
+          body: [stmts],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
+      # elsif is a parser event that represents another clause in an if chain.
+      # It accepts as arguments the predicate of the else if, the statements
+      # that are contained within the else if clause, and the optional
+      # consequent clause.
+      def on_elsif(predicate, stmts, consequent)
+        beging = find_scanner_event(:@kw, 'elsif')
+        ending = consequent || find_scanner_event(:@kw, 'end')
+
+        stmts.merge!(
+          char_start: predicate[:char_end],
+          char_end: ending[:char_start]
+        )
+
+        {
+          type: :elsif,
+          body: [predicate, stmts, consequent],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
       # embdocs are long comments that are surrounded by =begin..=end. They
       # cannot be nested, so we don't need to worry about keeping a stack around
       # like we do with heredocs. Instead we can just track the current embdoc
@@ -703,6 +744,44 @@ class Prettier::Parser < Ripper
       # Like comments, we need to force the encoding here so JSON doesn't break.
       def on_ident(value)
         super(value.force_encoding('UTF-8'))
+      end
+
+      # if is a parser event that represents the first clause in an if chain.
+      # It accepts as arguments the predicate of the if, the statements that are
+      # contained within the if clause, and the optional consequent clause.
+      def on_if(predicate, stmts, consequent)
+        beging = find_scanner_event(:@kw, 'if')
+        ending = consequent || find_scanner_event(:@kw, 'end')
+
+        stmts.merge!(
+          char_start: predicate[:char_end],
+          char_end: ending[:char_start]
+        )
+
+        {
+          type: :if,
+          body: [predicate, stmts, consequent],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
+      # if_mod is a parser event that represents the modifier form of an if
+      # statement. It accepts as arguments the predicate of the if and the
+      # statement that are contained within the if clause.
+      def on_if_mod(predicate, statement)
+        find_scanner_event(:@kw, 'if')
+
+        {
+          type: :if_mod,
+          body: [predicate, statement],
+          start: statement[:start],
+          char_start: statement[:char_start],
+          end: predicate[:end],
+          char_end: predicate[:char_end]
+        }
       end
 
       # massign is a parser event that is a parent node of any kind of multiple
@@ -1272,6 +1351,45 @@ class Prettier::Parser < Ripper
           end: last[:end],
           char_end: last[:char_end]
         )
+      end
+
+      # unless is a parser event that represents the first clause in an unless
+      # chain. It accepts as arguments the predicate of the unless, the
+      # statements that are contained within the unless clause, and the optional
+      # consequent clause.
+      def on_unless(predicate, stmts, consequent)
+        beging = find_scanner_event(:@kw, 'unless')
+        ending = consequent || find_scanner_event(:@kw, 'end')
+
+        stmts.merge!(
+          char_start: predicate[:char_end],
+          char_end: ending[:char_start]
+        )
+
+        {
+          type: :unless,
+          body: [predicate, stmts, consequent],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
+      # unless_mod is a parser event that represents the modifier form of an
+      # unless statement. It accepts as arguments the predicate of the unless
+      # and the statement that are contained within the unless clause.
+      def on_unless_mod(predicate, statement)
+        find_scanner_event(:@kw, 'unless')
+
+        {
+          type: :unless_mod,
+          body: [predicate, statement],
+          start: statement[:start],
+          char_start: statement[:char_start],
+          end: predicate[:end],
+          char_end: predicate[:char_end]
+        }
       end
 
       # var_alias is a parser event that represents when you're using the alias
