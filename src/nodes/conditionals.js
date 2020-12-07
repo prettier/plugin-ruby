@@ -90,21 +90,15 @@ function printSingle(keyword, modifier = false) {
       `${keyword} `,
       align(keyword.length + 1, predicateDoc),
       indent(concat([softline, statementsDoc])),
-      concat([softline, "end"])
+      softline,
+      "end"
     ];
-
-    // If the body of the conditional is empty but it has comments, then we
-    // don't want to print a newline before we print the comments, because it
-    // will result in an extra line in the body.
-    if (isEmptyStmts(statementsNode) && statementsNode.comments) {
-      multilineParts[2] = indent(statementsDoc);
-    }
 
     // If we do not allow modifier form conditionals or there are comments
     // inside of the body of the conditional, then we must print in the
     // multiline form.
-    if (!inlineConditionals || statementsNode.comments) {
-      return concat([multilineParts].concat(breakParent));
+    if (!inlineConditionals || statementsNode.body[0].comments) {
+      return concat([concat(multilineParts), breakParent]);
     }
 
     const inline = concat(
