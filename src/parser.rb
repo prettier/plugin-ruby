@@ -2,9 +2,9 @@
 
 # We implement our own version checking here instead of using Gem::Version so
 # that we can use the --disable-gems flag.
-major, minor, * = RUBY_VERSION.split('.').map(&:to_i)
+RUBY_MAJOR, RUBY_MINOR, * = RUBY_VERSION.split('.').map(&:to_i)
 
-if (major < 2) || ((major == 2) && (minor < 5))
+if (RUBY_MAJOR < 2) || ((RUBY_MAJOR == 2) && (RUBY_MINOR < 5))
   warn(
     "Ruby version #{RUBY_VERSION} not supported. " \
       'Please upgrade to 2.5.0 or above.'
@@ -606,7 +606,15 @@ class Prettier::Parser < Ripper
   #     foo.(1, 2, 3)
   #
   def on_call(receiver, oper, sending)
-    ending = sending == :call ? oper : sending
+    ending = sending
+
+    if sending == :call
+      ending = oper
+
+      # Special handling here for Ruby <= 2.5 because the oper argument to this
+      # method wasn't a parser event here it was just a plain symbol.
+      ending = receiver if RUBY_MAJOR <= 2 && RUBY_MINOR <= 5
+    end
 
     {
       type: :call,
@@ -906,12 +914,25 @@ class Prettier::Parser < Ripper
     end
   end
 
+  # else can either end with an end keyword (in which case we'll want to
+  # consume that event) or it can end with an ensure keyword (in which case
+  # we'll leave that to the ensure to handle).
+  def find_else_ending
+    index =
+      scanner_events.rindex do |event|
+        event[:type] == :@kw && %w[end ensure].include?(event[:body])
+      end
+
+    event = scanner_events[index]
+    event[:body] == 'end' ? scanner_events.delete_at(index) : event
+  end
+
   # else is a parser event that represents the end of a if, unless, or begin
   # chain. It accepts as an argument the statements that are contained
   # within the else clause.
   def on_else(stmts)
     beging = find_scanner_event(:@kw, 'else')
-    ending = find_scanner_event(:@kw, 'end')
+    ending = find_else_ending
 
     stmts.bind(beging[:char_end], ending[:char_start])
 
@@ -997,7 +1018,11 @@ class Prettier::Parser < Ripper
     }
   end
 
-  def on_excessed_comma
+  # An excessed_comma is a special kind of parser event that represents a comma
+  # at the end of a list of parameters. It's a very strange node. It accepts a
+  # different number of arguments depending on Ruby version, which is why we
+  # have the anonymous splat there.
+  def on_excessed_comma(*)
     find_scanner_event(:@comma).merge!(type: :excessed_comma)
   end
 
@@ -1436,7 +1461,7 @@ class Prettier::Parser < Ripper
   # type of param and the subarray is the list of parameters of that type.
   # We therefore have to flatten them down to get to the location.
   def on_params(*types)
-    flattened = types.flatten(2).select(&:itself)
+    flattened = types.flatten(2).select { |type| type.is_a?(Hash) }
     location =
       if flattened.any?
         {
