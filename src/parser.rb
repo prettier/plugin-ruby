@@ -392,6 +392,18 @@ class Prettier::Parser < Ripper
         end
       end
 
+      # assign is a parser event that represents assigning something to a
+      # variable or constant. It accepts as arguments the left side of the
+      # expression before the equals sign and the right side of the expression.
+      def on_assign(left, right)
+        left.merge(
+          type: :assign,
+          body: [left, right],
+          end: right[:end],
+          char_end: right[:char_end]
+        )
+      end
+
       # case is a parser event that represents the beginning of a case chain.
       # It accepts as arguments the switch of the case and the consequent
       # clause.
@@ -982,6 +994,19 @@ class Prettier::Parser < Ripper
       #
       def on_mrhs_new_from_args(args)
         args.merge(type: :mrhs_new_from_args, body: [args])
+      end
+
+      # opassign is a parser event that represents assigning something to a
+      # variable or constant using an operator like += or ||=. It accepts as
+      # arguments the left side of the expression before the operator, the
+      # operator itself, and the right side of the expression.
+      def on_opassign(left, oper, right)
+        left.merge(
+          type: :opassign,
+          body: [left, oper, right],
+          end: right[:end],
+          char_end: right[:char_end]
+        )
       end
 
       # A paren is a parser event that represents using parentheses pretty much
