@@ -1182,6 +1182,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
+    if assoclist_from_args
+      # Here we're going to expand out the location information for the assocs
+      # node so that it can grab up any remaining comments inside the hash.
+      assoclist_from_args.merge!(
+        char_start: beging[:char_end],
+        char_end: ending[:char_start]
+      )
+    end
+
     {
       type: :hash,
       body: [assoclist_from_args],
