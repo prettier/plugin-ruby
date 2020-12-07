@@ -130,7 +130,6 @@ function printSingle(keyword, modifier = false) {
 }
 
 const noTernary = [
-  "@comment",
   "alias",
   "assign",
   "break",
@@ -226,7 +225,7 @@ const printConditional = (keyword) => (path, { inlineConditionals }, print) => {
 
   // If the body of the conditional is empty, then we explicitly have to use the
   // block form.
-  if (isEmptyStmts(statements) && !statements.comments) {
+  if (isEmptyStmts(statements) && !statements.body[0].comments) {
     return concat([
       `${keyword} `,
       align(keyword.length + 1, path.call(print, "body", 0)),
