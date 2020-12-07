@@ -517,6 +517,30 @@ class Prettier::Parser < Ripper
         )
       end
 
+      # call is a parser event representing a method call with no arguments. It
+      # accepts as arguments the receiver of the method, the operator being used
+      # to send the method (., ::, or &.), and the value that is being sent to
+      # the receiver (which can be another nested call as well).
+      #
+      # There is one esoteric syntax that comes into play here as well. If the
+      # sending argument to this method is the symbol :call, then it represents
+      # calling a lambda in a very odd looking way, as in:
+      #
+      #     foo.(1, 2, 3)
+      #
+      def on_call(receiver, oper, sending)
+        ending = sending == :call ? oper : sending
+
+        {
+          type: :call,
+          body: [receiver, oper, sending],
+          start: receiver[:start],
+          char_start: receiver[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
       # case is a parser event that represents the beginning of a case chain.
       # It accepts as arguments the switch of the case and the consequent
       # clause.
@@ -565,6 +589,35 @@ class Prettier::Parser < Ripper
           char_start: beging[:char_start],
           end: ending[:end],
           char_end: ending[:char_end]
+        }
+      end
+
+      # command is a parser event representing a method call with arguments and
+      # no parentheses. It accepts as arguments the name of the method and the
+      # arguments being passed to the method.
+      def on_command(ident, args)
+        {
+          type: :command,
+          body: [ident, args],
+          start: ident[:start],
+          char_start: ident[:char_start],
+          end: args[:end],
+          char_end: args[:char_end]
+        }
+      end
+
+      # command_call is a parser event representing a method call on an object
+      # with arguments and no parentheses. It accepts as arguments the receiver
+      # of the method, the operator being used to send the method, the name of
+      # the method, and the arguments being passed to the method.
+      def on_command_call(receiver, oper, ident, args)
+        {
+          type: :command_call,
+          body: [receiver, oper, ident, args],
+          start: receiver[:start],
+          char_start: receiver[:char_start],
+          end: args[:end],
+          char_end: args[:char_end]
         }
       end
 
