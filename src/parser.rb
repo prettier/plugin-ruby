@@ -136,7 +136,6 @@ class Prettier::Parser < Ripper
         blockarg: [:@op, '&'],
         brace_block: :@lbrace,
         break: [:@kw, 'break'],
-        case: [:@kw, 'case'],
         class: [:@kw, 'class'],
         do_block: [:@kw, 'do'],
         for: [:@kw, 'for'],
@@ -392,6 +391,18 @@ class Prettier::Parser < Ripper
             char_start: contents[:char_start]
           )
         end
+      end
+
+      # case is a parser event that represents the beginning of a case chain.
+      # It accepts as arguments the switch of the case and the consequent
+      # clause.
+      def on_case(switch, consequent)
+        find_scanner_event(:@kw, 'case').merge!(
+          type: :case,
+          body: [switch, consequent],
+          end: consequent[:end],
+          char_end: consequent[:char_end]
+        )
       end
 
       # We keep track of each comment as it comes in and then eventually add
