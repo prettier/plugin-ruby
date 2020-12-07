@@ -807,6 +807,18 @@ class Prettier::Parser < Ripper
         }
       end
 
+      # ifop is a parser event that represents a ternary operator. It accepts as
+      # arguments the predicate to the ternary, the truthy clause, and the falsy
+      # clause.
+      def on_ifop(predicate, truthy, falsy)
+        predicate.merge(
+          type: :ifop,
+          body: [predicate, truthy, falsy],
+          end: falsy[:end],
+          char_end: falsy[:char_end]
+        )
+      end
+
       # if_mod is a parser event that represents the modifier form of an if
       # statement. It accepts as arguments the predicate of the if and the
       # statement that are contained within the if clause.
