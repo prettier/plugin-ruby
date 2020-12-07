@@ -60,7 +60,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :aref_field,
       parse('foo[bar] = baz').dig(:body, 0),
-      char_start: 0, char_end: 10
+      char_start: 0, char_end: 8
     )
   end
 
@@ -164,7 +164,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :block_var,
       parse('foo { |bar| }').dig(:body, 1, :body, 0),
-      char_start: 7, char_end: 11
+      char_start: 6, char_end: 11
     )
   end
 
@@ -493,7 +493,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :params,
       parse(content).dig(:body, 1, :body, 0),
-      char_start: 11, char_end: 23
+      char_start: 11, char_end: 21
     )
   end
 

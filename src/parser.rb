@@ -273,7 +273,7 @@ class Prettier::Parser < Ripper
     ending = find_scanner_event(:@rbracket)
 
     {
-      type: :aref,
+      type: :aref_field,
       body: [collection, index],
       start: collection[:start],
       char_start: collection[:char_start],
@@ -465,6 +465,14 @@ class Prettier::Parser < Ripper
   # begin is a parser event that represents the beginning of a begin..end chain.
   # It includes a bodystmt event that has all of the consequent clauses.
   def on_begin(bodystmt)
+    stmts, *others = bodystmt[:body]
+    ending =
+      if stmts[:body][0][:type] == :void_stmt && !others.any?
+        find_scanner_event(:@kw, 'end')
+      else
+        bodystmt
+      end
+
     find_scanner_event(:@kw, 'begin').merge!(
       type: :begin,
       body: [bodystmt],
@@ -1719,6 +1727,34 @@ class Prettier::Parser < Ripper
     )
   end
 
+  # rescue is a parser event that represents the use of the rescue keyword
+  # inside of a bodystmt.
+  def on_rescue(exceptions, variable, stmts, consequent)
+    beging = find_scanner_event(:@kw, 'rescue')
+    ending = consequent || stmts
+
+    stmts.merge!(
+      char_start: (variable || (exceptions || [])[-1] || beging)[:char_end],
+      char_end: ending[:char_start]
+    )
+
+    # If the only statement inside the list of statements is a void
+    # statement, then just shove it to the end.
+    if stmts[:body][0][:type] == :void_stmt
+      stmts[:body][0].merge!(
+        char_start: ending[:char_start],
+        char_end: ending[:char_start]
+      )
+    end
+
+    beging.merge!(
+      type: :rescue,
+      body: [exceptions, variable, stmts, consequent],
+      end: ending[:end],
+      char_end: ending[:char_end]
+    )
+  end
+
   # rescue_mod represents the modifier form of a rescue clause. It accepts as
   # arguments the statement that may raise an error and the value that should
   # be used if it does.
@@ -2493,22 +2529,6 @@ class Prettier::Parser < Ripper
   # or more values.
   def on_zsuper
     find_scanner_event(:@kw, 'super').merge!(type: :zsuper)
-  end
-
-  def on_rescue(*body)
-    min = body.map { |part| part.is_a?(Hash) ? part[:start] : lineno }.min
-    children = body.length == 1 && body[0].is_a?(Array) ? body[0] : body
-    char_starts =
-      children.map { |part| part[:char_start] if part.is_a?(Hash) }.compact
-
-    {
-      type: :rescue,
-      body: body,
-      start: min || lineno,
-      end: lineno,
-      char_start: char_starts.min || char_pos,
-      char_end: char_pos
-    }
   end
 end
 
