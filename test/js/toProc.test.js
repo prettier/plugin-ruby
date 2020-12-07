@@ -27,7 +27,7 @@ describe("to_proc transform", () => {
   test("maintains to_proc if already in use when toProcTransform true", () =>
     expect("loop(&:to_s)").toMatchFormat({ toProcTransform: true }));
 
-  test.skip("multi-line with comment", () => {
+  test("multi-line with comment", () => {
     const content = ruby(`
       foo.each do |bar|
         # comment
