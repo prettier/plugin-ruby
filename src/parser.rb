@@ -133,7 +133,6 @@ class Prettier::Parser < Ripper
         begin: [:@kw, 'begin'],
         for: [:@kw, 'for'],
         in: [:@kw, 'in'],
-        lambda: :@tlambda,
         rescue: [:@kw, 'rescue']
       }
 
@@ -1020,6 +1019,39 @@ class Prettier::Parser < Ripper
           end: ident[:end],
           char_end: ident[:char_end]
         )
+      end
+
+      # lambda is a parser event that represents using a "stabby" lambda
+      # literal. It accepts as arguments a params event that represents any
+      # parameters to the lambda and a stmts event that represents the
+      # statements inside the lambda.
+      #
+      # It can be wrapped in either {..} or do..end so we look for either of
+      # those combinations to get our bounds.
+      def on_lambda(params, stmts)
+        beging = find_scanner_event(:@tlambda)
+
+        if scanner_events.any? { |event| event[:type] == :@tlambeg }
+          opening = find_scanner_event(:@tlambeg)
+          closing = find_scanner_event(:@rbrace)
+        else
+          opening = find_scanner_event(:@kw, 'do')
+          closing = find_scanner_event(:@kw, 'end')
+        end
+
+        stmts.merge!(
+          char_start: opening[:char_end],
+          char_end: closing[:char_start]
+        )
+
+        {
+          type: :lambda,
+          body: [params, stmts],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: closing[:end],
+          char_end: closing[:char_end]
+        }
       end
 
       # massign is a parser event that is a parent node of any kind of multiple
