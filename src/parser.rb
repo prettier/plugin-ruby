@@ -139,8 +139,6 @@ class Prettier::Parser < Ripper
         break: [:@kw, 'break'],
         case: [:@kw, 'case'],
         class: [:@kw, 'class'],
-        def: [:@kw, 'def'],
-        defs: [:@kw, 'def'],
         do_block: [:@kw, 'do'],
         else: [:@kw, 'else'],
         elsif: [:@kw, 'elsif'],
@@ -461,38 +459,78 @@ class Prettier::Parser < Ripper
         const.merge(type: :const_ref, body: [const])
       end
 
-      # When the only statement inside of a `def` node is a `begin` node, then
-      # you can safely replace the body of the `def` with the body of the
-      # `begin`. For example:
+      # A def is a parser event that represents defining a regular method on the
+      # current self object. It accepts as arguments the ident (the name of the
+      # method being defined), the params (the parameter declaration for the
+      # method), and a bodystmt node which represents the statements inside the
+      # method. As an example, here are the parts that go into this:
       #
-      # def foo
-      #   begin
-      #     try_something
-      #   rescue SomeError => error
-      #     handle_error(error)
-      #   end
-      # end
+      #     def foo(bar) do baz end
+      #          │   │       │
+      #          │   │       └> bodystmt
+      #          │   └> params
+      #          └> ident
       #
-      # can get transformed into:
-      #
-      # def foo
-      #   try_something
-      # rescue SomeError => error
-      #   handle_error(error)
-      # end
-      #
-      # This module handles this by hoisting up the `bodystmt` node from the
-      # inner `begin` up to the `def`.
       def on_def(ident, params, bodystmt)
-        def_bodystmt = bodystmt
-        stmts, *other_parts = bodystmt[:body]
-
-        if !other_parts.any? && stmts[:body].length == 1 &&
-             stmts.dig(:body, 0, :type) == :begin
-          def_bodystmt = stmts.dig(:body, 0, :body, 0)
+        if params[:type] == :params && !params[:body].any?
+          location = ident[:char_end]
+          params.merge!(char_start: location, char_end: location)
         end
 
-        super(ident, params, def_bodystmt)
+        beging = find_scanner_event(:@kw, 'def')
+        ending = find_scanner_event(:@kw, 'end')
+        range = { char_start: params[:char_end], char_end: ending[:char_start] }
+
+        bodystmt.merge!(range)
+        stmts, *others = bodystmt[:body]
+        stmts.merge!(range) unless others.any?
+
+        {
+          type: :def,
+          body: [ident, params, bodystmt],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
+      # A defs is a parser event that represents defining a singleton method on
+      # an object. It accepts the same arguments as the def event, as well as
+      # the target and operator that on which this method is being defined. As
+      # an example, here are the parts that go into this:
+      #
+      #     def foo.bar(baz) do baz end
+      #          │ │ │   │       │
+      #          │ │ │   │       │
+      #          │ │ │   │       └> bodystmt
+      #          │ │ │   └> params
+      #          │ │ └> ident
+      #          │ └> oper 
+      #          └> target
+      #
+      def on_defs(target, oper, ident, params, bodystmt)
+        if params[:type] == :params && !params[:body].any?
+          location = ident[:char_end]
+          params.merge!(char_start: location, char_end: location)
+        end
+
+        beging = find_scanner_event(:@kw, 'def')
+        ending = find_scanner_event(:@kw, 'end')
+        range = { char_start: params[:char_end], char_end: ending[:char_start] }
+
+        bodystmt.merge!(range)
+        stmts, *others = bodystmt[:body]
+        stmts.merge!(range) unless others.any?
+
+        {
+          type: :defs,
+          body: [target, oper, ident, params, bodystmt],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
       end
 
       # A defined node represents the rather unique defined? operator. It can be
@@ -830,6 +868,20 @@ class Prettier::Parser < Ripper
       #
       def on_mrhs_new_from_args(args)
         args.merge(type: :mrhs_new_from_args, body: [args])
+      end
+
+      # A paren is a parser event that represents using parentheses pretty much
+      # anywhere in a Ruby program. It accepts as arguments the contents, which
+      # can be either params or statements.
+      def on_paren(contents)
+        ending = find_scanner_event(:@rparen)
+
+        find_scanner_event(:@lparen).merge!(
+          type: :paren,
+          body: [contents],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        )
       end
 
       # The program node is the very top of the AST. Here we'll attach all of

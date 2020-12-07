@@ -28,7 +28,11 @@ function printMethod(offset) {
 
     // If the body is empty, we can replace with a ;
     const stmts = body.body[0].body;
-    if (stmts.length === 1 && stmts[0].type === "void_stmt") {
+    if (
+      stmts.length === 1 &&
+      stmts[0].type === "void_stmt" &&
+      !stmts[0].comments
+    ) {
       return group(concat(declaration.concat(["; end"])));
     }
 

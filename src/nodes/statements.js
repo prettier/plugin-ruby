@@ -82,7 +82,7 @@ module.exports = {
         return `#${comment.value}`;
       });
 
-      return concat([breakParent, join("hardline", comments)]);
+      return concat([breakParent, join(hardline, comments)]);
     }
 
     const parts = [];

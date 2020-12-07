@@ -93,7 +93,7 @@ describe("method", () => {
       `)
       ));
 
-    test("def/begin transform", () => {
+    test.skip("def/begin transform", () => {
       const content = ruby(`
         def foo
           begin
