@@ -133,7 +133,6 @@ class Prettier::Parser < Ripper
         assoc_splat: [:@op, '**'],
         arg_paren: :@lparen,
         begin: [:@kw, 'begin'],
-        blockarg: [:@op, '&'],
         brace_block: :@lbrace,
         break: [:@kw, 'break'],
         class: [:@kw, 'class'],
@@ -401,6 +400,17 @@ class Prettier::Parser < Ripper
           body: [left, right],
           end: right[:end],
           char_end: right[:char_end]
+        )
+      end
+
+      # blockarg is a parser event that represents defining a block variable on
+      # a method definition.
+      def on_blockarg(ident)
+        find_scanner_event(:@op, '&').merge!(
+          type: :blockarg,
+          body: [ident],
+          end: ident[:end],
+          char_end: ident[:char_end]
         )
       end
 
