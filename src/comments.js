@@ -1,19 +1,4 @@
 const { addTrailingComment } = require("./prettier");
-const { isEmptyStmts } = require("./utils");
-
-function handleEmptyStmtsComments(comment) {
-  if (isEmptyStmts(comment.precedingNode)) {
-    addTrailingComment(comment.precedingNode, comment);
-    return true;
-  }
-
-  if (isEmptyStmts(comment.followingNode)) {
-    addTrailingComment(comment.followingNode, comment);
-    return true;
-  }
-
-  return false;
-}
 
 // Prevent `super 1, 2 # comment` from breaking the args because of the comment
 function handleSuperLastComment(comment, isLastComment) {
@@ -27,8 +12,8 @@ function handleSuperLastComment(comment, isLastComment) {
   return false;
 }
 
-function ownLine(comment, _text, _opts, _ast, _isLastComment) {
-  return handleEmptyStmtsComments(comment);
+function ownLine(_comment, _text, _opts, _ast, _isLastComment) {
+  return false;
 }
 
 function endOfLine(comment, _text, _opts, _ast, isLastComment) {
