@@ -111,15 +111,15 @@ class MetadataTest < Minitest::Test
   def test_assoc_new
     assert_node_metadata(
       :assoc_new,
-      parse('{ foo: bar, bar: baz }').dig(:body, 0, :body, 0, 0),
-      char_start: 2, char_end: 11
+      parse('{ foo: bar, bar: baz }').dig(:body, 0, :body, 0),
+      char_start: 2, char_end: 10
     )
   end
 
   def test_assoc_splat
     assert_node_metadata(
       :assoc_splat,
-      parse('foo **bar').dig(:body, 1, :body, 0, :body, 0, :body, 0, 0),
+      parse('foo **bar').dig(:body, 1, :body, 0, :body, 0, :body, 0),
       char_start: 4, char_end: 9
     )
   end
@@ -128,7 +128,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :assoclist_from_args,
       parse('{ foo => bar }').dig(:body, 0),
-      char_start: 2, char_end: 14
+      char_start: 2, char_end: 12
     )
   end
 
@@ -136,7 +136,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :bare_assoc_hash,
       parse('foo(bar: baz)').dig(:body, 1, :body, 0, :body, 0, :body, 0),
-      char_start: 4, char_end: 13
+      char_start: 4, char_end: 12
     )
   end
 
@@ -172,7 +172,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :bodystmt,
       parse('class Foo; def foo; end; end').dig(:body, 2),
-      char_start: 10, char_end: 28
+      char_start: 9, char_end: 25
     )
   end
 
@@ -683,7 +683,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_void_stmt
-    assert_node_metadata(:void_stmt, parse('; ;'), char_start: 1, char_end: 1)
+    assert_node_metadata(:void_stmt, parse('; ;'), char_start: 3, char_end: 3)
   end
 
   def test_when
