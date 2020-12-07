@@ -12,11 +12,15 @@ const { containsAssignment } = require("../utils");
 const inlineEnsureParens = require("../utils/inlineEnsureParens");
 
 const printLoop = (keyword, modifier) => (path, { inlineLoops }, print) => {
-  const [_predicate, statements] = path.getValue().body;
+  const [_predicate, stmts] = path.getValue().body;
 
   // If the only statement inside this while loop is a void statement, then we
   // can shorten to just displaying the predicate and then a semicolon.
-  if (statements.body.length === 1 && statements.body[0].type === "void_stmt") {
+  if (
+    stmts.body.length === 1 &&
+    stmts.body[0].type === "void_stmt" &&
+    !stmts.body[0].comments
+  ) {
     return group(
       concat([
         keyword,

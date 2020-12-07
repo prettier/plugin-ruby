@@ -1,12 +1,5 @@
-const embed = require("./embed");
-const parse = require("./parse");
-const print = require("./print");
-
-const pragmaPattern = /#\s*@(prettier|format)/;
-const hasPragma = (text) => pragmaPattern.test(text);
-
-const locStart = (node) => node.char_start;
-const locEnd = (node) => node.char_end;
+const printer = require("./printer");
+const parser = require("./parser");
 
 /*
  * metadata mostly pulled from linguist and rubocop:
@@ -77,19 +70,10 @@ module.exports = {
     }
   ],
   parsers: {
-    ruby: {
-      parse,
-      astFormat: "ruby",
-      hasPragma,
-      locStart,
-      locEnd
-    }
+    ruby: parser
   },
   printers: {
-    ruby: {
-      embed,
-      print
-    }
+    ruby: printer
   },
   options: {
     addTrailingCommas: {

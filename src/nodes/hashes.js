@@ -1,6 +1,13 @@
-const { concat, group, ifBreak, indent, join, line } = require("../prettier");
-
-const { nodeDive, prefix, skipAssignIndent } = require("../utils");
+const {
+  concat,
+  group,
+  hardline,
+  ifBreak,
+  indent,
+  join,
+  line
+} = require("../prettier");
+const { prefix, skipAssignIndent } = require("../utils");
 
 // When attempting to convert a hash rocket into a hash label, you need to take
 // care because only certain patterns are allowed. Ruby source says that they
@@ -13,13 +20,13 @@ const { nodeDive, prefix, skipAssignIndent } = require("../utils");
 // This function represents that check, as it determines if it can convert the
 // symbol node into a hash label.
 function isValidHashLabel(symbolLiteral) {
-  const label = symbolLiteral.body[0].body[0].body;
+  const label = symbolLiteral.body[0].body;
   return label.match(/^[_A-Za-z]/) && !label.endsWith("=");
 }
 
-function makeLabel(path, { preferHashLabels }, print, steps) {
-  const labelNode = nodeDive(path.getValue(), steps);
-  const labelDoc = path.call.apply(path, [print].concat(steps));
+function printHashKey(path, { preferHashLabels }, print) {
+  const labelNode = path.getValue().body[0];
+  const labelDoc = path.call(print, "body", 0);
 
   switch (labelNode.type) {
     case "@label":
@@ -29,12 +36,7 @@ function makeLabel(path, { preferHashLabels }, print, steps) {
       return `:${labelDoc.slice(0, labelDoc.length - 1)} =>`;
     case "symbol_literal": {
       if (preferHashLabels && isValidHashLabel(labelNode)) {
-        const symbolSteps = steps.concat("body", 0, "body", 0);
-
-        return concat([
-          path.call.apply(path, [print].concat(symbolSteps)),
-          ":"
-        ]);
+        return concat([path.call(print, "body", 0, "body", 0), ":"]);
       }
       return concat([labelDoc, " =>"]);
     }
@@ -50,7 +52,7 @@ function makeLabel(path, { preferHashLabels }, print, steps) {
 
 function printAssocNew(path, opts, print) {
   const valueDoc = path.call(print, "body", 1);
-  const parts = [makeLabel(path, opts, print, ["body", 0])];
+  const parts = [printHashKey(path, opts, print)];
 
   if (skipAssignIndent(path.getValue().body[1])) {
     parts.push(" ", valueDoc);
@@ -61,14 +63,32 @@ function printAssocNew(path, opts, print) {
   return group(concat(parts));
 }
 
-function printHash(path, { addTrailingCommas }, print) {
+function printEmptyHashWithComments(path, opts) {
+  const hashNode = path.getValue();
+
+  const printComment = (commentPath, index) => {
+    hashNode.comments[index].printed = true;
+    return opts.printer.printComment(commentPath);
+  };
+
+  return concat([
+    "{",
+    indent(
+      concat([hardline, join(hardline, path.map(printComment, "comments"))])
+    ),
+    line,
+    "}"
+  ]);
+}
+
+function printHash(path, opts, print) {
   const hashNode = path.getValue();
 
   // Hashes normally have a single assoclist_from_args child node. If it's
   // missing, then it means we're dealing with an empty hash, so we can just
   // exit here and print.
   if (hashNode.body[0] === null) {
-    return "{}";
+    return hashNode.comments ? printEmptyHashWithComments(path, opts) : "{}";
   }
 
   return group(
@@ -78,7 +98,7 @@ function printHash(path, { addTrailingCommas }, print) {
         concat([
           line,
           path.call(print, "body", 0),
-          addTrailingCommas ? ifBreak(",", "") : ""
+          opts.addTrailingCommas ? ifBreak(",", "") : ""
         ])
       ),
       line,
@@ -88,7 +108,7 @@ function printHash(path, { addTrailingCommas }, print) {
 }
 
 function printHashContents(path, opts, print) {
-  return group(join(concat([",", line]), path.map(print, "body", 0)));
+  return group(join(concat([",", line]), path.map(print, "body")));
 }
 
 module.exports = {

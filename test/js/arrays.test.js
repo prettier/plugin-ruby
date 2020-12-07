@@ -54,33 +54,10 @@ describe("array", () => {
     return expect(before).toChangeFormat(after, { addTrailingCommas: true });
   });
 
-  test("literal reference", () => expect("array[5]").toMatchFormat());
-
-  test("dynamic reference", () => expect("array[idx]").toMatchFormat());
-
-  test("reference with comment", () =>
-    expect("array[idx] # foo").toMatchFormat());
-
-  test("literal assignment", () => expect("array[5] = 6").toMatchFormat());
-
-  test("dynamic assignment", () => expect("array[idx] = 6").toMatchFormat());
-
-  test("comments within assignment", () => {
-    const contents = ruby(`
-      array = %w[foo bar]
-      array[1] = [
-        # abc
-        %w[abc]
-      ]
-    `);
-
-    return expect(contents).toMatchFormat();
-  });
-
   test("breaking maintains calls on the end", () =>
     expect(`[${long}].freeze`).toChangeFormat(`[\n  ${long}\n].freeze`));
 
-  describe("heredocs as elements", () => {
+  describe("heredocs", () => {
     test("as the first value", () => {
       const content = ruby(`
         [<<~HERE, foo]

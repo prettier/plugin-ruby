@@ -1,13 +1,15 @@
 const { spawnSync } = require("child_process");
 
 const nodes = require("../../src/nodes");
-const print = require("../../src/print");
+const print = require("../../src/printer").print;
 
 const expectedUnhandledNodes = [
   "alias_error",
   "arg_ambiguous",
   "args_add",
   "args_new",
+  "assign_error",
+  "class_name_error",
   "heredoc_dedent",
   "magic_comment",
   "mlhs_add",
@@ -15,6 +17,7 @@ const expectedUnhandledNodes = [
   "mrhs_add",
   "mrhs_new",
   "operator_ambiguous",
+  "param_error",
   "parse_error",
   "qsymbols_add",
   "qsymbols_new",
@@ -26,9 +29,12 @@ const expectedUnhandledNodes = [
   "stmts_new",
   "string_add",
   "string_content",
+  "symbol",
   "symbols_add",
   "symbols_new",
   "void_stmt",
+  "word_add",
+  "word_new",
   "words_add",
   "words_new",
   "xstring_add",
@@ -57,6 +63,7 @@ describe("node support", () => {
     const supportedNodes = Object.keys(nodes)
       .concat(expectedUnhandledNodes)
       .sort();
+
     expect(supportedNodes).toEqual(
       expect.arrayContaining(possibleNodes().sort())
     );

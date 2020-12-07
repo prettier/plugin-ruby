@@ -74,7 +74,7 @@ describe("comments", () => {
       });
     });
 
-    test.skip("if/elsif/else/end statements", () => {
+    test("if/elsif/else/end statements", () => {
       const content = ruby(`
         if a
           # this is the only comment in this if
@@ -113,7 +113,7 @@ describe("comments", () => {
       return expect(content).toMatchFormat();
     });
 
-    test.skip("begin/rescue/ensure/end statements", () => {
+    test("begin/rescue/ensure/end statements", () => {
       const content = ruby(`
         begin
           # this is the only statement in this begin
@@ -194,7 +194,7 @@ describe("comments", () => {
   });
 
   describe("method calls", () => {
-    test.skip("on their own lines", () => {
+    test("on their own lines", () => {
       const content = ruby(`
         foo.bar(
           # this is a comment at the beginning of the method call
@@ -209,10 +209,10 @@ describe("comments", () => {
     });
   });
 
-  test.skip("causing ignored_nl", () => {
+  test("causing ignored_nl", () => {
     const content = ruby(`
       foo.bar # comment
-         .baz
+        .baz
     `);
 
     return expect(content).toMatchFormat();

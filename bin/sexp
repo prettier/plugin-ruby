@@ -7,10 +7,11 @@ require 'pp'
 PP.prepend(
   Module.new do
     def pp_hash(obj)
-      pairs = obj.slice(*(obj.keys - %i[type char_start char_end start end]))
-
       group(1, '{', '}') do
         text obj[:type]
+        text "<L#{obj[:start]}-#{obj[:end]},"
+        text "C#{obj[:char_start]}-#{obj[:char_end]}>"
+
         group(1) do
           breakable ' '
           pp obj[:body]
@@ -21,4 +22,13 @@ PP.prepend(
 )
 
 source = File.file?(ARGV[0]) ? File.read(ARGV[0]) : ARGV[0].gsub('\\n', "\n")
-pp Prettier::Parser.new(source).parse
+parsed = Prettier::Parser.new(source).parse
+
+puts '=== SOURCE === '
+puts source
+
+puts "\n=== COMMENTS ==="
+puts parsed[:comments]
+
+puts "\n=== S-EXPS ==="
+pp parsed

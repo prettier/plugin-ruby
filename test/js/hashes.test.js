@@ -3,6 +3,17 @@ const { long, ruby } = require("./utils");
 describe("hash", () => {
   test("empty", () => expect("{}").toMatchFormat());
 
+  test("empty with comments", () => {
+    const content = ruby(`
+      {
+        # foo
+        # bar
+      }
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
   test("breaking", () => {
     const content = ruby(`
       {

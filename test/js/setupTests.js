@@ -31,7 +31,7 @@ const realFormat = (content, config = {}) =>
 
 const checkFormat = (before, after, config) =>
   new Promise((resolve) => {
-    if (before.includes("#")) {
+    if (before.includes("#") || before.includes("=begin")) {
       // If the source includes an #, then this test has a comment in it.
       // Unfortunately, formatAST ignores comments and doesn't parse them at
       // all, so we can't call it and check against the output. In this case,

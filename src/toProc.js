@@ -57,9 +57,9 @@ const toProc = (path, opts, node) => {
     return null;
   }
 
-  // Ensure that statement is a call
+  // Ensure that statement is a call and that it has no comments attached
   const [statement] = statements.body;
-  if (statement.type !== "call") {
+  if (statement.type !== "call" || statement.comments) {
     return null;
   }
 

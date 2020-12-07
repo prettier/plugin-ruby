@@ -1,5 +1,15 @@
 const { concat, join } = require("../prettier");
-const { literal, nodeDive } = require("../utils");
+const { literal } = require("../utils");
+
+const nodeDive = (node, steps) => {
+  let current = node;
+
+  steps.forEach((step) => {
+    current = current[step];
+  });
+
+  return current;
+};
 
 const unskippableParens = [
   "if_mod",

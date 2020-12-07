@@ -8,6 +8,7 @@ module.exports = Object.assign(
   require("./nodes/blocks"),
   require("./nodes/calls"),
   require("./nodes/case"),
+  require("./nodes/class"),
   require("./nodes/commands"),
   require("./nodes/conditionals"),
   require("./nodes/constants"),
@@ -26,7 +27,8 @@ module.exports = Object.assign(
   require("./nodes/regexp"),
   require("./nodes/rescue"),
   require("./nodes/return"),
-  require("./nodes/scopes"),
   require("./nodes/statements"),
-  require("./nodes/strings")
+  require("./nodes/strings"),
+  require("./nodes/super"),
+  require("./nodes/undef")
 );

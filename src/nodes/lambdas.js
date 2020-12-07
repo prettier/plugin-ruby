@@ -6,36 +6,39 @@ const {
   line,
   softline
 } = require("../prettier");
-const { hasAncestor, nodeDive } = require("../utils");
+const { hasAncestor } = require("../utils");
 
 // We can have our params coming in as the first child of the main lambda node,
 // or if we have them wrapped in parens then they'll be one level deeper. Even
 // though it's possible to omit the parens if you only have one argument, we're
 // going to keep them in no matter what for consistency.
-const printLambdaParams = (path, print) => {
-  const steps = ["body", 0];
-  let params = nodeDive(path.getValue(), steps);
+function printLambdaParams(path, print) {
+  const paramsPath = [print, "body", 0];
+  let paramsNode = path.getValue().body[0];
 
-  if (params.type !== "params") {
-    steps.push("body", 0);
-    params = nodeDive(path.getValue(), steps);
+  // In this case we had something like -> (foo) { bar } which would mean that
+  // we're looking at a paren node, so we'll descend one level deeper to get at
+  // the actual params node.
+  if (paramsNode.type !== "params") {
+    paramsPath.push("body", 0);
+    paramsNode = paramsNode.body[0];
   }
 
   // If we don't have any params at all, then we're just going to bail out and
   // print nothing. This is to avoid printing an empty set of parentheses.
-  if (params.body.every((type) => !type)) {
+  if (paramsNode.body.every((type) => !type)) {
     return "";
   }
 
   return group(
     concat([
       "(",
-      indent(concat([softline, path.call.apply(path, [print].concat(steps))])),
+      indent(concat([softline, path.call.apply(path, paramsPath)])),
       softline,
       ")"
     ])
   );
-};
+}
 
 // Lambda nodes represent stabby lambda literals, which can come in a couple of
 // flavors. They can use either braces or do...end for their block, and their
@@ -64,7 +67,7 @@ const printLambdaParams = (path, print) => {
 // for the single-line form. However, if we have an ancestor that is a command
 // or command_call node, then we'll need to use braces either way because of
 // operator precendence.
-const printLambda = (path, opts, print) => {
+function printLambda(path, opts, print) {
   const params = printLambdaParams(path, print);
   const inCommand = hasAncestor(path, ["command", "command_call"]);
 
@@ -82,7 +85,7 @@ const printLambda = (path, opts, print) => {
       concat(["->", params, " { ", path.call(print, "body", 1), " }"])
     )
   );
-};
+}
 
 module.exports = {
   lambda: printLambda
