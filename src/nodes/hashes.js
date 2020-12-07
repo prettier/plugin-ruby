@@ -1,4 +1,12 @@
-const { concat, group, ifBreak, indent, join, line } = require("../prettier");
+const {
+  concat,
+  group,
+  hardline,
+  ifBreak,
+  indent,
+  join,
+  line
+} = require("../prettier");
 const { prefix, skipAssignIndent } = require("../utils");
 
 // When attempting to convert a hash rocket into a hash label, you need to take
@@ -55,14 +63,32 @@ function printAssocNew(path, opts, print) {
   return group(concat(parts));
 }
 
-function printHash(path, { addTrailingCommas }, print) {
+function printEmptyHashWithComments(path, opts) {
+  const hashNode = path.getValue();
+
+  const printComment = (commentPath, index) => {
+    hashNode.comments[index].printed = true;
+    return opts.printer.printComment(commentPath);
+  };
+
+  return concat([
+    "{",
+    indent(
+      concat([hardline, join(hardline, path.map(printComment, "comments"))])
+    ),
+    line,
+    "}"
+  ]);
+}
+
+function printHash(path, opts, print) {
   const hashNode = path.getValue();
 
   // Hashes normally have a single assoclist_from_args child node. If it's
   // missing, then it means we're dealing with an empty hash, so we can just
   // exit here and print.
   if (hashNode.body[0] === null) {
-    return "{}";
+    return hashNode.comments ? printEmptyHashWithComments(path, opts) : "{}";
   }
 
   return group(
@@ -72,7 +98,7 @@ function printHash(path, { addTrailingCommas }, print) {
         concat([
           line,
           path.call(print, "body", 0),
-          addTrailingCommas ? ifBreak(",", "") : ""
+          opts.addTrailingCommas ? ifBreak(",", "") : ""
         ])
       ),
       line,
