@@ -61,7 +61,7 @@ describe("comments", () => {
         return expect(content).toMatchFormat();
       });
 
-      test.skip("as the last statement", () => {
+      test("as the last statement", () => {
         const content = ruby(`
           ${start}
             foo

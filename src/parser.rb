@@ -186,8 +186,8 @@ class Prettier::Parser < Ripper
     # statement, then just shove it to the end.
     if stmts[:body][0][:type] == :void_stmt
       stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
+        char_start: beging[:char_end],
+        char_end: beging[:char_end]
       )
     end
 
@@ -224,8 +224,8 @@ class Prettier::Parser < Ripper
     # statement, then just shove it to the end.
     if stmts[:body][0][:type] == :void_stmt
       stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
+        char_start: beging[:char_end],
+        char_end: beging[:char_end]
       )
     end
 
@@ -571,8 +571,9 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
+    char_start = (block_var || beging)[:char_end]
     stmts.merge!(
-      char_start: (block_var || beging)[:char_end],
+      char_start: char_start,
       char_end: ending[:char_start]
     )
 
@@ -580,8 +581,8 @@ class Prettier::Parser < Ripper
     # statement, then just shove it to the end.
     if stmts[:body][0][:type] == :void_stmt
       stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
+        char_start: char_start,
+        char_end: char_start
       )
     end
 
@@ -666,8 +667,8 @@ class Prettier::Parser < Ripper
       # statement, then just shove it to the end.
       if stmts[:body][0][:type] == :void_stmt
         stmts[:body][0].merge!(
-          char_start: ending[:char_start],
-          char_end: ending[:char_start]
+          char_start: range[:char_start],
+          char_end: range[:char_start]
         )
       end
     end
@@ -1509,8 +1510,8 @@ class Prettier::Parser < Ripper
       # statement, then just shove it to the end.
       if stmts[:body][0][:type] == :void_stmt
         stmts[:body][0].merge!(
-          char_start: ending[:char_start],
-          char_end: ending[:char_start]
+          char_start: range[:char_start],
+          char_end: range[:char_start]
         )
       end
     end
@@ -1667,10 +1668,7 @@ class Prettier::Parser < Ripper
     # If the only statement inside the list of statements is a void
     # statement, then just shove it to the end.
     if stmts[:body][0][:type] == :void_stmt
-      stmts[:body][0].merge!(
-        char_start: source.length,
-        char_end: source.length
-      )
+      stmts[:body][0].merge!(char_start: 0, char_end: 0)
     end
 
     range.merge(
@@ -1762,8 +1760,9 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'rescue')
     ending = consequent || stmts
 
+    char_start = (variable || (exceptions || [])[-1] || beging)[:char_end]
     stmts.merge!(
-      char_start: (variable || (exceptions || [])[-1] || beging)[:char_end],
+      char_start: char_start,
       char_end: ending[:char_start]
     )
 
@@ -1771,8 +1770,8 @@ class Prettier::Parser < Ripper
     # statement, then just shove it to the end.
     if stmts[:body][0][:type] == :void_stmt
       stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
+        char_start: char_start,
+        char_end: char_start
       )
     end
 
@@ -1868,8 +1867,8 @@ class Prettier::Parser < Ripper
       # statement, then just shove it to the end.
       if stmts[:body][0][:type] == :void_stmt
         stmts[:body][0].merge!(
-          char_start: ending[:char_start],
-          char_end: ending[:char_start]
+          char_start: range[:char_start],
+          char_end: range[:char_start]
         )
       end
     end
@@ -1990,8 +1989,8 @@ class Prettier::Parser < Ripper
     # statement, then just shove it to the end.
     if stmts[:body][0][:type] == :void_stmt
       stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
+        char_start: beging[:char_end],
+        char_end: beging[:char_end]
       )
     end
 
@@ -2192,8 +2191,8 @@ class Prettier::Parser < Ripper
     # statement, then just shove it to the end.
     if stmts[:body][0][:type] == :void_stmt
       stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
+        char_start: predicate[:char_end],
+        char_end: predicate[:char_end]
       )
     end
 
@@ -2239,8 +2238,8 @@ class Prettier::Parser < Ripper
     # statement, then just shove it to the end.
     if stmts[:body][0][:type] == :void_stmt
       stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
+        char_start: predicate[:char_end],
+        char_end: predicate[:char_end]
       )
     end
 
@@ -2355,8 +2354,8 @@ class Prettier::Parser < Ripper
     # statement, then just shove it to the end.
     if stmts[:body][0][:type] == :void_stmt
       stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
+        char_start: predicate[:char_end],
+        char_end: predicate[:char_end]
       )
     end
 
@@ -2386,8 +2385,8 @@ class Prettier::Parser < Ripper
     # statement, then just shove it to the end.
     if stmts[:body][0][:type] == :void_stmt
       stmts[:body][0].merge!(
-        char_start: ending[:char_start],
-        char_end: ending[:char_start]
+        char_start: predicate[:char_end],
+        char_end: predicate[:char_end]
       )
     end
 
