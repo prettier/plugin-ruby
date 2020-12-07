@@ -209,10 +209,10 @@ describe("comments", () => {
     });
   });
 
-  test.skip("causing ignored_nl", () => {
+  test("causing ignored_nl", () => {
     const content = ruby(`
       foo.bar # comment
-         .baz
+        .baz
     `);
 
     return expect(content).toMatchFormat();

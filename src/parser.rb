@@ -93,6 +93,47 @@ class Prettier::Parser < Ripper
     end
   end
 
+  # We keep track of each comment as it comes in and then eventually add
+  # them to the top of the generated AST so that prettier can start adding
+  # them back into the final representation. Comments come in including
+  # their starting pound sign and the newline at the end, so we also chop
+  # those off.
+  #
+  # If there is an encoding magic comment at the top of the file, ripper
+  # will actually change into that encoding for the storage of the string.
+  # This will break everything, so we need to force the encoding back into
+  # UTF-8 so that the JSON library won't break.
+  def on_comment(value)
+    @comments << {
+      type: :@comment,
+      value: value[1..-1].chomp.force_encoding('UTF-8'),
+      start: lineno,
+      end: lineno,
+      char_start: char_pos,
+      char_end: char_pos + value.length - 1
+    }
+  end
+
+  # ignored_nl is a special kind of scanner event that passes nil as the value,
+  # so we can't do our normal tracking of value.size. Instead of adding a
+  # condition to the main SCANNER_EVENTS loop above, we'll just explicitly
+  # define the method here. You can trigger the ignored_nl event with the
+  # following snippet:
+  #
+  #     foo.bar
+  #        .baz
+  #
+  def on_ignored_nl(value)
+    {
+      type: :ignored_nl,
+      body: nil,
+      start: lineno,
+      end: lineno,
+      char_start: char_pos,
+      char_end: char_pos
+    }
+  end
+
   prepend(
     Module.new do
       private
@@ -119,27 +160,6 @@ class Prettier::Parser < Ripper
       end
     end
   )
-
-  # We keep track of each comment as it comes in and then eventually add
-  # them to the top of the generated AST so that prettier can start adding
-  # them back into the final representation. Comments come in including
-  # their starting pound sign and the newline at the end, so we also chop
-  # those off.
-  #
-  # If there is an encoding magic comment at the top of the file, ripper
-  # will actually change into that encoding for the storage of the string.
-  # This will break everything, so we need to force the encoding back into
-  # UTF-8 so that the JSON library won't break.
-  def on_comment(value)
-    @comments << {
-      type: :@comment,
-      value: value[1..-1].chomp.force_encoding('UTF-8'),
-      start: lineno,
-      end: lineno,
-      char_start: char_pos,
-      char_end: char_pos + value.length - 1
-    }
-  end
 
   # A BEGIN node is a parser event that represents the use of the BEGIN
   # keyword, which hooks into the lifecycle of the interpreter. It's a bit

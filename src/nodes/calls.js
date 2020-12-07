@@ -1,4 +1,11 @@
-const { breakParent, concat, group, indent, softline } = require("../prettier");
+const {
+  breakParent,
+  concat,
+  group,
+  hardline,
+  indent,
+  softline
+} = require("../prettier");
 const { concatBody, first, makeCall } = require("../utils");
 
 const toProc = require("../toProc");
@@ -55,7 +62,13 @@ function printCall(path, opts, print) {
 
   // The right side of the call node, as in everything including the operator
   // and beyond.
-  const rightSideDoc = indent(concat([softline, operatorDoc, messageDoc]));
+  const rightSideDoc = indent(
+    concat([
+      receiverNode.comments ? hardline : softline,
+      operatorDoc,
+      messageDoc
+    ])
+  );
 
   // If this call is inside of a call chain (3 or more calls in a row), then
   // we're going to provide special handling.
@@ -68,7 +81,7 @@ function printCall(path, opts, print) {
 
     while (parentNode) {
       if (parentNode.type === "call") {
-        parentNode["callChain"] = true;
+        parentNode.callChain = true;
       }
       parent += 1;
       parentNode = path.getParentNode(parent);
@@ -80,7 +93,7 @@ function printCall(path, opts, print) {
   return group(
     concat([
       receiverDoc,
-      callNode["callChain"] ? rightSideDoc : group(rightSideDoc)
+      callNode.callChain ? rightSideDoc : group(rightSideDoc)
     ])
   );
 }
