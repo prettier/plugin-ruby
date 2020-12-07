@@ -1141,6 +1141,23 @@ class Prettier::Parser < Ripper
         end
       end
 
+      # string_concat is a parser event that represents concatenating two
+      # strings together using a backward slash, as in the following example:
+      #
+      #     'foo' \
+      #       'bar'
+      #
+      def on_string_concat(left, right)
+        {
+          type: :string_concat,
+          body: [left, right],
+          start: left[:start],
+          char_start: left[:char_start],
+          end: right[:end],
+          char_end: right[:char_end]
+        }
+      end
+
       # string_content is a parser event that represents the beginning of the
       # contents of a string, which will either be embedded inside of a
       # string_literal or a dyna_symbol node. It will have an array body so that
