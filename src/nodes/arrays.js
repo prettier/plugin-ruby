@@ -1,6 +1,7 @@
 const {
   concat,
   group,
+  hardline,
   ifBreak,
   indent,
   join,
@@ -85,17 +86,36 @@ function printSpecialArray(start) {
   };
 }
 
+function printEmptyArrayWithComments(path, opts) {
+  const arrayNode = path.getValue();
+
+  const printComment = (commentPath, index) => {
+    arrayNode.comments[index].printed = true;
+    return opts.printer.printComment(commentPath);
+  };
+
+  return concat([
+    "[",
+    indent(
+      concat([hardline, join(hardline, path.map(printComment, "comments"))])
+    ),
+    line,
+    "]"
+  ]);
+}
+
 // An array node is any literal array in Ruby. This includes all of the special
 // array literals as well as regular arrays. If it is a special array literal
 // then it will have one child that represents the special array, otherwise it
 // will have one child that contains all of the elements of the array.
-function printArray(path, { addTrailingCommas }, print) {
-  const args = path.getValue().body[0];
+function printArray(path, opts, print) {
+  const array = path.getValue();
+  const args = array.body[0];
 
   // If there is no inner arguments node, then we're dealing with an empty
   // array, so we can go ahead and return.
   if (args === null) {
-    return "[]";
+    return array.comments ? printEmptyArrayWithComments(path, opts) : "[]";
   }
 
   // If we have an array that contains only simple string literals with no
@@ -133,7 +153,7 @@ function printArray(path, { addTrailingCommas }, print) {
         concat([
           softline,
           join(concat([",", line]), path.call(print, "body", 0)),
-          addTrailingCommas ? ifBreak(",", "") : ""
+          opts.addTrailingCommas ? ifBreak(",", "") : ""
         ])
       ),
       softline,
