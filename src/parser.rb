@@ -1611,6 +1611,12 @@ class Prettier::Parser < Ripper
         }
       end
 
+      # var_ref is a parser event that represents using either a local variable,
+      # a nil literal, a true or false literal, or a numbered block variable.
+      def on_var_ref(contents)
+        contents.merge(type: :var_ref, body: [contents])
+      end
+
       # var_field is a parser event that represents a variable that is being
       # assigned a value. As such, it is always a child of an assignment type
       # node. For example, in the following example foo is a var_field:
