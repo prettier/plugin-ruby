@@ -1,6 +1,5 @@
 const { concat, trim } = require("./prettier");
 
-const comments = require("./comments");
 const embed = require("./embed");
 const nodes = require("./nodes");
 
@@ -66,7 +65,6 @@ function isBlockComment(comment) {
 module.exports = {
   embed,
   print: printNode,
-  handleComments: comments,
   canAttachComment,
   getCommentChildNodes,
   printComment,
