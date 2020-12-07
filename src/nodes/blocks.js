@@ -16,7 +16,11 @@ const printBlock = (braces) => (path, opts, print) => {
     statements.type === "stmts" ? statements.body : statements.body[0].body;
 
   let doBlockBody = "";
-  if (stmts.length !== 1 || stmts[0].type !== "void_stmt") {
+  if (
+    stmts.length !== 1 ||
+    stmts[0].type !== "void_stmt" ||
+    stmts[0].comments
+  ) {
     doBlockBody = indent(concat([softline, path.call(print, "body", 1)]));
   }
 
@@ -37,8 +41,9 @@ const printBlock = (braces) => (path, opts, print) => {
   // We can hit this next pattern if within the block the only statement is a
   // comment.
   if (
-    stmts.length > 1 &&
-    stmts.filter((stmt) => stmt.type !== "@comment").length === 1
+    stmts.length === 1 &&
+    stmts[0].type === "void_stmt" &&
+    stmts[0].comments
   ) {
     return concat([breakParent, doBlock]);
   }

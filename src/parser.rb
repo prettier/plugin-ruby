@@ -131,9 +131,7 @@ class Prettier::Parser < Ripper
 
       events = {
         begin: [:@kw, 'begin'],
-        brace_block: :@lbrace,
         class: [:@kw, 'class'],
-        do_block: [:@kw, 'do'],
         for: [:@kw, 'for'],
         in: [:@kw, 'in'],
         lambda: :@tlambda,
@@ -475,6 +473,29 @@ class Prettier::Parser < Ripper
         )
       end
 
+      # brace_block is a parser event that represents passing a block to a
+      # method call using the {..} operators. It accepts as arguments an
+      # optional block_var event that represents any parameters to the block as
+      # well as a stmts event that represents the statements inside the block.
+      def on_brace_block(block_var, stmts)
+        beging = find_scanner_event(:@lbrace)
+        ending = find_scanner_event(:@rbrace)
+
+        stmts.merge!(
+          char_start: (block_var || beging)[:char_end],
+          char_end: ending[:char_start]
+        )
+
+        {
+          type: :brace_block,
+          body: [block_var, stmts],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
+      end
+
       # break is a parser event that represents using the break keyword. It
       # accepts as an argument an args or args_add_block event that contains all
       # of the arguments being passed to the break.
@@ -654,6 +675,33 @@ class Prettier::Parser < Ripper
           end: ending[:end],
           char_end: ending[:char_end]
         )
+      end
+
+      # do_block is a parser event that represents passing a block to a method
+      # call using the do..end keywords. It accepts as arguments an optional
+      # block_var event that represents any parameters to the block as well as
+      # a bodystmt event that represents the statements inside the block.
+      def on_do_block(block_var, bodystmt)
+        beging = find_scanner_event(:@kw, 'do')
+        ending = find_scanner_event(:@kw, 'end')
+
+        range = {
+          char_start: (block_var || beging)[:char_end],
+          char_end: ending[:char_start]
+        }
+
+        bodystmt.merge!(range)
+        stmts, *others = bodystmt[:body]
+        stmts.merge!(range) unless others.any?
+
+        {
+          type: :do_block,
+          body: [block_var, bodystmt],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
       end
 
       # A dyna_symbol is a parser event that represents a symbol literal that
