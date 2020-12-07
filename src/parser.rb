@@ -130,7 +130,6 @@ class Prettier::Parser < Ripper
       end
 
       events = {
-        arg_paren: :@lparen,
         begin: [:@kw, 'begin'],
         brace_block: :@lbrace,
         break: [:@kw, 'break'],
@@ -355,6 +354,22 @@ class Prettier::Parser < Ripper
       # arguments onto another method call.
       def on_args_forward
         find_scanner_event(:@op, '...').merge!(type: :args_forward)
+      end
+
+      # arg_paren is a parser event that represents wrapping arguments to a
+      # method inside a set of parentheses.
+      def on_arg_paren(args)
+        beging = find_scanner_event(:@lparen)
+        ending = find_scanner_event(:@rparen)
+
+        {
+          type: :arg_paren,
+          body: [args],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
+        }
       end
 
       # Array nodes can contain a myriad of subnodes because of the special
