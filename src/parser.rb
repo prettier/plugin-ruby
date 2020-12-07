@@ -132,18 +132,14 @@ class Prettier::Parser < Ripper
       events = {
         begin: [:@kw, 'begin'],
         brace_block: :@lbrace,
-        break: [:@kw, 'break'],
         class: [:@kw, 'class'],
         do_block: [:@kw, 'do'],
         for: [:@kw, 'for'],
         in: [:@kw, 'in'],
         lambda: :@tlambda,
         module: [:@kw, 'module'],
-        next: [:@kw, 'next'],
         rescue: [:@kw, 'rescue'],
-        return: [:@kw, 'return'],
-        sclass: [:@kw, 'class'],
-        yield: [:@kw, 'yield']
+        sclass: [:@kw, 'class']
       }
 
       events.each do |event, (type, scanned)|
@@ -477,6 +473,18 @@ class Prettier::Parser < Ripper
           body: [ident],
           end: ident[:end],
           char_end: ident[:char_end]
+        )
+      end
+
+      # break is a parser event that represents using the break keyword. It
+      # accepts as an argument an args or args_add_block event that contains all
+      # of the arguments being passed to the break.
+      def on_break(args_add_block)
+        find_scanner_event(:@kw, 'break').merge!(
+          type: :break,
+          body: [args_add_block],
+          end: args_add_block[:end],
+          char_end: args_add_block[:char_end]
         )
       end
 
@@ -1115,6 +1123,18 @@ class Prettier::Parser < Ripper
         args.merge(type: :mrhs_new_from_args, body: [args])
       end
 
+      # next is a parser event that represents using the next keyword. It
+      # accepts as an argument an args or args_add_block event that contains all
+      # of the arguments being passed to the next.
+      def on_next(args_add_block)
+        find_scanner_event(:@kw, 'next').merge!(
+          type: :next,
+          body: [args_add_block],
+          end: args_add_block[:end],
+          char_end: args_add_block[:char_end]
+        )
+      end
+
       # opassign is a parser event that represents assigning something to a
       # variable or constant using an operator like += or ||=. It accepts as
       # arguments the left side of the expression before the operator, the
@@ -1260,6 +1280,18 @@ class Prettier::Parser < Ripper
       # no body as it accepts no arguments.
       def on_retry
         find_scanner_event(:@kw, 'retry').merge!(type: :retry)
+      end
+
+      # return is a parser event that represents using the return keyword with
+      # arguments. It accepts as an argument an args_add_block event that
+      # contains all of the arguments being passed.
+      def on_return(args_add_block)
+        find_scanner_event(:@kw, 'return').merge!(
+          type: :return,
+          body: [args_add_block],
+          end: args_add_block[:end],
+          char_end: args_add_block[:char_end]
+        )
       end
 
       # return0 is a parser event that represents the bare return keyword. It
@@ -1876,6 +1908,18 @@ class Prettier::Parser < Ripper
             char_end: ending[:char_end]
           )
         end
+      end
+
+      # yield is a parser event that represents using the yield keyword with
+      # arguments. It accepts as an argument an args_add_block event that
+      # contains all of the arguments being passed.
+      def on_yield(args_add_block)
+        find_scanner_event(:@kw, 'yield').merge!(
+          type: :yield,
+          body: [args_add_block],
+          end: args_add_block[:end],
+          char_end: args_add_block[:char_end]
+        )
       end
 
       # yield0 is a parser event that represents the bare yield keyword. It has
