@@ -82,7 +82,7 @@ function printHash(path, { addTrailingCommas }, print) {
 }
 
 function printHashContents(path, opts, print) {
-  return group(join(concat([",", line]), path.map(print, "body", 0)));
+  return group(join(concat([",", line]), path.map(print, "body")));
 }
 
 module.exports = {

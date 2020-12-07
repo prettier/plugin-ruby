@@ -37,12 +37,10 @@ function canAttachComment(node) {
   return !noComments.includes(node.type);
 }
 
-const nestedContents = ["assoclist_from_args", "bare_assoc_hash"];
-
 // This function tells prettier how to recurse down our AST so that it can find
 // where it needs to attach the comments.
 function getCommentChildNodes(node) {
-  return nestedContents.includes(node.type) ? node.body[0] : node.body;
+  return node.body;
 }
 
 // This is the generic print function for any comment in the AST. It handles

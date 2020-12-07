@@ -130,7 +130,6 @@ class Prettier::Parser < Ripper
       end
 
       events = {
-        assoc_splat: [:@op, '**'],
         arg_paren: :@lparen,
         begin: [:@kw, 'begin'],
         brace_block: :@lbrace,
@@ -138,7 +137,6 @@ class Prettier::Parser < Ripper
         class: [:@kw, 'class'],
         do_block: [:@kw, 'do'],
         for: [:@kw, 'for'],
-        hash: :@lbrace,
         in: [:@kw, 'in'],
         kwrest_param: [:@op, '**'],
         lambda: :@tlambda,
@@ -401,6 +399,61 @@ class Prettier::Parser < Ripper
           end: right[:end],
           char_end: right[:char_end]
         )
+      end
+
+      # assoc_new is a parser event that contains a key-value pair within a
+      # hash. It is a child event of either an assoclist_from_args or a
+      # bare_assoc_hash.
+      def on_assoc_new(key, value)
+        {
+          type: :assoc_new,
+          body: [key, value],
+          start: key[:start],
+          char_start: key[:char_start],
+          end: value[:end],
+          char_end: value[:char_end]
+        }
+      end
+
+      # assoc_splat is a parser event that represents splatting a value into a
+      # hash (either a hash literal or a bare hash in a method call).
+      def on_assoc_splat(contents)
+        find_scanner_event(:@op, '**').merge!(
+          type: :assoc_splat,
+          body: [contents],
+          end: contents[:end],
+          char_end: contents[:char_end]
+        )
+      end
+
+      # assoclist_from_args is a parser event that contains a list of all of the
+      # associations inside of a hash literal. Its parent node is always a hash.
+      # It accepts as an argument an array of assoc events (either assoc_new or
+      # assoc_splat).
+      def on_assoclist_from_args(assocs)
+        {
+          type: :assoclist_from_args,
+          body: assocs,
+          start: assocs[0][:start],
+          char_start: assocs[0][:char_start],
+          end: assocs[-1][:end],
+          char_end: assocs[-1][:char_end]
+        }
+      end
+
+      # bare_assoc_hash is a parser event that represents a hash of contents
+      # being passed as a method argument (and therefore has omitted braces). It
+      # accepts as an argument an array of assoc events (either assoc_new or
+      # assoc_splat).
+      def on_bare_assoc_hash(assoc_news)
+        {
+          type: :bare_assoc_hash,
+          body: assoc_news,
+          start: assoc_news[0][:start],
+          char_start: assoc_news[0][:char_start],
+          end: assoc_news[-1][:end],
+          char_end: assoc_news[-1][:char_end]
+        }
       end
 
       # blockarg is a parser event that represents defining a block variable on
@@ -756,6 +809,23 @@ class Prettier::Parser < Ripper
           char_start: left[:char_start],
           end: right[:end],
           char_end: right[:char_end]
+        }
+      end
+
+      # hash is a parser event that represents a hash literal. It accepts as an
+      # argument an optional assoclist_from_args event which contains the
+      # contents of the hash.
+      def on_hash(assoclist_from_args)
+        beging = find_scanner_event(:@lbrace)
+        ending = find_scanner_event(:@rbrace)
+
+        {
+          type: :hash,
+          body: [assoclist_from_args],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: ending[:end],
+          char_end: ending[:char_end]
         }
       end
 
