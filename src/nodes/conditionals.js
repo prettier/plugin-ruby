@@ -97,7 +97,7 @@ function printSingle(keyword, modifier = false) {
     // If we do not allow modifier form conditionals or there are comments
     // inside of the body of the conditional, then we must print in the
     // multiline form.
-    if (!inlineConditionals || statementsNode.body[0].comments) {
+    if (!inlineConditionals || (!modifier && statementsNode.body[0].comments)) {
       return concat([concat(multilineParts), breakParent]);
     }
 

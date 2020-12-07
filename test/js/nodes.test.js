@@ -16,6 +16,7 @@ const expectedUnhandledNodes = [
   "mlhs_new",
   "mrhs_add",
   "mrhs_new",
+  "nokw_param",
   "operator_ambiguous",
   "param_error",
   "parse_error",
@@ -38,8 +39,7 @@ const expectedUnhandledNodes = [
   "words_add",
   "words_new",
   "xstring_add",
-  "xstring_new",
-  ""
+  "xstring_new"
 ];
 
 const possibleNodes = () => {
@@ -55,7 +55,7 @@ const possibleNodes = () => {
     throw new Error(error);
   }
 
-  return child.stdout.toString().split("\n");
+  return child.stdout.toString().trim().split("\n");
 };
 
 describe("node support", () => {
