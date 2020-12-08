@@ -251,7 +251,7 @@ describe("method", () => {
           expect(`foo(${long}, a${long})`).toChangeFormat(
             `foo(\n  ${long},\n  a${long},\n)`,
             {
-              addTrailingCommas: true
+              trailingComma: "all"
             }
           ));
 
@@ -259,7 +259,7 @@ describe("method", () => {
           expect(`foo(${long}, a${long},)`).toChangeFormat(
             `foo(\n  ${long},\n  a${long},\n)`,
             {
-              addTrailingCommas: true
+              trailingComma: "all"
             }
           ));
 
@@ -267,7 +267,7 @@ describe("method", () => {
           expect(`foo(${long}, &block)`).toChangeFormat(
             `foo(\n  ${long},\n  &block\n)`,
             {
-              addTrailingCommas: true
+              trailingComma: "all"
             }
           ));
 
@@ -277,7 +277,7 @@ describe("method", () => {
               command ${long},
                       a${long}
             `),
-            { addTrailingCommas: true }
+            { trailingComma: "all" }
           ));
 
         test("on command calls", () =>
@@ -286,7 +286,7 @@ describe("method", () => {
               command.call ${long},
                            a${long}
             `),
-            { addTrailingCommas: true }
+            { trailingComma: "all" }
           ));
       });
     });

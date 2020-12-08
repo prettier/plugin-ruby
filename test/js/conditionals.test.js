@@ -163,30 +163,30 @@ describe("conditionals", () => {
     describe.each(["if", "unless"])("%s keyword", (keyword) => {
       test("inline changes", () =>
         expect(`1 ${keyword} a`).toChangeFormat(`${keyword} a\n  1\nend`, {
-          inlineConditionals: false
+          rubyModifier: false
         }));
 
       test("multi line stays", () =>
         expect(`${keyword} a\n  1\nend`).toMatchFormat({
-          inlineConditionals: false
+          rubyModifier: false
         }));
 
       test("inline breaking changes", () =>
         expect(`${long} ${keyword} ${long}`).toChangeFormat(
           `${keyword} ${long}\n  ${long}\nend`,
           {
-            inlineConditionals: false
+            rubyModifier: false
           }
         ));
 
       test("multi line breaking stays", () =>
         expect(`${keyword} ${long}\n  ${long}\nend`).toMatchFormat({
-          inlineConditionals: false
+          rubyModifier: false
         }));
 
       test("not operator", () =>
         expect(`${keyword} not a\n  b\nend`).toMatchFormat({
-          inlineConditionals: false
+          rubyModifier: false
         }));
 
       test("not operator parens", () => expect("not(true)").toMatchFormat());
@@ -197,7 +197,7 @@ describe("conditionals", () => {
           end
         `);
 
-        return expect(content).toMatchFormat({ inlineConditionals: false });
+        return expect(content).toMatchFormat({ rubyModifier: false });
       });
 
       test("empty first body with present second body", () => {
@@ -209,7 +209,7 @@ describe("conditionals", () => {
           end
         `);
 
-        return expect(content).toMatchFormat({ inlineConditionals: false });
+        return expect(content).toMatchFormat({ rubyModifier: false });
       });
 
       test("comment in body", () => {
@@ -219,7 +219,7 @@ describe("conditionals", () => {
           end
         `);
 
-        return expect(content).toMatchFormat({ inlineConditionals: false });
+        return expect(content).toMatchFormat({ rubyModifier: false });
       });
 
       test("comment on node in body", () => {
@@ -229,7 +229,7 @@ describe("conditionals", () => {
           end
         `);
 
-        return expect(content).toMatchFormat({ inlineConditionals: false });
+        return expect(content).toMatchFormat({ rubyModifier: false });
       });
 
       test("align long predicates", () =>
@@ -252,7 +252,7 @@ describe("conditionals", () => {
         `);
 
         return expect(content).toChangeFormat(expected, {
-          inlineConditionals: false
+          rubyModifier: false
         });
       });
     });

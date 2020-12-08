@@ -12,7 +12,7 @@ const isCall = (node) => ["::", "."].includes(node) || node.type === "@period";
 //
 // This works with `do` blocks as well.
 const toProc = (path, opts, node) => {
-  if (!node || !opts.toProcTransform) {
+  if (!node || !opts.rubyToProc) {
     return null;
   }
 

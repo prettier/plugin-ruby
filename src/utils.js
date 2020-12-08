@@ -31,6 +31,8 @@ const empty = () => "";
 
 const first = (path, opts, print) => path.call(print, "body", 0);
 
+const getTrailingComma = (opts) => ["all", "es5"].includes(opts.trailingComma);
+
 const hasAncestor = (path, types) => {
   let parent = 0;
   let parentNode = path.getParentNode();
@@ -73,6 +75,7 @@ module.exports = {
   docLength,
   empty,
   first,
+  getTrailingComma,
   hasAncestor,
   isEmptyStmts,
   literal,

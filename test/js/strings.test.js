@@ -52,19 +52,19 @@ describe("strings", () => {
 
   describe("with double quotes", () => {
     test("empty single quote strings change", () =>
-      expect("''").toChangeFormat(`""`, { preferSingleQuotes: false }));
+      expect("''").toChangeFormat(`""`, { rubySingleQuote: false }));
 
     test("empty double quote strings stay", () =>
-      expect(`""`).toMatchFormat({ preferSingleQuotes: false }));
+      expect(`""`).toMatchFormat({ rubySingleQuote: false }));
 
     test("basic strings with single quotes change", () =>
-      expect("'abc'").toChangeFormat(`"abc"`, { preferSingleQuotes: false }));
+      expect("'abc'").toChangeFormat(`"abc"`, { rubySingleQuote: false }));
 
     test("basic strings with double quotes stay", () =>
-      expect(`"abc"`).toMatchFormat({ preferSingleQuotes: false }));
+      expect(`"abc"`).toMatchFormat({ rubySingleQuote: false }));
 
     test("double quotes with inner single quotes stay", () =>
-      expect(`"abc's"`).toMatchFormat({ preferSingleQuotes: false }));
+      expect(`"abc's"`).toMatchFormat({ rubySingleQuote: false }));
 
     describe("escape sequences", () => {
       test("single quotes stay", () => expect("'abc\\n'").toMatchFormat());
@@ -110,7 +110,7 @@ describe("strings", () => {
     test("single chars get changed", () => expect("?a").toChangeFormat("'a'"));
 
     test("single chars get changed with double quotes", () =>
-      expect("?a").toChangeFormat(`"a"`, { preferSingleQuotes: false }));
+      expect("?a").toChangeFormat(`"a"`, { rubySingleQuote: false }));
 
     test("control escape sequences stay", () =>
       expect("?\\C-a").toMatchFormat());

@@ -3,11 +3,11 @@ const { ruby } = require("./utils");
 describe("to_proc transform", () => {
   test("basic inline", () =>
     expect("loop { |i| i.to_s }").toChangeFormat("loop(&:to_s)", {
-      toProcTransform: true
+      rubyToProc: true
     }));
 
   test("basic inline with option turned off", () =>
-    expect("loop { |i| i.to_s }").toMatchFormat({ toProcTransform: false }));
+    expect("loop { |i| i.to_s }").toMatchFormat({ rubyToProc: false }));
 
   test("basic multi-line", () => {
     const content = ruby(`
@@ -17,15 +17,15 @@ describe("to_proc transform", () => {
     `);
 
     return expect(content).toChangeFormat("list.each(&:print)", {
-      toProcTransform: true
+      rubyToProc: true
     });
   });
 
-  test("maintains to_proc if already in use when toProcTransform false", () =>
-    expect("loop(&:to_s)").toMatchFormat({ toProcTransform: false }));
+  test("maintains to_proc if already in use when rubyToProc false", () =>
+    expect("loop(&:to_s)").toMatchFormat({ rubyToProc: false }));
 
-  test("maintains to_proc if already in use when toProcTransform true", () =>
-    expect("loop(&:to_s)").toMatchFormat({ toProcTransform: true }));
+  test("maintains to_proc if already in use when rubyToProc true", () =>
+    expect("loop(&:to_s)").toMatchFormat({ rubyToProc: true }));
 
   test("multi-line with comment", () => {
     const content = ruby(`
@@ -35,7 +35,7 @@ describe("to_proc transform", () => {
       end
     `);
 
-    return expect(content).toMatchFormat({ toProcTransform: true });
+    return expect(content).toMatchFormat({ rubyToProc: true });
   });
 
   test("happens for command nodes", () => {
@@ -46,7 +46,7 @@ describe("to_proc transform", () => {
     `);
 
     return expect(content).toChangeFormat("command 'foo', &:to_s", {
-      toProcTransform: true
+      rubyToProc: true
     });
   });
 
@@ -58,13 +58,13 @@ describe("to_proc transform", () => {
     `);
 
     return expect(content).toChangeFormat("command.call 'foo', &:to_s", {
-      toProcTransform: true
+      rubyToProc: true
     });
   });
 
   test("with args and parens", () =>
     expect("foo(bar) { |baz| baz.to_i }").toChangeFormat("foo(bar, &:to_i)", {
-      toProcTransform: true
+      rubyToProc: true
     }));
 
   test("with commands", () => {
@@ -75,7 +75,7 @@ describe("to_proc transform", () => {
     `);
 
     return expect(content).toChangeFormat("command bar, &:to_i", {
-      toProcTransform: true
+      rubyToProc: true
     });
   });
 
@@ -87,7 +87,7 @@ describe("to_proc transform", () => {
     `);
 
     return expect(content).toChangeFormat("command.call bar, &:to_i", {
-      toProcTransform: true
+      rubyToProc: true
     });
   });
 
@@ -99,45 +99,45 @@ describe("to_proc transform", () => {
       end
     `);
 
-    return expect(content).toMatchFormat({ toProcTransform: true });
+    return expect(content).toMatchFormat({ rubyToProc: true });
   });
 
   test("does not happen when there are args to the method call", () =>
     expect("loop { |i| i.to_s(:db) }").toMatchFormat({
-      toProcTransform: true
+      rubyToProc: true
     }));
 
   test("does not happen when there are multiple args", () =>
-    expect("loop { |i, j| i.to_s }").toMatchFormat({ toProcTransform: true }));
+    expect("loop { |i, j| i.to_s }").toMatchFormat({ rubyToProc: true }));
 
   test("does not duplicate when inside of an aref node", () =>
     expect(
       "foo[:bar].each { |baz| baz.to_s }"
-    ).toChangeFormat("foo[:bar].each(&:to_s)", { toProcTransform: true }));
+    ).toChangeFormat("foo[:bar].each(&:to_s)", { rubyToProc: true }));
 
   describe.each(["if", "unless"])(
     "does not transform when used inside hash with %s",
     (keyword) => {
       test(`hash literal with :${keyword} key`, () =>
         expect(`{ ${keyword}: ->(foo) { foo.to_s } }`).toMatchFormat({
-          toProcTransform: true
+          rubyToProc: true
         }));
 
       test(`hash literal with hashrocket :${keyword} key`, () =>
         expect(`{ :${keyword} => ->(foo) { foo.to_s } }`).toMatchFormat({
-          preferHashLabels: false,
-          toProcTransform: true
+          rubyHashLabel: false,
+          rubyToProc: true
         }));
 
       test(`method arguments with :${keyword} key`, () =>
         expect(`bar ${keyword}: ->(foo) { foo.to_s }`).toMatchFormat({
-          toProcTransform: true
+          rubyToProc: true
         }));
 
       test(`method arguments with hashrocket :${keyword} key`, () =>
         expect(`bar :${keyword} => ->(foo) { foo.to_s }`).toMatchFormat({
-          preferHashLabels: false,
-          toProcTransform: true
+          rubyHashLabel: false,
+          rubyToProc: true
         }));
     }
   );

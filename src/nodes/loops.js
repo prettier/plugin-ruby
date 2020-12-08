@@ -11,7 +11,7 @@ const {
 const { containsAssignment } = require("../utils");
 const inlineEnsureParens = require("../utils/inlineEnsureParens");
 
-const printLoop = (keyword, modifier) => (path, { inlineLoops }, print) => {
+const printLoop = (keyword, modifier) => (path, { rubyModifier }, print) => {
   const [_predicate, stmts] = path.getValue().body;
 
   // If the only statement inside this while loop is a void statement, then we
@@ -66,7 +66,7 @@ const printLoop = (keyword, modifier) => (path, { inlineLoops }, print) => {
   // an assignment (in which case we can't know for certain that that
   // assignment doesn't impact the statements inside the loop) then we can't
   // use the modifier form and we must use the block form.
-  if (!inlineLoops || containsAssignment(path.getValue().body[0])) {
+  if (!rubyModifier || containsAssignment(path.getValue().body[0])) {
     return blockLoop;
   }
 
