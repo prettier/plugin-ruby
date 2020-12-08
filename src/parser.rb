@@ -2,7 +2,7 @@
 
 # We implement our own version checking here instead of using Gem::Version so
 # that we can use the --disable-gems flag.
-RUBY_MAJOR, RUBY_MINOR, * = RUBY_VERSION.split('.').map(&:to_i)
+RUBY_MAJOR, RUBY_MINOR, RUBY_PATCH, * = RUBY_VERSION.split('.').map(&:to_i)
 
 if (RUBY_MAJOR < 2) || ((RUBY_MAJOR == 2) && (RUBY_MINOR < 5))
   warn(
@@ -2335,6 +2335,8 @@ class Prettier::Parser < Ripper
 
     if heredoc && heredoc[:beging][3] = '`'
       heredoc.merge(type: :xstring, body: [])
+    elsif RUBY_MAJOR <= 2 && RUBY_MINOR <= 5 && RUBY_PATCH < 7
+      { type: :xstring, body: [] }
     else
       find_scanner_event(:@backtick).merge!(type: :xstring, body: [])
     end
