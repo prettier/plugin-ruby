@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [@kddeisz] - Rename options to prep for v1.0 release.
+  - `addTrailingCommas` -> `trailingComma`, `"es5"` means `true`
+  - `inlineConditionals` and `inlineLoops` -> `rubyModifier`
+  - `preferHashLabels` -> `rubyHashLabel`
+  - `preferSingleQuotes` -> `rubySingleQuote`
+  - `toProcTransform` -> `rubyToProc`
+- [@andyw8], [@kddeisz] - Fix for Ruby `2.5.1` dyna_symbols. Turns out they were previously incorrectly reported as `xstring` nodes.
+- [@andyw8], [@kddeisz] - Fix for plain `rescue` nodes with only comments in the body.
+- [@andyw8], [@kddeisz] - Move declaration-type comments up to the line in the original source, as in:
+
+```ruby
+def foo # :nodoc:
+  bar
+end
+```
+
+The comment in the above example should stay in place.
+
 # [0.22.0] - 2020-12-08
 
 ### Changed
