@@ -7,7 +7,8 @@ const {
   join,
   line
 } = require("../prettier");
-const { prefix, skipAssignIndent } = require("../utils");
+
+const { getTrailingComma, prefix, skipAssignIndent } = require("../utils");
 
 // When attempting to convert a hash rocket into a hash label, you need to take
 // care because only certain patterns are allowed. Ruby source says that they
@@ -24,24 +25,24 @@ function isValidHashLabel(symbolLiteral) {
   return label.match(/^[_A-Za-z]/) && !label.endsWith("=");
 }
 
-function printHashKey(path, { preferHashLabels }, print) {
+function printHashKey(path, { rubyHashLabel }, print) {
   const labelNode = path.getValue().body[0];
   const labelDoc = path.call(print, "body", 0);
 
   switch (labelNode.type) {
     case "@label":
-      if (preferHashLabels) {
+      if (rubyHashLabel) {
         return labelDoc;
       }
       return `:${labelDoc.slice(0, labelDoc.length - 1)} =>`;
     case "symbol_literal": {
-      if (preferHashLabels && isValidHashLabel(labelNode)) {
+      if (rubyHashLabel && isValidHashLabel(labelNode)) {
         return concat([path.call(print, "body", 0, "body", 0), ":"]);
       }
       return concat([labelDoc, " =>"]);
     }
     case "dyna_symbol":
-      if (preferHashLabels) {
+      if (rubyHashLabel) {
         return concat(labelDoc.parts.slice(1).concat(":"));
       }
       return concat([labelDoc, " =>"]);
@@ -98,7 +99,7 @@ function printHash(path, opts, print) {
         concat([
           line,
           path.call(print, "body", 0),
-          opts.addTrailingCommas ? ifBreak(",", "") : ""
+          getTrailingComma(opts) ? ifBreak(",", "") : ""
         ])
       ),
       line,

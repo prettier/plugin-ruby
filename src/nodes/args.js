@@ -9,12 +9,11 @@ const {
 } = require("../prettier");
 
 const toProc = require("../toProc");
-const { docLength } = require("../utils");
+const { docLength, getTrailingComma } = require("../utils");
 
 module.exports = {
   arg_paren: (path, opts, print) => {
     const argsNode = path.getValue().body[0];
-    const { addTrailingCommas } = opts;
 
     if (argsNode === null) {
       return "";
@@ -41,7 +40,7 @@ module.exports = {
     // parentheses or surrounding lines yet added.
     let argsDocs = [
       join(concat([",", line]), args),
-      addTrailingCommas && !hasBlock ? ifBreak(",", "") : ""
+      getTrailingComma(opts) && !hasBlock ? ifBreak(",", "") : ""
     ];
 
     // Here we're going to make a determination on whether or not we should put

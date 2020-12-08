@@ -9,6 +9,8 @@ const {
   softline
 } = require("../prettier");
 
+const { getTrailingComma } = require("../utils");
+
 // Checks that every argument within this args node is a string_literal node
 // that has no spaces or interpolations. This means we're dealing with an array
 // that looks something like:
@@ -153,7 +155,7 @@ function printArray(path, opts, print) {
         concat([
           softline,
           join(concat([",", line]), path.call(print, "body", 0)),
-          opts.addTrailingCommas ? ifBreak(",", "") : ""
+          getTrailingComma(opts) ? ifBreak(",", "") : ""
         ])
       ),
       softline,

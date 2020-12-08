@@ -38,7 +38,7 @@ describe("hash", () => {
     const expected = `{\n  ${long}:\n    ${long},\n}`;
 
     return expect(`{ ${long}: ${long} }`).toChangeFormat(expected, {
-      addTrailingCommas: true
+      trailingComma: "all"
     });
   });
 
@@ -74,7 +74,7 @@ describe("hash", () => {
         }
       `);
 
-      return expect(content).toMatchFormat({ addTrailingCommas: true });
+      return expect(content).toMatchFormat({ trailingComma: "all" });
     });
 
     test("when exceeding line length", () => {
@@ -105,12 +105,10 @@ describe("hash", () => {
       expect(`{ "#{1 + 1}": 2 }`).toMatchFormat());
 
     test("basic without hash labels", () =>
-      expect(`{ :'foo' => 'bar' }`).toMatchFormat({ preferHashLabels: false }));
+      expect(`{ :'foo' => 'bar' }`).toMatchFormat({ rubyHashLabel: false }));
 
     test("with interpolation without hash labels", () =>
-      expect(`{ :"#{1 + 1}" => 2 }`).toMatchFormat({
-        preferHashLabels: false
-      }));
+      expect(`{ :"#{1 + 1}" => 2 }`).toMatchFormat({ rubyHashLabel: false }));
   });
 
   describe("bare assoc hash", () => {
@@ -131,7 +129,7 @@ describe("hash", () => {
                  a${long}:
                    a${long}
         `),
-        { addTrailingCommas: true }
+        { trailingComma: "all" }
       ));
 
     test("does not add trailing commas on breaking command calls", () =>
@@ -142,7 +140,7 @@ describe("hash", () => {
                   a${long}:
                     a${long}
         `),
-        { addTrailingCommas: true }
+        { trailingComma: "all" }
       ));
 
     test("does add trailing commas on breaking calls", () =>
@@ -155,7 +153,7 @@ describe("hash", () => {
               a${long},
           )
         `),
-        { addTrailingCommas: true }
+        { trailingComma: "all" }
       ));
   });
 
@@ -186,33 +184,33 @@ describe("hash", () => {
       expect("{ a: 'a', b: 'b', c: 'c' }").toChangeFormat(
         "{ :a => 'a', :b => 'b', :c => 'c' }",
         {
-          preferHashLabels: false
+          rubyHashLabel: false
         }
       ));
 
     test("hash rockets stay", () =>
       expect("{ :a => 'a', :b => 'b', :c => 'c' }").toMatchFormat({
-        preferHashLabels: false
+        rubyHashLabel: false
       }));
 
     test("hash rockets stay when needed", () =>
       expect("{ Foo => 1, Bar => 2 }").toMatchFormat({
-        preferHashLabels: false
+        rubyHashLabel: false
       }));
 
     test("ending in equals stays", () =>
       expect("{ :foo= => 'bar' }").toMatchFormat({
-        preferHashLabels: false
+        rubyHashLabel: false
       }));
 
     test("starting with non-letter/non-underscore stays", () =>
       expect("{ :@foo => 'bar' }").toMatchFormat({
-        preferHashLabels: false
+        rubyHashLabel: false
       }));
 
     test("starting with underscore stays", () =>
       expect("{ :_foo => 'bar' }").toMatchFormat({
-        preferHashLabels: false
+        rubyHashLabel: false
       }));
   });
 });

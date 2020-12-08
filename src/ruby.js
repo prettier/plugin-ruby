@@ -76,42 +76,28 @@ module.exports = {
     ruby: printer
   },
   options: {
-    addTrailingCommas: {
-      type: "boolean",
-      category: "Global",
-      default: false,
-      description:
-        "Adds a trailing comma to array literals, hash literals, and method calls."
-    },
-    inlineConditionals: {
-      type: "boolean",
-      category: "Global",
-      default: true,
-      description:
-        "When it fits on one line, allows if and unless statements to use the modifier form."
-    },
-    inlineLoops: {
-      type: "boolean",
-      category: "Global",
-      default: true,
-      description:
-        "When it fits on one line, allows while and until statements to use the modifier form."
-    },
-    preferHashLabels: {
+    rubyHashLabel: {
       type: "boolean",
       category: "Global",
       default: true,
       description:
         "When possible, uses the shortened hash key syntax, as opposed to hash rockets."
     },
-    preferSingleQuotes: {
+    rubyModifier: {
+      type: "boolean",
+      category: "Global",
+      default: true,
+      description:
+        "When it fits on one line, allows if, unless, while, and until statements to use the modifier form."
+    },
+    rubySingleQuote: {
       type: "boolean",
       category: "Global",
       default: true,
       description:
         "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals."
     },
-    toProcTransform: {
+    rubyToProc: {
       type: "boolean",
       category: "Global",
       default: false,
@@ -121,6 +107,7 @@ module.exports = {
   },
   defaultOptions: {
     printWidth: 80,
-    tabWidth: 2
+    tabWidth: 2,
+    trailingComma: "none"
   }
 };

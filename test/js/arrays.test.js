@@ -51,7 +51,7 @@ describe("array", () => {
     const before = `[${long}, ${long}, ${long}]`;
     const after = `[\n  ${long},\n  ${long},\n  ${long},\n]`;
 
-    return expect(before).toChangeFormat(after, { addTrailingCommas: true });
+    return expect(before).toChangeFormat(after, { trailingComma: "all" });
   });
 
   test("breaking maintains calls on the end", () =>
@@ -98,7 +98,7 @@ describe("array", () => {
         ]
       `);
 
-      return expect(content).toMatchFormat({ addTrailingCommas: true });
+      return expect(content).toMatchFormat({ trailingComma: "all" });
     });
   });
 });

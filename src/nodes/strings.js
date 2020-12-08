@@ -77,14 +77,14 @@ function getClosingQuote(quote) {
 // Prints a @CHAR node. @CHAR nodes are special character strings that usually
 // are strings of length 1. If they're any longer than we'll try to apply the
 // correct quotes.
-function printChar(path, { preferSingleQuotes }, _print) {
+function printChar(path, { rubySingleQuote }, _print) {
   const { body } = path.getValue();
 
   if (body.length !== 2) {
     return body;
   }
 
-  const quote = preferSingleQuotes ? "'" : '"';
+  const quote = rubySingleQuote ? "'" : '"';
   return concat([quote, body.slice(1), quote]);
 }
 
@@ -107,13 +107,13 @@ function printStringDVar(path, opts, print) {
 // wishes of the user with regards to single versus double quotes, but if the
 // string contains any escape expressions then it will just keep the original
 // quotes.
-function printStringLiteral(path, { preferSingleQuotes }, print) {
+function printStringLiteral(path, { rubySingleQuote }, print) {
   const node = path.getValue();
 
   // If the string is empty, it will not have any parts, so just print out the
   // quotes corresponding to the config
   if (node.body.length === 0) {
-    return preferSingleQuotes ? "''" : '""';
+    return rubySingleQuote ? "''" : '""';
   }
 
   // Determine the quote that should enclose the new string
@@ -121,7 +121,7 @@ function printStringLiteral(path, { preferSingleQuotes }, print) {
   if (isQuoteLocked(node)) {
     quote = node.quote;
   } else {
-    quote = preferSingleQuotes && isSingleQuotable(node) ? "'" : '"';
+    quote = rubySingleQuote && isSingleQuotable(node) ? "'" : '"';
   }
 
   const parts = node.body.map((part, index) => {
