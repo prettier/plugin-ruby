@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+# [0.22.0] - 2020-12-08
+
 ### Changed
 
 - [@flyerhzm] - Print method chains by one indentation.
@@ -16,6 +18,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@flyerhzm] - Slight prettifying of wrapped args if doc length is under a certain value.
 - [@github0013], [@kddeisz] - Ensure `not` keeps parentheses if they are being used.
 - [@jbielick] - Print heredocs consistently.
+- [@kddeisz] - Completely revamp the way we handle comments.
+- [@kddeisz] - Support `hshptn` and the remaining missing pattern matching syntax.
 
 ## [0.21.0] - 2020-12-02
 
@@ -873,7 +877,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.21.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/prettier/plugin-ruby/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/prettier/plugin-ruby/compare/v0.20.1...v0.21.0
 [0.20.1]: https://github.com/prettier/plugin-ruby/compare/v0.20.0...v0.20.1
 [0.20.0]: https://github.com/prettier/plugin-ruby/compare/v0.19.1...v0.20.0
