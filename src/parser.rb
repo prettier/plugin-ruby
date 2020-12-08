@@ -653,6 +653,27 @@ class Prettier::Parser < Ripper
     )
   end
 
+  # Finds the next position in the source string that begins a statement. This
+  # is used to bind statements lists and make sure they don't include a
+  # preceding comment. For example, we want the following comment to be attached
+  # to the class node and not the statement node:
+  #
+  #     class Foo # :nodoc:
+  #       ...
+  #     end
+  #
+  # By finding the next non-space character, we can make sure that the bounds of
+  # the statement list are correct.
+  def find_next_statement_start(position)
+    remaining = source[position..-1]
+
+    if remaining.sub(/\A +/, '')[0] == '#'
+      return position + remaining.index("\n")
+    end
+
+    position
+  end
+
   # class is a parser event that represents defining a class. It accepts as
   # arguments the name of the class, the optional name of the superclass,
   # and the bodystmt event that represents the statements evaluated within
@@ -661,7 +682,10 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'class')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind((superclass || const)[:char_end], ending[:char_start])
+    bodystmt.bind(
+      find_next_statement_start((superclass || const)[:char_end]),
+      ending[:char_start]
+    )
 
     {
       type: :class,
@@ -769,7 +793,10 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'def')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind(params[:char_end], ending[:char_start])
+    bodystmt.bind(
+      find_next_statement_start(params[:char_end]),
+      ending[:char_start]
+    )
 
     {
       type: :def,
@@ -804,7 +831,10 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'def')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind(params[:char_end], ending[:char_start])
+    bodystmt.bind(
+      find_next_statement_start(params[:char_end]),
+      ending[:char_start]
+    )
 
     {
       type: :defs,
@@ -1418,7 +1448,10 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'module')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind(const[:char_end], ending[:char_start])
+    bodystmt.bind(
+      find_next_statement_start(const[:char_end]),
+      ending[:char_start]
+    )
 
     {
       type: :module,
@@ -1750,7 +1783,10 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'class')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind(target[:char_end], ending[:char_start])
+    bodystmt.bind(
+      find_next_statement_start(target[:char_end]),
+      ending[:char_start]
+    )
 
     {
       type: :sclass,

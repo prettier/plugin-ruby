@@ -217,4 +217,24 @@ describe("comments", () => {
 
     return expect(content).toMatchFormat();
   });
+
+  describe("declaration style comments", () => {
+    const declarations = [
+      "class Foo",
+      "module Foo",
+      "def foo",
+      "def self.foo",
+      "class << foo"
+    ];
+
+    test.each(declarations)("%s inline", (declaration) => {
+      const content = ruby(`
+        ${declaration} # :nodoc
+          bar
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+  });
 });
