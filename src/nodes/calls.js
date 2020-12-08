@@ -1,8 +1,8 @@
 const {
-  breakParent,
   concat,
   group,
   hardline,
+  ifBreak,
   indent,
   softline
 } = require("../prettier");
@@ -10,37 +10,8 @@ const { concatBody, first, makeCall } = require("../utils");
 
 const toProc = require("../toProc");
 
+const chained = ["call", "method_add_arg"];
 const noIndent = ["array", "hash", "if", "method_add_block", "xstring_literal"];
-
-// A call chain is when you call a bunch of methods right in a row. They're
-// pretty common on things like strings, arrays, or ActiveRecord::Relation
-// objects. This algorithm could be tweaked to include certain types of
-// arguments versus others, but this is a good first pass.
-function isCallChain(path) {
-  let parent = 0;
-  let parentNode = path.getParentNode(parent);
-  let callCount = 1;
-
-  while (parentNode) {
-    // We don't want to have special method handling if this method chain is
-    // actually an argument to something else
-    if (parentNode.type === "args") {
-      return false;
-    }
-
-    // We want to get a list of all of the ancestor call nodes, so that we can
-    // know if we need to provide special print handling for them.
-    if (parentNode.type === "call") {
-      callCount += 1;
-    }
-
-    parent += 1;
-    parentNode = path.getParentNode(parent);
-  }
-
-  // We consider it a call chain if there are >= 3 call nodes in a row.
-  return callCount >= 3;
-}
 
 function printCall(path, opts, print) {
   const callNode = path.getValue();
@@ -70,55 +41,79 @@ function printCall(path, opts, print) {
     ])
   );
 
-  // If this call is inside of a call chain (3 or more calls in a row), then
-  // we're going to provide special handling.
-  if (isCallChain(path)) {
-    // Recurse up the AST and mark all of the call nodes as being a part of a
-    // call chain so that when they get called to print they print themselves
-    // accordingly.
-    let parent = 0;
-    let parentNode = path.getParentNode();
+  // Get a reference to the parent node so we can check if we're inside a chain
+  const parentNode = path.getParentNode();
 
-    while (parentNode) {
-      if (parentNode.type === "call") {
-        parentNode.callChain = true;
-      }
-      parent += 1;
-      parentNode = path.getParentNode(parent);
-    }
-
-    return group(concat([breakParent, receiverDoc, rightSideDoc]));
+  // If our parent node is a chained node then we're not going to group the
+  // right side of the expression, as we want to have a nice multi-line layout.
+  if (chained.includes(parentNode.type)) {
+    parentNode.chain = (callNode.chain || 0) + 1;
+    parentNode.breakDoc = (callNode.breakDoc || [receiverDoc]).concat(
+      rightSideDoc
+    );
   }
 
-  return group(
-    concat([
-      receiverDoc,
-      callNode.callChain ? rightSideDoc : group(rightSideDoc)
-    ])
-  );
+  // If we're at the top of a chain, then we're going to print out a nice
+  // multi-line layout if this doesn't break into multiple lines.
+  if (!chained.includes(parentNode.type) && (callNode.chain || 0) >= 3) {
+    return ifBreak(
+      group(concat(callNode.breakDoc.concat(rightSideDoc))),
+      concat([receiverDoc, group(rightSideDoc)])
+    );
+  }
+
+  return group(concat([receiverDoc, group(rightSideDoc)]));
+}
+
+function printMethodAddArg(path, opts, print) {
+  const methodAddArgNode = path.getValue();
+  const argNode = methodAddArgNode.body[1];
+
+  const [methodDoc, argsDoc] = path.map(print, "body");
+
+  // You can end up here if you have a method with a ? ending, presumably
+  // because the parser knows that it cannot be a local variable.
+  if (argsDoc.length === 0) {
+    return methodDoc;
+  }
+
+  // This case will ONLY be hit if we can successfully turn the block into a
+  // to_proc call. In that case, we just explicitly add the parens around it.
+  if (argNode.type === "args" && argsDoc.length > 0) {
+    return concat([methodDoc, "("].concat(argsDoc).concat(")"));
+  }
+
+  // Get a reference to the parent node so we can check if we're inside a chain
+  const parentNode = path.getParentNode();
+
+  // If our parent node is a chained node then we're not going to group the
+  // right side of the expression, as we want to have a nice multi-line layout.
+  if (chained.includes(parentNode.type)) {
+    parentNode.chain = (methodAddArgNode.chain || 0) + 1;
+    parentNode.breakDoc = (methodAddArgNode.breakDoc || [methodDoc]).concat(
+      argsDoc
+    );
+  }
+
+  // If we're at the top of a chain, then we're going to print out a nice
+  // multi-line layout if this doesn't break into multiple lines.
+  if (
+    !chained.includes(parentNode.type) &&
+    (methodAddArgNode.chain || 0) >= 3
+  ) {
+    return ifBreak(
+      group(concat(methodAddArgNode.breakDoc.concat(argsDoc))),
+      concat([methodDoc, argsDoc])
+    );
+  }
+
+  return concat([methodDoc, argsDoc]);
 }
 
 module.exports = {
   call: printCall,
   fcall: concatBody,
-  method_add_arg: (path, opts, print) => {
-    const [method, args] = path.map(print, "body");
-    const argNode = path.getValue().body[1];
-
-    // You can end up here if you have a method with a ? ending, presumably
-    // because the parser knows that it cannot be a local variable.
-    if (args.length === 0) {
-      return method;
-    }
-
-    // This case will ONLY be hit if we can successfully turn the block into a
-    // to_proc call. In that case, we just explicitly add the parens around it.
-    if (argNode.type === "args" && args.length > 0) {
-      return concat([method, "("].concat(args).concat(")"));
-    }
-
-    return concat([method, args]);
-  },
+  method_add_arg: printMethodAddArg,
   method_add_block: (path, opts, print) => {
     const [method, block] = path.getValue().body;
     const proc = toProc(path, opts, block);
