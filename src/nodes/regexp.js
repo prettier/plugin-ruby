@@ -1,17 +1,21 @@
 const { concat } = require("../prettier");
 
+function isStringContent(node) {
+  return node.type === "@tstring_content";
+}
+
 function shouldUseBraces(node) {
   const first = node.body[0];
 
   // If the first part of this regex is plain string content and we have a
-  // space, then we want to use braces because otherwise we could end up with an
-  // ambiguous operator, e.g. foo / bar/
-  if (first && first.type === "@tstring_content" && first.body[0] === " ") {
+  // space or an =, then we want to use braces because otherwise we could end up
+  // with an ambiguous operator, e.g. foo / bar/ or foo /=bar/
+  if (first && isStringContent(first) && [" ", "="].includes(first.body[0])) {
     return true;
   }
 
   return node.body.some(
-    (child) => child.type === "@tstring_content" && child.body.includes("/")
+    (child) => isStringContent(child) && child.body.includes("/")
   );
 }
 

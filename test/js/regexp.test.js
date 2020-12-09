@@ -34,6 +34,9 @@ describe("regexp", () => {
     return expect(content).toMatchFormat();
   });
 
-  test("forces braces if could be ambiguous", () =>
+  test("forces braces if could be ambiguous with space", () =>
     expect("foo %r{ bar}").toMatchFormat());
+
+  test("forces braces if could be ambiguous with equals", () =>
+    expect("foo %r{= bar}").toMatchFormat());
 });
