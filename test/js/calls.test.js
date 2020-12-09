@@ -31,4 +31,10 @@ describe("calls", () => {
 
     return expect(content).toMatchFormat();
   });
+
+  test("no explicit call doesn't add call", () =>
+    expect("a.(1, 2, 3)").toMatchFormat());
+
+  test("explicit call maintains call", () =>
+    expect("a.call(1, 2, 3)").toMatchFormat());
 });

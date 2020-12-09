@@ -21,9 +21,9 @@ function printCall(path, opts, print) {
   const operatorDoc = makeCall(path, opts, print);
 
   // You can call lambdas with a special syntax that looks like func.(*args).
-  // In this case, "call" is returned for the 3rd child node.
-  const messageDoc =
-    messageNode === "call" ? messageNode : path.call(print, "body", 2);
+  // In this case, "call" is returned for the 3rd child node. We don't alter
+  // call syntax so if `call` is implicit, we don't print it out.
+  const messageDoc = messageNode === "call" ? "" : path.call(print, "body", 2);
 
   // For certain left sides of the call nodes, we want to attach directly to
   // the } or end.

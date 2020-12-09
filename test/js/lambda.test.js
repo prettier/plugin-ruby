@@ -75,11 +75,6 @@ describe("lambda", () => {
     );
   });
 
-  test("no explicit call adds call", () =>
-    expect("a.(1, 2, 3)").toChangeFormat("a.call(1, 2, 3)"));
-
-  test("calls maintains call", () => expect("a.call(1, 2, 3)").toMatchFormat());
-
   test("empty brackets", () => expect("a[]").toMatchFormat());
 
   test("brackets with multiple args", () =>
