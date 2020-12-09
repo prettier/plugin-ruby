@@ -1706,11 +1706,14 @@ class Prettier::Parser < Ripper
   # inside of a bodystmt.
   def on_rescue(exceptions, variable, stmts, consequent)
     beging = find_scanner_event(:@kw, 'rescue')
+    last_node =
+      if exceptions.is_a?(Array)
+        exceptions[-1]
+      else
+        exceptions || variable || beging
+      end
 
-    stmts.bind(
-      ((exceptions || [])[-1] || variable || beging)[:char_end],
-      char_pos
-    )
+    stmts.bind(last_node[:char_end], char_pos)
 
     Rescue.new(
       beging.merge!(
