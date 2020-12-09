@@ -47,6 +47,7 @@ end
 - [@kddeisz] - Fix for comments when you're defining a method whose name overlaps with a keyword.
 - [@kddeisz] - Don't automatically indent inside interpolated expressions from within a heredoc.
 - [@kddeisz] - Don't convert into string literal arrays if the elements have brackets.
+- [@kddeisz] - Ensure you break the parent when there is an assignment in the predicate of a loop.
 
 # [0.22.0] - 2020-12-08
 
