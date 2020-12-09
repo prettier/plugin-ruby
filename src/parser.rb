@@ -1059,8 +1059,15 @@ class Prettier::Parser < Ripper
   # and its subsequent statements.
   def on_ensure(stmts)
     beging = find_scanner_event(:@kw, 'ensure')
-    ending = find_scanner_event(:@kw, 'end')
 
+    # Specifically not using find_scanner_event here because we don't want to
+    # consume the :@end event, because that would break def..ensure..end chains.
+    index =
+      scanner_events.rindex do |scanner_event|
+        scanner_event[:type] == :@kw && scanner_event[:body] == 'end'
+      end
+
+    ending = scanner_events[index]
     stmts.bind(beging[:char_end], ending[:char_start])
 
     {

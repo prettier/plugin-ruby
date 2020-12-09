@@ -28,7 +28,9 @@ function printMethod(offset) {
 
     // If the body is empty, we can replace with a ;
     const stmts = body.body[0].body;
+
     if (
+      !body.body.slice(1).some((node) => node) &&
       stmts.length === 1 &&
       stmts[0].type === "void_stmt" &&
       !stmts[0].comments

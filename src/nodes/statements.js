@@ -12,35 +12,45 @@ const {
   trim
 } = require("../prettier");
 
+function printBodyStmt(path, opts, print) {
+  const [stmts, rescue, elseClause, ensure] = path.getValue().body;
+  const parts = [];
+
+  if (
+    stmts.body.length > 1 ||
+    stmts.body[0].type != "void_stmt" ||
+    stmts.body[0].comments
+  ) {
+    parts.push(path.call(print, "body", 0));
+  }
+
+  if (rescue) {
+    parts.push(dedent(concat([hardline, path.call(print, "body", 1)])));
+  }
+
+  if (elseClause) {
+    // Before Ruby 2.6, this piece of bodystmt was an explicit "else" node
+    const stmts =
+      elseClause.type === "else"
+        ? path.call(print, "body", 2, "body", 0)
+        : path.call(print, "body", 2);
+
+    parts.push(concat([dedent(concat([hardline, "else"])), hardline, stmts]));
+  }
+
+  if (ensure) {
+    parts.push(dedent(concat([hardline, path.call(print, "body", 3)])));
+  }
+
+  return group(concat(parts));
+}
+
 module.exports = {
   "@__end__": (path, _opts, _print) => {
     const { body } = path.getValue();
     return concat([trim, "__END__", literalline, body]);
   },
-  bodystmt: (path, opts, print) => {
-    const [_statements, rescue, elseClause, ensure] = path.getValue().body;
-    const parts = [path.call(print, "body", 0)];
-
-    if (rescue) {
-      parts.push(dedent(concat([hardline, path.call(print, "body", 1)])));
-    }
-
-    if (elseClause) {
-      // Before Ruby 2.6, this piece of bodystmt was an explicit "else" node
-      const stmts =
-        elseClause.type === "else"
-          ? path.call(print, "body", 2, "body", 0)
-          : path.call(print, "body", 2);
-
-      parts.push(concat([dedent(concat([hardline, "else"])), hardline, stmts]));
-    }
-
-    if (ensure) {
-      parts.push(dedent(concat([hardline, path.call(print, "body", 3)])));
-    }
-
-    return group(concat(parts));
-  },
+  bodystmt: printBodyStmt,
   paren: (path, opts, print) => {
     if (!path.getValue().body[0]) {
       return "()";
