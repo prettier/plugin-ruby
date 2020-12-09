@@ -123,7 +123,7 @@ function printArray(path, opts, print) {
 
   // If we have an array that contains only simple string literals with no
   // spaces or interpolation, then we're going to print a %w array.
-  if (isStringArray(args)) {
+  if (opts.rubyArrayLiteral && isStringArray(args)) {
     const printString = (stringPath) => stringPath.call(print, "body", 0);
     const parts = path.map(printString, "body", 0, "body");
 
@@ -132,7 +132,7 @@ function printArray(path, opts, print) {
 
   // If we have an array that contains only simple symbol literals with no
   // interpolation, then we're going to print a %i array.
-  if (isSymbolArray(args)) {
+  if (opts.rubyArrayLiteral && isSymbolArray(args)) {
     const printSymbol = (symbolPath) => symbolPath.call(print, "body", 0);
     const parts = path.map(printSymbol, "body", 0, "body");
 
