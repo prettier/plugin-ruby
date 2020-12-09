@@ -26,8 +26,19 @@ end
 
 The comment in the above example should stay in place.
 
-- [@janklimo] - Respect special call syntax, i.e., `a.(1, 2, 3)` should remain the same.
+- [@janklimo] - Respect special call syntax, e.g., `a.(1, 2, 3)` should remain the same.
 - [@kddeisz] - Fix up a bug with `ensure` being used in a `bodystmt` and not a `begin`.
+- [@kddeisz] - Fix up a bug with negative ranges, e.g., `-4..-3`.
+- [@kddeisz] - Fix up a bug with operator aliases, e.g., `alias << push`.
+- [@kddeisz] - Fix up a bug with calls and unary nodes, e.g., `!!foo&.bar`.
+- [@kddeisz] - Fix up a bug with multiple rescue clauses and comments, e.g.,
+
+```ruby
+begin
+rescue Foo, Bar
+  # comment
+end
+```
 
 # [0.22.0] - 2020-12-08
 
