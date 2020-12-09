@@ -85,6 +85,18 @@ describe("rescue", () => {
     return expect(content).toMatchFormat();
   });
 
+  test("comment inline", () => {
+    const content = ruby(`
+      begin
+        foo
+      rescue Foo # foo
+        bar
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
   test("one error with a comment", () => {
     const content = ruby(`
       begin

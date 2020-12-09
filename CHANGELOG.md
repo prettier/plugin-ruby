@@ -52,6 +52,7 @@ end
 - [@kddeisz] - Force using braces for regex if a regex starts with a blank space.
 - [@kddeisz] - Force using braces for regex if a regex starts with an equals sign.
 - [@kddeisz] - Fix up a bug with constant aliases, e.g., `alias in IN`.
+- [@andyw8], [@kddeisz] - Ensure `rescue` comments stay on the same line as their declaration.
 
 # [0.22.0] - 2020-12-08
 

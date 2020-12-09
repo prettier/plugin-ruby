@@ -564,7 +564,7 @@ class Prettier::Parser < Ripper
       # Next we're going to determine the rescue clause if there is one
       if parts[1]
         consequent = parts[2..-1].compact.first
-        self[:body][1].bind(consequent ? consequent[:char_start] : char_end)
+        self[:body][1].bind_end(consequent ? consequent[:char_start] : char_end)
       end
     end
   end
@@ -1724,17 +1724,17 @@ class Prettier::Parser < Ripper
   # determine its ending. Therefore it relies on its parent bodystmt node to
   # report its ending to it.
   class Rescue < SimpleDelegator
-    def bind(char_end)
+    def bind_end(char_end)
       merge!(char_end: char_end)
 
       stmts = self[:body][2]
       consequent = self[:body][3]
 
       if consequent
-        consequent.bind(char_end)
-        stmts.bind(stmts[:char_start], consequent[:char_start])
+        consequent.bind_end(char_end)
+        stmts.bind_end(consequent[:char_start])
       else
-        stmts.bind(stmts[:char_start], char_end)
+        stmts.bind_end(char_end)
       end
     end
   end
@@ -1743,14 +1743,11 @@ class Prettier::Parser < Ripper
   # inside of a bodystmt.
   def on_rescue(exceptions, variable, stmts, consequent)
     beging = find_scanner_event(:@kw, 'rescue')
-    last_node =
-      if exceptions.is_a?(Array)
-        exceptions[-1]
-      else
-        exceptions || variable || beging
-      end
 
-    stmts.bind(last_node[:char_end], char_pos)
+    last_exception = exceptions.is_a?(Array) ? exceptions[-1] : exceptions
+    last_node = variable || last_exception || beging
+
+    stmts.bind(find_next_statement_start(last_node[:char_end]), char_pos)
 
     Rescue.new(
       beging.merge!(
@@ -1863,6 +1860,10 @@ class Prettier::Parser < Ripper
       if self[:body][0][:type] == :void_stmt
         self[:body][0].merge!(char_start: char_start, char_end: char_start)
       end
+    end
+
+    def bind_end(char_end)
+      merge!(char_end: char_end)
     end
 
     def <<(statement)
