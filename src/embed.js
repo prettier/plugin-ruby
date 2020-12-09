@@ -67,7 +67,11 @@ const embed = (path, print, textToDoc, _opts) => {
       path.call(print, "beging"),
       lineSuffix(
         group(
-          concat([indent(markAsRoot(formatted)), literalLineNoBreak, ending])
+          concat([
+            indent(markAsRoot(formatted)),
+            literalLineNoBreak,
+            ending.trim()
+          ])
         )
       )
     ]);
@@ -78,7 +82,7 @@ const embed = (path, print, textToDoc, _opts) => {
   return markAsRoot(
     concat([
       path.call(print, "beging"),
-      lineSuffix(group(concat([formatted, literalLineNoBreak, ending])))
+      lineSuffix(group(concat([formatted, literalLineNoBreak, ending.trim()])))
     ])
   );
 };
