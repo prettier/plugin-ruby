@@ -25,4 +25,6 @@ describe("break", () => {
 
   test("keeps parens for _mod nodes", () =>
     expect("break(1 if true)").toMatchFormat());
+
+  test("works with comments", () => expect("break # foo").toMatchFormat());
 });

@@ -42,6 +42,7 @@ end
 
 - [@kddeisz] - Handle string literals that start with `%Q`.
 - [@kddeisz] - Handle question method methods in the predicate of an if with a comment in the body.
+- [@kddeisz] - Fix bare `break` with comments immediately after.
 
 # [0.22.0] - 2020-12-08
 

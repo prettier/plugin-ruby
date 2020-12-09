@@ -601,7 +601,16 @@ class Prettier::Parser < Ripper
   # accepts as an argument an args or args_add_block event that contains all
   # of the arguments being passed to the break.
   def on_break(args_add_block)
-    find_scanner_event(:@kw, 'break').merge!(
+    beging = find_scanner_event(:@kw, 'break')
+
+    # You can hit this if you are passing no arguments to break but it has a
+    # comment right after it. In that case we can just use the location
+    # information straight from the keyword.
+    if args_add_block[:type] == :args
+      return beging.merge!(type: :break, body: [args_add_block])
+    end
+
+    beging.merge!(
       type: :break,
       body: [args_add_block],
       end: args_add_block[:end],
