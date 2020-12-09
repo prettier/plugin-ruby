@@ -3,6 +3,9 @@ const { long, ruby } = require("./utils");
 describe("alias", () => {
   test("bare word aliases", () => expect("alias foo bar").toMatchFormat());
 
+  test("bare word operator aliases", () =>
+    expect("alias << push").toMatchFormat());
+
   test("symbol aliases become bare word aliases", () =>
     expect("alias :foo :bar").toChangeFormat("alias foo bar"));
 
