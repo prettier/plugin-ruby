@@ -798,6 +798,11 @@ class Prettier::Parser < Ripper
   #          └> ident
   #
   def on_def(ident, params, bodystmt)
+    # Make sure to delete this scanner event in case you're defining something
+    # like def class which would lead to this being a kw and causing all kinds
+    # of trouble
+    scanner_events.delete(ident)
+
     if params[:type] == :params && !params[:body].any?
       location = ident[:char_end]
       params.merge!(char_start: location, char_end: location)
@@ -836,6 +841,11 @@ class Prettier::Parser < Ripper
   #          └> target
   #
   def on_defs(target, oper, ident, params, bodystmt)
+    # Make sure to delete this scanner event in case you're defining something
+    # like def class which would lead to this being a kw and causing all kinds
+    # of trouble
+    scanner_events.delete(ident)
+
     if params[:type] == :params && !params[:body].any?
       location = ident[:char_end]
       params.merge!(char_start: location, char_end: location)

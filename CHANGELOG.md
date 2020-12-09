@@ -44,6 +44,7 @@ end
 - [@kddeisz] - Handle question method methods in the predicate of an if with a comment in the body.
 - [@kddeisz] - Fix bare `break` with comments immediately after.
 - [@kddeisz] - Fix for heredocs with comments immediately after the declaration.
+- [@kddeisz] - Fix for comments when you're defining a method whose name overlaps with a keyword.
 
 # [0.22.0] - 2020-12-08
 
