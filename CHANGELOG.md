@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.0.0-rc1] - 2020-12-09
+
 ### Changed
 
 - [@kddeisz] - Rename options to prep for v1.0 release.
@@ -926,7 +928,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v0.22.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.0.0-rc1...HEAD
+[1.0.0-rc1]: https://github.com/prettier/plugin-ruby/compare/v0.22.0...v1.0.0-rc1
 [0.22.0]: https://github.com/prettier/plugin-ruby/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/prettier/plugin-ruby/compare/v0.20.1...v0.21.0
 [0.20.1]: https://github.com/prettier/plugin-ruby/compare/v0.20.0...v0.20.1
