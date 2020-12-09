@@ -26,6 +26,12 @@ describe("array", () => {
   test("does not transform string arrays with brackets", () =>
     expect(`['a [] b', 'c [] d']`).toMatchFormat());
 
+  test("does not transform string arrays if disabled", () =>
+    expect(`['a', 'b']`).toMatchFormat({ rubyArrayLiteral: false }));
+
+  test("does not transform symbol arrays if disabled", () =>
+    expect("[:a, :b]").toMatchFormat({ rubyArrayLiteral: false }));
+
   test("transforms basic symbol arrays", () =>
     expect("[:a, :b, :c]").toChangeFormat("%i[a b c]"));
 

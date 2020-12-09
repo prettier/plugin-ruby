@@ -122,16 +122,17 @@ The `prettier` executable is now installed and ready for use:
 
 Below are the options (from [`src/ruby.js`](src/ruby.js)) that `@prettier/plugin-ruby` currently supports:
 
-| API Option        | CLI Option            | Default | Description                                                                                                                          |
-| ----------------- | --------------------- | :-----: | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `printWidth`      | `--print-width`       |  `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).                                     |
-| `requirePragma`   | `--require-pragma`    | `false` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#require-pragma)).                                  |
-| `rubyHashLabel`   | `--ruby-hash-label`   | `true`  | When possible, uses the shortened hash key syntax, as opposed to hash rockets.                                                       |
-| `rubyModifier`    | `--ruby-modifier`     | `true`  | When it fits on one line, allows while and until statements to use the modifier form.                                                |
-| `rubySingleQuote` | `--ruby-single-quote` | `true`  | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals.                        |
-| `rubyToProc`      | `--ruby-to-proc`      | `false` | When possible, convert blocks to the more concise `Symbol#to_proc` syntax.                                                           |
-| `tabWidth`        | `--tab-width`         |   `2`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).                                       |
-| `trailingComma`   | `--trailing-comma`    | `"es5"` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#trailing-comma)). `"es5"` is equivalent to `true`. |
+| API Option         | CLI Option             | Default | Description                                                                                                                          |
+| ------------------ | ---------------------- | :-----: | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `printWidth`       | `--print-width`        |  `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).                                     |
+| `requirePragma`    | `--require-pragma`     | `false` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#require-pragma)).                                  |
+| `rubyArrayLiteral` | `--ruby-array-literal` | `true`  | When possible, favor the use of string and symbol array literals.                                                                    |
+| `rubyHashLabel`    | `--ruby-hash-label`    | `true`  | When possible, uses the shortened hash key syntax, as opposed to hash rockets.                                                       |
+| `rubyModifier`     | `--ruby-modifier`      | `true`  | When it fits on one line, allows while and until statements to use the modifier form.                                                |
+| `rubySingleQuote`  | `--ruby-single-quote`  | `true`  | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals.                        |
+| `rubyToProc`       | `--ruby-to-proc`       | `false` | When possible, convert blocks to the more concise `Symbol#to_proc` syntax.                                                           |
+| `tabWidth`         | `--tab-width`          |   `2`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).                                       |
+| `trailingComma`    | `--trailing-comma`     | `"es5"` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#trailing-comma)). `"es5"` is equivalent to `true`. |
 
 Any of these can be added to your existing [prettier configuration
 file](https://prettier.io/docs/en/configuration.html). For example:
