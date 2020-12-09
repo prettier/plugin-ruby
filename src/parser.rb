@@ -115,15 +115,14 @@ class Prettier::Parser < Ripper
   # This will break everything, so we need to force the encoding back into
   # UTF-8 so that the JSON library won't break.
   def on_comment(value)
-    @comments <<
-      {
-        type: :@comment,
-        value: value[1..-1].chomp.force_encoding('UTF-8'),
-        start: lineno,
-        end: lineno,
-        char_start: char_pos,
-        char_end: char_pos + value.length - 1
-      }
+    @comments << {
+      type: :@comment,
+      value: value[1..-1].chomp.force_encoding('UTF-8'),
+      start: lineno,
+      end: lineno,
+      char_start: char_pos,
+      char_end: char_pos + value.length - 1
+    }
   end
 
   # ignored_nl is a special kind of scanner event that passes nil as the value,
@@ -1210,8 +1209,7 @@ class Prettier::Parser < Ripper
     # Here we're going to artificially create an extra node type so that if
     # there are comments after the declaration of a heredoc, they get printed.
     location.merge(
-      type: :heredoc,
-      beging: location.merge(type: :@heredoc_beg, body: beging),
+      type: :heredoc, beging: location.merge(type: :@heredoc_beg, body: beging)
     ).tap { |node| @heredocs << node }
   end
 
@@ -2149,7 +2147,8 @@ class Prettier::Parser < Ripper
             !%w[.. ...].include?(scanner_event[:body])
         end
 
-      scanner_events.delete_at(index).merge!(
+      beging = scanner_events.delete_at(index)
+      beging.merge!(
         type: :unary,
         oper: oper[0],
         body: [value],

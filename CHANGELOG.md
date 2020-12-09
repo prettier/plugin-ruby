@@ -35,6 +35,7 @@ The comment in the above example should stay in place.
 
 ```ruby
 begin
+
 rescue Foo, Bar
   # comment
 end
