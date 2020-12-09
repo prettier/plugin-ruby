@@ -48,6 +48,7 @@ end
 - [@kddeisz] - Don't automatically indent inside interpolated expressions from within a heredoc.
 - [@kddeisz] - Don't convert into string literal arrays if the elements have brackets.
 - [@kddeisz] - Ensure you break the parent when there is an assignment in the predicate of a loop.
+- [@kddeisz] - Fix up a bug with keyword aliases, e.g., `alias in within`.
 
 # [0.22.0] - 2020-12-08
 
