@@ -26,6 +26,8 @@ end
 
 The comment in the above example should stay in place.
 
+- [@janklimo] - Respect special call syntax, i.e., `a.(1, 2, 3)` should remain the same.
+
 # [0.22.0] - 2020-12-08
 
 ### Changed
