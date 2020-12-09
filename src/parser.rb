@@ -187,11 +187,14 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.bind(beging[:char_end], ending[:char_start])
+    stmts.bind(
+      find_next_statement_start(beging[:char_end]),
+      ending[:char_start]
+    )
 
     find_scanner_event(:@kw, 'BEGIN').merge!(
       type: :BEGIN,
-      body: [stmts],
+      body: [beging, stmts],
       end: ending[:end],
       char_end: ending[:char_end]
     )
@@ -211,7 +214,10 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.bind(beging[:char_end], ending[:char_start])
+    stmts.bind(
+      find_next_statement_start(beging[:char_end]),
+      ending[:char_start]
+    )
 
     find_scanner_event(:@kw, 'END').merge!(
       type: :END, body: [stmts], end: ending[:end], char_end: ending[:char_end]
@@ -1096,11 +1102,14 @@ class Prettier::Parser < Ripper
       end
 
     ending = scanner_events[index]
-    stmts.bind(beging[:char_end], ending[:char_start])
+    stmts.bind(
+      find_next_statement_start(beging[:char_end]),
+      ending[:char_start]
+    )
 
     {
       type: :ensure,
-      body: [stmts],
+      body: [beging, stmts],
       start: beging[:start],
       char_start: beging[:char_start],
       end: ending[:end],
