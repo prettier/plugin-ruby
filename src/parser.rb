@@ -219,7 +219,10 @@ class Prettier::Parser < Ripper
     )
 
     find_scanner_event(:@kw, 'END').merge!(
-      type: :END, body: [stmts], end: ending[:end], char_end: ending[:char_end]
+      type: :END,
+      body: [beging, stmts],
+      end: ending[:end],
+      char_end: ending[:char_end]
     )
   end
 
