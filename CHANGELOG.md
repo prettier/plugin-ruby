@@ -40,6 +40,8 @@ rescue Foo, Bar
 end
 ```
 
+- [@kddeisz] - Handle string literals that start with `%Q`.
+
 # [0.22.0] - 2020-12-08
 
 ### Changed

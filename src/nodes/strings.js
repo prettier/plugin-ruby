@@ -66,7 +66,7 @@ function getClosingQuote(quote) {
     return quote;
   }
 
-  const boundary = /%q?(.)/.exec(quote)[1];
+  const boundary = /%[Qq]?(.)/.exec(quote)[1];
   if (boundary in quotePairs) {
     return quotePairs[boundary];
   }
