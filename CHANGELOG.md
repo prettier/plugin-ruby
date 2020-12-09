@@ -51,6 +51,7 @@ end
 - [@kddeisz] - Fix up a bug with keyword aliases, e.g., `alias in within`.
 - [@kddeisz] - Force using braces for regex if a regex starts with a blank space.
 - [@kddeisz] - Force using braces for regex if a regex starts with an equals sign.
+- [@kddeisz] - Fix up a bug with constant aliases, e.g., `alias in IN`.
 
 # [0.22.0] - 2020-12-08
 

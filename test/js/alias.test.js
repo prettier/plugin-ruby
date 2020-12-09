@@ -9,6 +9,9 @@ describe("alias", () => {
   test("bare word keyword aliases", () =>
     expect("alias in within").toMatchFormat());
 
+  test("bare word constant aliases", () =>
+    expect("alias in IN").toMatchFormat());
+
   test("symbol aliases become bare word aliases", () =>
     expect("alias :foo :bar").toChangeFormat("alias foo bar"));
 

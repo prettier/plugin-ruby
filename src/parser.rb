@@ -2035,7 +2035,7 @@ class Prettier::Parser < Ripper
   # symbol node (for most cases) or an ident node (in the case that we're
   # using bare words, as in an alias node like alias foo bar).
   def on_symbol_literal(contents)
-    if %i[@ident @kw @op].include?(contents[:type])
+    if scanner_events[-1] == contents
       contents.merge(type: :symbol_literal, body: [contents])
     else
       beging = find_scanner_event(:@symbeg)
