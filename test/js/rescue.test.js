@@ -25,10 +25,10 @@ describe("rescue", () => {
     return expect(content).toMatchFormat();
   });
 
-  test("every clause", () => {
+  test.each(["begin", "def foo"])("%s with every clause", (declaration) => {
     const error = "BreakingBreakingBreakingBreakingBreakingError";
     const content = ruby(`
-      begin
+      ${declaration}
         1
       rescue ArgumentError
         retry
@@ -50,26 +50,26 @@ describe("rescue", () => {
 
     return expect(content).toChangeFormat(
       ruby(`
-      begin
-        1
-      rescue ArgumentError
-        retry
-      rescue NoMethodError => exception
-        puts exception
-        redo
-      rescue SyntaxError, NoMethodError
-        2
-      rescue One${error},
-             Two${error},
-             Three${error}
-        3
-      rescue StandardError
-        4
-      else
-        5
-      ensure
-        6
-      end
+        ${declaration}
+          1
+        rescue ArgumentError
+          retry
+        rescue NoMethodError => exception
+          puts exception
+          redo
+        rescue SyntaxError, NoMethodError
+          2
+        rescue One${error},
+               Two${error},
+               Three${error}
+          3
+        rescue StandardError
+          4
+        else
+          5
+        ensure
+          6
+        end
     `)
     );
   });
