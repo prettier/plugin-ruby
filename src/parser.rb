@@ -352,7 +352,12 @@ class Prettier::Parser < Ripper
   # method inside a set of parentheses.
   def on_arg_paren(args)
     beging = find_scanner_event(:@lparen)
-    ending = find_scanner_event(:@rparen)
+    rparen = find_scanner_event(:@rparen)
+
+    # If the arguments exceed the ending of the parentheses, then we know we
+    # have a heredoc in the arguments, and we need to use the bounds of the
+    # arguments to determine how large the arg_paren is.
+    ending = args[:end] > rparen[:end] ? args : rparen
 
     {
       type: :arg_paren,
