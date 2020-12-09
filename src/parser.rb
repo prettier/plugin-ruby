@@ -2085,7 +2085,17 @@ class Prettier::Parser < Ripper
         paren: paren
       )
     else
-      find_scanner_event(:@op).merge!(
+      # Special case instead of using find_scanner_event here. It turns out that
+      # if you have a range that goes from a negative number to a negative
+      # number then you can end up with a .. or a ... that's higher in the
+      # stack. So we need to explicitly disallow those operators.
+      index =
+        scanner_events.rindex do |scanner_event|
+          scanner_event[:type] == :@op &&
+            !%w[.. ...].include?(scanner_event[:body])
+        end
+
+      scanner_events.delete_at(index).merge!(
         type: :unary,
         oper: oper[0],
         body: [value],
