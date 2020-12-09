@@ -37,4 +37,7 @@ describe("calls", () => {
 
   test("explicit call maintains call", () =>
     expect("a.call(1, 2, 3)").toMatchFormat());
+
+  test("double bang with a special operator", () =>
+    expect("!!object&.topic_list").toMatchFormat());
 });

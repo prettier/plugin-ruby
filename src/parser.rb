@@ -621,6 +621,10 @@ class Prettier::Parser < Ripper
   #     foo.(1, 2, 3)
   #
   def on_call(receiver, oper, sending)
+    # Make sure we take the operator out of the scanner events so that it
+    # doesn't get confused for a unary operator later.
+    scanner_events.delete(oper)
+
     ending = sending
 
     if sending == :call
