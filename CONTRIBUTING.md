@@ -129,7 +129,7 @@ In order to support all preferences, the Ruby options need to be distinct from t
 
 ### What versions of Ruby are supported?
 
-At the moment, we support back to Ruby 2.5. This is because in Ruby 2.5, Ripper got some additional public methods for accessing lexer state, which is necessary for parsing comments. This is not to say that prettier can't parse and print earlier versions of Ruby, it's just that the Ruby process running prettier (whatever `ruby` resolves to when the process runs) must be >= 2.5.
+We support all Ruby versions that are under security maintenance or better (https://www.ruby-lang.org/en/downloads/branches/). This means at the moment we support back to Ruby 2.5. This is not to say that prettier can't parse and print code that was written while running earlier versions of Ruby, it's just that the Ruby process running prettier (whatever `ruby` resolves to when the process runs) must be >= 2.5.
 
 ### Do you support ERB files (.html.erb, .js.erb, etc.)?
 
