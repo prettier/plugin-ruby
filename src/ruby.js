@@ -78,28 +78,28 @@ module.exports = {
   options: {
     rubyHashLabel: {
       type: "boolean",
-      category: "Global",
+      category: "Ruby",
       default: true,
       description:
         "When possible, uses the shortened hash key syntax, as opposed to hash rockets."
     },
     rubyModifier: {
       type: "boolean",
-      category: "Global",
+      category: "Ruby",
       default: true,
       description:
         "When it fits on one line, allows if, unless, while, and until statements to use the modifier form."
     },
     rubySingleQuote: {
       type: "boolean",
-      category: "Global",
+      category: "Ruby",
       default: true,
       description:
         "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals."
     },
     rubyToProc: {
       type: "boolean",
-      category: "Global",
+      category: "Ruby",
       default: false,
       description:
         "When possible, convert blocks to the more concise Symbol#to_proc syntax."
