@@ -213,4 +213,7 @@ describe("hash", () => {
         rubyHashLabel: false
       }));
   });
+
+  test("prints hashes with consistent keys", () =>
+    expect("{ a: 'a', b => 'b' }").toChangeFormat("{ :a => 'a', b => 'b' }"));
 });
