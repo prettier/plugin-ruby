@@ -3,8 +3,11 @@ describe("numbers", () => {
 
   test("preserves sign", () => expect("-123").toMatchFormat());
 
-  test("auto adds o for octal numbers", () =>
-    expect("0123").toChangeFormat("0o123"));
+  test("respects no o for octal numbers", () =>
+    expect("0123").toChangeFormat("0123"));
+
+  test("respects o for octal numbers", () =>
+    expect("0o123").toChangeFormat("0o123"));
 
   test("does not consider numbers large until they have more than 4 digits", () =>
     expect("1234").toMatchFormat());

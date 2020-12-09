@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [@kddeisz] - Print hashes with consistent keys (e.g., if one key cannot be a hash label, use all hash rockets).
+- [@kddeisz] - Respect using `o` or not using `o` for octal numbers.
 
 ## [1.0.0-rc1] - 2020-12-09
 
