@@ -6,12 +6,11 @@ const {
   indent,
   softline
 } = require("../prettier");
-const { concatBody, first, makeCall } = require("../utils");
+const { concatBody, first, makeCall, noIndent } = require("../utils");
 
 const toProc = require("../toProc");
 
 const chained = ["call", "method_add_arg"];
-const noIndent = ["array", "hash", "if", "method_add_block", "xstring_literal"];
 
 function printCall(path, opts, print) {
   const callNode = path.getValue();

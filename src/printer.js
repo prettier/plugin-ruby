@@ -40,6 +40,8 @@ function canAttachComment(node) {
 // where it needs to attach the comments.
 function getCommentChildNodes(node) {
   switch (node.type) {
+    case "heredoc":
+      return [node.beging];
     case "rescue":
       return [].concat(node.body[0]).concat(node.body.slice(1));
     case "aryptn":

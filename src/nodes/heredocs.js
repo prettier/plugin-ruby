@@ -2,7 +2,7 @@ const { concat, group, lineSuffix, join } = require("../prettier");
 const { literalLineNoBreak } = require("../utils");
 
 function printHeredoc(path, opts, print) {
-  const { beging, body, ending } = path.getValue();
+  const { body, ending } = path.getValue();
 
   const parts = body.map((part, index) => {
     if (part.type !== "@tstring_content") {
@@ -21,7 +21,7 @@ function printHeredoc(path, opts, print) {
   // possible, so we use a literalline without the break-parent.
   return group(
     concat([
-      beging,
+      path.call(print, "beging"),
       lineSuffix(
         group(concat([literalLineNoBreak].concat(parts).concat(ending)))
       )

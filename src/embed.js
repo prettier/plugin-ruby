@@ -31,7 +31,7 @@ const replaceNewlines = (doc) =>
       : currentDoc
   );
 
-const embed = (path, _print, textToDoc, _opts) => {
+const embed = (path, print, textToDoc, _opts) => {
   const node = path.getValue();
 
   // Currently we only support embedded formatting on heredoc nodes
@@ -47,7 +47,7 @@ const embed = (path, _print, textToDoc, _opts) => {
 
   // Next, find the parser associated with this heredoc (if there is one). For
   // example, if you use <<~CSS, we'd hook it up to the css parser.
-  const parser = parsers[beging.slice(3).toLowerCase()];
+  const parser = parsers[beging.body.slice(3).toLowerCase()];
   if (!parser) {
     return null;
   }
@@ -62,9 +62,9 @@ const embed = (path, _print, textToDoc, _opts) => {
 
   // If we're using a squiggly heredoc, then we can properly handle indentation
   // ourselves.
-  if (beging[2] === "~") {
+  if (beging.body[2] === "~") {
     return concat([
-      beging,
+      path.call(print, "beging"),
       lineSuffix(
         group(
           concat([indent(markAsRoot(formatted)), literalLineNoBreak, ending])
@@ -77,7 +77,7 @@ const embed = (path, _print, textToDoc, _opts) => {
   // content as it is.
   return markAsRoot(
     concat([
-      beging,
+      path.call(print, "beging"),
       lineSuffix(group(concat([formatted, literalLineNoBreak, ending])))
     ])
   );

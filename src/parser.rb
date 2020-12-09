@@ -1176,21 +1176,26 @@ class Prettier::Parser < Ripper
   # prettier parser, we'll later attempt to print it using that parser and
   # printer through our embed function.
   def on_heredoc_beg(beging)
-    {
-      type: :heredoc,
-      beging: beging,
+    location = {
       start: lineno,
       end: lineno,
-      char_start: char_pos - beging.length + 1,
-      char_end: char_pos
-    }.tap { |node| @heredocs << node }
+      char_start: char_pos,
+      char_end: char_pos + beging.length + 1
+    }
+
+    # Here we're going to artificially create an extra node type so that if
+    # there are comments after the declaration of a heredoc, they get printed.
+    location.merge(
+      type: :heredoc,
+      beging: location.merge(type: :@heredoc_beg, body: beging),
+    ).tap { |node| @heredocs << node }
   end
 
   # This is a parser event that occurs when you're using a heredoc with a
   # tilde. These are considered `heredoc_dedent` nodes, whereas the hyphen
   # heredocs show up as string literals.
   def on_heredoc_dedent(string, _width)
-    @heredocs[-1].merge!(string.slice(:body))
+    @heredocs[-1].merge!(body: string[:body])
   end
 
   # This is a scanner event that represents the end of the heredoc.

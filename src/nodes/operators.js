@@ -1,23 +1,34 @@
 const { concat, group, indent, line, softline } = require("../prettier");
+const { noIndent } = require("../utils");
 
 function printBinary(path, opts, print) {
-  const operator = path.getValue().body[1];
-  const useNoSpace = operator === "**";
+  const [_leftNode, operator, rightNode] = path.getValue().body;
+  const space = operator === "**" ? "" : " ";
+
+  if (noIndent.includes(rightNode.type)) {
+    return group(
+      concat([
+        group(path.call(print, "body", 0)),
+        space,
+        operator,
+        space,
+        group(path.call(print, "body", 2))
+      ])
+    );
+  }
 
   return group(
     concat([
       group(path.call(print, "body", 0)),
-      indent(
-        concat([
-          useNoSpace ? "" : " ",
-          group(
-            concat([
-              operator,
-              useNoSpace ? softline : line,
-              path.call(print, "body", 2)
-            ])
-          )
-        ])
+      space,
+      group(
+        indent(
+          concat([
+            operator,
+            space === "" ? softline : line,
+            path.call(print, "body", 2)
+          ])
+        )
       )
     ])
   );

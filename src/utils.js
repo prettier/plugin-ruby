@@ -61,6 +61,15 @@ const makeCall = (path, opts, print) => {
   return operation === "::" ? "." : path.call(print, "body", 1);
 };
 
+const noIndent = [
+  "array",
+  "hash",
+  "heredoc",
+  "if",
+  "method_add_block",
+  "xstring_literal"
+];
+
 const prefix = (value) => (path, opts, print) =>
   concat([value, path.call(print, "body", 0)]);
 
@@ -81,6 +90,7 @@ module.exports = {
   literal,
   literalLineNoBreak,
   makeCall,
+  noIndent,
   prefix,
   skipAssignIndent
 };
