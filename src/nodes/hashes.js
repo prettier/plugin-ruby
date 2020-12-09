@@ -25,35 +25,54 @@ function isValidHashLabel(symbolLiteral) {
   return label.match(/^[_A-Za-z]/) && !label.endsWith("=");
 }
 
-function printHashKey(path, { rubyHashLabel }, print) {
-  const labelNode = path.getValue().body[0];
-  const labelDoc = path.call(print, "body", 0);
-
-  switch (labelNode.type) {
-    case "@label":
-      if (rubyHashLabel) {
-        return labelDoc;
-      }
-      return `:${labelDoc.slice(0, labelDoc.length - 1)} =>`;
-    case "symbol_literal": {
-      if (rubyHashLabel && isValidHashLabel(labelNode)) {
-        return concat([path.call(print, "body", 0, "body", 0), ":"]);
-      }
-      return concat([labelDoc, " =>"]);
+function canUseHashLabels(contentsNode) {
+  return contentsNode.body.every((assocNode) => {
+    if (assocNode.type === "assoc_splat") {
+      return true;
     }
+
+    switch (assocNode.body[0].type) {
+      case "@label":
+        return true;
+      case "symbol_literal":
+        return isValidHashLabel(assocNode.body[0]);
+      case "dyna_symbol":
+        return true;
+      default:
+        return false;
+    }
+  });
+}
+
+function printHashKeyLabel(path, print) {
+  const node = path.getValue();
+
+  switch (node.type) {
+    case "@label":
+      return print(path);
+    case "symbol_literal":
+      return concat([path.call(print, "body", 0), ":"]);
     case "dyna_symbol":
-      if (rubyHashLabel) {
-        return concat(labelDoc.parts.slice(1).concat(":"));
-      }
-      return concat([labelDoc, " =>"]);
-    default:
-      return concat([labelDoc, " =>"]);
+      return concat(print(path).parts.slice(1).concat(":"));
   }
 }
 
+function printHashKeyRocket(path, print) {
+  const node = path.getValue();
+  const doc = print(path);
+
+  if (node.type === "@label") {
+    return `:${doc.slice(0, doc.length - 1)} =>`;
+  }
+
+  return concat([doc, " =>"]);
+}
+
 function printAssocNew(path, opts, print) {
+  const { keyPrinter } = path.getParentNode();
+
+  const parts = [path.call((keyPath) => keyPrinter(keyPath, print), "body", 0)];
   const valueDoc = path.call(print, "body", 1);
-  const parts = [printHashKey(path, opts, print)];
 
   if (skipAssignIndent(path.getValue().body[1])) {
     parts.push(" ", valueDoc);
@@ -62,6 +81,19 @@ function printAssocNew(path, opts, print) {
   }
 
   return group(concat(parts));
+}
+
+function printHashContents(path, opts, print) {
+  const node = path.getValue();
+
+  // First determine which key printer we're going to use, so that the child
+  // nodes can reference it when they go to get printed.
+  node.keyPrinter =
+    opts.rubyHashLabel && canUseHashLabels(path.getValue())
+      ? printHashKeyLabel
+      : printHashKeyRocket;
+
+  return group(join(concat([",", line]), path.map(print, "body")));
 }
 
 function printEmptyHashWithComments(path, opts) {
@@ -106,10 +138,6 @@ function printHash(path, opts, print) {
       "}"
     ])
   );
-}
-
-function printHashContents(path, opts, print) {
-  return group(join(concat([",", line]), path.map(print, "body")));
 }
 
 module.exports = {
