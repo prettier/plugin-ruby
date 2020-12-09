@@ -108,6 +108,16 @@ describe("conditionals", () => {
         return expect(content).toMatchFormat();
       });
 
+      test("comment in body with question mark method", () => {
+        const content = ruby(`
+          ${keyword} a?
+            # comment
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
       test("comment on node in body", () => {
         const content = ruby(`
           ${keyword} a

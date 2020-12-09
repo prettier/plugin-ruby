@@ -1347,6 +1347,14 @@ class Prettier::Parser < Ripper
   # arguments and parentheses. It accepts as arguments the method being called
   # and the arg_paren event that contains the arguments to the method.
   def on_method_add_arg(fcall, arg_paren)
+    # You can hit this if you are passing no arguments to a method that ends in
+    # a question mark. Because it knows it has to be a method and not a local
+    # variable. In that case we can just use the location information straight
+    # from the fcall.
+    if arg_paren[:type] == :args
+      return fcall.merge(type: :method_add_arg, body: [fcall, arg_paren])
+    end
+
     {
       type: :method_add_arg,
       body: [fcall, arg_paren],
