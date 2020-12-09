@@ -45,6 +45,7 @@ end
 - [@kddeisz] - Fix bare `break` with comments immediately after.
 - [@kddeisz] - Fix for heredocs with comments immediately after the declaration.
 - [@kddeisz] - Fix for comments when you're defining a method whose name overlaps with a keyword.
+- [@kddeisz] - Don't automatically indent inside interpolated expressions from within a heredoc.
 
 # [0.22.0] - 2020-12-08
 
