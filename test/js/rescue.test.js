@@ -84,4 +84,40 @@ describe("rescue", () => {
 
     return expect(content).toMatchFormat();
   });
+
+  test("comment inline", () => {
+    const content = ruby(`
+      begin
+        foo
+      rescue Foo # foo
+        bar
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test("one error with a comment", () => {
+    const content = ruby(`
+      begin
+        foo
+      rescue Discourse::InvalidAccess
+        # keep going
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test("two errors with a comment", () => {
+    const content = ruby(`
+      begin
+        foo
+      rescue Discourse::InvalidAccess, UserDestroyer::PostsExistError
+        # keep going
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });

@@ -26,8 +26,34 @@ end
 
 The comment in the above example should stay in place.
 
-- [@janklimo] - Respect special call syntax, i.e., `a.(1, 2, 3)` should remain the same.
+- [@janklimo] - Respect special call syntax, e.g., `a.(1, 2, 3)` should remain the same.
 - [@kddeisz] - Fix up a bug with `ensure` being used in a `bodystmt` and not a `begin`.
+- [@kddeisz] - Fix up a bug with negative ranges, e.g., `-4..-3`.
+- [@kddeisz] - Fix up a bug with operator aliases, e.g., `alias << push`.
+- [@kddeisz] - Fix up a bug with calls and unary nodes, e.g., `!!foo&.bar`.
+- [@kddeisz] - Fix up a bug with multiple rescue clauses and comments, e.g.,
+
+```ruby
+begin
+
+rescue Foo, Bar
+  # comment
+end
+```
+
+- [@kddeisz] - Handle string literals that start with `%Q`.
+- [@kddeisz] - Handle question method methods in the predicate of an if with a comment in the body.
+- [@kddeisz] - Fix bare `break` with comments immediately after.
+- [@kddeisz] - Fix for heredocs with comments immediately after the declaration.
+- [@kddeisz] - Fix for comments when you're defining a method whose name overlaps with a keyword.
+- [@kddeisz] - Don't automatically indent inside interpolated expressions from within a heredoc.
+- [@kddeisz] - Don't convert into string literal arrays if the elements have brackets.
+- [@kddeisz] - Ensure you break the parent when there is an assignment in the predicate of a loop.
+- [@kddeisz] - Fix up a bug with keyword aliases, e.g., `alias in within`.
+- [@kddeisz] - Force using braces for regex if a regex starts with a blank space.
+- [@kddeisz] - Force using braces for regex if a regex starts with an equals sign.
+- [@kddeisz] - Fix up a bug with constant aliases, e.g., `alias in IN`.
+- [@andyw8], [@kddeisz] - Ensure `rescue` comments stay on the same line as their declaration.
 
 # [0.22.0] - 2020-12-08
 

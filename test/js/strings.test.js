@@ -17,6 +17,10 @@ describe("strings", () => {
     test.each(cases)("%q%s%s", (stringStart, stringEnd) =>
       expect(`%q${stringStart}a\\bc${stringEnd}`).toMatchFormat()
     );
+
+    test.each(cases)("%Q%s%s", (stringStart, stringEnd) =>
+      expect(`%Q${stringStart}a\\bc${stringEnd}`).toMatchFormat()
+    );
   });
 
   describe("with single quotes", () => {

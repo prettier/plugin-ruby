@@ -55,6 +55,18 @@ describe.each(["while", "until"])("%s", (keyword) => {
       return expect(content).toMatchFormat();
     });
 
+    test("breaks the parent when there is an assignment", () => {
+      const content = ruby(`
+        foo do
+          while foo = foo
+            yield foo
+          end
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
     test("wraps single lines in parens when assigning", () =>
       expect(
         `hash[:key] = ${keyword} false do break :value end`

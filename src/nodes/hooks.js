@@ -17,11 +17,13 @@ const { isEmptyStmts } = require("../utils");
 // nodes contain one child which is a `stmts` node.
 function printHook(name) {
   return function printHookWithName(path, opts, print) {
-    const stmtsNode = path.getValue().body[0];
-    const printedStmts = path.call(print, "body", 0);
+    const stmtsNode = path.getValue().body[1];
+    const printedStmts = path.call(print, "body", 1);
 
     const parts = [
-      `${name} {`,
+      name,
+      " ",
+      path.call(print, "body", 0),
       indent(concat([line, printedStmts])),
       concat([line, "}"])
     ];

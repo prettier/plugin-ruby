@@ -20,8 +20,8 @@ function printBegin(path, opts, print) {
 
 function printEnsure(path, opts, print) {
   return concat([
-    "ensure",
-    indent(concat([hardline, concat(path.map(print, "body"))]))
+    path.call(print, "body", 0),
+    indent(concat([hardline, path.call(print, "body", 1)]))
   ]);
 }
 

@@ -503,4 +503,24 @@ describe("heredocs", () => {
 
     return expect(content).toMatchFormat();
   });
+
+  test("with a comment after the declaration", () => {
+    const content = ruby(`
+      <<~HERE # foo
+        foo
+      HERE
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test("with a comment after the declaration in a call", () => {
+    const content = ruby(`
+      list << <<~HERE # foo
+        foo
+      HERE
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });

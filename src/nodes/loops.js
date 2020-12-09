@@ -1,5 +1,6 @@
 const {
   align,
+  breakParent,
   concat,
   group,
   hardline,
@@ -67,7 +68,7 @@ const printLoop = (keyword, modifier) => (path, { rubyModifier }, print) => {
   // assignment doesn't impact the statements inside the loop) then we can't
   // use the modifier form and we must use the block form.
   if (!rubyModifier || containsAssignment(path.getValue().body[0])) {
-    return blockLoop;
+    return concat([breakParent, blockLoop]);
   }
 
   return group(ifBreak(blockLoop, inlineLoop));

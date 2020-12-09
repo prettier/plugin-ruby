@@ -115,15 +115,14 @@ class Prettier::Parser < Ripper
   # This will break everything, so we need to force the encoding back into
   # UTF-8 so that the JSON library won't break.
   def on_comment(value)
-    @comments <<
-      {
-        type: :@comment,
-        value: value[1..-1].chomp.force_encoding('UTF-8'),
-        start: lineno,
-        end: lineno,
-        char_start: char_pos,
-        char_end: char_pos + value.length - 1
-      }
+    @comments << {
+      type: :@comment,
+      value: value[1..-1].chomp.force_encoding('UTF-8'),
+      start: lineno,
+      end: lineno,
+      char_start: char_pos,
+      char_end: char_pos + value.length - 1
+    }
   end
 
   # ignored_nl is a special kind of scanner event that passes nil as the value,
@@ -187,11 +186,14 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.bind(beging[:char_end], ending[:char_start])
+    stmts.bind(
+      find_next_statement_start(beging[:char_end]),
+      ending[:char_start]
+    )
 
     find_scanner_event(:@kw, 'BEGIN').merge!(
       type: :BEGIN,
-      body: [stmts],
+      body: [beging, stmts],
       end: ending[:end],
       char_end: ending[:char_end]
     )
@@ -211,10 +213,16 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.bind(beging[:char_end], ending[:char_start])
+    stmts.bind(
+      find_next_statement_start(beging[:char_end]),
+      ending[:char_start]
+    )
 
     find_scanner_event(:@kw, 'END').merge!(
-      type: :END, body: [stmts], end: ending[:end], char_end: ending[:char_end]
+      type: :END,
+      body: [beging, stmts],
+      end: ending[:end],
+      char_end: ending[:char_end]
     )
   end
 
@@ -352,7 +360,12 @@ class Prettier::Parser < Ripper
   # method inside a set of parentheses.
   def on_arg_paren(args)
     beging = find_scanner_event(:@lparen)
-    ending = find_scanner_event(:@rparen)
+    rparen = find_scanner_event(:@rparen)
+
+    # If the arguments exceed the ending of the parentheses, then we know we
+    # have a heredoc in the arguments, and we need to use the bounds of the
+    # arguments to determine how large the arg_paren is.
+    ending = (args && args[:end] > rparen[:end]) ? args : rparen
 
     {
       type: :arg_paren,
@@ -559,7 +572,7 @@ class Prettier::Parser < Ripper
       # Next we're going to determine the rescue clause if there is one
       if parts[1]
         consequent = parts[2..-1].compact.first
-        self[:body][1].bind(consequent ? consequent[:char_start] : char_end)
+        self[:body][1].bind_end(consequent ? consequent[:char_start] : char_end)
       end
     end
   end
@@ -601,7 +614,16 @@ class Prettier::Parser < Ripper
   # accepts as an argument an args or args_add_block event that contains all
   # of the arguments being passed to the break.
   def on_break(args_add_block)
-    find_scanner_event(:@kw, 'break').merge!(
+    beging = find_scanner_event(:@kw, 'break')
+
+    # You can hit this if you are passing no arguments to break but it has a
+    # comment right after it. In that case we can just use the location
+    # information straight from the keyword.
+    if args_add_block[:type] == :args
+      return beging.merge!(type: :break, body: [args_add_block])
+    end
+
+    beging.merge!(
       type: :break,
       body: [args_add_block],
       end: args_add_block[:end],
@@ -621,6 +643,10 @@ class Prettier::Parser < Ripper
   #     foo.(1, 2, 3)
   #
   def on_call(receiver, oper, sending)
+    # Make sure we take the operator out of the scanner events so that it
+    # doesn't get confused for a unary operator later.
+    scanner_events.delete(oper)
+
     ending = sending
 
     if sending == :call
@@ -785,6 +811,11 @@ class Prettier::Parser < Ripper
   #          └> ident
   #
   def on_def(ident, params, bodystmt)
+    # Make sure to delete this scanner event in case you're defining something
+    # like def class which would lead to this being a kw and causing all kinds
+    # of trouble
+    scanner_events.delete(ident)
+
     if params[:type] == :params && !params[:body].any?
       location = ident[:char_end]
       params.merge!(char_start: location, char_end: location)
@@ -823,6 +854,11 @@ class Prettier::Parser < Ripper
   #          └> target
   #
   def on_defs(target, oper, ident, params, bodystmt)
+    # Make sure to delete this scanner event in case you're defining something
+    # like def class which would lead to this being a kw and causing all kinds
+    # of trouble
+    scanner_events.delete(ident)
+
     if params[:type] == :params && !params[:body].any?
       location = ident[:char_end]
       params.merge!(char_start: location, char_end: location)
@@ -1068,11 +1104,14 @@ class Prettier::Parser < Ripper
       end
 
     ending = scanner_events[index]
-    stmts.bind(beging[:char_end], ending[:char_start])
+    stmts.bind(
+      find_next_statement_start(beging[:char_end]),
+      ending[:char_start]
+    )
 
     {
       type: :ensure,
-      body: [stmts],
+      body: [beging, stmts],
       start: beging[:start],
       char_start: beging[:char_start],
       end: ending[:end],
@@ -1163,21 +1202,25 @@ class Prettier::Parser < Ripper
   # prettier parser, we'll later attempt to print it using that parser and
   # printer through our embed function.
   def on_heredoc_beg(beging)
-    {
-      type: :heredoc,
-      beging: beging,
+    location = {
       start: lineno,
       end: lineno,
-      char_start: char_pos - beging.length + 1,
-      char_end: char_pos
-    }.tap { |node| @heredocs << node }
+      char_start: char_pos,
+      char_end: char_pos + beging.length + 1
+    }
+
+    # Here we're going to artificially create an extra node type so that if
+    # there are comments after the declaration of a heredoc, they get printed.
+    location.merge(
+      type: :heredoc, beging: location.merge(type: :@heredoc_beg, body: beging)
+    ).tap { |node| @heredocs << node }
   end
 
   # This is a parser event that occurs when you're using a heredoc with a
   # tilde. These are considered `heredoc_dedent` nodes, whereas the hyphen
   # heredocs show up as string literals.
   def on_heredoc_dedent(string, _width)
-    @heredocs[-1].merge!(string.slice(:body))
+    @heredocs[-1].merge!(body: string[:body])
   end
 
   # This is a scanner event that represents the end of the heredoc.
@@ -1343,6 +1386,14 @@ class Prettier::Parser < Ripper
   # arguments and parentheses. It accepts as arguments the method being called
   # and the arg_paren event that contains the arguments to the method.
   def on_method_add_arg(fcall, arg_paren)
+    # You can hit this if you are passing no arguments to a method that ends in
+    # a question mark. Because it knows it has to be a method and not a local
+    # variable. In that case we can just use the location information straight
+    # from the fcall.
+    if arg_paren[:type] == :args
+      return fcall.merge(type: :method_add_arg, body: [fcall, arg_paren])
+    end
+
     {
       type: :method_add_arg,
       body: [fcall, arg_paren],
@@ -1683,17 +1734,17 @@ class Prettier::Parser < Ripper
   # determine its ending. Therefore it relies on its parent bodystmt node to
   # report its ending to it.
   class Rescue < SimpleDelegator
-    def bind(char_end)
+    def bind_end(char_end)
       merge!(char_end: char_end)
 
       stmts = self[:body][2]
       consequent = self[:body][3]
 
       if consequent
-        consequent.bind(char_end)
-        stmts.bind(stmts[:char_start], consequent[:char_start])
+        consequent.bind_end(char_end)
+        stmts.bind_end(consequent[:char_start])
       else
-        stmts.bind(stmts[:char_start], char_end)
+        stmts.bind_end(char_end)
       end
     end
   end
@@ -1703,10 +1754,10 @@ class Prettier::Parser < Ripper
   def on_rescue(exceptions, variable, stmts, consequent)
     beging = find_scanner_event(:@kw, 'rescue')
 
-    stmts.bind(
-      ((exceptions || [])[-1] || variable || beging)[:char_end],
-      char_pos
-    )
+    last_exception = exceptions.is_a?(Array) ? exceptions[-1] : exceptions
+    last_node = variable || last_exception || beging
+
+    stmts.bind(find_next_statement_start(last_node[:char_end]), char_pos)
 
     Rescue.new(
       beging.merge!(
@@ -1819,6 +1870,10 @@ class Prettier::Parser < Ripper
       if self[:body][0][:type] == :void_stmt
         self[:body][0].merge!(char_start: char_start, char_end: char_start)
       end
+    end
+
+    def bind_end(char_end)
+      merge!(char_end: char_end)
     end
 
     def <<(statement)
@@ -1991,7 +2046,7 @@ class Prettier::Parser < Ripper
   # symbol node (for most cases) or an ident node (in the case that we're
   # using bare words, as in an alias node like alias foo bar).
   def on_symbol_literal(contents)
-    if contents[:type] == :@ident
+    if scanner_events[-1] == contents
       contents.merge(type: :symbol_literal, body: [contents])
     else
       beging = find_scanner_event(:@symbeg)
@@ -2085,7 +2140,18 @@ class Prettier::Parser < Ripper
         paren: paren
       )
     else
-      find_scanner_event(:@op).merge!(
+      # Special case instead of using find_scanner_event here. It turns out that
+      # if you have a range that goes from a negative number to a negative
+      # number then you can end up with a .. or a ... that's higher in the
+      # stack. So we need to explicitly disallow those operators.
+      index =
+        scanner_events.rindex do |scanner_event|
+          scanner_event[:type] == :@op &&
+            !%w[.. ...].include?(scanner_event[:body])
+        end
+
+      beging = scanner_events.delete_at(index)
+      beging.merge!(
         type: :unary,
         oper: oper[0],
         body: [value],

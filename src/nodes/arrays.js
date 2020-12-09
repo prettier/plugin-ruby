@@ -39,9 +39,10 @@ function isStringArray(args) {
       return false;
     }
 
-    // Finally, verify that the string doesn't contain a space or an escape
-    // character so that we know it can be put into a string literal array.
-    return !part.body.includes(" ") && !part.body.includes("\\");
+    // Finally, verify that the string doesn't contain a space, an escape
+    // character, or brackets so that we know it can be put into a string
+    // literal array.
+    return !/[\s\\[\]]/.test(part.body);
   });
 }
 

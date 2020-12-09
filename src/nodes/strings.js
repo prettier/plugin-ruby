@@ -66,7 +66,7 @@ function getClosingQuote(quote) {
     return quote;
   }
 
-  const boundary = /%q?(.)/.exec(quote)[1];
+  const boundary = /%[Qq]?(.)/.exec(quote)[1];
   if (boundary in quotePairs) {
     return quotePairs[boundary];
   }
@@ -167,10 +167,11 @@ module.exports = {
   string_embexpr: (path, opts, print) => {
     const parts = path.call(print, "body", 0);
 
-    // If the interpolated expression is inside of an xstring literal (a string
-    // that gets sent to the command line) then we don't want to automatically
-    // indent, as this can lead to some very odd looking expressions
-    if (path.getParentNode().type === "xstring_literal") {
+    // If the interpolated expression is inside of a heredoc or an xstring
+    // literal (a string that gets sent to the command line) then we don't want
+    // to automatically indent, as this can lead to some very odd looking
+    // expressions
+    if (["heredoc", "xstring_literal"].includes(path.getParentNode().type)) {
       return concat(["#{", parts, "}"]);
     }
 
