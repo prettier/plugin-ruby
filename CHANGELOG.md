@@ -46,6 +46,7 @@ end
 - [@kddeisz] - Fix for heredocs with comments immediately after the declaration.
 - [@kddeisz] - Fix for comments when you're defining a method whose name overlaps with a keyword.
 - [@kddeisz] - Don't automatically indent inside interpolated expressions from within a heredoc.
+- [@kddeisz] - Don't convert into string literal arrays if the elements have brackets.
 
 # [0.22.0] - 2020-12-08
 

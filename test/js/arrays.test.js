@@ -23,6 +23,9 @@ describe("array", () => {
   test("does not transform string arrays with interpolation", () =>
     expect(`['a', "b#{c}d", 'e']`).toMatchFormat());
 
+  test("does not transform string arrays with brackets", () =>
+    expect(`['a [] b', 'c [] d']`).toMatchFormat());
+
   test("transforms basic symbol arrays", () =>
     expect("[:a, :b, :c]").toChangeFormat("%i[a b c]"));
 
