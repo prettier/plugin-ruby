@@ -28,13 +28,17 @@ module.exports = {
     // The `fill` builder command expects an array of docs alternating with
     // line breaks. This is so it can loop through and determine where to break.
     const preds = fill(
-      path
-        .call(print, "body", 0)
-        .reduce(
-          (accum, pred, index) =>
-            index === 0 ? [pred] : accum.concat([",", line, pred]),
-          null
-        )
+      path.call(print, "body", 0).reduce((accum, pred, index) => {
+        if (index === 0) {
+          return [pred];
+        }
+
+        // Pull off the last element and make it concat with a comma so that
+        // we can maintain alternating lines and docs.
+        return accum
+          .slice(0, -1)
+          .concat([concat([accum[accum.length - 1], ","]), line, pred]);
+      }, null)
     );
 
     const stmts = path.call(print, "body", 1);
