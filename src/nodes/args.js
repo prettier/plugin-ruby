@@ -11,6 +11,45 @@ const {
 const toProc = require("../toProc");
 const { docLength, getTrailingComma } = require("../utils");
 
+function printArgs(path, { rubyToProc }, print) {
+  const args = path.map(print, "body");
+
+  // Don't bother trying to do any kind of fancy toProc transform if the
+  // option is disabled.
+  if (rubyToProc) {
+    let blockNode = null;
+
+    // Look up the chain to see if these arguments are contained within a
+    // method_add_block node, and if they are that that node has a block
+    // associated with it. If it does, we're going to attempt to transform it
+    // into the to_proc shorthand and add it to the list of arguments.
+    [1, 2, 3].find((parent) => {
+      const parentNode = path.getParentNode(parent);
+      blockNode =
+        parentNode &&
+        parentNode.type === "method_add_block" &&
+        parentNode.body[1];
+
+      return blockNode;
+    });
+
+    const proc = blockNode && toProc(path, blockNode);
+
+    // If we have a successful to_proc transformation, but we're part of an
+    // aref node, that means it's something to the effect of
+    //
+    //     foo[:bar].each(&:to_s)
+    //
+    // In this case we need to just return regular arguments, otherwise we
+    // would end up putting &:to_s inside the brackets accidentally.
+    if (proc && path.getParentNode(1).type !== "aref") {
+      args.push(proc);
+    }
+  }
+
+  return args;
+}
+
 module.exports = {
   arg_paren: (path, opts, print) => {
     const argsNode = path.getValue().body[0];
@@ -81,39 +120,7 @@ module.exports = {
     // including the surrouding parentheses.
     return group(concat(["("].concat(argsDocs).concat(")")));
   },
-  args: (path, opts, print) => {
-    const args = path.map(print, "body");
-    let blockNode = null;
-
-    // Look up the chain to see if these arguments are contained within a
-    // method_add_block node, and if they are that that node has a block
-    // associated with it. If it does, we're going to attempt to transform it
-    // into the to_proc shorthand and add it to the list of arguments.
-    [1, 2, 3].find((parent) => {
-      const parentNode = path.getParentNode(parent);
-      blockNode =
-        parentNode &&
-        parentNode.type === "method_add_block" &&
-        parentNode.body[1];
-
-      return blockNode;
-    });
-
-    const proc = blockNode && toProc(path, opts, blockNode);
-
-    // If we have a successful to_proc transformation, but we're part of an aref
-    // node, that means it's something to the effect of
-    //
-    //     foo[:bar].each(&:to_s)
-    //
-    // In this case we need to just return regular arguments, otherwise we would
-    // end up putting &:to_s inside the brackets accidentally.
-    if (proc && path.getParentNode(1).type !== "aref") {
-      args.push(proc);
-    }
-
-    return args;
-  },
+  args: printArgs,
   args_add_block: (path, opts, print) => {
     const parts = path.call(print, "body", 0);
 

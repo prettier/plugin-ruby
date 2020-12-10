@@ -6,7 +6,7 @@ const {
   indent,
   softline
 } = require("../prettier");
-const { concatBody, first, makeCall, noIndent } = require("../utils");
+const { first, makeCall, noIndent } = require("../utils");
 
 const toProc = require("../toProc");
 
@@ -109,13 +109,13 @@ function printMethodAddArg(path, opts, print) {
   return concat([methodDoc, argsDoc]);
 }
 
-module.exports = {
-  call: printCall,
-  fcall: concatBody,
-  method_add_arg: printMethodAddArg,
-  method_add_block: (path, opts, print) => {
-    const [method, block] = path.getValue().body;
-    const proc = toProc(path, opts, block);
+function printMethodAddBlock(path, { rubyToProc }, print) {
+  const [method, block] = path.getValue().body;
+
+  // Don't bother trying to do any kind of fancy toProc transform if the option
+  // is disabled.
+  if (rubyToProc) {
+    const proc = toProc(path, block);
 
     if (proc && method.type === "call") {
       return group(
@@ -131,8 +131,15 @@ module.exports = {
     if (proc) {
       return path.call(print, "body", 0);
     }
+  }
 
-    return concat(path.map(print, "body"));
-  },
+  return concat(path.map(print, "body"));
+}
+
+module.exports = {
+  call: printCall,
+  fcall: first,
+  method_add_arg: printMethodAddArg,
+  method_add_block: printMethodAddBlock,
   vcall: first
 };
