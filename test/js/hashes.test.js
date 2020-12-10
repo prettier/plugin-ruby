@@ -216,4 +216,15 @@ describe("hash", () => {
 
   test("prints hashes with consistent keys", () =>
     expect("{ a: 'a', b => 'b' }").toChangeFormat("{ :a => 'a', b => 'b' }"));
+
+  test("print hashes with correct braces when contents fits", () => {
+    const content = ruby(`
+      {
+        key1: ${long.slice(0, 32)},
+        key2: ${long.slice(0, 32)}
+      }
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });
