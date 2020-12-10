@@ -50,8 +50,8 @@ jobs:
     # Actually run tests and lint
     - name: Lint and test
       run: |
+        yarn check-format
         yarn lint
-        yarn print --check '**/*'
         yarn test
         bundle exec rake test
 

@@ -4,8 +4,8 @@
   "description": "prettier plugin for the Ruby programming language",
   "main": "src/ruby.js",
   "scripts": {
+    "check-format": "prettier --check '**/*'",
     "lint": "eslint --cache .",
-    "print": "prettier --plugin=.",
     "test": "jest"
   },
   "repository": {
@@ -61,6 +61,9 @@
     }
   },
   "prettier": {
-    "trailingComma": "none"
+    "trailingComma": "none",
+    "plugins": [
+      "."
+    ]
   }
 }

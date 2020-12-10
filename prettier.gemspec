@@ -27,8 +27,4 @@ Gem::Specification.new do |spec|
   spec.bindir = 'exe'
   spec.executables = 'rbprettier'
   spec.require_paths = %w[lib]
-
-  spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'minitest', '~> 5.13'
-  spec.add_development_dependency 'rake', '~> 13.0'
 end
