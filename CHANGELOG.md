@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@kddeisz] - Print hashes with consistent keys (e.g., if one key cannot be a hash label, use all hash rockets).
 - [@kddeisz] - Respect using `o` or not using `o` for octal numbers.
 - [@kddeisz] - Ensure `when` clauses with multiple predicates that can be split into multiple lines are split correctly.
+- [@kddeisz] - Ensure hash literal is split correctly when only its contents would fit on one line.
 
 ## [1.0.0-rc1] - 2020-12-09
 

@@ -1064,7 +1064,10 @@ class Prettier::Parser < Ripper
   # event, so here we'll initialize the current embdoc.
   def on_embdoc_beg(value)
     @embdoc = {
-      type: :@embdoc, value: value, start: lineno, char_start: char_pos
+      type: :@embdoc,
+      value: value,
+      start: lineno,
+      char_start: char_pos
     }
   end
 
@@ -1644,7 +1647,10 @@ class Prettier::Parser < Ripper
   # some found at the end of the source string.
   def on_program(stmts)
     range = {
-      start: 1, end: lines.length, char_start: 0, char_end: source.length
+      start: 1,
+      end: lines.length,
+      char_start: 0,
+      char_end: source.length
     }
 
     stmts[:body] << @__end__ if @__end__
