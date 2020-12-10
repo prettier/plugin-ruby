@@ -566,8 +566,10 @@ class Prettier::Parser < Ripper
 
       # Here we're going to determine the bounds for the stmts
       consequent = parts[1..-1].compact.first
-      self[:body][0].bind(char_start,
-        consequent ? consequent[:char_start] : char_end)
+      self[:body][0].bind(
+        char_start,
+        consequent ? consequent[:char_start] : char_end
+      )
 
       # Next we're going to determine the rescue clause if there is one
       if parts[1]
@@ -1214,9 +1216,12 @@ class Prettier::Parser < Ripper
 
     # Here we're going to artificially create an extra node type so that if
     # there are comments after the declaration of a heredoc, they get printed.
-    location.merge(
-      type: :heredoc, beging: location.merge(type: :@heredoc_beg, body: beging)
-    ).tap { |node| @heredocs << node }
+    location
+      .merge(
+        type: :heredoc,
+        beging: location.merge(type: :@heredoc_beg, body: beging)
+      )
+      .tap { |node| @heredocs << node }
   end
 
   # This is a parser event that occurs when you're using a heredoc with a

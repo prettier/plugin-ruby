@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@kddeisz] - Ensure `when` clauses with multiple predicates that can be split into multiple lines are split correctly.
 - [@kddeisz] - Ensure hash literal is split correctly when only its contents would fit on one line.
 - [@kddeisz] - Simplify `toProc` checks by not calling if the option is disabled.
+- [@johncsnyder], [@kddeisz] - Add `method_add_block` to the potential like of method calls that can be chained.
 
 ## [1.0.0-rc1] - 2020-12-09
 

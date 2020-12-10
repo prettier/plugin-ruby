@@ -1,4 +1,4 @@
-const { concat, group, join, line } = require("../prettier");
+const { concat, group, join, indent, line, softline } = require("../prettier");
 const { literal } = require("../utils");
 
 function printRestParam(symbol) {
@@ -64,6 +64,8 @@ function printParams(path, opts, print) {
     parts.push(path.call(print, "body", 6));
   }
 
+  const contents = [join(concat([",", line]), parts)];
+
   // You can put an extra comma at the end of block args between pipes to
   // change what it does. Below is the difference:
   //
@@ -73,9 +75,19 @@ function printParams(path, opts, print) {
   // In ruby 2.5, the excessed comma is indicated by having a 0 in the rest
   // param position. In ruby 2.6+ it's indicated by having an "excessed_comma"
   // node in the rest position. Seems odd, but it's true.
-  const comma = rest === 0 || (rest && rest.type === "excessed_comma");
+  if (rest === 0 || (rest && rest.type === "excessed_comma")) {
+    contents.push(",");
+  }
 
-  return group(concat([join(concat([",", line]), parts), comma ? "," : ""]));
+  // If the parent node is a paren then we skipped printing the parentheses so
+  // that we could handle them here and get nicer formatting.
+  if (["lambda", "paren"].includes(path.getParentNode().type)) {
+    return group(
+      concat(["(", indent(concat([softline].concat(contents))), softline, ")"])
+    );
+  }
+
+  return group(concat(contents));
 }
 
 module.exports = {

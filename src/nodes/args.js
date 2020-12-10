@@ -9,7 +9,49 @@ const {
 } = require("../prettier");
 
 const toProc = require("../toProc");
-const { docLength, getTrailingComma } = require("../utils");
+const { getTrailingComma } = require("../utils");
+
+function printArgParen(path, opts, print) {
+  const argsNode = path.getValue().body[0];
+
+  if (argsNode === null) {
+    return "";
+  }
+
+  // Here we can skip the entire rest of the method by just checking if it's
+  // an args_forward node, as we're guaranteed that there are no other arg
+  // nodes.
+  if (argsNode.type === "args_forward") {
+    return group(
+      concat([
+        "(",
+        indent(concat([softline, path.call(print, "body", 0)])),
+        softline,
+        ")"
+      ])
+    );
+  }
+
+  const args = path.call(print, "body", 0);
+  const hasBlock = argsNode.type === "args_add_block" && argsNode.body[1];
+
+  // Now here we return a doc that represents the whole grouped expression,
+  // including the surrouding parentheses.
+  return group(
+    concat([
+      "(",
+      indent(
+        concat([
+          softline,
+          join(concat([",", line]), args),
+          getTrailingComma(opts) && !hasBlock ? ifBreak(",", "") : ""
+        ])
+      ),
+      softline,
+      ")"
+    ])
+  );
+}
 
 function printArgs(path, { rubyToProc }, print) {
   const args = path.map(print, "body");
@@ -51,75 +93,7 @@ function printArgs(path, { rubyToProc }, print) {
 }
 
 module.exports = {
-  arg_paren: (path, opts, print) => {
-    const argsNode = path.getValue().body[0];
-
-    if (argsNode === null) {
-      return "";
-    }
-
-    // Here we can skip the entire rest of the method by just checking if it's
-    // an args_forward node, as we're guaranteed that there are no other arg
-    // nodes.
-    if (argsNode.type === "args_forward") {
-      return group(
-        concat([
-          "(",
-          indent(concat([softline, path.call(print, "body", 0)])),
-          softline,
-          ")"
-        ])
-      );
-    }
-
-    const args = path.call(print, "body", 0);
-    const hasBlock = argsNode.type === "args_add_block" && argsNode.body[1];
-
-    // These are the docs representing the actual arguments, without any
-    // parentheses or surrounding lines yet added.
-    let argsDocs = [
-      join(concat([",", line]), args),
-      getTrailingComma(opts) && !hasBlock ? ifBreak(",", "") : ""
-    ];
-
-    // Here we're going to make a determination on whether or not we should put
-    // a newline before the first argument. In some cases this makes the
-    // appearance a little better. For example, instead of taking this input:
-    //
-    //     foo(arg1, arg2).bar(arg1, arg2).baz(arg1)
-    //
-    // and transforming it into this:
-    //
-    //     foo(arg1, arg2).bar(arg1, arg2).baz(
-    //       arg1
-    //     )
-    //
-    // it instead gets transformed into this:
-    //
-    //     foo(arg1, arg2).bar(arg1, arg2)
-    //       .baz(arg1)
-    //
-    const maxDocLength = 15;
-    const firstArgDoc = args[0];
-
-    // prettier-ignore
-    const shouldWrapLine =
-      (args.reduce((sum, arg) => sum + docLength(arg), 0) > maxDocLength) ||
-      (args.length == 1 && firstArgDoc.type === "group" && docLength(firstArgDoc) > maxDocLength) ||
-      (firstArgDoc.type === "concat" && firstArgDoc.parts.some((part) => part.type === "group"));
-
-    // Here we're going to get all of the docs representing the doc that's
-    // inside the parentheses.
-    if (shouldWrapLine) {
-      argsDocs = [indent(concat([softline].concat(argsDocs))), softline];
-    } else {
-      argsDocs = [indent(concat(argsDocs))];
-    }
-
-    // Now here we return a doc that represents the whole grouped expression,
-    // including the surrouding parentheses.
-    return group(concat(["("].concat(argsDocs).concat(")")));
-  },
+  arg_paren: printArgParen,
   args: printArgs,
   args_add_block: (path, opts, print) => {
     const parts = path.call(print, "body", 0);

@@ -1,11 +1,4 @@
-const {
-  concat,
-  group,
-  ifBreak,
-  indent,
-  line,
-  softline
-} = require("../prettier");
+const { concat, group, ifBreak, indent, line } = require("../prettier");
 const { hasAncestor } = require("../utils");
 
 // We can have our params coming in as the first child of the main lambda node,
@@ -13,31 +6,22 @@ const { hasAncestor } = require("../utils");
 // though it's possible to omit the parens if you only have one argument, we're
 // going to keep them in no matter what for consistency.
 function printLambdaParams(path, print) {
-  const paramsPath = [print, "body", 0];
-  let paramsNode = path.getValue().body[0];
+  let node = path.getValue().body[0];
 
   // In this case we had something like -> (foo) { bar } which would mean that
   // we're looking at a paren node, so we'll descend one level deeper to get at
   // the actual params node.
-  if (paramsNode.type !== "params") {
-    paramsPath.push("body", 0);
-    paramsNode = paramsNode.body[0];
+  if (node.type !== "params") {
+    node = node.body[0];
   }
 
   // If we don't have any params at all, then we're just going to bail out and
   // print nothing. This is to avoid printing an empty set of parentheses.
-  if (paramsNode.body.every((type) => !type)) {
+  if (node.body.every((type) => !type)) {
     return "";
   }
 
-  return group(
-    concat([
-      "(",
-      indent(concat([softline, path.call.apply(path, paramsPath)])),
-      softline,
-      ")"
-    ])
-  );
+  return path.call(print, "body", 0);
 }
 
 // Lambda nodes represent stabby lambda literals, which can come in a couple of
