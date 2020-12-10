@@ -314,7 +314,9 @@ class Prettier::Parser < Ripper
       arg.merge(type: :args, body: [arg])
     else
       args.merge!(
-        body: args[:body] << arg, end: arg[:end], char_end: arg[:char_end]
+        body: args[:body] << arg,
+        end: arg[:end],
+        char_end: arg[:char_end]
       )
     end
   end
@@ -1186,7 +1188,8 @@ class Prettier::Parser < Ripper
       # Here we're going to expand out the location information for the assocs
       # node so that it can grab up any remaining comments inside the hash.
       assoclist_from_args.merge!(
-        char_start: beging[:char_end], char_end: ending[:char_start]
+        char_start: beging[:char_end],
+        char_end: ending[:char_start]
       )
     end
 
@@ -1448,7 +1451,9 @@ class Prettier::Parser < Ripper
       part.merge(type: :mlhs, body: [part])
     else
       mlhs.merge!(
-        body: mlhs[:body] << part, end: part[:end], char_end: part[:char_end]
+        body: mlhs[:body] << part,
+        end: part[:end],
+        char_end: part[:char_end]
       )
     end
   end
@@ -1551,7 +1556,9 @@ class Prettier::Parser < Ripper
       part.merge(type: :mrhs, body: [part])
     else
       mrhs.merge!(
-        body: mrhs[:body] << part, end: part[:end], char_end: part[:char_end]
+        body: mrhs[:body] << part,
+        end: part[:end],
+        char_end: part[:char_end]
       )
     end
   end
@@ -1960,7 +1967,9 @@ class Prettier::Parser < Ripper
   # piece of the string.
   def on_string_add(string, piece)
     string.merge!(
-      body: string[:body] << piece, end: piece[:end], char_end: piece[:char_end]
+      body: string[:body] << piece,
+      end: piece[:end],
+      char_end: piece[:char_end]
     )
   end
 
@@ -2417,7 +2426,9 @@ class Prettier::Parser < Ripper
       piece.merge(type: :word, body: [piece])
     else
       word.merge!(
-        body: word[:body] << piece, end: piece[:end], char_end: piece[:char_end]
+        body: word[:body] << piece,
+        end: piece[:end],
+        char_end: piece[:char_end]
       )
     end
   end
@@ -2498,7 +2509,9 @@ class Prettier::Parser < Ripper
     else
       ending = find_scanner_event(:@tstring_end)
       xstring.merge!(
-        type: :xstring_literal, end: ending[:end], char_end: ending[:char_end]
+        type: :xstring_literal,
+        end: ending[:end],
+        char_end: ending[:char_end]
       )
     end
   end
