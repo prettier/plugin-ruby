@@ -155,6 +155,21 @@ describe("hash", () => {
         `),
         { trailingComma: "all" }
       ));
+
+    test("breaks contents and parens together", () => {
+      const content = ruby(`
+        foobar(key1: ${long.slice(0, 32)}, key2: ${long.slice(0, 32)})
+      `);
+
+      const expected = ruby(`
+        foobar(
+          key1: ${long.slice(0, 32)},
+          key2: ${long.slice(0, 32)}
+        )
+      `);
+
+      return expect(content).toChangeFormat(expected);
+    });
   });
 
   describe("when hash labels allowed", () => {

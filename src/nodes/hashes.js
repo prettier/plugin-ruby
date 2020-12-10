@@ -93,32 +93,7 @@ function printHashContents(path, opts, print) {
       ? printHashKeyLabel
       : printHashKeyRocket;
 
-  const contents = join(concat([",", line]), path.map(print, "body"));
-
-  // If we're inside a hash literal, then we want to add the braces at this
-  // level so that the grouping is correct. Otherwise you could end up with
-  // opening and closing braces being split up, but the contents not being split
-  // correctly.
-  if (path.getParentNode().type === "hash") {
-    return group(
-      concat([
-        "{",
-        indent(
-          concat([
-            line,
-            contents,
-            getTrailingComma(opts) ? ifBreak(",", "") : ""
-          ])
-        ),
-        line,
-        "}"
-      ])
-    );
-  }
-
-  // Otherwise, we're inside a bare_assoc_hash, so we don't want to print
-  // braces at all.
-  return group(contents);
+  return join(concat([",", line]), path.map(print, "body"));
 }
 
 function printEmptyHashWithComments(path, opts) {
@@ -129,14 +104,16 @@ function printEmptyHashWithComments(path, opts) {
     return opts.printer.printComment(commentPath);
   };
 
-  return concat([
-    "{",
-    indent(
-      concat([hardline, join(hardline, path.map(printComment, "comments"))])
-    ),
-    line,
-    "}"
-  ]);
+  return group(
+    concat([
+      "{",
+      indent(
+        concat([hardline, join(hardline, path.map(printComment, "comments"))])
+      ),
+      line,
+      "}"
+    ])
+  );
 }
 
 function printHash(path, opts, print) {
@@ -149,7 +126,20 @@ function printHash(path, opts, print) {
     return hashNode.comments ? printEmptyHashWithComments(path, opts) : "{}";
   }
 
-  return path.call(print, "body", 0);
+  return group(
+    concat([
+      "{",
+      indent(
+        concat([
+          line,
+          path.call(print, "body", 0),
+          getTrailingComma(opts) ? ifBreak(",", "") : ""
+        ])
+      ),
+      line,
+      "}"
+    ])
+  );
 }
 
 module.exports = {
