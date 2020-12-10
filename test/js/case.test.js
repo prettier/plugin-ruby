@@ -1,12 +1,38 @@
 const { long, ruby } = require("./utils");
 
 describe("case", () => {
-  test("empty case", () => expect("case\nwhen a\n  1\nend").toMatchFormat());
+  test("empty case", () => {
+    const content = ruby(`
+      case
+      when a
+        1
+      end
+    `);
 
-  test("single when", () => expect("case a\nwhen b\n  1\nend").toMatchFormat());
+    return expect(content).toMatchFormat();
+  });
 
-  test("multiple predicates, one when", () =>
-    expect("case a\nwhen b, c\n  1\nend").toMatchFormat());
+  test("single when", () => {
+    const content = ruby(`
+      case a
+      when b
+        1
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test("multiple predicates, one when", () => {
+    const content = ruby(`
+      case a
+      when b, c
+        1
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 
   test("breaking with multiple predicates, one when", () => {
     const content = ruby(`
@@ -21,12 +47,60 @@ describe("case", () => {
     return expect(content).toMatchFormat();
   });
 
-  test("multiple consecutive whens", () =>
-    expect("case a\nwhen b\nwhen c\n  1\nend").toMatchFormat());
+  test("breaking with multiple predicates, each one not too long", () => {
+    const content = ruby(`
+      case foo
+      when '${long.slice(0, 40)}', '${long.slice(0, 40)}'
+        bar
+      end
+    `);
 
-  test("basic multiple branches", () =>
-    expect("case a\nwhen b\n  1\nwhen c\n  2\nend").toMatchFormat());
+    const expected = ruby(`
+      case foo
+      when '${long.slice(0, 40)}',
+           '${long.slice(0, 40)}'
+        bar
+      end
+    `);
 
-  test("else clauses", () =>
-    expect("case a\nwhen b\n  1\nelse\n  2\nend").toMatchFormat());
+    return expect(content).toChangeFormat(expected);
+  });
+
+  test("multiple consecutive whens", () => {
+    const content = ruby(`
+      case a
+      when b
+      when c
+        1
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test("basic multiple branches", () => {
+    const content = ruby(`
+      case a
+      when b
+        1
+      when c
+        2
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test("else clauses", () => {
+    const content = ruby(`
+      case a
+      when b
+        1
+      else
+        2
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });
