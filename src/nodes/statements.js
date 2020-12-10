@@ -45,35 +45,45 @@ function printBodyStmt(path, opts, print) {
   return group(concat(parts));
 }
 
+const argNodeTypes = ["args", "args_add_star", "args_add_block"];
+
+function printParen(path, opts, print) {
+  const contentNode = path.getValue().body[0];
+
+  if (!contentNode) {
+    return "()";
+  }
+
+  let contentDoc = path.call(print, "body", 0);
+
+  // If the content is params, we're going to let it handle its own parentheses
+  // so that it breaks nicely.
+  if (contentNode.type === "params") {
+    return contentDoc;
+  }
+
+  // If we have an arg type node as the contents, then it's going to return an
+  // array, so we need to explicitly join that content here.
+  if (argNodeTypes.includes(contentNode.type)) {
+    contentDoc = join(concat([",", line]), contentDoc);
+  }
+
+  return group(
+    concat([
+      "(",
+      indent(concat([softline, contentDoc])),
+      concat([softline, ")"])
+    ])
+  );
+}
+
 module.exports = {
   "@__end__": (path, _opts, _print) => {
     const { body } = path.getValue();
     return concat([trim, "__END__", literalline, body]);
   },
   bodystmt: printBodyStmt,
-  paren: (path, opts, print) => {
-    if (!path.getValue().body[0]) {
-      return "()";
-    }
-
-    let content = path.call(print, "body", 0);
-
-    if (
-      ["args", "args_add_star", "args_add_block"].includes(
-        path.getValue().body[0].type
-      )
-    ) {
-      content = join(concat([",", line]), content);
-    }
-
-    return group(
-      concat([
-        "(",
-        indent(concat([softline, content])),
-        concat([softline, ")"])
-      ])
-    );
-  },
+  paren: printParen,
   program: (path, opts, print) =>
     concat([join(hardline, path.map(print, "body")), hardline]),
   stmts: (path, opts, print) => {

@@ -10,11 +10,11 @@ const { first, makeCall, noIndent } = require("../utils");
 
 const toProc = require("../toProc");
 
-const chained = ["call", "method_add_arg"];
+const chained = ["call", "method_add_arg", "method_add_block"];
 
 function printCall(path, opts, print) {
-  const callNode = path.getValue();
-  const [receiverNode, _operatorNode, messageNode] = callNode.body;
+  const node = path.getValue();
+  const [receiverNode, _operatorNode, messageNode] = node.body;
 
   const receiverDoc = path.call(print, "body", 0);
   const operatorDoc = makeCall(path, opts, print);
@@ -24,21 +24,13 @@ function printCall(path, opts, print) {
   // call syntax so if `call` is implicit, we don't print it out.
   const messageDoc = messageNode === "call" ? "" : path.call(print, "body", 2);
 
-  // For certain left sides of the call nodes, we want to attach directly to
-  // the } or end.
-  if (noIndent.includes(receiverNode.type)) {
-    return concat([receiverDoc, operatorDoc, messageDoc]);
-  }
-
   // The right side of the call node, as in everything including the operator
   // and beyond.
-  const rightSideDoc = indent(
-    concat([
-      receiverNode.comments ? hardline : softline,
-      operatorDoc,
-      messageDoc
-    ])
-  );
+  const rightSideDoc = concat([
+    receiverNode.comments ? hardline : softline,
+    operatorDoc,
+    messageDoc
+  ]);
 
   // Get a reference to the parent node so we can check if we're inside a chain
   const parentNode = path.getParentNode();
@@ -46,27 +38,31 @@ function printCall(path, opts, print) {
   // If our parent node is a chained node then we're not going to group the
   // right side of the expression, as we want to have a nice multi-line layout.
   if (chained.includes(parentNode.type)) {
-    parentNode.chain = (callNode.chain || 0) + 1;
-    parentNode.breakDoc = (callNode.breakDoc || [receiverDoc]).concat(
-      rightSideDoc
-    );
+    parentNode.chain = (node.chain || 0) + 1;
+    parentNode.breakDoc = (node.breakDoc || [receiverDoc]).concat(rightSideDoc);
   }
 
   // If we're at the top of a chain, then we're going to print out a nice
   // multi-line layout if this doesn't break into multiple lines.
-  if (!chained.includes(parentNode.type) && (callNode.chain || 0) >= 3) {
+  if (!chained.includes(parentNode.type) && (node.chain || 0) >= 3) {
     return ifBreak(
-      group(concat(callNode.breakDoc.concat(rightSideDoc))),
+      group(indent(concat(node.breakDoc.concat(rightSideDoc)))),
       concat([receiverDoc, group(rightSideDoc)])
     );
   }
 
-  return group(concat([receiverDoc, group(rightSideDoc)]));
+  // For certain left sides of the call nodes, we want to attach directly to
+  // the } or end.
+  if (noIndent.includes(receiverNode.type)) {
+    return concat([receiverDoc, operatorDoc, messageDoc]);
+  }
+
+  return group(concat([receiverDoc, group(indent(rightSideDoc))]));
 }
 
 function printMethodAddArg(path, opts, print) {
-  const methodAddArgNode = path.getValue();
-  const argNode = methodAddArgNode.body[1];
+  const node = path.getValue();
+  const argNode = node.body[1];
 
   const [methodDoc, argsDoc] = path.map(print, "body");
 
@@ -88,20 +84,15 @@ function printMethodAddArg(path, opts, print) {
   // If our parent node is a chained node then we're not going to group the
   // right side of the expression, as we want to have a nice multi-line layout.
   if (chained.includes(parentNode.type)) {
-    parentNode.chain = (methodAddArgNode.chain || 0) + 1;
-    parentNode.breakDoc = (methodAddArgNode.breakDoc || [methodDoc]).concat(
-      argsDoc
-    );
+    parentNode.chain = (node.chain || 0) + 1;
+    parentNode.breakDoc = (node.breakDoc || [methodDoc]).concat(argsDoc);
   }
 
   // If we're at the top of a chain, then we're going to print out a nice
   // multi-line layout if this doesn't break into multiple lines.
-  if (
-    !chained.includes(parentNode.type) &&
-    (methodAddArgNode.chain || 0) >= 3
-  ) {
+  if (!chained.includes(parentNode.type) && (node.chain || 0) >= 3) {
     return ifBreak(
-      group(concat(methodAddArgNode.breakDoc.concat(argsDoc))),
+      group(indent(concat(node.breakDoc.concat(argsDoc)))),
       concat([methodDoc, argsDoc])
     );
   }
@@ -110,14 +101,17 @@ function printMethodAddArg(path, opts, print) {
 }
 
 function printMethodAddBlock(path, { rubyToProc }, print) {
-  const [method, block] = path.getValue().body;
+  const node = path.getValue();
+
+  const [callNode, blockNode] = node.body;
+  const [callDoc, blockDoc] = path.map(print, "body");
 
   // Don't bother trying to do any kind of fancy toProc transform if the option
   // is disabled.
   if (rubyToProc) {
-    const proc = toProc(path, block);
+    const proc = toProc(path, blockNode);
 
-    if (proc && method.type === "call") {
+    if (proc && callNode.type === "call") {
       return group(
         concat([
           path.call(print, "body", 0),
@@ -133,7 +127,26 @@ function printMethodAddBlock(path, { rubyToProc }, print) {
     }
   }
 
-  return concat(path.map(print, "body"));
+  // Get a reference to the parent node so we can check if we're inside a chain
+  const parentNode = path.getParentNode();
+
+  // If our parent node is a chained node then we're not going to group the
+  // right side of the expression, as we want to have a nice multi-line layout.
+  if (chained.includes(parentNode.type)) {
+    parentNode.chain = (node.chain || 0) + 1;
+    parentNode.breakDoc = (node.breakDoc || [callDoc]).concat(blockDoc);
+  }
+
+  // If we're at the top of a chain, then we're going to print out a nice
+  // multi-line layout if this doesn't break into multiple lines.
+  if (!chained.includes(parentNode.type) && (node.chain || 0) >= 3) {
+    return ifBreak(
+      group(indent(concat(node.breakDoc.concat(blockDoc)))),
+      concat([callDoc, blockDoc])
+    );
+  }
+
+  return concat([callDoc, blockDoc]);
 }
 
 module.exports = {
