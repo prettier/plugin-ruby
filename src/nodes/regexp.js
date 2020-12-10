@@ -1,16 +1,23 @@
 const { concat } = require("../prettier");
+const { hasAncestor } = require("../utils");
 
 function isStringContent(node) {
   return node.type === "@tstring_content";
 }
 
-function shouldUseBraces(node) {
+function shouldUseBraces(path) {
+  const node = path.getValue();
   const first = node.body[0];
 
   // If the first part of this regex is plain string content and we have a
   // space or an =, then we want to use braces because otherwise we could end up
   // with an ambiguous operator, e.g. foo / bar/ or foo /=bar/
-  if (first && isStringContent(first) && [" ", "="].includes(first.body[0])) {
+  if (
+    first &&
+    isStringContent(first) &&
+    [" ", "="].includes(first.body[0]) &&
+    hasAncestor(path, ["command", "command_call"])
+  ) {
     return true;
   }
 
@@ -28,7 +35,7 @@ function shouldUseBraces(node) {
 // itself. In that case we switch over to using %r with braces.
 function printRegexpLiteral(path, opts, print) {
   const node = path.getValue();
-  const useBraces = shouldUseBraces(node);
+  const useBraces = shouldUseBraces(path);
 
   const parts = [useBraces ? "%r{" : "/"]
     .concat(path.map(print, "body"))

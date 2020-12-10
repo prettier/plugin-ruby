@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [@kddeisz] - Do not unescape double quotes in a single quote string.
+- [@kddeisz] - Only force braces on regexp for spaces and equals if it's inside a command or command_call.
 
 ## [1.0.0-rc2] - 2020-12-10
 

@@ -34,9 +34,12 @@ describe("regexp", () => {
     return expect(content).toMatchFormat();
   });
 
-  test("forces braces if could be ambiguous with space", () =>
+  test("forces braces if could be ambiguous with space in command", () =>
     expect("foo %r{ bar}").toMatchFormat());
 
-  test("forces braces if could be ambiguous with equals", () =>
+  test("forces braces if could be ambiguous with equals in command", () =>
     expect("foo %r{= bar}").toMatchFormat());
+
+  test("do not force braces if space is in parens", () =>
+    expect("foo(/ bar/)").toMatchFormat());
 });
