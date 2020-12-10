@@ -259,7 +259,8 @@ will now be printed as:
 ```ruby
 Config::Download.new(
   'prettier',
-  filename: 'prettier.yml', url: 'https://raw.githubusercontent.com/...'
+  filename: 'prettier.yml',
+  url: 'https://raw.githubusercontent.com/...'
 ).perform
 ```
 
