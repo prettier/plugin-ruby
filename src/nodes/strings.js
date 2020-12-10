@@ -32,7 +32,7 @@ function isSingleQuotable(node) {
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
 
 function normalizeQuotes(content, enclosingQuote, originalQuote) {
-  const replaceOther = ["'", '"'].includes(originalQuote);
+  const replaceOther = originalQuote === '"';
   const otherQuote = enclosingQuote === '"' ? "'" : '"';
 
   // Escape and unescape single and double quotes as needed to be able to
