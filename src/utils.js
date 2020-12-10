@@ -2,8 +2,6 @@ const { concat } = require("./prettier");
 const isEmptyStmts = require("./utils/isEmptyStmts");
 const literalLineNoBreak = require("./utils/literalLineNoBreak");
 
-const concatBody = (path, opts, print) => concat(path.map(print, "body"));
-
 // If the node is a type of assignment or if the node is a paren and nested
 // inside that paren is a node that is a type of assignment.
 const containsAssignment = (node) =>
@@ -79,7 +77,6 @@ const skipAssignIndent = (node) =>
   (node.type === "call" && skipAssignIndent(node.body[0]));
 
 module.exports = {
-  concatBody,
   containsAssignment,
   docLength,
   empty,

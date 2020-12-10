@@ -11,8 +11,8 @@ const isCall = (node) => ["::", "."].includes(node) || node.type === "@period";
 //     [1, 2, 3].map(&:to_s)
 //
 // This works with `do` blocks as well.
-const toProc = (path, opts, node) => {
-  if (!node || !opts.rubyToProc) {
+const toProc = (path, node) => {
+  if (!node) {
     return null;
   }
 
