@@ -5,6 +5,12 @@ describe("array", () => {
 
   test("basic formatting", () => expect("[1, 2, 3]").toMatchFormat());
 
+  test("does not transform single string arrays", () =>
+    expect("['a']").toMatchFormat());
+
+  test("does not transform single symbol arrays", () =>
+    expect("[:a]").toMatchFormat());
+
   test("transforms basic string arrays", () =>
     expect("['a', 'b', 'c', 'd', 'e']").toChangeFormat("%w[a b c d e]"));
 

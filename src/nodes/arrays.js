@@ -18,32 +18,35 @@ const { getTrailingComma } = require("../utils");
 //     ['a', 'b', 'c']
 //
 function isStringArray(args) {
-  return args.body.every((arg) => {
-    // We want to verify that every node inside of this array is a string
-    // literal. We also want to make sure none of them have comments attached.
-    if (arg.type !== "string_literal" || arg.comments) {
-      return false;
-    }
+  return (
+    args.body.length > 1 &&
+    args.body.every((arg) => {
+      // We want to verify that every node inside of this array is a string
+      // literal. We also want to make sure none of them have comments attached.
+      if (arg.type !== "string_literal" || arg.comments) {
+        return false;
+      }
 
-    // If the string has multiple parts (meaning plain string content but also
-    // interpolated content) then we know it's not a simple string.
-    if (arg.body.length !== 1) {
-      return false;
-    }
+      // If the string has multiple parts (meaning plain string content but also
+      // interpolated content) then we know it's not a simple string.
+      if (arg.body.length !== 1) {
+        return false;
+      }
 
-    const part = arg.body[0];
+      const part = arg.body[0];
 
-    // If the only part of this string is not @tstring_content then it's
-    // interpolated, so again we can return false.
-    if (part.type !== "@tstring_content") {
-      return false;
-    }
+      // If the only part of this string is not @tstring_content then it's
+      // interpolated, so again we can return false.
+      if (part.type !== "@tstring_content") {
+        return false;
+      }
 
-    // Finally, verify that the string doesn't contain a space, an escape
-    // character, or brackets so that we know it can be put into a string
-    // literal array.
-    return !/[\s\\[\]]/.test(part.body);
-  });
+      // Finally, verify that the string doesn't contain a space, an escape
+      // character, or brackets so that we know it can be put into a string
+      // literal array.
+      return !/[\s\\[\]]/.test(part.body);
+    })
+  );
 }
 
 // Checks that every argument within this args node is a symbol_literal node (as
@@ -53,8 +56,9 @@ function isStringArray(args) {
 //     [:a, :b, :c]
 //
 function isSymbolArray(args) {
-  return args.body.every(
-    (arg) => arg.type === "symbol_literal" && !arg.comments
+  return (
+    args.body.length > 1 &&
+    args.body.every((arg) => arg.type === "symbol_literal" && !arg.comments)
   );
 }
 

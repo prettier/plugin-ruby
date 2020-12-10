@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.0.0-rc2] - 2020-12-10
+
 ### Changed
 
 - [@kddeisz] - Print hashes with consistent keys (e.g., if one key cannot be a hash label, use all hash rockets).
@@ -14,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@kddeisz] - Ensure hash literal is split correctly when only its contents would fit on one line.
 - [@kddeisz] - Simplify `toProc` checks by not calling if the option is disabled.
 - [@johncsnyder], [@kddeisz] - Add `method_add_block` to the potential like of method calls that can be chained.
+- [@kddeisz] - Add the `rubyArrayLiteral` option for disabling automatically turning into array literals.
 
 ## [1.0.0-rc1] - 2020-12-09
 
@@ -937,7 +940,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.0.0-rc1...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.0.0-rc2...HEAD
+[1.0.0-rc2]: https://github.com/prettier/plugin-ruby/compare/v1.0.0-rc1...v1.0.0-rc2
 [1.0.0-rc1]: https://github.com/prettier/plugin-ruby/compare/v0.22.0...v1.0.0-rc1
 [0.22.0]: https://github.com/prettier/plugin-ruby/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/prettier/plugin-ruby/compare/v0.20.1...v0.21.0
