@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@kddeisz] - Only force braces on regexp for spaces and equals if it's inside a command or command_call.
 - [@kddeisz] - Leave Sorbet type annotations in place.
 - [@kddeisz] - Don't group hash contents, just allow them to break with their parent node.
+- [@kddeisz] - Honor the UTF-8 lang passed in through ENV vars.
 
 ## [1.0.0-rc2] - 2020-12-10
 
