@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.0.0] - 2020-12-11
+
 ### Changed
 
 - [@kddeisz] - Do not unescape double quotes in a single quote string.
@@ -949,7 +951,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.0.0-rc2...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/prettier/plugin-ruby/compare/v1.0.0-rc2...v1.0.0
 [1.0.0-rc2]: https://github.com/prettier/plugin-ruby/compare/v1.0.0-rc1...v1.0.0-rc2
 [1.0.0-rc1]: https://github.com/prettier/plugin-ruby/compare/v0.22.0...v1.0.0-rc1
 [0.22.0]: https://github.com/prettier/plugin-ruby/compare/v0.21.0...v0.22.0
