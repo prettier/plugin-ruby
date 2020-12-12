@@ -1,0 +1,15 @@
+Layout:
+  Enabled: false
+
+Style/MultilineIfModifier: # clashes with rubyModifier
+  Enabled: false
+Style/SymbolArray: # clashes with rubyArrayLiteral
+  Enabled: false
+Style/WordArray: # clashes with rubyArrayLiteral
+  Enabled: false
+Style/TrailingCommaInArguments: # clashes with trailingComma
+  Enabled: false
+Style/TrailingCommaInArrayLiteral: # clashes with trailingComma
+  Enabled: false
+Style/TrailingCommaInHashLiteral: # clashes with trailingComma
+  Enabled: false

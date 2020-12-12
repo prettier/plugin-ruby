@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
         node_modules/prettier/index.js
         node_modules/prettier/third-party.js
         package.json
+        rubocop.yml
       ]
     end
 
