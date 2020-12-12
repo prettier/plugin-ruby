@@ -1,7 +1,6 @@
 const {
   concat,
   group,
-  hardline,
   ifBreak,
   indent,
   join,
@@ -9,7 +8,7 @@ const {
   softline
 } = require("../prettier");
 
-const { getTrailingComma } = require("../utils");
+const { getTrailingComma, printEmptyCollection } = require("../utils");
 
 // Checks that every argument within this args node is a string_literal node
 // that has no spaces or interpolations. This means we're dealing with an array
@@ -93,24 +92,6 @@ function printSpecialArray(start) {
   };
 }
 
-function printEmptyArrayWithComments(path, opts) {
-  const arrayNode = path.getValue();
-
-  const printComment = (commentPath, index) => {
-    arrayNode.comments[index].printed = true;
-    return opts.printer.printComment(commentPath);
-  };
-
-  return concat([
-    "[",
-    indent(
-      concat([hardline, join(hardline, path.map(printComment, "comments"))])
-    ),
-    line,
-    "]"
-  ]);
-}
-
 // An array node is any literal array in Ruby. This includes all of the special
 // array literals as well as regular arrays. If it is a special array literal
 // then it will have one child that represents the special array, otherwise it
@@ -122,7 +103,7 @@ function printArray(path, opts, print) {
   // If there is no inner arguments node, then we're dealing with an empty
   // array, so we can go ahead and return.
   if (args === null) {
-    return array.comments ? printEmptyArrayWithComments(path, opts) : "[]";
+    return printEmptyCollection(path, opts, "[", "]");
   }
 
   // If we have an array that contains only simple string literals with no

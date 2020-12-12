@@ -116,4 +116,13 @@ describe("array", () => {
       return expect(content).toMatchFormat({ trailingComma: "all" });
     });
   });
+
+  test("with leading comments but none in body", () => {
+    const content = ruby(`
+      # leading
+      []
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });

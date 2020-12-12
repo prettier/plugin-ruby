@@ -98,8 +98,8 @@ module.exports = {
       stmts[0].comments
     ) {
       const comments = path.map(
-        (commentPath, index) => {
-          stmts[0].comments[index].printed = true;
+        (commentPath) => {
+          commentPath.getValue().printed = true;
           return opts.printer.printComment(commentPath);
         },
         "body",
