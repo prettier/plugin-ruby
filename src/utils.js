@@ -1,6 +1,7 @@
 const { concat } = require("./prettier");
 const isEmptyStmts = require("./utils/isEmptyStmts");
 const literalLineNoBreak = require("./utils/literalLineNoBreak");
+const printEmptyCollection = require("./utils/printEmptyCollection");
 
 // If the node is a type of assignment or if the node is a paren and nested
 // inside that paren is a node that is a type of assignment.
@@ -89,5 +90,6 @@ module.exports = {
   makeCall,
   noIndent,
   prefix,
+  printEmptyCollection,
   skipAssignIndent
 };

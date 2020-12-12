@@ -1,14 +1,11 @@
-const {
-  concat,
-  group,
-  hardline,
-  ifBreak,
-  indent,
-  join,
-  line
-} = require("../prettier");
+const { concat, group, ifBreak, indent, join, line } = require("../prettier");
 
-const { getTrailingComma, prefix, skipAssignIndent } = require("../utils");
+const {
+  getTrailingComma,
+  prefix,
+  printEmptyCollection,
+  skipAssignIndent
+} = require("../utils");
 
 // When attempting to convert a hash rocket into a hash label, you need to take
 // care because only certain patterns are allowed. Ruby source says that they
@@ -96,26 +93,6 @@ function printHashContents(path, opts, print) {
   return join(concat([",", line]), path.map(print, "body"));
 }
 
-function printEmptyHashWithComments(path, opts) {
-  const hashNode = path.getValue();
-
-  const printComment = (commentPath, index) => {
-    hashNode.comments[index].printed = true;
-    return opts.printer.printComment(commentPath);
-  };
-
-  return group(
-    concat([
-      "{",
-      indent(
-        concat([hardline, join(hardline, path.map(printComment, "comments"))])
-      ),
-      line,
-      "}"
-    ])
-  );
-}
-
 function printHash(path, opts, print) {
   const hashNode = path.getValue();
 
@@ -123,7 +100,7 @@ function printHash(path, opts, print) {
   // missing, then it means we're dealing with an empty hash, so we can just
   // exit here and print.
   if (hashNode.body[0] === null) {
-    return hashNode.comments ? printEmptyHashWithComments(path, opts) : "{}";
+    return printEmptyCollection(path, opts, "{", "}");
   }
 
   return group(

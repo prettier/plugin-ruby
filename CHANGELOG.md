@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [@steobrien], [@kddeisz] - Ensure leading comments in empty array and hash literals do not duplicate.
+
 ## [1.0.0] - 2020-12-11
 
 ### Changed

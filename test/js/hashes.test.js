@@ -242,4 +242,13 @@ describe("hash", () => {
 
     return expect(content).toMatchFormat();
   });
+
+  test("with leading comments but none in body", () => {
+    const content = ruby(`
+      # leading
+      {}
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });
