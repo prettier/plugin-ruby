@@ -21,6 +21,14 @@ describe("regexp", () => {
 
   test("global interpolation", () => expect("/#$&/").toChangeFormat("/#{$&}/"));
 
+  test("do not change if { and / in regexp literal", () =>
+    expect("%r(a{b/c)").toMatchFormat());
+
+  test("do not change if } and / in regexp literal", () =>
+    expect("%r[a}b/c]").toMatchFormat());
+
+  test("parens with }", () => expect("%r(a}bc)").toChangeFormat("/a}bc/"));
+
   test("comments in regex", () => {
     const content = ruby(`
       /\\A

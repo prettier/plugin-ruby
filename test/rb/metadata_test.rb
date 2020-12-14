@@ -556,6 +556,14 @@ class MetadataTest < Minitest::Test
   def test_regexp_literal
     assert_metadata :regexp_literal, '/foo/'
     assert_metadata :regexp_literal, '%r{foo}'
+    assert_metadata :regexp_literal, '%r(foo)'
+
+    assert_node_metadata(
+      :regexp_literal,
+      parse('%r(foo)'),
+      beginning: '%r(',
+      ending: ')'
+    )
   end
 
   def test_rescue

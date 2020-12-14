@@ -26,6 +26,16 @@ function shouldUseBraces(path) {
   );
 }
 
+function hasBrace(path) {
+  const node = path.getValue();
+
+  return node.body.some(
+    (child) =>
+      isStringContent(child) &&
+      (child.body.includes("{") || child.body.includes("}"))
+  );
+}
+
 // This function is responsible for printing out regexp_literal nodes. They can
 // either use the special %r literal syntax or they can use forward slashes. At
 // the end of either of those they can have modifiers like m or x that have
@@ -36,6 +46,15 @@ function shouldUseBraces(path) {
 function printRegexpLiteral(path, opts, print) {
   const node = path.getValue();
   const useBraces = shouldUseBraces(path);
+
+  if (useBraces && hasBrace(path)) {
+    // noop
+    //  NG: %r(test{test) => %r{test{test}
+    const parts = [node.beginning]
+      .concat(path.map(print, "body"))
+      .concat([node.ending]);
+    return concat(parts);
+  }
 
   const parts = [useBraces ? "%r{" : "/"]
     .concat(path.map(print, "body"))
