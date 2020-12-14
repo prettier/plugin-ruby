@@ -1,4 +1,4 @@
-const { long } = require("./utils");
+const { long } = require("../utils");
 
 describe("return", () => {
   test("bare", () => expect("return").toMatchFormat());

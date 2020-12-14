@@ -1,4 +1,4 @@
-const { ruby } = require("./utils");
+const { ruby } = require("../utils");
 
 describe("super", () => {
   test("bare", () => expect("super").toMatchFormat());

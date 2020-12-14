@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- [@kddeisz] - Now that the comments are all fixed up, we can support `# prettier-ignore` comments.
+
 ## [1.0.1] - 2020-12-12
 
 ### Changed

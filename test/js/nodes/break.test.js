@@ -1,4 +1,4 @@
-const { ruby } = require("./utils");
+const { ruby } = require("../utils");
 
 describe("break", () => {
   test("empty break", () => expect("break").toMatchFormat());

@@ -1,4 +1,4 @@
-const { ruby } = require("./utils");
+const { ruby } = require("../utils");
 
 describe("aref", () => {
   test("literal reference", () => expect("array[5]").toMatchFormat());

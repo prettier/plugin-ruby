@@ -1,4 +1,4 @@
-const { long, ruby } = require("./utils");
+const { long, ruby } = require("../utils");
 
 describe("strings", () => {
   describe("%-literals with escape sequences in the middle", () => {

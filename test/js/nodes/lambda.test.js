@@ -1,4 +1,4 @@
-const { long, ruby } = require("./utils");
+const { long, ruby } = require("../utils");
 
 describe("lambda", () => {
   test("plain stabby lambda literal", () => expect("-> { 1 }").toMatchFormat());

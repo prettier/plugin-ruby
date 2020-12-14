@@ -1,4 +1,4 @@
-const { long } = require("./utils");
+const { long } = require("../utils");
 
 describe("defined", () => {
   test("no parens", () => expect("defined? a").toChangeFormat("defined?(a)"));
