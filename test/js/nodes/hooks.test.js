@@ -1,4 +1,4 @@
-const { long, ruby } = require("./utils");
+const { long, ruby } = require("../utils");
 
 describe.each(["BEGIN", "END"])("%s hook", (hook) => {
   test("shortens to one line", () =>

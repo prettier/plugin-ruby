@@ -1,4 +1,4 @@
-const { ruby } = require("./utils");
+const { ruby } = require("../utils");
 
 describe("embdoc", () => {
   test("basic embdocs", () => {

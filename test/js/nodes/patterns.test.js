@@ -1,4 +1,4 @@
-const { ruby } = require("./utils");
+const { ruby } = require("../utils");
 
 describe("patterns", () => {
   if (process.env.RUBY_VERSION <= "2.7") {

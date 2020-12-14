@@ -1,4 +1,4 @@
-const { ruby } = require("./utils");
+const { ruby } = require("../utils");
 
 describe("regexp", () => {
   test("basic", () => expect("/abc/").toMatchFormat());

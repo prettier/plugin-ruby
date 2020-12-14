@@ -1,4 +1,4 @@
-const { long, ruby } = require("./utils");
+const { long, ruby } = require("../utils");
 
 describe("undef", () => {
   test("single inline", () => expect("undef foo").toMatchFormat());
