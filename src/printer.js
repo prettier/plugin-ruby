@@ -20,6 +20,18 @@ function printNode(path, opts, print) {
   throw new Error(`Unsupported node encountered: ${type}\n${ast}`);
 }
 
+// This is an escape-hatch to ignore nodes in the tree. If you have a comment
+// that includes this pattern, then the entire node will be ignored and just the
+// original source will be printed out.
+function hasPrettierIgnore(path) {
+  const node = path.getValue();
+
+  return (
+    node.comments &&
+    node.comments.some((comment) => comment.value.includes("prettier-ignore"))
+  );
+}
+
 const noComments = [
   "args",
   "args_add_block",
@@ -83,6 +95,7 @@ function isBlockComment(comment) {
 module.exports = {
   embed,
   print: printNode,
+  hasPrettierIgnore,
   canAttachComment,
   getCommentChildNodes,
   printComment,
