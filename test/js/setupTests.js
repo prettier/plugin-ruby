@@ -1,61 +1,69 @@
-const { spawn, spawnSync } = require("child_process");
+const net = require("net");
 const path = require("path");
 const prettier = require("prettier");
-const readline = require("readline");
-
-// Set RUBY_VERSION so certain tests only run for certain versions
-const args = ["--disable-gems", "-e", "puts RUBY_VERSION"];
-process.env.RUBY_VERSION = spawnSync("ruby", args).stdout.toString().trim();
 
 // eslint-disable-next-line no-underscore-dangle
 const { formatAST } = prettier.__debug;
 
-const parser = spawn("ruby", ["./test/js/parser.rb"]);
+function parseAsync(text) {
+  return new Promise((resolve, reject) => {
+    const client = new net.Socket();
 
-const rl = readline.createInterface({
-  input: parser.stdout,
-  output: parser.stdin
-});
+    client.setTimeout(10 * 1000, () => {
+      client.destroy();
+      reject(new Error("Connection to the server timed out."));
+    });
 
-afterAll(() => {
-  rl.close();
-  parser.stdin.pause();
-  parser.kill("SIGINT");
-});
+    client.on("error", (error) => {
+      client.destroy();
+      reject(error);
+    });
 
-const realFormat = (content, config = {}) =>
-  prettier.format(
-    content,
-    Object.assign(
-      { parser: "ruby", plugins: ["."], originalText: content },
-      config
-    )
+    client.on("end", () => {
+      client.destroy();
+      reject(new Error("Server closed the connection."));
+    });
+
+    client.on("data", (data) => {
+      client.destroy();
+      resolve(JSON.parse(data.toString()));
+    });
+
+    client.connect({ port: 22020 }, () => {
+      client.end(text);
+    });
+  });
+}
+
+function checkFormat(before, after, config) {
+  const opts = Object.assign(
+    { parser: "ruby", plugins: ["."], originalText: before },
+    config
   );
 
-const checkFormat = (before, after, config) =>
-  new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if (before.includes("#") || before.includes("=begin")) {
       // If the source includes an #, then this test has a comment in it.
-      // Unfortunately, formatAST ignores comments and doesn't parse them at
-      // all, so we can't call it and check against the output. In this case,
-      // we need to instead go through the normal format function and spawn a
-      // process.
-      resolve(realFormat(before, config));
+      // Unfortunately, formatAST expects comments to already be attached, but
+      // prettier doesn't export anything that allows you to hook into their
+      // attachComments function. So in this case, we need to instead go through
+      // the normal format function and spawn a process.
+      resolve(prettier.format(before, opts));
     } else {
-      const opts = Object.assign(
-        { parser: "ruby", plugins: ["."], originalText: before },
-        config
-      );
-
-      rl.question(`${before}\n---\n`, (response) => {
-        const { formatted } = formatAST(JSON.parse(response), opts);
-        resolve(formatted);
-      });
+      parseAsync(before)
+        .then((ast) => resolve(formatAST(ast, opts).formatted))
+        .catch(reject);
     }
-  }).then((formatted) => ({
-    pass: formatted === `${after}\n`,
-    message: () => `Expected:\n${after}\nReceived:\n${formatted}`
-  }));
+  })
+    .then((formatted) => ({
+      pass: formatted === `${after}\n`,
+      message: () => `Expected:\n${after}\nReceived:\n${formatted}`
+    }))
+    .catch((error) => ({
+      pass: false,
+      message: () => error.message
+    }));
+}
 
 expect.extend({
   toChangeFormat(before, after, config = {}) {
@@ -69,7 +77,7 @@ expect.extend({
     let error = null;
 
     try {
-      realFormat(before);
+      prettier.format(before, { parser: "ruby", plugins: ["."] });
     } catch (caught) {
       error = caught;
       pass = caught.message === message;

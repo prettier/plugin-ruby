@@ -1,29 +1,43 @@
 # frozen_string_literal: true
 
+require 'socket'
 require_relative '../../src/parser'
 
-# This function will poll $stdin for 2 seconds and attempt to gather up every
-# line until it hits a "---" line. At that point it will return everything
-# joined together. If it does not receive input within 2 seconds, it will bail
-# out and return `nil`.
-def gather
-  return unless select([$stdin], nil, nil, 2)
+# Set the program name so that it's easy to find if we need it
+$PROGRAM_NAME = 'prettier-ruby-test-parser'
 
-  lines, line = [], nil
-  while (line = gets) != "---\n"
-    lines << line
-  end
-  lines.join
-end
+# Make sure we trap these signals to be sure we get the quit command coming from
+# the parent node process
+quit = false
+trap(:QUIT) { quit = true }
+trap(:INT) { quit = true }
+trap(:TERM) { quit = true }
 
-# This process will loop infinitely, gathering up lines from stdin, parsing them
-# with Prettier::Parser, and then returning the parsed AST over stdout.
+server = TCPServer.new(22_020)
+
 loop do
-  gathered = gather
-  next unless gathered
+  break if quit
 
-  parser = Prettier::Parser.new(gathered)
+  # Start up a new thread that will handle each successive connection.
+  Thread.new(server.accept_nonblock) do |socket|
+    source = socket.readpartial(10 * 1024 * 1024)
 
-  STDOUT.puts JSON.fast_generate(parser.parse)
-  STDOUT.flush
+    builder = Prettier::Parser.new(source.force_encoding('UTF-8'))
+    response = builder.parse
+
+    if !response || builder.error?
+      socket.puts('{ "error": true }')
+    else
+      socket.puts(JSON.fast_generate(response))
+    end
+
+    socket.close
+  end
+rescue IO::WaitReadable, Errno::EINTR
+  # Wait for select(2) to give us a connection that has content for 1 second.
+  # Otherwise timeout and continue on (so that we hit our "break if quit"
+  # pretty often).
+  IO.select([server], nil, nil, 1)
+
+  retry unless quit
 end

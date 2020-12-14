@@ -50,6 +50,8 @@
     }
   },
   "jest": {
+    "globalSetup": "./test/js/globalSetup.js",
+    "globalTeardown": "./test/js/globalTeardown.js",
     "setupFilesAfterEnv": [
       "./test/js/setupTests.js"
     ],
