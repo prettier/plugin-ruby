@@ -151,7 +151,7 @@ prettier --ruby-single-quote false --write '**/*.rb'
 
 ## Use with RuboCop
 
-RuboCop and prettier for Ruby serve different purposes, but there is overlap
+RuboCop and Prettier for Ruby serve different purposes, but there is overlap
 with some of RuboCop's functionality.
 
 Prettier provides a RuboCop configuration fle to disable the rules which clash.
