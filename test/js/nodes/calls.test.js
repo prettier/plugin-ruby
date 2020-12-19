@@ -40,4 +40,10 @@ describe("calls", () => {
 
   test("double bang with a special operator", () =>
     expect("!!object&.topic_list").toMatchFormat());
+
+  test("#call shorthand does not eliminate empty parentheses", () =>
+    expect("Foo.new.()").toMatchFormat());
+
+  test("methods that look like constants do not eliminate empty parens", () =>
+    expect("Foo()").toMatchFormat());
 });

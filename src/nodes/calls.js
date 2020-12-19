@@ -62,13 +62,31 @@ function printCall(path, opts, print) {
 
 function printMethodAddArg(path, opts, print) {
   const node = path.getValue();
-  const argNode = node.body[1];
 
+  const [methodNode, argNode] = node.body;
   const [methodDoc, argsDoc] = path.map(print, "body");
 
   // You can end up here if you have a method with a ? ending, presumably
-  // because the parser knows that it cannot be a local variable.
+  // because the parser knows that it cannot be a local variable. You can also
+  // end up here if you are explicitly using an empty set of parentheses.
   if (argsDoc.length === 0) {
+    // If you're using an explicit set of parentheses on something that looks
+    // like a constant, then we need to match that in order to maintain valid
+    // Ruby. For example, you could do something like Foo(), on which we would
+    // need to keep the parentheses to make it look like a method call.
+    if (methodNode.type === "fcall" && methodNode.body[0].type === "@const") {
+      return concat([methodDoc, "()"]);
+    }
+
+    // If you're using an explicit set parentheses with the special call syntax,
+    // then we need to explicitly print out an extra set of parentheses. For
+    // example, if you call something like Foo.new.() (implicitly calling the
+    // #call method on a new instance of the Foo class), then we have to print
+    // out those parentheses, otherwise we'll end up with Foo.new.
+    if (methodNode.type === "call" && methodNode.body[2] === "call") {
+      return concat([methodDoc, "()"]);
+    }
+
     return methodDoc;
   }
 
