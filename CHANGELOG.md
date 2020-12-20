@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@rindek], [@kddeisz] - Do not remove parentheses when using the special `call` syntax with no arguments.
 - [@ykpythemind] - Do not change regexp bounds if the body has certain content.
 - [@karanmandal], [@kddeisz] - Correctly print for loops.
+- [@rafbm], [@kddeisz] - If there are method chains with arguments only at the end, we should group the method chain and the method args.
 
 ## [1.0.1] - 2020-12-12
 
@@ -1071,6 +1072,7 @@ would previously result in `array[]`, but now prints properly.
 [@overload119]: https://github.com/Overload119
 [@petevk]: https://github.com/petevk
 [@pje]: https://github.com/pje
+[@rafbm]: https://github.com/rafbm
 [@rindek]: https://github.com/rindek
 [@rosskinsella]: https://github.com/RossKinsella
 [@rsullivan00]: https://github.com/Rsullivan00

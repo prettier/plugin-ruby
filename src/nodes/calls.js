@@ -39,6 +39,7 @@ function printCall(path, opts, print) {
   // right side of the expression, as we want to have a nice multi-line layout.
   if (chained.includes(parentNode.type)) {
     parentNode.chain = (node.chain || 0) + 1;
+    parentNode.callChain = (node.callChain || 0) + 1;
     parentNode.breakDoc = (node.breakDoc || [receiverDoc]).concat(rightSideDoc);
   }
 
@@ -109,6 +110,21 @@ function printMethodAddArg(path, opts, print) {
   // If we're at the top of a chain, then we're going to print out a nice
   // multi-line layout if this doesn't break into multiple lines.
   if (!chained.includes(parentNode.type) && (node.chain || 0) >= 3) {
+    // This is pretty specialized behavior. Basically if we're at the top of a
+    // chain but we've only had method calls without arguments and now we have
+    // arguments, then we're effectively trying to call a method with arguments
+    // that is nested under a bunch of stuff. So we group together to first part
+    // to make it so just the arguments break. This looks like, for example:
+    //
+    //     config.action_dispatch.rescue_responses.merge!(
+    //       'ActiveRecord::ConnectionTimeoutError' => :service_unavailable,
+    //       'ActiveRecord::QueryCanceled' => :service_unavailable
+    //     )
+    //
+    if (node.callChain === node.chain) {
+      return concat([group(indent(concat(node.breakDoc))), group(argsDoc)]);
+    }
+
     return ifBreak(
       group(indent(concat(node.breakDoc.concat(argsDoc)))),
       concat([methodDoc, argsDoc])
