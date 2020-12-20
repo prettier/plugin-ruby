@@ -561,7 +561,7 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :regexp_literal,
       parse('%r(foo)'),
-      beginning: '%r(',
+      beging: '%r(',
       ending: ')'
     )
   end
