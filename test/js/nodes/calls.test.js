@@ -1,4 +1,4 @@
-const { ruby } = require("../utils");
+const { long, ruby } = require("../utils");
 
 describe("calls", () => {
   test("simple calls", () => {
@@ -24,6 +24,17 @@ describe("calls", () => {
     `);
 
     return expect(before).toChangeFormat(after);
+  });
+
+  test("chains of methods with one with arguments right at the top", () => {
+    const content = ruby(`
+      aaa.bbb.ccc.ddd.eee.merge(
+        ${long.slice(0, 30)}: 'aaa',
+        ${long.slice(0, 31)}: 'bbb'
+      )
+    `);
+
+    return expect(content).toMatchFormat();
   });
 
   test("tons of calls that fit on one line", () => {
