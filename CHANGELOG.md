@@ -9,8 +9,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 
 - [@kddeisz] - Now that the comments are all fixed up, we can support `# prettier-ignore` comments.
+
+### Changed
+
 - [@rindek], [@kddeisz] - Do not remove parentheses when receiver looks like a constant.
 - [@rindek], [@kddeisz] - Do not remove parentheses when using the special `call` syntax with no arguments.
+- [@ykpythemind] - Do not change regexp bounds if the body has certain content.
 
 ## [1.0.1] - 2020-12-12
 
@@ -1075,4 +1079,5 @@ would previously result in `array[]`, but now prints properly.
 [@tobyndockerill]: https://github.com/tobyndockerill
 [@uri]: https://github.com/uri
 [@xipgroc]: https://github.com/xipgroc
+[@ykpythemind]: https://github.com/ykpythemind
 [@yuki24]: https://github.com/yuki24

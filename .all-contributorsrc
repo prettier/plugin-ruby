@@ -490,6 +490,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "ykpythemind",
+      "name": "Yukito Ito",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/22209702?v=4",
+      "profile": "https://twitter.com/ykpythemind",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -228,6 +228,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/mmcnl"><img src="https://avatars2.githubusercontent.com/u/1498727?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matt McNeil</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ammcnl" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/johncsnyder"><img src="https://avatars2.githubusercontent.com/u/9882099?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John Snyder</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ajohncsnyder" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/rindek"><img src="https://avatars1.githubusercontent.com/u/881209?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jacek Jakubik</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Arindek" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://twitter.com/ykpythemind"><img src="https://avatars2.githubusercontent.com/u/22209702?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Yukito Ito</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Aykpythemind" title="Bug reports">🐛</a> <a href="https://github.com/prettier/plugin-ruby/commits?author=ykpythemind" title="Code">💻</a></td>
   </tr>
 </table>
 
