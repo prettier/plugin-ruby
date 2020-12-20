@@ -1719,9 +1719,8 @@ class Prettier::Parser < Ripper
   # expression literal, like /foo/. It can be followed by any number of
   # regexp_add events, which we'll append onto an array body.
   def on_regexp_new
-    regexp_beg = find_scanner_event(:@regexp_beg)
-    beginning = regexp_beg[:body]
-    regexp_beg.merge!(type: :regexp, body: [], beginning: beginning)
+    beging = find_scanner_event(:@regexp_beg)
+    beging.merge!(type: :regexp, body: [], beging: beging[:body])
   end
 
   # regexp_add is a parser event that represents a piece of a regular

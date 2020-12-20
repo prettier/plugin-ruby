@@ -1,38 +1,25 @@
 const { concat } = require("../prettier");
 const { hasAncestor } = require("../utils");
 
-function isStringContent(node) {
-  return node.type === "@tstring_content";
-}
-
-function shouldUseBraces(path) {
-  const node = path.getValue();
-  const first = node.body[0];
-
-  // If the first part of this regex is plain string content and we have a
-  // space or an =, then we want to use braces because otherwise we could end up
-  // with an ambiguous operator, e.g. foo / bar/ or foo /=bar/
-  if (
-    first &&
-    isStringContent(first) &&
-    [" ", "="].includes(first.body[0]) &&
-    hasAncestor(path, ["command", "command_call"])
-  ) {
-    return true;
-  }
-
+function hasContent(node, pattern) {
   return node.body.some(
-    (child) => isStringContent(child) && child.body.includes("/")
+    (child) => child.type === "@tstring_content" && pattern.test(child.body)
   );
 }
 
-function hasBrace(path) {
+// If the first part of this regex is plain string content, we have a space
+// or an =, and we're contained within a command or command_call node, then we
+// want to use braces because otherwise we could end up with an ambiguous
+// operator, e.g. foo / bar/ or foo /=bar/
+function forwardSlashIsAmbiguous(path) {
   const node = path.getValue();
+  const firstChildNode = node.body[0];
 
-  return node.body.some(
-    (child) =>
-      isStringContent(child) &&
-      (child.body.includes("{") || child.body.includes("}"))
+  return (
+    firstChildNode &&
+    firstChildNode.type === "@tstring_content" &&
+    [" ", "="].includes(firstChildNode.body[0]) &&
+    hasAncestor(path, ["command", "command_call"])
   );
 }
 
@@ -45,22 +32,23 @@ function hasBrace(path) {
 // itself. In that case we switch over to using %r with braces.
 function printRegexpLiteral(path, opts, print) {
   const node = path.getValue();
-  const useBraces = shouldUseBraces(path);
+  const docs = path.map(print, "body");
 
-  if (useBraces && hasBrace(path)) {
-    // noop
-    //  NG: %r(test{test) => %r{test{test}
-    const parts = [node.beginning]
-      .concat(path.map(print, "body"))
-      .concat([node.ending]);
-    return concat(parts);
+  // We should use braces if using a forward slash would be ambiguous in the
+  // current context or if there's a forward slash in the content of the regexp.
+  const useBraces = forwardSlashIsAmbiguous(path) || hasContent(node, /\//);
+
+  // If we should be using braces but we have braces in the body of the regexp,
+  // then we're just going to resort to using whatever the original content was.
+  if (useBraces && hasContent(node, /[{}]/)) {
+    return concat([node.beging].concat(docs).concat(node.ending));
   }
 
-  const parts = [useBraces ? "%r{" : "/"]
-    .concat(path.map(print, "body"))
-    .concat([useBraces ? "}" : "/", node.ending.slice(1)]);
-
-  return concat(parts);
+  return concat(
+    [useBraces ? "%r{" : "/"]
+      .concat(docs)
+      .concat(useBraces ? "}" : "/", node.ending.slice(1))
+  );
 }
 
 module.exports = {
