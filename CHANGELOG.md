@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@rindek], [@kddeisz] - Do not remove parentheses when receiver looks like a constant.
 - [@rindek], [@kddeisz] - Do not remove parentheses when using the special `call` syntax with no arguments.
 - [@ykpythemind] - Do not change regexp bounds if the body has certain content.
+- [@karanmandal], [@kddeisz] - Correctly print for loops.
 
 ## [1.0.1] - 2020-12-12
 
@@ -1055,6 +1056,7 @@ would previously result in `array[]`, but now prints properly.
 [@jpickwell]: https://github.com/jpickwell
 [@jrdioko]: https://github.com/jrdioko
 [@jviney]: https://github.com/jviney
+[@karanmandal]: https://github.com/karanmandal
 [@kddeisz]: https://github.com/kddeisz
 [@kmcq]: https://github.com/kmcq
 [@krachtstefan]: https://github.com/krachtstefan

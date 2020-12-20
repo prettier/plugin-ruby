@@ -62,20 +62,14 @@ describe("blocks", () => {
     return expect(content).toMatchFormat();
   });
 
-  test("for loops get changed", () => {
+  test("for loops", () => {
     const content = ruby(`
-      for i in [1, 2, 3] do
+      for i in [1, 2, 3]
         p i
       end
     `);
 
-    return expect(content).toChangeFormat(
-      ruby(`
-      [1, 2, 3].each do |i|
-        p i
-      end
-    `)
-    );
+    return expect(content).toMatchFormat();
   });
 
   // from ruby test/ruby/test_call.rb
