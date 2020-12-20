@@ -500,6 +500,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "karanmandal",
+      "name": "Karan Mandal",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/45869605?v=4",
+      "profile": "https://studyfied.com/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
