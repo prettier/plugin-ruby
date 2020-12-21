@@ -83,6 +83,12 @@ module.exports = {
       description:
         "When possible, favor the use of string and symbol array literals."
     },
+    rubyArrayLiteralDelimiters: {
+      type: "string",
+      category: "Ruby",
+      default: "[]",
+      description: "Specify the delimiters for array literal."
+    },
     rubyHashLabel: {
       type: "boolean",
       category: "Ruby",

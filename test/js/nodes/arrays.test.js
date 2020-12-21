@@ -14,6 +14,11 @@ describe("array", () => {
   test("transforms basic string arrays", () =>
     expect("['a', 'b', 'c', 'd', 'e']").toChangeFormat("%w[a b c d e]"));
 
+  test("uses parentheses for string array literals when specified", () =>
+    expect("['a', 'b', 'c', 'd', 'e']").toChangeFormat("%w(a b c d e)", {
+      rubyArrayLiteralDelimiters: "()"
+    }));
+
   test("does not transform string arrays with spaces", () =>
     expect("['a', 'b c', 'd', 'e']").toMatchFormat());
 
@@ -40,6 +45,11 @@ describe("array", () => {
 
   test("transforms basic symbol arrays", () =>
     expect("[:a, :b, :c]").toChangeFormat("%i[a b c]"));
+
+  test("uses parentheses for symbol array literals when specified", () =>
+    expect("[:a, :b, :c]").toChangeFormat("%i(a b c)", {
+      rubyArrayLiteralDelimiters: "()"
+    }));
 
   test("does not transform symbol arrays with dynamic symbols", () =>
     expect("[:'a + b']").toMatchFormat());

@@ -71,13 +71,13 @@ function printSpecialArrayWord(path, opts, print) {
 // Prints out a special array literal. Accepts the parts of the array literal as
 // an argument, where the first element of the parts array is a string that
 // contains the special start.
-function printSpecialArrayParts(parts) {
+function printSpecialArrayParts(parts, opts) {
   return group(
     concat([
       parts[0],
-      "[",
+      opts.rubyArrayLiteralDelimiters[0],
       indent(concat([softline, join(line, parts.slice(1))])),
-      concat([softline, "]"])
+      concat([softline, opts.rubyArrayLiteralDelimiters[1]])
     ])
   );
 }
@@ -112,7 +112,7 @@ function printArray(path, opts, print) {
     const printString = (stringPath) => stringPath.call(print, "body", 0);
     const parts = path.map(printString, "body", 0, "body");
 
-    return printSpecialArrayParts(["%w"].concat(parts));
+    return printSpecialArrayParts(["%w"].concat(parts), opts);
   }
 
   // If we have an array that contains only simple symbol literals with no
@@ -121,7 +121,7 @@ function printArray(path, opts, print) {
     const printSymbol = (symbolPath) => symbolPath.call(print, "body", 0);
     const parts = path.map(printSymbol, "body", 0, "body");
 
-    return printSpecialArrayParts(["%i"].concat(parts));
+    return printSpecialArrayParts(["%i"].concat(parts), opts);
   }
 
   // If we don't have a regular args node at this point then we have a special
@@ -129,7 +129,7 @@ function printArray(path, opts, print) {
   // return to us an array with the first one being the start of the array) and
   // send that over to the printSpecialArrayParts function.
   if (!["args", "args_add_star"].includes(args.type)) {
-    return printSpecialArrayParts(path.call(print, "body", 0));
+    return printSpecialArrayParts(path.call(print, "body", 0), opts);
   }
 
   // Here we have a normal array of any type of object with no special literal
