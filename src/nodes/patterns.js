@@ -48,6 +48,22 @@ function printAryPtn(path, opts, print) {
   return args;
 }
 
+function printFndPtn(path, opts, print) {
+  const [constant] = path.getValue().body;
+
+  let args = [path.call(print, "body", 1)]
+    .concat(path.map(print, "body", 2))
+    .concat(path.call(print, "body", 3));
+
+  args = concat(["[", group(join(concat([",", line]), args)), "]"]);
+
+  if (constant) {
+    return concat([path.call(print, "body", 0), args]);
+  }
+
+  return args;
+}
+
 function printHshPtn(path, opts, print) {
   const [constant, keyValuePairs, keyValueRest] = path.getValue().body;
   let args = [];
@@ -113,6 +129,7 @@ function printIn(path, opts, print) {
 
 module.exports = {
   aryptn: printAryPtn,
+  fndptn: printFndPtn,
   hshptn: printHshPtn,
   in: printIn
 };

@@ -1157,6 +1157,24 @@ class Prettier::Parser < Ripper
     }
   end
 
+  # fndptn is a parser event that represents matching against a pattern where
+  # you find a pattern in an array using the Ruby 3.0+ pattern matching syntax.
+  def on_fndptn(const, presplat, args, postsplat)
+    beging = const || find_scanner_event(:@lbracket)
+    ending = find_scanner_event(:@rbracket)
+
+    pieces = [const, presplat, *args, postsplat].compact
+
+    {
+      type: :fndptn,
+      body: [const, presplat, args, postsplat],
+      start: beging[:start],
+      char_start: beging[:char_start],
+      end: ending[:end],
+      char_end: ending[:char_end]
+    }
+  end
+
   # for is a parser event that represents using the somewhat esoteric for
   # loop. It accepts as arguments an ident which is the iterating variable,
   # an enumerable for that which is being enumerated, and a stmts event that
@@ -2306,7 +2324,7 @@ class Prettier::Parser < Ripper
     else
       # You can hit this pattern if you're assigning to a splat using pattern
       # matching syntax in Ruby 2.7+
-      { type: :var_field, body: [] }
+      { type: :var_field, body: nil }
     end
   end
 
