@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 
 - [@kddeisz] - Support for the `fndptn` node for Ruby 3.0 pattern matching.
+- [@kddeisz] - Support for Ruby 3.0+ single-line method definitions.
 
 ## [1.1.0] - 2020-12-20
 

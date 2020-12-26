@@ -93,6 +93,11 @@ describe("method", () => {
       `)
       ));
 
+    if (process.env.RUBY_VERSION >= "3.0") {
+      test("single-line methods", () =>
+        expect("def foo = bar").toMatchFormat());
+    }
+
     test.skip("def/begin transform", () => {
       const content = ruby(`
         def foo

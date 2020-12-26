@@ -814,18 +814,43 @@ class Prettier::Parser < Ripper
   #          │   └> params
   #          └> ident
   #
+  # You can also have single-line methods since Ruby 3.0+, which have slightly
+  # different syntax but still flow through this method. Those look like:
+  #
+  #     def foo = bar
+  #          |     |
+  #          |     └> stmt
+  #          └> ident
+  #
   def on_def(ident, params, bodystmt)
     # Make sure to delete this scanner event in case you're defining something
     # like def class which would lead to this being a kw and causing all kinds
     # of trouble
     scanner_events.delete(ident)
 
+    # Find the beginning of the method definition, which works for single-line
+    # and normal method definitions.
+    beging = find_scanner_event(:@kw, 'def')
+
+    # If there is not a params node, then we have a single-line method
+    unless params
+      return(
+        {
+          type: :defsl,
+          body: [ident, bodystmt],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: bodystmt[:end],
+          char_end: bodystmt[:char_end]
+        }
+      )
+    end
+
     if params[:type] == :params && !params[:body].any?
       location = ident[:char_end]
       params.merge!(char_start: location, char_end: location)
     end
 
-    beging = find_scanner_event(:@kw, 'def')
     ending = find_scanner_event(:@kw, 'end')
 
     bodystmt.bind(
