@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.2.0] - 2020-12-26
+
 ### Added
 
 - [@kddeisz] - Support for the `fndptn` node for Ruby 3.0 pattern matching.
