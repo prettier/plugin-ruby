@@ -31,9 +31,17 @@ function printOpAssign(path, opts, print) {
   );
 }
 
+function printVarField(path, opts, print) {
+  if (path.getValue().body) {
+    return path.call(print, "body", 0);
+  }
+
+  return "*";
+}
+
 module.exports = {
   assign: printAssign,
   opassign: printOpAssign,
-  var_field: first,
+  var_field: printVarField,
   var_ref: first
 };

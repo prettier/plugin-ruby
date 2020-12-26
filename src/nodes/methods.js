@@ -1,4 +1,4 @@
-const { concat, group, hardline, indent } = require("../prettier");
+const { concat, group, hardline, indent, line } = require("../prettier");
 const { first } = require("../utils");
 
 function printMethod(offset) {
@@ -48,8 +48,17 @@ function printMethod(offset) {
   };
 }
 
+function printSingleLineMethod(path, opts, print) {
+  const [nameDoc, stmtDoc] = path.map(print, "body");
+
+  return group(
+    concat(["def ", nameDoc, " =", indent(group(concat([line, stmtDoc])))])
+  );
+}
+
 module.exports = {
   access_ctrl: first,
   def: printMethod(0),
-  defs: printMethod(2)
+  defs: printMethod(2),
+  defsl: printSingleLineMethod
 };

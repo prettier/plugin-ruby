@@ -11,7 +11,7 @@ describe("patterns", () => {
   }
 
   describe("value pattern", () => {
-    const cases = [
+    let cases = [
       "0",
       "-1..1",
       "Integer",
@@ -27,6 +27,10 @@ describe("patterns", () => {
       "SuperPoint[x: 0.. => px]",
       "a, b if b == a * 2"
     ];
+
+    if (process.env.RUBY_VERSION >= "3.0") {
+      cases.push("[*, 0, *]", "[*, 0, 1, 2, *]", "FooBar[*, 0, *]");
+    }
 
     test.each(cases)("%s", (pattern) => {
       const content = ruby(`

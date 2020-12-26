@@ -814,18 +814,43 @@ class Prettier::Parser < Ripper
   #          │   └> params
   #          └> ident
   #
+  # You can also have single-line methods since Ruby 3.0+, which have slightly
+  # different syntax but still flow through this method. Those look like:
+  #
+  #     def foo = bar
+  #          |     |
+  #          |     └> stmt
+  #          └> ident
+  #
   def on_def(ident, params, bodystmt)
     # Make sure to delete this scanner event in case you're defining something
     # like def class which would lead to this being a kw and causing all kinds
     # of trouble
     scanner_events.delete(ident)
 
+    # Find the beginning of the method definition, which works for single-line
+    # and normal method definitions.
+    beging = find_scanner_event(:@kw, 'def')
+
+    # If there is not a params node, then we have a single-line method
+    unless params
+      return(
+        {
+          type: :defsl,
+          body: [ident, bodystmt],
+          start: beging[:start],
+          char_start: beging[:char_start],
+          end: bodystmt[:end],
+          char_end: bodystmt[:char_end]
+        }
+      )
+    end
+
     if params[:type] == :params && !params[:body].any?
       location = ident[:char_end]
       params.merge!(char_start: location, char_end: location)
     end
 
-    beging = find_scanner_event(:@kw, 'def')
     ending = find_scanner_event(:@kw, 'end')
 
     bodystmt.bind(
@@ -1154,6 +1179,24 @@ class Prettier::Parser < Ripper
       char_start: left[:char_start],
       end: right[:end],
       char_end: right[:char_end]
+    }
+  end
+
+  # fndptn is a parser event that represents matching against a pattern where
+  # you find a pattern in an array using the Ruby 3.0+ pattern matching syntax.
+  def on_fndptn(const, presplat, args, postsplat)
+    beging = const || find_scanner_event(:@lbracket)
+    ending = find_scanner_event(:@rbracket)
+
+    pieces = [const, presplat, *args, postsplat].compact
+
+    {
+      type: :fndptn,
+      body: [const, presplat, args, postsplat],
+      start: beging[:start],
+      char_start: beging[:char_start],
+      end: ending[:end],
+      char_end: ending[:char_end]
     }
   end
 
@@ -2306,7 +2349,7 @@ class Prettier::Parser < Ripper
     else
       # You can hit this pattern if you're assigning to a splat using pattern
       # matching syntax in Ruby 2.7+
-      { type: :var_field, body: [] }
+      { type: :var_field, body: nil }
     end
   end
 
