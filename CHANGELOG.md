@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [@kddeisz] - Handle single-line method definitions with parameters.
+- [@kddeisz] - Handle hash and array patterns nested within find patterns.
+- [@kddeisz] - Handle rightward assignment.
+- [@kddeisz] - Handle find patterns with named boundaries.
+- [@kddeisz] - Handle rightward assignment in conditionals.
+
 ## [1.2.0] - 2020-12-26
 
 ### Added

@@ -16,8 +16,7 @@ function printMethod(offset) {
     }
 
     // In case there are no parens but there are arguments
-    const parens =
-      params.type === "params" && params.body.some((paramType) => paramType);
+    const parens = params.type === "params" && params.body.some((type) => type);
 
     declaration.push(
       path.call(print, "body", offset),
@@ -49,10 +48,27 @@ function printMethod(offset) {
 }
 
 function printSingleLineMethod(path, opts, print) {
-  const [nameDoc, stmtDoc] = path.map(print, "body");
+  let paramsNode = path.getValue().body[1];
+  let paramsDoc = "";
+
+  if (paramsNode) {
+    if (paramsNode.body[0].type === "params") {
+      paramsNode = paramsNode.body[0];
+    }
+
+    if (paramsNode.type === "params" && paramsNode.body.some((type) => type)) {
+      paramsDoc = path.call(print, "body", 1);
+    }
+  }
 
   return group(
-    concat(["def ", nameDoc, " =", indent(group(concat([line, stmtDoc])))])
+    concat([
+      "def ",
+      path.call(print, "body", 0),
+      paramsDoc,
+      " =",
+      indent(group(concat([line, path.call(print, "body", 2)])))
+    ])
   );
 }
 

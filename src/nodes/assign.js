@@ -32,11 +32,7 @@ function printOpAssign(path, opts, print) {
 }
 
 function printVarField(path, opts, print) {
-  if (path.getValue().body) {
-    return path.call(print, "body", 0);
-  }
-
-  return "*";
+  return path.getValue().body ? path.call(print, "body", 0) : "";
 }
 
 module.exports = {

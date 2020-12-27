@@ -43,4 +43,18 @@ describe("patterns", () => {
       return expect(content).toMatchFormat();
     });
   });
+
+  if (process.env.RUBY_VERSION >= "3.0") {
+    test("rassign", () => {
+      const content = "{ db: { user: 'John' } } => { db: { user: } }";
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("rassign with fndptn", () => {
+      const content = "(1..10).to_a.shuffle => [*bef, 2..4 => thresh, *aft]";
+
+      return expect(content).toMatchFormat();
+    });
+  }
 });
