@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.2.1] - 2020-12-27
+
 ### Changed
 
 - [@kddeisz] - Handle single-line method definitions with parameters.
