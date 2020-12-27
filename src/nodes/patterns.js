@@ -1,5 +1,7 @@
 const { concat, group, hardline, indent, join, line } = require("../prettier");
 
+const patterns = ["aryptn", "binary", "fndptn", "hshptn", "rassign"];
+
 function printPatternArg(path, opts, print) {
   // Pinning is a really special syntax in pattern matching that's not really
   // all that well supported in ripper. Here we're just going to the original
@@ -34,10 +36,7 @@ function printAryPtn(path, opts, print) {
 
   args = group(join(concat([",", line]), args));
 
-  if (
-    constant ||
-    ["aryptn", "binary", "hshptn"].includes(path.getParentNode().type)
-  ) {
+  if (constant || patterns.includes(path.getParentNode().type)) {
     args = concat(["[", args, "]"]);
   }
 
@@ -51,9 +50,9 @@ function printAryPtn(path, opts, print) {
 function printFndPtn(path, opts, print) {
   const [constant] = path.getValue().body;
 
-  let args = [path.call(print, "body", 1)]
+  let args = [concat(["*", path.call(print, "body", 1)])]
     .concat(path.map(print, "body", 2))
-    .concat(path.call(print, "body", 3));
+    .concat(concat(["*", path.call(print, "body", 3)]));
 
   args = concat(["[", group(join(concat([",", line]), args)), "]"]);
 
@@ -96,10 +95,8 @@ function printHshPtn(path, opts, print) {
 
   if (constant) {
     args = concat(["[", args, "]"]);
-  } else if (
-    ["aryptn", "binary", "hshptn"].includes(path.getParentNode().type)
-  ) {
-    args = concat(["{", args, "}"]);
+  } else if (patterns.includes(path.getParentNode().type)) {
+    args = concat(["{ ", args, " }"]);
   }
 
   if (constant) {
@@ -127,9 +124,23 @@ function printIn(path, opts, print) {
   return group(concat(parts));
 }
 
+function printRAssign(path, opts, print) {
+  const { keyword } = path.getValue();
+  const [leftDoc, rightDoc] = path.map(print, "body");
+
+  return group(
+    concat([
+      leftDoc,
+      keyword ? " in" : " =>",
+      group(indent(concat([line, rightDoc])))
+    ])
+  );
+}
+
 module.exports = {
   aryptn: printAryPtn,
   fndptn: printFndPtn,
   hshptn: printHshPtn,
-  in: printIn
+  in: printIn,
+  rassign: printRAssign
 };

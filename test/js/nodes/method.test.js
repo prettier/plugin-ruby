@@ -83,6 +83,18 @@ describe("method", () => {
       });
     }
 
+    if (process.env.RUBY_VERSION >= "3.0") {
+      test("args_forward with other arguments", () => {
+        const content = ruby(`
+          def get(...)
+            request(:get, ...)
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+    }
+
     test("breaking", () =>
       expect(`def foo(${long}:, a${long}:); end`).toChangeFormat(
         ruby(`
@@ -95,7 +107,7 @@ describe("method", () => {
 
     if (process.env.RUBY_VERSION >= "3.0") {
       test("single-line methods", () =>
-        expect("def foo = bar").toMatchFormat());
+        expect("def foo(name) = bar").toMatchFormat());
     }
 
     test.skip("def/begin transform", () => {

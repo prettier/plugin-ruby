@@ -533,4 +533,15 @@ describe("conditionals", () => {
         `foo ||= (baz ${keyword} bar?)`
       ));
   });
+
+  if (process.env.RUBY_VERSION >= "3.0") {
+    test.each(["if", "unless"])("%s with pattern matching", (keyword) => {
+      const content = ruby(`
+        user = { role: 'admin', login: 'matz' }
+        puts "admin: #{name}" ${keyword} user in { role: 'admin', name: }
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+  }
 });

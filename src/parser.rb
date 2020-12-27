@@ -63,14 +63,14 @@ class Prettier::Parser < Ripper
   # would happen to be the innermost keyword). Then the outer one would only be
   # able to grab the first one. In this way all of the scanner events act as
   # their own stack.
-  def find_scanner_event(type, body = :any)
+  def find_scanner_event(type, body = :any, consume: true)
     index =
       scanner_events.rindex do |scanner_event|
         scanner_event[:type] == type &&
           (body == :any || (scanner_event[:body] == body))
       end
 
-    scanner_events.delete_at(index)
+    consume ? scanner_events.delete_at(index) : (index && scanner_events[index])
   end
 
   # Scanner events occur when the lexer hits a new token, like a keyword or an
@@ -675,8 +675,15 @@ class Prettier::Parser < Ripper
   # It accepts as arguments the switch of the case and the consequent
   # clause.
   def on_case(switch, consequent)
-    find_scanner_event(:@kw, 'case').merge!(
-      type: :case,
+    beging =
+      if event = find_scanner_event(:@kw, 'case', consume: false)
+        scanner_events.delete(event).merge!(type: :case)
+      else
+        keyword = find_scanner_event(:@kw, 'in', consume: false)
+        switch.merge(type: :rassign, keyword: keyword)
+      end
+
+    beging.merge!(
       body: [switch, consequent],
       end: consequent[:end],
       char_end: consequent[:char_end]
@@ -832,12 +839,12 @@ class Prettier::Parser < Ripper
     # and normal method definitions.
     beging = find_scanner_event(:@kw, 'def')
 
-    # If there is not a params node, then we have a single-line method
-    unless params
+    # If we don't have a bodystmt node, then we have a single-line method
+    if bodystmt[:type] != :bodystmt
       return(
         {
           type: :defsl,
-          body: [ident, bodystmt],
+          body: [ident, params, bodystmt],
           start: beging[:start],
           char_start: beging[:char_start],
           end: bodystmt[:end],
@@ -1006,7 +1013,7 @@ class Prettier::Parser < Ripper
   #
   # which would be the same symbol as above.
   def on_dyna_symbol(string)
-    if scanner_events.any? { |event| event[:type] == :@symbeg }
+    if find_scanner_event(:@symbeg, consume: false)
       # A normal dynamic symbol
       beging = find_scanner_event(:@symbeg)
       ending = find_scanner_event(:@tstring_end)
@@ -1345,8 +1352,12 @@ class Prettier::Parser < Ripper
   end
 
   # in is a parser event that represents using the in keyword within the
-  # Ruby 2.7+ pattern matching syntax.
+  # Ruby 2.7+ pattern matching syntax. Alternatively in Ruby 3+ it is also used
+  # to handle rightward assignment for pattern matching.
   def on_in(pattern, stmts, consequent)
+    # Here we have a rightward assignment
+    return pattern unless stmts
+
     beging = find_scanner_event(:@kw, 'in')
     ending = consequent || find_scanner_event(:@kw, 'end')
 
@@ -1384,8 +1395,8 @@ class Prettier::Parser < Ripper
   def on_lambda(params, stmts)
     beging = find_scanner_event(:@tlambda)
 
-    if scanner_events.any? { |event| event[:type] == :@tlambeg }
-      opening = find_scanner_event(:@tlambeg)
+    if event = find_scanner_event(:@tlambeg, consume: false)
+      opening = scanner_events.delete(event)
       closing = find_scanner_event(:@rbrace)
     else
       opening = find_scanner_event(:@kw, 'do')
