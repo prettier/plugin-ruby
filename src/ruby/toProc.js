@@ -12,15 +12,11 @@ const isCall = (node) => ["::", "."].includes(node) || node.type === "@period";
 //
 // This works with `do` blocks as well.
 const toProc = (path, node) => {
-  if (!node) {
-    return null;
-  }
-
   const [variables, blockContents] = node.body;
 
   // Ensure that there are variables being passed to this block.
   const params = variables && variables.body[0];
-  if (!params || params.type !== "params") {
+  if (!params) {
     return null;
   }
 
@@ -39,7 +35,7 @@ const toProc = (path, node) => {
   if (blockContents.type === "bodystmt") {
     // We’re in a `do` block
     const blockStatements = blockContents.body[0];
-    const rescueElseEnsure = blockStatements.body.slice(1);
+    const rescueElseEnsure = blockContents.body.slice(1);
 
     // You can’t use the to_proc shortcut if you’re rescuing
     if (rescueElseEnsure.some(Boolean)) {
@@ -84,7 +80,7 @@ const toProc = (path, node) => {
 
   if (path.getValue().type === "method_add_block") {
     assocNode = path.getParentNode();
-  } else if (path.getValue().type === "args") {
+  } else {
     assocNode = path.getParentNode(2);
   }
 
@@ -97,7 +93,7 @@ const toProc = (path, node) => {
 
     if (
       key.type === "symbol_literal" &&
-      ["if", "unless"].includes(key.body[0].body[0].body)
+      ["if", "unless"].includes(key.body[0].body)
     ) {
       return null;
     }

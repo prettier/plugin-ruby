@@ -7,6 +7,8 @@ describe("calls", () => {
     return expect(content).toMatchFormat();
   });
 
+  test("short chains", () => expect("foo.bar.baz qux").toMatchFormat());
+
   test("chain methods", () => {
     const before = ruby(`
       aaaaaaaaaa.bbbbbbbbbb.cccccccccc.dddddddddd(foo, bar).eeeeeeeeee.ffffffffff.gggggggggg.hhhhhhhhhh
@@ -35,6 +37,25 @@ describe("calls", () => {
     `);
 
     return expect(content).toMatchFormat();
+  });
+
+  test("chains of methods with a block right at the top", () => {
+    const block = long.slice(0, 60);
+    const content = ruby(`
+      aaa.bbb.ccc.ddd.eee do
+        ${block}
+      end
+    `);
+
+    const expected = ruby(`
+      aaa
+        .bbb
+        .ccc
+        .ddd
+        .eee { ${block} }
+    `);
+
+    return expect(content).toChangeFormat(expected);
   });
 
   test("tons of calls that fit on one line", () => {

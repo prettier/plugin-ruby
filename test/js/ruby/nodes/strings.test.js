@@ -70,6 +70,11 @@ describe("strings", () => {
     test("double quotes with inner single quotes stay", () =>
       expect(`"abc's"`).toMatchFormat({ rubySingleQuote: false }));
 
+    test("double quotes get escaped", () =>
+      expect(`'"foo"'`).toChangeFormat(`"\\"foo\\""`, {
+        rubySingleQuote: false
+      }));
+
     describe("escape sequences", () => {
       test("single quotes stay", () => expect("'abc\\n'").toMatchFormat());
 
@@ -103,11 +108,21 @@ describe("strings", () => {
     test("breaks interpolation on #{ ... } and not some inner node", () =>
       expect(`"${long} #{foo[:bar]} ${long}"`).toChangeFormat(
         ruby(`
-        "${long} #{
-          foo[:bar]
-        } ${long}"
-      `)
+          "${long} #{
+            foo[:bar]
+          } ${long}"
+        `)
       ));
+
+    test("within a heredoc there is no indentation", () => {
+      const content = ruby(`
+        <<~HERE
+          #{${long}}
+        HERE
+      `);
+
+      return expect(content).toMatchFormat();
+    });
   });
 
   describe("char literals", () => {
@@ -161,5 +176,9 @@ describe("strings", () => {
 
       return expect(content).toMatchFormat();
     });
+  });
+
+  test.each(["@v", "@@v", "$v"])("%s dvar", (interp) => {
+    expect(`"#${interp}"`).toChangeFormat(`"#{${interp}}"`);
   });
 });

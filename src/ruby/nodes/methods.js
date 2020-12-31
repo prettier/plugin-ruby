@@ -47,15 +47,13 @@ function printMethod(offset) {
 }
 
 function printSingleLineMethod(path, opts, print) {
-  let paramsNode = path.getValue().body[1];
+  let parensNode = path.getValue().body[1];
   let paramsDoc = "";
 
-  if (paramsNode) {
-    if (paramsNode.body[0].type === "params") {
-      paramsNode = paramsNode.body[0];
-    }
+  if (parensNode) {
+    const paramsNode = parensNode.body[0];
 
-    if (paramsNode.type === "params" && paramsNode.body.some((type) => type)) {
+    if (paramsNode.body.some((type) => type)) {
       paramsDoc = path.call(print, "body", 1);
     }
   }

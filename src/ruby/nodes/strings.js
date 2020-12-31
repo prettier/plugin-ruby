@@ -31,17 +31,10 @@ function isSingleQuotable(node) {
 
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
 
-function normalizeQuotes(content, enclosingQuote, originalQuote) {
-  const replaceOther = originalQuote === '"';
-  const otherQuote = enclosingQuote === '"' ? "'" : '"';
-
+function normalizeQuotes(content, enclosingQuote) {
   // Escape and unescape single and double quotes as needed to be able to
   // enclose `content` with `enclosingQuote`.
   return content.replace(quotePattern, (match, escaped, quote) => {
-    if (replaceOther && escaped === otherQuote) {
-      return escaped;
-    }
-
     if (quote === enclosingQuote) {
       return `\\${quote}`;
     }
@@ -97,10 +90,32 @@ function printDynaSymbol(path, opts, print) {
   return concat([":", quote].concat(path.map(print, "body")).concat(quote));
 }
 
+function printStringConcat(path, opts, print) {
+  const [leftDoc, rightDoc] = path.map(print, "body");
+
+  return group(concat([leftDoc, " \\", indent(concat([hardline, rightDoc]))]));
+}
+
 // Prints out an interpolated variable in the string by converting it into an
 // embedded expression.
 function printStringDVar(path, opts, print) {
   return concat(["#{", path.call(print, "body", 0), "}"]);
+}
+
+function printStringEmbExpr(path, opts, print) {
+  const parts = path.call(print, "body", 0);
+
+  // If the interpolated expression is inside of a heredoc or an xstring
+  // literal (a string that gets sent to the command line) then we don't want
+  // to automatically indent, as this can lead to some very odd looking
+  // expressions
+  if (["heredoc", "xstring_literal"].includes(path.getParentNode().type)) {
+    return concat(["#{", parts, "}"]);
+  }
+
+  return group(
+    concat(["#{", indent(concat([softline, parts])), concat([softline, "}"])])
+  );
 }
 
 // Prints out a literal string. This function does its best to respect the
@@ -131,10 +146,7 @@ function printStringLiteral(path, { rubySingleQuote }, print) {
     }
 
     // In this case, the part of the string is just regular string content
-    return join(
-      literalline,
-      normalizeQuotes(part.body, quote, node.quote).split("\n")
-    );
+    return join(literalline, normalizeQuotes(part.body, quote).split("\n"));
   });
 
   return concat([quote].concat(parts).concat(getClosingQuote(quote)));
@@ -155,30 +167,9 @@ function printXStringLiteral(path, opts, print) {
 module.exports = {
   "@CHAR": printChar,
   dyna_symbol: printDynaSymbol,
-  string_concat: (path, opts, print) =>
-    group(
-      concat([
-        path.call(print, "body", 0),
-        " \\",
-        indent(concat([hardline, path.call(print, "body", 1)]))
-      ])
-    ),
+  string_concat: printStringConcat,
   string_dvar: printStringDVar,
-  string_embexpr: (path, opts, print) => {
-    const parts = path.call(print, "body", 0);
-
-    // If the interpolated expression is inside of a heredoc or an xstring
-    // literal (a string that gets sent to the command line) then we don't want
-    // to automatically indent, as this can lead to some very odd looking
-    // expressions
-    if (["heredoc", "xstring_literal"].includes(path.getParentNode().type)) {
-      return concat(["#{", parts, "}"]);
-    }
-
-    return group(
-      concat(["#{", indent(concat([softline, parts])), concat([softline, "}"])])
-    );
-  },
+  string_embexpr: printStringEmbExpr,
   string_literal: printStringLiteral,
   symbol_literal: printSymbolLiteral,
   xstring_literal: printXStringLiteral

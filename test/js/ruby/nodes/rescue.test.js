@@ -1,16 +1,29 @@
 const { ruby } = require("../../utils");
 
 describe("rescue", () => {
-  test("inline", () =>
-    expect("a rescue nil").toChangeFormat(
-      ruby(`
+  test("inline", () => {
+    const expected = ruby(`
       begin
         a
       rescue StandardError
         nil
       end
-    `)
-    ));
+    `);
+
+    return expect("a rescue nil").toChangeFormat(expected);
+  });
+
+  test("rescue just variable", () => {
+    const content = ruby(`
+      begin
+        a
+      rescue => e
+        nil
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 
   // from ruby spec/ruby/language/rescue_spec.rb
   test("splat errors", () => {

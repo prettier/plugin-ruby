@@ -29,18 +29,22 @@ function printParams(path, opts, print) {
   let parts = [];
 
   if (reqs) {
-    parts = parts.concat(path.map(print, "body", 0));
+    path.each(
+      (reqPath) => {
+        // For some very strange reason, if you have a comment attached to a
+        // rest_param, it shows up here in the list of required params.
+        if (reqPath.getValue().type !== "rest_param") {
+          parts.push(print(reqPath));
+        }
+      },
+      "body",
+      0
+    );
   }
 
   if (optls) {
     parts = parts.concat(
-      optls.map((_, index) =>
-        concat([
-          path.call(print, "body", 1, index, 0),
-          " = ",
-          path.call(print, "body", 1, index, 1)
-        ])
-      )
+      path.map((optlPath) => join(" = ", optlPath.map(print)), "body", 1)
     );
   }
 
@@ -54,12 +58,16 @@ function printParams(path, opts, print) {
 
   if (kwargs) {
     parts = parts.concat(
-      kwargs.map(([, value], index) => {
-        if (!value) {
-          return path.call(print, "body", 4, index, 0);
-        }
-        return group(join(" ", path.map(print, "body", 4, index)));
-      })
+      path.map(
+        (kwargPath) => {
+          if (!kwargPath.getValue()[1]) {
+            return kwargPath.call(print, 0);
+          }
+          return group(join(" ", kwargPath.map(print)));
+        },
+        "body",
+        4
+      )
     );
   }
 

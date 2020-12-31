@@ -30,6 +30,7 @@ function printBodyStmt(path, opts, print) {
 
   if (elseClause) {
     // Before Ruby 2.6, this piece of bodystmt was an explicit "else" node
+    /* istanbul ignore next */
     const stmts =
       elseClause.type === "else"
         ? path.call(print, "body", 2, "body", 0)
@@ -69,11 +70,7 @@ function printParen(path, opts, print) {
   }
 
   return group(
-    concat([
-      "(",
-      indent(concat([softline, contentDoc])),
-      concat([softline, ")"])
-    ])
+    concat(["(", indent(concat([softline, contentDoc])), softline, ")"])
   );
 }
 

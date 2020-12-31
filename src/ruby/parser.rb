@@ -1657,9 +1657,14 @@ class Prettier::Parser < Ripper
   # anywhere in a Ruby program. It accepts as arguments the contents, which
   # can be either params or statements.
   def on_paren(contents)
+    beging = find_scanner_event(:@lparen)
     ending = find_scanner_event(:@rparen)
 
-    find_scanner_event(:@lparen).merge!(
+    if contents && contents[:type] == :params
+      contents.merge!(sc: beging[:ec], ec: ending[:sc])
+    end
+
+    beging.merge!(
       type: :paren,
       body: [contents],
       end: ending[:end],

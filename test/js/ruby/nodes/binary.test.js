@@ -28,4 +28,6 @@ describe("binary", () => {
 
     return expect(content).toMatchFormat();
   });
+
+  test("no spaces for **", () => expect("a**b").toMatchFormat());
 });

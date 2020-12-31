@@ -504,6 +504,19 @@ describe("conditionals", () => {
 
         return expect(content).toMatchFormat();
       });
+
+      test("cannot transform with multiple statements", () => {
+        const content = ruby(`
+          if a
+            1
+            2
+          else
+            3
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
     });
   });
 
