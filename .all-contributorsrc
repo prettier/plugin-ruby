@@ -519,6 +519,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "blampe",
+      "name": "Bryce Lampe",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/848843?v=4",
+      "profile": "https://github.com/blampe",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

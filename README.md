@@ -231,6 +231,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://twitter.com/ykpythemind"><img src="https://avatars2.githubusercontent.com/u/22209702?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Yukito Ito</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Aykpythemind" title="Bug reports">🐛</a> <a href="https://github.com/prettier/plugin-ruby/commits?author=ykpythemind" title="Code">💻</a></td>
     <td align="center"><a href="https://studyfied.com/"><img src="https://avatars2.githubusercontent.com/u/45869605?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Karan Mandal</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Akaranmandal" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://nathanbeam.codes/"><img src="https://avatars3.githubusercontent.com/u/24681333?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nathan Beam</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Anathan-beam" title="Bug reports">🐛</a> <a href="https://github.com/prettier/plugin-ruby/commits?author=nathan-beam" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/blampe"><img src="https://avatars3.githubusercontent.com/u/848843?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bryce Lampe</b></sub></a><br /><a href="https://github.com/prettier/plugin-ruby/issues?q=author%3Ablampe" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
