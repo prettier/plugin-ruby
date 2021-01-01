@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [@nathan-beam] - Gem does not work with CMD/Powershell.
+- [@blampe], [@kddeisz] - Comments inside keyword parameters in method declarations are not printed.
+- [@blampe], [@kddeisz] - `command_call` nodes with unary operators incorrectly parse their operator.
+- [@blampe], [@kddeisz] - Returning multiple values where the first has parentheses was incorrectly removing the remaining values.
+- [@johncsnyder], [@kddeisz] - Call chains whose left-most receiver is a no-indent expression should not indent their entire chain.
+
 ## [1.2.1] - 2020-12-27
 
 ### Changed
@@ -1051,6 +1059,7 @@ would previously result in `array[]`, but now prints properly.
 [@andyw8]: https://github.com/andyw8
 [@ashfurrow]: https://github.com/ashfurrow
 [@awinograd]: https://github.com/awinograd
+[@blampe]: https://github.com/blampe
 [@bugthing]: https://github.com/bugthing
 [@cbothner]: https://github.com/cbothner
 [@christoomey]: https://github.com/christoomey
@@ -1090,6 +1099,7 @@ would previously result in `array[]`, but now prints properly.
 [@meleyal]: https://github.com/meleyal
 [@mmainz]: https://github.com/mmainz
 [@mmcnl]: https://github.com/mmcnl
+[@nathan-beam]: https://github.com/nathan-beam
 [@noahtheduke]: https://github.com/NoahTheDuke
 [@overload119]: https://github.com/Overload119
 [@petevk]: https://github.com/petevk

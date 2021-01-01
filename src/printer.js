@@ -67,6 +67,38 @@ function getCommentChildNodes(node) {
 
       return [node.body[0]].concat(values).concat(node.body[2]);
     }
+    case "params": {
+      const [reqs, optls, rest, post, kwargs, kwargRest, block] = node.body;
+      let parts = reqs || [];
+
+      (optls || []).forEach((optl) => {
+        parts = parts.concat(optl);
+      });
+
+      if (rest) {
+        parts.push(rest);
+      }
+
+      parts = parts.concat(post || []);
+
+      (kwargs || []).forEach((kwarg) => {
+        if (kwarg[1]) {
+          parts = parts.concat(kwarg);
+        } else {
+          parts.push(kwarg[0]);
+        }
+      });
+
+      if (kwargRest && kwargRest !== "nil") {
+        parts.push(kwargRest);
+      }
+
+      if (block) {
+        parts.push(block);
+      }
+
+      return parts;
+    }
     default:
       return node.body;
   }

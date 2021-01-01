@@ -509,6 +509,25 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "nathan-beam",
+      "name": "Nathan Beam",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/24681333?v=4",
+      "profile": "http://nathanbeam.codes/",
+      "contributions": [
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "blampe",
+      "name": "Bryce Lampe",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/848843?v=4",
+      "profile": "https://github.com/blampe",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

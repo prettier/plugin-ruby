@@ -13,10 +13,13 @@ const { literal } = require("../utils");
 // because they have low enough operator precedence that you need to explicitly
 // keep them in there.
 const canSkipParens = (args) => {
-  const statement = args.body[0].body[0].body[0];
-  return (
-    statement.type !== "binary" || !["and", "or"].includes(statement.body[1])
-  );
+  const stmts = args.body[0].body[0];
+  if (stmts.comments) {
+    return false;
+  }
+
+  const stmt = stmts.body[0];
+  return stmt.type !== "binary" || !["and", "or"].includes(stmt.body[1]);
 };
 
 const printReturn = (path, opts, print) => {
@@ -27,25 +30,27 @@ const printReturn = (path, opts, print) => {
     return "return";
   }
 
-  // If the body of the return contains parens, then just skip directly to the
-  // content of the parens so that we can skip printing parens if we don't
-  // want them.
-  if (args.body[0] && args.body[0].type === "paren" && canSkipParens(args)) {
-    args = args.body[0].body[0];
-    steps = steps.concat("body", 0, "body", 0);
-  }
+  if (args.body.length === 1) {
+    // If the body of the return contains parens, then just skip directly to the
+    // content of the parens so that we can skip printing parens if we don't
+    // want them.
+    if (args.body[0] && args.body[0].type === "paren" && canSkipParens(args)) {
+      args = args.body[0].body[0];
+      steps = steps.concat("body", 0, "body", 0);
+    }
 
-  // If we're returning an array literal that isn't a special array, single
-  // element array, or an empty array, then we want to grab the arguments so
-  // that we can print them out as if they were normal return arguments.
-  if (
-    args.body[0] &&
-    args.body[0].type === "array" &&
-    args.body[0].body[0] &&
-    args.body[0].body[0].body.length > 1 &&
-    ["args", "args_add_star"].includes(args.body[0].body[0].type)
-  ) {
-    steps = steps.concat("body", 0, "body", 0);
+    // If we're returning an array literal that isn't a special array, single
+    // element array, or an empty array, then we want to grab the arguments so
+    // that we can print them out as if they were normal return arguments.
+    if (
+      args.body[0] &&
+      args.body[0].type === "array" &&
+      args.body[0].body[0] &&
+      args.body[0].body[0].body.length > 1 &&
+      ["args", "args_add_star"].includes(args.body[0].body[0].type)
+    ) {
+      steps = steps.concat("body", 0, "body", 0);
+    }
   }
 
   // Now that we've established which actual node is the arguments to return,
@@ -55,6 +60,12 @@ const printReturn = (path, opts, print) => {
   // If we got the value straight out of the parens, then `parts` would only
   // be a singular doc as opposed to an array.
   const value = Array.isArray(parts) ? join(concat([",", line]), parts) : parts;
+
+  // We only get here if we have comments somewhere that would prevent us from
+  // skipping the parentheses.
+  if (args.body.length === 1 && args.body[0].type === "paren") {
+    return concat(["return", value]);
+  }
 
   return group(
     concat([

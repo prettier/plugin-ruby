@@ -9,8 +9,8 @@ module Prettier
 
   class << self
     def run(args)
-      quoted = args.map { |arg| arg.start_with?('-') ? arg : "'#{arg}'" }
-      command = "node #{BINARY} --plugin '#{PLUGIN}' #{quoted.join(' ')}"
+      quoted = args.map { |arg| arg.start_with?('-') ? arg : "\"#{arg}\"" }
+      command = "node #{BINARY} --plugin \"#{PLUGIN}\" #{quoted.join(' ')}"
 
       system({ 'RBPRETTIER' => '1' }, command)
     end
