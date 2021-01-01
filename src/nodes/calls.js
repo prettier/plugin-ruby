@@ -6,7 +6,7 @@ const {
   indent,
   softline
 } = require("../prettier");
-const { first, makeCall, noIndent } = require("../utils");
+const { makeCall, noIndent } = require("../utils");
 
 const toProc = require("../toProc");
 
@@ -217,10 +217,14 @@ function printMethodAddBlock(path, opts, print) {
   return concat([callDoc, blockDoc]);
 }
 
+function printCallContainer(path, opts, print) {
+  return path.call(print, "body", 0);
+}
+
 module.exports = {
   call: printCall,
-  fcall: first,
+  fcall: printCallContainer,
   method_add_arg: printMethodAddArg,
   method_add_block: printMethodAddBlock,
-  vcall: first
+  vcall: printCallContainer
 };

@@ -1,8 +1,6 @@
 const { concat, group, ifBreak, indent, join, line } = require("../prettier");
-
 const {
   getTrailingComma,
-  prefix,
   printEmptyCollection,
   skipAssignIndent
 } = require("../utils");
@@ -80,6 +78,10 @@ function printAssocNew(path, opts, print) {
   return group(concat(parts));
 }
 
+function printAssocSplat(path, opts, print) {
+  return concat(["**", path.call(print, "body", 0)]);
+}
+
 function printHashContents(path, opts, print) {
   const node = path.getValue();
 
@@ -121,7 +123,7 @@ function printHash(path, opts, print) {
 
 module.exports = {
   assoc_new: printAssocNew,
-  assoc_splat: prefix("**"),
+  assoc_splat: printAssocSplat,
   assoclist_from_args: printHashContents,
   bare_assoc_hash: printHashContents,
   hash: printHash

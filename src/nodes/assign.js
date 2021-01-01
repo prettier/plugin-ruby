@@ -1,5 +1,5 @@
 const { concat, group, indent, join, line } = require("../prettier");
-const { first, skipAssignIndent } = require("../utils");
+const { skipAssignIndent } = require("../utils");
 
 function printAssign(path, opts, print) {
   const [_targetNode, valueNode] = path.getValue().body;
@@ -35,9 +35,13 @@ function printVarField(path, opts, print) {
   return path.getValue().body ? path.call(print, "body", 0) : "";
 }
 
+function printVarRef(path, opts, print) {
+  return path.call(print, "body", 0);
+}
+
 module.exports = {
   assign: printAssign,
   opassign: printOpAssign,
   var_field: printVarField,
-  var_ref: first
+  var_ref: printVarRef
 };

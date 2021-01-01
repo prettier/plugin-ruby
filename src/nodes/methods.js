@@ -1,5 +1,4 @@
 const { concat, group, hardline, indent, line } = require("../prettier");
-const { first } = require("../utils");
 
 function printMethod(offset) {
   return function printMethodWithOffset(path, opts, print) {
@@ -72,8 +71,12 @@ function printSingleLineMethod(path, opts, print) {
   );
 }
 
+function printAccessControl(path, opts, print) {
+  return path.call(print, "body", 0);
+}
+
 module.exports = {
-  access_ctrl: first,
+  access_ctrl: printAccessControl,
   def: printMethod(0),
   defs: printMethod(2),
   defsl: printSingleLineMethod
