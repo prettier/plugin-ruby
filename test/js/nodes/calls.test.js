@@ -49,12 +49,34 @@ describe("calls", () => {
   test("explicit call maintains call", () =>
     expect("a.call(1, 2, 3)").toMatchFormat());
 
-  test("double bang with a special operator", () =>
+  test("double bang with a special operator on a call", () =>
     expect("!!object&.topic_list").toMatchFormat());
+
+  test("bang with a special operator on a command_call", () =>
+    expect("!domain&.include? '@'").toMatchFormat());
 
   test("#call shorthand does not eliminate empty parentheses", () =>
     expect("Foo.new.()").toMatchFormat());
 
   test("methods that look like constants do not eliminate empty parens", () =>
     expect("Foo()").toMatchFormat());
+
+  test("call chains with no indent on the first receiver", () => {
+    const item = long.slice(0, 30);
+    const content = `result = [${item}, ${item}, ${item}].map(&:foo?).bbb.ccc`;
+
+    const expected = ruby(`
+      result =
+        [
+          ${item},
+          ${item},
+          ${item}
+        ]
+        .map(&:foo?)
+        .bbb
+        .ccc
+    `);
+
+    return expect(content).toChangeFormat(expected);
+  });
 });

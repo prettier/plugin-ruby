@@ -41,15 +41,18 @@ function printCall(path, opts, print) {
     parentNode.chain = (node.chain || 0) + 1;
     parentNode.callChain = (node.callChain || 0) + 1;
     parentNode.breakDoc = (node.breakDoc || [receiverDoc]).concat(rightSideDoc);
+    parentNode.firstReceiverType = node.firstReceiverType || receiverNode.type;
   }
 
   // If we're at the top of a chain, then we're going to print out a nice
   // multi-line layout if this doesn't break into multiple lines.
   if (!chained.includes(parentNode.type) && (node.chain || 0) >= 3) {
-    return ifBreak(
-      group(indent(concat(node.breakDoc.concat(rightSideDoc)))),
-      concat([receiverDoc, group(rightSideDoc)])
-    );
+    let breakDoc = concat(node.breakDoc.concat(rightSideDoc));
+    if (!noIndent.includes(node.firstReceiverType)) {
+      breakDoc = indent(breakDoc);
+    }
+
+    return ifBreak(group(breakDoc), concat([receiverDoc, group(rightSideDoc)]));
   }
 
   // For certain left sides of the call nodes, we want to attach directly to
@@ -105,6 +108,7 @@ function printMethodAddArg(path, opts, print) {
   if (chained.includes(parentNode.type)) {
     parentNode.chain = (node.chain || 0) + 1;
     parentNode.breakDoc = (node.breakDoc || [methodDoc]).concat(argsDoc);
+    parentNode.firstReceiverType = node.firstReceiverType;
   }
 
   // If we're at the top of a chain, then we're going to print out a nice
@@ -152,7 +156,7 @@ function isSorbetTypeAnnotation(node) {
     callNode.body[0].body[0].body === "sig" &&
     callNode.body[1].type === "args" &&
     callNode.body[1].body.length === 0 &&
-    blockNode.type === "brace_block"
+    blockNode
   );
 }
 
@@ -198,6 +202,7 @@ function printMethodAddBlock(path, opts, print) {
   if (chained.includes(parentNode.type)) {
     parentNode.chain = (node.chain || 0) + 1;
     parentNode.breakDoc = (node.breakDoc || [callDoc]).concat(blockDoc);
+    parentNode.firstReceiverType = node.firstReceiverType;
   }
 
   // If we're at the top of a chain, then we're going to print out a nice

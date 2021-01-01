@@ -135,6 +135,19 @@ describe("method", () => {
 
       return expect(content).toChangeFormat(expected);
     });
+
+    test("comments on kwargs", () => {
+      const content = ruby(`
+        def foo(
+          bar:, # hello
+          baz:
+        )
+          bar
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
   });
 
   describe("method calls", () => {

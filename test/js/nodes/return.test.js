@@ -40,4 +40,7 @@ describe("return", () => {
     expect(`return foo, ${long}`).toChangeFormat(
       `return [\n  foo,\n  ${long}\n]`
     ));
+
+  test("returning two arguments, the first with parentheses", () =>
+    expect("return (1), 2").toMatchFormat());
 });
