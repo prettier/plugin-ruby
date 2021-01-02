@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [@lukyth], [@kddeisz] - Ensure if a ternary breaks into an `if..else..end` within a `command_call` node that parentheses are added.
+
 ## [1.2.2] - 2021-01-01
 
 ### Changed
@@ -1096,6 +1100,7 @@ would previously result in `array[]`, but now prints properly.
 [@kmcq]: https://github.com/kmcq
 [@krachtstefan]: https://github.com/krachtstefan
 [@localhostdotdev]: https://github.com/localhostdotdev
+[@lukyth]: https://github.com/lukyth
 [@marcmaniez]: https://github.com/MarcManiez
 [@masqita]: https://github.com/masqita
 [@matt-wratt]: https://github.com/matt-wratt

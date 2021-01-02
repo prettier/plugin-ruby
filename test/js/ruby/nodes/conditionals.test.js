@@ -342,6 +342,36 @@ describe("conditionals", () => {
       return expect(content).toChangeFormat("(a ? 1 : 2) + 1");
     });
 
+    test("adds parens if within a command", () => {
+      const content = `foo baz ? ${long} : ${long}`;
+      const expected = ruby(`
+        foo(
+          if baz
+            ${long}
+          else
+            ${long}
+          end
+        )
+      `);
+
+      return expect(content).toChangeFormat(expected);
+    });
+
+    test("adds parens if within a command_call", () => {
+      const content = `foo.bar baz ? ${long} : ${long}`;
+      const expected = ruby(`
+        foo.bar(
+          if baz
+            ${long}
+          else
+            ${long}
+          end
+        )
+      `);
+
+      return expect(content).toChangeFormat(expected);
+    });
+
     describe("unable to transform", () => {
       test("breaking", () => {
         const content = ruby(`
