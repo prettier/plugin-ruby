@@ -93,7 +93,7 @@ expect.extend({
   },
   toInferParser(filename) {
     const filepath = path.join(__dirname, filename);
-    const plugin = path.join(__dirname, "..", "..", "src", "ruby");
+    const plugin = path.join(__dirname, "..", "..", "src", "plugin");
 
     return prettier
       .getFileInfo(filepath, { plugins: [plugin] })

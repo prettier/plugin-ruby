@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'socket'
-require_relative '../../src/parser'
+require_relative '../../src/ruby/parser'
 
 # Set the program name so that it's easy to find if we need it
 $PROGRAM_NAME = 'prettier-ruby-test-parser'

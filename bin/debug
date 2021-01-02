@@ -7,7 +7,7 @@ gemfile do
   gem 'sinatra', require: 'sinatra/base'
 end
 
-require_relative '../src/parser'
+require_relative '../src/ruby/parser'
 
 class App < Sinatra::Base
   HTML = DATA.read

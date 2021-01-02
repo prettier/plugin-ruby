@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'test_helper'
-require_relative '../../src/parser'
+require_relative '../../src/ruby/parser'
 
 class MetadataTest < Minitest::Test
   def test_BEGIN

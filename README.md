@@ -120,7 +120,7 @@ The `prettier` executable is now installed and ready for use:
 
 ## Configuration
 
-Below are the options (from [`src/ruby.js`](src/ruby.js)) that `@prettier/plugin-ruby` currently supports:
+Below are the options (from [`src/plugin.js`](src/plugin.js)) that `@prettier/plugin-ruby` currently supports:
 
 | API Option         | CLI Option             | Default | Description                                                                                                                          |
 | ------------------ | ---------------------- | :-----: | ------------------------------------------------------------------------------------------------------------------------------------ |

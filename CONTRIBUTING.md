@@ -22,7 +22,7 @@ In order to get printed, the code goes through a couple of transformations. The 
 
 ### Text to AST
 
-When the prettier process first spins up, it examines which files it's going to print and selects an appropriate plugin for each one. Once selected, it runs that plugin's `parse` function, seen [here](src/parser.js). For the case of the Ruby plugin, that entails spawning a Ruby process that runs [parser.rb](src/parser.rb) with the input code preloaded on stdin.
+When the prettier process first spins up, it examines which files it's going to print and selects an appropriate plugin for each one. Once selected, it runs that plugin's `parse` function, seen [here](src/ruby/parser.js). For the case of the Ruby plugin, that entails spawning a Ruby process that runs [parser.rb](src/ruby/parser.rb) with the input code preloaded on stdin.
 
 `parser.rb` will read the text off of stdin and then feed it to a new `Ripper` instance, which is a Ruby standard library recursive-descent parser. Briefly, the way that `Ripper` works is by tokenizing the input and then matching those tokens against a grammar to form s-expressions. To extend `Ripper`, you overwrite the methods that control how those s-expressions are formed, e.g., to modify the s-expression that is formed when `Ripper` encounters a string literal, you would override the `#on_string_literal` method. Below is an example for seeing that in action.
 
@@ -71,7 +71,7 @@ Now that the text has been transformed into an AST that we can work with, `parse
 
 ### AST to Doc
 
-Once prettier has a working AST, it will take it and call the selected plugin's [`printNode` function](src/printer.js), whose purpose is to convert that AST into prettier's intermediate representation called Docs. It does this by handing the print function a `FastPath` object that keeps track of the state of the printing as it goes, and allows accessing various parts of the AST quickly.
+Once prettier has a working AST, it will take it and call the selected plugin's [`printNode` function](src/ruby/printer.js), whose purpose is to convert that AST into prettier's intermediate representation called Docs. It does this by handing the print function a `FastPath` object that keeps track of the state of the printing as it goes, and allows accessing various parts of the AST quickly.
 
 Effectively, it walks the AST in the reverse direction from the way `Ripper` built it (top-down instead of bottom-up). The first node that gets passed into the `print` function is the `program` node as that's always on top. Then it is the `program` node's responsibility to recursively call print on its child nodes as it best sees fit.
 
