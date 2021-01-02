@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [@lukyth], [@kddeisz] - Ensure if a ternary breaks into an `if..else..end` within a `command_call` node that parentheses are added.
+- [@AlanFoster], [@kddeisz] - Ensure you consume the optional `do` keyword on `while` and `until` loops so that it doesn't confuse the parser.
 
 ## [1.2.2] - 2021-01-01
 

@@ -2297,6 +2297,11 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'until')
     ending = find_scanner_event(:@kw, 'end')
 
+    # Consume the do keyword if it exists so that it doesn't get confused for
+    # some other block
+    do_event = find_scanner_event(:@kw, 'do', consume: false)
+    scanner_events.delete(do_event) if do_event
+
     stmts.bind(predicate[:char_end], ending[:char_start])
 
     {
@@ -2428,6 +2433,11 @@ class Prettier::Parser < Ripper
   def on_while(predicate, stmts)
     beging = find_scanner_event(:@kw, 'while')
     ending = find_scanner_event(:@kw, 'end')
+
+    # Consume the do keyword if it exists so that it doesn't get confused for
+    # some other block
+    do_event = find_scanner_event(:@kw, 'do', consume: false)
+    scanner_events.delete(do_event) if do_event
 
     stmts.bind(predicate[:char_end], ending[:char_start])
 
