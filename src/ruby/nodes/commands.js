@@ -55,17 +55,17 @@ function skipArgsAlign(path) {
 // If there is a ternary argument to a command and it's going to get broken
 // into multiple lines, then we're going to have to use parentheses around the
 // command in order to make sure operator precedence doesn't get messed up.
-function hasTernaryArg(path) {
-  const node = path.getValue();
-
-  return node.body[1].body[0].body.some((child) => child.type === "ifop");
+function hasTernaryArg(node) {
+  return node.body[0].body.some((child) => child.type === "ifop");
 }
 
 function printCommand(path, opts, print) {
+  const node = path.getValue();
+
   const command = path.call(print, "body", 0);
   const joinedArgs = join(concat([",", line]), path.call(print, "body", 1));
 
-  const hasTernary = hasTernaryArg(path);
+  const hasTernary = hasTernaryArg(node.body[1]);
   let breakArgs;
 
   if (hasTernary) {
@@ -90,26 +90,34 @@ function printCommand(path, opts, print) {
 }
 
 function printCommandCall(path, opts, print) {
+  const node = path.getValue();
   const parts = [
     path.call(print, "body", 0),
     makeCall(path, opts, print),
     path.call(print, "body", 2)
   ];
 
-  if (!path.getValue().body[3]) {
+  if (!node.body[3]) {
     return concat(parts);
   }
 
-  parts.push(" ");
+  const argDocs = join(concat([",", line]), path.call(print, "body", 3));
+  let breakDoc;
 
-  const joinedArgs = join(concat([",", line]), path.call(print, "body", 3));
-  const breakArgs = skipArgsAlign(path)
-    ? joinedArgs
-    : align(docLength(concat(parts)), joinedArgs);
+  if (hasTernaryArg(node.body[3])) {
+    parts.push("(");
+    breakDoc = parts.concat(indent(concat([softline, argDocs])), softline, ")");
+  } else if (skipArgsAlign(path)) {
+    parts.push(" ");
+    breakDoc = parts.concat(argDocs);
+  } else {
+    parts.push(" ");
+    breakDoc = parts.concat(align(docLength(concat(parts)), argDocs));
+  }
 
-  return group(
-    ifBreak(concat(parts.concat(breakArgs)), concat(parts.concat(joinedArgs)))
-  );
+  const joinedDoc = parts.concat(argDocs);
+
+  return group(ifBreak(concat(breakDoc), concat(joinedDoc)));
 }
 
 module.exports = {
