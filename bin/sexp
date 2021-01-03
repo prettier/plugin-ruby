@@ -9,7 +9,7 @@ PP.prepend(
       group(1, '{', '}') do
         text obj[:type]
         text "<L#{obj[:start]}-#{obj[:end]},"
-        text "C#{obj[:char_start]}-#{obj[:char_end]}>"
+        text "C#{obj[:sc]}-#{obj[:ec]}>"
 
         group(1) do
           breakable ' '

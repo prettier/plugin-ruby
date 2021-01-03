@@ -175,7 +175,7 @@ describe.each(["while", "until"])("%s", (keyword) => {
   );
 
   // https://github.com/prettier/plugin-ruby/issues/759
-  test.each(["while", "until"])("%s handles do keyword", (keyword) => {
+  test("handles do keyword", () => {
     const content = ruby(`
       %w[foo bar].each do |resource|
         puts resource

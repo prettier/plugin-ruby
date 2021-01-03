@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@AlanFoster], [@kddeisz] - Ensure you consume the optional `do` keyword on `while` and `until` loops so that it doesn't confuse the parser.
 - [@AlanFoster], [@kddeisz] - Ensure key-value pairs split on line when the key has a comment attached within a hash.
 - [@AlanFoster], [@kddeisz] - Fix for `for` loops that have multiple index variables.
+- [@AlanFoster], [@kddeisz] - Fix parsing very large files by reducing the size of the JSON output from the parser.
 
 ## [1.2.2] - 2021-01-01
 
