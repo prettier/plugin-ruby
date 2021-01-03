@@ -89,14 +89,14 @@ class Prettier::Parser < Ripper
 
   (SCANNER_EVENTS - defined).each do |event|
     define_method(:"on_#{event}") do |value|
-      char_end = char_pos + value.size
+      ec = char_pos + value.size
       node = {
         type: :"@#{event}",
         body: value,
         start: lineno,
         end: lineno,
-        char_start: char_pos,
-        char_end: char_end
+        sc: char_pos,
+        ec: ec
       }
 
       scanner_events << node
@@ -120,8 +120,8 @@ class Prettier::Parser < Ripper
       value: value[1..-1].chomp.force_encoding('UTF-8'),
       start: lineno,
       end: lineno,
-      char_start: char_pos,
-      char_end: char_pos + value.length - 1
+      sc: char_pos,
+      ec: char_pos + value.length - 1
     }
   end
 
@@ -140,8 +140,8 @@ class Prettier::Parser < Ripper
       body: nil,
       start: lineno,
       end: lineno,
-      char_start: char_pos,
-      char_end: char_pos
+      sc: char_pos,
+      ec: char_pos
     }
   end
 
@@ -186,16 +186,13 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.bind(
-      find_next_statement_start(beging[:char_end]),
-      ending[:char_start]
-    )
+    stmts.bind(find_next_statement_start(beging[:ec]), ending[:sc])
 
     find_scanner_event(:@kw, 'BEGIN').merge!(
       type: :BEGIN,
       body: [beging, stmts],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     )
   end
 
@@ -213,16 +210,13 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.bind(
-      find_next_statement_start(beging[:char_end]),
-      ending[:char_start]
-    )
+    stmts.bind(find_next_statement_start(beging[:ec]), ending[:sc])
 
     find_scanner_event(:@kw, 'END').merge!(
       type: :END,
       body: [beging, stmts],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     )
   end
 
@@ -234,16 +228,16 @@ class Prettier::Parser < Ripper
   def on_alias(left, right)
     beging = find_scanner_event(:@kw, 'alias')
 
-    paren = source[beging[:char_end]...left[:char_start]].include?('(')
+    paren = source[beging[:ec]...left[:sc]].include?('(')
     ending = paren ? find_scanner_event(:@rparen) : right
 
     {
       type: :alias,
       body: [left, right],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -269,9 +263,9 @@ class Prettier::Parser < Ripper
       type: :aref,
       body: [collection, index],
       start: collection[:start],
-      char_start: collection[:char_start],
+      sc: collection[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -285,9 +279,9 @@ class Prettier::Parser < Ripper
       type: :aref_field,
       body: [collection, index],
       start: collection[:start],
-      char_start: collection[:char_start],
+      sc: collection[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -299,9 +293,9 @@ class Prettier::Parser < Ripper
       type: :args,
       body: [],
       start: lineno,
-      char_start: char_pos,
+      sc: char_pos,
       end: lineno,
-      char_end: char_pos
+      ec: char_pos
     }
   end
 
@@ -313,11 +307,7 @@ class Prettier::Parser < Ripper
     if args[:body].empty?
       arg.merge(type: :args, body: [arg])
     else
-      args.merge!(
-        body: args[:body] << arg,
-        end: arg[:end],
-        char_end: arg[:char_end]
-      )
+      args.merge!(body: args[:body] << arg, end: arg[:end], ec: arg[:ec])
     end
   end
 
@@ -331,7 +321,7 @@ class Prettier::Parser < Ripper
       type: :args_add_block,
       body: [args, block],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     )
   end
 
@@ -346,9 +336,9 @@ class Prettier::Parser < Ripper
       type: :args_add_star,
       body: [args, part],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -373,9 +363,9 @@ class Prettier::Parser < Ripper
       type: :arg_paren,
       body: [args],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -392,19 +382,19 @@ class Prettier::Parser < Ripper
         type: :array,
         body: [contents],
         start: beging[:start],
-        char_start: beging[:char_start],
+        sc: beging[:sc],
         end: ending[:end],
-        char_end: ending[:char_end]
+        ec: ending[:ec]
       }
     else
       ending = find_scanner_event(:@tstring_end)
-      contents[:char_end] = ending[:char_end]
+      contents[:ec] = ending[:ec]
 
       ending.merge!(
         type: :array,
         body: [contents],
         start: contents[:start],
-        char_start: contents[:char_start]
+        sc: contents[:sc]
       )
     end
   end
@@ -418,9 +408,9 @@ class Prettier::Parser < Ripper
       type: :aryptn,
       body: [const, preargs, splatarg, postargs],
       start: pieces[0][:start],
-      char_start: pieces[0][:char_start],
+      sc: pieces[0][:sc],
       end: pieces[-1][:end],
-      char_end: pieces[-1][:char_end]
+      ec: pieces[-1][:ec]
     }
   end
 
@@ -432,7 +422,7 @@ class Prettier::Parser < Ripper
       type: :assign,
       body: [left, right],
       end: right[:end],
-      char_end: right[:char_end]
+      ec: right[:ec]
     )
   end
 
@@ -444,9 +434,9 @@ class Prettier::Parser < Ripper
       type: :assoc_new,
       body: [key, value],
       start: key[:start],
-      char_start: key[:char_start],
+      sc: key[:sc],
       end: value[:end],
-      char_end: value[:char_end]
+      ec: value[:ec]
     }
   end
 
@@ -457,7 +447,7 @@ class Prettier::Parser < Ripper
       type: :assoc_splat,
       body: [contents],
       end: contents[:end],
-      char_end: contents[:char_end]
+      ec: contents[:ec]
     )
   end
 
@@ -470,9 +460,9 @@ class Prettier::Parser < Ripper
       type: :assoclist_from_args,
       body: assocs,
       start: assocs[0][:start],
-      char_start: assocs[0][:char_start],
+      sc: assocs[0][:sc],
       end: assocs[-1][:end],
-      char_end: assocs[-1][:char_end]
+      ec: assocs[-1][:ec]
     }
   end
 
@@ -485,9 +475,9 @@ class Prettier::Parser < Ripper
       type: :bare_assoc_hash,
       body: assoc_news,
       start: assoc_news[0][:start],
-      char_start: assoc_news[0][:char_start],
+      sc: assoc_news[0][:sc],
       end: assoc_news[-1][:end],
-      char_end: assoc_news[-1][:char_end]
+      ec: assoc_news[-1][:ec]
     }
   end
 
@@ -495,20 +485,20 @@ class Prettier::Parser < Ripper
   # It includes a bodystmt event that has all of the consequent clauses.
   def on_begin(bodystmt)
     beging = find_scanner_event(:@kw, 'begin')
-    char_end =
+    ec =
       if bodystmt[:body][1..-1].any?
-        bodystmt[:char_end]
+        bodystmt[:ec]
       else
-        find_scanner_event(:@kw, 'end')[:char_end]
+        find_scanner_event(:@kw, 'end')[:ec]
       end
 
-    bodystmt.bind(beging[:char_end], char_end)
+    bodystmt.bind(beging[:ec], ec)
 
     beging.merge!(
       type: :begin,
       body: [bodystmt],
       end: bodystmt[:end],
-      char_end: bodystmt[:char_end]
+      ec: bodystmt[:ec]
     )
   end
 
@@ -519,9 +509,9 @@ class Prettier::Parser < Ripper
       type: :binary,
       body: [left, oper, right],
       start: left[:start],
-      char_start: left[:char_start],
+      sc: left[:sc],
       end: right[:end],
-      char_end: right[:char_end]
+      ec: right[:ec]
     }
   end
 
@@ -531,7 +521,7 @@ class Prettier::Parser < Ripper
     index =
       scanner_events.rindex do |event|
         event[:type] == :@op && %w[| ||].include?(event[:body]) &&
-          event[:char_start] < params[:char_start]
+          event[:sc] < params[:sc]
       end
 
     beging = scanner_events[index]
@@ -541,9 +531,9 @@ class Prettier::Parser < Ripper
       type: :block_var,
       body: [params, locals],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -554,7 +544,7 @@ class Prettier::Parser < Ripper
       type: :blockarg,
       body: [ident],
       end: ident[:end],
-      char_end: ident[:char_end]
+      ec: ident[:ec]
     )
   end
 
@@ -562,21 +552,18 @@ class Prettier::Parser < Ripper
   # doesn't necessarily know where it started. So the parent node needs to
   # report back down into this one where it goes.
   class BodyStmt < SimpleDelegator
-    def bind(char_start, char_end)
-      merge!(char_start: char_start, char_end: char_end)
+    def bind(sc, ec)
+      merge!(sc: sc, ec: ec)
       parts = self[:body]
 
       # Here we're going to determine the bounds for the stmts
       consequent = parts[1..-1].compact.first
-      self[:body][0].bind(
-        char_start,
-        consequent ? consequent[:char_start] : char_end
-      )
+      self[:body][0].bind(sc, consequent ? consequent[:sc] : ec)
 
       # Next we're going to determine the rescue clause if there is one
       if parts[1]
         consequent = parts[2..-1].compact.first
-        self[:body][1].bind_end(consequent ? consequent[:char_start] : char_end)
+        self[:body][1].bind_end(consequent ? consequent[:sc] : ec)
       end
     end
   end
@@ -588,9 +575,9 @@ class Prettier::Parser < Ripper
       type: :bodystmt,
       body: [stmts, rescued, ensured, elsed],
       start: lineno,
-      char_start: char_pos,
+      sc: char_pos,
       end: lineno,
-      char_end: char_pos
+      ec: char_pos
     )
   end
 
@@ -602,15 +589,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.bind((block_var || beging)[:char_end], ending[:char_start])
+    stmts.bind((block_var || beging)[:ec], ending[:sc])
 
     {
       type: :brace_block,
       body: [block_var, stmts],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -631,7 +618,7 @@ class Prettier::Parser < Ripper
       type: :break,
       body: [args_add_block],
       end: args_add_block[:end],
-      char_end: args_add_block[:char_end]
+      ec: args_add_block[:ec]
     )
   end
 
@@ -665,9 +652,9 @@ class Prettier::Parser < Ripper
       type: :call,
       body: [receiver, oper, sending],
       start: receiver[:start],
-      char_start: receiver[:char_start],
+      sc: receiver[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -686,7 +673,7 @@ class Prettier::Parser < Ripper
     beging.merge!(
       body: [switch, consequent],
       end: consequent[:end],
-      char_end: consequent[:char_end]
+      ec: consequent[:ec]
     )
   end
 
@@ -720,17 +707,17 @@ class Prettier::Parser < Ripper
     ending = find_scanner_event(:@kw, 'end')
 
     bodystmt.bind(
-      find_next_statement_start((superclass || const)[:char_end]),
-      ending[:char_start]
+      find_next_statement_start((superclass || const)[:ec]),
+      ending[:sc]
     )
 
     {
       type: :class,
       body: [const, superclass, bodystmt],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -742,9 +729,9 @@ class Prettier::Parser < Ripper
       type: :command,
       body: [ident, args],
       start: ident[:start],
-      char_start: ident[:char_start],
+      sc: ident[:sc],
       end: args[:end],
-      char_end: args[:char_end]
+      ec: args[:ec]
     }
   end
 
@@ -764,9 +751,9 @@ class Prettier::Parser < Ripper
       type: :command_call,
       body: [receiver, oper, ident, args],
       start: receiver[:start],
-      char_start: receiver[:char_start],
+      sc: receiver[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -781,9 +768,9 @@ class Prettier::Parser < Ripper
       type: :const_path_field,
       body: [left, const],
       start: left[:start],
-      char_start: left[:char_start],
+      sc: left[:sc],
       end: const[:end],
-      char_end: const[:char_end]
+      ec: const[:ec]
     }
   end
 
@@ -798,9 +785,9 @@ class Prettier::Parser < Ripper
       type: :const_path_ref,
       body: [left, const],
       start: left[:start],
-      char_start: left[:char_start],
+      sc: left[:sc],
       end: const[:end],
-      char_end: const[:char_end]
+      ec: const[:ec]
     }
   end
 
@@ -851,32 +838,29 @@ class Prettier::Parser < Ripper
           type: :defsl,
           body: [ident, params, bodystmt],
           start: beging[:start],
-          char_start: beging[:char_start],
+          sc: beging[:sc],
           end: bodystmt[:end],
-          char_end: bodystmt[:char_end]
+          ec: bodystmt[:ec]
         }
       )
     end
 
     if params[:type] == :params && !params[:body].any?
-      location = ident[:char_end]
-      params.merge!(char_start: location, char_end: location)
+      location = ident[:ec]
+      params.merge!(sc: location, ec: location)
     end
 
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind(
-      find_next_statement_start(params[:char_end]),
-      ending[:char_start]
-    )
+    bodystmt.bind(find_next_statement_start(params[:ec]), ending[:sc])
 
     {
       type: :def,
       body: [ident, params, bodystmt],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -901,25 +885,22 @@ class Prettier::Parser < Ripper
     scanner_events.delete(ident)
 
     if params[:type] == :params && !params[:body].any?
-      location = ident[:char_end]
-      params.merge!(char_start: location, char_end: location)
+      location = ident[:ec]
+      params.merge!(sc: location, ec: location)
     end
 
     beging = find_scanner_event(:@kw, 'def')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind(
-      find_next_statement_start(params[:char_end]),
-      ending[:char_start]
-    )
+    bodystmt.bind(find_next_statement_start(params[:ec]), ending[:sc])
 
     {
       type: :defs,
       body: [target, oper, ident, params, bodystmt],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -930,14 +911,14 @@ class Prettier::Parser < Ripper
   def on_defined(value)
     beging = find_scanner_event(:@kw, 'defined?')
 
-    paren = source[beging[:char_end]...value[:char_start]].include?('(')
+    paren = source[beging[:ec]...value[:sc]].include?('(')
     ending = paren ? find_scanner_event(:@rparen) : value
 
     beging.merge!(
       type: :defined,
       body: [value],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     )
   end
 
@@ -949,15 +930,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'do')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind((block_var || beging)[:char_end], ending[:char_start])
+    bodystmt.bind((block_var || beging)[:ec], ending[:sc])
 
     {
       type: :do_block,
       body: [block_var, bodystmt],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -974,9 +955,9 @@ class Prettier::Parser < Ripper
       type: :dot2,
       body: [left, right],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -993,9 +974,9 @@ class Prettier::Parser < Ripper
       type: :dot3,
       body: [left, right],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1028,7 +1009,7 @@ class Prettier::Parser < Ripper
         quote: beging[:body][1],
         body: string[:body],
         end: ending[:end],
-        char_end: ending[:char_end]
+        ec: ending[:ec]
       )
     else
       # A dynamic symbol as a hash key
@@ -1039,9 +1020,9 @@ class Prettier::Parser < Ripper
         type: :dyna_symbol,
         quote: ending[:body][0],
         start: beging[:start],
-        char_start: beging[:char_start],
+        sc: beging[:sc],
         end: ending[:end],
-        char_end: ending[:char_end]
+        ec: ending[:ec]
       )
     end
   end
@@ -1066,15 +1047,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'else')
     ending = find_else_ending
 
-    stmts.bind(beging[:char_end], ending[:char_start])
+    stmts.bind(beging[:ec], ending[:sc])
 
     {
       type: :else,
       body: [stmts],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1086,15 +1067,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'elsif')
     ending = consequent || find_scanner_event(:@kw, 'end')
 
-    stmts.bind(predicate[:char_end], ending[:char_start])
+    stmts.bind(predicate[:ec], ending[:sc])
 
     {
       type: :elsif,
       body: [predicate, stmts, consequent],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1104,12 +1085,7 @@ class Prettier::Parser < Ripper
   # and add to it as we get content. It always starts with this scanner
   # event, so here we'll initialize the current embdoc.
   def on_embdoc_beg(value)
-    @embdoc = {
-      type: :@embdoc,
-      value: value,
-      start: lineno,
-      char_start: char_pos
-    }
+    @embdoc = { type: :@embdoc, value: value, start: lineno, sc: char_pos }
   end
 
   # This is a scanner event that gets hit when we're inside an embdoc and
@@ -1129,7 +1105,7 @@ class Prettier::Parser < Ripper
       @embdoc.merge!(
         value: @embdoc[:value] << value.chomp,
         end: lineno,
-        char_end: char_pos + value.length - 1
+        ec: char_pos + value.length - 1
       )
 
     @embdoc = nil
@@ -1148,18 +1124,15 @@ class Prettier::Parser < Ripper
       end
 
     ending = scanner_events[index]
-    stmts.bind(
-      find_next_statement_start(beging[:char_end]),
-      ending[:char_start]
-    )
+    stmts.bind(find_next_statement_start(beging[:ec]), ending[:sc])
 
     {
       type: :ensure,
       body: [beging, stmts],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1188,9 +1161,9 @@ class Prettier::Parser < Ripper
       type: :field,
       body: [left, oper, right],
       start: left[:start],
-      char_start: left[:char_start],
+      sc: left[:sc],
       end: right[:end],
-      char_end: right[:char_end]
+      ec: right[:ec]
     }
   end
 
@@ -1204,9 +1177,9 @@ class Prettier::Parser < Ripper
       type: :fndptn,
       body: [const, presplat, args, postsplat],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1218,15 +1191,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'for')
     ending = find_scanner_event(:@kw, 'end')
 
-    stmts.bind(enumerable[:char_end], ending[:char_start])
+    stmts.bind(enumerable[:ec], ending[:sc])
 
     {
       type: :for,
       body: [ident, enumerable, stmts],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1240,19 +1213,16 @@ class Prettier::Parser < Ripper
     if assoclist_from_args
       # Here we're going to expand out the location information for the assocs
       # node so that it can grab up any remaining comments inside the hash.
-      assoclist_from_args.merge!(
-        char_start: beging[:char_end],
-        char_end: ending[:char_start]
-      )
+      assoclist_from_args.merge!(sc: beging[:ec], ec: ending[:sc])
     end
 
     {
       type: :hash,
       body: [assoclist_from_args],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1266,8 +1236,8 @@ class Prettier::Parser < Ripper
     location = {
       start: lineno,
       end: lineno,
-      char_start: char_pos,
-      char_end: char_pos + beging.length + 1
+      sc: char_pos,
+      ec: char_pos + beging.length + 1
     }
 
     # Here we're going to artificially create an extra node type so that if
@@ -1289,7 +1259,7 @@ class Prettier::Parser < Ripper
 
   # This is a scanner event that represents the end of the heredoc.
   def on_heredoc_end(ending)
-    @heredocs[-1].merge!(ending: ending.chomp, end: lineno, char_end: char_pos)
+    @heredocs[-1].merge!(ending: ending.chomp, end: lineno, ec: char_pos)
   end
 
   # hshptn is a parser event that represents matching against a hash pattern
@@ -1301,9 +1271,9 @@ class Prettier::Parser < Ripper
       type: :hshptn,
       body: [const, kw, kwrest],
       start: pieces[0][:start],
-      char_start: pieces[0][:char_start],
+      sc: pieces[0][:sc],
       end: pieces[-1][:end],
-      char_end: pieces[-1][:char_end]
+      ec: pieces[-1][:ec]
     }
   end
 
@@ -1314,15 +1284,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'if')
     ending = consequent || find_scanner_event(:@kw, 'end')
 
-    stmts.bind(predicate[:char_end], ending[:char_start])
+    stmts.bind(predicate[:ec], ending[:sc])
 
     {
       type: :if,
       body: [predicate, stmts, consequent],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1334,7 +1304,7 @@ class Prettier::Parser < Ripper
       type: :ifop,
       body: [predicate, truthy, falsy],
       end: falsy[:end],
-      char_end: falsy[:char_end]
+      ec: falsy[:ec]
     )
   end
 
@@ -1348,9 +1318,9 @@ class Prettier::Parser < Ripper
       type: :if_mod,
       body: [predicate, statement],
       start: statement[:start],
-      char_start: statement[:char_start],
+      sc: statement[:sc],
       end: predicate[:end],
-      char_end: predicate[:char_end]
+      ec: predicate[:ec]
     }
   end
 
@@ -1364,13 +1334,13 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'in')
     ending = consequent || find_scanner_event(:@kw, 'end')
 
-    stmts.bind(beging[:char_end], ending[:char_start])
+    stmts.bind(beging[:ec], ending[:sc])
 
     beging.merge!(
       type: :in,
       body: [pattern, stmts, consequent],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     )
   end
 
@@ -1384,7 +1354,7 @@ class Prettier::Parser < Ripper
       type: :kwrest_param,
       body: [ident],
       end: ident[:end],
-      char_end: ident[:char_end]
+      ec: ident[:ec]
     )
   end
 
@@ -1406,15 +1376,15 @@ class Prettier::Parser < Ripper
       closing = find_scanner_event(:@kw, 'end')
     end
 
-    stmts.bind(opening[:char_end], closing[:char_start])
+    stmts.bind(opening[:ec], closing[:sc])
 
     {
       type: :lambda,
       body: [params, stmts],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: closing[:end],
-      char_end: closing[:char_end]
+      ec: closing[:ec]
     }
   end
 
@@ -1436,17 +1406,15 @@ class Prettier::Parser < Ripper
   # in which case we need to explicitly track the comma and add it onto the
   # child node.
   def on_massign(left, right)
-    if source[left[:char_end]...right[:char_start]].strip.start_with?(',')
-      left[:comma] = true
-    end
+    left[:comma] = true if source[left[:ec]...right[:sc]].strip.start_with?(',')
 
     {
       type: :massign,
       body: [left, right],
       start: left[:start],
-      char_start: left[:char_start],
+      sc: left[:sc],
       end: right[:end],
-      char_end: right[:char_end]
+      ec: right[:ec]
     }
   end
 
@@ -1466,9 +1434,9 @@ class Prettier::Parser < Ripper
       type: :method_add_arg,
       body: [fcall, arg_paren],
       start: fcall[:start],
-      char_start: fcall[:char_start],
+      sc: fcall[:sc],
       end: arg_paren[:end],
-      char_end: arg_paren[:char_end]
+      ec: arg_paren[:ec]
     }
   end
 
@@ -1480,9 +1448,9 @@ class Prettier::Parser < Ripper
       type: :method_add_block,
       body: [method_add_arg, block],
       start: method_add_arg[:start],
-      char_start: method_add_arg[:char_start],
+      sc: method_add_arg[:sc],
       end: block[:end],
-      char_end: block[:char_end]
+      ec: block[:ec]
     }
   end
 
@@ -1494,9 +1462,9 @@ class Prettier::Parser < Ripper
       type: :mlhs,
       body: [],
       start: lineno,
-      char_start: char_pos,
+      sc: char_pos,
       end: lineno,
-      char_end: char_pos
+      ec: char_pos
     }
   end
 
@@ -1507,11 +1475,7 @@ class Prettier::Parser < Ripper
     if mlhs[:body].empty?
       part.merge(type: :mlhs, body: [part])
     else
-      mlhs.merge!(
-        body: mlhs[:body] << part,
-        end: part[:end],
-        char_end: part[:char_end]
-      )
+      mlhs.merge!(body: mlhs[:body] << part, end: part[:end], ec: part[:ec])
     end
   end
 
@@ -1525,7 +1489,7 @@ class Prettier::Parser < Ripper
       type: :mlhs_add_post,
       body: [mlhs_add_star, mlhs],
       end: mlhs[:end],
-      char_end: mlhs[:char_end]
+      ec: mlhs[:ec]
     )
   end
 
@@ -1541,9 +1505,9 @@ class Prettier::Parser < Ripper
       type: :mlhs_add_star,
       body: [mlhs, part],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1555,7 +1519,7 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lparen)
     ending = find_scanner_event(:@rparen)
 
-    if source[beging[:char_end]...ending[:char_start]].strip.end_with?(',')
+    if source[beging[:ec]...ending[:sc]].strip.end_with?(',')
       contents[:comma] = true
     end
 
@@ -1563,9 +1527,9 @@ class Prettier::Parser < Ripper
       type: :mlhs_paren,
       body: [contents],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1576,18 +1540,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'module')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind(
-      find_next_statement_start(const[:char_end]),
-      ending[:char_start]
-    )
+    bodystmt.bind(find_next_statement_start(const[:ec]), ending[:sc])
 
     {
       type: :module,
       body: [const, bodystmt],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1600,9 +1561,9 @@ class Prettier::Parser < Ripper
       type: :mrhs,
       body: [],
       start: lineno,
-      char_start: char_pos,
+      sc: char_pos,
       end: lineno,
-      char_end: char_pos
+      ec: char_pos
     }
   end
 
@@ -1612,11 +1573,7 @@ class Prettier::Parser < Ripper
     if mrhs[:body].empty?
       part.merge(type: :mrhs, body: [part])
     else
-      mrhs.merge!(
-        body: mrhs[:body] << part,
-        end: part[:end],
-        char_end: part[:char_end]
-      )
+      mrhs.merge!(body: mrhs[:body] << part, end: part[:end], ec: part[:ec])
     end
   end
 
@@ -1631,9 +1588,9 @@ class Prettier::Parser < Ripper
       type: :mrhs_add_star,
       body: [mrhs, part],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1657,7 +1614,7 @@ class Prettier::Parser < Ripper
       type: :next,
       body: [args_add_block],
       end: args_add_block[:end],
-      char_end: args_add_block[:char_end]
+      ec: args_add_block[:ec]
     )
   end
 
@@ -1670,7 +1627,7 @@ class Prettier::Parser < Ripper
       type: :opassign,
       body: [left, oper, right],
       end: right[:end],
-      char_end: right[:char_end]
+      ec: right[:ec]
     )
   end
 
@@ -1685,12 +1642,12 @@ class Prettier::Parser < Ripper
       if flattened.any?
         {
           start: flattened[0][:start],
-          char_start: flattened[0][:char_start],
+          sc: flattened[0][:sc],
           end: flattened[-1][:end],
-          char_end: flattened[-1][:char_end]
+          ec: flattened[-1][:ec]
         }
       else
-        { start: lineno, char_start: char_pos, end: lineno, char_end: char_pos }
+        { start: lineno, sc: char_pos, end: lineno, ec: char_pos }
       end
 
     location.merge!(type: :params, body: types)
@@ -1706,7 +1663,7 @@ class Prettier::Parser < Ripper
       type: :paren,
       body: [contents],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     )
   end
 
@@ -1715,12 +1672,7 @@ class Prettier::Parser < Ripper
   # source string. We'll also attach on the __END__ content if there was
   # some found at the end of the source string.
   def on_program(stmts)
-    range = {
-      start: 1,
-      end: lines.length,
-      char_start: 0,
-      char_end: source.length
-    }
+    range = { start: 1, end: lines.length, sc: 0, ec: source.length }
 
     stmts[:body] << @__end__ if @__end__
     stmts.bind(0, source.length)
@@ -1743,7 +1695,7 @@ class Prettier::Parser < Ripper
     qsymbols.merge!(
       body: qsymbols[:body] << tstring_content,
       end: tstring_content[:end],
-      char_end: tstring_content[:char_end]
+      ec: tstring_content[:ec]
     )
   end
 
@@ -1762,7 +1714,7 @@ class Prettier::Parser < Ripper
     qwords.merge!(
       body: qwords[:body] << tstring_content,
       end: tstring_content[:end],
-      char_end: tstring_content[:char_end]
+      ec: tstring_content[:ec]
     )
   end
 
@@ -1788,7 +1740,7 @@ class Prettier::Parser < Ripper
     regexp.merge!(
       body: regexp[:body] << piece,
       end: regexp[:end],
-      char_end: regexp[:char_end]
+      ec: regexp[:ec]
     )
   end
 
@@ -1801,7 +1753,7 @@ class Prettier::Parser < Ripper
       type: :regexp_literal,
       ending: ending[:body],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     )
   end
 
@@ -1810,17 +1762,17 @@ class Prettier::Parser < Ripper
   # determine its ending. Therefore it relies on its parent bodystmt node to
   # report its ending to it.
   class Rescue < SimpleDelegator
-    def bind_end(char_end)
-      merge!(char_end: char_end)
+    def bind_end(ec)
+      merge!(ec: ec)
 
       stmts = self[:body][2]
       consequent = self[:body][3]
 
       if consequent
-        consequent.bind_end(char_end)
-        stmts.bind_end(consequent[:char_start])
+        consequent.bind_end(ec)
+        stmts.bind_end(consequent[:sc])
       else
-        stmts.bind_end(char_end)
+        stmts.bind_end(ec)
       end
     end
   end
@@ -1833,14 +1785,14 @@ class Prettier::Parser < Ripper
     last_exception = exceptions.is_a?(Array) ? exceptions[-1] : exceptions
     last_node = variable || last_exception || beging
 
-    stmts.bind(find_next_statement_start(last_node[:char_end]), char_pos)
+    stmts.bind(find_next_statement_start(last_node[:ec]), char_pos)
 
     Rescue.new(
       beging.merge!(
         type: :rescue,
         body: [exceptions, variable, stmts, consequent],
         end: lineno,
-        char_end: char_pos
+        ec: char_pos
       )
     )
   end
@@ -1855,9 +1807,9 @@ class Prettier::Parser < Ripper
       type: :rescue_mod,
       body: [statement, rescued],
       start: statement[:start],
-      char_start: statement[:char_start],
+      sc: statement[:sc],
       end: rescued[:end],
-      char_end: rescued[:char_end]
+      ec: rescued[:ec]
     }
   end
 
@@ -1873,7 +1825,7 @@ class Prettier::Parser < Ripper
       type: :rest_param,
       body: [ident],
       end: ident[:end],
-      char_end: ident[:char_end]
+      ec: ident[:ec]
     )
   end
 
@@ -1891,7 +1843,7 @@ class Prettier::Parser < Ripper
       type: :return,
       body: [args_add_block],
       end: args_add_block[:end],
-      char_end: args_add_block[:char_end]
+      ec: args_add_block[:ec]
     )
   end
 
@@ -1917,18 +1869,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'class')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind(
-      find_next_statement_start(target[:char_end]),
-      ending[:char_start]
-    )
+    bodystmt.bind(find_next_statement_start(target[:ec]), ending[:sc])
 
     {
       type: :sclass,
       body: [target, bodystmt],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -1940,23 +1889,23 @@ class Prettier::Parser < Ripper
   # propagate that onto void_stmt nodes inside the stmts in order to make sure
   # all comments get printed appropriately.
   class Stmts < SimpleDelegator
-    def bind(char_start, char_end)
-      merge!(char_start: char_start, char_end: char_end)
+    def bind(sc, ec)
+      merge!(sc: sc, ec: ec)
 
       if self[:body][0][:type] == :void_stmt
-        self[:body][0].merge!(char_start: char_start, char_end: char_start)
+        self[:body][0].merge!(sc: sc, ec: sc)
       end
     end
 
-    def bind_end(char_end)
-      merge!(char_end: char_end)
+    def bind_end(ec)
+      merge!(ec: ec)
     end
 
     def <<(statement)
       if self[:body].any?
-        merge!(statement.slice(:end, :char_end))
+        merge!(statement.slice(:end, :ec))
       else
-        merge!(statement.slice(:start, :end, :char_start, :char_end))
+        merge!(statement.slice(:start, :end, :sc, :ec))
       end
 
       self[:body] << statement
@@ -1973,8 +1922,8 @@ class Prettier::Parser < Ripper
       body: [],
       start: lineno,
       end: lineno,
-      char_start: char_pos,
-      char_end: char_pos
+      sc: char_pos,
+      ec: char_pos
     )
   end
 
@@ -1997,9 +1946,9 @@ class Prettier::Parser < Ripper
       type: :string_concat,
       body: [left, right],
       start: left[:start],
-      char_start: left[:char_start],
+      sc: left[:sc],
       end: right[:end],
-      char_end: right[:char_end]
+      ec: right[:ec]
     }
   end
 
@@ -2014,8 +1963,8 @@ class Prettier::Parser < Ripper
       body: [],
       start: lineno,
       end: lineno,
-      char_start: char_pos,
-      char_end: char_pos
+      sc: char_pos,
+      ec: char_pos
     }
   end
 
@@ -2027,7 +1976,7 @@ class Prettier::Parser < Ripper
     string.merge!(
       body: string[:body] << piece,
       end: piece[:end],
-      char_end: piece[:char_end]
+      ec: piece[:ec]
     )
   end
 
@@ -2041,7 +1990,7 @@ class Prettier::Parser < Ripper
       type: :string_dvar,
       body: [var_ref],
       end: var_ref[:end],
-      char_end: var_ref[:char_end]
+      ec: var_ref[:ec]
     )
   end
 
@@ -2053,15 +2002,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@embexpr_beg)
     ending = find_scanner_event(:@embexpr_end)
 
-    stmts.bind(beging[:char_end], ending[:char_start])
+    stmts.bind(beging[:ec], ending[:sc])
 
     {
       type: :string_embexpr,
       body: [stmts],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -2081,9 +2030,9 @@ class Prettier::Parser < Ripper
         body: string[:body],
         quote: beging[:body],
         start: beging[:start],
-        char_start: beging[:char_start],
+        sc: beging[:sc],
         end: ending[:end],
-        char_end: ending[:char_end]
+        ec: ending[:ec]
       }
     end
   end
@@ -2097,7 +2046,7 @@ class Prettier::Parser < Ripper
       type: :super,
       body: [contents],
       end: contents[:end],
-      char_end: contents[:char_end]
+      ec: contents[:ec]
     )
   end
 
@@ -2128,7 +2077,7 @@ class Prettier::Parser < Ripper
       contents.merge(type: :symbol_literal, body: [contents])
     else
       beging = find_scanner_event(:@symbeg)
-      contents.merge!(type: :symbol_literal, char_start: beging[:char_start])
+      contents.merge!(type: :symbol_literal, sc: beging[:sc])
     end
   end
 
@@ -2148,7 +2097,7 @@ class Prettier::Parser < Ripper
     symbols.merge!(
       body: symbols[:body] << word_add,
       end: word_add[:end],
-      char_end: word_add[:char_end]
+      ec: word_add[:ec]
     )
   end
 
@@ -2159,8 +2108,7 @@ class Prettier::Parser < Ripper
   def find_colon2_before(const)
     index =
       scanner_events.rindex do |event|
-        event[:type] == :@op && event[:body] == '::' &&
-          event[:char_start] < const[:char_start]
+        event[:type] == :@op && event[:body] == '::' && event[:sc] < const[:sc]
       end
 
     scanner_events[index]
@@ -2178,7 +2126,7 @@ class Prettier::Parser < Ripper
       type: :top_const_field,
       body: [const],
       start: beging[:start],
-      char_start: beging[:char_start]
+      sc: beging[:sc]
     )
   end
 
@@ -2194,7 +2142,7 @@ class Prettier::Parser < Ripper
       type: :top_const_ref,
       body: [const],
       start: beging[:start],
-      char_start: beging[:char_start]
+      sc: beging[:sc]
     )
   end
 
@@ -2206,7 +2154,7 @@ class Prettier::Parser < Ripper
     if oper == :not
       node = find_scanner_event(:@kw, 'not')
 
-      paren = source[node[:char_end]...value[:char_start]].include?('(')
+      paren = source[node[:ec]...value[:sc]].include?('(')
       ending = paren ? find_scanner_event(:@rparen) : value
 
       node.merge!(
@@ -2214,7 +2162,7 @@ class Prettier::Parser < Ripper
         oper: oper,
         body: [value],
         end: ending[:end],
-        char_end: ending[:char_end],
+        ec: ending[:ec],
         paren: paren
       )
     else
@@ -2234,7 +2182,7 @@ class Prettier::Parser < Ripper
         oper: oper[0],
         body: [value],
         end: value[:end],
-        char_end: value[:char_end]
+        ec: value[:ec]
       )
     end
   end
@@ -2250,7 +2198,7 @@ class Prettier::Parser < Ripper
       type: :undef,
       body: symbol_literals,
       end: last[:end],
-      char_end: last[:char_end]
+      ec: last[:ec]
     )
   end
 
@@ -2262,15 +2210,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'unless')
     ending = consequent || find_scanner_event(:@kw, 'end')
 
-    stmts.bind(predicate[:char_end], ending[:char_start])
+    stmts.bind(predicate[:ec], ending[:sc])
 
     {
       type: :unless,
       body: [predicate, stmts, consequent],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -2284,9 +2232,9 @@ class Prettier::Parser < Ripper
       type: :unless_mod,
       body: [predicate, statement],
       start: statement[:start],
-      char_start: statement[:char_start],
+      sc: statement[:sc],
       end: predicate[:end],
-      char_end: predicate[:char_end]
+      ec: predicate[:ec]
     }
   end
 
@@ -2297,15 +2245,22 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'until')
     ending = find_scanner_event(:@kw, 'end')
 
-    stmts.bind(predicate[:char_end], ending[:char_start])
+    # Consume the do keyword if it exists so that it doesn't get confused for
+    # some other block
+    do_event = find_scanner_event(:@kw, 'do', consume: false)
+    if do_event && do_event[:sc] > predicate[:ec] && do_event[:ec] < ending[:sc]
+      scanner_events.delete(do_event)
+    end
+
+    stmts.bind(predicate[:ec], ending[:sc])
 
     {
       type: :until,
       body: [predicate, stmts],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -2319,9 +2274,9 @@ class Prettier::Parser < Ripper
       type: :until_mod,
       body: [predicate, statement],
       start: statement[:start],
-      char_start: statement[:char_start],
+      sc: statement[:sc],
       end: predicate[:end],
-      char_end: predicate[:char_end]
+      ec: predicate[:ec]
     }
   end
 
@@ -2332,16 +2287,16 @@ class Prettier::Parser < Ripper
   def on_var_alias(left, right)
     beging = find_scanner_event(:@kw, 'alias')
 
-    paren = source[beging[:char_end]...left[:char_start]].include?('(')
+    paren = source[beging[:ec]...left[:sc]].include?('(')
     ending = paren ? find_scanner_event(:@rparen) : right
 
     {
       type: :var_alias,
       body: [left, right],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -2393,13 +2348,7 @@ class Prettier::Parser < Ripper
   # block of code. It often will have comments attached to it, so it requires
   # some special handling.
   def on_void_stmt
-    {
-      type: :void_stmt,
-      start: lineno,
-      end: lineno,
-      char_start: char_pos,
-      char_end: char_pos
-    }
+    { type: :void_stmt, start: lineno, end: lineno, sc: char_pos, ec: char_pos }
   end
 
   # when is a parser event that represents another clause in a case chain.
@@ -2410,15 +2359,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'when')
     ending = consequent || find_scanner_event(:@kw, 'end')
 
-    stmts.bind(predicate[:char_end], ending[:char_start])
+    stmts.bind(predicate[:ec], ending[:sc])
 
     {
       type: :when,
       body: [predicate, stmts, consequent],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -2429,15 +2378,22 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'while')
     ending = find_scanner_event(:@kw, 'end')
 
-    stmts.bind(predicate[:char_end], ending[:char_start])
+    # Consume the do keyword if it exists so that it doesn't get confused for
+    # some other block
+    do_event = find_scanner_event(:@kw, 'do', consume: false)
+    if do_event && do_event[:sc] > predicate[:ec] && do_event[:ec] < ending[:sc]
+      scanner_events.delete(do_event)
+    end
+
+    stmts.bind(predicate[:ec], ending[:sc])
 
     {
       type: :while,
       body: [predicate, stmts],
       start: beging[:start],
-      char_start: beging[:char_start],
+      sc: beging[:sc],
       end: ending[:end],
-      char_end: ending[:char_end]
+      ec: ending[:ec]
     }
   end
 
@@ -2451,9 +2407,9 @@ class Prettier::Parser < Ripper
       type: :while_mod,
       body: [predicate, statement],
       start: statement[:start],
-      char_start: statement[:char_start],
+      sc: statement[:sc],
       end: predicate[:end],
-      char_end: predicate[:char_end]
+      ec: predicate[:ec]
     }
   end
 
@@ -2483,11 +2439,7 @@ class Prettier::Parser < Ripper
       # location information from the first piece.
       piece.merge(type: :word, body: [piece])
     else
-      word.merge!(
-        body: word[:body] << piece,
-        end: piece[:end],
-        char_end: piece[:char_end]
-      )
+      word.merge!(body: word[:body] << piece, end: piece[:end], ec: piece[:ec])
     end
   end
 
@@ -2507,7 +2459,7 @@ class Prettier::Parser < Ripper
     words.merge!(
       body: words[:body] << word_add,
       end: word_add[:end],
-      char_end: word_add[:char_end]
+      ec: word_add[:ec]
     )
   end
 
@@ -2541,7 +2493,7 @@ class Prettier::Parser < Ripper
     xstring.merge!(
       body: xstring[:body] << piece,
       end: piece[:end],
-      char_end: piece[:char_end]
+      ec: piece[:ec]
     )
   end
 
@@ -2566,11 +2518,7 @@ class Prettier::Parser < Ripper
       heredoc.merge!(body: xstring[:body])
     else
       ending = find_scanner_event(:@tstring_end)
-      xstring.merge!(
-        type: :xstring_literal,
-        end: ending[:end],
-        char_end: ending[:char_end]
-      )
+      xstring.merge!(type: :xstring_literal, end: ending[:end], ec: ending[:ec])
     end
   end
 
@@ -2582,7 +2530,7 @@ class Prettier::Parser < Ripper
       type: :yield,
       body: [args_add_block],
       end: args_add_block[:end],
-      char_end: args_add_block[:char_end]
+      ec: args_add_block[:ec]
     )
   end
 

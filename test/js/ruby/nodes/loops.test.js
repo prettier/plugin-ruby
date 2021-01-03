@@ -173,4 +173,29 @@ describe.each(["while", "until"])("%s", (keyword) => {
         ));
     }
   );
+
+  // https://github.com/prettier/plugin-ruby/issues/759
+  test("handles do keyword", () => {
+    const content = ruby(`
+      %w[foo bar].each do |resource|
+        puts resource
+      
+        # comment comment
+        ${keyword} @client.missing?(resource) do
+          sleep 1
+        end
+      end
+    `);
+
+    const expected = ruby(`
+      %w[foo bar].each do |resource|
+        puts resource
+      
+        # comment comment
+        sleep 1 ${keyword} @client.missing?(resource)
+      end
+    `);
+
+    return expect(content).toChangeFormat(expected);
+  });
 });

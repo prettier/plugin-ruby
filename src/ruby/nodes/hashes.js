@@ -54,8 +54,20 @@ function printHashKeyLabel(path, print) {
       return print(path);
     case "symbol_literal":
       return concat([path.call(print, "body", 0), ":"]);
-    case "dyna_symbol":
-      return concat(print(path).parts.slice(1).concat(":"));
+    case "dyna_symbol": {
+      const { parts } = print(path);
+
+      // We're going to slice off the starting colon character so that we can
+      // move it to the end. If there are comments, then we're going to go
+      // further into the printed doc nodes.
+      if (parts[0] === ":") {
+        parts.splice(0, 1);
+      } else {
+        parts[1].parts.splice(0, 1);
+      }
+
+      return concat(parts.concat(":"));
+    }
   }
 }
 
@@ -71,15 +83,16 @@ function printHashKeyRocket(path, print) {
 }
 
 function printAssocNew(path, opts, print) {
+  const [keyNode, valueNode] = path.getValue().body;
   const { keyPrinter } = path.getParentNode();
 
   const parts = [path.call((keyPath) => keyPrinter(keyPath, print), "body", 0)];
   const valueDoc = path.call(print, "body", 1);
 
-  if (skipAssignIndent(path.getValue().body[1])) {
-    parts.push(" ", valueDoc);
-  } else {
+  if (!skipAssignIndent(valueNode) || keyNode.comments) {
     parts.push(indent(concat([line, valueDoc])));
+  } else {
+    parts.push(" ", valueDoc);
   }
 
   return group(concat(parts));

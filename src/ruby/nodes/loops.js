@@ -6,6 +6,7 @@ const {
   hardline,
   ifBreak,
   indent,
+  join,
   softline
 } = require("../../prettier");
 
@@ -78,15 +79,17 @@ function printLoop(keyword, modifier) {
 }
 
 function printFor(path, opts, print) {
-  const [variable, range, stmts] = path.map(print, "body");
+  const [varDoc, rangeDoc, stmtsDoc] = path.map(print, "body");
+  const varsDoc =
+    path.getValue().body[0].type === "mlhs" ? join(", ", varDoc) : varDoc;
 
   return group(
     concat([
       "for ",
-      variable,
+      varsDoc,
       " in ",
-      range,
-      indent(concat([hardline, stmts])),
+      rangeDoc,
+      indent(concat([hardline, stmtsDoc])),
       concat([hardline, "end"])
     ])
   );

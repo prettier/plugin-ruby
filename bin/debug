@@ -122,10 +122,10 @@ const createTree = (parent, node) => {
   const button = document.createElement("button");
 
   button.onclick = highlight;
-  button.setAttribute("data-char-start", node.char_start);
-  button.setAttribute("data-char-end", node.char_end);
+  button.setAttribute("data-char-start", node.sc);
+  button.setAttribute("data-char-end", node.ec);
 
-  const label = `${node.type} (${node.char_start}-${node.char_end})`;
+  const label = `${node.type} (${node.sc}-${node.ec})`;
 
   if (node.type.startsWith("@")) {
     button.appendChild(document.createTextNode(`${label} = ${node.body}`));

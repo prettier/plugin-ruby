@@ -67,14 +67,14 @@ function hasPragma(text) {
 // for returning the index of the character within the source string that is the
 // beginning of the given node.
 function locStart(node) {
-  return node.char_start;
+  return node.sc;
 }
 
 // This function is critical for comments and cursor support, and is responsible
 // for returning the index of the character within the source string that is the
 // ending of the given node.
 function locEnd(node) {
-  return node.char_end;
+  return node.ec;
 }
 
 module.exports = {

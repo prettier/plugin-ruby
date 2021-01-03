@@ -62,14 +62,26 @@ describe("blocks", () => {
     return expect(content).toMatchFormat();
   });
 
-  test("for loops", () => {
-    const content = ruby(`
-      for i in [1, 2, 3]
-        p i
-      end
-    `);
+  describe("for loops", () => {
+    test("for loops", () => {
+      const content = ruby(`
+        for i in [1, 2, 3]
+          p i
+        end
+      `);
 
-    return expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
+    });
+
+    test("multiple variables", () => {
+      const content = ruby(`
+        for a, b in [[1, 2], [3, 4]]
+          p i
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
   });
 
   // from ruby test/ruby/test_call.rb
