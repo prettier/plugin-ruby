@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- [@andyw8] - Explain usage with Rubocop, as well as shipping a rubocop.yml config.
+
 ### Changed
 
 - [@kddeisz] - Reduce JSON size passing from Ruby process to node process by changing `char_start` -> `sc`, `char_end` -> `ec`, `start` -> `sl`, `end` -> `el`.
