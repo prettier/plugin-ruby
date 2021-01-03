@@ -149,6 +149,19 @@ Or, they can be passed to `prettier` as arguments:
 prettier --ruby-single-quote false --write '**/*.rb'
 ```
 
+## Use with RuboCop
+
+RuboCop and Prettier for Ruby serve different purposes, but there is overlap
+with some of RuboCop's functionality.
+
+Prettier provides a RuboCop configuration fle to disable the rules which clash.
+To enable, add the following config at the top of your project's `.rubocop.yml`:
+
+```yaml
+inherit_gem:
+  prettier: rubocop.yml
+```
+
 ## Contributing
 
 Check out our [contributing guide](CONTRIBUTING.md). Bug reports and pull requests are welcome on GitHub at https://github.com/prettier/plugin-ruby.
