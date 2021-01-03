@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.2.4] - 2021-01-03
+
 ### Added
 
 - [@andyw8] - Explain usage with Rubocop, as well as shipping a rubocop.yml config.
