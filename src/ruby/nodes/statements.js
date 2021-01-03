@@ -120,12 +120,12 @@ module.exports = {
       if (lineNo === null) {
         parts.push(printed);
       } else if (
-        stmt.start - lineNo > 1 ||
+        stmt.sl - lineNo > 1 ||
         [stmt.type, stmts[index - 1].type].includes("access_ctrl")
       ) {
         parts.push(hardline, hardline, printed);
       } else if (
-        stmt.start !== lineNo ||
+        stmt.sl !== lineNo ||
         path.getParentNode().type !== "string_embexpr"
       ) {
         parts.push(hardline, printed);
@@ -133,7 +133,7 @@ module.exports = {
         parts.push("; ", printed);
       }
 
-      lineNo = stmt.end;
+      lineNo = stmt.el;
     });
 
     return concat(parts);
