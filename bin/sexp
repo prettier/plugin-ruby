@@ -8,7 +8,7 @@ PP.prepend(
     def pp_hash(obj)
       group(1, '{', '}') do
         text obj[:type]
-        text "<L#{obj[:start]}-#{obj[:end]},"
+        text "<L#{obj[:sl]}-#{obj[:el]},"
         text "C#{obj[:sc]}-#{obj[:ec]}>"
 
         group(1) do

@@ -808,7 +808,14 @@ class MetadataTest < Minitest::Test
   private
 
   def assert_metadata(type, ruby)
-    assert_node_metadata(type, parse(ruby), sc: 0, ec: ruby.chomp.size)
+    assert_node_metadata(
+      type,
+      parse(ruby),
+      sc: 0,
+      ec: ruby.chomp.size,
+      sl: 1,
+      el: [1, ruby.count("\n")].max
+    )
   end
 
   def assert_node_metadata(type, node, metadata)
