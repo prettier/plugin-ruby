@@ -251,4 +251,23 @@ describe("hash", () => {
 
     return expect(content).toMatchFormat();
   });
+
+  // https://github.com/prettier/plugin-ruby/issues/758
+  test("splits if the key has a comment attached", () => {
+    const content = ruby(`
+      items = {
+        :'foo-bar'=> # Inline comment
+          {:name=>'foo-bar', :date=>'1970'},
+      }
+    `);
+
+    const expected = ruby(`
+      items = {
+        'foo-bar': # Inline comment
+          { name: 'foo-bar', date: '1970' }
+      }
+    `);
+
+    return expect(content).toChangeFormat(expected);
+  });
 });

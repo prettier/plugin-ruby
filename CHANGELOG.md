@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - [@lukyth], [@kddeisz] - Ensure if a ternary breaks into an `if..else..end` within a `command_call` node that parentheses are added.
 - [@AlanFoster], [@kddeisz] - Ensure you consume the optional `do` keyword on `while` and `until` loops so that it doesn't confuse the parser.
+- [@AlanFoster], [@kddeisz] - Ensure key-value pairs split on line when the key has a comment attached within a hash.
 
 ## [1.2.2] - 2021-01-01
 
