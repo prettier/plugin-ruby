@@ -149,7 +149,7 @@ Or, they can be passed to `prettier` as arguments:
 prettier --ruby-single-quote false --write '**/*.rb'
 ```
 
-## Use with RuboCop
+### Usage with RuboCop
 
 RuboCop and Prettier for Ruby serve different purposes, but there is overlap
 with some of RuboCop's functionality.
