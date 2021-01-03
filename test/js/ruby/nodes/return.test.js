@@ -43,4 +43,10 @@ describe("return", () => {
 
   test("returning two arguments, the first with parentheses", () =>
     expect("return (1), 2").toMatchFormat());
+
+  test("returning with the or keyword", () =>
+    expect("return(a or b)").toMatchFormat());
+
+  test("returning with the not keyword", () =>
+    expect("return(not a)").toMatchFormat());
 });
