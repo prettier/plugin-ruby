@@ -13,6 +13,7 @@ jobs:
         - "2.5"
         - "2.6"
         - "2.7"
+        - "3.0"
         - truffleruby-head
     env: 
       CI: true
@@ -52,13 +53,35 @@ jobs:
     - name: Lint and test
       run: |
         yarn check-format
-        yarn lint
         yarn test
         bundle exec rake test
 
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    env: 
+      CI: true
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-node@v2-beta
+      with:
+        node-version: 12.x
+    - id: yarn-cache
+      run: echo "::set-output name=directory::$(yarn cache dir)"
+    - uses: actions/cache@v1
+      with:
+        path: ${{ steps.yarn-cache.outputs.directory }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - run: yarn install --frozen-lockfile
+    - run: yarn lint
+
   automerge:
     name: AutoMerge
-    needs: ci
+    needs:
+      - ci
+      - lint
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
     steps:
