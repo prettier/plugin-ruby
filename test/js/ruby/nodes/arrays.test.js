@@ -14,6 +14,9 @@ describe("array", () => {
   test("transforms basic string arrays", () =>
     expect("['a', 'b', 'c', 'd', 'e']").toChangeFormat("%w[a b c d e]"));
 
+  test("does not transform string arrays with interpolation", () =>
+    expect(`['a', "#{b}", 'c']`).toMatchFormat());
+
   test("does not transform string arrays with spaces", () =>
     expect("['a', 'b c', 'd', 'e']").toMatchFormat());
 
@@ -125,4 +128,31 @@ describe("array", () => {
 
     return expect(content).toMatchFormat();
   });
+
+  test("with leading comments and comments in the body", () => {
+    const content = ruby(`
+      # leading
+      [
+        # inside
+        # body
+      ]
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test("with comments just in the body", () => {
+    const content = ruby(`
+      [
+        # inside
+        # body
+      ]
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test.each(["%w", "%W", "%i", "%I"])("%s special array literals", (start) =>
+    expect(`${start}[a b c]`).toMatchFormat()
+  );
 });

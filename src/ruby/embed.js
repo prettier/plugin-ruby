@@ -20,6 +20,10 @@ const parsers = {
   scss: "scss"
 };
 
+// This function is in here because it handles embedded parser values. I don't
+// have a test that exercises it because I'm not sure for which parser it is
+// necessary, but since it's in prettier core I'm keeping it here.
+/* istanbul ignore next */
 const replaceNewlines = (doc) =>
   mapDoc(doc, (currentDoc) =>
     typeof currentDoc === "string" && currentDoc.includes("\n")

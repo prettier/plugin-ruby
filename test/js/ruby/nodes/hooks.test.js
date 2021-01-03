@@ -13,6 +13,16 @@ describe.each(["BEGIN", "END"])("%s hook", (hook) => {
   test("expands to multi line", () =>
     expect(`${hook} { ${long} }`).toChangeFormat(`${hook} {\n  ${long}\n}`));
 
+  test("does not move comments on the declaration", () => {
+    const content = ruby(`
+      ${hook} { # comment
+        p 'hook'
+      }
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
   test("works for comments in the body", () => {
     const content = ruby(`
       ${hook} {

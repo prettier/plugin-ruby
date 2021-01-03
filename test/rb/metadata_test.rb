@@ -507,8 +507,8 @@ class MetadataTest < Minitest::Test
     assert_node_metadata(
       :params,
       parse(content).dig(:body, 1, :body, 0),
-      sc: 11,
-      ec: 21
+      sc: 8,
+      ec: 22
     )
   end
 

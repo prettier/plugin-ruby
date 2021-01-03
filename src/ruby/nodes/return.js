@@ -41,10 +41,6 @@ const printReturn = (path, opts, print) => {
   let args = path.getValue().body[0].body[0];
   let steps = ["body", 0, "body", 0];
 
-  if (!args) {
-    return "return";
-  }
-
   if (args.body.length === 1) {
     // If the body of the return contains parens, then just skip directly to the
     // content of the parens so that we can skip printing parens if we don't

@@ -1,4 +1,4 @@
-const { long } = require("../../utils");
+const { long, ruby } = require("../../utils");
 
 describe("return", () => {
   test("bare", () => expect("return").toMatchFormat());
@@ -49,4 +49,15 @@ describe("return", () => {
 
   test("returning with the not keyword", () =>
     expect("return(not a)").toMatchFormat());
+
+  test("comment inside of return parentheses", () => {
+    const content = ruby(`
+      return(
+        # foo
+        bar
+      )
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });

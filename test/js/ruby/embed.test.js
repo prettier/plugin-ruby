@@ -1,6 +1,16 @@
 const { ruby } = require("../utils");
 
 describe("embed", () => {
+  test("ignores parsers it can't find", () => {
+    const content = ruby(`
+      <<-JAVA
+      int i=0;
+      JAVA
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
   test("formats correctly on straight heredocs", () => {
     const content = ruby(`
       <<-JS.squish

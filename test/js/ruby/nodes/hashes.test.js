@@ -252,6 +252,29 @@ describe("hash", () => {
     return expect(content).toMatchFormat();
   });
 
+  test("with leading comments and comments in the body", () => {
+    const content = ruby(`
+      # leading
+      {
+        # inside
+        # body
+      }
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test("with comments just in the body", () => {
+    const content = ruby(`
+      {
+        # inside
+        # body
+      }
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
   // https://github.com/prettier/plugin-ruby/issues/758
   test("splits if the key has a comment attached", () => {
     const content = ruby(`

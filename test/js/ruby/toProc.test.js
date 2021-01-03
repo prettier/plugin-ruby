@@ -91,29 +91,85 @@ describe("to_proc transform", () => {
     });
   });
 
-  test("does not happen when there are multiple lines", () => {
-    const content = ruby(`
-      loop do |i|
-        i.to_s
-        i.next
-      end
-    `);
+  test("when inside of an aref node", () => {
+    const content = "foo[:bar].each { |baz| baz.to_s }";
+    const expected = "foo[:bar].each(&:to_s)";
 
-    return expect(content).toMatchFormat({ rubyToProc: true });
+    return expect(content).toChangeFormat(expected, { rubyToProc: true });
   });
 
-  test("does not happen when there are args to the method call", () =>
-    expect("loop { |i| i.to_s(:db) }").toMatchFormat({
-      rubyToProc: true
-    }));
+  describe("when not to transform", () => {
+    test("when called with &.", () => {
+      const content = "loop { |i| i&.to_s }";
 
-  test("does not happen when there are multiple args", () =>
-    expect("loop { |i, j| i.to_s }").toMatchFormat({ rubyToProc: true }));
+      expect(content).toMatchFormat({ rubyToProc: true });
+    });
 
-  test("does not duplicate when inside of an aref node", () =>
-    expect(
-      "foo[:bar].each { |baz| baz.to_s }"
-    ).toChangeFormat("foo[:bar].each(&:to_s)", { rubyToProc: true }));
+    test("when there are multiple lines", () => {
+      const content = ruby(`
+        loop do |i|
+          i.to_s
+          i.next
+        end
+      `);
+
+      return expect(content).toMatchFormat({ rubyToProc: true });
+    });
+
+    test("when there is a rescue, else, or ensure", () => {
+      const content = ruby(`
+        loop do |i|
+          i.to_s
+        rescue Foo
+          foo
+        end
+      `);
+
+      return expect(content).toMatchFormat({ rubyToProc: true });
+    });
+
+    test("when there are args to the method call", () => {
+      const content = "loop { |i| i.to_s(:db) }";
+
+      expect(content).toMatchFormat({ rubyToProc: true });
+    });
+
+    test("when there are multiple args", () => {
+      const content = "loop { |i, j| i.to_s }";
+
+      return expect(content).toMatchFormat({ rubyToProc: true });
+    });
+
+    test("when we're inside an if:", () => {
+      const content = "{ if: proc { |i| i.to_s } }";
+
+      return expect(content).toMatchFormat({ rubyToProc: true });
+    });
+
+    test("when we're inside an :if =>", () => {
+      const content = "{ :if => proc { |i| i.to_s } }";
+      const expected = "{ if: proc { |i| i.to_s } }";
+
+      return expect(content).toChangeFormat(expected, { rubyToProc: true });
+    });
+
+    test("when we're inside a regular hash", () => {
+      const content = "{ when: proc { |i| i.to_s } }";
+      const expected = "{ when: proc(&:to_s) }";
+
+      return expect(content).toChangeFormat(expected, { rubyToProc: true });
+    });
+
+    test("when we're inside a regular hash", () => {
+      const content = "{ when: proc { |i| i.to_s } }";
+      const expected = "{ when: proc(&:to_s) }";
+
+      return expect(content).toChangeFormat(expected, { rubyToProc: true });
+    });
+
+    test("when there are no variables", () =>
+      expect("loop { i.to_s }").toMatchFormat({ rubyToProc: true }));
+  });
 
   describe.each(["if", "unless"])(
     "does not transform when used inside hash with %s",

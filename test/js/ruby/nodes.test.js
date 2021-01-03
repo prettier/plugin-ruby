@@ -10,6 +10,7 @@ const expectedUnhandledNodes = [
   "args_new",
   "assign_error",
   "class_name_error",
+  "excessed_comma",
   "heredoc_dedent",
   "magic_comment",
   "mlhs_add",

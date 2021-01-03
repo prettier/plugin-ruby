@@ -1,4 +1,5 @@
 const {
+  align,
   concat,
   group,
   hardline,
@@ -74,7 +75,7 @@ function printHshPtn(path, opts, print) {
   const [constant, keyValuePairs, keyValueRest] = path.getValue().body;
   let args = [];
 
-  if (keyValuePairs) {
+  if (keyValuePairs.length > 0) {
     const printPair = (pairPath) => {
       const parts = [pairPath.call(print, 0)];
 
@@ -116,10 +117,13 @@ function printHshPtn(path, opts, print) {
 function printIn(path, opts, print) {
   const parts = [
     "in ",
-    path.call(
-      (valuePath) => printPatternArg(valuePath, opts, print),
-      "body",
-      0
+    align(
+      "in ".length,
+      path.call(
+        (valuePath) => printPatternArg(valuePath, opts, print),
+        "body",
+        0
+      )
     ),
     indent(concat([hardline, path.call(print, "body", 1)]))
   ];

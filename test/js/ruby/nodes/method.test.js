@@ -69,6 +69,48 @@ describe("method", () => {
       return expect(content).toMatchFormat();
     });
 
+    test("breaking", () => {
+      const content = `def foo(${long}:, a${long}:); end`;
+      const expected = ruby(`
+        def foo(
+          ${long}:,
+          a${long}:
+        ); end
+      `);
+
+      return expect(content).toChangeFormat(expected);
+    });
+
+    test("with comments on params", () => {
+      const content = ruby(`
+        def method(
+          req, # req comment
+          *rest, # rest comment
+          post, # post comment
+          kwarg:, # kwarg comment
+          kwarg_opt: 1, # kwarg_opt comment
+          **kwarg_rest, # kwarg_rest comment
+          &block # block comment
+        )
+          'foo'
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("with comments on optional params", () => {
+      const content = ruby(`
+        def method(
+          optl = 'value' # comment
+        )
+          'foo'
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
     if (process.env.RUBY_VERSION >= "2.7") {
       test("nokw_param", () => expect("def foo(**nil); end").toMatchFormat());
 
@@ -93,20 +135,14 @@ describe("method", () => {
 
         return expect(content).toMatchFormat();
       });
-    }
 
-    test("breaking", () =>
-      expect(`def foo(${long}:, a${long}:); end`).toChangeFormat(
-        ruby(`
-        def foo(
-          ${long}:,
-          a${long}:
-        ); end
-      `)
-      ));
-
-    if (process.env.RUBY_VERSION >= "3.0") {
       test("single-line methods", () =>
+        expect("def foo = bar").toMatchFormat());
+
+      test("single-line methods with empty params", () =>
+        expect("def foo() = bar").toChangeFormat("def foo = bar"));
+
+      test("single-line methods with params", () =>
         expect("def foo(name) = bar").toMatchFormat());
     }
 

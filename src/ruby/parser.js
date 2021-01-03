@@ -4,6 +4,7 @@ const path = require("path");
 // In order to properly parse ruby code, we need to tell the ruby process to
 // parse using UTF-8. Unfortunately, the way that you accomplish this looks
 // differently depending on your platform.
+/* istanbul ignore next */
 const LANG = (() => {
   const { env, platform } = process;
   const envValue = env.LC_ALL || env.LC_CTYPE || env.LANG;
