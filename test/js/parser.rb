@@ -3,6 +3,16 @@
 require 'socket'
 require_relative '../../src/ruby/parser'
 
+if RUBY_VERSION >= '3.0.0'
+  require_relative '../../src/rbs/parser'
+else
+  class Prettier::RBSParser
+    def self.parse(source)
+      false
+    end
+  end
+end
+
 # Set the program name so that it's easy to find if we need it
 $PROGRAM_NAME = 'prettier-ruby-test-parser'
 
@@ -20,12 +30,19 @@ loop do
 
   # Start up a new thread that will handle each successive connection.
   Thread.new(server.accept_nonblock) do |socket|
-    source = socket.readpartial(10 * 1024 * 1024)
+    message = socket.readpartial(10 * 1024 * 1024)
+    parser, source = message.force_encoding('UTF-8').split('|', 2)
 
-    builder = Prettier::Parser.new(source.force_encoding('UTF-8'))
-    response = builder.parse
+    response =
+      if parser == 'ruby'
+        builder = Prettier::Parser.new(source)
+        response = builder.parse
+        response unless builder.error?
+      elsif parser == 'rbs'
+        Prettier::RBSParser.parse(source)
+      end
 
-    if !response || builder.error?
+    if !response
       socket.puts('{ "error": true }')
     else
       socket.puts(JSON.fast_generate(response))

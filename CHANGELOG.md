@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- [@kddeisz] - Handling of the RBS language.
+
 ## [1.2.5] - 2021-01-04
 
 ### Changed

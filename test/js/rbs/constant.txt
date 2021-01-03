@@ -1,0 +1,11 @@
+Object
+::Object
+Enumerator::Lazy
+::Enumerator::Lazy
+Array[untyped]
+foo
+::foo
+Foo::foo
+::Foo::foo
+singleton(Object)
+singleton(::Object)

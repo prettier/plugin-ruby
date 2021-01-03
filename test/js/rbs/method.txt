@@ -1,0 +1,11 @@
+def t: -> void
+def t: -> void | ...
+def self.t: -> void
+def self.t: -> void | ...
+def self?.t: -> void
+def self?.t: -> void | ...
+def t: { -> void } -> void
+def t: ?{ -> void } -> void
+def `self`: -> void
+def `: -> void
+def t: (untyped `untyped`) -> void

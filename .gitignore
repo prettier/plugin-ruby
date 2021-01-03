@@ -4,6 +4,7 @@
 /yarn-error.log
 /pkg/
 /test.rb
+/test.rbs
 *.gem
 
 # This is to better support the GitHub actions checking - since bundler changes
