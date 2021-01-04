@@ -634,10 +634,6 @@ class Prettier::Parser < Ripper
   #     foo.(1, 2, 3)
   #
   def on_call(receiver, oper, sending)
-    # Make sure we take the operator out of the scanner events so that it
-    # doesn't get confused for a unary operator later.
-    scanner_events.delete(oper)
-
     ending = sending
 
     if sending == :call
@@ -740,11 +736,6 @@ class Prettier::Parser < Ripper
   # of the method, the operator being used to send the method, the name of
   # the method, and the arguments being passed to the method.
   def on_command_call(receiver, oper, ident, args)
-    # Make sure we take the operator out of the scanner events so that it
-    # doesn't get confused for a unary operator later.
-    scanner_events.delete(oper)
-
-    # Grab the ending from either the arguments or the method being sent
     ending = args || ident
 
     {
@@ -2173,7 +2164,7 @@ class Prettier::Parser < Ripper
       # stack. So we need to explicitly disallow those operators.
       index =
         scanner_events.rindex do |scanner_event|
-          scanner_event[:type] == :@op &&
+          scanner_event[:type] == :@op && scanner_event[:sc] < value[:sc] &&
             !%w[.. ...].include?(scanner_event[:body])
         end
 
