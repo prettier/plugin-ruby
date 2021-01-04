@@ -357,6 +357,9 @@ describe("conditionals", () => {
       return expect(content).toChangeFormat(expected);
     });
 
+    test("does not add parens if within a command_call non-breaking", () =>
+      expect("foo.bar baz ? foo : bar").toMatchFormat());
+
     test("adds parens if within a command_call", () => {
       const content = `foo.bar baz ? ${long} : ${long}`;
       const expected = ruby(`

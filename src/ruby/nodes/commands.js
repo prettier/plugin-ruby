@@ -105,8 +105,13 @@ function printCommandCall(path, opts, print) {
   let breakDoc;
 
   if (hasTernaryArg(node.body[3])) {
-    parts.push("(");
-    breakDoc = parts.concat(indent(concat([softline, argDocs])), softline, ")");
+    breakDoc = parts.concat(
+      "(",
+      indent(concat([softline, argDocs])),
+      softline,
+      ")"
+    );
+    parts.push(" ");
   } else if (skipArgsAlign(path)) {
     parts.push(" ");
     breakDoc = parts.concat(argDocs);
