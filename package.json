@@ -22,7 +22,6 @@
     "prettier": ">=1.10"
   },
   "devDependencies": {
-    "all-contributors-cli": "^6.14.1",
     "eslint": "^7.8.1",
     "eslint-config-prettier": "^7.0.0",
     "husky": "^4.3.5",
