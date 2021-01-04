@@ -1024,7 +1024,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.2.3...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.2.4...HEAD
+[1.2.4]: https://github.com/prettier/plugin-ruby/compare/v1.2.3...v1.2.4
 [1.2.3]: https://github.com/prettier/plugin-ruby/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/prettier/plugin-ruby/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/prettier/plugin-ruby/compare/v1.2.0...v1.2.1
