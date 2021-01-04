@@ -1132,6 +1132,7 @@ would previously result in `array[]`, but now prints properly.
 [@mmcnl]: https://github.com/mmcnl
 [@nathan-beam]: https://github.com/nathan-beam
 [@noahtheduke]: https://github.com/NoahTheDuke
+[@nruth]: https://github.com/nruth
 [@overload119]: https://github.com/Overload119
 [@petevk]: https://github.com/petevk
 [@pje]: https://github.com/pje
