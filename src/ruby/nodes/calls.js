@@ -24,6 +24,12 @@ function printCall(path, opts, print) {
   // call syntax so if `call` is implicit, we don't print it out.
   const messageDoc = messageNode === "call" ? "" : path.call(print, "body", 2);
 
+  // For certain left sides of the call nodes, we want to attach directly to
+  // the } or end.
+  if (noIndent.includes(receiverNode.type)) {
+    return concat([receiverDoc, operatorDoc, messageDoc]);
+  }
+
   // The right side of the call node, as in everything including the operator
   // and beyond.
   const rightSideDoc = concat([
@@ -47,18 +53,10 @@ function printCall(path, opts, print) {
   // If we're at the top of a chain, then we're going to print out a nice
   // multi-line layout if this doesn't break into multiple lines.
   if (!chained.includes(parentNode.type) && (node.chain || 0) >= 3) {
-    let breakDoc = concat(node.breakDoc.concat(rightSideDoc));
-    if (!noIndent.includes(node.firstReceiverType)) {
-      breakDoc = indent(breakDoc);
-    }
-
-    return ifBreak(group(breakDoc), concat([receiverDoc, group(rightSideDoc)]));
-  }
-
-  // For certain left sides of the call nodes, we want to attach directly to
-  // the } or end.
-  if (noIndent.includes(receiverNode.type)) {
-    return concat([receiverDoc, operatorDoc, messageDoc]);
+    return ifBreak(
+      group(indent(concat(node.breakDoc.concat(rightSideDoc)))),
+      concat([receiverDoc, group(rightSideDoc)])
+    );
   }
 
   return group(concat([receiverDoc, group(indent(rightSideDoc))]));
