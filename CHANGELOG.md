@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.2.5] - 2021-01-04
+
 ### Changed
 
 - [@nruth], [@kddeisz] - Ensure unary operators on method calls that are sending operators get the correct scanner events.
@@ -1026,7 +1028,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.2.4...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.2.5...HEAD
+[1.2.5]: https://github.com/prettier/plugin-ruby/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/prettier/plugin-ruby/compare/v1.2.3...v1.2.4
 [1.2.3]: https://github.com/prettier/plugin-ruby/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/prettier/plugin-ruby/compare/v1.2.1...v1.2.2
