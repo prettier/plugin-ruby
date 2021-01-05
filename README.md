@@ -95,7 +95,7 @@ gem install prettier
 The `rbprettier` executable is now installed and ready for use:
 
 ```bash
-bundle exec rbprettier --write '**/*.rb'
+bundle exec rbprettier --write '**/*.{rb,rbs}'
 ```
 
 ### `npm` package
@@ -115,7 +115,7 @@ yarn add --dev prettier @prettier/plugin-ruby
 The `prettier` executable is now installed and ready for use:
 
 ```bash
-./node_modules/.bin/prettier --write '**/*.rb'
+./node_modules/.bin/prettier --write '**/*.{rb,rbs}'
 ```
 
 ## Configuration
@@ -146,7 +146,7 @@ file](https://prettier.io/docs/en/configuration.html). For example:
 Or, they can be passed to `prettier` as arguments:
 
 ```bash
-prettier --ruby-single-quote false --write '**/*.rb'
+prettier --ruby-single-quote false --write '**/*.{rb,rbs}'
 ```
 
 ### Usage with RuboCop
