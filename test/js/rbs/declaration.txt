@@ -1,0 +1,3 @@
+Hello::World: Integer
+$name: String
+type ::Module::foo = String | Integer

@@ -1,0 +1,28 @@
+alias foo bar
+alias self.foo self.bar
+attr_accessor foo: Foo
+attr_accessor self.foo: Foo
+attr_accessor foo(): Foo
+attr_accessor self.foo(): Foo
+attr_accessor foo(@bar): Foo
+attr_accessor self.foo(@bar): Foo
+attr_reader foo: Foo
+attr_reader self.foo: Foo
+attr_reader foo(): Foo
+attr_reader self.foo(): Foo
+attr_reader foo(@bar): Foo
+attr_reader self.foo(@bar): Foo
+attr_writer foo: Foo
+attr_writer self.foo: Foo
+attr_writer foo(): Foo
+attr_writer self.foo(): Foo
+attr_writer foo(@bar): Foo
+attr_writer self.foo(@bar): Foo
+@foo: Foo
+self.@foo: Foo
+@@foo: Foo
+include Foo
+prepend Foo
+extend Foo
+private
+public

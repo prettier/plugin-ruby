@@ -1,5 +1,8 @@
-const printer = require("./ruby/printer");
-const parser = require("./ruby/parser");
+const rubyPrinter = require("./ruby/printer");
+const rubyParser = require("./ruby/parser");
+
+const rbsPrinter = require("./rbs/printer");
+const rbsParser = require("./rbs/parser");
 
 /*
  * metadata mostly pulled from linguist and rubocop:
@@ -67,13 +70,20 @@ module.exports = {
       interpreters: ["jruby", "macruby", "rake", "rbx", "ruby"],
       linguistLanguageId: 326,
       vscodeLanguageIds: ["ruby"]
+    },
+    {
+      name: "RBS",
+      parsers: ["rbs"],
+      extensions: [".rbs"]
     }
   ],
   parsers: {
-    ruby: parser
+    ruby: rubyParser,
+    rbs: rbsParser
   },
   printers: {
-    ruby: printer
+    ruby: rubyPrinter,
+    rbs: rbsPrinter
   },
   options: {
     rubyArrayLiteral: {

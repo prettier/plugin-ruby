@@ -5,7 +5,7 @@ const prettier = require("prettier");
 // eslint-disable-next-line no-underscore-dangle
 const { formatAST } = prettier.__debug;
 
-function parseAsync(text) {
+function parseAsync(parser, text) {
   return new Promise((resolve, reject) => {
     const client = new net.Socket();
 
@@ -26,11 +26,13 @@ function parseAsync(text) {
 
     client.on("data", (data) => {
       client.destroy();
-      resolve(JSON.parse(data.toString()));
+
+      const response = JSON.parse(data.toString());
+      (response.error ? reject : resolve)(response);
     });
 
     client.connect({ port: 22020 }, () => {
-      client.end(text);
+      client.end(`${parser}|${text}`);
     });
   });
 }
@@ -42,7 +44,10 @@ function checkFormat(before, after, config) {
   );
 
   return new Promise((resolve, reject) => {
-    if (before.includes("#") || before.includes("=begin")) {
+    if (
+      opts.parser === "ruby" &&
+      (before.includes("#") || before.includes("=begin"))
+    ) {
       // If the source includes an #, then this test has a comment in it.
       // Unfortunately, formatAST expects comments to already be attached, but
       // prettier doesn't export anything that allows you to hook into their
@@ -50,7 +55,7 @@ function checkFormat(before, after, config) {
       // the normal format function and spawn a process.
       resolve(prettier.format(before, opts));
     } else {
-      parseAsync(before)
+      parseAsync(opts.parser, before)
         .then((ast) => resolve(formatAST(ast, opts).formatted))
         .catch(reject);
     }

@@ -3,8 +3,16 @@
 const fs = require("fs");
 const prettier = require("prettier");
 
-const code = fs.existsSync(process.argv[2])
-  ? fs.readFileSync(process.argv[2], "utf-8")
-  : process.argv.slice(2).join(" ").replace(/\\n/g, "\n");
+let parser = "ruby";
+let content = 2;
 
-console.log(prettier.format(code, { parser: "ruby", plugins: ["."] }));
+if (process.argv[content] === "rbs") {
+  parser = "rbs";
+  content = 3;
+}
+
+const code = fs.existsSync(process.argv[content])
+  ? fs.readFileSync(process.argv[content], "utf-8")
+  : process.argv.slice(content).join(" ").replace(/\\n/g, "\n");
+
+console.log(prettier.format(code, { parser, plugins: ["."] }));

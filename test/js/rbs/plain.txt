@@ -1,0 +1,11 @@
+void
+untyped
+bool
+true
+false
+nil
+top
+bot
+self
+instance
+class

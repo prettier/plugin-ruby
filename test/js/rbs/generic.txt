@@ -1,0 +1,7 @@
+[A, B] (A) -> B
+[A] (A) -> A
+[A, B, C] -> ::Foo[A, B, C]
+[A, B] -> [A, B]
+[A] -> { foo: A }
+[A, B] (A & B) -> void
+[A, B, C, D] -> ::Foo[A, B, C, D]

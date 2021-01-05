@@ -1,0 +1,5 @@
+untyped?
+^-> untyped?
+untyped | void?
+:foo??
+:foo!?

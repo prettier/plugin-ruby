@@ -11,3 +11,6 @@
 /*.lock
 /LICENSE
 /test.rb
+/test.rbs
+
+*.txt
