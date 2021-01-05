@@ -72,6 +72,12 @@ To run `prettier` with the Ruby plugin, you're going to need [`ruby`](https://ww
 
 Note that currently the editor integrations work best with the `npm` package, as most of the major editor plugins expect a `node_modules` directory. You can get them to work with the Ruby gem, but it requires manually configuring the paths.
 
+This plugin currently supports formatting the following kinds of files:
+
+- All varieties of Ruby source files (e.g., `*.rb`, `*.gemspec`, `Gemfile`, etc.)
+- [RBS type language](https://github.com/ruby/rbs) files - requires having the `rbs` gem in your gem path
+- [HAML template language](https://haml.info/) files - requires having the `haml` gem in your gem path
+
 ### Ruby gem
 
 Add this line to your application's Gemfile:
@@ -95,7 +101,7 @@ gem install prettier
 The `rbprettier` executable is now installed and ready for use:
 
 ```bash
-bundle exec rbprettier --write '**/*.{rb,rbs}'
+bundle exec rbprettier --write '**/*'
 ```
 
 ### `npm` package
@@ -115,7 +121,7 @@ yarn add --dev prettier @prettier/plugin-ruby
 The `prettier` executable is now installed and ready for use:
 
 ```bash
-./node_modules/.bin/prettier --write '**/*.{rb,rbs}'
+./node_modules/.bin/prettier --write '**/*'
 ```
 
 ## Configuration
@@ -146,7 +152,7 @@ file](https://prettier.io/docs/en/configuration.html). For example:
 Or, they can be passed to `prettier` as arguments:
 
 ```bash
-prettier --ruby-single-quote false --write '**/*.{rb,rbs}'
+prettier --ruby-single-quote false --write '**/*'
 ```
 
 ### Usage with RuboCop

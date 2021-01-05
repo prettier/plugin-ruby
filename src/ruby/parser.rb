@@ -14,7 +14,7 @@ if (RUBY_MAJOR < 2) || ((RUBY_MAJOR == 2) && (RUBY_MINOR < 5))
 end
 
 require 'delegate'
-require 'json' unless defined?(JSON)
+require 'json'
 require 'ripper'
 
 module Prettier; end
@@ -38,6 +38,13 @@ class Prettier::Parser < Ripper
     @line_counts = [0]
 
     @source.lines.each { |line| @line_counts << @line_counts.last + line.size }
+  end
+
+  def self.parse(source)
+    builder = new(source)
+
+    response = builder.parse
+    response unless builder.error?
   end
 
   private
@@ -2548,10 +2555,9 @@ end
 # stdin and report back the AST over stdout.
 
 if $0 == __FILE__
-  builder = Prettier::Parser.new($stdin.read)
-  response = builder.parse
+  response = Prettier::Parser.parse($stdin.read)
 
-  if !response || builder.error?
+  if !response
     warn(
       '@prettier/plugin-ruby encountered an error when attempting to parse ' \
         'the ruby source. This usually means there was a syntax error in the ' \

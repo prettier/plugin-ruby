@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 
 - [@kddeisz] - Handling of the RBS language.
+- [@kddeisz] - Incorporate the HAML plugin.
 
 ## [1.2.5] - 2021-01-04
 

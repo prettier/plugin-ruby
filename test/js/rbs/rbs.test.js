@@ -1,16 +1,14 @@
 const fs = require("fs");
 const path = require("path");
 
-const { ruby } = require("../utils");
+const { rbs } = require("../utils");
 
 function testCases(name, transform) {
   const buffer = fs.readFileSync(path.resolve(__dirname, `${name}.txt`));
   const sources = buffer.toString().slice(0, -1).split("\n");
 
   sources.forEach((source) => {
-    test(source, () =>
-      expect(transform(source)).toMatchFormat({ parser: "rbs" })
-    );
+    test(source, () => expect(rbs(transform(source))).toMatchFormat());
   });
 }
 
@@ -21,15 +19,6 @@ function describeCases(name, transform) {
 }
 
 describe("rbs", () => {
-  if (process.env.RUBY_VERSION <= "3.0") {
-    test("RBS did not exist before ruby 3.0", () => {
-      // this is here because test files must contain at least one test, so for
-      // earlier versions of ruby this is just going to chill here
-    });
-
-    return;
-  }
-
   describeCases("combination", (source) => `T: ${source}`);
 
   describeCases("constant", (source) => `T: ${source}`);
@@ -38,118 +27,118 @@ describe("rbs", () => {
     testCases("declaration", (source) => source);
 
     test("interface", () => {
-      const content = ruby(`
+      const content = rbs(`
         interface _Foo
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("interface with type params", () => {
-      const content = ruby(`
+      const content = rbs(`
         interface _Foo[A, B]
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("class", () => {
-      const content = ruby(`
+      const content = rbs(`
         class Foo
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("class with type params", () => {
-      const content = ruby(`
+      const content = rbs(`
         class Foo[A, B]
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("class with complicated type params", () => {
-      const content = ruby(`
+      const content = rbs(`
         class Foo[unchecked in A, unchecked out B, in C, out D, unchecked E, unchecked F, G, H]
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("class with annotations", () => {
-      const content = ruby(`
+      const content = rbs(`
         %a{This is an annotation.}
         class Foo
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("class with annotations that cannot be switched to braces", () => {
-      const content = ruby(`
+      const content = rbs(`
         %a<This is {an} annotation.>
         class Foo
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("class with comments", () => {
-      const content = ruby(`
+      const content = rbs(`
         # This is a comment.
         class Foo
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("class with superclass", () => {
-      const content = ruby(`
+      const content = rbs(`
         class Foo < Bar
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("module", () => {
-      const content = ruby(`
+      const content = rbs(`
         module Foo
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("module with type params", () => {
-      const content = ruby(`
+      const content = rbs(`
         module Foo[A, B]
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("module with self types", () => {
-      const content = ruby(`
+      const content = rbs(`
         module Foo : A
         end
       `);
 
-      return expect(content).toMatchFormat({ parser: "rbs" });
+      return expect(content).toMatchFormat();
     });
 
     test("multiple empty lines", () => {
-      const content = ruby(`
+      const content = rbs(`
         class Foo
           A: 1
           B: 2
@@ -159,7 +148,7 @@ describe("rbs", () => {
         end
       `);
 
-      const expected = ruby(`
+      const expected = rbs(`
         class Foo
           A: 1
           B: 2
@@ -168,16 +157,17 @@ describe("rbs", () => {
         end
       `);
 
-      return expect(content).toChangeFormat(expected, { parser: "rbs" });
+      return expect(content).toChangeFormat(expected);
     });
   });
 
-  describeCases("generic", (source) =>
-    ruby(`
-      class T
-        def t: ${source}
-      end
-    `)
+  describeCases(
+    "generic",
+    (source) => `
+    class T
+      def t: ${source}
+    end
+  `
   );
 
   describeCases("interface", (source) => `T: ${source}`);
@@ -186,79 +176,72 @@ describe("rbs", () => {
     testCases("literal", (source) => `T: ${source}`);
 
     test("+1 drops the plus sign", () =>
-      expect("T: +1").toChangeFormat("T: 1", { parser: "rbs" }));
+      expect(rbs("T: +1")).toChangeFormat("T: 1"));
 
-    test("uses default quotes", () =>
-      expect("T: 'foo'").toMatchFormat({ parser: "rbs" }));
+    test("uses default quotes", () => expect(rbs("T: 'foo'")).toMatchFormat());
 
     test("changes quotes to match", () =>
-      expect("T: 'foo'").toChangeFormat(`T: "foo"`, {
-        rubySingleQuote: false,
-        parser: "rbs"
+      expect(rbs("T: 'foo'")).toChangeFormat(`T: "foo"`, {
+        rubySingleQuote: false
       }));
 
     test("keeps string the same when there is an escape sequence", () =>
-      expect(`T: "super \\" duper"`).toMatchFormat({ parser: "rbs" }));
+      expect(rbs(`T: "super \\" duper"`)).toMatchFormat());
 
     test("unescapes single quotes when using double quotes", () =>
-      expect(`T: 'super \\' duper'`).toChangeFormat(`T: "super ' duper"`, {
-        rubySingleQuote: false,
-        parser: "rbs"
+      expect(rbs(`T: 'super \\' duper'`)).toChangeFormat(`T: "super ' duper"`, {
+        rubySingleQuote: false
       }));
 
     test("maintains escape sequences when using double quotes", () =>
-      expect(`T: "escape sequences \\a\\b\\e\\f\\n\\r\\t\\v"`).toMatchFormat({
-        parser: "rbs"
-      }));
+      expect(rbs(`T: "escape sequences \\a\\b\\e\\f\\n\\r"`)).toMatchFormat());
 
     test("maintains not escape sequences when using single quotes", () =>
-      expect(`T: 'escape sequences \\a\\b\\e\\f\\n\\r\\t\\v'`).toMatchFormat({
-        parser: "rbs"
-      }));
+      expect(rbs(`T: 'escape sequences \\a\\b\\e\\f\\n\\r'`)).toMatchFormat());
   });
 
-  describeCases("member", (source) =>
-    ruby(`
-      class T
-        ${source}
-      end
-    `)
+  describeCases(
+    "member",
+    (source) => `
+    class T
+      ${source}
+    end
+  `
   );
 
-  describeCases("method", (source) =>
-    ruby(`
-      class T
-        ${source}
-      end
-    `)
+  describeCases(
+    "method",
+    (source) => `
+    class T
+      ${source}
+    end
+  `
   );
 
   describe("optional", () => {
     testCases("optional", (source) => `T: ${source}`);
 
     test("removes optional space before question mark", () =>
-      expect("T: :foo ?").toChangeFormat("T: :foo?", { parser: "rbs" }));
+      expect(rbs("T: :foo ?")).toChangeFormat("T: :foo?"));
   });
 
   describe("plain", () => {
     testCases("plain", (source) => `T: ${source}`);
 
     test("any gets transformed into untyped", () =>
-      expect("T: any").toChangeFormat("T: untyped", { parser: "rbs" }));
+      expect(rbs("T: any")).toChangeFormat("T: untyped"));
   });
 
   describe("proc", () => {
     testCases("proc", (source) => `T: ${source}`);
 
     test("drops optional parentheses when there are no params", () =>
-      expect("T: ^() -> void").toChangeFormat("T: ^-> void", {
-        parser: "rbs"
-      }));
+      expect(rbs("T: ^() -> void")).toChangeFormat("T: ^-> void"));
 
     test("drops optional parentheses with block param when there are no params to the block", () =>
-      expect(
-        "T: ^{ () -> void } -> void"
-      ).toChangeFormat("T: ^{ -> void } -> void", { parser: "rbs" }));
+      expect(rbs("T: ^{ () -> void } -> void")).toChangeFormat(
+        "T: ^{ -> void } -> void"
+      ));
   });
 
   describeCases("record", (source) => `T: ${source}`);
