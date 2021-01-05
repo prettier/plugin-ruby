@@ -1102,6 +1102,7 @@ would previously result in `array[]`, but now prints properly.
 [@cldevs]: https://github.com/cldevs
 [@codingitwrong]: https://github.com/CodingItWrong
 [@coiti]: https://github.com/coiti
+[@cvoege]: https://github.com/cvoege
 [@deecewan]: https://github.com/deecewan
 [@dudeofawesome]: https://github.com/dudeofawesome
 [@eins78]: https://github.com/eins78
@@ -1152,6 +1153,7 @@ would previously result in `array[]`, but now prints properly.
 [@sviccari]: https://github.com/SViccari
 [@tobyndockerill]: https://github.com/tobyndockerill
 [@uri]: https://github.com/uri
+[@valscion]: https://github.com/valscion
 [@xipgroc]: https://github.com/xipgroc
 [@ykpythemind]: https://github.com/ykpythemind
 [@yuki24]: https://github.com/yuki24
