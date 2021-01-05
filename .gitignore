@@ -5,6 +5,7 @@
 /pkg/
 /test.rb
 /test.rbs
+/test.haml
 *.gem
 
 # This is to better support the GitHub actions checking - since bundler changes

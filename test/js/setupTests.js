@@ -31,31 +31,31 @@ function parseAsync(parser, text) {
       (response.error ? reject : resolve)(response);
     });
 
-    client.connect({ port: 22020 }, () => {
+    client.connect({ port: process.env.PORT || 22021 }, () => {
       client.end(`${parser}|${text}`);
     });
   });
 }
 
 function checkFormat(before, after, config) {
-  const opts = Object.assign(
-    { parser: "ruby", plugins: ["."], originalText: before },
-    config
-  );
+  const parser = before.parser || "ruby";
+  const originalText = before.code || before;
+
+  const opts = Object.assign({ parser, plugins: ["."], originalText }, config);
 
   return new Promise((resolve, reject) => {
     if (
       opts.parser === "ruby" &&
-      (before.includes("#") || before.includes("=begin"))
+      (originalText.includes("#") || originalText.includes("=begin"))
     ) {
       // If the source includes an #, then this test has a comment in it.
       // Unfortunately, formatAST expects comments to already be attached, but
       // prettier doesn't export anything that allows you to hook into their
       // attachComments function. So in this case, we need to instead go through
       // the normal format function and spawn a process.
-      resolve(prettier.format(before, opts));
+      resolve(prettier.format(originalText, opts));
     } else {
-      parseAsync(opts.parser, before)
+      parseAsync(opts.parser, originalText)
         .then((ast) => resolve(formatAST(ast, opts).formatted))
         .catch(reject);
     }
@@ -72,10 +72,10 @@ function checkFormat(before, after, config) {
 
 expect.extend({
   toChangeFormat(before, after, config = {}) {
-    return checkFormat(before, after, config);
+    return checkFormat(before, after.code || after, config);
   },
   toMatchFormat(before, config = {}) {
-    return checkFormat(before, before, config);
+    return checkFormat(before, before.code || before, config);
   },
   toFailFormat(before, message) {
     let pass = false;

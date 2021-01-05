@@ -6,21 +6,12 @@ const {
   locEnd
 } = require("../../../src/rbs/parser");
 
-describe("printer", () => {
-  if (process.env.RUBY_VERSION <= "3.0") {
-    test("RBS did not exist before ruby 3.0", () => {
-      // this is here because test files must contain at least one test, so for
-      // earlier versions of ruby this is just going to chill here
-    });
-
-    return;
-  }
-
+describe("parser", () => {
   test("parse", () => {
     expect(parse("class Foo end").declarations).toHaveLength(1);
   });
 
-  test("parse", () => {
+  test("parse failure", () => {
     expect(() => parse("<>")).toThrowError();
   });
 

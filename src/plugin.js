@@ -4,6 +4,9 @@ const rubyParser = require("./ruby/parser");
 const rbsPrinter = require("./rbs/printer");
 const rbsParser = require("./rbs/parser");
 
+const hamlPrinter = require("./haml/printer");
+const hamlParser = require("./haml/parser");
+
 /*
  * metadata mostly pulled from linguist and rubocop:
  * https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
@@ -75,15 +78,23 @@ module.exports = {
       name: "RBS",
       parsers: ["rbs"],
       extensions: [".rbs"]
+    },
+    {
+      name: "HAML",
+      parsers: ["haml"],
+      extensions: [".haml"],
+      vscodeLanguageIds: ["haml"]
     }
   ],
   parsers: {
     ruby: rubyParser,
-    rbs: rbsParser
+    rbs: rbsParser,
+    haml: hamlParser
   },
   printers: {
     ruby: rubyPrinter,
-    rbs: rbsPrinter
+    rbs: rbsPrinter,
+    haml: hamlPrinter
   },
   options: {
     rubyArrayLiteral: {

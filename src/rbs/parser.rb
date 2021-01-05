@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'bundler/setup' if ENV['CI']
 require 'json'
 require 'rbs'
 
@@ -43,15 +44,17 @@ end
 # key-value pairs of the record.
 class RBS::Types::Record
   def to_json(*a)
-    fields_extra =
-      fields.to_h do |key, type|
-        if key.is_a?(Symbol) && key.match?(/\A[A-Za-z_][A-Za-z_]*\z/) &&
-             !key.match?(RBS::Parser::KEYWORDS_RE)
-          [key, { type: type, joiner: :label }]
-        else
-          [key.inspect, { type: type, joiner: :rocket }]
-        end
+    fields_extra = {}
+
+    # Explicitly not using Enumerable#to_h here to support Ruby 2.5
+    fields.each do |key, type|
+      if key.is_a?(Symbol) && key.match?(/\A[A-Za-z_][A-Za-z_]*\z/) &&
+           !key.match?(RBS::Parser::KEYWORDS_RE)
+        fields_extra[key] = { type: type, joiner: :label }
+      else
+        fields_extra[key.inspect] = { type: type, joiner: :rocket }
       end
+    end
 
     { class: :record, fields: fields_extra, location: location }.to_json(*a)
   end

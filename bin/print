@@ -4,15 +4,22 @@ const fs = require("fs");
 const prettier = require("prettier");
 
 let parser = "ruby";
-let content = 2;
+let contentIdx = 2;
 
-if (process.argv[content] === "rbs") {
-  parser = "rbs";
-  content = 3;
+if (["rbs", "haml"].includes(process.argv[contentIdx])) {
+  parser = process.argv[contentIdx];
+  contentIdx += 1;
 }
 
-const code = fs.existsSync(process.argv[content])
-  ? fs.readFileSync(process.argv[content], "utf-8")
-  : process.argv.slice(content).join(" ").replace(/\\n/g, "\n");
+let content;
 
-console.log(prettier.format(code, { parser, plugins: ["."] }));
+if (fs.existsSync(process.argv[contentIdx])) {
+  content = fs.readFileSync(process.argv[contentIdx], "utf-8");
+} else if (process.argv.length === contentIdx) {
+  const extension = parser === "ruby" ? "rb" : parser;
+  content = fs.readFileSync(`test.${extension}`, "utf-8");
+} else {
+  content = process.argv.slice(contentIdx).join(" ").replace(/\\n/g, "\n");
+}
+
+console.log(prettier.format(content, { parser, plugins: ["."] }));
