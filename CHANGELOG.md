@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [@nruth], [@kddeisz] - Ensure unary operators on method calls that are sending operators get the correct scanner events.
+- [@cvoege], [@kddeisz] - Do not add parentheses when they're not needed to non-breaking command_calls with ternary arguments.
+- [@valscion], [@kddeisz] - Print method chains more nicely off array and hash literals.
 
 ## [1.2.4] - 2021-01-03
 

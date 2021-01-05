@@ -92,10 +92,7 @@ describe("calls", () => {
           ${item},
           ${item},
           ${item}
-        ]
-        .map(&:foo?)
-        .bbb
-        .ccc
+        ].map(&:foo?).bbb.ccc
     `);
 
     return expect(content).toChangeFormat(expected);
