@@ -5,7 +5,7 @@ const process = require("process");
 const os = require("os");
 const { kill } = require("process");
 
-let SOCKFILE;
+let SOCKFILE = process.env.PRETTIER_RUBY_PARSER_HOST;
 let NETCAT_ADAPTER;
 
 function killServer(server) {
@@ -109,7 +109,7 @@ function sendRequest(request, env) {
 
   const { stdout, stderr } = spawnSync(netcatExe, [...netcatArgs, SOCKFILE], {
     env: Object.assign({}, process.env, env),
-    input: JSON.stringify(request),
+    input: `${request.type}|${request.data}`,
     maxBuffer: 15 * 1024 * 1024 // 15MB
   });
 
@@ -118,12 +118,12 @@ function sendRequest(request, env) {
     throw new Error(msg);
   }
 
-  const response = stdout.toString();
+  const response = JSON.parse(stdout.toString());
 
-  if (response.match(/^ERROR: /)) {
-    throw new Error(response);
+  if (response.error) {
+    throw new Error(response.error);
   } else {
-    return JSON.parse(response);
+    return response;
   }
 }
 
