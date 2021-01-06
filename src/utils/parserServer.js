@@ -3,9 +3,18 @@ const path = require("path");
 const { existsSync, mkdtempSync } = require("fs");
 const process = require("process");
 const os = require("os");
+const { kill } = require("process");
 
 let SOCKFILE;
 let NETCAT_ADAPTER;
+
+function killServer(server) {
+  try {
+    process.kill(-server.pid);
+    SOCKFILE = undefined;
+    NETCAT_ADAPTER = undefined;
+  } catch (e) {}
+}
 
 // Spawn the parser_server.rb subprocess. We do this since booting Ruby is slow,
 // and we can re-use the parser process multiple times since it is statelesss.
@@ -21,7 +30,7 @@ function spawnParserServer(sockfile, env) {
     }
   );
 
-  process.on("exit", (code) => process.kill(-server.pid));
+  process.on("exit", () => killServer(server));
 
   server.unref();
 
