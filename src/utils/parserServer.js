@@ -14,11 +14,13 @@ function spawnParserServer(sockfile, env) {
     "ruby",
     ["--disable-gems", path.join(__dirname, "./parser_server.rb"), sockfile],
     {
-      env: Object.assign({}, process.env, env),
+      env: Object.assign({ PARSER_SERVER_TIMEOUT: "600" }, process.env, env),
       detached: true,
       stdio: "inherit"
     }
   );
+
+  process.on("exit", (code) => process.kill(-server.pid));
 
   server.unref();
 
