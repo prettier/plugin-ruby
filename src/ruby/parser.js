@@ -1,5 +1,6 @@
 const { spawnSync } = require("child_process");
-const path = require("path");
+const process = require("process");
+const { sendRequest, ensureParseServer } = require("./../utils/parserServer");
 
 // In order to properly parse ruby code, we need to tell the ruby process to
 // parse using UTF-8. Unfortunately, the way that you accomplish this looks
@@ -37,23 +38,11 @@ const LANG = (() => {
 // the code stored in that string. We accomplish this by spawning a new Ruby
 // process of parser.rb and reading JSON off STDOUT.
 function parse(text, _parsers, _opts) {
-  const child = spawnSync(
-    "ruby",
-    ["--disable-gems", path.join(__dirname, "./parser.rb")],
-    {
-      env: Object.assign({}, process.env, { LANG }),
-      input: text,
-      maxBuffer: 15 * 1024 * 1024 // 15MB
-    }
-  );
+  ensureParseServer({ LANG });
 
-  const error = child.stderr.toString();
-  if (error) {
-    throw new Error(error);
-  }
+  const request = { type: "ruby", data: text };
 
-  const response = child.stdout.toString();
-  return JSON.parse(response);
+  return sendRequest(request, { LANG });
 }
 
 const pragmaPattern = /#\s*@(prettier|format)/;
