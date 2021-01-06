@@ -14,7 +14,7 @@ jobs:
         - "2.6"
         - "2.7"
         - "3.0"
-        - truffleruby-head
+        - truffleruby
     env: 
       CI: true
     steps:
@@ -23,17 +23,8 @@ jobs:
     # Setup ruby dependencies
     - uses: ruby/setup-ruby@v1
       with:
+        bundler-cache: true
         ruby-version: ${{ matrix.ruby }}
-    - uses: actions/cache@v1
-      with:
-        path: vendor/bundle
-        key: ${{ runner.os }}-${{ matrix.ruby }}-${{ hashFiles('**/Gemfile.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.ruby }}-
-    - name: bundle install
-      run: |
-        bundle config path vendor/bundle
-        bundle install --jobs 4 --retry 3
 
     # Setup node dependencies
     - uses: actions/setup-node@v2-beta
