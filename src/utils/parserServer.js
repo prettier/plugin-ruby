@@ -3,7 +3,6 @@ const path = require("path");
 const { existsSync, mkdtempSync } = require("fs");
 const process = require("process");
 const os = require("os");
-const { kill } = require("process");
 
 let SOCKFILE = process.env.PRETTIER_RUBY_PARSER_HOST;
 let NETCAT_ADAPTER;
@@ -13,7 +12,9 @@ function killServer(server) {
     process.kill(-server.pid);
     SOCKFILE = undefined;
     NETCAT_ADAPTER = undefined;
-  } catch (e) {}
+  } catch (e) {
+    // ok
+  }
 }
 
 // Spawn the parser_server.rb subprocess. We do this since booting Ruby is slow,
