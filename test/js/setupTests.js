@@ -31,7 +31,7 @@ function parseAsync(parser, text) {
       (response.error ? reject : resolve)(response);
     });
 
-    client.connect({ port: process.env.PORT || 22021 }, () => {
+    client.connect(process.env.PRETTIER_RUBY_PARSER_HOST, () => {
       client.end(`${parser}|${text}`);
     });
   });

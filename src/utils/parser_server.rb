@@ -1,39 +1,79 @@
+# frozen_string_literal: true
+
 require 'socket'
-require_relative './../ruby/parser'
 
-# A sanity check to kill lingering processes that may get stuck. Theoretically,
-# this should not happen, but it's best to be safe and not risking zombies
-# running around.
-if ENV['PARSER_SERVER_TIMEOUT']
-  t = ENV['PARSER_SERVER_TIMEOUT'].to_i
+# Set the program name so that it's easy to find if we need it
+$PROGRAM_NAME = 'prettier-ruby-parser'
 
-  Thread.new { sleep(t) && abort('Prettier: Ruby parser server timed out') }
+# Make sure we trap these signals to be sure we get the quit command coming from
+# the parent node process
+quit = false
+trap(:QUIT) { quit = true }
+trap(:INT) { quit = true }
+trap(:TERM) { quit = true }
+
+sockfile = ARGV.first
+server = UNIXServer.new(sockfile)
+
+MAX_LEN = 10 * 1024 * 1024
+
+def read_message(socket)
+  message = +''
+
+  loop do
+    message << socket.readpartial(MAX_LEN)
+  rescue EOFError
+    break
+  end
+
+  message.force_encoding('UTF-8').split('|', 2)
 end
 
-Socket.unix_server_loop(ARGV.last) do |socket, client_addrinfo|
-  begin
-    request = JSON.parse(socket.read, symbolize_names: true)
+begin
+  loop do
+    break if quit
 
-    builder =
-      case request[:type]
-      when 'ruby'
-        Prettier::Parser.new(request[:data])
+    # Start up a new thread that will handle each successive connection.
+    Thread.new(server.accept_nonblock) do |socket|
+      parser, source = read_message(socket)
+
+      response =
+        case parser
+        when 'ruby'
+          require_relative '../ruby/parser'
+          Prettier::Parser.parse(source)
+        when 'rbs'
+          require_relative '../rbs/parser'
+          Prettier::RBSParser.parse(source)
+        when 'haml'
+          require_relative '../haml/parser'
+          Prettier::HAMLParser.parse(source)
+        end
+
+      if !response
+        socket.write(
+          JSON.fast_generate(
+            error:
+              '@prettier/plugin-ruby encountered an error when attempting to parse ' \
+                'the ruby source. This usually means there was a syntax error in the ' \
+                'file in question. You can verify by running `ruby -i [path/to/file]`.'
+          )
+        )
       else
-        raise "unknown file type: #{request[:type].inspect}"
+        socket.write(JSON.fast_generate(response))
       end
+    ensure
+      socket.close
+    end
+  rescue IO::WaitReadable, Errno::EINTR
+    # Wait for select(2) to give us a connection that has content for 1 second.
+    # Otherwise timeout and continue on (so that we hit our "break if quit"
+    # pretty often).
+    IO.select([server], nil, nil, 1)
 
-    response = builder.parse
-
-    raise 'could not parse input' if !response || builder.error?
-
-    socket.write(JSON.fast_generate(response))
-  rescue StandardError => e
-    socket.puts(
-      'ERROR: @prettier/plugin-ruby encountered an error when attempting to parse ' \
-        'the RBS source. This usually means there was a syntax error in the ' \
-        "file in question. (#{e.inspect})"
-    )
-  ensure
-    socket.close
+    retry unless quit
   end
+ensure
+  server.close
+  File.unlink(sockfile)
 end

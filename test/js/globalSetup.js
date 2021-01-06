@@ -9,8 +9,8 @@ function globalSetup() {
   // Spawn the async parser process so that tests can send their content over to
   // it to get back the AST.
   global.__ASYNC_PARSER__ = spawn("ruby", [
-    "./test/js/parser.rb",
-    process.env.PORT
+    "./src/utils/parser_server.rb",
+    process.env.PRETTIER_RUBY_PARSER_HOST
   ]);
 }
 
