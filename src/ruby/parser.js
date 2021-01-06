@@ -1,4 +1,3 @@
-const { spawnSync } = require("child_process");
 const process = require("process");
 const { sendRequest, ensureParseServer } = require("./../utils/parserServer");
 
