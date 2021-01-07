@@ -113,7 +113,7 @@ function sendRequest(request, env) {
     [...netcatArgs, SOCKFILE],
     {
       env: Object.assign({}, process.env, env),
-      input: `${request.type}|${request.data}`,
+      input: JSON.stringify(request),
       maxBuffer: 15 * 1024 * 1024 // 15MB
     }
   );

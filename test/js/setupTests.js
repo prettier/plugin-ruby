@@ -1,4 +1,5 @@
 const net = require("net");
+const { parse } = require("path");
 const path = require("path");
 const prettier = require("prettier");
 
@@ -32,7 +33,7 @@ function parseAsync(parser, text) {
     });
 
     client.connect(process.env.PRETTIER_RUBY_PARSER_HOST, () => {
-      client.end(`${parser}|${text}`);
+      client.end(JSON.stringify({ type: parser, data: text }));
     });
   });
 }
