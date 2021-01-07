@@ -120,20 +120,15 @@ function sendRequest(request, env) {
 
   if (stdout == null || status !== 0) {
     const msg = stderr ? stderr.toString() : "Unknown error occurred";
+    console.error("Could not parse response from server", {
+      stdout: stdout ? stdout.toString() : null,
+      stderr: stderr ? stderr.toString() : null
+    });
+
     throw new Error(msg);
   }
 
-  let response;
-
-  try {
-    response = JSON.parse(stdout.toString());
-  } catch (e) {
-    console.error("Could not parse response from server", {
-      stdout: stdout.toString(),
-      stderr: stderr ? stderr.toString() : null
-    });
-    throw e;
-  }
+  const response = JSON.parse(stdout.toString());
 
   if (response.error) {
     throw new Error(response.error);
