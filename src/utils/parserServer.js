@@ -120,9 +120,12 @@ function sendRequest(request, env) {
 
   if (stdout == null || status !== 0) {
     const msg = stderr ? stderr.toString() : "Unknown error occurred";
+
     console.error("Could not parse response from server", {
       stdout: stdout ? stdout.toString() : null,
-      stderr: stderr ? stderr.toString() : null
+      stderr: stderr ? stderr.toString() : null,
+      status,
+      netcatExe
     });
 
     throw new Error(msg);
