@@ -23,7 +23,7 @@ function killServer(server) {
 function spawnParserServer(sockfile, env) {
   const server = spawn(
     "ruby",
-    ["--disable-gems", path.join(__dirname, "./parser_server.rb"), sockfile],
+    [path.join(__dirname, "./parser_server.rb"), sockfile],
     {
       env: Object.assign({ PARSER_SERVER_TIMEOUT: "600" }, process.env, env),
       detached: true,
