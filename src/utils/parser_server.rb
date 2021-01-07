@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'socket'
+require 'json'
 
 # Set the program name so that it's easy to find if we need it
 $PROGRAM_NAME = 'prettier-ruby-parser'
@@ -20,7 +21,7 @@ at_exit do
   File.unlink(sockfile)
 end
 
-MAX_LEN = 10 * 1024 * 1024
+MAX_LEN = 15 * 1024 * 1024
 
 def read_message(socket)
   message = +''
@@ -31,7 +32,7 @@ def read_message(socket)
     break
   end
 
-  message.force_encoding('UTF-8').split('|', 2)
+  JSON.parse(message.force_encoding('UTF-8'), symbolize_names: true)
 end
 
 loop do
@@ -39,7 +40,7 @@ loop do
 
   # Start up a new thread that will handle each successive connection.
   Thread.new(server.accept_nonblock) do |socket|
-    parser, source = read_message(socket)
+    parser, source = read_message(socket).values_at(:type, :data)
 
     response =
       case parser
