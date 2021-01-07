@@ -123,7 +123,17 @@ function sendRequest(request, env) {
     throw new Error(msg);
   }
 
-  const response = JSON.parse(stdout.toString());
+  let response;
+
+  try {
+    response = JSON.parse(stdout.toString());
+  } catch (e) {
+    console.error("Could not parse response from server", {
+      stdout: stdout.toString(),
+      stderr: stderr ? stderr.toString() : null
+    });
+    throw e;
+  }
 
   if (response.error) {
     throw new Error(response.error);
