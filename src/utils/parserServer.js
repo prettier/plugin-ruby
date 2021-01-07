@@ -114,7 +114,7 @@ function sendRequest(request, env) {
     maxBuffer: 15 * 1024 * 1024 // 15MB
   });
 
-  if (stdout == null) {
+  if (stdout == null || stderr) {
     const msg = stderr ? stderr.toString() : "Unknown error occurred";
     throw new Error(msg);
   }
