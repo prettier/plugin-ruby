@@ -109,6 +109,3 @@ expect.extend({
       }));
   }
 });
-
-// For some reason, the process.on('exit') handler does not get called in jest specs even when the process exits. To remedy this, we emit a custom event.
-afterAll(() => process.emit("exit"));
