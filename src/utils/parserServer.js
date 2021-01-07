@@ -108,13 +108,17 @@ function fetchNetcatAdapter() {
 function sendRequest(request, env) {
   const [netcatExe, ...netcatArgs] = fetchNetcatAdapter();
 
-  const { stdout, stderr } = spawnSync(netcatExe, [...netcatArgs, SOCKFILE], {
-    env: Object.assign({}, process.env, env),
-    input: `${request.type}|${request.data}`,
-    maxBuffer: 15 * 1024 * 1024 // 15MB
-  });
+  const { stdout, stderr, status } = spawnSync(
+    netcatExe,
+    [...netcatArgs, SOCKFILE],
+    {
+      env: Object.assign({}, process.env, env),
+      input: `${request.type}|${request.data}`,
+      maxBuffer: 15 * 1024 * 1024 // 15MB
+    }
+  );
 
-  if (stdout == null || stderr) {
+  if (stdout == null || status !== 0) {
     const msg = stderr ? stderr.toString() : "Unknown error occurred";
     throw new Error(msg);
   }
