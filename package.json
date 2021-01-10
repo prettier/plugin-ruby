@@ -6,7 +6,7 @@
   "scripts": {
     "check-format": "prettier --check '**/*'",
     "lint": "eslint --cache .",
-    "test": "PRETTIER_RUBY_PARSER_HOST=\"/tmp/prettier-ruby-test-$(openssl rand -hex 8).sock\" jest"
+    "test": "jest"
   },
   "repository": {
     "type": "git",

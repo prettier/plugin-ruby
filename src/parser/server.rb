@@ -3,6 +3,10 @@
 require 'socket'
 require 'json'
 
+require_relative '../ruby/parser'
+require_relative '../rbs/parser'
+require_relative '../haml/parser'
+
 # Set the program name so that it's easy to find if we need it
 $PROGRAM_NAME = 'prettier-ruby-parser'
 
@@ -13,7 +17,7 @@ trap(:QUIT) { quit = true }
 trap(:INT) { quit = true }
 trap(:TERM) { quit = true }
 
-sockfile = ARGV.first
+sockfile = ARGV.first || "/tmp/#{$PROGRAM_NAME}.sock"
 server = UNIXServer.new(sockfile)
 
 at_exit do
@@ -21,51 +25,27 @@ at_exit do
   File.unlink(sockfile)
 end
 
-MAX_LEN = 15 * 1024 * 1024
-
-def read_message(socket)
-  message = +''
-
-  loop do
-    message << socket.readpartial(MAX_LEN)
-  rescue EOFError
-    break
-  end
-
-  JSON.parse(message.force_encoding('UTF-8'), symbolize_names: true)
-end
-
 loop do
   break if quit
 
   # Start up a new thread that will handle each successive connection.
   Thread.new(server.accept_nonblock) do |socket|
-    parser, source = read_message(socket).values_at(:type, :data)
+    parser, source = socket.read.force_encoding('UTF-8').split('|', 2)
 
     response =
       case parser
       when 'ruby'
-        require_relative '../ruby/parser'
         Prettier::Parser.parse(source)
       when 'rbs'
-        require_relative '../rbs/parser'
         Prettier::RBSParser.parse(source)
       when 'haml'
-        require_relative '../haml/parser'
         Prettier::HAMLParser.parse(source)
       end
 
-    if !response
-      socket.write(
-        JSON.fast_generate(
-          error:
-            '@prettier/plugin-ruby encountered an error when attempting to parse ' \
-              'the ruby source. This usually means there was a syntax error in the ' \
-              'file in question. You can verify by running `ruby -i [path/to/file]`.'
-        )
-      )
-    else
+    if response
       socket.write(JSON.fast_generate(response))
+    else
+      socket.write('{ "error": true }')
     end
   ensure
     socket.close

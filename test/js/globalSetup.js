@@ -5,12 +5,16 @@ const { spawn, spawnSync } = require("child_process");
 const args = ["--disable-gems", "-e", "puts RUBY_VERSION"];
 process.env.RUBY_VERSION = spawnSync("ruby", args).stdout.toString().trim();
 
+// Spawn the async parser process so that tests can send their content over to
+// it to get back the AST.
 function globalSetup() {
-  // Spawn the async parser process so that tests can send their content over to
-  // it to get back the AST.
+  if (!process.env.PRETTIER_RUBY_HOST) {
+    process.env.PRETTIER_RUBY_HOST = `/tmp/prettier-ruby-test-${process.id}.sock`;
+  }
+
   global.__ASYNC_PARSER__ = spawn("ruby", [
-    "./src/utils/parser_server.rb",
-    process.env.PRETTIER_RUBY_PARSER_HOST
+    "./src/parser/server.rb",
+    process.env.PRETTIER_RUBY_HOST
   ]);
 }
 

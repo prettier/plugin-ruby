@@ -1,12 +1,11 @@
 const net = require("net");
-const { parse } = require("path");
 const path = require("path");
 const prettier = require("prettier");
 
 // eslint-disable-next-line no-underscore-dangle
 const { formatAST } = prettier.__debug;
 
-function parseAsync(parser, text) {
+function parseAsync(parser, source) {
   return new Promise((resolve, reject) => {
     const client = new net.Socket();
 
@@ -32,8 +31,8 @@ function parseAsync(parser, text) {
       (response.error ? reject : resolve)(response);
     });
 
-    client.connect(process.env.PRETTIER_RUBY_PARSER_HOST, () => {
-      client.end(JSON.stringify({ type: parser, data: text }));
+    client.connect(process.env.PRETTIER_RUBY_HOST, () => {
+      client.end(`${parser}|${source}`);
     });
   });
 }

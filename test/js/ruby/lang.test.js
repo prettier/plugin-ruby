@@ -13,9 +13,10 @@ expect.extend({
 test("different lang settings don't break", () => {
   const script = path.join(__dirname, "../../../node_modules/.bin/prettier");
 
-  const env = { ...process.env, LANG: "US-ASCII" };
+  const env = Object.assign({}, process.env, { LANG: "US-ASCII" });
+
   // Make sure a new parser server is spawned
-  delete env.PRETTIER_RUBY_PARSER_HOST;
+  delete env.PRETTIER_RUBY_HOST;
 
   const child = spawnSync(
     process.execPath,
