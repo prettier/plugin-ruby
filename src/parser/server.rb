@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 require 'socket'
+require 'json'
 
-require_relative '../../src/ruby/parser'
-require_relative '../../src/haml/parser'
-require_relative '../../src/rbs/parser'
+require_relative '../ruby/parser'
+require_relative '../rbs/parser'
+require_relative '../haml/parser'
 
 # Set the program name so that it's easy to find if we need it
-$PROGRAM_NAME = 'prettier-ruby-test-parser'
+$PROGRAM_NAME = 'prettier-ruby-parser'
 
 # Make sure we trap these signals to be sure we get the quit command coming from
 # the parent node process
@@ -16,15 +17,20 @@ trap(:QUIT) { quit = true }
 trap(:INT) { quit = true }
 trap(:TERM) { quit = true }
 
-server = TCPServer.new(ARGV.first || 22_021)
+sockfile = ARGV.first || "/tmp/#{$PROGRAM_NAME}.sock"
+server = UNIXServer.new(sockfile)
+
+at_exit do
+  server.close
+  File.unlink(sockfile)
+end
 
 loop do
   break if quit
 
   # Start up a new thread that will handle each successive connection.
   Thread.new(server.accept_nonblock) do |socket|
-    message = socket.readpartial(10 * 1024 * 1024)
-    parser, source = message.force_encoding('UTF-8').split('|', 2)
+    parser, source = socket.read.force_encoding('UTF-8').split('|', 2)
 
     response =
       case parser
@@ -36,12 +42,12 @@ loop do
         Prettier::HAMLParser.parse(source)
       end
 
-    if !response
-      socket.puts('{ "error": true }')
+    if response
+      socket.write(JSON.fast_generate(response))
     else
-      socket.puts(JSON.fast_generate(response))
+      socket.write('{ "error": true }')
     end
-
+  ensure
     socket.close
   end
 rescue IO::WaitReadable, Errno::EINTR

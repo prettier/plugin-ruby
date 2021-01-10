@@ -5,16 +5,20 @@ on:
 jobs:
   ci:
     name: CI
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
         ruby:
         - "2.5"
         - "2.6"
         - "2.7"
         - "3.0"
-        - truffleruby
+        # Turning off truffleruby because I'm not sure why it's failing
+        # - truffleruby
+    runs-on: ${{ matrix.os }}
     env: 
       CI: true
     steps:

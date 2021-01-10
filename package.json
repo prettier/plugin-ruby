@@ -6,7 +6,7 @@
   "scripts": {
     "check-format": "prettier --check '**/*'",
     "lint": "eslint --cache .",
-    "test": "PORT=$(bin/port) jest"
+    "test": "jest"
   },
   "repository": {
     "type": "git",

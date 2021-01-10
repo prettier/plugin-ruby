@@ -1,18 +1,7 @@
-const { spawnSync } = require("child_process");
-const path = require("path");
-
-const parser = path.join(__dirname, "./parser.rb");
+const parseSync = require("../parser/parseSync");
 
 const parse = (text, _parsers, _opts) => {
-  const child = spawnSync("ruby", [parser], { input: text });
-
-  const error = child.stderr.toString();
-  if (error) {
-    throw new Error(error);
-  }
-
-  const response = child.stdout.toString();
-  return JSON.parse(response);
+  return parseSync("haml", text);
 };
 
 const pragmaPattern = /^\s*-#\s*@(prettier|format)/;
