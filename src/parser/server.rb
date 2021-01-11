@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'bundler/setup' if ENV['CI']
 require 'socket'
 require 'json'
 

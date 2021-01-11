@@ -2549,23 +2549,3 @@ class Prettier::Parser < Ripper
     find_scanner_event(:@kw, 'super').merge!(type: :zsuper)
   end
 end
-
-# If this is the main file we're executing, then most likely this is being
-# executed from the parser.js spawn. In that case, read the ruby source from
-# stdin and report back the AST over stdout.
-
-if $0 == __FILE__
-  response = Prettier::Parser.parse($stdin.read)
-
-  if !response
-    warn(
-      '@prettier/plugin-ruby encountered an error when attempting to parse ' \
-        'the ruby source. This usually means there was a syntax error in the ' \
-        'file in question. You can verify by running `ruby -i [path/to/file]`.'
-    )
-
-    exit 1
-  end
-
-  puts JSON.fast_generate(response)
-end

@@ -1,8 +1,23 @@
 #!/usr/bin/env ruby
 
-require 'bundler/setup' if ENV['CI']
-require 'json'
-require 'rbs'
+begin
+  require 'rbs'
+rescue LoadError
+  # If we can't load the rbs gem, then we're going to provide a shim parser that
+  # will warn and bail out.
+  class Prettier::RBSParser
+    def self.parse(text)
+      warn(
+        'The `rbs` gem could not be loaded. Please ensure you have it ' \
+          'installed and that it is available in the gem path.'
+      )
+
+      false
+    end
+  end
+
+  return
+end
 
 # Monkey-patch this so that we can get the character positions.
 class RBS::Location
@@ -16,6 +31,7 @@ class RBS::Location
   end
 end
 
+# Monkey-patch this so that we get whether or not it needs to be escaped.
 class RBS::Types::Function::Param
   def to_json(*a)
     escaped = name && /\A#{RBS::Parser::KEYWORDS_RE}\z/.match?(name)
@@ -60,6 +76,7 @@ class RBS::Types::Record
   end
 end
 
+# The main parser interface.
 module Prettier
   class RBSParser
     def self.parse(text)
@@ -68,24 +85,4 @@ module Prettier
       false
     end
   end
-end
-
-# If this is the main file we're executing, then most likely this is being
-# executed from the parser.js spawn. In that case, read the rbs source from
-# stdin and report back the AST over stdout.
-
-if $0 == __FILE__
-  response = Prettier::RBSParser.parse($stdin.read)
-
-  if !response
-    warn(
-      '@prettier/plugin-ruby encountered an error when attempting to parse ' \
-        'the RBS source. This usually means there was a syntax error in the ' \
-        'file in question.'
-    )
-
-    exit 1
-  end
-
-  puts JSON.fast_generate(response)
 end

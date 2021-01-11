@@ -1,9 +1,25 @@
 # frozen_string_literal: true
 
-require 'bundler/setup' if ENV['CI']
-require 'haml'
-require 'json'
 require 'ripper'
+
+begin
+  require 'haml'
+rescue LoadError
+  # If we can't load the haml gem, then we're going to provide a shim parser
+  # that will warn and bail out.
+  class Prettier::HAMLParser
+    def self.parse(text)
+      warn(
+        'The `haml` gem could not be loaded. Please ensure you have it ' \
+          'installed and that it is available in the gem path.'
+      )
+
+      false
+    end
+  end
+
+  return
+end
 
 class Haml::Parser::ParseNode
   class DeepAttributeParser
@@ -119,23 +135,4 @@ module Prettier
       false
     end
   end
-end
-
-# If this is the main file we're executing, then most likely this is being
-# executed from the haml.js spawn. In that case, read the ruby source from
-# stdin and report back the AST over stdout.
-if $0 == __FILE__
-  response = Prettier::HAMLParser.parse($stdin.read)
-
-  if !response
-    warn(
-      '@prettier/plugin-ruby encountered an error when attempting to parse ' \
-        'the HAML source. This usually means there was a syntax error in the ' \
-        'file in question.'
-    )
-
-    exit 1
-  end
-
-  puts JSON.fast_generate(response)
 end
