@@ -79,6 +79,9 @@ module.exports = {
     const { body } = path.getValue();
     return concat([trim, "__END__", literalline, body]);
   },
+  "@comment"(path, opts, _print) {
+    return opts.printer.printComment(path);
+  },
   bodystmt: printBodyStmt,
   paren: printParen,
   program: (path, opts, print) =>

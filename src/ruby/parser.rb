@@ -22,6 +22,10 @@ module Prettier; end
 class Prettier::Parser < Ripper
   attr_reader :source, :lines, :scanner_events, :line_counts
 
+  # This is an attr_accessor so Stmts objects can grab comments out of this
+  # array and attach them to themselves.
+  attr_accessor :comments
+
   def initialize(source, *args)
     super(source, *args)
 
@@ -125,6 +129,7 @@ class Prettier::Parser < Ripper
     @comments << {
       type: :@comment,
       value: value[1..-1].chomp.force_encoding('UTF-8'),
+      inline: value.strip != lines[lineno - 1],
       sl: lineno,
       el: lineno,
       sc: char_pos,
@@ -1906,12 +1911,21 @@ class Prettier::Parser < Ripper
   # propagate that onto void_stmt nodes inside the stmts in order to make sure
   # all comments get printed appropriately.
   class Stmts < SimpleDelegator
+    attr_reader :parser
+
+    def initialize(parser, values)
+      @parser = parser
+      __setobj__(values)
+    end
+
     def bind(sc, ec)
       merge!(sc: sc, ec: ec)
 
       if self[:body][0][:type] == :void_stmt
         self[:body][0].merge!(sc: sc, ec: sc)
       end
+
+      attach_comments(sc, ec)
     end
 
     def bind_end(ec)
@@ -1928,6 +1942,22 @@ class Prettier::Parser < Ripper
       self[:body] << statement
       self
     end
+
+    private
+
+    def attach_comments(sc, ec)
+      attachable =
+        parser.comments.select do |comment|
+          comment[:type] == :@comment && !comment[:inline] &&
+            sc <= comment[:sc] && ec >= comment[:ec] &&
+            !comment[:value].include?('prettier-ignore')
+        end
+
+      return if attachable.empty?
+
+      parser.comments -= attachable
+      self[:body] = (self[:body] + attachable).sort_by! { |node| node[:sc] }
+    end
   end
 
   # stmts_new is a parser event that represents the beginning of a list of
@@ -1935,6 +1965,7 @@ class Prettier::Parser < Ripper
   # stmts_add events, which we'll append onto an array body.
   def on_stmts_new
     Stmts.new(
+      self,
       type: :stmts,
       body: [],
       sl: lineno,
