@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- [@ianks], [@kddeisz] - Use `netcat` to communicate to a parser server for better performance when formatting multiple files.
+
 ### Changed
 
 - [@jeffcarbs], [@kddeisz] - Long strings with interpolated expressions should only break if the contents in the original source is broken.
@@ -1115,6 +1119,7 @@ would previously result in `array[]`, but now prints properly.
 [@bugthing]: https://github.com/bugthing
 [@cbothner]: https://github.com/cbothner
 [@christoomey]: https://github.com/christoomey
+[@clarkdave]: https://github.com/clarkdave
 [@cldevs]: https://github.com/cldevs
 [@codingitwrong]: https://github.com/CodingItWrong
 [@coiti]: https://github.com/coiti
@@ -1134,7 +1139,9 @@ would previously result in `array[]`, but now prints properly.
 [@jamescostian]: https://github.com/jamescostian
 [@janklimo]: https://github.com/janklimo
 [@jbielick]: https://github.com/jbielick
+[@jeffcarbs]: https://github.com/jeffcarbs
 [@joeyjoejoejr]: https://github.com/joeyjoejoejr
+[@johannesluedke]: https://github.com/johannesluedke
 [@johncsnyder]: https://github.com/johncsnyder
 [@johnschoeman]: https://github.com/johnschoeman
 [@joshuakgoldberg]: https://github.com/JoshuaKGoldberg
