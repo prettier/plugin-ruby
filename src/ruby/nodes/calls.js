@@ -43,7 +43,7 @@ function printCall(path, opts, print) {
 
   // If our parent node is a chained node then we're not going to group the
   // right side of the expression, as we want to have a nice multi-line layout.
-  if (chained.includes(parentNode.type)) {
+  if (chained.includes(parentNode.type) && !node.comments) {
     parentNode.chain = (node.chain || 0) + 1;
     parentNode.callChain = (node.callChain || 0) + 1;
     parentNode.breakDoc = (node.breakDoc || [receiverDoc]).concat(rightSideDoc);
@@ -103,7 +103,7 @@ function printMethodAddArg(path, opts, print) {
 
   // If our parent node is a chained node then we're not going to group the
   // right side of the expression, as we want to have a nice multi-line layout.
-  if (chained.includes(parentNode.type)) {
+  if (chained.includes(parentNode.type) && !node.comments) {
     parentNode.chain = (node.chain || 0) + 1;
     parentNode.breakDoc = (node.breakDoc || [methodDoc]).concat(argsDoc);
     parentNode.firstReceiverType = node.firstReceiverType;
