@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.4.0] - 2021-01-15
+
 ### Added
 
 - [@ianks], [@kddeisz] - Use `netcat` to communicate to a parser server for better performance when formatting multiple files.
@@ -1047,7 +1049,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.3.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/prettier/plugin-ruby/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/prettier/plugin-ruby/compare/v1.2.5...v1.3.0
 [1.2.5]: https://github.com/prettier/plugin-ruby/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/prettier/plugin-ruby/compare/v1.2.3...v1.2.4
