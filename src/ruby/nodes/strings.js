@@ -4,6 +4,7 @@ const {
   hardline,
   indent,
   literalline,
+  removeLines,
   softline,
   join
 } = require("../../prettier");
@@ -103,14 +104,14 @@ function printStringDVar(path, opts, print) {
 }
 
 function printStringEmbExpr(path, opts, print) {
+  const node = path.getValue();
   const parts = path.call(print, "body", 0);
 
-  // If the interpolated expression is inside of a heredoc or an xstring
-  // literal (a string that gets sent to the command line) then we don't want
-  // to automatically indent, as this can lead to some very odd looking
-  // expressions
-  if (["heredoc", "xstring_literal"].includes(path.getParentNode().type)) {
-    return concat(["#{", parts, "}"]);
+  // If the contents of this embedded expression were originally on the same
+  // line in the source, then we're going to leave them in place and assume
+  // that's the way the developer wanted this expression represented.
+  if (node.sl === node.el) {
+    return concat(["#{", removeLines(parts), "}"]);
   }
 
   return group(

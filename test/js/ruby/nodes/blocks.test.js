@@ -129,7 +129,4 @@ describe("blocks", () => {
     test("does not split up args inside pipes", () =>
       expect(`loop do |${long} = 1, a${long} = 2|\nend`).toMatchFormat());
   });
-
-  test("leaves sorbet type annotations in place", () =>
-    expect(`sig { ${long} }`).toMatchFormat());
 });

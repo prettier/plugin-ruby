@@ -22,6 +22,10 @@ module Prettier; end
 class Prettier::Parser < Ripper
   attr_reader :source, :lines, :scanner_events, :line_counts
 
+  # This is an attr_accessor so Stmts objects can grab comments out of this
+  # array and attach them to themselves.
+  attr_accessor :comments
+
   def initialize(source, *args)
     super(source, *args)
 
@@ -125,6 +129,7 @@ class Prettier::Parser < Ripper
     @comments << {
       type: :@comment,
       value: value[1..-1].chomp.force_encoding('UTF-8'),
+      inline: value.strip != lines[lineno - 1],
       sl: lineno,
       el: lineno,
       sc: char_pos,
@@ -1768,8 +1773,8 @@ class Prettier::Parser < Ripper
     def bind_end(ec)
       merge!(ec: ec)
 
-      stmts = self[:body][2]
-      consequent = self[:body][3]
+      stmts = self[:body][1]
+      consequent = self[:body][2]
 
       if consequent
         consequent.bind_end(ec)
@@ -1784,16 +1789,30 @@ class Prettier::Parser < Ripper
   # inside of a bodystmt.
   def on_rescue(exceptions, variable, stmts, consequent)
     beging = find_scanner_event(:@kw, 'rescue')
+    exceptions = exceptions[0] if exceptions.is_a?(Array)
 
-    last_exception = exceptions.is_a?(Array) ? exceptions[-1] : exceptions
-    last_node = variable || last_exception || beging
-
+    last_node = variable || exceptions || beging
     stmts.bind(find_next_statement_start(last_node[:ec]), char_pos)
+
+    # We add an additional inner node here that ripper doesn't provide so that
+    # we have a nice place to attach inline comment. But we only need it if we
+    # have an exception or a variable that we're rescuing.
+    rescue_ex =
+      if exceptions || variable
+        {
+          type: :rescue_ex,
+          body: [exceptions, variable],
+          sl: beging[:sl],
+          sc: beging[:ec] + 1,
+          el: last_node[:el],
+          ec: last_node[:ec]
+        }
+      end
 
     Rescue.new(
       beging.merge!(
         type: :rescue,
-        body: [exceptions, variable, stmts, consequent],
+        body: [rescue_ex, stmts, consequent],
         el: lineno,
         ec: char_pos
       )
@@ -1892,12 +1911,21 @@ class Prettier::Parser < Ripper
   # propagate that onto void_stmt nodes inside the stmts in order to make sure
   # all comments get printed appropriately.
   class Stmts < SimpleDelegator
+    attr_reader :parser
+
+    def initialize(parser, values)
+      @parser = parser
+      __setobj__(values)
+    end
+
     def bind(sc, ec)
       merge!(sc: sc, ec: ec)
 
       if self[:body][0][:type] == :void_stmt
         self[:body][0].merge!(sc: sc, ec: sc)
       end
+
+      attach_comments(sc, ec)
     end
 
     def bind_end(ec)
@@ -1914,6 +1942,22 @@ class Prettier::Parser < Ripper
       self[:body] << statement
       self
     end
+
+    private
+
+    def attach_comments(sc, ec)
+      attachable =
+        parser.comments.select do |comment|
+          comment[:type] == :@comment && !comment[:inline] &&
+            sc <= comment[:sc] && ec >= comment[:ec] &&
+            !comment[:value].include?('prettier-ignore')
+        end
+
+      return if attachable.empty?
+
+      parser.comments -= attachable
+      self[:body] = (self[:body] + attachable).sort_by! { |node| node[:sc] }
+    end
   end
 
   # stmts_new is a parser event that represents the beginning of a list of
@@ -1921,6 +1965,7 @@ class Prettier::Parser < Ripper
   # stmts_add events, which we'll append onto an array body.
   def on_stmts_new
     Stmts.new(
+      self,
       type: :stmts,
       body: [],
       sl: lineno,

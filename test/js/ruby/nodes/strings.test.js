@@ -105,14 +105,20 @@ describe("strings", () => {
     test("very interpolated", () =>
       expect(`"abc #{"abc #{abc} abc"} abc"`).toMatchFormat());
 
-    test("breaks interpolation on #{ ... } and not some inner node", () =>
-      expect(`"${long} #{foo[:bar]} ${long}"`).toChangeFormat(
-        ruby(`
-          "${long} #{
-            foo[:bar]
-          } ${long}"
-        `)
-      ));
+    test("long strings with interpolation do not break", () =>
+      expect(`"${long} #{foo[:bar]} ${long}"`).toMatchFormat());
+
+    test("long strings with interpolation that were broken do break", () => {
+      const content = ruby(`
+        <<~HERE
+          #{
+          ${long}
+        }
+        HERE
+      `);
+
+      return expect(content).toMatchFormat();
+    });
 
     test("within a heredoc there is no indentation", () => {
       const content = ruby(`
