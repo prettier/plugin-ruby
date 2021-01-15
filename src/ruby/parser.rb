@@ -1768,8 +1768,8 @@ class Prettier::Parser < Ripper
     def bind_end(ec)
       merge!(ec: ec)
 
-      stmts = self[:body][2]
-      consequent = self[:body][3]
+      stmts = self[:body][1]
+      consequent = self[:body][2]
 
       if consequent
         consequent.bind_end(ec)
@@ -1784,16 +1784,30 @@ class Prettier::Parser < Ripper
   # inside of a bodystmt.
   def on_rescue(exceptions, variable, stmts, consequent)
     beging = find_scanner_event(:@kw, 'rescue')
+    exceptions = exceptions[0] if exceptions.is_a?(Array)
 
-    last_exception = exceptions.is_a?(Array) ? exceptions[-1] : exceptions
-    last_node = variable || last_exception || beging
-
+    last_node = variable || exceptions || beging
     stmts.bind(find_next_statement_start(last_node[:ec]), char_pos)
+
+    # We add an additional inner node here that ripper doesn't provide so that
+    # we have a nice place to attach inline comment. But we only need it if we
+    # have an exception or a variable that we're rescuing.
+    rescue_ex =
+      if exceptions || variable
+        {
+          type: :rescue_ex,
+          body: [exceptions, variable],
+          sl: beging[:sl],
+          sc: beging[:ec] + 1,
+          el: last_node[:el],
+          ec: last_node[:ec]
+        }
+      end
 
     Rescue.new(
       beging.merge!(
         type: :rescue,
-        body: [exceptions, variable, stmts, consequent],
+        body: [rescue_ex, stmts, consequent],
         el: lineno,
         ec: char_pos
       )

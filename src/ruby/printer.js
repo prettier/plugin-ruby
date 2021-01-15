@@ -54,8 +54,6 @@ function getCommentChildNodes(node) {
   switch (node.type) {
     case "heredoc":
       return [node.beging];
-    case "rescue":
-      return [].concat(node.body[0]).concat(node.body.slice(1));
     case "aryptn":
       return [node.body[0]]
         .concat(node.body[1])

@@ -110,6 +110,30 @@ describe("rescue", () => {
     return expect(content).toMatchFormat();
   });
 
+  test("comment inline with multiple", () => {
+    const content = ruby(`
+      begin
+        foo
+      rescue Foo, Bar # foo
+        bar
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test("comment inline with splat", () => {
+    const content = ruby(`
+      begin
+        foo
+      rescue Foo, *Bar # foo
+        bar
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
   test("one error with a comment", () => {
     const content = ruby(`
       begin

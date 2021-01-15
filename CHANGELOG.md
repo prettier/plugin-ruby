@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [@jeffcarbs], [@kddeisz] - Long strings with interpolated expressions should only break if the contents in the original source is broken.
+- [@johannesluedke], [@kddeisz] - Fix for rescues with inline comments.
 
 ## [1.3.0] - 2021-01-05
 
