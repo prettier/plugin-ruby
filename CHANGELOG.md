@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [@johannesluedke], [@kddeisz] - Fix for rescues with inline comments.
 - [@johncsnyder], [@kddeisz] - Comments should not attach to nodes beyond a double newline.
 - [@blampe], [@kddeisz] - Comments inside of a broken method chain get dropped.
+- [@clarkdave], [@kddeisz] - Don't ignore Sorbet `sig` transformations.
 
 ## [1.3.0] - 2021-01-05
 
