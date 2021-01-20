@@ -62,4 +62,20 @@ describe("embed", () => {
 
     return expect(content).toMatchFormat();
   });
+
+  test("removes whitespace so embedded parsers don't misinterpret", () => {
+    const content = ruby(`
+      <<~MARKDOWN
+          foo
+      MARKDOWN
+    `);
+
+    const expected = ruby(`
+      <<~MARKDOWN
+        foo
+      MARKDOWN
+    `);
+
+    return expect(content).toChangeFormat(expected);
+  });
 });

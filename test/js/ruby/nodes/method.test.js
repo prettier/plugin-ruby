@@ -354,6 +354,18 @@ describe("method", () => {
             `),
             { trailingComma: "all" }
           ));
+
+        test("on long commands within an arg_paren", () => {
+          const expected = ruby(`
+            foo(
+              ${long} 'bar'
+            )
+          `);
+
+          return expect(`foo(${long} 'bar')`).toChangeFormat(expected, {
+            trailingComma: "all"
+          });
+        });
       });
     });
   });

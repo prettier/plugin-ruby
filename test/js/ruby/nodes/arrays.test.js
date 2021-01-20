@@ -152,6 +152,16 @@ describe("array", () => {
     return expect(content).toMatchFormat();
   });
 
+  test("with comments just outside but attached", () => {
+    const content = ruby(`
+      foo(
+        [] # comment comment
+      )
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
   test.each(["%w", "%W", "%i", "%I"])("%s special array literals", (start) =>
     expect(`${start}[a b c]`).toMatchFormat()
   );

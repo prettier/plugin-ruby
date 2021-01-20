@@ -8,8 +8,25 @@ const {
   softline
 } = require("../../prettier");
 const { getTrailingComma } = require("../../utils");
-
 const toProc = require("../toProc");
+
+const noTrailingComma = ["command", "command_call"];
+
+function getArgParenTrailingComma(node) {
+  // If we have a block, then we don't want to add a trailing comma.
+  if (node.type === "args_add_block" && node.body[1]) {
+    return "";
+  }
+
+  // If we only have one argument and that first argument necessitates that we
+  // skip putting a comma (because it would interfere with parsing the argument)
+  // then we don't want to add a trailing comma.
+  if (node.body.length === 1 && noTrailingComma.includes(node.body[0].type)) {
+    return "";
+  }
+
+  return ifBreak(",", "");
+}
 
 function printArgParen(path, opts, print) {
   const argsNode = path.getValue().body[0];
@@ -32,9 +49,6 @@ function printArgParen(path, opts, print) {
     );
   }
 
-  const args = path.call(print, "body", 0);
-  const hasBlock = argsNode.type === "args_add_block" && argsNode.body[1];
-
   // Now here we return a doc that represents the whole grouped expression,
   // including the surrouding parentheses.
   return group(
@@ -43,8 +57,8 @@ function printArgParen(path, opts, print) {
       indent(
         concat([
           softline,
-          join(concat([",", line]), args),
-          getTrailingComma(opts) && !hasBlock ? ifBreak(",", "") : ""
+          join(concat([",", line]), path.call(print, "body", 0)),
+          getTrailingComma(opts) && getArgParenTrailingComma(argsNode)
         ])
       ),
       softline,
