@@ -70,6 +70,12 @@ describe("embed", () => {
       MARKDOWN
     `);
 
-    return expect(content).toMatchFormat();
+    const expected = ruby(`
+      <<~MARKDOWN
+        foo
+      MARKDOWN
+    `);
+
+    return expect(content).toChangeFormat(expected);
   });
 });
