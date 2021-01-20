@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [#795](https://github.com/prettier/plugin-ruby/issues/795) djrodgerspryor, kddeisz - Trailing comments attached to empty arrays should not multiply.
+- [#794](https://github.com/prettier/plugin-ruby/issues/794) djrodgerspryor, kddeisz - Fix embedded parser parsing by stripping common leading whitespace before passing on the content.
 
 ## [1.4.0] - 2021-01-15
 
