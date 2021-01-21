@@ -10,7 +10,7 @@ const {
   softline
 } = require("../../prettier");
 
-const { containsAssignment } = require("../../utils");
+const { containsAssignment, isEmptyStmts } = require("../../utils");
 const inlineEnsureParens = require("../../utils/inlineEnsureParens");
 
 function printLoop(keyword, modifier) {
@@ -19,17 +19,11 @@ function printLoop(keyword, modifier) {
 
     // If the only statement inside this while loop is a void statement, then we
     // can shorten to just displaying the predicate and then a semicolon.
-    if (
-      stmts.body.length === 1 &&
-      stmts.body[0].type === "void_stmt" &&
-      !stmts.body[0].comments
-    ) {
+    if (isEmptyStmts(stmts)) {
       return group(
         concat([
-          keyword,
-          " ",
-          path.call(print, "body", 0),
-          ifBreak(softline, "; "),
+          group(concat([keyword, " ", path.call(print, "body", 0)])),
+          hardline,
           "end"
         ])
       );

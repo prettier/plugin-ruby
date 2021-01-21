@@ -12,15 +12,13 @@ const {
   trim
 } = require("../../prettier");
 
+const { isEmptyStmts } = require("../../utils");
+
 function printBodyStmt(path, opts, print) {
   const [stmts, rescue, elseClause, ensure] = path.getValue().body;
   const parts = [];
 
-  if (
-    stmts.body.length > 1 ||
-    stmts.body[0].type != "void_stmt" ||
-    stmts.body[0].comments
-  ) {
+  if (!isEmptyStmts(stmts)) {
     parts.push(path.call(print, "body", 0));
   }
 

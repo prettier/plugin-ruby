@@ -5,8 +5,11 @@ describe("class", () => {
     const content = ruby(`
       module Pret
         module Tier
-          class Plugin; end
-          module Ruby; end
+          class Plugin
+          end
+
+          module Ruby
+          end
         end
       end
     `);
@@ -17,7 +20,8 @@ describe("class", () => {
   test("inheritance", () => {
     const content = ruby(`
       module Prettier
-        class Ruby < Object; end
+        class Ruby < Object
+        end
       end
     `);
 
@@ -33,7 +37,8 @@ describe("class", () => {
   test("class push blocks", () => {
     const content = ruby(`
       class << Prettier
-        def foo; end
+        def foo
+        end
       end
     `);
 

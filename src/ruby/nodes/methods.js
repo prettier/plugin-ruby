@@ -1,8 +1,9 @@
 const { concat, group, hardline, indent, line } = require("../../prettier");
+const { isEmptyBodyStmt } = require("../../utils");
 
 function printMethod(offset) {
   return function printMethodWithOffset(path, opts, print) {
-    const [_name, params, body] = path.getValue().body.slice(offset);
+    const [_name, params, bodystmt] = path.getValue().body.slice(offset);
     const declaration = ["def "];
 
     // In this case, we're printing a method that's defined as a singleton, so
@@ -24,16 +25,8 @@ function printMethod(offset) {
       parens ? ")" : ""
     );
 
-    // If the body is empty, we can replace with a ;
-    const stmts = body.body[0].body;
-
-    if (
-      !body.body.slice(1).some((node) => node) &&
-      stmts.length === 1 &&
-      stmts[0].type === "void_stmt" &&
-      !stmts[0].comments
-    ) {
-      return group(concat(declaration.concat(["; end"])));
+    if (isEmptyBodyStmt(bodystmt)) {
+      return group(concat([group(concat(declaration)), hardline, "end"]));
     }
 
     return group(

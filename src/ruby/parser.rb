@@ -17,7 +17,8 @@ require 'delegate'
 require 'json'
 require 'ripper'
 
-module Prettier; end
+module Prettier
+end
 
 class Prettier::Parser < Ripper
   attr_reader :source, :lines, :scanner_events, :line_counts
