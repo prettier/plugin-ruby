@@ -36,6 +36,7 @@ module.exports = {
         ".rabl",
         ".rake",
         ".rb",
+        ".rbi",
         ".rbuild",
         ".rbw",
         ".rbx",

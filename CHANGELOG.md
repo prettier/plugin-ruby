@@ -6,12 +6,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- kddeisz - Add `.rbi` as a file type that we support.
+
 ### Changed
 
 - [#795](https://github.com/prettier/plugin-ruby/issues/795) djrodgerspryor, kddeisz - Trailing comments attached to empty arrays should not multiply.
 - [#794](https://github.com/prettier/plugin-ruby/issues/794) djrodgerspryor, kddeisz - Fix embedded parser parsing by stripping common leading whitespace before passing on the content.
 - [#793](https://github.com/prettier/plugin-ruby/issues/793) djrodgerspryor, kddeisz - Do not include trailing commas on arguments within `arg_paren` nodes if they could not be parsed with them (`command` and `command_call`).
 - [#788](https://github.com/prettier/plugin-ruby/issues/788) clarkdave, kddeisz - Break child hashes within a multi-line hash regardless of whether or not they can fit on one line.
+- kddeisz - Stop using `;` to separate empty class definitions, module definitions, method definitions, and loops.
 
 ## [1.4.0] - 2021-01-15
 
@@ -320,7 +325,8 @@ return (a or b) if c?
 - kddeisz - Support for the `nokw_param` node for specifying when methods should no accept keywords, as in:
 
 ```ruby
-def foo(**nil); end
+def foo(**nil)
+end
 ```
 
 - kddeisz - Support for the `args_forward` node for forwarding all types of arguments, as in:

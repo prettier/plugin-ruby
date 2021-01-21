@@ -4,11 +4,11 @@ describe.each(["while", "until"])("%s", (keyword) => {
   test("aligns predicates", () =>
     expect(`foo ${keyword} ${long} || ${long}`).toChangeFormat(
       ruby(`
-      ${keyword} ${long} ||
-          ${Array(keyword.length).fill().join(" ")}${long}
-        foo
-      end
-    `)
+        ${keyword} ${long} ||
+            ${Array(keyword.length).fill().join(" ")}${long}
+          foo
+        end
+      `)
     ));
 
   describe("inlines allowed", () => {
@@ -78,7 +78,7 @@ describe.each(["while", "until"])("%s", (keyword) => {
         end
       `);
 
-      return expect(content).toChangeFormat("while foo; end");
+      return expect(content).toMatchFormat();
     });
 
     test("empty body, long predicate", () => {
@@ -129,9 +129,7 @@ describe.each(["while", "until"])("%s", (keyword) => {
         end
       `);
 
-      return expect(content).toChangeFormat("while foo; end", {
-        rubyModifier: false
-      });
+      return expect(content).toMatchFormat({ rubyModifier: false });
     });
 
     test("empty body, long predicate", () => {

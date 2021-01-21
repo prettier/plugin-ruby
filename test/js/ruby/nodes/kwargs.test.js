@@ -1,8 +1,30 @@
+const { ruby } = require("../../utils");
+
 describe("kwargs", () => {
-  test("basic", () => expect("def foo(bar: baz); end").toMatchFormat());
+  test("basic", () => {
+    const content = ruby(`
+      def foo(bar: baz)
+      end
+    `);
 
-  test("optional", () => expect("def foo(bar:); end").toMatchFormat());
+    return expect(content).toMatchFormat();
+  });
 
-  test("double splat", () =>
-    expect("def foo(bar:, **baz); end").toMatchFormat());
+  test("optional", () => {
+    const content = ruby(`
+      def foo(bar:)
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test("double splat", () => {
+    const content = ruby(`
+      def foo(bar:, **baz)
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });

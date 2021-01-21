@@ -219,7 +219,7 @@ const printConditional = (keyword) => (path, { rubyModifier }, print) => {
 
   // If the body of the conditional is empty, then we explicitly have to use the
   // block form.
-  if (isEmptyStmts(statements) && !statements.body[0].comments) {
+  if (isEmptyStmts(statements)) {
     return concat([
       `${keyword} `,
       align(keyword.length + 1, path.call(print, "body", 0)),
