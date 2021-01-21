@@ -23,8 +23,14 @@ end
 class RBS::Location
   def to_json(*args)
     {
-      start: { line: start_line, column: start_column },
-      end: { line: end_line, column: end_column },
+      start: {
+        line: start_line,
+        column: start_column
+      },
+      end: {
+        line: end_line,
+        column: end_column
+      },
       start_pos: start_pos,
       end_pos: end_pos
     }.to_json(*args)

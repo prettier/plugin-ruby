@@ -6,6 +6,7 @@ const {
   join,
   line
 } = require("../../prettier");
+
 const {
   getTrailingComma,
   printEmptyCollection,
@@ -89,6 +90,13 @@ function printAssocNew(path, opts, print) {
   const parts = [path.call((keyPath) => keyPrinter(keyPath, print), "body", 0)];
   const valueDoc = path.call(print, "body", 1);
 
+  // If we're printing a child hash then we want it to break along with its
+  // parent hash, so we don't group the parts.
+  if (valueNode.type === "hash") {
+    parts.push(" ", valueDoc);
+    return concat(parts);
+  }
+
   if (!skipAssignIndent(valueNode) || keyNode.comments) {
     parts.push(indent(concat([line, valueDoc])));
   } else {
@@ -125,20 +133,26 @@ function printHash(path, opts, print) {
     return printEmptyCollection(path, opts, "{", "}");
   }
 
-  return group(
-    concat([
-      "{",
-      indent(
-        concat([
-          line,
-          path.call(print, "body", 0),
-          getTrailingComma(opts) ? ifBreak(",", "") : ""
-        ])
-      ),
-      line,
-      "}"
-    ])
-  );
+  let hashDoc = concat([
+    "{",
+    indent(
+      concat([
+        line,
+        path.call(print, "body", 0),
+        getTrailingComma(opts) ? ifBreak(",", "") : ""
+      ])
+    ),
+    line,
+    "}"
+  ]);
+
+  // If we're inside another hash, then we don't want to group our contents
+  // because we want this hash to break along with its parent hash.
+  if (path.getParentNode().type === "assoc_new") {
+    return hashDoc;
+  }
+
+  return group(hashDoc);
 }
 
 module.exports = {

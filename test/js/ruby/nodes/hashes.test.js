@@ -280,14 +280,55 @@ describe("hash", () => {
     const content = ruby(`
       items = {
         :'foo-bar'=> # Inline comment
-          {:name=>'foo-bar', :date=>'1970'},
+          baz,
       }
     `);
 
     const expected = ruby(`
       items = {
         'foo-bar': # Inline comment
-          { name: 'foo-bar', date: '1970' }
+          baz
+      }
+    `);
+
+    return expect(content).toChangeFormat(expected);
+  });
+
+  test("child hashes break assoc_news if their parents break", () => {
+    const content = ruby(`
+      {
+        ${long}: { foo: bar }
+      }
+    `);
+
+    const expected = ruby(`
+      {
+        ${long}: {
+          foo: bar
+        }
+      }
+    `);
+
+    return expect(content).toChangeFormat(expected);
+  });
+
+  test("child hashes break hashes if their parents break", () => {
+    const key = long.slice(0, 40);
+    const content = ruby(`
+      {
+        ${key}: foo,
+        ${key}: foo,
+        ${key}: { foo: bar }
+      }
+    `);
+
+    const expected = ruby(`
+      {
+        ${key}: foo,
+        ${key}: foo,
+        ${key}: {
+          foo: bar
+        }
       }
     `);
 
