@@ -3,4 +3,6 @@
 $LOAD_PATH.unshift(File.expand_path('../../lib', __dir__))
 
 require 'prettier'
+require_relative '../../src/ruby/parser'
+
 require 'minitest/autorun'
