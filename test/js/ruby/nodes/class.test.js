@@ -37,8 +37,7 @@ describe("class", () => {
   test("class push blocks", () => {
     const content = ruby(`
       class << Prettier
-        def foo
-        end
+        def foo; end
       end
     `);
 

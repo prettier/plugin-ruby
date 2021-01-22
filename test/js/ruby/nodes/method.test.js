@@ -2,42 +2,30 @@ const { long, ruby } = require("../../utils");
 
 describe("method", () => {
   describe("definitions", () => {
-    test("shorthand for empty methods", () => {
-      const expected = ruby(`
-        def foo
-        end
-      `);
+    test("shorthand for empty methods", () =>
+      expect("def foo; end").toMatchFormat());
 
-      return expect("def foo; end").toChangeFormat(expected);
-    });
-
-    test("shorthand for empty methods with parens", () => {
-      const expected = ruby(`
-        def foo()
-        end
-      `);
-
-      return expect("def foo(); end").toChangeFormat(expected);
-    });
+    test("shorthand for empty methods with parens", () =>
+      expect("def foo(); end").toMatchFormat());
 
     test("single arg, no parens", () =>
-      expect("def foo bar\nend").toChangeFormat("def foo(bar)\nend"));
+      expect("def foo bar\nend").toChangeFormat("def foo(bar); end"));
 
     test("single arg, with parens", () =>
-      expect("def foo(bar)\nend").toChangeFormat("def foo(bar)\nend"));
+      expect("def foo(bar)\nend").toChangeFormat("def foo(bar); end"));
 
     test("shorthand for empty singleton methods", () =>
-      expect("def self.foo; end").toChangeFormat("def self.foo\nend"));
+      expect("def self.foo; end").toMatchFormat());
 
     test("shorthand for empty singleton methods with parens", () =>
-      expect("def self.foo(); end").toChangeFormat("def self.foo()\nend"));
+      expect("def self.foo(); end").toMatchFormat());
 
     test("singleton, single arg, no parens", () =>
-      expect("def self.foo bar\nend").toChangeFormat("def self.foo(bar)\nend"));
+      expect("def self.foo bar\nend").toChangeFormat("def self.foo(bar); end"));
 
     test("singleton, single arg, with parens", () =>
       expect("def self.foo(bar)\nend").toChangeFormat(
-        "def self.foo(bar)\nend"
+        "def self.foo(bar); end"
       ));
 
     test("shorthand with a body", () =>
@@ -46,10 +34,10 @@ describe("method", () => {
       ));
 
     test("single splat arg with no name", () =>
-      expect("def foo(*); end").toChangeFormat("def foo(*)\nend"));
+      expect("def foo(*); end").toMatchFormat());
 
     test("double splat arg with no name", () =>
-      expect("def foo(**); end").toChangeFormat("def foo(**)\nend"));
+      expect("def foo(**); end").toMatchFormat());
 
     test("with helper method", () => {
       const content = ruby(`
@@ -87,8 +75,7 @@ describe("method", () => {
         def foo(
           ${long}:,
           a${long}:
-        )
-        end
+        ); end
       `);
 
       return expect(content).toChangeFormat(expected);
@@ -125,14 +112,7 @@ describe("method", () => {
     });
 
     if (process.env.RUBY_VERSION >= "2.7") {
-      test("nokw_param", () => {
-        const expected = ruby(`
-          def foo(**nil)
-          end
-        `);
-
-        return expect("def foo(**nil); end").toChangeFormat(expected);
-      });
+      test("nokw_param", () => expect("def foo(**nil); end").toMatchFormat());
 
       test("args_forward", () => {
         const content = ruby(`

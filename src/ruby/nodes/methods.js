@@ -26,7 +26,7 @@ function printMethod(offset) {
     );
 
     if (isEmptyBodyStmt(bodystmt)) {
-      return group(concat([group(concat(declaration)), hardline, "end"]));
+      return group(concat(declaration.concat("; end")));
     }
 
     return group(
