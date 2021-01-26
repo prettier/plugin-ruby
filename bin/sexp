@@ -20,7 +20,15 @@ PP.prepend(
   end
 )
 
-source = File.file?(ARGV[0]) ? File.read(ARGV[0]) : ARGV[0].gsub('\\n', "\n")
+source =
+  if !ARGV[0]
+    File.read('test.rb')
+  elsif File.file?(ARGV[0])
+    File.read(ARGV[0])
+  else
+    ARGV[0].gsub('\\n', "\n")
+  end
+
 parsed = Prettier::Parser.new(source).parse
 
 puts '=== SOURCE === '

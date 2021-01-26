@@ -21,7 +21,40 @@ module Prettier
 end
 
 class Prettier::Parser < Ripper
-  attr_reader :source, :lines, :scanner_events, :line_counts
+  # Represents a line in the source. If this class is being used, it means that
+  # every character in the string is 1 byte in length, so we can just return the
+  # start of the line + the index.
+  class SingleByteString
+    def initialize(start)
+      @start = start
+    end
+
+    def [](byteindex)
+      @start + byteindex
+    end
+  end
+
+  # Represents a line in the source. If this class is being used, it means that
+  # there are characters in the string that are multi-byte, so we will build up
+  # an array of indices, such that array[byteindex] will be equal to the index
+  # of the character within the string.
+  class MultiByteString
+    def initialize(start, line)
+      @indices = []
+
+      line
+        .each_char
+        .with_index(start) do |char, index|
+          char.bytesize.times { @indices << index }
+        end
+    end
+
+    def [](byteindex)
+      @indices[byteindex]
+    end
+  end
+
+  attr_reader :source, :lines, :scanner_events
 
   # This is an attr_accessor so Stmts objects can grab comments out of this
   # array and attach them to themselves.
@@ -40,9 +73,23 @@ class Prettier::Parser < Ripper
     @heredocs = []
 
     @scanner_events = []
-    @line_counts = [0]
+    @line_counts = []
 
-    @source.lines.each { |line| @line_counts << @line_counts.last + line.size }
+    # Here we're going to build up a list of SingleByteString or MultiByteString
+    # objects. They're each going to represent a string in the source. They are
+    # used by the `char_pos` method to determine where we are in the source
+    # string.
+    last_index = 0
+
+    @source.lines.each do |line|
+      if line.size == line.bytesize
+        @line_counts << SingleByteString.new(last_index)
+      else
+        @line_counts << MultiByteString.new(last_index, line)
+      end
+
+      last_index += line.size
+    end
   end
 
   def self.parse(source)
@@ -60,7 +107,7 @@ class Prettier::Parser < Ripper
   # this line, then we add the number of columns into this line that we've gone
   # through.
   def char_pos
-    line_counts[lineno - 1] + column
+    @line_counts[lineno - 1][column]
   end
 
   # As we build up a list of scanner events, we'll periodically need to go

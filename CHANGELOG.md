@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [#799](https://github.com/prettier/plugin-ruby/issues/799) - jscheid, kddeisz - Multi-byte characters shouldn't give invalid source string bounds.
+- [#801](https://github.com/prettier/plugin-ruby/issues/801) - jscheid, kddeisz - When converting a conditional to the modifier form, make sure to add parentheses if there is a chained method call.
+
 ## [1.5.0] - 2021-01-21
 
 ### Added
