@@ -237,4 +237,15 @@ describe("comments", () => {
       return expect(content).toMatchFormat();
     });
   });
+
+  test("works with multi-byte characters", () => {
+    const content = ruby(`
+      [
+        ['先生小'], #
+        ['小']
+      ]
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });

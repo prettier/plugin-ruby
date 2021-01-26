@@ -42,7 +42,9 @@ class Prettier::Parser < Ripper
     @scanner_events = []
     @line_counts = [0]
 
-    @source.lines.each { |line| @line_counts << @line_counts.last + line.size }
+    @source.lines.each do |line|
+      @line_counts << @line_counts.last + line.bytesize
+    end
   end
 
   def self.parse(source)
