@@ -1,4 +1,11 @@
-const needsParens = ["args", "assign", "assoc_new", "massign", "opassign"];
+const needsParens = [
+  "args",
+  "assign",
+  "assoc_new",
+  "call",
+  "massign",
+  "opassign"
+];
 
 // If you have a modifier statement (for instance an inline if statement or an
 // inline while loop) there are times when you need to wrap the entire statement

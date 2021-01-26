@@ -166,6 +166,16 @@ describe("conditionals", () => {
         expect(`hash[:key] = ${keyword} false then :value end`).toChangeFormat(
           `hash[:key] = (:value ${keyword} false)`
         ));
+
+      test("wraps inline version with calls", () => {
+        const content = ruby(`
+          if true
+            false
+          end.to_s
+        `);
+
+        return expect(content).toChangeFormat("(false if true).to_s");
+      });
     });
   });
 
