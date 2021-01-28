@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.5.1] - 2021-01-27
+
 ### Changed
 
 - [#799](https://github.com/prettier/plugin-ruby/issues/799) - jscheid, kddeisz - Multi-byte characters shouldn't give invalid source string bounds.
@@ -1069,7 +1071,9 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.4.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/prettier/plugin-ruby/compare/v1.5.0...v1.5.1
+[1.5.0]: https://github.com/prettier/plugin-ruby/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/prettier/plugin-ruby/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/prettier/plugin-ruby/compare/v1.2.5...v1.3.0
 [1.2.5]: https://github.com/prettier/plugin-ruby/compare/v1.2.4...v1.2.5
