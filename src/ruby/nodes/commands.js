@@ -73,7 +73,7 @@ function printCommand(path, opts, print) {
   } else if (hasDef(path.getValue())) {
     breakArgs = joinedArgs;
   } else {
-    breakArgs = align(command.length + 1, joinedArgs);
+    breakArgs = align(docLength(command) + 1, joinedArgs);
   }
 
   return group(

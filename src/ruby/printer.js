@@ -38,7 +38,8 @@ const noComments = [
   "args_add_star",
   "mlhs",
   "mlhs_add_post",
-  "mlhs_add_star"
+  "mlhs_add_star",
+  "mlhs_paren"
 ];
 
 // Certain nodes are used more for organizational purposed than for actually
@@ -97,8 +98,12 @@ function getCommentChildNodes(node) {
 
       return parts;
     }
-    default:
-      return node.body;
+    default: {
+      if (Array.isArray(node.body)) {
+        return node.body.filter((child) => child && typeof child === "object");
+      }
+      return [];
+    }
   }
 }
 
