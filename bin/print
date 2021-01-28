@@ -22,4 +22,10 @@ if (fs.existsSync(process.argv[contentIdx])) {
   content = process.argv.slice(contentIdx).join(" ").replace(/\\n/g, "\n");
 }
 
-console.log(prettier.format(content, { parser, plugins: ["."] }));
+const { formatted } = prettier.formatWithCursor(content, {
+  parser,
+  plugins: ["."],
+  cursorOffset: 1
+});
+
+console.log(formatted);

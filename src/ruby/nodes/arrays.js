@@ -63,33 +63,30 @@ function isSymbolArray(args) {
 // Prints out a word that is a part of a special array literal that accepts
 // interpolation. The body is an array of either plain strings or interpolated
 // expressions.
-function printSpecialArrayWord(path, opts, print) {
+function printArrayLiteralWord(path, opts, print) {
   return concat(path.map(print, "body"));
 }
 
 // Prints out a special array literal. Accepts the parts of the array literal as
 // an argument, where the first element of the parts array is a string that
 // contains the special start.
-function printSpecialArrayParts(parts) {
+function printArrayLiteral(start, parts) {
   return group(
     concat([
-      parts[0],
+      start,
       "[",
-      indent(concat([softline, join(line, parts.slice(1))])),
+      indent(concat([softline, join(line, parts)])),
       concat([softline, "]"])
     ])
   );
 }
 
-// Generates a print function with an embedded special start character for the
-// specific type of array literal that we're dealing with. The print function
-// returns an array as it expects to eventually be handed off to
-// printSpecialArrayParts.
-function printSpecialArray(start) {
-  return function printSpecialArrayWithStart(path, opts, print) {
-    return [start].concat(path.map(print, "body"));
-  };
-}
+const arrayLiteralStarts = {
+  qsymbols: "%i",
+  qwords: "%w",
+  symbols: "%I",
+  words: "%W"
+};
 
 // An array node is any literal array in Ruby. This includes all of the special
 // array literals as well as regular arrays. If it is a special array literal
@@ -105,30 +102,40 @@ function printArray(path, opts, print) {
     return printEmptyCollection(path, opts, "[", "]");
   }
 
-  // If we have an array that contains only simple string literals with no
-  // spaces or interpolation, then we're going to print a %w array.
-  if (opts.rubyArrayLiteral && isStringArray(args)) {
-    const printString = (stringPath) => stringPath.call(print, "body", 0);
-    const parts = path.map(printString, "body", 0, "body");
+  if (opts.rubyArrayLiteral) {
+    // If we have an array that contains only simple string literals with no
+    // spaces or interpolation, then we're going to print a %w array.
+    if (isStringArray(args)) {
+      const printString = (stringPath) => stringPath.call(print, "body", 0);
+      const parts = path.map(printString, "body", 0, "body");
 
-    return printSpecialArrayParts(["%w"].concat(parts));
-  }
+      return printArrayLiteral("%w", parts);
+    }
 
-  // If we have an array that contains only simple symbol literals with no
-  // interpolation, then we're going to print a %i array.
-  if (opts.rubyArrayLiteral && isSymbolArray(args)) {
-    const printSymbol = (symbolPath) => symbolPath.call(print, "body", 0);
-    const parts = path.map(printSymbol, "body", 0, "body");
+    // If we have an array that contains only simple symbol literals with no
+    // interpolation, then we're going to print a %i array.
+    if (isSymbolArray(args)) {
+      const printSymbol = (symbolPath) => symbolPath.call(print, "body", 0);
+      const parts = path.map(printSymbol, "body", 0, "body");
 
-    return printSpecialArrayParts(["%i"].concat(parts));
+      return printArrayLiteral("%i", parts);
+    }
   }
 
   // If we don't have a regular args node at this point then we have a special
   // array literal. In that case we're going to print out the body (which will
   // return to us an array with the first one being the start of the array) and
-  // send that over to the printSpecialArrayParts function.
+  // send that over to the printArrayLiteral function.
   if (!["args", "args_add_star"].includes(args.type)) {
-    return printSpecialArrayParts(path.call(print, "body", 0));
+    return path.call(
+      (arrayPath) =>
+        printArrayLiteral(
+          arrayLiteralStarts[arrayPath.getValue().type],
+          arrayPath.map(print, "body")
+        ),
+      "body",
+      0
+    );
   }
 
   // Here we have a normal array of any type of object with no special literal
@@ -151,9 +158,5 @@ function printArray(path, opts, print) {
 
 module.exports = {
   array: printArray,
-  qsymbols: printSpecialArray("%i"),
-  qwords: printSpecialArray("%w"),
-  symbols: printSpecialArray("%I"),
-  word: printSpecialArrayWord,
-  words: printSpecialArray("%W")
+  word: printArrayLiteralWord
 };
