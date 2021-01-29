@@ -1,5 +1,5 @@
 const { concat, group, lineSuffix, join } = require("../../prettier");
-const { literalLineNoBreak } = require("../../utils");
+const { literallineWithoutBreakParent } = require("../../utils");
 
 function printHeredoc(path, opts, print) {
   const { body, ending } = path.getValue();
@@ -11,7 +11,7 @@ function printHeredoc(path, opts, print) {
     }
 
     // In this case, the part of the string is just regular string content
-    return join(literalLineNoBreak, part.body.split("\n"));
+    return join(literallineWithoutBreakParent, part.body.split("\n"));
   });
 
   // We use a literalline break because matching indentation is required
@@ -23,7 +23,9 @@ function printHeredoc(path, opts, print) {
     concat([
       path.call(print, "beging"),
       lineSuffix(
-        group(concat([literalLineNoBreak].concat(parts).concat(ending)))
+        group(
+          concat([literallineWithoutBreakParent].concat(parts).concat(ending))
+        )
       )
     ])
   );
