@@ -8,7 +8,7 @@ const {
   stripTrailingHardline
 } = require("../prettier");
 
-const { literalLineNoBreak } = require("../utils");
+const { literallineWithoutBreakParent } = require("../utils");
 
 const parsers = {
   css: "css",
@@ -30,7 +30,7 @@ function replaceNewlines(doc) {
       ? concat(
           currentDoc
             .split(/(\n)/g)
-            .map((v, i) => (i % 2 === 0 ? v : literalLineNoBreak))
+            .map((v, i) => (i % 2 === 0 ? v : literallineWithoutBreakParent))
         )
       : currentDoc
   );
@@ -106,7 +106,7 @@ function embed(path, print, textToDoc, _opts) {
 
   // Pass that content into the embedded parser. Get back the doc node.
   const formatted = concat([
-    literalLineNoBreak,
+    literallineWithoutBreakParent,
     replaceNewlines(stripTrailingHardline(textToDoc(content, { parser })))
   ]);
 
@@ -119,7 +119,7 @@ function embed(path, print, textToDoc, _opts) {
         group(
           concat([
             indent(markAsRoot(formatted)),
-            literalLineNoBreak,
+            literallineWithoutBreakParent,
             ending.trim()
           ])
         )
@@ -132,7 +132,9 @@ function embed(path, print, textToDoc, _opts) {
   return markAsRoot(
     concat([
       path.call(print, "beging"),
-      lineSuffix(group(concat([formatted, literalLineNoBreak, ending.trim()])))
+      lineSuffix(
+        group(concat([formatted, literallineWithoutBreakParent, ending.trim()]))
+      )
     ])
   );
 }

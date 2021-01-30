@@ -5,7 +5,7 @@ module.exports = {
   isEmptyStmts: require("./utils/isEmptyStmts"),
   hasAncestor: require("./utils/hasAncestor"),
   literal: require("./utils/literal"),
-  literalLineNoBreak: require("./utils/literalLineNoBreak"),
+  literallineWithoutBreakParent: require("./utils/literallineWithoutBreakParent"),
   makeCall: require("./utils/makeCall"),
   noIndent: require("./utils/noIndent"),
   printEmptyCollection: require("./utils/printEmptyCollection"),
