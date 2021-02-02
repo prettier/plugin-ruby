@@ -20,7 +20,7 @@ jobs:
         # - truffleruby
     runs-on: ${{ matrix.os }}
     env: 
-      CI: true
+      PLUGIN_RUBY_CI: true
     steps:
     - uses: actions/checkout@master
 
@@ -55,7 +55,7 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     env: 
-      CI: true
+      PLUGIN_RUBY_CI: true
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-node@v2-beta
