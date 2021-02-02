@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'bundler/setup' if ENV['CI']
+require 'bundler/setup' if ENV['PLUGIN_RUBY_CI']
 require 'socket'
 require 'json'
 
