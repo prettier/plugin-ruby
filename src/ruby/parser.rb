@@ -565,6 +565,12 @@ class Prettier::Parser < Ripper
   # binary is a parser event that represents a binary operation between two
   # values.
   def on_binary(left, oper, right)
+    # On most Ruby implementations, oper is a Symbol that represents that
+    # operation being performed. For instance in the example `1 < 2`, the `oper`
+    # object would be `:<`. However, on JRuby, it's an `@op` node, so here we're
+    # going to explicitly convert it into the same normalized form.
+    oper = scanner_events.delete(oper)[:body] unless oper.is_a?(Symbol)
+
     {
       type: :binary,
       body: [left, oper, right],
