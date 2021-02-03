@@ -14,7 +14,7 @@ $PROGRAM_NAME = 'prettier-ruby-parser'
 # Make sure we trap these signals to be sure we get the quit command coming from
 # the parent node process
 quit = false
-trap(:QUIT) { quit = true }
+trap(:QUIT) { quit = true } if RUBY_PLATFORM != 'java'
 trap(:INT) { quit = true }
 trap(:TERM) { quit = true }
 

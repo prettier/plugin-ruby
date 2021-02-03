@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- kddeisz - Fix up `binary` node comparison operators so that it will handle either Symbol literals or the `@op` nodes which are incorrectly coming from JRuby (https://github.com/jruby/jruby/issues/6548).
+
 ## [1.5.1] - 2021-01-27
 
 ### Changed
