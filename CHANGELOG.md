@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.5.2] - 2021-02-03
+
 ### Changed
 
 - kddeisz - Fix up `binary` node comparison operators so that it will handle either Symbol literals or the `@op` nodes which are incorrectly coming from JRuby (https://github.com/jruby/jruby/issues/6548).
@@ -203,7 +205,7 @@ end
 - kddeisz - Fix up a bug with constant aliases, e.g., `alias in IN`.
 - andyw8, kddeisz - Ensure `rescue` comments stay on the same line as their declaration.
 
-# [0.22.0] - 2020-12-08
+## [0.22.0] - 2020-12-08
 
 ### Changed
 
@@ -1075,7 +1077,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.5.1...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.5.2...HEAD
+[1.5.2]: https://github.com/prettier/plugin-ruby/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/prettier/plugin-ruby/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/prettier/plugin-ruby/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/prettier/plugin-ruby/compare/v1.3.0...v1.4.0
