@@ -245,7 +245,29 @@ describe("method", () => {
       test("between multi args", () =>
         expect("foo(1, 2, *abc, 3, 4)").toMatchFormat());
 
+      test("with comments", () => {
+        const content = ruby(`
+          foo(
+            # comment
+            *values
+          )
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
       test("with block", () => expect("foo(*bar, &block)").toMatchFormat());
+
+      test("with comments and block", () => {
+        const content = ruby(`
+          foo(
+            # comment
+            &block
+          )
+        `);
+
+        return expect(content).toMatchFormat();
+      });
     });
 
     describe("double splat", () => {
@@ -254,7 +276,7 @@ describe("method", () => {
       test("with block", () => expect("foo(**bar, &block)").toMatchFormat());
 
       test("with splat and block", () =>
-        expect("foo(*bar, **baz, &lock)").toMatchFormat());
+        expect("foo(*bar, **baz, &block)").toMatchFormat());
 
       test("after kwarg", () =>
         expect("foo(kwarg: 1, **splat)").toMatchFormat());
