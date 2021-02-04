@@ -106,25 +106,66 @@ function printArgs(path, { rubyToProc }, print) {
   return args;
 }
 
+function printArgsAddBlock(path, opts, print) {
+  const node = path.getValue();
+  const parts = path.call(print, "body", 0);
+
+  if (node.body[1]) {
+    let blockDoc = path.call(print, "body", 1);
+
+    if (node.body[1].comments) {
+      // If we have a method call like:
+      //
+      //     foo(
+      //       # comment
+      //       &block
+      //     )
+      //
+      // then we need to make sure we don't accidentally prepend the operator
+      // before the comment.
+      blockDoc.parts[2] = concat(["&", blockDoc.parts[2]]);
+    } else {
+      // If we don't have any comments, we can just prepend the operator
+      blockDoc = concat(["&", blockDoc]);
+    }
+
+    parts.push(blockDoc);
+  }
+
+  return parts;
+}
+
+function printArgsAddStar(path, opts, print) {
+  const node = path.getValue();
+  const docs = path.map(print, "body");
+
+  if (node.body[1].comments) {
+    // If we have an array like:
+    //
+    //     [
+    //       # comment
+    //       *values
+    //     ]
+    //
+    // then we need to make sure we don't accidentally prepend the operator
+    // before the comment.
+    docs[1].parts[2] = concat(["*", docs[1].parts[2]]);
+  } else {
+    // If we don't have any comments, we can just prepend the operator
+    docs[1] = concat(["*", docs[1]]);
+  }
+
+  return docs[0].concat(docs[1]).concat(docs.slice(2));
+}
+
+function printBlockArg(path, opts, print) {
+  return concat(["&", path.call(print, "body", 0)]);
+}
+
 module.exports = {
   arg_paren: printArgParen,
   args: printArgs,
-  args_add_block: (path, opts, print) => {
-    const parts = path.call(print, "body", 0);
-
-    if (path.getValue().body[1]) {
-      parts.push(concat(["&", path.call(print, "body", 1)]));
-    }
-
-    return parts;
-  },
-  args_add_star: (path, opts, print) => {
-    const printed = path.map(print, "body");
-    const parts = printed[0]
-      .concat([concat(["*", printed[1]])])
-      .concat(printed.slice(2));
-
-    return parts;
-  },
-  blockarg: (path, opts, print) => concat(["&", path.call(print, "body", 0)])
+  args_add_block: printArgsAddBlock,
+  args_add_star: printArgsAddStar,
+  blockarg: printBlockArg
 };
