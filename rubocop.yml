@@ -24,3 +24,6 @@ Style/TrailingCommaInArrayLiteral: # trailingComma
 
 Style/TrailingCommaInHashLiteral: # trailingComma
   Enabled: false
+
+Style/Lambda:
+  Enabled: false
