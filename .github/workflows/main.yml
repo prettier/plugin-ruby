@@ -1,7 +1,7 @@
 name: Main
 on:
-- push
-- pull_request
+  - push
+  - pull_request
 jobs:
   ci:
     name: CI
@@ -12,68 +12,65 @@ jobs:
           - macos-latest
           - ubuntu-latest
         ruby:
-        - "2.5"
-        - "2.6"
-        - "2.7"
-        - "3.0"
-        # Turning off truffleruby because I'm not sure why it's failing
-        # - truffleruby
+          - "2.5"
+          - "2.6"
+          - "2.7"
+          - "3.0"
+          # Turning off truffleruby because I'm not sure why it's failing
+          # - truffleruby
     runs-on: ${{ matrix.os }}
-    env: 
+    env:
       PLUGIN_RUBY_CI: true
     steps:
-    - uses: actions/checkout@master
-
-    # Setup ruby dependencies
-    - uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: true
-        ruby-version: ${{ matrix.ruby }}
-
-    # Setup node dependencies
-    - uses: actions/setup-node@v2-beta
-      with:
-        node-version: 12.x
-    - id: yarn-cache
-      run: echo "::set-output name=directory::$(yarn cache dir)"
-    - uses: actions/cache@v1
-      with:
-        path: ${{ steps.yarn-cache.outputs.directory }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-yarn-
-    - run: yarn install --frozen-lockfile
-
-    # Actually run tests and lint
-    - name: Lint and test
-      run: |
-        yarn check-format
-        yarn test
-        bundle exec rake test
+      - uses: actions/checkout@master
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          ruby-version: ${{ matrix.ruby }}
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: 12.x
+      - id: yarn-cache
+        run: echo "::set-output name=directory::$(yarn cache dir)"
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache.outputs.directory }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+      - run: yarn install --frozen-lockfile
+      - name: Test
+        run: |
+          yarn test
+          bundle exec rake test
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    env: 
+    env:
       PLUGIN_RUBY_CI: true
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-node@v2-beta
-      with:
-        node-version: 12.x
-    - id: yarn-cache
-      run: echo "::set-output name=directory::$(yarn cache dir)"
-    - uses: actions/cache@v1
-      with:
-        path: ${{ steps.yarn-cache.outputs.directory }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-yarn-
-    - run: yarn install --frozen-lockfile
-    - run: yarn lint
+      - uses: actions/checkout@master
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          ruby-version: "3.0"
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: 12.x
+      - id: yarn-cache
+        run: echo "::set-output name=directory::$(yarn cache dir)"
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache.outputs.directory }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+      - run: yarn install --frozen-lockfile
+      - run: |
+          yarn check-format
+          yarn lint
 
   automerge:
-    name: AutoMerge
+    name: Auto Merge
     needs:
       - ci
       - lint
@@ -88,4 +85,3 @@ jobs:
               repo: context.payload.repository.name,
               pull_number: context.payload.pull_request.number
             })
-  
