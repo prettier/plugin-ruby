@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [#812](https://github.com/prettier/plugin-ruby/issues/812) - valscion, kddeisz - Splats and blocks within args that have comments attached should place their respective operators in the right place.
+- [#816](https://github.com/prettier/plugin-ruby/pull/816) - valscion - Document RuboCop's Style/Lambda should be disabled
 
 ## [1.5.2] - 2021-02-03
 
