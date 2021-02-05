@@ -1,5 +1,4 @@
 const net = require("net");
-const path = require("path");
 const prettier = require("prettier");
 
 // eslint-disable-next-line no-underscore-dangle
@@ -76,36 +75,5 @@ expect.extend({
   },
   toMatchFormat(before, config = {}) {
     return checkFormat(before, before.code || before, config);
-  },
-  toFailFormat(before, message) {
-    let pass = false;
-    let error = null;
-
-    try {
-      prettier.format(before, { parser: "ruby", plugins: ["."] });
-    } catch (caught) {
-      error = caught;
-      pass = caught.message === message;
-    }
-
-    return {
-      pass,
-      message: () => `
-        Expected format to throw an error for ${before} with ${message},
-        but got ${error.message} instead
-      `
-    };
-  },
-  toInferParser(filename) {
-    const filepath = path.join(__dirname, filename);
-    const plugin = path.join(__dirname, "..", "..", "src", "plugin");
-
-    return prettier
-      .getFileInfo(filepath, { plugins: [plugin] })
-      .then((props) => ({
-        pass: props.inferredParser === "ruby",
-        message: () =>
-          `Expected prettier to infer the ruby parser for ${filename}, but got ${props.inferredParser} instead`
-      }));
   }
 });

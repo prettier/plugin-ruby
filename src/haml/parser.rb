@@ -131,8 +131,6 @@ module Prettier
   class HAMLParser
     def self.parse(source)
       Haml::Parser.new({}).call(source).as_json
-    rescue StandardError
-      false
     end
   end
 end

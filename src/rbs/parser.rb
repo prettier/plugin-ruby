@@ -87,8 +87,6 @@ module Prettier
   class RBSParser
     def self.parse(text)
       { declarations: RBS::Parser.parse_signature(text) }
-    rescue StandardError
-      false
     end
   end
 end
