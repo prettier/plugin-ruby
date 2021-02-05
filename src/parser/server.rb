@@ -48,6 +48,11 @@ loop do
     else
       socket.write('{ "error": true }')
     end
+  rescue Prettier::Parser::ParserError => error
+    loc = { start: { line: error.lineno, column: error.column } }
+    socket.write(JSON.fast_generate(error: error.message, loc: loc))
+  rescue StandardError => error
+    socket.write(JSON.fast_generate(error: error.message))
   ensure
     socket.close
   end

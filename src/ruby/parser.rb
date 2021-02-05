@@ -1729,6 +1729,28 @@ class Prettier::Parser < Ripper
     )
   end
 
+  # A special parser error so that we can get nice syntax displays on the error
+  # message when prettier prints out the results.
+  class ParserError < StandardError
+    attr_reader :lineno, :column
+
+    def initialize(error, lineno, column)
+      super(error)
+      @lineno = lineno
+      @column = column
+    end
+  end
+
+  # If we encounter a parse error, just immediately bail out so that our runner
+  # can catch it.
+  def on_parse_error(error, *)
+    raise ParserError.new(error, lineno, column)
+  end
+  alias on_alias_error on_parse_error
+  alias on_assign_error on_parse_error
+  alias on_class_name_error on_parse_error
+  alias on_param_error on_parse_error
+
   # The program node is the very top of the AST. Here we'll attach all of
   # the comments that we've gathered up over the course of parsing the
   # source string. We'll also attach on the __END__ content if there was
