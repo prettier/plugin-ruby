@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.5.3] - 2021-02-28
+
 ### Changed
 
 - [#812](https://github.com/prettier/plugin-ruby/issues/812) - valscion, kddeisz - Splats and blocks within args that have comments attached should place their respective operators in the right place.
