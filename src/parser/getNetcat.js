@@ -16,35 +16,42 @@ function hasCommand(name) {
 
 // Finds an netcat-like adapter to use for sending data to a socket. We order
 // these by likelihood of being found so we can avoid some shell-outs.
-function getCommandAndArg() {
+function getCommandAndArgs() {
   if (hasCommand("nc")) {
-    return ["nc", "-U"];
+    return ["nc", ["-U"]];
   }
 
   if (hasCommand("telnet")) {
-    return ["telnet", "-u"];
+    return ["telnet", ["-u"]];
   }
 
   if (hasCommand("ncat")) {
-    return ["ncat", "-U"];
+    return ["ncat", ["-U"]];
   }
 
   if (hasCommand("socat")) {
-    return ["socat", "-"];
+    return ["socat", ["-"]];
   }
 
-  return ["node", require.resolve("./netcat.js")];
+  return ["node", [require.resolve("./netcat.js")]];
 }
 
 let command;
-let arg;
+let args;
 
-function getNetcat() {
+function getNetcat(opts) {
   if (!command) {
-    [command, arg] = getCommandAndArg();
+    if (opts.rubyNetcatCommand) {
+      const splits = opts.rubyNetcatCommand.split(" ");
+
+      command = splits[0];
+      args = splits.slice(1);
+    } else {
+      [command, args] = getCommandAndArgs();
+    }
   }
 
-  return { command, arg };
+  return { command, args };
 }
 
 module.exports = getNetcat;
