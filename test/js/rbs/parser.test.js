@@ -8,11 +8,11 @@ const {
 
 describe("parser", () => {
   test("parse", () => {
-    expect(parse("class Foo end").declarations).toHaveLength(1);
+    expect(parse("class Foo end", [], {}).declarations).toHaveLength(1);
   });
 
   test("parse failure", () => {
-    expect(() => parse("<>")).toThrowError();
+    expect(() => parse("<>", [], {})).toThrowError();
   });
 
   test("hasPragma", () => {

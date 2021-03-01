@@ -4,8 +4,8 @@ const parseSync = require("../parser/parseSync");
 // to prettier a JavaScript object that is the equivalent AST that represents
 // the code stored in that string. We accomplish this by spawning a new Ruby
 // process of parser.rb and reading JSON off STDOUT.
-function parse(text, _parsers, _opts) {
-  return parseSync("ruby", text);
+function parse(text, _parsers, opts) {
+  return parseSync("ruby", text, opts);
 }
 
 const pragmaPattern = /#\s*@(prettier|format)/;

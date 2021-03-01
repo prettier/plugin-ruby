@@ -1,7 +1,7 @@
 const parseSync = require("../parser/parseSync");
 
-const parse = (text, _parsers, _opts) => {
-  return parseSync("haml", text);
+const parse = (text, _parsers, opts) => {
+  return parseSync("haml", text, opts);
 };
 
 const pragmaPattern = /^\s*-#\s*@(prettier|format)/;

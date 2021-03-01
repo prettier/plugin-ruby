@@ -119,6 +119,12 @@ module.exports = {
       description:
         "When it fits on one line, allows if, unless, while, and until statements to use the modifier form."
     },
+    rubyNetcatCommand: {
+      type: "string",
+      category: "Ruby",
+      description:
+        'The prefix of the command to execute to communicate between the node.js process and the Ruby process. (For example, "nc -U" or "telnet -u") Normally you should not set this option.'
+    },
     rubySingleQuote: {
       type: "boolean",
       category: "Ruby",

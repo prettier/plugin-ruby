@@ -54,11 +54,11 @@ function ensureParseServer() {
 }
 
 // Sends a request to the parse server to parse the given content.
-function requestParse(parser, source) {
+function requestParse(parser, source, opts) {
   ensureParseServer();
 
-  const { command, arg } = getNetcat();
-  const { stdout, stderr, status } = spawnSync(command, [arg, sockfile], {
+  const { command, args } = getNetcat(opts);
+  const { stdout, stderr, status } = spawnSync(command, args.concat(sockfile), {
     input: `${parser}|${source}`,
     maxBuffer: 15 * 1024 * 1024
   });

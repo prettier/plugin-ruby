@@ -7,11 +7,11 @@ const {
 
 describe("parser", () => {
   test("parse", () => {
-    expect(parse("= foo").type).toEqual("root");
+    expect(parse("= foo", [], {}).type).toEqual("root");
   });
 
   test("parse failure", () => {
-    expect(() => parse(`%div("invalid ": 1)`)).toThrowError();
+    expect(() => parse(`%div("invalid ": 1)`, [], {})).toThrowError();
   });
 
   test("hasPragma", () => {
