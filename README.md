@@ -170,7 +170,7 @@ inherit_gem:
   prettier: rubocop.yml
 ```
 
-### `npm` package
+#### `npm` package
 
 ```yaml
 inherit_gem:
