@@ -163,9 +163,18 @@ with some of RuboCop's functionality.
 Prettier provides a RuboCop configuration file to disable the rules which clash.
 To enable, add the following config at the top of your project's `.rubocop.yml`:
 
+#### Ruby gem
+
 ```yaml
 inherit_gem:
   prettier: rubocop.yml
+```
+
+### `npm` package
+
+```yaml
+inherit_gem:
+  - node_modules/@prettier/plugin-ruby/rubocop.yml
 ```
 
 ## Contributing
