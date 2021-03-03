@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [#834](https://github.com/prettier/plugin-ruby/pull/834) - ayrton - Ignore Rubocop's incompatible Style/GuardClause and Style/IfUnlessModifier rules.
+
 ## [1.5.3] - 2021-02-28
 
 ### Changed
