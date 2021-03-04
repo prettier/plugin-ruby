@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [#835](https://github.com/prettier/plugin-ruby/issues/835) - valscion, kddeisz - Array splat operator should not get moved by leading comments.
+- [#836](https://github.com/prettier/plugin-ruby/issues/836) - valscion, kddeisz - Array splat operator should not get moved by trailing comments.
+
 ## [1.5.3] - 2021-02-28
 
 ### Changed

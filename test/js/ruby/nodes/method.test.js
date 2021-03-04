@@ -249,7 +249,22 @@ describe("method", () => {
         const content = ruby(`
           foo(
             # comment
+            # another comment
+            # even more comment
             *values
+          )
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("with trailing comments", () => {
+        const content = ruby(`
+          foo(
+            # comment
+            # another comment
+            *values # a trailing comment
+            # a whole other comment
           )
         `);
 

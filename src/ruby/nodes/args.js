@@ -147,9 +147,16 @@ function printArgsAddStar(path, opts, print) {
     //       *values
     //     ]
     //
+    // or if we have an array like:
+    //
+    //     [
+    //       *values # comment
+    //     ]
+    //
     // then we need to make sure we don't accidentally prepend the operator
     // before the comment.
-    docs[1].parts[2] = concat(["*", docs[1].parts[2]]);
+    const index = node.body[1].comments.filter(({ leading }) => leading).length;
+    docs[1].parts[index] = concat(["*", docs[1].parts[index]]);
   } else {
     // If we don't have any comments, we can just prepend the operator
     docs[1] = concat(["*", docs[1]]);
