@@ -173,7 +173,7 @@ inherit_gem:
 #### `npm` package
 
 ```yaml
-inherit_gem:
+inherit_from:
   - node_modules/@prettier/plugin-ruby/rubocop.yml
 ```
 
