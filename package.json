@@ -22,7 +22,7 @@
     "prettier": ">=1.10"
   },
   "devDependencies": {
-    "eslint": "^7.21.0",
+    "eslint": "^7.22.0",
     "eslint-config-prettier": "^8.0.0",
     "husky": "^5.0.9",
     "jest": "^26.0.0",
