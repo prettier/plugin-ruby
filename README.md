@@ -136,7 +136,6 @@ Below are the options (from [`src/plugin.js`](src/plugin.js)) that `@prettier/pl
 | `rubyHashLabel`     | `--ruby-hash-label`     | `true`  | When possible, uses the shortened hash key syntax, as opposed to hash rockets.                                                                                                           |
 | `rubyModifier`      | `--ruby-modifier`       | `true`  | When it fits on one line, allows while and until statements to use the modifier form.                                                                                                    |
 | `rubyNetcatCommand` | `--ruby-netcat-command` |         | The prefix of the command to execute to communicate between the node.js process and the Ruby process. (For example, `"nc -U"` or `"telnet -u"`) Normally you should not set this option. |
-
 | `rubySingleQuote` | `--ruby-single-quote` | `true` | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals. |
 | `rubyToProc` | `--ruby-to-proc` | `false` | When possible, convert blocks to the more concise `Symbol#to_proc` syntax. |
 | `tabWidth` | `--tab-width` | `2` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)). |
