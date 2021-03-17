@@ -58,7 +58,7 @@ function printArgParen(path, opts, print) {
         concat([
           softline,
           join(concat([",", line]), path.call(print, "body", 0)),
-          getTrailingComma(opts) && getArgParenTrailingComma(argsNode)
+          getTrailingComma(opts) ? getArgParenTrailingComma(argsNode) : ""
         ])
       ),
       softline,
