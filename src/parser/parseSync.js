@@ -9,7 +9,10 @@ function parseSync(parser, source, opts) {
 
   // We need special handling in case the user's version of nc doesn't support
   // using unix sockets.
-  if (stderr.includes("invalid option -- U")) {
+  if (
+    stderr.includes("invalid option -- U") ||
+    stderr.includes("Protocol not supported")
+  ) {
     throw new Error(`
       @prettier/plugin-ruby uses netcat to communicate over unix sockets between
       the node.js process running prettier and an underlying Ruby process used
