@@ -153,7 +153,7 @@ file](https://prettier.io/docs/en/configuration.html). For example:
 Or, they can be passed to `prettier` as arguments:
 
 ```bash
-prettier --ruby-single-quote false --write '**/*'
+bundle exec rbprettier --ruby-single-quote false --write '**/*'
 ```
 
 ### Usage with RuboCop
