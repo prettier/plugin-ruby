@@ -44,15 +44,11 @@ function spawnParseServer() {
   const tmpDir = mkdtempSync(path.join(os.tmpdir(), "prettier-ruby"));
   const tmpFile = path.join(tmpDir, `${process.pid}.sock`);
 
-  const server = spawn(
-    "ruby",
-    [path.join(__dirname, "./server.rb"), tmpFile],
-    {
-      env: Object.assign({}, process.env, { LANG: getLang() }),
-      detached: true,
-      stdio: "inherit"
-    }
-  );
+  const server = spawn("ruby", [path.join(__dirname, "./server.rb"), tmpFile], {
+    env: Object.assign({}, process.env, { LANG: getLang() }),
+    detached: true,
+    stdio: "inherit"
+  });
 
   process.on("exit", () => {
     try {
