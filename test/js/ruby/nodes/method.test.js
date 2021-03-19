@@ -146,32 +146,6 @@ describe("method", () => {
         expect("def foo(name) = bar").toMatchFormat());
     }
 
-    test.skip("def/begin transform", () => {
-      const content = ruby(`
-        def foo
-          begin
-            try_something
-          rescue SomeError => error
-            handle_error(error)
-          ensure
-            this_always_happens
-          end
-        end
-      `);
-
-      const expected = ruby(`
-        def foo
-          try_something
-        rescue SomeError => error
-          handle_error(error)
-        ensure
-          this_always_happens
-        end
-      `);
-
-      return expect(content).toChangeFormat(expected);
-    });
-
     test("comments on kwargs", () => {
       const content = ruby(`
         def foo(
