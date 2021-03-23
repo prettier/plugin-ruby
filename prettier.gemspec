@@ -14,15 +14,11 @@ Gem::Specification.new do |spec|
 
   spec.files =
     Dir.chdir(__dir__) do
-      Dir['{{exe,lib,src}/**/*,*.md}'] + %w[
-        bin/console
-        LICENSE
-        node_modules/prettier/bin-prettier.js
-        node_modules/prettier/index.js
-        node_modules/prettier/third-party.js
-        package.json
-        rubocop.yml
-      ]
+      %w[LICENSE bin/console package.json rubocop.yml] +
+        Dir['{{exe,lib,src}/**/*,*.md}'] +
+        Dir[
+          'node_modules/prettier/{index,bin-prettier,third-party,parser-*}.js'
+        ]
     end
 
   spec.bindir = 'exe'
