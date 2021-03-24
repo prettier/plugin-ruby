@@ -86,7 +86,13 @@ end
 module Prettier
   class RBSParser
     def self.parse(text)
-      { declarations: RBS::Parser.parse_signature(text) }
+      {
+        declarations: RBS::Parser.parse_signature(text),
+        location: {
+          start_pos: 0,
+          end_pos: text.length
+        }
+      }
     end
   end
 end

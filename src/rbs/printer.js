@@ -147,7 +147,7 @@ function printNode(path, opts, print) {
 
   // This is the big function that prints out any individual type, which can
   // look like all kinds of things, listed in the case statement below.
-  function printType(path) {
+  function printType(path, { forceUnionParens = false } = {}) {
     const node = path.getValue();
 
     switch (node.class) {
@@ -173,8 +173,11 @@ function printNode(path, opts, print) {
           join(concat([line, "| "]), path.map(printType, "types"))
         );
 
-        const parentType = path.getParentNode().class;
-        return parentType === "intersection" ? concat(["(", doc, ")"]) : doc;
+        if (forceUnionParens || path.getParentNode().class === "intersection") {
+          return concat(["(", doc, ")"]);
+        }
+
+        return doc;
       }
       case "intersection":
         return group(join(concat([line, "& "]), path.map(printType, "types")));
@@ -515,7 +518,14 @@ function printNode(path, opts, print) {
       );
     }
 
-    parts.push("-> ", path.call(printType, "type", "return_type"));
+    parts.push(
+      "-> ",
+      path.call(
+        (typePath) => printType(typePath, { forceUnionParens: true }),
+        "type",
+        "return_type"
+      )
+    );
 
     return group(concat(parts));
   }
