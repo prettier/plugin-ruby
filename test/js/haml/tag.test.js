@@ -42,45 +42,55 @@ describe("tag", () => {
     return expect(content).toMatchFormat();
   });
 
-  test("static attributes", () =>
-    expect(haml("%span(foo)")).toChangeFormat("%span{foo: true}"));
+  describe("static attributes", () => {
+    test("basic", () =>
+      expect(haml("%span(foo)")).toChangeFormat("%span{foo: true}"));
 
-  test("static attributes (hash label, single quote)", () => {
-    const content = haml(`%section(xml:lang="en" title="title")`);
-    const expected = "%section{'xml:lang': 'en', title: 'title'}";
+    test("hash label, single quote", () => {
+      const content = haml(`%section(xml:lang="en" title="title")`);
+      const expected = "%section{'xml:lang': 'en', title: 'title'}";
 
-    return expect(content).toChangeFormat(expected);
-  });
-
-  test("static attributes (hash label, double quote)", () => {
-    const content = haml(`%section(xml:lang="en" title="title")`);
-    const expected = `%section{"xml:lang": "en", title: "title"}`;
-
-    return expect(content).toChangeFormat(expected, { rubySingleQuote: false });
-  });
-
-  test("static attributes (hash rocket, single quote)", () => {
-    const content = haml(`%section(xml:lang="en" title="title")`);
-    const expected = `%section{:'xml:lang' => 'en', :title => 'title'}`;
-
-    return expect(content).toChangeFormat(expected, { rubyHashLabel: false });
-  });
-
-  test("static attributes (hash rocket, double quote)", () => {
-    const content = haml(`%section(xml:lang="en" title="title")`);
-    const expected = '%section{:"xml:lang" => "en", :title => "title"}';
-
-    return expect(content).toChangeFormat(expected, {
-      rubyHashLabel: false,
-      rubySingleQuote: false
+      return expect(content).toChangeFormat(expected);
     });
-  });
 
-  test("static attributes (non-strings)", () => {
-    const content = haml(`%section(foo=1 bar=2)`);
-    const expected = `%section(foo=1 bar=2)`;
+    test("hash label, double quote", () => {
+      const content = haml(`%section(xml:lang="en" title="title")`);
+      const expected = `%section{"xml:lang": "en", title: "title"}`;
 
-    return expect(content).toChangeFormat(expected);
+      return expect(content).toChangeFormat(expected, {
+        rubySingleQuote: false
+      });
+    });
+
+    test("hash label, single quote, interpolation", () => {
+      const content = haml(`%section{title: "#{title}"}`);
+
+      return expect(content).toMatchFormat(content);
+    });
+
+    test("hash rocket, single quote", () => {
+      const content = haml(`%section(xml:lang="en" title="title")`);
+      const expected = `%section{:'xml:lang' => 'en', :title => 'title'}`;
+
+      return expect(content).toChangeFormat(expected, { rubyHashLabel: false });
+    });
+
+    test("hash rocket, double quote", () => {
+      const content = haml(`%section(xml:lang="en" title="title")`);
+      const expected = '%section{:"xml:lang" => "en", :title => "title"}';
+
+      return expect(content).toChangeFormat(expected, {
+        rubyHashLabel: false,
+        rubySingleQuote: false
+      });
+    });
+
+    test("non-strings", () => {
+      const content = haml(`%section(foo=1 bar=2)`);
+      const expected = `%section(foo=1 bar=2)`;
+
+      return expect(content).toChangeFormat(expected);
+    });
   });
 
   test("object reference", () => {
