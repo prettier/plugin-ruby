@@ -662,7 +662,7 @@ class Prettier::Parser < Ripper
       body: [block_var, stmts],
       sl: beging[:sl],
       sc: beging[:sc],
-      el: ending[:el],
+      el: [ending[:el], stmts[:el]].max,
       ec: ending[:ec]
     }
   end
@@ -715,7 +715,7 @@ class Prettier::Parser < Ripper
       body: [receiver, oper, sending],
       sl: receiver[:sl],
       sc: receiver[:sc],
-      el: ending[:el],
+      el: [ending[:el], receiver[:el]].max,
       ec: ending[:ec]
     }
   end
