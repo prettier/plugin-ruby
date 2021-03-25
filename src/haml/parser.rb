@@ -86,7 +86,14 @@ class Haml::Parser::ParseNode
         json[:value][:text] = "\\#{text}" if text.match?(SPECIAL_START)
       end
     when :root
-      to_h.tap { |json| json[:children] = children.map(&:as_json) }
+      to_h.tap do |json|
+        json[:children] = children.map(&:as_json)
+
+        # We need this information in the printer to know how to lay out
+        # multi-line attributes.
+        json[:supports_multiline] =
+          Gem::Version.new(Haml::VERSION) >= Gem::Version.new('5.2')
+      end
     when :script
       to_h.tap do |json|
         json.delete(:parent)
