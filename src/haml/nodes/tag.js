@@ -84,17 +84,42 @@ function getAttributesObject(object, opts, level = 0) {
     ])
   );
 
+  // If we have support for multi-line attributes laid out like a regular hash,
+  // then we print them that way here.
+  if (opts.supportsMultiline) {
+    return group(
+      concat([
+        "{",
+        indent(group(concat([boundary, join(concat([",", line]), parts)]))),
+        boundary,
+        "}"
+      ])
+    );
+  }
+
+  // Otherwise, if we only have one attribute, then just print it inline
+  // regardless of how long it is.
+  if (parts.length === 0) {
+    return group(concat(["{", parts[0], "}"]));
+  }
+
+  // Otherwise, depending on how long the line is it will split the content into
+  // multi-line attributes that old Haml understands.
   return group(
     concat([
       "{",
-      indent(group(concat([boundary, join(concat([",", line]), parts)]))),
-      boundary,
+      parts[0],
+      ",",
+      align(
+        opts.headerLength + 1,
+        concat([line, join(concat([",", line]), parts.slice(1))])
+      ),
       "}"
     ])
   );
 }
 
-function getHeader(value, opts) {
+function getHeader(value, opts, supportsMultiline) {
   const { attributes } = value;
   const parts = [];
 
@@ -130,7 +155,15 @@ function getHeader(value, opts) {
     if (typeof value.dynamic_attributes.old === "string") {
       parts.push(value.dynamic_attributes.old);
     } else {
-      parts.push(getAttributesObject(value.dynamic_attributes.old, opts));
+      parts.push(
+        getAttributesObject(
+          value.dynamic_attributes.old,
+          Object.assign({}, opts, {
+            supportsMultiline,
+            headerLength: parts.join("").length
+          })
+        )
+      );
     }
   }
 
@@ -176,7 +209,13 @@ function getHeader(value, opts) {
 // https://haml.info/docs/yardoc/file.REFERENCE.html#element-name-
 function tag(path, opts, print) {
   const { children, value } = path.getValue();
-  const header = getHeader(value, opts);
+
+  // This is kind of a total hack in that I don't think you're really supposed
+  // to directly use `path.stack`, but it's the easiest way to get the root node
+  // without having to know how many levels deep we are.
+  const { supports_multiline } = path.stack[0];
+
+  const header = getHeader(value, opts, supports_multiline);
 
   if (children.length === 0) {
     return header;
