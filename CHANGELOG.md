@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.5.5] - 2021-03-25
+
 ### Changed
 
 - [#841](https://github.com/prettier/plugin-ruby/issues/841) - LoganBarnett, kddeisz - Better error messaging for when unix sockets are not supported by netcat.
@@ -1102,7 +1104,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.5.4...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.5.5...HEAD
+[1.5.5]: https://github.com/prettier/plugin-ruby/compare/v1.5.4...v1.5.5
 [1.5.4]: https://github.com/prettier/plugin-ruby/compare/v1.5.3...v1.5.4
 [1.5.3]: https://github.com/prettier/plugin-ruby/compare/v1.5.2...v1.5.3
 [1.5.2]: https://github.com/prettier/plugin-ruby/compare/v1.5.1...v1.5.2
