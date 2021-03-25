@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [#847](https://github.com/prettier/plugin-ruby/issues/847) - jflinter, kddeisz - Ensure parentheses are present on union return types in RBS.
 - [#850](https://github.com/prettier/plugin-ruby/issues/850) - maethub, kddeisz - Ensure double quotes are used even when single quotes are requested for HAML attribute values.
 - [#849](https://github.com/prettier/plugin-ruby/issues/849) - indirect, kddeisz - Support HAML version <= 5.1 multi-line attributes.
+- [#810](https://github.com/prettier/plugin-ruby/issues/810) - valscion, kddeisz - Make it so that brace blocks containing heredocs have the correct end line so that they format subsequent statements correctly.
 
 ## [1.5.4] - 2021-03-17
 

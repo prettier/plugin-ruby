@@ -523,4 +523,15 @@ describe("heredocs", () => {
 
     return expect(content).toMatchFormat();
   });
+
+  test("spilling out from another node keeps subsequent formatting", () => {
+    const content = ruby(`
+      foo { <<~BAR.baz }
+        qux
+      BAR
+      qaz
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });
