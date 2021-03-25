@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [#841](https://github.com/prettier/plugin-ruby/issues/841) - LoganBarnett, kddeisz - Better error messaging for when unix sockets are not supported by netcat.
 - [#844](https://github.com/prettier/plugin-ruby/issues/844) - andyw8, kddeisz - Ensure we ship all of the parsers with the prettier gem so that `rbprettier` can parse other languages as well.
 - [#847](https://github.com/prettier/plugin-ruby/issues/847) - jflinter, kddeisz - Ensure parentheses are present on union return types in RBS.
+- [#850](https://github.com/prettier/plugin-ruby/issues/850) - maethub, kddeisz - Ensure double quotes are used even when single quotes are requested for HAML attribute values.
 
 ## [1.5.4] - 2021-03-17
 

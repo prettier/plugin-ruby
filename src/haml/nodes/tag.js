@@ -36,7 +36,7 @@ function getHashValue(value, opts) {
     return value.slice(1);
   }
 
-  const quote = opts.rubySingleQuote ? "'" : '"';
+  const quote = opts.rubySingleQuote && !value.includes("#{") ? "'" : '"';
   return `${quote}${value}${quote}`;
 }
 
