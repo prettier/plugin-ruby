@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [#854](https://github.com/prettier/plugin-ruby/issues/854) - jflinter, kddeisz - Parentheses should not be stripped from optional RBS union types.
+
 ## [1.5.5] - 2021-03-25
 
 ### Changed
