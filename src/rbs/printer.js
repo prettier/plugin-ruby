@@ -147,7 +147,7 @@ function printNode(path, opts, print) {
 
   // This is the big function that prints out any individual type, which can
   // look like all kinds of things, listed in the case statement below.
-  function printType(path, { forceUnionParens = false } = {}) {
+  function printType(path, { forceParens = false } = {}) {
     const node = path.getValue();
 
     switch (node.class) {
@@ -157,7 +157,13 @@ function printNode(path, opts, print) {
         }
         return node.literal;
       case "optional":
-        return concat([path.call(printType, "type"), "?"]);
+        return concat([
+          path.call(
+            (typePath) => printType(typePath, { forceParens: true }),
+            "type"
+          ),
+          "?"
+        ]);
       case "tuple":
         // If we don't have any sub types, we explicitly need the space in between
         // the brackets to not confuse the parser.
@@ -173,14 +179,29 @@ function printNode(path, opts, print) {
           join(concat([line, "| "]), path.map(printType, "types"))
         );
 
-        if (forceUnionParens || path.getParentNode().class === "intersection") {
+        if (forceParens) {
           return concat(["(", doc, ")"]);
         }
 
         return doc;
       }
-      case "intersection":
-        return group(join(concat([line, "& "]), path.map(printType, "types")));
+      case "intersection": {
+        const doc = group(
+          join(
+            concat([line, "& "]),
+            path.map(
+              (typePath) => printType(typePath, { forceParens: true }),
+              "types"
+            )
+          )
+        );
+
+        if (forceParens) {
+          return concat(["(", doc, ")"]);
+        }
+
+        return doc;
+      }
       case "class_singleton":
         return concat(["singleton(", node.name, ")"]);
       case "proc":
@@ -521,7 +542,7 @@ function printNode(path, opts, print) {
     parts.push(
       "-> ",
       path.call(
-        (typePath) => printType(typePath, { forceUnionParens: true }),
+        (typePath) => printType(typePath, { forceParens: true }),
         "type",
         "return_type"
       )
