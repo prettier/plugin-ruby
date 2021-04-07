@@ -11,7 +11,7 @@ const nodes = {
   tag: require("./nodes/tag")
 };
 
-const genericPrint = (path, opts, print) => {
+function printNode(path, opts, print) {
   const { type } = path.getValue();
 
   /* istanbul ignore next */
@@ -20,9 +20,18 @@ const genericPrint = (path, opts, print) => {
   }
 
   return nodes[type](path, opts, print);
-};
+}
+
+// This function handles adding the format pragma to a source string. This is an
+// optional workflow for incremental adoption.
+function insertPragma(text) {
+  const boundary = text.startsWith("-#") ? "\n" : "\n\n";
+
+  return `-# @format${boundary}${text}`;
+}
 
 module.exports = {
   embed,
-  print: genericPrint
+  print: printNode,
+  insertPragma
 };

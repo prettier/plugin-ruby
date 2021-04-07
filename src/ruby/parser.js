@@ -8,12 +8,10 @@ function parse(text, _parsers, opts) {
   return parseSync("ruby", text, opts);
 }
 
-const pragmaPattern = /#\s*@(prettier|format)/;
-
 // This function handles checking whether or not the source string has the
 // pragma for prettier. This is an optional workflow for incremental adoption.
 function hasPragma(text) {
-  return pragmaPattern.test(text);
+  return /^\s*#[^\S\n]*@(format|prettier)\s*(\n|$)/.test(text);
 }
 
 // This function is critical for comments and cursor support, and is responsible

@@ -127,6 +127,14 @@ function isBlockComment(comment) {
   return comment.type === "@embdoc";
 }
 
+// This function handles adding the format pragma to a source string. This is an
+// optional workflow for incremental adoption.
+function insertPragma(text) {
+  const boundary = text.startsWith("#") ? "\n" : "\n\n";
+
+  return `# @format${boundary}${text}`;
+}
+
 module.exports = {
   embed,
   print: printNode,
@@ -134,5 +142,6 @@ module.exports = {
   canAttachComment,
   getCommentChildNodes,
   printComment,
-  isBlockComment
+  isBlockComment,
+  insertPragma
 };
