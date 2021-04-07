@@ -630,7 +630,14 @@ function hasPrettierIgnore(path) {
   return node.comment && node.comment.string.includes("prettier-ignore");
 }
 
+// This function handles adding the format pragma to a source string. This is an
+// optional workflow for incremental adoption.
+function insertPragma(text) {
+  return `# @format\n${text}`;
+}
+
 module.exports = {
   print: printNode,
-  hasPrettierIgnore
+  hasPrettierIgnore,
+  insertPragma
 };
