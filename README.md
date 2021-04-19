@@ -184,12 +184,12 @@ inherit_from:
 
 - Add the npm `@prettier/plugin-ruby` package to your project as described above.
 - Install the [Prettier - Code Formatter](https://github.com/prettier/prettier-vscode) extension.
-- Configure in your `settings.json`:
+- Configure in your `settings.json` (`formatOnSave` is optional):
   ```json
   {
     "[ruby]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode",
-      "editor.formatOnSave": true // optional
+      "editor.formatOnSave": true
     }
   }
   ```
