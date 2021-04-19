@@ -194,7 +194,7 @@ inherit_from:
   }
   ```
 
-Refer to https://github.com/prettier/plugin-ruby/issues/113#issuecomment-783426539 if you're having difficulties.
+Refer to [this issue](https://github.com/prettier/plugin-ruby/issues/113#issuecomment-783426539) if you're having difficulties.
 
 ## Contributing
 
