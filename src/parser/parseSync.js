@@ -109,6 +109,24 @@ function findNetcat(opts) {
   return { command: "node", args: [require.resolve("./netcat.js")] };
 }
 
+// Handles the error message in the case that the user's netcat-like
+// adapter does not support unix sockets.
+function handleNetcatError(command) {
+	let command_name = command;
+	if(command === "nc" || command === "ncat") {
+		command_name = "netcat";
+	}
+		
+  throw new Error(`
+    @prettier/plugin-ruby uses ${command_name} to communicate over unix sockets between
+    the node.js process running prettier and an underlying Ruby process used
+    for parsing. Unfortunately the version of ${command_name} that you have installed
+    does not support unix sockets. To solve this either uninstall the version
+    of ${command_name} that you're using and use a different implementation, or change
+    the value of the rubyNetcatCommand option in your prettier configuration.
+  `);
+}
+
 // Formats and sends a request to the parser server. We use netcat (or something
 // like it) here since Prettier requires the results of `parse` to be
 // synchronous and Node.js does not offer a mechanism for synchronous socket
@@ -134,17 +152,11 @@ function parseSync(parser, source, opts) {
   // We need special handling in case the user's version of nc doesn't support
   // using unix sockets.
   if (
-    stderr.includes("invalid option -- U") ||
+    stderr.includes("invalid option -- U")    ||
+    stderr.includes("invalid option -- 'u'")  ||
     stderr.includes("Protocol not supported")
-  ) {
-    throw new Error(`
-      @prettier/plugin-ruby uses netcat to communicate over unix sockets between
-      the node.js process running prettier and an underlying Ruby process used
-      for parsing. Unfortunately the version of netcat that you have installed
-      does not support unix sockets. To solve this either uninstall the version
-      of netcat that you're using and use a different implementation, or change
-      the value of the rubyNetcatCommand option in your prettier configuration.
-    `);
+	) {
+		handleNetcatError(netcat.command);
   }
 
   // If we didn't receive anything over stdout or we have a bad exit status,
