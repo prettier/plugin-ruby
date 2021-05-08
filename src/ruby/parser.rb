@@ -13,8 +13,7 @@ if (RUBY_MAJOR < 2) || ((RUBY_MAJOR == 2) && (RUBY_MINOR < 5))
   exit 1
 end
 
-require 'delegate'
-require 'json'
+require 'json' unless defined?(JSON)
 require 'ripper'
 
 module Prettier
@@ -51,6 +50,31 @@ class Prettier::Parser < Ripper
 
     def [](byteindex)
       @indices[byteindex]
+    end
+  end
+
+  # This is a small wrapper around the value of a node for those specific events
+  # that need extra handling. (For example: statement, body statement, and
+  # rescue nodes which all need extra information to determine their character
+  # boundaries.)
+  class Node
+    attr_reader :parser, :value
+
+    def initialize(parser, value)
+      @parser = parser
+      @value = value
+    end
+
+    def [](key)
+      value[key]
+    end
+
+    def dig(*keys)
+      value.dig(*keys)
+    end
+
+    def to_json(*opts)
+      value.to_json(*opts)
     end
   end
 
@@ -617,19 +641,19 @@ class Prettier::Parser < Ripper
   # bodystmt can't actually determine its bounds appropriately because it
   # doesn't necessarily know where it started. So the parent node needs to
   # report back down into this one where it goes.
-  class BodyStmt < SimpleDelegator
+  class BodyStmt < Node
     def bind(sc, ec)
-      merge!(sc: sc, ec: ec)
-      parts = self[:body]
+      value.merge!(sc: sc, ec: ec)
+      parts = value[:body]
 
       # Here we're going to determine the bounds for the stmts
       consequent = parts[1..-1].compact.first
-      self[:body][0].bind(sc, consequent ? consequent[:sc] : ec)
+      value[:body][0].bind(sc, consequent ? consequent[:sc] : ec)
 
       # Next we're going to determine the rescue clause if there is one
       if parts[1]
         consequent = parts[2..-1].compact.first
-        self[:body][1].bind_end(consequent ? consequent[:sc] : ec)
+        value[:body][1].bind_end(consequent ? consequent[:sc] : ec)
       end
     end
   end
@@ -638,6 +662,7 @@ class Prettier::Parser < Ripper
   # of clauses within the body of a method or block.
   def on_bodystmt(stmts, rescued, ensured, elsed)
     BodyStmt.new(
+      self,
       type: :bodystmt,
       body: [stmts, rescued, ensured, elsed],
       sl: lineno,
@@ -1845,12 +1870,12 @@ class Prettier::Parser < Ripper
   # doesn't really have all of the information that it needs in order to
   # determine its ending. Therefore it relies on its parent bodystmt node to
   # report its ending to it.
-  class Rescue < SimpleDelegator
+  class Rescue < Node
     def bind_end(ec)
-      merge!(ec: ec)
+      value.merge!(ec: ec)
 
-      stmts = self[:body][1]
-      consequent = self[:body][2]
+      stmts = value[:body][1]
+      consequent = value[:body][2]
 
       if consequent
         consequent.bind_end(ec)
@@ -1886,6 +1911,7 @@ class Prettier::Parser < Ripper
       end
 
     Rescue.new(
+      self,
       beging.merge!(
         type: :rescue,
         body: [rescue_ex, stmts, consequent],
@@ -1986,36 +2012,29 @@ class Prettier::Parser < Ripper
   # stmts nodes will report back down the location information. We then
   # propagate that onto void_stmt nodes inside the stmts in order to make sure
   # all comments get printed appropriately.
-  class Stmts < SimpleDelegator
-    attr_reader :parser
-
-    def initialize(parser, values)
-      @parser = parser
-      __setobj__(values)
-    end
-
+  class Stmts < Node
     def bind(sc, ec)
-      merge!(sc: sc, ec: ec)
+      value.merge!(sc: sc, ec: ec)
 
-      if self[:body][0][:type] == :void_stmt
-        self[:body][0].merge!(sc: sc, ec: sc)
+      if value[:body][0][:type] == :void_stmt
+        value[:body][0].merge!(sc: sc, ec: sc)
       end
 
       attach_comments(sc, ec)
     end
 
     def bind_end(ec)
-      merge!(ec: ec)
+      value.merge!(ec: ec)
     end
 
     def <<(statement)
-      if self[:body].any?
-        merge!(statement.slice(:el, :ec))
+      if value[:body].any?
+        value.merge!(statement.slice(:el, :ec))
       else
-        merge!(statement.slice(:sl, :el, :sc, :ec))
+        value.merge!(statement.slice(:sl, :el, :sc, :ec))
       end
 
-      self[:body] << statement
+      value[:body] << statement
       self
     end
 
@@ -2032,7 +2051,7 @@ class Prettier::Parser < Ripper
       return if attachable.empty?
 
       parser.comments -= attachable
-      self[:body] = (self[:body] + attachable).sort_by! { |node| node[:sc] }
+      value[:body] = (value[:body] + attachable).sort_by! { |node| node[:sc] }
     end
   end
 

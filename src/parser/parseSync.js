@@ -137,8 +137,8 @@ function parseSync(parser, source, opts) {
     stderr.includes("invalid option -- U") ||
     stderr.includes("invalid option -- 'u'") ||
     stderr.includes("Protocol not supported")
-	) {
-		throw new Error(`
+  ) {
+    throw new Error(`
       @prettier/plugin-ruby uses unix sockets to communicate between the node.js
       process running prettier and an underlying Ruby process used for parsing.
       Unfortunately the command that it tried to use to do that
