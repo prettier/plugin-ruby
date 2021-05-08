@@ -135,15 +135,17 @@ function parseSync(parser, source, opts) {
   // using unix sockets.
   if (
     stderr.includes("invalid option -- U") ||
+    stderr.includes("invalid option -- 'u'") ||
     stderr.includes("Protocol not supported")
-  ) {
-    throw new Error(`
-      @prettier/plugin-ruby uses netcat to communicate over unix sockets between
-      the node.js process running prettier and an underlying Ruby process used
-      for parsing. Unfortunately the version of netcat that you have installed
-      does not support unix sockets. To solve this either uninstall the version
-      of netcat that you're using and use a different implementation, or change
-      the value of the rubyNetcatCommand option in your prettier configuration.
+	) {
+		throw new Error(`
+      @prettier/plugin-ruby uses unix sockets to communicate between the node.js
+      process running prettier and an underlying Ruby process used for parsing.
+      Unfortunately the command that it tried to use to do that
+      (${netcat.command}) does not support unix sockets. To solve this either
+      uninstall the version of ${netcat.command} that you're using and use a
+      different implementation, or change the value of the rubyNetcatCommand
+      option in your prettier configuration.
     `);
   }
 
