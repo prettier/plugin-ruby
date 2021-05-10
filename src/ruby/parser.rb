@@ -76,6 +76,10 @@ class Prettier::Parser < Ripper
     def to_json(*opts)
       value.to_json(*opts)
     end
+
+    def pretty_print(q)
+      q.pp_hash(self)
+    end
   end
 
   attr_reader :source, :lines, :scanner_events
