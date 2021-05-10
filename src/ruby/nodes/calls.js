@@ -4,6 +4,7 @@ const {
   hardline,
   ifBreak,
   indent,
+  join,
   softline
 } = require("../../prettier");
 const { makeCall, noIndent } = require("../../utils");
@@ -133,7 +134,13 @@ function printMethodAddArg(path, opts, print) {
     );
   }
 
-  return concat([methodDoc, argsDoc]);
+  // If there are already parentheses, then we can just use the doc that's
+  // already printed.
+  if (argNode.type == "arg_paren") {
+    return concat([methodDoc, argsDoc]);
+  }
+
+  return concat([methodDoc, " ", join(", ", argsDoc), " "]);
 }
 
 function printMethodAddBlock(path, opts, print) {
