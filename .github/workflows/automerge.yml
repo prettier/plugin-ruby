@@ -1,0 +1,54 @@
+name: Auto Merge pull requests
+
+# read-write repo token
+# access to secrets
+on:
+  workflow_run:
+    workflows: ["Main"]
+    types:
+      - completed
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    # Only run if workflow completed successfully in a pull request made by dependabot
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.sender.login == 'dependabot[bot]'
+    steps:
+      - name: "Download artifact"
+        uses: actions/github-script@v3
+        with:
+          # Artifact unzip code based on code in
+          # https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+          script: |
+            var artifacts = await github.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: ${{github.event.workflow_run.id }},
+            });
+            var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
+              return artifact.name == "pre-automerge"
+            })[0];
+            var download = await github.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: matchArtifact.id,
+               archive_format: 'zip',
+            });
+            var fs = require('fs');
+            fs.writeFileSync('${{github.workspace}}/pre-automerge.zip', Buffer.from(download.data));
+      - run: unzip pre-automerge.zip
+      - name: "Merge pull request"
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            var fs = require('fs');
+            var issue_number = Number(fs.readFileSync('./PRE_AUTOMERGE_PULL_REQUEST_NUMBER'));
+            await github.pulls.merge({
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
+              pull_number: issue_number
+            })

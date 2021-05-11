@@ -68,3 +68,20 @@ jobs:
       - run: |
           yarn check-format
           yarn lint
+
+  pre-automerge:
+    name: Setup for Auto Merge
+    needs:
+      - ci
+      - lint
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
+    steps:
+      - name: Save PR number
+        run: |
+          mkdir -p ./pre-automerge
+          echo ${{ github.event.number }} > ./pre-automerge/PRE_AUTOMERGE_PULL_REQUEST_NUMBER
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pre-automerge
+          path: pre-automerge/
