@@ -2,6 +2,7 @@ const needsParens = [
   "args",
   "assign",
   "assoc_new",
+  "binary",
   "call",
   "massign",
   "opassign"
