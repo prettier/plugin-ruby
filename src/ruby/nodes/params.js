@@ -17,15 +17,8 @@ function printRestParam(symbol) {
 }
 
 function printParams(path, opts, print) {
-  const [
-    reqs,
-    optls,
-    rest,
-    post,
-    kwargs,
-    kwargRest,
-    block
-  ] = path.getValue().body;
+  const [reqs, optls, rest, post, kwargs, kwargRest, block] =
+    path.getValue().body;
   let parts = [];
 
   if (reqs) {

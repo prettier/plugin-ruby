@@ -108,12 +108,18 @@ function printArgs(path, { rubyToProc }, print) {
 
 function printArgsAddBlock(path, opts, print) {
   const node = path.getValue();
+  const blockNode = node.body[1];
+
   const parts = path.call(print, "body", 0);
 
-  if (node.body[1]) {
+  if (blockNode) {
     let blockDoc = path.call(print, "body", 1);
 
-    if (node.body[1].comments) {
+    if (!(blockNode.comments || []).some(({ leading }) => leading)) {
+      // If we don't have any leading comments, we can just prepend the
+      // operator.
+      blockDoc = concat(["&", blockDoc]);
+    } else if (Array.isArray(blockDoc[0])) {
       // If we have a method call like:
       //
       //     foo(
@@ -123,10 +129,20 @@ function printArgsAddBlock(path, opts, print) {
       //
       // then we need to make sure we don't accidentally prepend the operator
       // before the comment.
-      blockDoc.parts[2] = concat(["&", blockDoc.parts[2]]);
+      //
+      // In prettier >= 2.3.0, the comments are printed as an array before the
+      // content. I don't love this kind of reflection, but it's the simplest
+      // way at the moment to get this right.
+      blockDoc = blockDoc[0].concat(
+        concat(["&", blockDoc[1]]),
+        blockDoc.slice(2)
+      );
     } else {
-      // If we don't have any comments, we can just prepend the operator
-      blockDoc = concat(["&", blockDoc]);
+      // In prettier < 2.3.0, the comments are printed as part of a concat, so
+      // we can reflect on how many leading comments there are to determine
+      // which doc node we should modify.
+      const index = blockNode.comments.filter(({ leading }) => leading).length;
+      blockDoc.parts[index] = concat(["&", blockDoc.parts[index]]);
     }
 
     parts.push(blockDoc);
@@ -136,10 +152,23 @@ function printArgsAddBlock(path, opts, print) {
 }
 
 function printArgsAddStar(path, opts, print) {
-  const node = path.getValue();
-  const docs = path.map(print, "body");
+  let docs = [];
 
-  if (node.body[1].comments) {
+  path.each((argPath, argIndex) => {
+    const doc = print(argPath);
+
+    if (argIndex !== 1) {
+      docs = docs.concat(doc);
+      return;
+    }
+
+    // If we don't have any leading comments, we can just prepend the operator.
+    const argsNode = argPath.getValue();
+    if (!(argsNode.comments || []).some(({ leading }) => leading)) {
+      docs.push(concat(["*", doc]));
+      return;
+    }
+
     // If we have an array like:
     //
     //     [
@@ -147,22 +176,26 @@ function printArgsAddStar(path, opts, print) {
     //       *values
     //     ]
     //
-    // or if we have an array like:
-    //
-    //     [
-    //       *values # comment
-    //     ]
-    //
     // then we need to make sure we don't accidentally prepend the operator
-    // before the comment.
-    const index = node.body[1].comments.filter(({ leading }) => leading).length;
-    docs[1].parts[index] = concat(["*", docs[1].parts[index]]);
-  } else {
-    // If we don't have any comments, we can just prepend the operator
-    docs[1] = concat(["*", docs[1]]);
-  }
+    // before the comment(s).
+    //
+    // In prettier >= 2.3.0, the comments are printed as an array before the
+    // content. I don't love this kind of reflection, but it's the simplest way
+    // at the moment to get this right.
+    if (Array.isArray(doc[0])) {
+      docs.push(doc[0].concat(concat(["*", doc[1]]), doc.slice(2)));
+      return;
+    }
 
-  return docs[0].concat(docs[1]).concat(docs.slice(2));
+    // In prettier < 2.3.0, the comments are printed as part of a concat, so
+    // we can reflect on how many leading comments there are to determine which
+    // doc node we should modify.
+    const index = argsNode.comments.filter(({ leading }) => leading).length;
+    doc.parts[index] = concat(["*", doc.parts[index]]);
+    docs = docs.concat(doc);
+  }, "body");
+
+  return docs;
 }
 
 function printBlockArg(path, opts, print) {
