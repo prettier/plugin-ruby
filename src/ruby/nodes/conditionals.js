@@ -190,57 +190,59 @@ const canTernary = (path) => {
 };
 
 // A normalized print function for both `if` and `unless` nodes.
-const printConditional = (keyword) => (path, { rubyModifier }, print) => {
-  if (canTernary(path)) {
-    let ternaryParts = [path.call(print, "body", 0), " ? "].concat(
-      printTernaryClauses(
-        keyword,
-        path.call(print, "body", 1),
-        path.call(print, "body", 2, "body", 0)
-      )
-    );
+const printConditional =
+  (keyword) =>
+  (path, { rubyModifier }, print) => {
+    if (canTernary(path)) {
+      let ternaryParts = [path.call(print, "body", 0), " ? "].concat(
+        printTernaryClauses(
+          keyword,
+          path.call(print, "body", 1),
+          path.call(print, "body", 2, "body", 0)
+        )
+      );
 
-    if (["binary", "call"].includes(path.getParentNode().type)) {
-      ternaryParts = ["("].concat(ternaryParts).concat(")");
+      if (["binary", "call"].includes(path.getParentNode().type)) {
+        ternaryParts = ["("].concat(ternaryParts).concat(")");
+      }
+
+      return group(
+        ifBreak(printWithAddition(keyword, path, print), concat(ternaryParts))
+      );
     }
 
-    return group(
-      ifBreak(printWithAddition(keyword, path, print), concat(ternaryParts))
-    );
-  }
+    const [predicate, statements, addition] = path.getValue().body;
 
-  const [predicate, statements, addition] = path.getValue().body;
+    // If there's an additional clause that wasn't matched earlier, we know we
+    // can't go for the inline option.
+    if (addition) {
+      return group(printWithAddition(keyword, path, print, { breaking: true }));
+    }
 
-  // If there's an additional clause that wasn't matched earlier, we know we
-  // can't go for the inline option.
-  if (addition) {
-    return group(printWithAddition(keyword, path, print, { breaking: true }));
-  }
+    // If the body of the conditional is empty, then we explicitly have to use the
+    // block form.
+    if (isEmptyStmts(statements)) {
+      return concat([
+        `${keyword} `,
+        align(keyword.length + 1, path.call(print, "body", 0)),
+        concat([hardline, "end"])
+      ]);
+    }
 
-  // If the body of the conditional is empty, then we explicitly have to use the
-  // block form.
-  if (isEmptyStmts(statements)) {
-    return concat([
-      `${keyword} `,
-      align(keyword.length + 1, path.call(print, "body", 0)),
-      concat([hardline, "end"])
-    ]);
-  }
+    // If the predicate of the conditional contains an assignment, then we can't
+    // know for sure that it doesn't impact the body of the conditional, so we
+    // have to default to the block form.
+    if (containsAssignment(predicate)) {
+      return concat([
+        `${keyword} `,
+        align(keyword.length + 1, path.call(print, "body", 0)),
+        indent(concat([hardline, path.call(print, "body", 1)])),
+        concat([hardline, "end"])
+      ]);
+    }
 
-  // If the predicate of the conditional contains an assignment, then we can't
-  // know for sure that it doesn't impact the body of the conditional, so we
-  // have to default to the block form.
-  if (containsAssignment(predicate)) {
-    return concat([
-      `${keyword} `,
-      align(keyword.length + 1, path.call(print, "body", 0)),
-      indent(concat([hardline, path.call(print, "body", 1)])),
-      concat([hardline, "end"])
-    ]);
-  }
-
-  return printSingle(keyword)(path, { rubyModifier }, print);
-};
+    return printSingle(keyword)(path, { rubyModifier }, print);
+  };
 
 module.exports = {
   else: (path, opts, print) => {
