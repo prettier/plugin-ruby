@@ -8,17 +8,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
+        platform:
           - macos-latest
           - ubuntu-latest
+          - windows-latest
         ruby:
           - "2.5"
           - "2.6"
           - "2.7"
           - "3.0"
-          # Turning off truffleruby because I'm not sure why it's failing
-          # - truffleruby
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.platform }}
     env:
       PLUGIN_RUBY_CI: true
     steps:
@@ -39,9 +38,7 @@ jobs:
           restore-keys: ${{ runner.os }}-yarn-
       - run: yarn install --frozen-lockfile
       - name: Test
-        run: |
-          yarn test
-          bundle exec rake test
+        run: yarn test && bundle exec rake test
 
   lint:
     name: Lint
@@ -65,9 +62,7 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: ${{ runner.os }}-yarn-
       - run: yarn install --frozen-lockfile
-      - run: |
-          yarn check-format
-          yarn lint
+      - run: yarn check-format && yarn lint
 
   gem:
     name: Gem
