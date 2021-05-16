@@ -97,4 +97,13 @@ describe("calls", () => {
 
     return expect(content).toChangeFormat(expected);
   });
+
+  test("chained method_add_arg after a block", () => {
+    const content = ruby(`
+      a.b c do
+      end.d e, f
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });
