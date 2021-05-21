@@ -69,8 +69,10 @@ jobs:
           yarn check-format
           yarn lint
 
-  pre-automerge:
-    name: Setup for Auto Merge
+  # Saves pull request details for later workflow runs which can run in
+  # a privileged environment
+  save-pr-info:
+    name: Save PR info
     needs:
       - ci
       - lint
@@ -79,9 +81,9 @@ jobs:
     steps:
       - name: Save PR number
         run: |
-          mkdir -p ./pre-automerge
-          echo ${{ github.event.number }} > ./pre-automerge/PRE_AUTOMERGE_PULL_REQUEST_NUMBER
+          mkdir -p ./save-pr-info
+          echo ${{ github.event.number }} > ./save-pr-info/PULL_REQUEST_NUMBER
       - uses: actions/upload-artifact@v2
         with:
-          name: pre-automerge
-          path: pre-automerge/
+          name: save-pr-info
+          path: save-pr-info/

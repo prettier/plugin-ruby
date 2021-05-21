@@ -29,7 +29,7 @@ jobs:
                run_id: ${{github.event.workflow_run.id }},
             });
             var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "pre-automerge"
+              return artifact.name == "save-pr-info"
             })[0];
             var download = await github.actions.downloadArtifact({
                owner: context.repo.owner,
@@ -38,15 +38,15 @@ jobs:
                archive_format: 'zip',
             });
             var fs = require('fs');
-            fs.writeFileSync('${{github.workspace}}/pre-automerge.zip', Buffer.from(download.data));
-      - run: unzip pre-automerge.zip
+            fs.writeFileSync('${{github.workspace}}/save-pr-info.zip', Buffer.from(download.data));
+      - run: unzip save-pr-info.zip
       - name: "Merge pull request"
         uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             var fs = require('fs');
-            var issue_number = Number(fs.readFileSync('./PRE_AUTOMERGE_PULL_REQUEST_NUMBER'));
+            var issue_number = Number(fs.readFileSync('./PULL_REQUEST_NUMBER'));
             await github.pulls.merge({
               owner: context.payload.repository.owner.login,
               repo: context.payload.repository.name,
