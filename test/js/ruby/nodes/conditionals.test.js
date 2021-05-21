@@ -176,6 +176,16 @@ describe("conditionals", () => {
 
         return expect(content).toChangeFormat("(false if true).to_s");
       });
+
+      test("wraps inline version within binary", () => {
+        const content = ruby(`
+          if foo
+            bar
+          end || baz
+        `);
+
+        return expect(content).toChangeFormat("(bar if foo) || baz");
+      });
     });
   });
 

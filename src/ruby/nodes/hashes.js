@@ -56,28 +56,19 @@ function printHashKeyLabel(path, print) {
     case "symbol_literal":
       return concat([path.call(print, "body", 0), ":"]);
     case "dyna_symbol": {
-      const { parts } = print(path);
-
-      // We're going to slice off the starting colon character so that we can
-      // move it to the end. If there are comments, then we're going to go
-      // further into the printed doc nodes.
-      if (parts[0] === ":") {
-        parts.splice(0, 1);
-      } else {
-        parts[1].parts.splice(0, 1);
-      }
-
-      return concat(parts.concat(":"));
+      return concat([print(path), ":"]);
     }
   }
 }
 
 function printHashKeyRocket(path, print) {
   const node = path.getValue();
-  const doc = print(path);
+  let doc = print(path);
 
   if (node.type === "@label") {
-    return `:${doc.slice(0, doc.length - 1)} =>`;
+    doc = concat([":", doc.slice(0, doc.length - 1)]);
+  } else if (node.type === "dyna_symbol") {
+    doc = concat([":", doc]);
   }
 
   return concat([doc, " =>"]);

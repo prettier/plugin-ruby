@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [#854](https://github.com/prettier/plugin-ruby/issues/854) - jflinter, kddeisz - Parentheses should not be stripped from optional RBS union types.
+- [#888](https://github.com/prettier/plugin-ruby/issues/888) - MaxNotarangelo, kddeisz - Ensure parentheses wrap conditionals that get transformed into the modifier form when they're used within a binary node.
+- [#874](https://github.com/prettier/plugin-ruby/issues/874) - yratanov, kddeisz - Ensure that method calls chained onto the ends of blocks still print their arguments.
 
 ## [1.5.5] - 2021-03-25
 

@@ -86,9 +86,17 @@ function printChar(path, { rubySingleQuote }, _print) {
 // node that will tell us which quote to use when printing. We're just going to
 // use whatever quote was provided.
 function printDynaSymbol(path, opts, print) {
-  const { quote } = path.getValue();
+  const node = path.getValue();
+  const parts = [node.quote].concat(path.map(print, "body")).concat(node.quote);
 
-  return concat([":", quote].concat(path.map(print, "body")).concat(quote));
+  // If we're inside of an assoc_new node as the key, then it will handle
+  // printing the : on its own since it could change sides.
+  const parentNode = path.getParentNode();
+  if (parentNode.type !== "assoc_new" || parentNode.body[0] !== node) {
+    parts.unshift(":");
+  }
+
+  return concat(parts);
 }
 
 function printStringConcat(path, opts, print) {
