@@ -1,7 +1,7 @@
 name: Main
 on:
   - push
-  - pull_request_target
+  - pull_request
 jobs:
   ci:
     name: CI
@@ -69,19 +69,21 @@ jobs:
           yarn check-format
           yarn lint
 
-  automerge:
-    name: Auto Merge
+  # Saves pull request details for later workflow runs which can run in
+  # a privileged environment
+  save-pr-info:
+    name: Save PR info
     needs:
       - ci
       - lint
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]'
+    if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/github-script@v3
+      - name: Save PR number
+        run: |
+          mkdir -p ./save-pr-info
+          echo ${{ github.event.number }} > ./save-pr-info/PULL_REQUEST_NUMBER
+      - uses: actions/upload-artifact@v2
         with:
-          script: |
-            github.pulls.merge({
-              owner: context.payload.repository.owner.login,
-              repo: context.payload.repository.name,
-              pull_number: context.payload.pull_request.number
-            })
+          name: save-pr-info
+          path: save-pr-info/
