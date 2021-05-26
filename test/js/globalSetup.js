@@ -1,4 +1,5 @@
 const { spawn, spawnSync } = require("child_process");
+const os = require("os");
 
 // Set a RUBY_VERSION environment variable because certain tests will only run
 // for certain versions of Ruby.
@@ -8,14 +9,22 @@ process.env.RUBY_VERSION = spawnSync("ruby", args).stdout.toString().trim();
 // Spawn the async parser process so that tests can send their content over to
 // it to get back the AST.
 function globalSetup() {
-  if (!process.env.PRETTIER_RUBY_HOST) {
-    process.env.PRETTIER_RUBY_HOST = `/tmp/prettier-ruby-test-${process.pid}.sock`;
+  let parserArgs;
+
+  if (os.type() === "Windows_NT") {
+    parserArgs = ["--tcp", "8912"];
+  } else {
+    parserArgs = ["--unix", `/tmp/prettier-ruby-test-${process.pid}.sock`];
   }
 
-  global.__ASYNC_PARSER__ = spawn("ruby", [
-    "./src/parser/server.rb",
-    process.env.PRETTIER_RUBY_HOST
-  ]);
+  if (!process.env.PRETTIER_RUBY_HOST) {
+    process.env.PRETTIER_RUBY_HOST = parserArgs[1];
+  }
+
+  global.__ASYNC_PARSER__ = spawn(
+    "ruby",
+    ["./src/parser/server.rb"].concat(parserArgs)
+  );
 }
 
 module.exports = globalSetup;

@@ -11,7 +11,7 @@ function printHeredoc(path, opts, print) {
     }
 
     // In this case, the part of the string is just regular string content
-    return join(literallineWithoutBreakParent, part.body.split("\n"));
+    return join(literallineWithoutBreakParent, part.body.split(/\r?\n/));
   });
 
   // We use a literalline break because matching indentation is required

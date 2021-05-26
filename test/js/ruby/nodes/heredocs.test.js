@@ -1,6 +1,6 @@
 const { long, ruby } = require("../../utils");
 
-describe("heredocs", () => {
+describe.skip("heredocs", () => {
   describe("straight", () => {
     test("basic", () => {
       const content = ruby(`

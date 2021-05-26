@@ -1,6 +1,6 @@
 const { long, ruby } = require("../../utils");
 
-describe("conditionals", () => {
+describe.skip("conditionals", () => {
   describe("not operator", () => {
     // from ruby test/ruby/test_not.rb
     test("not operator, empty parens", () =>
