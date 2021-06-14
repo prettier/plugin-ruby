@@ -157,8 +157,19 @@ function printArgsAddStar(path, opts, print) {
   path.each((argPath, argIndex) => {
     const doc = print(argPath);
 
+    // If it's the first child, then it's an array of args, so we're going to
+    // concat that onto the existing docs if there are any.
+    if (argIndex === 0) {
+      if (doc.length > 0) {
+        docs = docs.concat(doc);
+      }
+      return;
+    }
+
+    // If it's after the splat, then it's an individual arg, so we're just going
+    // to push it onto the array.
     if (argIndex !== 1) {
-      docs = docs.concat(doc);
+      docs.push(doc);
       return;
     }
 
