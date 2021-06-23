@@ -102,6 +102,22 @@ describe("calls", () => {
     });
   });
 
+  test("chains with blocks mixed in", () => {
+    const content = ruby(`
+      Model
+        .dataset
+        .eager(:table1)
+        .join(:second_table_name.as(:table2), %i[album_id artist_id])
+        .where(table1__artist_id: artists.map(&:id))
+        .where { table1__date > Time.now - 31.days }
+        .where { table2__date > table1_date }
+        .exclude(table2__album_id: :table1__album_id)
+        .select_all(:table1)
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
   test("no explicit call doesn't add call", () =>
     expect("a.(1, 2, 3)").toMatchFormat());
 
