@@ -33,11 +33,22 @@ function printCall(path, opts, print) {
 
   // The right side of the call node, as in everything including the operator
   // and beyond.
-  const rightSideDoc = concat([
+  let rightSideDoc = concat([
     receiverNode.comments ? hardline : softline,
     operatorDoc,
     messageDoc
   ]);
+
+  // This is very specialized behavior wherein we group .where.not calls
+  // together because it looks better. For more information, see
+  // https://github.com/prettier/plugin-ruby/issues/862.
+  if (
+    receiverNode.type === "call" &&
+    receiverNode.body[2].body === "where" &&
+    messageDoc === "not"
+  ) {
+    rightSideDoc = concat([operatorDoc, messageDoc]);
+  }
 
   // Get a reference to the parent node so we can check if we're inside a chain
   const parentNode = path.getParentNode();
