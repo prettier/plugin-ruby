@@ -77,6 +77,31 @@ describe("calls", () => {
     return expect(content).toMatchFormat();
   });
 
+  describe("within sig blocks", () => {
+    test("basic chains", () => {
+      const content = ruby(`
+        sig do
+          params(contacts: Contact::ActiveRecord_Relation)
+            .returns(Customer::ActiveRecord_Relation)
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
+    test("chains with other methods", () => {
+      const content = ruby(`
+        sig do
+          overridable
+            .params(contacts: Contact::ActiveRecord_Relation)
+            .returns(Customer::ActiveRecord_Relation)
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+  });
+
   test("no explicit call doesn't add call", () =>
     expect("a.(1, 2, 3)").toMatchFormat());
 

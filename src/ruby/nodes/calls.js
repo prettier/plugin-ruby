@@ -121,9 +121,38 @@ function printMethodAddArg(path, opts, print) {
     parentNode.firstReceiverType = node.firstReceiverType;
   }
 
+  // This is the threshold at which we will start to try to make a nicely
+  // indented call chain. For the most part, it's always 3.
+  let threshold = 3;
+
+  // Here, we have very specialized behavior where if we're within a sig block,
+  // then we're going to assume we're creating a Sorbet type signature. In that
+  // case, we really want the threshold to be lowered to 2 so that we create
+  // method chains off of any two method calls within the block. For more
+  // details, see
+  // https://github.com/prettier/plugin-ruby/issues/863.
+  let sigBlock = path.getParentNode(2);
+  if (sigBlock) {
+    // If we're at a do_block, then we want to go one more level up. This is
+    // because do_blocks have bodystmt nodes instead of just stmt nodes.
+    if (sigBlock.type === "do_block") {
+      sigBlock = path.getParentNode(3);
+    }
+
+    if (
+      sigBlock.type === "method_add_block" &&
+      sigBlock.body[1] &&
+      sigBlock.body[0].type === "method_add_arg" &&
+      sigBlock.body[0].body[0].type === "fcall" &&
+      sigBlock.body[0].body[0].body[0].body === "sig"
+    ) {
+      threshold = 2;
+    }
+  }
+
   // If we're at the top of a chain, then we're going to print out a nice
   // multi-line layout if this doesn't break into multiple lines.
-  if (!chained.includes(parentNode.type) && (node.chain || 0) >= 3) {
+  if (!chained.includes(parentNode.type) && (node.chain || 0) >= threshold) {
     // This is pretty specialized behavior. Basically if we're at the top of a
     // chain but we've only had method calls without arguments and now we have
     // arguments, then we're effectively trying to call a method with arguments
