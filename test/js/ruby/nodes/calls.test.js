@@ -64,6 +64,19 @@ describe("calls", () => {
     return expect(content).toMatchFormat();
   });
 
+  test("chains which contain a .where.not", () => {
+    const content = ruby(`
+      Customer
+        .active
+        .where(foo: 'bar')
+        .where.not(banned_at: nil)
+        .order(created_at: 'desc')
+        .limit(10)
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
   test("no explicit call doesn't add call", () =>
     expect("a.(1, 2, 3)").toMatchFormat());
 
