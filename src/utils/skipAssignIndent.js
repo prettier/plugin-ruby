@@ -1,4 +1,11 @@
-const skippable = ["array", "hash", "heredoc", "lambda", "regexp_literal"];
+const skippable = [
+  "array",
+  "dyna_symbol",
+  "hash",
+  "heredoc",
+  "lambda",
+  "regexp_literal"
+];
 
 function skipAssignIndent(node) {
   return (

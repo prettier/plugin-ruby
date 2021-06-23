@@ -82,12 +82,97 @@ function printChar(path, { rubySingleQuote }, _print) {
   return concat([quote, body.slice(1), quote]);
 }
 
+function printPercentSDynaSymbol(path, opts, print) {
+  const node = path.getValue();
+  const parts = [];
+
+  // Push on the quote, which includes the opening character.
+  parts.push(node.quote);
+
+  path.each((childPath) => {
+    const childNode = childPath.getValue();
+
+    if (childNode.type !== "@tstring_content") {
+      // Here we are printing an embedded variable or expression.
+      parts.push(print(childPath));
+    } else {
+      // Here we are printing plain string content.
+      parts.push(join(literalline, childNode.body.split("\n")));
+    }
+  }, "body");
+
+  // Push on the closing character, which is the opposite of the third
+  // character from the opening.
+  parts.push(quotePairs[node.quote[2]]);
+
+  return concat(parts);
+}
+
+// We don't actually want to print %s symbols, as they're much more rarely seen
+// in the wild. But we're going to be forced into it if it's a multi-line symbol
+// or if the quoting would get super complicated.
+function shouldPrintPercentSDynaSymbol(node) {
+  // We shouldn't print a %s dyna symbol if it was not already that way in the
+  // original source.
+  if (node.quote[0] !== "%") {
+    return false;
+  }
+
+  // Here we're going to check if there is a closing character, a new line, or a
+  // quote in the content of the dyna symbol. If there is, then quoting could
+  // get weird, so just bail out and stick to the original bounds in the source.
+  const closing = quotePairs[node.quote[2]];
+
+  return node.body.some(
+    (child) =>
+      child.type === "@tstring_content" &&
+      (child.body.includes("\n") ||
+        child.body.includes(closing) ||
+        child.body.includes("'") ||
+        child.body.includes('"'))
+  );
+}
+
 // Prints a dynamic symbol. Assumes there's a quote property attached to the
 // node that will tell us which quote to use when printing. We're just going to
 // use whatever quote was provided.
+//
+// In the case of a plain dyna symbol, node.quote will be either :" or :'
+// For %s dyna symbols, node.quote will be %s[, %s(, %s{, or %s<
 function printDynaSymbol(path, opts, print) {
   const node = path.getValue();
-  const parts = [node.quote].concat(path.map(print, "body")).concat(node.quote);
+
+  if (shouldPrintPercentSDynaSymbol(node)) {
+    return printPercentSDynaSymbol(path, opts, print);
+  }
+
+  const parts = [];
+  let quote;
+
+  if (isQuoteLocked(node)) {
+    if (node.quote.startsWith("%")) {
+      quote = opts.rubySingleQuote ? "'" : '"';
+    } else {
+      quote = node.quote.slice(1);
+    }
+  } else {
+    quote = opts.rubySingleQuote && isSingleQuotable(node) ? "'" : '"';
+  }
+
+  parts.push(quote);
+  path.each((childPath) => {
+    const child = childPath.getValue();
+
+    if (child.type !== "@tstring_content") {
+      parts.push(print(childPath));
+    } else {
+      parts.push(
+        join(literalline, normalizeQuotes(child.body, quote).split("\n"))
+      );
+    }
+  }, "body");
+
+  parts.push(quote);
 
   // If we're inside of an assoc_new node as the key, then it will handle
   // printing the : on its own since it could change sides.
