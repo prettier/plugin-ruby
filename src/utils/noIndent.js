@@ -3,7 +3,6 @@ const noIndent = [
   "hash",
   "heredoc",
   "if",
-  "method_add_block",
   "unless",
   "xstring_literal"
 ];
