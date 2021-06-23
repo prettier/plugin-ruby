@@ -5,14 +5,18 @@ about: Issues for ugly or incorrect code
 
 ## Metadata
 
-- Ruby version: ...
-- `@prettier/plugin-ruby` or `prettier` gem version: ...
+- Operating system: Ubuntu
+- Ruby version: latest
+- Node version: latest
+- `@prettier/plugin-ruby` or `prettier` gem version: latest
 - Options:
-  - [x] `rubyHashLabel`
-  - [x] `rubyModifier`
-  - [x] `rubySingleQuote`
-  - [ ] `rubyToProc`
-  - [ ] `trailingComma`
+  - `rubyArrayLiteral` - `true`
+  - `rubyHashLabel` - `true`
+  - `rubyModifier` - `true`
+  - `rubyNetcatCommand` - `null`
+  - `rubySingleQuote` - `true`
+  - `rubyToProc` - `false`
+  - `trailingComma` - `"none"`
 
 ## Input
 
