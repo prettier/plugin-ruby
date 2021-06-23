@@ -75,7 +75,7 @@ Once prettier has a working AST, it will take it and call the selected plugin's 
 
 Effectively, it walks the AST in the reverse direction from the way `Ripper` built it (top-down instead of bottom-up). The first node that gets passed into the `print` function is the `program` node as that's always on top. Then it is the `program` node's responsibility to recursively call print on its child nodes as it best sees fit.
 
-As the nodes are printing themselves and their children, they're additionally building up a second AST. That AST is built using the `builder` commands from prettier core, described [here](https://github.com/prettier/prettier/blob/master/commands.md). As an example, below is how a `binary` node (like the one representing the `1 + 1` above) would handle printing itself:
+As the nodes are printing themselves and their children, they're additionally building up a second AST. That AST is built using the `builder` commands from prettier core, described [here](https://github.com/prettier/prettier/blob/main/commands.md). As an example, below is how a `binary` node (like the one representing the `1 + 1` above) would handle printing itself:
 
 ```javascript
 const { concat, group, indent, line } = require("prettier").doc.builders;
@@ -159,7 +159,7 @@ Links relating to `ripper` and how it parses Ruby source.
 Links relating to `prettier` and its plugins.
 
 - [Prettier plugin documentation](https://prettier.io/docs/en/plugins.html) - documentation around `prettier`'s plugin system
-- [Builder commands](https://github.com/prettier/prettier/blob/master/commands.md) - the functions used to build the `prettier` IR
+- [Builder commands](https://github.com/prettier/prettier/blob/main/commands.md) - the functions used to build the `prettier` IR
 - [Writing a Prettier plugin](https://medium.com/@fvictorio/how-to-write-a-plugin-for-prettier-a0d98c845e70) - a nice tutorial on how to build a `prettier` plugin
 
 ## Useful commands
