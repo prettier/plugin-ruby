@@ -1092,7 +1092,7 @@ class Prettier::Parser < Ripper
 
       beging.merge(
         type: :dyna_symbol,
-        quote: beging[:body][1],
+        quote: beging[:body],
         body: string[:body],
         el: ending[:el],
         ec: ending[:ec]

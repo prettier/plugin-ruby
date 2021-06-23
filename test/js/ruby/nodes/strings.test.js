@@ -169,13 +169,42 @@ describe("strings", () => {
 
     test("with single quotes", () => expect(":'abc'").toMatchFormat());
 
-    test("with double quotes", () => expect(`:"abc"`).toMatchFormat());
+    test("with double quotes", () => expect(`:"abc"`).toChangeFormat(":'abc'"));
 
-    test("with false interpolation and single quotes", () =>
-      expect(":'abc#{foo}abc'").toMatchFormat());
+    test("with double quotes with double quotes desired", () =>
+      expect(`:"abc"`).toMatchFormat({ rubySingleQuote: false }));
+
+    test("with false interpolation and single quotes, no rubySingleQuote", () =>
+      expect(":'abc#{foo}abc'").toMatchFormat({ rubySingleQuote: false }));
 
     test("with real interpolation and double quotes", () =>
       expect(`:"abc#{foo}abc"`).toMatchFormat());
+
+    test("with real interpolation and double quotes, rubySingleQuote", () =>
+      expect(`:"abc#{foo}abc"`).toMatchFormat({ rubySingleQuote: true }));
+
+    test("%s literal", () => expect("%s[abc]").toChangeFormat(":'abc'"));
+
+    test("%s literal with false interpolation", () =>
+      expect("%s[abc#{d}]").toChangeFormat(":'abc#{d}'"));
+
+    test("%s literal as hash key", () =>
+      expect("{ %s[abc] => d }").toChangeFormat("{ 'abc': d }"));
+
+    test("%s literal as hash key, no rubySingleQuote", () =>
+      expect("{ %s[abc] => d }").toChangeFormat(`{ "abc": d }`, {
+        rubySingleQuote: false
+      }));
+
+    test("%s literal with newlines", () => {
+      const content = ruby(`
+        a = %s[
+          a
+        ]
+      `);
+
+      return expect(content).toMatchFormat();
+    });
 
     test("gets correct quotes", () => {
       const content = "where('lint_tool_configs.plugin': plugins + %w[core])";
