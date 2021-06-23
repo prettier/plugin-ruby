@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - [#859](https://github.com/prettier/plugin-ruby/issues/859) - azz, kddeisz - Support the `--insert-pragma` option for the incremental adoption workflow.
 - [#904](https://github.com/prettier/plugin-ruby/issues/904) - Hansenq, kddeisz - Support the `%s` symbol literal syntax.
+- [#833](https://github.com/prettier/plugin-ruby/issues/883) - kddeisz - Support for prettier >= v2.3.0.
 
 ### Changed
 
