@@ -178,21 +178,22 @@ inherit_from:
   - node_modules/@prettier/plugin-ruby/rubocop.yml
 ```
 
-## Editor Integration
+### Usage with an editor
 
-### VS Code
+For [supported editor integrations](https://github.com/prettier/prettier/blob/main/website/data/editors.yml), you should follow the instructions for installing the integration, then install the npm version of this plugin as a development dependency of your project. For most integrations, that should be sufficient. For convenience, the instructions for integrating with VSCode are used as an example below:
 
-- Add the npm `@prettier/plugin-ruby` package to your project as described above.
 - Install the [Prettier - Code Formatter](https://github.com/prettier/prettier-vscode) extension.
+- Add the npm `@prettier/plugin-ruby` package to your project as described above.
 - Configure in your `settings.json` (`formatOnSave` is optional):
-  ```json
-  {
-    "[ruby]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode",
-      "editor.formatOnSave": true
-    }
+
+```json
+{
+  "[ruby]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
   }
-  ```
+}
+```
 
 Refer to [this issue](https://github.com/prettier/plugin-ruby/issues/113#issuecomment-783426539) if you're having difficulties.
 
