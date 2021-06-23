@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.6.0] - 2021-06-23
+
 ### Added
 
 - [#859](https://github.com/prettier/plugin-ruby/issues/859) - azz, kddeisz - Support the `--insert-pragma` option for the incremental adoption workflow.
@@ -1117,7 +1119,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.5.5...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/prettier/plugin-ruby/compare/v1.5.5...v1.6.0
 [1.5.5]: https://github.com/prettier/plugin-ruby/compare/v1.5.4...v1.5.5
 [1.5.4]: https://github.com/prettier/plugin-ruby/compare/v1.5.3...v1.5.4
 [1.5.3]: https://github.com/prettier/plugin-ruby/compare/v1.5.2...v1.5.3
