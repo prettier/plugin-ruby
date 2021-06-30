@@ -152,8 +152,10 @@ function printDynaSymbol(path, opts, print) {
   if (isQuoteLocked(node)) {
     if (node.quote.startsWith("%")) {
       quote = opts.rubySingleQuote ? "'" : '"';
-    } else {
+    } else if (node.quote.startsWith(":")) {
       quote = node.quote.slice(1);
+    } else {
+      quote = node.quote;
     }
   } else {
     quote = opts.rubySingleQuote && isSingleQuotable(node) ? "'" : '"';
