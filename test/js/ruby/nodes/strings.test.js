@@ -196,6 +196,9 @@ describe("strings", () => {
         rubySingleQuote: false
       }));
 
+    test("symbol literal as a hash key", () =>
+      expect("{ '\\d' => 1 }").toMatchFormat());
+
     test("%s literal with newlines", () => {
       const content = ruby(`
         a = %s[
