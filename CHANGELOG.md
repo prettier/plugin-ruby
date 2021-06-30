@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [1.6.1] - 2021-06-30
+
 ### Changed
 
 - [#862](https://github.com/prettier/plugin-ruby/issues/862) - azz, kddeisz - Group together `.where.not` calls in method chains.
@@ -1127,7 +1129,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.6.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/prettier/plugin-ruby/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/prettier/plugin-ruby/compare/v1.5.5...v1.6.0
 [1.5.5]: https://github.com/prettier/plugin-ruby/compare/v1.5.4...v1.5.5
 [1.5.4]: https://github.com/prettier/plugin-ruby/compare/v1.5.3...v1.5.4
