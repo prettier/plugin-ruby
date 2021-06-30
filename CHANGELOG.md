@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [#862](https://github.com/prettier/plugin-ruby/issues/862) - azz, kddeisz - Group together `.where.not` calls in method chains.
 - [#863](https://github.com/prettier/plugin-ruby/issues/863) - azz, kddeisz - Fix up Sorbet `sig` block formatting when chaining method calls.
 - [#908](https://github.com/prettier/plugin-ruby/issues/908) - Hansenq, kddeisz - Method chains with blocks should be properly indented.
+- [#916](https://github.com/prettier/plugin-ruby/issues/916) - pbrisbin, kddeisz - Ensure all of the necessary files are present in the gem.
 
 ## [1.6.0] - 2021-06-23
 

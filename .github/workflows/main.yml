@@ -27,7 +27,7 @@ jobs:
         with:
           bundler-cache: true
           ruby-version: ${{ matrix.ruby }}
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: 12.x
       - id: yarn-cache
@@ -54,7 +54,7 @@ jobs:
         with:
           bundler-cache: true
           ruby-version: "3.0"
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: 12.x
       - id: yarn-cache
@@ -68,6 +68,31 @@ jobs:
       - run: |
           yarn check-format
           yarn lint
+
+  gem:
+    name: Gem
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          ruby-version: "3.0"
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+      - id: yarn-cache
+        run: echo "::set-output name=directory::$(yarn cache dir)"
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache.outputs.directory }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+      - run: yarn install --frozen-lockfile
+      - run: |
+          gem build -o prettier.gem
+          gem unpack prettier.gem
+          prettier/exe/rbprettier --help
 
   # Saves pull request details for later workflow runs which can run in
   # a privileged environment
