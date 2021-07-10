@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/prettier/plugin-ruby.git"
   },
-  "author": "Kevin Deisz",
+  "author": "Kevin Newton",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/prettier/plugin-ruby/issues"
