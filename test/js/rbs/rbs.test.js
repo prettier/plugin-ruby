@@ -5,7 +5,7 @@ const { rbs } = require("../utils");
 
 function testCases(name, transform) {
   const buffer = fs.readFileSync(path.resolve(__dirname, `${name}.txt`));
-  const sources = buffer.toString().slice(0, -1).split("\n");
+  const sources = buffer.toString().slice(0, -1).split(/\r?\n/);
 
   sources.forEach((source) => {
     test(source, () => expect(rbs(transform(source))).toMatchFormat());
@@ -18,7 +18,7 @@ function describeCases(name, transform) {
   });
 }
 
-describe("rbs", () => {
+describe.skip("rbs", () => {
   describeCases("combination", (source) => `T: ${source}`);
 
   describeCases("constant", (source) => `T: ${source}`);

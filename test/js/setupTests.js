@@ -60,7 +60,7 @@ function checkFormat(before, after, config) {
     }
   })
     .then((formatted) => ({
-      pass: formatted === `${after}\n`,
+      pass: formatted.replace(/\r\n/g, "\n") === `${after}\n`,
       message: () => `Expected:\n${after}\nReceived:\n${formatted}`
     }))
     .catch((error) => ({

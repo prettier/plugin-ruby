@@ -14,16 +14,29 @@ $PROGRAM_NAME = 'prettier-ruby-parser'
 # Make sure we trap these signals to be sure we get the quit command coming from
 # the parent node process
 quit = false
-trap(:QUIT) { quit = true } if RUBY_PLATFORM != 'java'
 trap(:INT) { quit = true }
 trap(:TERM) { quit = true }
+trap(:QUIT) { quit = true } if Signal.list.key?('QUIT')
 
-sockfile = ARGV.first || "/tmp/#{$PROGRAM_NAME}.sock"
-server = UNIXServer.new(sockfile)
+case ARGV[0]
+when '--tcp'
+  server = TCPServer.new('127.0.0.1', ARGV[1])
+  at_exit { server.close }
+when '--unix'
+  server = UNIXServer.new(ARGV[1])
 
-at_exit do
-  server.close
-  File.unlink(sockfile)
+  at_exit do
+    server.close
+    File.unlink(ARGV[1])
+  end
+else
+  warn(<<~USAGE)
+    Run the server with one of:
+
+    ruby server.rb --tcp [PORT]
+    ruby server.rb --unix [PATH]
+  USAGE
+  exit 1
 end
 
 loop do
@@ -35,6 +48,8 @@ loop do
 
     response =
       case parser
+      when 'ping'
+        :ok
       when 'ruby'
         Prettier::Parser.parse(source)
       when 'rbs'
