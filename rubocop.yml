@@ -16,6 +16,9 @@ Layout/LineLength:
 # Disabling all of the following options because they could conflict with a
 # prettier configuration setting.
 
+Style/MultilineBlockChain:
+  Enabled: false
+
 Style/MultilineIfModifier: # rubyModifier
   Enabled: false
 
