@@ -2,8 +2,15 @@ import type { Plugin, Ruby } from "../types";
 import prettier from "../prettier";
 import { literallineWithoutBreakParent } from "../utils";
 
-const { group, indent, lineSuffix, mapDoc, markAsRoot, stripTrailingHardline } =
-  prettier;
+const {
+  group,
+  indent,
+  dedent,
+  lineSuffix,
+  mapDoc,
+  markAsRoot,
+  stripTrailingHardline
+} = prettier;
 
 const parsers: Record<string, string> = {
   css: "css",
@@ -47,6 +54,7 @@ function getCommonLeadingWhitespace(content: string) {
   return content
     .split("\n")
     .slice(0, -1)
+    .filter((line) => line.trim().length > 0)
     .reduce((minimum, line) => {
       const matched = pattern.exec(line);
       const length = matched ? matched[0].length : 0;
@@ -109,9 +117,9 @@ const embed: Plugin.Embed<Ruby.AnyNode> = (path, print, textToDoc) => {
     return [
       path.call(print, "beging"),
       lineSuffix(
-        group([
+        dedent([
           indent(markAsRoot(formatted)),
-          literallineWithoutBreakParent,
+          { type: "line", hard: true },
           ending.trim()
         ])
       )
