@@ -1,6 +1,6 @@
 const { long, ruby } = require("../../utils");
 
-describe.skip("conditionals", () => {
+describe("conditionals", () => {
   describe("not operator", () => {
     // from ruby test/ruby/test_not.rb
     test("not operator, empty parens", () =>
@@ -57,6 +57,38 @@ describe.skip("conditionals", () => {
 
         return expect(content).toChangeFormat(expected);
       });
+    });
+
+    test("does not insert double modifiers on a single line", () => {
+      const content = ruby(`
+        if a
+          do_something unless b
+        end
+      `);
+      const expected = ruby(`
+        if a
+          do_something unless b
+        end
+      `);
+
+      return expect(content).toChangeFormat(expected);
+    });
+
+    test("does not insert double modifiers on a single line for nested conditionals", () => {
+      const content = ruby(`
+        if a
+          unless b
+            do_something
+          end
+        end
+      `);
+      const expected = ruby(`
+        if a
+          do_something unless b
+        end
+      `);
+
+      return expect(content).toChangeFormat(expected);
     });
   });
 
