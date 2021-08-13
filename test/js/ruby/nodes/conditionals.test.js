@@ -1,6 +1,6 @@
 const { long, ruby } = require("../../utils");
 
-describe.skip("conditionals", () => {
+describe("conditionals", () => {
   describe("not operator", () => {
     // from ruby test/ruby/test_not.rb
     test("not operator, empty parens", () =>
@@ -454,6 +454,52 @@ describe.skip("conditionals", () => {
         `);
 
         return expect(content).toMatchFormat();
+      });
+
+      test("nested conditional in if body", () => {
+        const content = ruby(`
+          if a
+            if b
+              c
+            else
+              d
+            end
+          else
+            b
+          end
+        `);
+        const expected = ruby(`
+          if a
+            b ? c : d
+          else
+            b
+          end
+        `);
+
+        return expect(content).toChangeFormat(expected);
+      });
+
+      test("nested conditional in else body", () => {
+        const content = ruby(`
+          if a
+            b
+          else
+            if c
+              d
+            else
+              b
+            end
+          end
+        `);
+        const expected = ruby(`
+          if a
+            b
+          else
+            c ? d : b
+          end
+        `);
+
+        return expect(content).toChangeFormat(expected);
       });
 
       test("command with argument predicate", () => {
