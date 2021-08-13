@@ -1,6 +1,6 @@
 const { long, ruby } = require("../../utils");
 
-describe.skip("conditionals", () => {
+describe("conditionals", () => {
   describe("not operator", () => {
     // from ruby test/ruby/test_not.rb
     test("not operator, empty parens", () =>
@@ -450,6 +450,36 @@ describe.skip("conditionals", () => {
             b(1)
           else
             b.b 2
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("heredoc in if body", () => {
+        const content = ruby(`
+          if a
+            <<~HEREDOC
+              a
+              b
+            HEREDOC
+          else
+            b
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("heredoc in else body", () => {
+        const content = ruby(`
+          if a
+            a
+          else
+            <<~HEREDOC
+              a
+              b
+            HEREDOC
           end
         `);
 
