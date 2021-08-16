@@ -488,6 +488,36 @@ describe("conditionals", () => {
         return expect(content).toMatchFormat();
       });
 
+      test("heredoc in if body", () => {
+        const content = ruby(`
+          if a
+            <<~HEREDOC
+              a
+              b
+            HEREDOC
+          else
+            b
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("heredoc in else body", () => {
+        const content = ruby(`
+          if a
+            a
+          else
+            <<~HEREDOC
+              a
+              b
+            HEREDOC
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
       test("nested conditional in if body", () => {
         const content = ruby(`
           if a
@@ -500,6 +530,7 @@ describe("conditionals", () => {
             b
           end
         `);
+
         const expected = ruby(`
           if a
             b ? c : d

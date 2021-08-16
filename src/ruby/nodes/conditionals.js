@@ -130,6 +130,7 @@ const noTernary = [
   "break",
   "command",
   "command_call",
+  "heredoc",
   "if",
   "if_mod",
   "ifop",
