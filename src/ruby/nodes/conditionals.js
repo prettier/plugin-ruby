@@ -10,6 +10,7 @@ const {
 } = require("../../prettier");
 
 const { containsAssignment, isEmptyStmts } = require("../../utils");
+const containsSingleConditional = require("../../utils/containsSingleConditional");
 const inlineEnsureParens = require("../../utils/inlineEnsureParens");
 
 const printWithAddition = (keyword, path, print, { breaking = false } = {}) =>
@@ -231,10 +232,17 @@ const printConditional =
       ]);
     }
 
-    // If the predicate of the conditional contains an assignment, then we can't
-    // know for sure that it doesn't impact the body of the conditional, so we
-    // have to default to the block form.
-    if (containsAssignment(predicate)) {
+    // Two situations in which we need to use the block form:
+    //
+    // 1. If the predicate of the conditional contains an assignment, then we can't
+    // know for sure that it doesn't impact the body of the conditional.
+    //
+    // 2. If the conditional contains just another conditional, then collapsing it
+    // would result in double modifiers on the same line.
+    if (
+      containsAssignment(predicate) ||
+      containsSingleConditional(statements)
+    ) {
       return concat([
         `${keyword} `,
         align(keyword.length + 1, path.call(print, "body", 0)),
