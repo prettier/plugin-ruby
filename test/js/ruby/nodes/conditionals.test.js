@@ -565,6 +565,28 @@ describe("conditionals", () => {
         return expect(content).toChangeFormat(expected);
       });
 
+      test("nested ternary in if body", () => {
+        const content = ruby(`
+          if a
+            b ? c : d
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
+      test("nested ternary in else body", () => {
+        const content = ruby(`
+          if a
+            b
+          else
+            c ? d : e
+          end
+        `);
+
+        return expect(content).toMatchFormat();
+      });
+
       test("command with argument predicate", () => {
         const content = ruby(`
           if a b
