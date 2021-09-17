@@ -1,7 +1,9 @@
+import type { Plugin, Ruby } from "./types";
+
 const { align, concat, group, join, line } = require("../../prettier");
 const { literal } = require("../../utils");
 
-function printSuper(path, opts, print) {
+const printSuper: Plugin.Printer<Ruby.Super> = (path, opts, print) => {
   const args = path.getValue().body[0];
 
   if (args.type === "arg_paren") {
@@ -24,7 +26,7 @@ function printSuper(path, opts, print) {
       align(keyword.length, group(join(concat([",", line]), argsDocs)))
     ])
   );
-}
+};
 
 // Version of super without any parens or args.
 const printZSuper = literal("super");

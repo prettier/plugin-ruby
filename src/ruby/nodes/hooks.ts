@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const { concat, group, indent, line } = require("../../prettier");
 
 // The `BEGIN` and `END` keywords are used to hook into the Ruby process. Any
@@ -14,7 +16,7 @@ const { concat, group, indent, line } = require("../../prettier");
 //
 // Interesting side note, you don't use `do...end` blocks with these hooks. Both
 // nodes contain one child which is a `stmts` node.
-function printHook(name) {
+function printHook(name: string): Plugin.Printer<Ruby.BEGIN | Ruby.END> {
   return function printHookWithName(path, opts, print) {
     return group(
       concat([

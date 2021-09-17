@@ -1,10 +1,12 @@
+import type { Plugin, Ruby } from "./types";
+
 const { concat, group, hardline, indent, line } = require("../../prettier");
 const { isEmptyBodyStmt } = require("../../utils");
 
-function printMethod(offset) {
+function printMethod(offset: number): Plugin.Printer<Ruby.Def | Ruby.Defs> {
   return function printMethodWithOffset(path, opts, print) {
     const [_name, params, bodystmt] = path.getValue().body.slice(offset);
-    const declaration = ["def "];
+    const declaration: Plugin.Doc[] = ["def "];
 
     // In this case, we're printing a method that's defined as a singleton, so
     // we need to include the target and the operator
@@ -39,9 +41,9 @@ function printMethod(offset) {
   };
 }
 
-function printSingleLineMethod(path, opts, print) {
+const printSingleLineMethod: Plugin.Printer<Ruby.Defsl> = (path, opts, print) => {
   let parensNode = path.getValue().body[1];
-  let paramsDoc = "";
+  let paramsDoc: Plugin.Doc = "";
 
   if (parensNode) {
     const paramsNode = parensNode.body[0];
@@ -60,11 +62,11 @@ function printSingleLineMethod(path, opts, print) {
       indent(group(concat([line, path.call(print, "body", 2)])))
     ])
   );
-}
+};
 
-function printAccessControl(path, opts, print) {
+const printAccessControl: Plugin.Printer<Ruby.AccessCtrl> = (path, opts, print) => {
   return path.call(print, "body", 0);
-}
+};
 
 module.exports = {
   access_ctrl: printAccessControl,

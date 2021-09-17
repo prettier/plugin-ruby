@@ -1,7 +1,9 @@
+import type { Plugin, Ruby } from "./types";
+
 const { concat, group, indent, join, line } = require("../../prettier");
 const { skipAssignIndent } = require("../../utils");
 
-function printAssign(path, opts, print) {
+const printAssign: Plugin.Printer<Ruby.Assign> = (path, opts, print) => {
   const [_targetNode, valueNode] = path.getValue().body;
   const [targetDoc, valueDoc] = path.map(print, "body");
 
@@ -18,9 +20,9 @@ function printAssign(path, opts, print) {
   }
 
   return group(concat([targetDoc, " =", indent(concat([line, rightSideDoc]))]));
-}
+};
 
-function printOpAssign(path, opts, print) {
+const printOpAssign: Plugin.Printer<Ruby.Opassign> = (path, opts, print) => {
   return group(
     concat([
       path.call(print, "body", 0),
@@ -29,15 +31,15 @@ function printOpAssign(path, opts, print) {
       indent(concat([line, path.call(print, "body", 2)]))
     ])
   );
-}
+};
 
-function printVarField(path, opts, print) {
+const printVarField: Plugin.Printer<Ruby.VarField> = (path, opts, print) => {
   return path.getValue().body ? path.call(print, "body", 0) : "";
-}
+};
 
-function printVarRef(path, opts, print) {
+const printVarRef: Plugin.Printer<Ruby.VarRef> = (path, opts, print) => {
   return path.call(print, "body", 0);
-}
+};
 
 module.exports = {
   assign: printAssign,

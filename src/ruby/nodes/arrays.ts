@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const {
   concat,
   group,
@@ -15,7 +17,7 @@ const { getTrailingComma, printEmptyCollection } = require("../../utils");
 //
 //     ['a', 'b', 'c']
 //
-function isStringArray(args) {
+function isStringArray(args: Ruby.Args | Ruby.ArgsAddStar) {
   return (
     args.body.length > 1 &&
     args.body.every((arg) => {
@@ -53,7 +55,7 @@ function isStringArray(args) {
 //
 //     [:a, :b, :c]
 //
-function isSymbolArray(args) {
+function isSymbolArray(args: Ruby.Args | Ruby.ArgsAddStar) {
   return (
     args.body.length > 1 &&
     args.body.every((arg) => arg.type === "symbol_literal" && !arg.comments)
@@ -63,14 +65,14 @@ function isSymbolArray(args) {
 // Prints out a word that is a part of a special array literal that accepts
 // interpolation. The body is an array of either plain strings or interpolated
 // expressions.
-function printArrayLiteralWord(path, opts, print) {
+const printArrayLiteralWord: Plugin.Printer<Ruby.Word> = (path, opts, print) => {
   return concat(path.map(print, "body"));
-}
+};
 
 // Prints out a special array literal. Accepts the parts of the array literal as
 // an argument, where the first element of the parts array is a string that
 // contains the special start.
-function printArrayLiteral(start, parts) {
+function printArrayLiteral(start: string, parts: Plugin.Doc[]) {
   return group(
     concat([
       start,
@@ -92,7 +94,7 @@ const arrayLiteralStarts = {
 // array literals as well as regular arrays. If it is a special array literal
 // then it will have one child that represents the special array, otherwise it
 // will have one child that contains all of the elements of the array.
-function printArray(path, opts, print) {
+const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
   const array = path.getValue();
   const args = array.body[0];
 
@@ -102,40 +104,42 @@ function printArray(path, opts, print) {
     return printEmptyCollection(path, opts, "[", "]");
   }
 
+  // If we don't have a regular args node at this point then we have a special
+  // array literal. In that case we're going to print out the body (which will
+  // return to us an array with the first one being the start of the array) and
+  // send that over to the printArrayLiteral function.
+  if (args.type !== "args" && args.type !== "args_add_star") {
+    return path.call(
+      (arrayPath) =>
+        printArrayLiteral(
+          arrayLiteralStarts[args.type],
+          arrayPath.map(print, "body")
+        ),
+      "body",
+      0
+    );
+  }
+
   if (opts.rubyArrayLiteral) {
     // If we have an array that contains only simple string literals with no
     // spaces or interpolation, then we're going to print a %w array.
     if (isStringArray(args)) {
-      const printString = (stringPath) => stringPath.call(print, "body", 0);
-      const parts = path.map(printString, "body", 0, "body");
+      const printString = (stringPath: Plugin.Path<Ruby.StringLiteral>) =>
+        stringPath.call(print, "body", 0);
 
+      const parts = path.map(printString, "body", 0, "body");
       return printArrayLiteral("%w", parts);
     }
 
     // If we have an array that contains only simple symbol literals with no
     // interpolation, then we're going to print a %i array.
     if (isSymbolArray(args)) {
-      const printSymbol = (symbolPath) => symbolPath.call(print, "body", 0);
-      const parts = path.map(printSymbol, "body", 0, "body");
+      const printSymbol = (symbolPath: Plugin.Path<Ruby.SymbolLiteral>) =>
+        symbolPath.call(print, "body", 0);
 
+      const parts = path.map(printSymbol, "body", 0, "body");
       return printArrayLiteral("%i", parts);
     }
-  }
-
-  // If we don't have a regular args node at this point then we have a special
-  // array literal. In that case we're going to print out the body (which will
-  // return to us an array with the first one being the start of the array) and
-  // send that over to the printArrayLiteral function.
-  if (!["args", "args_add_star"].includes(args.type)) {
-    return path.call(
-      (arrayPath) =>
-        printArrayLiteral(
-          arrayLiteralStarts[arrayPath.getValue().type],
-          arrayPath.map(print, "body")
-        ),
-      "body",
-      0
-    );
   }
 
   // Here we have a normal array of any type of object with no special literal
@@ -154,7 +158,7 @@ function printArray(path, opts, print) {
       "]"
     ])
   );
-}
+};
 
 module.exports = {
   array: printArray,

@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const {
   align,
   concat,
@@ -10,7 +12,7 @@ const {
 
 const patterns = ["aryptn", "binary", "fndptn", "hshptn", "rassign"];
 
-function printPatternArg(path, opts, print) {
+const printPatternArg: Plugin.Printer<Ruby.AnyNode> = (path, opts, print) => {
   // Pinning is a really special syntax in pattern matching that's not really
   // all that well supported in ripper. Here we're just going to the original
   // source to see if the variable is pinned.
@@ -22,11 +24,11 @@ function printPatternArg(path, opts, print) {
   }
 
   return path.call(print);
-}
+};
 
-function printAryPtn(path, opts, print) {
+const printAryPtn: Plugin.Printer<Ruby.Aryptn> = (path, opts, print) => {
   const [constant, preargs, splatarg, postargs] = path.getValue().body;
-  let args = [];
+  let args: Plugin.Doc[] = [];
 
   if (preargs) {
     args = args.concat(
@@ -53,9 +55,9 @@ function printAryPtn(path, opts, print) {
   }
 
   return args;
-}
+};
 
-function printFndPtn(path, opts, print) {
+const printFndPtn: Plugin.Printer<Ruby.FndPtn> = (path, opts, print) => {
   const [constant] = path.getValue().body;
 
   let args = [concat(["*", path.call(print, "body", 1)])]
@@ -69,14 +71,14 @@ function printFndPtn(path, opts, print) {
   }
 
   return args;
-}
+};
 
-function printHshPtn(path, opts, print) {
+const printHshPtn: Plugin.Printer<Ruby.Hshptn> = (path, opts, print) => {
   const [constant, keyValuePairs, keyValueRest] = path.getValue().body;
-  let args = [];
+  let args: Plugin.Doc[] = [];
 
   if (keyValuePairs.length > 0) {
-    const printPair = (pairPath) => {
+    const printPair = (pairPath: Plugin.Path<[Ruby.Label, Ruby.AnyNode]>) => {
       const parts = [pairPath.call(print, 0)];
 
       if (pairPath.getValue()[1]) {
@@ -112,9 +114,9 @@ function printHshPtn(path, opts, print) {
   }
 
   return args;
-}
+};
 
-function printIn(path, opts, print) {
+const printIn: Plugin.Printer<Ruby.In> = (path, opts, print) => {
   const parts = [
     "in ",
     align(
@@ -133,9 +135,9 @@ function printIn(path, opts, print) {
   }
 
   return group(concat(parts));
-}
+};
 
-function printRAssign(path, opts, print) {
+const printRAssign: Plugin.Printer<Ruby.Rassign> = (path, opts, print) => {
   const { keyword } = path.getValue();
   const [leftDoc, rightDoc] = path.map(print, "body");
 
@@ -146,7 +148,7 @@ function printRAssign(path, opts, print) {
       group(indent(concat([line, rightDoc])))
     ])
   );
-}
+};
 
 module.exports = {
   aryptn: printAryPtn,

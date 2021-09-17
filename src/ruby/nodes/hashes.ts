@@ -1,3 +1,6 @@
+import { Doc } from "prettier";
+import type { Plugin, Ruby } from "./types";
+
 const {
   concat,
   group,
@@ -13,6 +16,9 @@ const {
   skipAssignIndent
 } = require("../../utils");
 
+type KeyPrinter = (path: Plugin.Path<Ruby.Label | Ruby.SymbolLiteral | Ruby.DynaSymbol>, print: Plugin.Print) => Doc;
+type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & { keyPrinter: KeyPrinter };
+
 // When attempting to convert a hash rocket into a hash label, you need to take
 // care because only certain patterns are allowed. Ruby source says that they
 // have to match keyword arguments to methods, but don't specify what that is.
@@ -23,12 +29,12 @@ const {
 //
 // This function represents that check, as it determines if it can convert the
 // symbol node into a hash label.
-function isValidHashLabel(symbolLiteral) {
+function isValidHashLabel(symbolLiteral: Ruby.SymbolLiteral) {
   const label = symbolLiteral.body[0].body;
   return label.match(/^[_A-Za-z]/) && !label.endsWith("=");
 }
 
-function canUseHashLabels(contentsNode) {
+function canUseHashLabels(contentsNode: HashContents) {
   return contentsNode.body.every((assocNode) => {
     if (assocNode.type === "assoc_splat") {
       return true;
@@ -47,7 +53,7 @@ function canUseHashLabels(contentsNode) {
   });
 }
 
-function printHashKeyLabel(path, print) {
+const printHashKeyLabel: KeyPrinter = (path, print) => {
   const node = path.getValue();
 
   switch (node.type) {
@@ -59,24 +65,25 @@ function printHashKeyLabel(path, print) {
       return concat([print(path), ":"]);
     }
   }
-}
+};
 
-function printHashKeyRocket(path, print) {
+const printHashKeyRocket: KeyPrinter = (path, print) => {
   const node = path.getValue();
   let doc = print(path);
 
   if (node.type === "@label") {
-    doc = concat([":", doc.slice(0, doc.length - 1)]);
+    const sDoc = doc as string; // since we know this is a label
+    doc = concat([":", sDoc.slice(0, sDoc.length - 1)]);
   } else if (node.type === "dyna_symbol") {
     doc = concat([":", doc]);
   }
 
   return concat([doc, " =>"]);
-}
+};
 
-function printAssocNew(path, opts, print) {
+const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (path, opts, print) => {
   const [keyNode, valueNode] = path.getValue().body;
-  const { keyPrinter } = path.getParentNode();
+  const { keyPrinter } = path.getParentNode() as HashContents;
 
   const parts = [path.call((keyPath) => keyPrinter(keyPath, print), "body", 0)];
   const valueDoc = path.call(print, "body", 1);
@@ -95,13 +102,13 @@ function printAssocNew(path, opts, print) {
   }
 
   return group(concat(parts));
-}
+};
 
-function printAssocSplat(path, opts, print) {
+const printAssocSplat: Plugin.Printer<Ruby.AssocSplat> = (path, opts, print) => {
   return concat(["**", path.call(print, "body", 0)]);
-}
+};
 
-function printHashContents(path, opts, print) {
+const printHashContents: Plugin.Printer<HashContents> = (path, opts, print) => {
   const node = path.getValue();
 
   // First determine which key printer we're going to use, so that the child
@@ -112,9 +119,9 @@ function printHashContents(path, opts, print) {
       : printHashKeyRocket;
 
   return join(concat([",", line]), path.map(print, "body"));
-}
+};
 
-function printHash(path, opts, print) {
+const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
   const hashNode = path.getValue();
 
   // Hashes normally have a single assoclist_from_args child node. If it's
@@ -144,7 +151,7 @@ function printHash(path, opts, print) {
   }
 
   return group(hashDoc);
-}
+};
 
 module.exports = {
   assoc_new: printAssocNew,

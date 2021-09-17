@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const {
   concat,
   group,
@@ -11,8 +13,8 @@ const { literal } = require("../../utils");
 
 // You can't skip the parentheses if you have comments or certain operators with
 // lower precedence than the return keyword.
-const canSkipParens = (args) => {
-  const stmts = args.body[0].body[0];
+function canSkipParens(args: Ruby.Args | Ruby.ArgsAddStar) {
+  const stmts = (args.body[0] as any).body[0] as Ruby.Stmts;
 
   // return(
   //   # a
@@ -35,10 +37,12 @@ const canSkipParens = (args) => {
   }
 
   return true;
-};
+}
 
-const printReturn = (path, opts, print) => {
-  let args = path.getValue().body[0].body[0];
+type CallArgs = [Plugin.Print, ...PropertyKey[]];
+
+const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
+  let args = path.getValue().body[0].body[0] as Ruby.Args | Ruby.ArgsAddStar;
   let steps = ["body", 0, "body", 0];
 
   if (args.body.length === 1) {
@@ -46,7 +50,7 @@ const printReturn = (path, opts, print) => {
     // content of the parens so that we can skip printing parens if we don't
     // want them.
     if (args.body[0] && args.body[0].type === "paren" && canSkipParens(args)) {
-      args = args.body[0].body[0];
+      args = args.body[0].body[0] as any as Ruby.Args | Ruby.ArgsAddStar;
       steps = steps.concat("body", 0, "body", 0);
     }
 
@@ -66,7 +70,7 @@ const printReturn = (path, opts, print) => {
 
   // Now that we've established which actual node is the arguments to return,
   // we grab it out of the path by diving down the steps that we've set up.
-  const parts = path.call.apply(path, [print].concat(steps));
+  const parts = path.call.apply(path, ([print] as CallArgs).concat(steps) as CallArgs) as Plugin.Doc[];
 
   // If we got the value straight out of the parens, then `parts` would only
   // be a singular doc as opposed to an array.

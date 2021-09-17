@@ -1,3 +1,6 @@
+import type * as Prettier from "prettier";
+import type { Plugin, Ruby } from "./types";
+
 const {
   align,
   concat,
@@ -10,13 +13,13 @@ const {
 } = require("../../prettier");
 const { makeCall } = require("../../utils");
 
-function docLength(doc) {
+function docLength(doc: any): number {
   if (doc.length) {
     return doc.length;
   }
 
   if (doc.parts) {
-    return doc.parts.reduce((sum, child) => sum + docLength(child), 0);
+    return (doc as Prettier.doc.builders.Concat).parts.reduce((sum, child) => sum + docLength(child), 0);
   }
 
   if (doc.contents) {
@@ -26,7 +29,7 @@ function docLength(doc) {
   return 0;
 }
 
-function hasDef(node) {
+function hasDef(node: Ruby.Command) {
   return (
     node.body[1].type === "args_add_block" &&
     node.body[1].body[0].type === "args" &&
@@ -48,18 +51,18 @@ function hasDef(node) {
 //
 // In this case the arguments are aligned to the left side as opposed to being
 // aligned with the `receive` call.
-function skipArgsAlign(path) {
+function skipArgsAlign(path: Plugin.Path<Ruby.CommandCall>) {
   return ["to", "not_to"].includes(path.getValue().body[2].body);
 }
 
 // If there is a ternary argument to a command and it's going to get broken
 // into multiple lines, then we're going to have to use parentheses around the
 // command in order to make sure operator precedence doesn't get messed up.
-function hasTernaryArg(node) {
-  return node.body[0].body.some((child) => child.type === "ifop");
+function hasTernaryArg(node: Ruby.Args | Ruby.ArgsAddBlock) {
+  return (node.body[0] as any).body.some((child: Ruby.AnyNode) => child.type === "ifop");
 }
 
-function printCommand(path, opts, print) {
+const printCommand: Plugin.Printer<Ruby.Command> = (path, opts, print) => {
   const node = path.getValue();
 
   const command = path.call(print, "body", 0);
@@ -70,7 +73,7 @@ function printCommand(path, opts, print) {
 
   if (hasTernary) {
     breakArgs = indent(concat([softline, joinedArgs]));
-  } else if (hasDef(path.getValue())) {
+  } else if (hasDef(node)) {
     breakArgs = joinedArgs;
   } else {
     breakArgs = align(docLength(command) + 1, joinedArgs);
@@ -87,9 +90,9 @@ function printCommand(path, opts, print) {
       concat([command, " ", joinedArgs])
     )
   );
-}
+};
 
-function printCommandCall(path, opts, print) {
+const printCommandCall: Plugin.Printer<Ruby.CommandCall> = (path, opts, print) => {
   const node = path.getValue();
   const parts = [
     path.call(print, "body", 0),
@@ -123,7 +126,7 @@ function printCommandCall(path, opts, print) {
   const joinedDoc = parts.concat(argDocs);
 
   return group(ifBreak(concat(breakDoc), concat(joinedDoc)));
-}
+};
 
 module.exports = {
   command: printCommand,

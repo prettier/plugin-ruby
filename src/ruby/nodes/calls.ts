@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const {
   concat,
   group,
@@ -13,7 +15,20 @@ const toProc = require("../toProc");
 
 const chained = ["call", "method_add_arg", "method_add_block"];
 
-function printCall(path, opts, print) {
+// We decorate these nodes with a bunch of extra stuff so that we can display
+// nice method chains.
+type Chain = {
+  chain?: number,
+  callChain?: number,
+  breakDoc?: Plugin.Doc[],
+  firstReceiverType?: string
+};
+
+type ChainedCall = Ruby.Call & Chain;
+type ChainedMethodAddArg = Ruby.MethodAddArg & Chain;
+type ChainedMethodAddBlock = Ruby.MethodAddBlock & Chain;
+
+const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   const node = path.getValue();
   const [receiverNode, _operatorNode, messageNode] = node.body;
 
@@ -44,6 +59,7 @@ function printCall(path, opts, print) {
   // https://github.com/prettier/plugin-ruby/issues/862.
   if (
     receiverNode.type === "call" &&
+    receiverNode.body[2] !== "call" &&
     receiverNode.body[2].body === "where" &&
     messageDoc === "not"
   ) {
@@ -66,19 +82,19 @@ function printCall(path, opts, print) {
   // multi-line layout if this doesn't break into multiple lines.
   if (!chained.includes(parentNode.type) && (node.chain || 0) >= 3) {
     return ifBreak(
-      group(indent(concat(node.breakDoc.concat(rightSideDoc)))),
+      group(indent(concat(node.breakDoc!.concat(rightSideDoc)))),
       concat([receiverDoc, group(rightSideDoc)])
     );
   }
 
   return group(concat([receiverDoc, group(indent(rightSideDoc))]));
-}
+};
 
-function printMethodAddArg(path, opts, print) {
+const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (path, opts, print) => {
   const node = path.getValue();
 
   const [methodNode, argNode] = node.body;
-  const [methodDoc, argsDoc] = path.map(print, "body");
+  const [methodDoc, argsDoc] = path.map(print, "body") as [Plugin.Doc, Plugin.Doc[]];
 
   // You can end up here if you have a method with a ? ending, presumably
   // because the parser knows that it cannot be a local variable. You can also
@@ -169,7 +185,7 @@ function printMethodAddArg(path, opts, print) {
     }
 
     return ifBreak(
-      group(indent(concat(node.breakDoc.concat(argsDoc)))),
+      group(indent(concat(node.breakDoc!.concat(argsDoc)))),
       concat([methodDoc, argsDoc])
     );
   }
@@ -181,9 +197,9 @@ function printMethodAddArg(path, opts, print) {
   }
 
   return concat([methodDoc, " ", join(", ", argsDoc), " "]);
-}
+};
 
-function printMethodAddBlock(path, opts, print) {
+const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (path, opts, print) => {
   const node = path.getValue();
 
   const [callNode, blockNode] = node.body;
@@ -225,17 +241,17 @@ function printMethodAddBlock(path, opts, print) {
   // multi-line layout if this doesn't break into multiple lines.
   if (!chained.includes(parentNode.type) && (node.chain || 0) >= 3) {
     return ifBreak(
-      group(indent(concat(node.breakDoc.concat(blockDoc)))),
+      group(indent(concat(node.breakDoc!.concat(blockDoc)))),
       concat([callDoc, blockDoc])
     );
   }
 
   return concat([callDoc, blockDoc]);
-}
+};
 
-function printCallContainer(path, opts, print) {
+const printCallContainer: Plugin.Printer<Ruby.Fcall | Ruby.VCall> = (path, opts, print) => {
   return path.call(print, "body", 0);
-}
+};
 
 module.exports = {
   call: printCall,

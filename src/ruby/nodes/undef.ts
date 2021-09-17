@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const {
   addTrailingComment,
   align,
@@ -7,7 +9,7 @@ const {
   line
 } = require("../../prettier");
 
-function printUndefSymbol(path, opts, print) {
+const printUndefSymbol: Plugin.Printer<Ruby.DynaSymbol | Ruby.SymbolLiteral> = (path, opts, print) => {
   const node = path.getValue();
 
   // Since we're going to descend into the symbol literal to grab out the ident
@@ -20,9 +22,9 @@ function printUndefSymbol(path, opts, print) {
   }
 
   return path.call(print, "body", 0);
-}
+};
 
-function printUndef(path, opts, print) {
+const printUndef: Plugin.Printer<Ruby.Undef> = (path, opts, print) => {
   const keyword = "undef ";
   const argNodes = path.map(
     (symbolPath) => printUndefSymbol(symbolPath, opts, print),
@@ -35,7 +37,7 @@ function printUndef(path, opts, print) {
       align(keyword.length, join(concat([",", line]), argNodes))
     ])
   );
-}
+};
 
 module.exports = {
   undef: printUndef

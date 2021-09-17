@@ -35,7 +35,6 @@
     "typescript": "^4.4.3"
   },
   "eslintConfig": {
-    "preset": "ts-jest",
     "extends": [
       "eslint:recommended",
       "prettier"
@@ -58,6 +57,7 @@
   "jest": {
     "globalSetup": "./test/js/globalSetup.js",
     "globalTeardown": "./test/js/globalTeardown.js",
+    "preset": "ts-jest",
     "setupFilesAfterEnv": [
       "./test/js/setupTests.js"
     ],

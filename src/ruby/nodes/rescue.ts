@@ -1,3 +1,6 @@
+import type * as Prettier from "prettier";
+import type { Plugin, Ruby } from "./types";
+
 const {
   align,
   concat,
@@ -9,23 +12,23 @@ const {
 } = require("../../prettier");
 const { literal } = require("../../utils");
 
-function printBegin(path, opts, print) {
+const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
   return concat([
     "begin",
     indent(concat([hardline, concat(path.map(print, "body"))])),
     hardline,
     "end"
   ]);
-}
+};
 
-function printEnsure(path, opts, print) {
+const printEnsure: Plugin.Printer<Ruby.Ensure> = (path, opts, print) => {
   return concat([
     path.call(print, "body", 0),
     indent(concat([hardline, path.call(print, "body", 1)]))
   ]);
-}
+};
 
-function printRescue(path, opts, print) {
+const printRescue: Plugin.Printer<Ruby.Rescue> = (path, opts, print) => {
   const parts = ["rescue"];
 
   if (path.getValue().body[0]) {
@@ -37,7 +40,7 @@ function printRescue(path, opts, print) {
     parts.push(" StandardError");
   }
 
-  const bodystmt = path.call(print, "body", 1);
+  const bodystmt = path.call(print, "body", 1) as Prettier.doc.builders.Concat;
 
   if (bodystmt.parts.length > 0) {
     parts.push(indent(concat([hardline, bodystmt])));
@@ -50,11 +53,11 @@ function printRescue(path, opts, print) {
   }
 
   return group(concat(parts));
-}
+};
 
 // This is a container node that we're adding into the AST that isn't present in
 // Ripper solely so that we have a nice place to attach inline comments.
-function printRescueEx(path, opts, print) {
+const printRescueEx: Plugin.Printer<Ruby.RescueEx> = (path, opts, print) => {
   const [exception, variable] = path.getValue().body;
   const parts = [];
 
@@ -74,9 +77,9 @@ function printRescueEx(path, opts, print) {
   }
 
   return group(concat(parts));
-}
+};
 
-function printRescueMod(path, opts, print) {
+const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (path, opts, print) => {
   const [statementDoc, valueDoc] = path.map(print, "body");
 
   return concat([
@@ -88,7 +91,7 @@ function printRescueMod(path, opts, print) {
     hardline,
     "end"
   ]);
-}
+};
 
 module.exports = {
   begin: printBegin,

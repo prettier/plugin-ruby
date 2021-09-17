@@ -1,7 +1,9 @@
+import type { Plugin, Ruby } from "./types";
+
 const { concat, group, hardline, indent } = require("../../prettier");
 const { isEmptyBodyStmt } = require("../../utils");
 
-function printClass(path, opts, print) {
+const printClass: Plugin.Printer<Ruby.Class> = (path, opts, print) => {
   const [_constant, superclass, bodystmt] = path.getValue().body;
 
   const parts = ["class ", path.call(print, "body", 0)];
@@ -21,9 +23,9 @@ function printClass(path, opts, print) {
       concat([hardline, "end"])
     ])
   );
-}
+};
 
-function printModule(path, opts, print) {
+const printModule: Plugin.Printer<Ruby.Module> = (path, opts, print) => {
   const node = path.getValue();
   const declaration = group(concat(["module ", path.call(print, "body", 0)]));
 
@@ -38,9 +40,9 @@ function printModule(path, opts, print) {
       concat([hardline, "end"])
     ])
   );
-}
+};
 
-function printSClass(path, opts, print) {
+const printSClass: Plugin.Printer<Ruby.Sclass> = (path, opts, print) => {
   const bodystmt = path.getValue().body[1];
   const declaration = concat(["class << ", path.call(print, "body", 0)]);
 
@@ -55,7 +57,7 @@ function printSClass(path, opts, print) {
       concat([hardline, "end"])
     ])
   );
-}
+};
 
 module.exports = {
   class: printClass,

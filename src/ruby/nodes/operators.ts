@@ -1,7 +1,9 @@
+import type { Plugin, Ruby } from "./types";
+
 const { concat, group, indent, line, softline } = require("../../prettier");
 const { noIndent } = require("../../utils");
 
-function printBinary(path, opts, print) {
+const printBinary: Plugin.Printer<Ruby.Binary> = (path, opts, print) => {
   const [_leftNode, operator, rightNode] = path.getValue().body;
   const space = operator === "**" ? "" : " ";
 
@@ -32,11 +34,11 @@ function printBinary(path, opts, print) {
       )
     ])
   );
-}
+};
 
 // dot2 nodes are used with ranges (or flip-flops). They can optionally drop
 // their left side for beginless ranges or their right side for endless ranges.
-function printDot2(path, opts, print) {
+const printDot2: Plugin.Printer<Ruby.Dot2> = (path, opts, print) => {
   const [leftNode, rightNode] = path.getValue().body;
 
   return concat([
@@ -44,11 +46,11 @@ function printDot2(path, opts, print) {
     "..",
     rightNode ? path.call(print, "body", 1) : ""
   ]);
-}
+};
 
 // dot3 nodes are used with ranges (or flip-flops). They can optionally drop
 // their left side for beginless ranges or their right side for endless ranges.
-function printDot3(path, opts, print) {
+const printDot3: Plugin.Printer<Ruby.Dot3> = (path, opts, print) => {
   const [leftNode, rightNode] = path.getValue().body;
 
   return concat([
@@ -56,9 +58,9 @@ function printDot3(path, opts, print) {
     "...",
     rightNode ? path.call(print, "body", 1) : ""
   ]);
-}
+};
 
-function printUnary(path, opts, print) {
+const printUnary: Plugin.Printer<Ruby.Unary> = (path, opts, print) => {
   const node = path.getValue();
   const contentsDoc = path.call(print, "body", 0);
 
@@ -73,7 +75,7 @@ function printUnary(path, opts, print) {
   }
 
   return concat([node.oper, contentsDoc]);
-}
+};
 
 module.exports = {
   binary: printBinary,

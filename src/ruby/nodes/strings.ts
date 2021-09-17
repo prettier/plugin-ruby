@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const {
   concat,
   group,
@@ -14,7 +16,7 @@ const {
 // quote the user chose. (If they chose single quotes, then double quoting
 // would activate the escape sequence, and if they chose double quotes, then
 // single quotes would deactivate it.)
-function isQuoteLocked(node) {
+function isQuoteLocked(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
   return node.body.some(
     (part) =>
       part.type === "@tstring_content" &&
@@ -24,7 +26,7 @@ function isQuoteLocked(node) {
 
 // A string is considered to be able to use single quotes if it contains only
 // plain string content and that content does not contain a single quote.
-function isSingleQuotable(node) {
+function isSingleQuotable(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
   return node.body.every(
     (part) => part.type === "@tstring_content" && !part.body.includes("'")
   );
@@ -32,7 +34,7 @@ function isSingleQuotable(node) {
 
 const quotePattern = new RegExp("\\\\([\\s\\S])|(['\"])", "g");
 
-function normalizeQuotes(content, enclosingQuote) {
+function normalizeQuotes(content: string, enclosingQuote: string) {
   // Escape and unescape single and double quotes as needed to be able to
   // enclose `content` with `enclosingQuote`.
   return content.replace(quotePattern, (match, escaped, quote) => {
@@ -55,14 +57,16 @@ const quotePairs = {
   "<": ">"
 };
 
-function getClosingQuote(quote) {
+type Quote = keyof typeof quotePairs;
+
+function getClosingQuote(quote: string) {
   if (!quote.startsWith("%")) {
     return quote;
   }
 
-  const boundary = /%[Qq]?(.)/.exec(quote)[1];
+  const boundary = /%[Qq]?(.)/.exec(quote)![1];
   if (boundary in quotePairs) {
-    return quotePairs[boundary];
+    return quotePairs[boundary as Quote];
   }
 
   return boundary;
@@ -71,7 +75,7 @@ function getClosingQuote(quote) {
 // Prints a @CHAR node. @CHAR nodes are special character strings that usually
 // are strings of length 1. If they're any longer than we'll try to apply the
 // correct quotes.
-function printChar(path, { rubySingleQuote }, _print) {
+const printChar: Plugin.Printer<Ruby.Char> = (path, { rubySingleQuote }, _print) => {
   const { body } = path.getValue();
 
   if (body.length !== 2) {
@@ -80,9 +84,9 @@ function printChar(path, { rubySingleQuote }, _print) {
 
   const quote = rubySingleQuote ? "'" : '"';
   return concat([quote, body.slice(1), quote]);
-}
+};
 
-function printPercentSDynaSymbol(path, opts, print) {
+const printPercentSDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (path, opts, print) => {
   const node = path.getValue();
   const parts = [];
 
@@ -103,15 +107,15 @@ function printPercentSDynaSymbol(path, opts, print) {
 
   // Push on the closing character, which is the opposite of the third
   // character from the opening.
-  parts.push(quotePairs[node.quote[2]]);
+  parts.push(quotePairs[node.quote[2] as Quote]);
 
   return concat(parts);
-}
+};
 
 // We don't actually want to print %s symbols, as they're much more rarely seen
 // in the wild. But we're going to be forced into it if it's a multi-line symbol
 // or if the quoting would get super complicated.
-function shouldPrintPercentSDynaSymbol(node) {
+function shouldPrintPercentSDynaSymbol(node: Ruby.DynaSymbol) {
   // We shouldn't print a %s dyna symbol if it was not already that way in the
   // original source.
   if (node.quote[0] !== "%") {
@@ -121,7 +125,7 @@ function shouldPrintPercentSDynaSymbol(node) {
   // Here we're going to check if there is a closing character, a new line, or a
   // quote in the content of the dyna symbol. If there is, then quoting could
   // get weird, so just bail out and stick to the original bounds in the source.
-  const closing = quotePairs[node.quote[2]];
+  const closing = quotePairs[node.quote[2] as Quote];
 
   return node.body.some(
     (child) =>
@@ -139,7 +143,7 @@ function shouldPrintPercentSDynaSymbol(node) {
 //
 // In the case of a plain dyna symbol, node.quote will be either :" or :'
 // For %s dyna symbols, node.quote will be %s[, %s(, %s{, or %s<
-function printDynaSymbol(path, opts, print) {
+const printDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (path, opts, print) => {
   const node = path.getValue();
 
   if (shouldPrintPercentSDynaSymbol(node)) {
@@ -147,7 +151,7 @@ function printDynaSymbol(path, opts, print) {
   }
 
   const parts = [];
-  let quote;
+  let quote: string;
 
   if (isQuoteLocked(node)) {
     if (node.quote.startsWith("%")) {
@@ -162,8 +166,9 @@ function printDynaSymbol(path, opts, print) {
   }
 
   parts.push(quote);
+
   path.each((childPath) => {
-    const child = childPath.getValue();
+    const child = childPath.getValue() as Ruby.StringContent;
 
     if (child.type !== "@tstring_content") {
       parts.push(print(childPath));
@@ -184,21 +189,21 @@ function printDynaSymbol(path, opts, print) {
   }
 
   return concat(parts);
-}
+};
 
-function printStringConcat(path, opts, print) {
+const printStringConcat: Plugin.Printer<Ruby.StringConcat> = (path, opts, print) => {
   const [leftDoc, rightDoc] = path.map(print, "body");
 
   return group(concat([leftDoc, " \\", indent(concat([hardline, rightDoc]))]));
-}
+};
 
 // Prints out an interpolated variable in the string by converting it into an
 // embedded expression.
-function printStringDVar(path, opts, print) {
+const printStringDVar: Plugin.Printer<Ruby.StringDVar> = (path, opts, print) => {
   return concat(["#{", path.call(print, "body", 0), "}"]);
-}
+};
 
-function printStringEmbExpr(path, opts, print) {
+const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (path, opts, print) => {
   const node = path.getValue();
   const parts = path.call(print, "body", 0);
 
@@ -212,13 +217,13 @@ function printStringEmbExpr(path, opts, print) {
   return group(
     concat(["#{", indent(concat([softline, parts])), concat([softline, "}"])])
   );
-}
+};
 
 // Prints out a literal string. This function does its best to respect the
 // wishes of the user with regards to single versus double quotes, but if the
 // string contains any escape expressions then it will just keep the original
 // quotes.
-function printStringLiteral(path, { rubySingleQuote }, print) {
+const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (path, { rubySingleQuote }, print) => {
   const node = path.getValue();
 
   // If the string is empty, it will not have any parts, so just print out the
@@ -228,7 +233,7 @@ function printStringLiteral(path, { rubySingleQuote }, print) {
   }
 
   // Determine the quote that should enclose the new string
-  let quote;
+  let quote: string;
   if (isQuoteLocked(node)) {
     quote = node.quote;
   } else {
@@ -246,19 +251,19 @@ function printStringLiteral(path, { rubySingleQuote }, print) {
   });
 
   return concat([quote].concat(parts).concat(getClosingQuote(quote)));
-}
+};
 
 // Prints out a symbol literal. Its child will always be the ident that
 // represents the string content of the symbol.
-function printSymbolLiteral(path, opts, print) {
+const printSymbolLiteral: Plugin.Printer<Ruby.SymbolLiteral> = (path, opts, print) => {
   return concat([":", path.call(print, "body", 0)]);
-}
+};
 
 // Prints out an xstring literal. Its child is an array of string parts,
 // including plain string content and interpolated content.
-function printXStringLiteral(path, opts, print) {
-  return concat(["`"].concat(path.map(print, "body")).concat("`"));
-}
+const printXStringLiteral: Plugin.Printer<Ruby.XStringLiteral> = (path, opts, print) => {
+  return concat((["`"] as Plugin.Doc[]).concat(path.map(print, "body")).concat("`"));
+};
 
 module.exports = {
   "@CHAR": printChar,

@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const {
   concat,
   group,
@@ -8,7 +10,7 @@ const {
 } = require("../../prettier");
 const { literal } = require("../../utils");
 
-function printRestParam(symbol) {
+function printRestParam(symbol: string): Plugin.Printer<Ruby.KeywordRestParam | Ruby.RestParam> {
   return function printRestParamWithSymbol(path, opts, print) {
     return path.getValue().body[0]
       ? concat([symbol, path.call(print, "body", 0)])
@@ -16,10 +18,10 @@ function printRestParam(symbol) {
   };
 }
 
-function printParams(path, opts, print) {
+const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   const [reqs, optls, rest, post, kwargs, kwargRest, block] =
     path.getValue().body;
-  let parts = [];
+  let parts: Plugin.Doc[] = [];
 
   if (reqs) {
     path.each(
@@ -83,7 +85,7 @@ function printParams(path, opts, print) {
   // In ruby 2.5, the excessed comma is indicated by having a 0 in the rest
   // param position. In ruby 2.6+ it's indicated by having an "excessed_comma"
   // node in the rest position. Seems odd, but it's true.
-  if (rest === 0 || (rest && rest.type === "excessed_comma")) {
+  if ((rest as any) === 0 || (rest && rest.type === "excessed_comma")) {
     contents.push(",");
   }
 
@@ -96,7 +98,7 @@ function printParams(path, opts, print) {
   }
 
   return group(concat(contents));
-}
+};
 
 module.exports = {
   args_forward: literal("..."),

@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const {
   align,
   breakParent,
@@ -13,7 +15,7 @@ const {
 const { containsAssignment, isEmptyStmts } = require("../../utils");
 const inlineEnsureParens = require("../../utils/inlineEnsureParens");
 
-function printLoop(keyword, modifier) {
+function printLoop(keyword: string, modifier: boolean): Plugin.Printer<Ruby.While | Ruby.WhileModifier | Ruby.Until | Ruby.UntilModifier> {
   return function printLoopWithOptions(path, { rubyModifier }, print) {
     const [_predicate, stmts] = path.getValue().body;
 
@@ -72,7 +74,7 @@ function printLoop(keyword, modifier) {
   };
 }
 
-function printFor(path, opts, print) {
+const printFor: Plugin.Printer<Ruby.For> = (path, opts, print) => {
   const [varDoc, rangeDoc, stmtsDoc] = path.map(print, "body");
   const varsDoc =
     path.getValue().body[0].type === "mlhs" ? join(", ", varDoc) : varDoc;
@@ -87,7 +89,7 @@ function printFor(path, opts, print) {
       concat([hardline, "end"])
     ])
   );
-}
+};
 
 module.exports = {
   while: printLoop("while", false),

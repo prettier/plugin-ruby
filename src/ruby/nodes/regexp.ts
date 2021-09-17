@@ -1,7 +1,9 @@
+import type { Plugin, Ruby } from "./types";
+
 const { concat } = require("../../prettier");
 const { hasAncestor } = require("../../utils");
 
-function hasContent(node, pattern) {
+function hasContent(node: Ruby.RegexpLiteral, pattern: RegExp) {
   return node.body.some(
     (child) => child.type === "@tstring_content" && pattern.test(child.body)
   );
@@ -11,7 +13,7 @@ function hasContent(node, pattern) {
 // or an =, and we're contained within a command or command_call node, then we
 // want to use braces because otherwise we could end up with an ambiguous
 // operator, e.g. foo / bar/ or foo /=bar/
-function forwardSlashIsAmbiguous(path) {
+function forwardSlashIsAmbiguous(path: Plugin.Path<Ruby.RegexpLiteral>) {
   const node = path.getValue();
   const firstChildNode = node.body[0];
 
@@ -30,7 +32,7 @@ function forwardSlashIsAmbiguous(path) {
 //
 // We favor the use of forward slashes unless the regex contains a forward slash
 // itself. In that case we switch over to using %r with braces.
-function printRegexpLiteral(path, opts, print) {
+const printRegexpLiteral: Plugin.Printer<Ruby.RegexpLiteral> = (path, opts, print) => {
   const node = path.getValue();
   const docs = path.map(print, "body");
 
@@ -41,15 +43,15 @@ function printRegexpLiteral(path, opts, print) {
   // If we should be using braces but we have braces in the body of the regexp,
   // then we're just going to resort to using whatever the original content was.
   if (useBraces && hasContent(node, /[{}]/)) {
-    return concat([node.beging].concat(docs).concat(node.ending));
+    return concat(([node.beging] as Plugin.Doc[]).concat(docs).concat(node.ending));
   }
 
   return concat(
-    [useBraces ? "%r{" : "/"]
+    ([useBraces ? "%r{" : "/"] as Plugin.Doc[])
       .concat(docs)
       .concat(useBraces ? "}" : "/", node.ending.slice(1))
   );
-}
+};
 
 module.exports = {
   regexp_literal: printRegexpLiteral

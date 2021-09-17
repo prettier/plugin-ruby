@@ -1,3 +1,6 @@
+import type * as Prettier from "prettier";
+import type { Plugin, Ruby } from "./types";
+
 const {
   align,
   concat,
@@ -8,8 +11,8 @@ const {
   line
 } = require("../../prettier");
 
-function printCase(path, opts, print) {
-  const statement = ["case"];
+const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
+  const statement: Plugin.Doc[] = ["case"];
 
   // You don't need to explicitly have something to test against in a case
   // statement (without it it effectively becomes an if/elsif chain).
@@ -20,28 +23,28 @@ function printCase(path, opts, print) {
   return concat(
     statement.concat([hardline, path.call(print, "body", 1), hardline, "end"])
   );
-}
+};
 
-function printWhen(path, opts, print) {
+const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
   const [_preds, _stmts, addition] = path.getValue().body;
 
   // The `fill` builder command expects an array of docs alternating with
   // line breaks. This is so it can loop through and determine where to break.
   const preds = fill(
-    path.call(print, "body", 0).reduce((accum, pred, index) => {
+    (path.call(print, "body", 0) as Plugin.Doc[]).reduce((accum, pred, index) => {
       if (index === 0) {
         return [pred];
       }
 
       // Pull off the last element and make it concat with a comma so that
       // we can maintain alternating lines and docs.
-      return accum
+      return accum!
         .slice(0, -1)
-        .concat([concat([accum[accum.length - 1], ","]), line, pred]);
-    }, null)
+        .concat([concat([accum![accum!.length - 1], ","]), line, pred]);
+    }, null as (null | Plugin.Doc[]))
   );
 
-  const stmts = path.call(print, "body", 1);
+  const stmts = path.call(print, "body", 1) as Prettier.doc.builders.Concat;
   const parts = [concat(["when ", align("when ".length, preds)])];
 
   // It's possible in a when to just have empty void statements, in which case
@@ -57,7 +60,7 @@ function printWhen(path, opts, print) {
   }
 
   return group(concat(parts));
-}
+};
 
 module.exports = {
   case: printCase,

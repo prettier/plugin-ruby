@@ -1,3 +1,6 @@
+import type * as Prettier from "prettier";
+import type { Plugin, Ruby } from "./types";
+
 const {
   concat,
   group,
@@ -12,7 +15,7 @@ const toProc = require("../toProc");
 
 const noTrailingComma = ["command", "command_call"];
 
-function getArgParenTrailingComma(node) {
+function getArgParenTrailingComma(node: Ruby.Args | Ruby.ArgsAddBlock) {
   // If we have a block, then we don't want to add a trailing comma.
   if (node.type === "args_add_block" && node.body[1]) {
     return "";
@@ -28,7 +31,7 @@ function getArgParenTrailingComma(node) {
   return ifBreak(",", "");
 }
 
-function printArgParen(path, opts, print) {
+const printArgParen: Plugin.Printer<Ruby.ArgParen> = (path, opts, print) => {
   const argsNode = path.getValue().body[0];
 
   if (argsNode === null) {
@@ -65,9 +68,9 @@ function printArgParen(path, opts, print) {
       ")"
     ])
   );
-}
+};
 
-function printArgs(path, { rubyToProc }, print) {
+const printArgs: Plugin.Printer<Ruby.Args> = (path, { rubyToProc }, print) => {
   const args = path.map(print, "body");
 
   // Don't bother trying to do any kind of fancy toProc transform if the
@@ -104,16 +107,16 @@ function printArgs(path, { rubyToProc }, print) {
   }
 
   return args;
-}
+};
 
-function printArgsAddBlock(path, opts, print) {
+const printArgsAddBlock: Plugin.Printer<Ruby.ArgsAddBlock> = (path, opts, print) => {
   const node = path.getValue();
   const blockNode = node.body[1];
 
-  const parts = path.call(print, "body", 0);
+  const parts = path.call(print, "body", 0) as Plugin.Doc[];
 
   if (blockNode) {
-    let blockDoc = path.call(print, "body", 1);
+    let blockDoc = path.call(print, "body", 1) as Plugin.Doc[];
 
     if (!(blockNode.comments || []).some(({ leading }) => leading)) {
       // If we don't have any leading comments, we can just prepend the
@@ -141,21 +144,22 @@ function printArgsAddBlock(path, opts, print) {
       // In prettier < 2.3.0, the comments are printed as part of a concat, so
       // we can reflect on how many leading comments there are to determine
       // which doc node we should modify.
-      const index = blockNode.comments.filter(({ leading }) => leading).length;
-      blockDoc.parts[index] = concat(["&", blockDoc.parts[index]]);
+      const index = blockNode.comments!.filter(({ leading }) => leading).length;
+      const cBlockDoc = blockDoc as any as Prettier.doc.builders.Concat;
+      cBlockDoc.parts[index] = concat(["&", cBlockDoc.parts[index]]);
     }
 
     parts.push(blockDoc);
   }
 
   return parts;
-}
+};
 
-function printArgsAddStar(path, opts, print) {
-  let docs = [];
+const printArgsAddStar: Plugin.Printer<Ruby.ArgsAddStar> = (path, opts, print) => {
+  let docs: Plugin.Doc[] = [];
 
   path.each((argPath, argIndex) => {
-    const doc = print(argPath);
+    const doc = print(argPath) as Plugin.Doc[];
 
     // If it's the first child, then it's an array of args, so we're going to
     // concat that onto the existing docs if there are any.
@@ -174,7 +178,7 @@ function printArgsAddStar(path, opts, print) {
     }
 
     // If we don't have any leading comments, we can just prepend the operator.
-    const argsNode = argPath.getValue();
+    const argsNode = argPath.getValue() as Ruby.AnyNode;
     if (!(argsNode.comments || []).some(({ leading }) => leading)) {
       docs.push(concat(["*", doc]));
       return;
@@ -201,17 +205,19 @@ function printArgsAddStar(path, opts, print) {
     // In prettier < 2.3.0, the comments are printed as part of a concat, so
     // we can reflect on how many leading comments there are to determine which
     // doc node we should modify.
-    const index = argsNode.comments.filter(({ leading }) => leading).length;
-    doc.parts[index] = concat(["*", doc.parts[index]]);
-    docs = docs.concat(doc);
+    const index = argsNode.comments!.filter(({ leading }) => leading).length;
+    const cDoc = doc as any as Prettier.doc.builders.Concat;
+
+    cDoc.parts[index] = concat(["*", cDoc.parts[index]]);
+    docs = docs.concat(cDoc);
   }, "body");
 
   return docs;
-}
+};
 
-function printBlockArg(path, opts, print) {
+const printBlockArg: Plugin.Printer<Ruby.Blockarg> = (path, opts, print) => {
   return concat(["&", path.call(print, "body", 0)]);
-}
+};
 
 module.exports = {
   arg_paren: printArgParen,

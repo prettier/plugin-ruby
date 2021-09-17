@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const {
   concat,
   group,
@@ -19,7 +21,7 @@ const {
 //
 //     foo[]
 //
-function printAref(path, opts, print) {
+const printAref: Plugin.Printer<Ruby.Aref> = (path, opts, print) => {
   const indexNode = path.getValue().body[1];
 
   if (!indexNode) {
@@ -27,7 +29,7 @@ function printAref(path, opts, print) {
   }
 
   return printArefField(path, opts, print);
-}
+};
 
 // `aref_field` nodes are for assigning values into collections at specific
 // indices. Put another way, it's any time you're calling the method `#[]=`.
@@ -43,7 +45,7 @@ function printAref(path, opts, print) {
 //
 //     foo[bar] = baz
 //
-function printArefField(path, opts, print) {
+const printArefField: Plugin.Printer<Ruby.Aref | Ruby.ArefField> = (path, opts, print) => {
   const [printedArray, printedIndex] = path.map(print, "body");
 
   return group(
@@ -54,7 +56,7 @@ function printArefField(path, opts, print) {
       concat([softline, "]"])
     ])
   );
-}
+};
 
 module.exports = {
   aref: printAref,

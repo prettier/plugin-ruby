@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const {
   concat,
   group,
@@ -7,7 +9,7 @@ const {
   softline
 } = require("../../prettier");
 
-function printMAssign(path, opts, print) {
+const printMAssign: Plugin.Printer<Ruby.Massign> = (path, opts, print) => {
   let right = path.call(print, "body", 1);
 
   if (
@@ -19,34 +21,34 @@ function printMAssign(path, opts, print) {
   }
 
   const parts = [join(concat([",", line]), path.call(print, "body", 0))];
-  if (path.getValue().body[0].comma) {
+  if ((path.getValue().body[0] as any).comma) {
     parts.push(",");
   }
 
   return group(
     concat([group(concat(parts)), " =", indent(concat([line, right]))])
   );
-}
+};
 
-function printMLHS(path, opts, print) {
+const printMLHS: Plugin.Printer<Ruby.Mlhs> = (path, opts, print) => {
   return path.map(print, "body");
-}
+};
 
-function printMLHSAddPost(path, opts, print) {
-  return path.call(print, "body", 0).concat(path.call(print, "body", 1));
-}
+const printMLHSAddPost: Plugin.Printer<Ruby.MlhsAddPost> = (path, opts, print) => {
+  return (path.call(print, "body", 0) as Plugin.Doc[]).concat(path.call(print, "body", 1));
+};
 
-function printMLHSAddStar(path, opts, print) {
-  const rightParts = ["*"];
+const printMLHSAddStar: Plugin.Printer<Ruby.MlhsAddStar> = (path, opts, print) => {
+  const rightParts: Plugin.Doc[] = ["*"];
 
   if (path.getValue().body[1]) {
     rightParts.push(path.call(print, "body", 1));
   }
 
-  return path.call(print, "body", 0).concat(concat(rightParts));
-}
+  return (path.call(print, "body", 0) as Plugin.Doc[]).concat(concat(rightParts));
+};
 
-function printMLHSParen(path, opts, print) {
+const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (path, opts, print) => {
   if (["massign", "mlhs_paren"].includes(path.getParentNode().type)) {
     // If we're nested in brackets as part of the left hand side of an
     // assignment, i.e., (a, b, c) = 1, 2, 3
@@ -59,32 +61,32 @@ function printMLHSParen(path, opts, print) {
     join(concat([",", line]), path.call(print, "body", 0))
   ];
 
-  if (path.getValue().body[0].comma) {
+  if ((path.getValue().body[0] as any).comma) {
     parts.push(",");
   }
 
   return group(concat(["(", indent(concat(parts)), concat([softline, ")"])]));
-}
+};
 
-function printMRHS(path, opts, print) {
+const printMRHS: Plugin.Printer<Ruby.Mrhs> = (path, opts, print) => {
   return path.map(print, "body");
-}
+};
 
-function printMRHSAddStar(path, opts, print) {
+const printMRHSAddStar: Plugin.Printer<Ruby.MrhsAddStar> = (path, opts, print) => {
   const [leftDoc, rightDoc] = path.map(print, "body");
 
-  return leftDoc.concat([concat(["*", rightDoc])]);
-}
+  return (leftDoc as Plugin.Doc[]).concat([concat(["*", rightDoc])]);
+};
 
-function printMRHSNewFromArgs(path, opts, print) {
-  const parts = path.call(print, "body", 0);
+const printMRHSNewFromArgs: Plugin.Printer<Ruby.MrhsNewFromArgs> = (path, opts, print) => {
+  const parts = path.call(print, "body", 0) as Plugin.Doc[];
 
   if (path.getValue().body[1]) {
     parts.push(path.call(print, "body", 1));
   }
 
   return parts;
-}
+};
 
 module.exports = {
   massign: printMAssign,

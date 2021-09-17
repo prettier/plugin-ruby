@@ -1,16 +1,58 @@
+import type * as Prettier from "prettier";
+
+// This namespace contains everything to do with the Ruby prettier plugin.
+export namespace Plugin {
+  // We're doing weird things here with the types because if you pass a generic
+  // type to AstPath it gets overly restrictive.
+
+  // This is just a simple alias for the doc nodes.
+  export type Doc = Prettier.doc.builders.Doc;
+
+  // We're overwriting call and map here because if you restrict the AST for the
+  // main path then presumably you're printing a lower node in the tree that
+  // won't match the current AST type.
+  export type Path<T> = Omit<Prettier.AstPath<T>, "call" | "each" | "getParentNode" | "map"> & {
+    call: <U>(callback: (path: Path<any>) => U, ...names: PropertyKey[]) => U,
+    each: (callback: (path: Path<any>, index: number, value: any) => void, ...names: PropertyKey[]) => void,
+    getParentNode: (count?: number | undefined) => any | null,
+    map: <U>(callback: (path: Path<any>, index: number, value: any) => U, ...names: PropertyKey[]) => U[]
+  };
+
+  // This is the regular prettier options + the options defined by this plugin.
+  type Options = Prettier.ParserOptions<any> & {
+    printer: any, // TODO: make this the ruby printer
+    rubyArrayLiteral: boolean,
+    rubyHashLabel: boolean,
+    rubyModifier: boolean,
+    rubyNetcatCommand?: string,
+    rubySingleQuote: boolean,
+    rubyToProc: boolean
+  };
+
+  // This is the regular print node, except it's not restricted by the AST that
+  // is passed to the parent AST.
+  export type Print = (path: Path<any>) => Doc;
+
+  export type Printer<T> = (path: Path<T>, options: Options, print: Print) => Doc;
+}
+
+// This namespace contains everything to do with the types of the various nodes
+// within the syntax tree generated from the Ruby parser.
 export namespace Ruby {
   // These are utility types used to construct the various node types.
-  type ScannerEvent<T extends string> = { type: `@${T}`, body: string, comments?: Comment[] };
-  type ParserEvent0<T extends string> = ScannerEvent<T>;
-  type ParserEvent<T, V = {}> = { type: T, sl: number, el: number, sc: number, ec: number, comments?: Comment[] } & V;
+  type Location = { sl: number, el: number, sc: number, ec: number };
+  type ScannerEvent<T extends string> = { type: `@${T}`, body: string, comments?: Comment[] } & Location;
+  type ParserEvent0<T extends string> = { type: T, body: string, comments?: Comment[] } & Location;
+  type ParserEvent<T, V = {}> = { type: T, comments?: Comment[] } & Location & V;
 
   // This is the main expression type that goes in places where the AST will
   // accept just about anything.
-  type AnyNode = AccessCtrl | Alias | Aref | ArefField | ArgsForward | Array | Assign | BEGIN | Backref | Begin | Binary | Break | CVar | Call | Case | Char | Class | Command | CommandCall | Const | ConstPathField | ConstPathRef | ConstRef | Def | Defined | Defs | Defsl | Dot2 | Dot3 | DynaSymbol | END | Fcall | Field | Float | For | GVar | Hash | Heredoc | IVar | Identifier | If | IfModifier | Ternary | Imaginary | Int | Keyword | Lambda | Massign | MethodAddArg | MethodAddBlock | Mlhs | MlhsAddPost | MlhsAddStar | Module | Mrhs | MrhsAddStar | MrhsNewFromArgs | Next | Op | Opassign | Paren | Qsymbols | Qwords | Rassign | Rational | Redo | RegexpLiteral | Rescue | RescueModifier | Retry | Return | Return0 | Sclass | String | StringConcat | StringLiteral | Super | SymbolLiteral | Symbols | TopConstField | TopConstRef | Unary | Undef | Unless | UnlessModifier | Until | UntilModifier | VarAlias | VarField | VarRef | VCall | VoidStmt | While | WhileModifier | Words | XStringLiteral | Yield | Yield0 | Zsuper;
+  export type AnyNode = AccessCtrl | Alias | Aref | ArefField | ArgsForward | Array | Assign | BEGIN | Backref | Begin | Binary | Break | CVar | Call | Case | Char | Class | Command | CommandCall | Const | ConstPathField | ConstPathRef | ConstRef | Def | Defined | Defs | Defsl | Dot2 | Dot3 | DynaSymbol | END | Fcall | Field | Float | For | GVar | Hash | Heredoc | IVar | Identifier | If | IfModifier | Ternary | Imaginary | Int | Keyword | Label | Lambda | Massign | MethodAddArg | MethodAddBlock | Mlhs | MlhsAddPost | MlhsAddStar | Module | Mrhs | MrhsAddStar | MrhsNewFromArgs | Next | Op | Opassign | Params | Paren | Qsymbols | Qwords | Rassign | Rational | Redo | RegexpLiteral | Rescue | RescueModifier | Retry | Return | Return0 | Sclass | String | StringConcat | StringLiteral | Super | SymbolLiteral | Symbols | TopConstField | TopConstRef | Unary | Undef | Unless | UnlessModifier | Until | UntilModifier | VarAlias | VarField | VarRef | VCall | VoidStmt | While | WhileModifier | Words | XStringLiteral | Yield | Yield0 | Zsuper;
 
   // This is a special scanner event that contains a comment. It can be attached
   // to almost any kind of node, which is why it's pulled out here separately.
-  export type Comment = { type: "@comment", value: string, inline: boolean };
+  type UndecoratedComment = { type: "@comment", value: string, inline: boolean };
+  export type Comment = UndecoratedComment & { leading: boolean };
 
   // These are the scanner events that contain only a single string. They're
   // always leaves in the tree. Ignored ones that can't show up in the tree but
@@ -71,7 +113,7 @@ export namespace Ruby {
 
   // These are various parser events that have to do with string or string-like
   // nodes.
-  type StringContent = StringDVar | StringEmbExpr | TStringContent;
+  export type StringContent = StringDVar | StringEmbExpr | TStringContent;
   export type DynaSymbol = ParserEvent<"dyna_symbol", { body: StringContent[], quote: string }>;
   export type Heredoc = ParserEvent<"heredoc", { beging: HeredocBegin, ending: string, body: StringContent[] }>;
   export type RegexpLiteral = ParserEvent<"regexp_literal", { body: StringContent[], beging: string, ending: string }>;
@@ -149,17 +191,19 @@ export namespace Ruby {
 
   // These are various parser events for pattern matching.
   export type Aryptn = ParserEvent<"aryptn", { body: [null | VarRef, AnyNode[], null | VarField, null | AnyNode[]] }>;
-  export type FndPtn = ParserEvent<"fndptn", { body: [null | AnyNode, AnyNode[], Stmts, null | AnyNode[]] }>;
-  export type Hshptn = ParserEvent<"hshptn", { body: [null | AnyNode, [Label, AnyNode][] | Stmts, null | VarField] }>;
+  export type FndPtn = ParserEvent<"fndptn", { body: [null | AnyNode, VarField, AnyNode[], VarField] }>;
+  export type Hshptn = ParserEvent<"hshptn", { body: [null | AnyNode, [Label, AnyNode][], null | VarField] }>;
   export type Rassign = ParserEvent<"rassign", { body: [AnyNode, AnyNode], keyword: boolean }>;
 
   // These are various parser events for method declarations.
+  type ParenAroundParams = Omit<Paren, "body"> & { body: [Params] };
   export type Blockarg = ParserEvent<"blockarg", { body: [Identifier] }>;
   export type Def = ParserEvent<"def", { body: [Backtick | Const | Identifier | Keyword | Op, Params | Paren, Bodystmt] }>;
   export type Defs = ParserEvent<"defs", { body: [AnyNode, Op | Period, Const | Op | Identifier | Keyword, Params | Paren, Bodystmt] }>;
-  export type Defsl = ParserEvent<"defsl", { body: [Identifier, null | Paren, AnyNode] }>;
+  export type Defsl = ParserEvent<"defsl", { body: [Identifier, null | ParenAroundParams, AnyNode] }>;
   export type KeywordRestParam = ParserEvent<"kwrest_param", { body: [null | Identifier] }>;
-  export type Params = ParserEvent<"params", { body: [Identifier[], null | [Identifier, AnyNode][], null | ArgsForward | RestParam, Identifier[], null | [Label, AnyNode][], null | "nil" | KeywordRestParam, null | Blockarg] }>;
+  export type Lambda = ParserEvent<"lambda", { body: [Params | ParenAroundParams, Bodystmt | Stmts] }>;
+  export type Params = ParserEvent<"params", { body: [Identifier[], null | [Identifier, AnyNode][], null | ArgsForward | ExcessedComma | RestParam, Identifier[], null | [Label, AnyNode][], null | "nil" | KeywordRestParam, null | Blockarg] }>;
   export type RestParam = ParserEvent<"rest_param", { body: [null | Identifier] }>;
 
   // These are various parser events for method calls.
@@ -189,7 +233,6 @@ export namespace Ruby {
   export type Dot2 = ParserEvent<"dot2", { body: [AnyNode, null] | [null, AnyNode] | [AnyNode, AnyNode] }>;
   export type Dot3 = ParserEvent<"dot3", { body: [AnyNode, null] | [null, AnyNode] | [AnyNode, AnyNode] }>;
   export type END = ParserEvent<"END", { body: [Lbrace, Stmts] }>;
-  export type Lambda = ParserEvent<"lambda", { body: [Params | Paren, Bodystmt | Stmts] }>;
   export type Paren = ParserEvent<"paren", { body: [AnyNode] }>;
   export type TopConstRef = ParserEvent<"top_const_ref", { body: [Const] }>;
   export type Unary = ParserEvent<"unary", { body: AnyNode, oper: string, paren: boolean | undefined }>;

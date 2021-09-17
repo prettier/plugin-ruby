@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "./types";
+
 const { concat, group, ifBreak, indent, line } = require("../../prettier");
 const { hasAncestor } = require("../../utils");
 
@@ -5,7 +7,7 @@ const { hasAncestor } = require("../../utils");
 // or if we have them wrapped in parens then they'll be one level deeper. Even
 // though it's possible to omit the parens if you only have one argument, we're
 // going to keep them in no matter what for consistency.
-function printLambdaParams(path, print) {
+function printLambdaParams(path: Plugin.Path<Ruby.Lambda>, print: Plugin.Print) {
   let node = path.getValue().body[0];
 
   // In this case we had something like -> (foo) { bar } which would mean that
@@ -51,7 +53,7 @@ function printLambdaParams(path, print) {
 // for the single-line form. However, if we have an ancestor that is a command
 // or command_call node, then we'll need to use braces either way because of
 // operator precendence.
-function printLambda(path, opts, print) {
+const printLambda: Plugin.Printer<Ruby.Lambda> = (path, opts, print) => {
   const params = printLambdaParams(path, print);
   const inCommand = hasAncestor(path, ["command", "command_call"]);
 
@@ -69,7 +71,7 @@ function printLambda(path, opts, print) {
       concat(["->", params, " { ", path.call(print, "body", 1), " }"])
     )
   );
-}
+};
 
 module.exports = {
   lambda: printLambda
