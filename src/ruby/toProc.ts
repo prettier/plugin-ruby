@@ -1,4 +1,14 @@
-const isCall = (node) => ["::", "."].includes(node) || node.type === "@period";
+import type { Plugin, Ruby } from "./nodes/types";
+
+function isCall(node: Ruby.CallOperator) {
+  // Older versions of Ruby didn't have a @period ripper event, so we need to
+  // explicitly cast to any here.
+  if (node === "::" || (node as any) === ".") {
+    return true;
+  }
+
+  return node.type === "@period";
+}
 
 // If you have a simple block that only calls a method on the single required
 // parameter that is passed to it, then you can replace that block with the
@@ -11,7 +21,7 @@ const isCall = (node) => ["::", "."].includes(node) || node.type === "@period";
 //     [1, 2, 3].map(&:to_s)
 //
 // This works with `do` blocks as well.
-const toProc = (path, node) => {
+function toProc(path: Plugin.Path<Ruby.Args | Ruby.MethodAddBlock>, node: Ruby.BraceBlock | Ruby.DoBlock) {
   const [variables, blockContents] = node.body;
 
   // Ensure that there are variables being passed to this block.
@@ -31,7 +41,7 @@ const toProc = (path, node) => {
     return null;
   }
 
-  let statements;
+  let statements: Ruby.Stmts;
   if (blockContents.type === "bodystmt") {
     // We’re in a `do` block
     const blockStatements = blockContents.body[0];
@@ -60,14 +70,14 @@ const toProc = (path, node) => {
   }
 
   // Ensure the call is a method of the block argument
-  const [varRef, call, method, args] = statement.body;
+  const [varRef, call, method] = statement.body;
 
   if (
     varRef.type !== "var_ref" ||
     varRef.body[0].body !== reqParams[0].body ||
     !isCall(call) ||
-    method.type !== "@ident" ||
-    args
+    method === "call" ||
+    method.type !== "@ident"
   ) {
     return null;
   }
@@ -100,6 +110,6 @@ const toProc = (path, node) => {
   }
 
   return `&:${method.body}`;
-};
+}
 
 module.exports = toProc;

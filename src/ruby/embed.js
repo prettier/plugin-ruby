@@ -73,7 +73,7 @@ function stripCommonLeadingWhitespace(content) {
 
 function embed(path, print, textToDoc, _opts) {
   const node = path.getValue();
-
+  
   // Currently we only support embedded formatting on heredoc nodes
   if (node.type !== "heredoc") {
     return null;

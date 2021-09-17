@@ -19,8 +19,8 @@ export namespace Plugin {
   };
 
   // This is the regular prettier options + the options defined by this plugin.
-  type Options = Prettier.ParserOptions<any> & {
-    printer: any, // TODO: make this the ruby printer
+  export type Options = Prettier.ParserOptions<any> & {
+    printer: Prettier.Printer,
     rubyArrayLiteral: boolean,
     rubyHashLabel: boolean,
     rubyModifier: boolean,
@@ -40,10 +40,16 @@ export namespace Plugin {
 // within the syntax tree generated from the Ruby parser.
 export namespace Ruby {
   // These are utility types used to construct the various node types.
+  type Comments = { comments?: Comment[] };
   type Location = { sl: number, el: number, sc: number, ec: number };
-  type ScannerEvent<T extends string> = { type: `@${T}`, body: string, comments?: Comment[] } & Location;
-  type ParserEvent0<T extends string> = { type: T, body: string, comments?: Comment[] } & Location;
-  type ParserEvent<T, V = {}> = { type: T, comments?: Comment[] } & Location & V;
+
+  type ScannerEvent<T extends string> = { type: `@${T}`, body: string } & Comments & Location;
+  type ParserEvent0<T extends string> = { type: T, body: string } & Comments & Location;
+  type ParserEvent<T, V = {}> = { type: T } & Comments & Location & V;
+
+  // This is a useful node type to have around when you're just looking at
+  // comparing any generic node.
+  export type Node = { type: string } & Comments & Location;
 
   // This is the main expression type that goes in places where the AST will
   // accept just about anything.
@@ -207,7 +213,7 @@ export namespace Ruby {
   export type RestParam = ParserEvent<"rest_param", { body: [null | Identifier] }>;
 
   // These are various parser events for method calls.
-  type CallOperator = Op | Period | "::";
+  export type CallOperator = Op | Period | "::";
   export type ArgParen = ParserEvent<"arg_paren", { body: [Args | ArgsAddBlock | ArgsForward | null] }>;
   export type Args = ParserEvent<"args", { body: AnyNode[] }>;
   export type ArgsAddBlock = ParserEvent<"args_add_block", { body: [Args | ArgsAddStar, false | AnyNode] }>;
