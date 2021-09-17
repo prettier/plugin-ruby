@@ -8,7 +8,7 @@ const {
   line,
   softline
 } = require("../../prettier");
-const { literal } = require("../../utils");
+import { literal } from "../../utils";
 
 function printRestParam(symbol: string): Plugin.Printer<Ruby.KeywordRestParam | Ruby.RestParam> {
   return function printRestParamWithSymbol(path, opts, print) {

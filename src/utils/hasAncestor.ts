@@ -1,4 +1,6 @@
-function hasAncestor(path, types) {
+import type { Plugin } from "../ruby/nodes/types";
+
+function hasAncestor(path: Plugin.Path<{ type: string }>, types: string[]) {
   let parent = 0;
   let parentNode = path.getParentNode();
 
@@ -14,4 +16,4 @@ function hasAncestor(path, types) {
   return false;
 }
 
-module.exports = hasAncestor;
+export default hasAncestor;

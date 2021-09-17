@@ -14,7 +14,7 @@ const {
   trim
 } = require("../../prettier");
 
-const { isEmptyStmts } = require("../../utils");
+import { isEmptyStmts } from "../../utils";
 
 const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (path, opts, print) => {
   const [stmts, rescue, elseClause, ensure] = path.getValue().body;
@@ -80,7 +80,7 @@ const printEndContent: Plugin.Printer<Ruby.EndContent> = (path, opts, print) => 
 };
 
 const printComment: Plugin.Printer<Ruby.Comment> = (path, opts, print) => {
-  return opts.printer.printComment(path);
+  return opts.printer.printComment(path, opts);
 };
 
 const printProgram: Plugin.Printer<Ruby.Program> = (path, opts, print) => {
@@ -101,7 +101,7 @@ const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
     const comments = path.map(
       (commentPath) => {
         commentPath.getValue().printed = true;
-        return opts.printer.printComment(commentPath);
+        return opts.printer.printComment(commentPath, opts);
       },
       "body",
       0,

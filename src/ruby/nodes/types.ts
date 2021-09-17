@@ -20,7 +20,7 @@ export namespace Plugin {
 
   // This is the regular prettier options + the options defined by this plugin.
   export type Options = Prettier.ParserOptions<any> & {
-    printer: Prettier.Printer,
+    printer: Omit<Prettier.Printer, "printComment"> & Required<Pick<Prettier.Printer, "printComment">>,
     rubyArrayLiteral: boolean,
     rubyHashLabel: boolean,
     rubyModifier: boolean,
@@ -57,8 +57,8 @@ export namespace Ruby {
 
   // This is a special scanner event that contains a comment. It can be attached
   // to almost any kind of node, which is why it's pulled out here separately.
-  type UndecoratedComment = { type: "@comment", value: string, inline: boolean };
-  export type Comment = UndecoratedComment & { leading: boolean };
+  type UndecoratedComment = { type: "@comment", value: string, inline: boolean } & Location;
+  export type Comment = UndecoratedComment & { leading: boolean, printed: boolean };
 
   // These are the scanner events that contain only a single string. They're
   // always leaves in the tree. Ignored ones that can't show up in the tree but

@@ -1,20 +1,29 @@
 import type { Plugin, Ruby } from "./types";
 
 const { concat, group, hardline, indent, line } = require("../../prettier");
-const { isEmptyBodyStmt } = require("../../utils");
+import { isEmptyBodyStmt } from "../../utils";
 
 function printMethod(offset: number): Plugin.Printer<Ruby.Def | Ruby.Defs> {
   return function printMethodWithOffset(path, opts, print) {
-    const [_name, params, bodystmt] = path.getValue().body.slice(offset);
+    const node = path.getValue();
     const declaration: Plugin.Doc[] = ["def "];
 
-    // In this case, we're printing a method that's defined as a singleton, so
-    // we need to include the target and the operator
-    if (offset > 0) {
+    let params: Ruby.Params | Ruby.Paren;
+    let bodystmt: Ruby.Bodystmt;
+
+    if (node.type === "def") {
+      params = node.body[1];
+      bodystmt = node.body[2];
+    } else {
+      // In this case, we're printing a method that's defined as a singleton, so
+      // we need to include the target and the operator
       declaration.push(
         path.call(print, "body", 0),
         path.call(print, "body", 1)
       );
+
+      params = node.body[3];
+      bodystmt = node.body[4];
     }
 
     // In case there are no parens but there are arguments

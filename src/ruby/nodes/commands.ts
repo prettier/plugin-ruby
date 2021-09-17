@@ -11,7 +11,7 @@ const {
   line,
   softline
 } = require("../../prettier");
-const { makeCall } = require("../../utils");
+import { makeCall } from "../../utils";
 
 function docLength(doc: any): number {
   if (doc.length) {

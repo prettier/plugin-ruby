@@ -1,7 +1,7 @@
 import type { Plugin, Ruby } from "./types";
 
 const { concat, join } = require("../../prettier");
-const { literal } = require("../../utils");
+import { literal } from "../../utils";
 
 function nodeDive(node: any, steps: PropertyKey[]) {
   let current = node;

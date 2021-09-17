@@ -12,8 +12,7 @@ const {
   softline
 } = require("../../prettier");
 
-const { containsAssignment, isEmptyStmts } = require("../../utils");
-const inlineEnsureParens = require("../../utils/inlineEnsureParens");
+import { containsAssignment, inlineEnsureParens, isEmptyStmts } from "../../utils";
 
 function printLoop(keyword: string, modifier: boolean): Plugin.Printer<Ruby.While | Ruby.WhileModifier | Ruby.Until | Ruby.UntilModifier> {
   return function printLoopWithOptions(path, { rubyModifier }, print) {

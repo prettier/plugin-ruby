@@ -1,3 +1,5 @@
+import type { Plugin, Ruby } from "../ruby/nodes/types";
+
 const needsParens = [
   "args",
   "assign",
@@ -39,12 +41,12 @@ const needsParens = [
 //
 // This approach maintains the nice conciseness of the inline version, while
 // keeping the correct semantic meaning.
-const inlineEnsureParens = (path, parts) => {
+function inlineEnsureParens(path: Plugin.Path<Ruby.AnyNode>, parts: Plugin.Doc) {
   if (needsParens.includes(path.getParentNode().type)) {
-    return ["("].concat(parts, ")");
+    return (["("] as Plugin.Doc[]).concat(parts, ")");
   }
 
   return parts;
-};
+}
 
-module.exports = inlineEnsureParens;
+export default inlineEnsureParens;

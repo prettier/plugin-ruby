@@ -1,7 +1,7 @@
 import type { Plugin, Ruby } from "./types";
 
 const { concat, group, indent, join, softline } = require("../../prettier");
-const { makeCall } = require("../../utils");
+import { makeCall } from "../../utils";
 
 const printConstPath: Plugin.Printer<Ruby.ConstPathField | Ruby.ConstPathRef> = (path, opts, print) => {
   return join("::", path.map(print, "body"));

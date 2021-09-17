@@ -1,4 +1,6 @@
-function isEmptyStmts(node) {
+import type { Ruby } from "../ruby/nodes/types";
+
+function isEmptyStmts(node: Ruby.AnyNode | Ruby.Stmts) {
   return (
     node &&
     node.type === "stmts" &&
@@ -8,4 +10,4 @@ function isEmptyStmts(node) {
   );
 }
 
-module.exports = isEmptyStmts;
+export default isEmptyStmts;

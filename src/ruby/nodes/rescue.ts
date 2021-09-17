@@ -10,7 +10,7 @@ const {
   join,
   line
 } = require("../../prettier");
-const { literal } = require("../../utils");
+import { literal } from "../../utils";
 
 const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
   return concat([

@@ -12,12 +12,19 @@ const {
   softline
 } = require("../../prettier");
 
-const { containsAssignment, isEmptyStmts } = require("../../utils");
-const containsSingleConditional = require("../../utils/containsSingleConditional");
-const inlineEnsureParens = require("../../utils/inlineEnsureParens");
+import { containsAssignment, inlineEnsureParens, isEmptyStmts } from "../../utils";
 
 function isConcat(doc: any): doc is Prettier.doc.builders.Concat {
   return doc.type === "concat";
+}
+
+// If the statements are just a single if/unless, in block or modifier form, or
+// a ternary
+function containsSingleConditional(stmts: Ruby.Stmts) {
+  return (
+    stmts.body.length === 1 &&
+    ["if", "if_mod", "ifop", "unless", "unless_mod"].includes(stmts.body[0].type)
+  );
 }
 
 function printWithAddition(keyword: string, path: Plugin.Path<Ruby.If | Ruby.Unless>, print: Plugin.Print, breaking: boolean) {

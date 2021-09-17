@@ -9,7 +9,7 @@ const {
   join,
   softline
 } = require("../../prettier");
-const { literal } = require("../../utils");
+import { literal } from "../../utils";
 
 // You can't skip the parentheses if you have comments or certain operators with
 // lower precedence than the return keyword.

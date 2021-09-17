@@ -10,11 +10,11 @@ const {
   line
 } = require("../../prettier");
 
-const {
+import {
   getTrailingComma,
   printEmptyCollection,
   skipAssignIndent
-} = require("../../utils");
+} from "../../utils";
 
 type KeyPrinter = (path: Plugin.Path<Ruby.Label | Ruby.SymbolLiteral | Ruby.DynaSymbol>, print: Plugin.Print) => Doc;
 type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & { keyPrinter: KeyPrinter };

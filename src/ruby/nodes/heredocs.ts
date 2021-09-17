@@ -1,7 +1,7 @@
 import type { Plugin, Ruby } from "./types";
 
 const { concat, group, lineSuffix, join } = require("../../prettier");
-const { literallineWithoutBreakParent } = require("../../utils");
+import { literallineWithoutBreakParent } from "../../utils";
 
 const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (path, opts, print) => {
   const { body, ending } = path.getValue();

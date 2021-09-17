@@ -9,7 +9,7 @@ const {
   line,
   softline
 } = require("../../prettier");
-const { getTrailingComma, printEmptyCollection } = require("../../utils");
+import { getTrailingComma, printEmptyCollection } from "../../utils";
 
 // Checks that every argument within this args node is a string_literal node
 // that has no spaces or interpolations. This means we're dealing with an array

@@ -1,6 +1,8 @@
 import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "./types";
 
+import { getTrailingComma } from "../../utils";
+
 const {
   concat,
   group,
@@ -10,7 +12,7 @@ const {
   line,
   softline
 } = require("../../prettier");
-const { getTrailingComma } = require("../../utils");
+
 const toProc = require("../toProc");
 
 const noTrailingComma = ["command", "command_call"];

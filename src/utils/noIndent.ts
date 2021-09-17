@@ -7,4 +7,4 @@ const noIndent = [
   "xstring_literal"
 ];
 
-module.exports = noIndent;
+export default noIndent;

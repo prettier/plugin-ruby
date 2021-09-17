@@ -1,7 +1,7 @@
 import type { Plugin, Ruby } from "./types";
 
 const { concat, group, indent, line, softline } = require("../../prettier");
-const { noIndent } = require("../../utils");
+import { noIndent } from "../../utils";
 
 const printBinary: Plugin.Printer<Ruby.Binary> = (path, opts, print) => {
   const [_leftNode, operator, rightNode] = path.getValue().body;

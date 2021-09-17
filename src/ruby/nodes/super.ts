@@ -1,7 +1,7 @@
 import type { Plugin, Ruby } from "./types";
 
 const { align, concat, group, join, line } = require("../../prettier");
-const { literal } = require("../../utils");
+import { literal } from "../../utils";
 
 const printSuper: Plugin.Printer<Ruby.Super> = (path, opts, print) => {
   const args = path.getValue().body[0];

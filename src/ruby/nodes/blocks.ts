@@ -10,7 +10,7 @@ const {
   removeLines,
   softline
 } = require("../../prettier");
-const { hasAncestor } = require("../../utils");
+import { hasAncestor } from "../../utils";
 
 const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (path, opts, print) => {
   const parts = ["|", removeLines(path.call(print, "body", 0))];

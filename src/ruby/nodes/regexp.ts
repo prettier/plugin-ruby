@@ -1,7 +1,7 @@
 import type { Plugin, Ruby } from "./types";
 
 const { concat } = require("../../prettier");
-const { hasAncestor } = require("../../utils");
+import { hasAncestor } from "../../utils";
 
 function hasContent(node: Ruby.RegexpLiteral, pattern: RegExp) {
   return node.body.some(

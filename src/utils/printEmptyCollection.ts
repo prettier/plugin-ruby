@@ -1,6 +1,8 @@
+import type { Plugin, Ruby } from "../ruby/nodes/types";
+
 const { concat, group, hardline, indent, join, line } = require("../prettier");
 
-function containedWithin(node) {
+function containedWithin(node: Ruby.Array | Ruby.Hash): (comment: Ruby.Comment) => boolean {
   return function containedWithinNode(comment) {
     return comment.sc >= node.sc && comment.ec <= node.ec;
   };
@@ -11,7 +13,7 @@ function containedWithin(node) {
 // this by having a child node inside the array that gets the comments attached
 // to it, but that requires modifying the parser. Instead, we can just manually
 // print out the non-leading comments here.
-function printEmptyCollection(path, opts, startToken, endToken) {
+function printEmptyCollection(path: Plugin.Path<Ruby.Array | Ruby.Hash>, opts: Plugin.Options, startToken: string, endToken: string) {
   const node = path.getValue();
   const containedWithinNode = containedWithin(node);
 
@@ -22,15 +24,15 @@ function printEmptyCollection(path, opts, startToken, endToken) {
     return `${startToken}${endToken}`;
   }
 
-  const comments = [];
+  const comments: Plugin.Doc[] = [];
 
   // For each comment, go through its path and print it out manually.
-  const printComment = (commentPath) => {
+  const printComment = (commentPath: Plugin.Path<Ruby.Comment>) => {
     const comment = commentPath.getValue();
 
     if (containedWithinNode(comment)) {
       comment.printed = true;
-      comments.push(opts.printer.printComment(commentPath));
+      comments.push(opts.printer.printComment(commentPath, opts));
     }
   };
 
@@ -46,4 +48,4 @@ function printEmptyCollection(path, opts, startToken, endToken) {
   );
 }
 
-module.exports = printEmptyCollection;
+export default printEmptyCollection;

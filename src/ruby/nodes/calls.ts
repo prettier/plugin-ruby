@@ -9,7 +9,7 @@ const {
   join,
   softline
 } = require("../../prettier");
-const { makeCall, noIndent } = require("../../utils");
+import { makeCall, noIndent } from "../../utils";
 
 const toProc = require("../toProc");
 
