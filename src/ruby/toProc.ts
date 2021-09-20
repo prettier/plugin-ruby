@@ -1,4 +1,4 @@
-import type { Plugin, Ruby } from "./nodes/types";
+import type { Plugin, Ruby } from "./types";
 
 function isCall(node: Ruby.CallOperator) {
   // Older versions of Ruby didn't have a @period ripper event, so we need to

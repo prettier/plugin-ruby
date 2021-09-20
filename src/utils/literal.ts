@@ -1,4 +1,4 @@
-import { Plugin } from "../ruby/nodes/types";
+import { Plugin } from "../ruby/types";
 
 function literal(value: string): Plugin.Printer<{}> {
   return function printLiteral() {

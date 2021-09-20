@@ -1,4 +1,4 @@
-import type { Ruby } from "../ruby/nodes/types";
+import type { Ruby } from "../ruby/types";
 
 // If the node is a type of assignment or if the node is a paren and nested
 // inside that paren is a node that is a type of assignment.

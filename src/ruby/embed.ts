@@ -1,4 +1,4 @@
-import type { Plugin } from "./nodes/types";
+import type { Plugin } from "./types";
 
 const {
   concat,

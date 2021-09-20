@@ -1,4 +1,4 @@
-import type { Plugin, Ruby } from "../ruby/nodes/types";
+import type { Plugin, Ruby } from "../ruby/types";
 
 const needsParens = [
   "args",

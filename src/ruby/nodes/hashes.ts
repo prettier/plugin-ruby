@@ -1,5 +1,5 @@
 import { Doc } from "prettier";
-import type { Plugin, Ruby } from "./types";
+import type { Plugin, Ruby } from "../types";
 
 const {
   concat,

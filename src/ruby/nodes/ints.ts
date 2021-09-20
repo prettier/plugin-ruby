@@ -1,4 +1,4 @@
-import type { Plugin, Ruby } from "./types";
+import type { Plugin, Ruby } from "../types";
 
 // An @int node is any literal integer in Ruby. They can come in a number of
 // bases, and look like the following:

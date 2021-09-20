@@ -1,4 +1,4 @@
-import { Plugin } from "../ruby/nodes/types";
+import { Plugin } from "../ruby/types";
 
 const literallineWithoutBreakParent = {
   type: "line",

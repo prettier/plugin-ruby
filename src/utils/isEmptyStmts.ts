@@ -1,4 +1,4 @@
-import type { Ruby } from "../ruby/nodes/types";
+import type { Ruby } from "../ruby/types";
 
 function isEmptyStmts(node: Ruby.AnyNode | Ruby.Stmts) {
   return (

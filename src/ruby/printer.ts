@@ -1,4 +1,4 @@
-import type { Plugin, Ruby } from "./nodes/types";
+import type { Plugin, Ruby } from "./types";
 
 const { concat, trim } = require("../prettier");
 

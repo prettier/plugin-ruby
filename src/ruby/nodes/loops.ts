@@ -1,4 +1,4 @@
-import type { Plugin, Ruby } from "./types";
+import type { Plugin, Ruby } from "../types";
 
 const {
   align,
