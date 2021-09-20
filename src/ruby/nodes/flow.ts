@@ -1,7 +1,8 @@
 import type { Plugin, Ruby } from "../../types";
-
-const { concat, join } = require("../../prettier");
+import prettier from "../../prettier";
 import { literal } from "../../utils";
+
+const { concat, join } = prettier;
 
 function nodeDive(node: any, steps: PropertyKey[]) {
   let current = node;
@@ -34,11 +35,11 @@ function maybeHandleParens(path: Plugin.Path<Ruby.Break | Ruby.Next>, print: Plu
 
   if (stmts.length === 1 && !unskippableParens.includes(stmts[0].type)) {
     args = args.concat(steps).concat("body", 0) as CallArgs;
-    return concat([`${keyword} `, path.call.apply(path, args)]);
+    return concat([`${keyword} `, path.call.apply(path, args) as Plugin.Doc]);
   }
 
   args = args.concat(steps) as CallArgs;
-  return concat([keyword, path.call.apply(path, args)]);
+  return concat([keyword, path.call.apply(path, args) as Plugin.Doc]);
 }
 
 export const printBreak: Plugin.Printer<Ruby.Break> = (path, opts, print) => {

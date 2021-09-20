@@ -1,4 +1,7 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
+import { makeCall, noIndent } from "../../utils";
+import toProc from "../toProc";
 
 const {
   concat,
@@ -8,10 +11,7 @@ const {
   indent,
   join,
   softline
-} = require("../../prettier");
-
-import { makeCall, noIndent } from "../../utils";
-import toProc from "../toProc";
+} = prettier;
 
 const chained = ["call", "method_add_arg", "method_add_block"];
 
@@ -168,7 +168,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (path, opt
 
   // If we're at the top of a chain, then we're going to print out a nice
   // multi-line layout if this doesn't break into multiple lines.
-  if (!chained.includes(parentNode.type) && (node.chain || 0) >= threshold) {
+  if (!chained.includes(parentNode.type) && (node.chain || 0) >= threshold && node.breakDoc) {
     // This is pretty specialized behavior. Basically if we're at the top of a
     // chain but we've only had method calls without arguments and now we have
     // arguments, then we're effectively trying to call a method with arguments
@@ -185,7 +185,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (path, opt
     }
 
     return ifBreak(
-      group(indent(concat(node.breakDoc!.concat(argsDoc)))),
+      group(indent(concat(node.breakDoc.concat(argsDoc)))),
       concat([methodDoc, argsDoc])
     );
   }

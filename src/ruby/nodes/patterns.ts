@@ -1,4 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
 
 const {
   align,
@@ -8,7 +9,7 @@ const {
   indent,
   join,
   line
-} = require("../../prettier");
+} = prettier;
 
 const patterns = ["aryptn", "binary", "fndptn", "hshptn", "rassign"];
 
@@ -28,7 +29,7 @@ const printPatternArg: Plugin.Printer<Ruby.AnyNode> = (path, opts, print) => {
 
 export const printAryPtn: Plugin.Printer<Ruby.Aryptn> = (path, opts, print) => {
   const [constant, preargs, splatarg, postargs] = path.getValue().body;
-  let args: Plugin.Doc[] = [];
+  let args: Plugin.Doc | Plugin.Doc[] = [];
 
   if (preargs) {
     args = args.concat(
@@ -59,23 +60,22 @@ export const printAryPtn: Plugin.Printer<Ruby.Aryptn> = (path, opts, print) => {
 
 export const printFndPtn: Plugin.Printer<Ruby.FndPtn> = (path, opts, print) => {
   const [constant] = path.getValue().body;
-
-  let args = [concat(["*", path.call(print, "body", 1)])]
+  const args = ([concat(["*", path.call(print, "body", 1)])] as Plugin.Doc[])
     .concat(path.map(print, "body", 2))
     .concat(concat(["*", path.call(print, "body", 3)]));
 
-  args = concat(["[", group(join(concat([",", line]), args)), "]"]);
+  const docs = concat(["[", group(join(concat([",", line]), args)), "]"]);
 
   if (constant) {
-    return concat([path.call(print, "body", 0), args]);
+    return concat([path.call(print, "body", 0), docs]);
   }
 
-  return args;
+  return docs;
 };
 
 export const printHshPtn: Plugin.Printer<Ruby.Hshptn> = (path, opts, print) => {
   const [constant, keyValuePairs, keyValueRest] = path.getValue().body;
-  let args: Plugin.Doc[] = [];
+  let args: Plugin.Doc | Plugin.Doc[] = [];
 
   if (keyValuePairs.length > 0) {
     const printPair = (pairPath: Plugin.Path<[Ruby.Label, Ruby.AnyNode]>) => {
@@ -117,7 +117,7 @@ export const printHshPtn: Plugin.Printer<Ruby.Hshptn> = (path, opts, print) => {
 };
 
 export const printIn: Plugin.Printer<Ruby.In> = (path, opts, print) => {
-  const parts = [
+  const parts: Plugin.Doc[] = [
     "in ",
     align(
       "in ".length,

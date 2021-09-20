@@ -1,5 +1,9 @@
 import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
+
+import { getTrailingComma } from "../../utils";
+import toProc from "../toProc";
 
 const {
   concat,
@@ -9,10 +13,7 @@ const {
   join,
   line,
   softline
-} = require("../../prettier");
-
-import { getTrailingComma } from "../../utils";
-import toProc from "../toProc";
+} = prettier;
 
 const noTrailingComma = ["command", "command_call"];
 
@@ -117,7 +118,7 @@ export const printArgsAddBlock: Plugin.Printer<Ruby.ArgsAddBlock> = (path, opts,
   const parts = path.call(print, "body", 0) as Plugin.Doc[];
 
   if (blockNode) {
-    let blockDoc = path.call(print, "body", 1) as Plugin.Doc[];
+    let blockDoc = path.call(print, "body", 1) as any;
 
     if (!(blockNode.comments || []).some(({ leading }) => leading)) {
       // If we don't have any leading comments, we can just prepend the

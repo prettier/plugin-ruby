@@ -1,4 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
 
 const {
   concat,
@@ -7,7 +8,7 @@ const {
   join,
   line,
   softline
-} = require("../../prettier");
+} = prettier;
 
 // `aref` nodes are when you're pulling a value out of a collection at a
 // specific index. Put another way, it's any time you're calling the method

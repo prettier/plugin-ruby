@@ -1,6 +1,7 @@
 import type { Plugin, Ruby } from "../types";
+import prettier from "../prettier";
 
-const { concat, group, hardline, indent, join, line } = require("../prettier");
+const { concat, group, hardline, indent, join, line } = prettier;
 
 function containedWithin(node: Ruby.Array | Ruby.Hash): (comment: Ruby.Comment) => boolean {
   return function containedWithinNode(comment) {

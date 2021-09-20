@@ -1,4 +1,6 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
+import { getTrailingComma, printEmptyCollection } from "../../utils";
 
 const {
   concat,
@@ -8,8 +10,7 @@ const {
   join,
   line,
   softline
-} = require("../../prettier");
-import { getTrailingComma, printEmptyCollection } from "../../utils";
+} = prettier;
 
 // Checks that every argument within this args node is a string_literal node
 // that has no spaces or interpolations. This means we're dealing with an array

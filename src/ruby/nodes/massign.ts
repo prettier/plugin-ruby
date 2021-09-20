@@ -1,4 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
 
 const {
   concat,
@@ -7,7 +8,7 @@ const {
   join,
   line,
   softline
-} = require("../../prettier");
+} = prettier;
 
 export const printMAssign: Plugin.Printer<Ruby.Massign> = (path, opts, print) => {
   let right = path.call(print, "body", 1);
@@ -20,7 +21,7 @@ export const printMAssign: Plugin.Printer<Ruby.Massign> = (path, opts, print) =>
     right = group(join(concat([",", line]), right));
   }
 
-  const parts = [join(concat([",", line]), path.call(print, "body", 0))];
+  const parts: Plugin.Doc[] = [join(concat([",", line]), path.call(print, "body", 0))];
   if ((path.getValue().body[0] as any).comma) {
     parts.push(",");
   }
@@ -56,7 +57,7 @@ export const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (path, opts, print
     return path.call(print, "body", 0);
   }
 
-  const parts = [
+  const parts: Plugin.Doc[] = [
     softline,
     join(concat([",", line]), path.call(print, "body", 0))
   ];

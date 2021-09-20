@@ -1,7 +1,8 @@
 import type { Plugin, Ruby } from "../../types";
-
-const { concat, group, ifBreak, indent, line } = require("../../prettier");
+import prettier from "../../prettier";
 import { hasAncestor } from "../../utils";
+
+const { concat, group, ifBreak, indent, line } = prettier;
 
 // We can have our params coming in as the first child of the main lambda node,
 // or if we have them wrapped in parens then they'll be one level deeper. Even

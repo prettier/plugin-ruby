@@ -1,7 +1,8 @@
 import type { Plugin, Ruby } from "../../types";
-
-const { concat, group, hardline, indent } = require("../../prettier");
+import prettier from "../../prettier";
 import { isEmptyBodyStmt } from "../../utils";
+
+const { concat, group, hardline, indent } = prettier;
 
 export const printClass: Plugin.Printer<Ruby.Class> = (path, opts, print) => {
   const [_constant, superclass, bodystmt] = path.getValue().body;

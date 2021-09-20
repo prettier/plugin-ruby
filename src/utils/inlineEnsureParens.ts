@@ -41,7 +41,7 @@ const needsParens = [
 //
 // This approach maintains the nice conciseness of the inline version, while
 // keeping the correct semantic meaning.
-function inlineEnsureParens(path: Plugin.Path<Ruby.AnyNode>, parts: Plugin.Doc) {
+function inlineEnsureParens(path: Plugin.Path<Ruby.AnyNode>, parts: Plugin.Doc[]) {
   if (needsParens.includes(path.getParentNode().type)) {
     return (["("] as Plugin.Doc[]).concat(parts, ")");
   }

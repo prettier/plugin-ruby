@@ -1,4 +1,6 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
+import { isEmptyStmts } from "../../utils";
 
 const {
   breakParent,
@@ -12,9 +14,7 @@ const {
   literalline,
   softline,
   trim
-} = require("../../prettier");
-
-import { isEmptyStmts } from "../../utils";
+} = prettier;
 
 export const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (path, opts, print) => {
   const [stmts, rescue, elseClause, ensure] = path.getValue().body;

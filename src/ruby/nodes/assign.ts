@@ -1,7 +1,8 @@
 import type { Plugin, Ruby } from "../../types";
-
-const { concat, group, indent, join, line } = require("../../prettier");
+import prettier from "../../prettier";
 import { skipAssignIndent } from "../../utils";
+
+const { concat, group, indent, join, line } = prettier;
 
 export const printAssign: Plugin.Printer<Ruby.Assign> = (path, opts, print) => {
   const [_targetNode, valueNode] = path.getValue().body;

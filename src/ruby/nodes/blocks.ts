@@ -1,4 +1,6 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
+import { hasAncestor } from "../../utils";
 
 const {
   breakParent,
@@ -9,8 +11,7 @@ const {
   join,
   removeLines,
   softline
-} = require("../../prettier");
-import { hasAncestor } from "../../utils";
+} = prettier;
 
 export const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (path, opts, print) => {
   const parts = ["|", removeLines(path.call(print, "body", 0))];
@@ -30,7 +31,7 @@ function printBlock(braces: boolean): Plugin.Printer<Ruby.BraceBlock | Ruby.DoBl
     const stmts =
       statements.type === "stmts" ? statements.body : statements.body[0].body;
 
-    let doBlockBody = "";
+    let doBlockBody: Plugin.Doc = "";
     if (
       stmts.length !== 1 ||
       stmts[0].type !== "void_stmt" ||

@@ -1,4 +1,6 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
+import { literal } from "../../utils";
 
 const {
   concat,
@@ -8,8 +10,7 @@ const {
   line,
   join,
   softline
-} = require("../../prettier");
-import { literal } from "../../utils";
+} = prettier;
 
 // You can't skip the parentheses if you have comments or certain operators with
 // lower precedence than the return keyword.

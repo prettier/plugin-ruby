@@ -1,4 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
 
 const {
   addTrailingComment,
@@ -7,7 +8,7 @@ const {
   group,
   hardline,
   line
-} = require("../../prettier");
+} = prettier;
 
 // The `alias` keyword is used to make a method respond to another name as well
 // as the current one. For example, to get the method `foo` to also respond to

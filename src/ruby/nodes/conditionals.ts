@@ -1,5 +1,7 @@
 import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
+import { containsAssignment, inlineEnsureParens, isEmptyStmts } from "../../utils";
 
 const {
   align,
@@ -10,9 +12,7 @@ const {
   ifBreak,
   indent,
   softline
-} = require("../../prettier");
-
-import { containsAssignment, inlineEnsureParens, isEmptyStmts } from "../../utils";
+} = prettier;
 
 function isConcat(doc: any): doc is Prettier.doc.builders.Concat {
   return doc.type === "concat";

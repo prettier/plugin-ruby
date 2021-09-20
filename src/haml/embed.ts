@@ -1,4 +1,5 @@
 import type { Plugin, HAML } from "../types";
+import prettier from "../prettier";
 
 const {
   concat,
@@ -8,7 +9,7 @@ const {
   markAsRoot,
   mapDoc,
   stripTrailingHardline
-} = require("../prettier");
+} = prettier;
 
 // This function is in here because it handles embedded parser values. I don't
 // have a test that exercises it because I'm not sure for which parser it is

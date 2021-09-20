@@ -1,4 +1,10 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
+import {
+  getTrailingComma,
+  printEmptyCollection,
+  skipAssignIndent
+} from "../../utils";
 
 const {
   concat,
@@ -7,13 +13,7 @@ const {
   indent,
   join,
   line
-} = require("../../prettier");
-
-import {
-  getTrailingComma,
-  printEmptyCollection,
-  skipAssignIndent
-} from "../../utils";
+} = prettier;
 
 type KeyPrinter = (path: Plugin.Path<Ruby.Label | Ruby.SymbolLiteral | Ruby.DynaSymbol>, print: Plugin.Print) => Plugin.Doc;
 type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & { keyPrinter: KeyPrinter };

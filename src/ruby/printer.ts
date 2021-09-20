@@ -1,9 +1,10 @@
 import type { Plugin, Ruby } from "../types";
-
-const { concat, trim } = require("../prettier");
+import prettier from "../prettier";
 
 import embed from "./embed";
 import nodes from "./nodes";
+
+const { concat, trim } = prettier;
 
 const noComments = [
   "args",

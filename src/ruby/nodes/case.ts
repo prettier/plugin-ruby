@@ -1,5 +1,6 @@
 import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
 
 const {
   align,
@@ -9,7 +10,7 @@ const {
   hardline,
   indent,
   line
-} = require("../../prettier");
+} = prettier;
 
 export const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
   const statement: Plugin.Doc[] = ["case"];
@@ -45,7 +46,7 @@ export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
   );
 
   const stmts = path.call(print, "body", 1) as Prettier.doc.builders.Concat;
-  const parts = [concat(["when ", align("when ".length, preds)])];
+  const parts: Plugin.Doc[] = [concat(["when ", align("when ".length, preds)])];
 
   // It's possible in a when to just have empty void statements, in which case
   // we would skip adding the body.

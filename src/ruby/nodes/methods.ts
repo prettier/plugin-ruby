@@ -1,7 +1,8 @@
 import type { Plugin, Ruby } from "../../types";
-
-const { concat, group, hardline, indent, line } = require("../../prettier");
+import prettier from "../../prettier";
 import { isEmptyBodyStmt } from "../../utils";
+
+const { concat, group, hardline, indent, line } = prettier;
 
 function printMethod(offset: number): Plugin.Printer<Ruby.Def | Ruby.Defs> {
   return function printMethodWithOffset(path, opts, print) {

@@ -1,4 +1,6 @@
 import type { Plugin, Ruby } from "../types";
+import prettier from "../prettier";
+import { literallineWithoutBreakParent } from "../utils";
 
 const {
   concat,
@@ -8,9 +10,7 @@ const {
   mapDoc,
   markAsRoot,
   stripTrailingHardline
-} = require("../prettier");
-
-import { literallineWithoutBreakParent } from "../utils";
+} = prettier;
 
 const parsers: Record<string, string> = {
   css: "css",

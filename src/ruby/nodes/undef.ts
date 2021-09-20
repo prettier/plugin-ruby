@@ -1,4 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
 
 const {
   addTrailingComment,
@@ -7,7 +8,7 @@ const {
   group,
   join,
   line
-} = require("../../prettier");
+} = prettier;
 
 const printUndefSymbol: Plugin.Printer<Ruby.DynaSymbol | Ruby.SymbolLiteral> = (path, opts, print) => {
   const node = path.getValue();

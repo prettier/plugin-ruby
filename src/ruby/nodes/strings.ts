@@ -1,4 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
 
 const {
   concat,
@@ -9,7 +10,7 @@ const {
   removeLines,
   softline,
   join
-} = require("../../prettier");
+} = prettier;
 
 // If there is some part of this string that matches an escape sequence or that
 // contains the interpolation pattern ("#{"), then we are locked into whichever
@@ -250,7 +251,7 @@ export const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (path, { r
     return join(literalline, normalizeQuotes(part.body, quote).split("\n"));
   });
 
-  return concat([quote].concat(parts).concat(getClosingQuote(quote)));
+  return concat(([quote] as Plugin.Doc[]).concat(parts).concat(getClosingQuote(quote)));
 };
 
 // Prints out a symbol literal. Its child will always be the ident that

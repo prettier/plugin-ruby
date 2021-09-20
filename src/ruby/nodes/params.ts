@@ -1,4 +1,6 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
+import { literal } from "../../utils";
 
 const {
   concat,
@@ -7,8 +9,7 @@ const {
   indent,
   line,
   softline
-} = require("../../prettier");
-import { literal } from "../../utils";
+} = prettier;
 
 function printRestParamSymbol(symbol: string): Plugin.Printer<Ruby.KeywordRestParam | Ruby.RestParam> {
   return function printRestParamWithSymbol(path, opts, print) {
@@ -74,7 +75,7 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
     parts.push(path.call(print, "body", 6));
   }
 
-  const contents = [join(concat([",", line]), parts)];
+  const contents: Plugin.Doc[] = [join(concat([",", line]), parts)];
 
   // You can put an extra comma at the end of block args between pipes to
   // change what it does. Below is the difference:
@@ -93,7 +94,7 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   // that we could handle them here and get nicer formatting.
   if (["lambda", "paren"].includes(path.getParentNode().type)) {
     return group(
-      concat(["(", indent(concat([softline].concat(contents))), softline, ")"])
+      concat(["(", indent(concat(([softline] as Plugin.Doc[]).concat(contents))), softline, ")"])
     );
   }
 

@@ -1,4 +1,6 @@
 import type { Plugin, HAML } from "../types";
+import prettier from "../prettier";
+import embed from "./embed";
 
 const {
   align,
@@ -11,8 +13,7 @@ const {
   join,
   line,
   softline
-} = require("../prettier");
-import embed from "./embed";
+} = prettier;
 
 const docTypes = {
   basic: "Basic",
@@ -182,7 +183,7 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
       // https://haml.info/docs/yardoc/file.REFERENCE.html#haml-comments--
       case "haml_comment": {
         const { value } = node;
-        const parts = ["-#"];
+        const parts: Plugin.Doc[] = ["-#"];
 
         if (value.text) {
           if (opts.originalText.split("\n")[node.line - 1].trim() === "-#") {
@@ -227,7 +228,7 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
       }
       // https://haml.info/docs/yardoc/file.REFERENCE.html#running-ruby--
       case "silent_script": {
-        const parts = [`- ${node.value.text.trim()}`];
+        const parts: Plugin.Doc[] = [`- ${node.value.text.trim()}`];
 
         if (node.children.length > 0) {
           parts.push(

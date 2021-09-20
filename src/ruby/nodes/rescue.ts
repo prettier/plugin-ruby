@@ -1,5 +1,7 @@
 import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
+import { literal } from "../../utils";
 
 const {
   align,
@@ -9,8 +11,7 @@ const {
   indent,
   join,
   line
-} = require("../../prettier");
-import { literal } from "../../utils";
+} = prettier;
 
 export const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
   return concat([
@@ -29,7 +30,7 @@ export const printEnsure: Plugin.Printer<Ruby.Ensure> = (path, opts, print) => {
 };
 
 export const printRescue: Plugin.Printer<Ruby.Rescue> = (path, opts, print) => {
-  const parts = ["rescue"];
+  const parts: Plugin.Doc[] = ["rescue"];
 
   if (path.getValue().body[0]) {
     parts.push(align("rescue ".length, path.call(print, "body", 0)));

@@ -1,15 +1,8 @@
+import type * as Prettier from "prettier";
 import type { Plugin, RBS } from "../types";
+import prettier from "../prettier";
 
-const {
-  concat,
-  group,
-  hardline,
-  indent,
-  makeString,
-  join,
-  line,
-  softline
-} = require("../prettier");
+const { concat, group, hardline, indent, makeString, join, line, softline } = prettier;
 
 // For some lists of entities in the AST, the parser returns them as an unsorted
 // object (presumably because Ruby hashes have implicit ordering). We do not
@@ -65,7 +58,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         // Prints out a class declarations, which looks like:
         // class Foo end
         case "class": {
-          const parts = ["class ", printNameAndTypeParams(node)];
+          const parts: Plugin.Doc[] = ["class ", printNameAndTypeParams(node)];
 
           if (node.super_class) {
             parts.push(" < ", path.call(printNameAndArgs, "super_class"));
@@ -100,7 +93,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         // Prints out a module declaration, which looks like:
         // module Foo end
         case "module": {
-          const parts = ["module ", printNameAndTypeParams(node)];
+          const parts: Plugin.Doc[] = ["module ", printNameAndTypeParams(node)];
 
           if (node.self_types.length > 0) {
             parts.push(" : ", join(", ", path.map(printNameAndArgs, "self_types")));
@@ -247,7 +240,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
       // there is an escape sequence in the source string.
       const quote = node.literal.includes("\\") ? originalQuote : preferredQuote;
 
-      return makeString(value.slice(1, -1), quote, false);
+      return makeString(value.slice(1, -1), quote as Prettier.util.Quote, false);
     }
 
     // Certain nodes are names with optional arguments attached, as in Array[A].
@@ -553,7 +546,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
     // Prints out a method definition, which looks like:
     // def t: (T t) -> void
     function printMethodDefinition(node: RBS.MethodDefinition) {
-      let typeDocs = path.map(printMethodSignature, "types");
+      let typeDocs: Plugin.Doc = path.map(printMethodSignature, "types");
 
       if (node.overload) {
         typeDocs.push("...");

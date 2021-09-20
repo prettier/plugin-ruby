@@ -1,5 +1,7 @@
 import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
+import { makeCall } from "../../utils";
 
 const {
   align,
@@ -10,8 +12,7 @@ const {
   join,
   line,
   softline
-} = require("../../prettier");
-import { makeCall } from "../../utils";
+} = prettier;
 
 function docLength(doc: any): number {
   if (doc.length) {

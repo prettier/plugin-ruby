@@ -1,6 +1,7 @@
 import type { Plugin, Ruby } from "../../types";
+import prettier from "../../prettier";
 
-const { concat, group, indent, line } = require("../../prettier");
+const { concat, group, indent, line } = prettier;
 
 // The `BEGIN` and `END` keywords are used to hook into the Ruby process. Any
 // `BEGIN` blocks are executed right when the process starts up, and the `END`
