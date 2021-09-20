@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "allowJs": true,
+    "allowJs": false,
     "esModuleInterop": true,
     "module": "commonjs",
     "moduleResolution": "node",
@@ -8,7 +8,5 @@
     "sourceMap": false,
     "strict": true,
     "target": "es2019"
-  },
-  "include": ["**/src/*"],
-  "exclude": ["**/test/*"]
+  }
 }

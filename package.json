@@ -55,13 +55,13 @@
     }
   },
   "jest": {
-    "globalSetup": "./test/js/globalSetup.js",
-    "globalTeardown": "./test/js/globalTeardown.js",
+    "globalSetup": "./test/js/globalSetup.ts",
+    "globalTeardown": "./test/js/globalTeardown.ts",
     "preset": "ts-jest",
     "setupFilesAfterEnv": [
-      "./test/js/setupTests.js"
+      "./test/js/setupTests.ts"
     ],
-    "testRegex": ".test.js$"
+    "testRegex": ".test.ts$"
   },
   "husky": {
     "hooks": {

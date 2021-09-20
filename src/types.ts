@@ -16,7 +16,7 @@ export namespace Plugin {
     rubyToProc: boolean
   };
 
-  export type Parser<T> = Omit<Prettier.Parser<T>, "parse"> & {
+  export type Parser<T> = Omit<Prettier.Parser<T>, "hasPragma" | "parse"> & Required<Pick<Prettier.Parser<T>, "hasPragma">> & {
     parse: (text: string, parsers: { [name: string]: Prettier.Parser<any> }, options: Options) => any
   };
 
