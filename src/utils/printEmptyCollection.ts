@@ -3,7 +3,7 @@ import prettier from "../prettier";
 
 const { concat, group, hardline, indent, join, line } = prettier;
 
-function containedWithin(node: Ruby.Array | Ruby.Hash): (comment: Ruby.Comment) => boolean {
+function containedWithin(node: Ruby.Array | Ruby.Hash): (_comment: Ruby.Comment) => boolean {
   return function containedWithinNode(comment) {
     return comment.sc >= node.sc && comment.ec <= node.ec;
   };

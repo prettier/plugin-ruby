@@ -96,7 +96,7 @@ export const printTernary: Plugin.Printer<Ruby.Ternary> = (path, _opts, print) =
 // Prints an `if_mod` or `unless_mod` node. Because it was previously in the
 // modifier form, we're guaranteed to not have an additional node, so we can
 // just work with the predicate and the body.
-function printSingle(keyword: string, modifier: boolean = false): Plugin.Printer<Ruby.If | Ruby.IfModifier | Ruby.Unless | Ruby.UnlessModifier> {
+function printSingle(keyword: string, modifier = false): Plugin.Printer<Ruby.If | Ruby.IfModifier | Ruby.Unless | Ruby.UnlessModifier> {
   return function printSingleWithKeyword(path, { rubyModifier }, print) {
     const [_predicateNode, statementsNode] = path.getValue().body;
     const predicateDoc = path.call(print, "body", 0);

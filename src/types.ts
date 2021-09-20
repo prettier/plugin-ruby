@@ -17,32 +17,32 @@ export namespace Plugin {
   };
 
   export type Parser<T> = Omit<Prettier.Parser<T>, "hasPragma" | "parse"> & Required<Pick<Prettier.Parser<T>, "hasPragma">> & {
-    parse: (text: string, parsers: { [name: string]: Prettier.Parser<any> }, options: Options) => any
+    parse: (_text: string, _parsers: { [name: string]: Prettier.Parser<any> }, _options: Options) => any
   };
 
   // We're overwriting call and map here because if you restrict the AST for the
   // main path then presumably you're printing a lower node in the tree that
   // won't match the current AST type.
   export type Path<T> = Omit<Prettier.AstPath<T>, "call" | "each" | "getParentNode" | "map"> & {
-    call: <U>(callback: (path: Path<any>) => U, ...names: PropertyKey[]) => U,
-    each: (callback: (path: Path<any>, index: number, value: any) => void, ...names: PropertyKey[]) => void,
-    getParentNode: (count?: number | undefined) => any | null,
-    map: <U>(callback: (path: Path<any>, index: number, value: any) => U, ...names: PropertyKey[]) => U[]
+    call: <U>(_callback: (_path: Path<any>) => U, ..._names: PropertyKey[]) => U,
+    each: (_callback: (_path: Path<any>, _index: number, _value: any) => void, ..._names: PropertyKey[]) => void,
+    getParentNode: (_count?: number | undefined) => any | null,
+    map: <U>(_callback: (_path: Path<any>, _index: number, _value: any) => U, ..._names: PropertyKey[]) => U[]
   };
 
   export type PrinterConfig<T> = Omit<Prettier.Printer<T>, "print"> & {
-    getCommentChildNodes?: (node: any) => any[],
-    isBlockComment?: (comment: any, options: Plugin.Options) => boolean,
+    getCommentChildNodes?: (_node: any) => any[],
+    isBlockComment?: (_comment: any, _options: Plugin.Options) => boolean,
     print: Printer<T>
   };
 
   // This is the regular print node, except it's not restricted by the AST that
   // is passed to the parent AST.
-  export type Print = (path: Path<any>) => Doc;
+  export type Print = (_path: Path<any>) => Doc;
 
   // This is the regular printer, except it uses our overridden options and
   // print types.
-  export type Printer<T> = (path: Path<T>, options: Options, print: Print) => Doc;
+  export type Printer<T> = (_path: Path<T>, _options: Options, _print: Print) => Doc;
 }
 
 // This namespace contains everything to do with the types of the various nodes
@@ -54,10 +54,11 @@ export namespace Ruby {
 
   type ScannerEvent<T extends string> = { type: `@${T}`, body: string } & Comments & Location;
   type ParserEvent0<T extends string> = { type: T, body: string } & Comments & Location;
-  type ParserEvent<T, V = {}> = { type: T } & Comments & Location & V;
+  type ParserEvent<T, V = Record<string, unknown>> = { type: T } & Comments & Location & V;
 
   // This is the main expression type that goes in places where the AST will
   // accept just about anything.
+  // eslint-disable-next-line @typescript-eslint/ban-types
   export type AnyNode = AccessCtrl | Alias | Aref | ArefField | ArgParen | Args | ArgsAddBlock | ArgsAddStar | ArgsForward | Array | Aryptn | Assign | AssocNew | AssocSplat | AssoclistFromArgs | BEGIN | Backref | Backtick | BareAssocHash | Begin | Binary | BlockVar | Blockarg | Bodystmt | BraceBlock | Break | CVar | Call | Case | Char | Class | Command | CommandCall | Const | ConstPathField | ConstPathRef | ConstRef | Def | Defined | Defs | Defsl | DoBlock | Dot2 | Dot3 | DynaSymbol | END | Else | Elsif | EndContent | Ensure | ExcessedComma | Fcall | Field | Float | FndPtn | For | GVar | Hash | Heredoc | HeredocBegin | Hshptn | IVar | Identifier | If | IfModifier | Imaginary | In | Int | Keyword | KeywordRestParam | Label | Lambda | Lbrace | Massign | MethodAddArg | MethodAddBlock | Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen | Module | Mrhs | MrhsAddStar | MrhsNewFromArgs | Next | Op | Opassign | Params | Paren | Period | Program | Qsymbols | Qwords | Rassign | Rational | Redo | RegexpLiteral | Rescue | RescueEx | RescueModifier | RestParam | Retry | Return | Return0 | Sclass | Stmts | String | StringConcat | StringDVar | StringEmbExpr | StringLiteral | Super | SymbolLiteral | Symbols | TStringContent | Ternary | TopConstField | TopConstRef | Unary | Undef | Unless | UnlessModifier | Until | UntilModifier | VCall | VarAlias | VarField | VarRef | VoidStmt | When | While | WhileModifier | Word | Words | XStringLiteral | Yield | Yield0 | Zsuper
 
   // This is a special scanner event that contains a comment. It can be attached

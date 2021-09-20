@@ -3,7 +3,7 @@ import path from "path";
 
 import { rbs } from "../utils";
 
-function testCases(name: string, transform: (source: string) => string) {
+function testCases(name: string, transform: (_source: string) => string) {
   const buffer = fs.readFileSync(path.resolve(__dirname, `${name}.txt`));
   const sources = buffer.toString().slice(0, -1).split(/\r?\n/);
 
@@ -12,7 +12,7 @@ function testCases(name: string, transform: (source: string) => string) {
   });
 }
 
-function describeCases(name: string, transform: (source: string) => string) {
+function describeCases(name: string, transform: (_source: string) => string) {
   describe(name, () => {
     testCases(name, transform);
   });

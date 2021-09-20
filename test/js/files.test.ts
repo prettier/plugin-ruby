@@ -1,6 +1,7 @@
 import path from "path";
 import { FileInfoOptions, getFileInfo } from "prettier";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const plugin = require("../../src/plugin");
 
 function getInferredParser(filename: string) {

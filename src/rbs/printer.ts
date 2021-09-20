@@ -507,7 +507,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         parts.push("[", join(", ", node.type_params), "] ");
       }
 
-      let params = path.call(printMethodParams, "type");
+      const params = path.call(printMethodParams, "type");
 
       if (params.length > 0) {
         parts.push(

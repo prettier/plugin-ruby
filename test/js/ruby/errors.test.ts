@@ -1,4 +1,3 @@
-import type { Plugin, Ruby } from "../../../src/types";
 import prettier from "prettier";
 import printer from "../../../src/ruby/printer";
 

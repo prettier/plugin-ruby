@@ -15,7 +15,7 @@ const {
   line
 } = prettier;
 
-type KeyPrinter = (path: Plugin.Path<Ruby.Label | Ruby.SymbolLiteral | Ruby.DynaSymbol>, print: Plugin.Print) => Plugin.Doc;
+type KeyPrinter = (_path: Plugin.Path<Ruby.Label | Ruby.SymbolLiteral | Ruby.DynaSymbol>, _print: Plugin.Print) => Plugin.Doc;
 type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & { keyPrinter: KeyPrinter };
 
 // When attempting to convert a hash rocket into a hash label, you need to take
@@ -130,7 +130,7 @@ export const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
     return printEmptyCollection(path, opts, "{", "}");
   }
 
-  let hashDoc = concat([
+  const hashDoc = concat([
     "{",
     indent(
       concat([

@@ -52,7 +52,7 @@ function printMethod(offset: number): Plugin.Printer<Ruby.Def | Ruby.Defs> {
 }
 
 export const printSingleLineMethod: Plugin.Printer<Ruby.Defsl> = (path, opts, print) => {
-  let parensNode = path.getValue().body[1];
+  const parensNode = path.getValue().body[1];
   let paramsDoc: Plugin.Doc = "";
 
   if (parensNode) {

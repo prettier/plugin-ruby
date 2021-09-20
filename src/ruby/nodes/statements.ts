@@ -74,12 +74,12 @@ export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
   );
 };
 
-export const printEndContent: Plugin.Printer<Ruby.EndContent> = (path, opts, print) => {
+export const printEndContent: Plugin.Printer<Ruby.EndContent> = (path, _opts, _print) => {
   const { body } = path.getValue();
   return concat([trim, "__END__", literalline, body]);
 };
 
-export const printComment: Plugin.Printer<Ruby.Comment> = (path, opts, print) => {
+export const printComment: Plugin.Printer<Ruby.Comment> = (path, opts, _print) => {
   return opts.printer.printComment(path, opts);
 };
 

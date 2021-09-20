@@ -32,7 +32,7 @@ import { printChar, printDynaSymbol, printStringConcat, printStringDVar, printSt
 import { printSuper, printZSuper } from "./nodes/super";
 import { printUndef } from "./nodes/undef";
 
-const nodes: Partial<{ [T in Ruby.AnyNode["type"] | "@comment"]: Plugin.Printer<any> }> = {
+const nodes: Partial<{ [_T in Ruby.AnyNode["type"] | "@comment"]: Plugin.Printer<any> }> = {
   "@__end__": printEndContent,
   "@CHAR": printChar,
   "@comment": printComment,

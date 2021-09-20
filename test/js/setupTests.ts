@@ -83,9 +83,10 @@ expect.extend({
 
 declare global {
   namespace jest {
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     interface Matchers<R> {
-      toChangeFormat(after: Code, config?: Partial<Plugin.Options>): Promise<CustomMatcherResult>;
-      toMatchFormat(config?: Partial<Plugin.Options>): Promise<CustomMatcherResult>;
+      toChangeFormat(_after: Code, _config?: Partial<Plugin.Options>): Promise<CustomMatcherResult>;
+      toMatchFormat(_config?: Partial<Plugin.Options>): Promise<CustomMatcherResult>;
     }
   }
 }
