@@ -5,14 +5,10 @@ export namespace Plugin {
   // We're doing weird things here with the types because if you pass a generic
   // type to AstPath it gets overly restrictive.
 
-  // This is just a simple alias for the doc nodes.
   export type Doc = Prettier.doc.builders.Doc;
 
-  // This is the regular embed except that it's required and it's restricted to
-  // our AST.
-  export type Embed = Required<Prettier.Printer<Ruby.AnyNode>>["embed"];
+  export type Embed<T> = Required<Prettier.Printer<T>>["embed"];
 
-  // This is the regular prettier options + the options defined by this plugin.
   export type Options = Prettier.ParserOptions<any> & {
     printer: Omit<Prettier.Printer, "printComment"> & Required<Pick<Prettier.Printer, "printComment">>,
     rubyArrayLiteral: boolean,
@@ -22,6 +18,8 @@ export namespace Plugin {
     rubySingleQuote: boolean,
     rubyToProc: boolean
   };
+
+  export type Parser<T> = Prettier.Parser<T>;
 
   // We're overwriting call and map here because if you restrict the AST for the
   // main path then presumably you're printing a lower node in the tree that
@@ -33,7 +31,6 @@ export namespace Plugin {
     map: <U>(callback: (path: Path<any>, index: number, value: any) => U, ...names: PropertyKey[]) => U[]
   };
 
-  // The Prettier Printer type is missing some options.
   export type PrinterConfig<T> = Omit<Prettier.Printer<T>, "print"> & {
     getCommentChildNodes?: (node: any) => any[],
     isBlockComment?: (comment: any, options: Plugin.Options) => boolean,
@@ -267,4 +264,85 @@ export namespace Ruby {
   export type Bodystmt = ParserEvent<"bodystmt", { body: [Stmts, null | Rescue, null | Stmts, null | Ensure] }>;
   export type Program = ParserEvent<"program", { body: [Stmts] }>;
   export type Stmts = ParserEvent<"stmts", { body: AnyNode[] }>;
+}
+
+export namespace HAML {
+  export type AnyNode = (
+    | Comment
+    | DocType
+    | Filter
+    | HAMLComment
+    | Plain
+    | Root
+    | Script
+    | SilentScript
+    | Tag
+  );
+
+  export type Comment = {
+    type: "comment",
+    value: { revealed: boolean, conditional?: string, text?: string },
+    children: AnyNode[]
+  };
+
+  export type DocType = {
+    type: "doctype",
+    value: { type: string, version?: string, encoding?: string }
+  };
+
+  export type Filter = {
+    type: "filter",
+    value: { name: string, text: string }
+  };
+
+  export type HAMLComment = {
+    type: "haml_comment",
+    value: { text?: string },
+    line: number
+  };
+
+  export type Plain = {
+    type: "plain",
+    value: { text: string }
+  };
+
+  export type Root = {
+    type: "root",
+    children: AnyNode[],
+    supports_multiline: boolean
+  };
+  
+  export type Script = {
+    type: "script",
+    value: {
+      escape_html: boolean,
+      preserve: boolean,
+      interpolate: boolean,
+      text: string
+    },
+    children: AnyNode[]
+  };
+  
+  export type SilentScript = {
+    type: "silent_script",
+    value: { text: string, keyword: string },
+    children: AnyNode[]
+  };
+  
+  export type TagAttrs = string | { [property: string]: TagAttrs }
+  export type Tag = {
+    type: "tag",
+    value: {
+      name: string,
+      attributes: { class?: string, id?: string } & Record<string, string | number>,
+      dynamic_attributes: { new?: string, old?: TagAttrs },
+      object_ref?: string,
+      nuke_outer_whitespace: boolean,
+      nuke_inner_whitespace: boolean,
+      self_closing: boolean,
+      value?: string,
+      parse: boolean
+    },
+    children: AnyNode[]
+  };
 }

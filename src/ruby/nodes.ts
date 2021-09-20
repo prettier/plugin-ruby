@@ -1,4 +1,4 @@
-import type { Plugin, Ruby } from "./types";
+import type { Plugin, Ruby } from "../types";
 
 import { printAlias } from "./nodes/alias";
 import { printAref, printArefField } from "./nodes/aref";

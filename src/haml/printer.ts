@@ -1,5 +1,4 @@
-import type { Plugin } from "../ruby/types";
-import type { HAML } from "./types";
+import type { Plugin, HAML } from "../types";
 
 const {
   align,

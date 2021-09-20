@@ -1,7 +1,7 @@
-import type { Parser } from "prettier";
+import type { Plugin, Ruby } from "../types";
 import parseSync from "../parser/parseSync";
 
-const parser: Parser = {
+const parser: Plugin.Parser<Ruby.AnyNode> = {
   // This function is responsible for taking an input string of text and returning
   // to prettier a JavaScript object that is the equivalent AST that represents
   // the code stored in that string. We accomplish this by spawning a new Ruby

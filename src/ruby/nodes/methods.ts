@@ -1,4 +1,4 @@
-import type { Plugin, Ruby } from "../types";
+import type { Plugin, Ruby } from "../../types";
 
 const { concat, group, hardline, indent, line } = require("../../prettier");
 import { isEmptyBodyStmt } from "../../utils";

@@ -1,5 +1,4 @@
-import type { Doc, Printer } from "prettier";
-import type { HAML } from "./types";
+import type { Plugin, HAML } from "../types";
 
 const {
   concat,
@@ -15,8 +14,8 @@ const {
 // have a test that exercises it because I'm not sure for which parser it is
 // necessary, but since it's in prettier core I'm keeping it here.
 /* istanbul ignore next */
-function replaceNewlines(doc: Doc) {
-  return mapDoc(doc, (currentDoc: Doc) =>
+function replaceNewlines(doc: Plugin.Doc) {
+  return mapDoc(doc, (currentDoc: Plugin.Doc) =>
     typeof currentDoc === "string" && currentDoc.includes("\n")
       ? concat(
           currentDoc
@@ -27,7 +26,7 @@ function replaceNewlines(doc: Doc) {
   );
 }
 
-const embed: Printer<HAML.AnyNode>["embed"] = (path, _print, textToDoc, opts) => {
+const embed: Plugin.Embed<HAML.AnyNode> = (path, _print, textToDoc, opts) => {
   const node = path.getValue();
 
   // We're only going to embed other languages on filter nodes.

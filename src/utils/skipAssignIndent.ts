@@ -1,4 +1,4 @@
-import type { Ruby } from "../ruby/types";
+import type { Ruby } from "../types";
 
 const skippable = [
   "array",

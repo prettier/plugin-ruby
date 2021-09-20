@@ -1,5 +1,4 @@
-import { Doc } from "prettier";
-import type { Plugin, Ruby } from "../types";
+import type { Plugin, Ruby } from "../../types";
 
 const {
   concat,
@@ -16,7 +15,7 @@ import {
   skipAssignIndent
 } from "../../utils";
 
-type KeyPrinter = (path: Plugin.Path<Ruby.Label | Ruby.SymbolLiteral | Ruby.DynaSymbol>, print: Plugin.Print) => Doc;
+type KeyPrinter = (path: Plugin.Path<Ruby.Label | Ruby.SymbolLiteral | Ruby.DynaSymbol>, print: Plugin.Print) => Plugin.Doc;
 type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & { keyPrinter: KeyPrinter };
 
 // When attempting to convert a hash rocket into a hash label, you need to take

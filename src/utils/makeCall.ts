@@ -1,4 +1,4 @@
-import type { Plugin, Ruby } from "../ruby/types";
+import type { Plugin, Ruby } from "../types";
 
 type Callable = {
   body: [any, Ruby.CallOperator, ...any[]]

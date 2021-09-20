@@ -1,4 +1,4 @@
-import type { Plugin, Ruby } from "../ruby/types";
+import type { Plugin, Ruby } from "../types";
 
 const { concat, group, hardline, indent, join, line } = require("../prettier");
 

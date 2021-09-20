@@ -1,4 +1,4 @@
-import type { Ruby } from "../ruby/types";
+import type { Ruby } from "../types";
 import isEmptyStmts from "./isEmptyStmts";
 
 function isEmptyBodyStmt(node: Ruby.Bodystmt) {

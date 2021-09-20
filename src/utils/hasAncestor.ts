@@ -1,4 +1,4 @@
-import type { Plugin } from "../ruby/types";
+import type { Plugin } from "../types";
 
 function hasAncestor(path: Plugin.Path<{ type: string }>, types: string[]) {
   let parent = 0;
