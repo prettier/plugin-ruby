@@ -38,7 +38,7 @@ jobs:
           restore-keys: ${{ runner.os }}-yarn-
       - run: yarn install --frozen-lockfile
       - name: Test
-        run: yarn test && bundle exec rake test
+        run: yarn prepublishOnly && yarn test && bundle exec rake test
 
   lint:
     name: Lint
@@ -85,6 +85,7 @@ jobs:
           restore-keys: ${{ runner.os }}-yarn-
       - run: yarn install --frozen-lockfile
       - run: |
+          yarn prepublishOnly
           gem build -o prettier.gem
           gem unpack prettier.gem
           prettier/exe/rbprettier --help
