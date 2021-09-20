@@ -1,7 +1,9 @@
-#!/usr/bin/env node
+#!./node_modules/.bin/ts-node
 
-const fs = require("fs");
-const prettier = require("prettier");
+import fs from "fs"
+import prettier from "prettier";
+
+import plugin from "../src/plugin";
 
 let parser = "ruby";
 let contentIdx = 2;
@@ -24,7 +26,7 @@ if (fs.existsSync(process.argv[contentIdx])) {
 
 const { formatted } = prettier.formatWithCursor(content, {
   parser,
-  plugins: ["."],
+  plugins: [plugin as any as string], // hacky, but it works
   cursorOffset: 1
 });
 

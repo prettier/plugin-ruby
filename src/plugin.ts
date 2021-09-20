@@ -1,18 +1,18 @@
-const rubyPrinter = require("./ruby/printer").default;
-const rubyParser = require("./ruby/parser").default;
+import rubyPrinter from "./ruby/printer";
+import rubyParser from "./ruby/parser";
 
-const rbsPrinter = require("./rbs/printer").default;
-const rbsParser = require("./rbs/parser").default;
+import rbsPrinter from "./rbs/printer";
+import rbsParser from "./rbs/parser";
 
-const hamlPrinter = require("./haml/printer").default;
-const hamlParser = require("./haml/parser").default;
+import hamlPrinter from "./haml/printer";
+import hamlParser from "./haml/parser";
 
 /*
  * metadata mostly pulled from linguist and rubocop:
  * https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
  * https://github.com/rubocop/rubocop/blob/master/spec/rubocop/target_finder_spec.rb
  */
-module.exports = {
+const plugin = {
   languages: [
     {
       name: "Ruby",
@@ -102,41 +102,47 @@ module.exports = {
       category: "Ruby",
       default: true,
       description:
-        "When possible, favor the use of string and symbol array literals."
+        "When possible, favor the use of string and symbol array literals.",
+      since: "1.0.0"
     },
     rubyHashLabel: {
       type: "boolean",
       category: "Ruby",
       default: true,
       description:
-        "When possible, uses the shortened hash key syntax, as opposed to hash rockets."
+        "When possible, uses the shortened hash key syntax, as opposed to hash rockets.",
+      since: "1.0.0"
     },
     rubyModifier: {
       type: "boolean",
       category: "Ruby",
       default: true,
       description:
-        "When it fits on one line, allows if, unless, while, and until statements to use the modifier form."
+        "When it fits on one line, allows if, unless, while, and until statements to use the modifier form.",
+      since: "1.0.0"
     },
     rubyNetcatCommand: {
       type: "string",
       category: "Ruby",
       description:
-        'The prefix of the command to execute to communicate between the node.js process and the Ruby process. (For example, "nc -U" or "telnet -u") Normally you should not set this option.'
+        'The prefix of the command to execute to communicate between the node.js process and the Ruby process. (For example, "nc -U" or "telnet -u") Normally you should not set this option.',
+      since: "1.4.0"
     },
     rubySingleQuote: {
       type: "boolean",
       category: "Ruby",
       default: true,
       description:
-        "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals."
+        "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals.",
+      since: "1.0.0"
     },
     rubyToProc: {
       type: "boolean",
       category: "Ruby",
       default: false,
       description:
-        "When possible, convert blocks to the more concise Symbol#to_proc syntax."
+        "When possible, convert blocks to the more concise Symbol#to_proc syntax.",
+      since: "1.0.0"
     }
   },
   defaultOptions: {
@@ -145,3 +151,5 @@ module.exports = {
     trailingComma: "none"
   }
 };
+
+export = plugin;

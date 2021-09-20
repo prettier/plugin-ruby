@@ -2,10 +2,11 @@
   "name": "@prettier/plugin-ruby",
   "version": "1.6.1",
   "description": "prettier plugin for the Ruby programming language",
-  "main": "src/plugin.js",
+  "main": "dist/plugin.js",
   "scripts": {
     "check-format": "prettier --check '**/*'",
     "lint": "eslint --cache .",
+    "prepublishOnly": "tsc -p tsconfig.build.json",
     "test": "jest"
   },
   "repository": {
