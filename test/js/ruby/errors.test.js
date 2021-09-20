@@ -1,5 +1,5 @@
 const prettier = require("prettier");
-const { print } = require("../../../src/ruby/printer");
+const { print } = require("../../../src/ruby/printer").default;
 
 describe("errors", () => {
   const cases = [

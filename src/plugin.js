@@ -1,11 +1,11 @@
-const rubyPrinter = require("./ruby/printer");
-const rubyParser = require("./ruby/parser");
+const rubyPrinter = require("./ruby/printer").default;
+const rubyParser = require("./ruby/parser").default;
 
-const rbsPrinter = require("./rbs/printer");
-const rbsParser = require("./rbs/parser");
+const rbsPrinter = require("./rbs/printer").default;
+const rbsParser = require("./rbs/parser").default;
 
-const hamlPrinter = require("./haml/printer");
-const hamlParser = require("./haml/parser");
+const hamlPrinter = require("./haml/printer").default;
+const hamlParser = require("./haml/parser").default;
 
 /*
  * metadata mostly pulled from linguist and rubocop:

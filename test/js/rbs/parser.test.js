@@ -4,7 +4,7 @@ const {
   hasPragma,
   locStart,
   locEnd
-} = require("../../../src/rbs/parser");
+} = require("../../../src/rbs/parser").default;
 
 describe("parser", () => {
   test("parse", () => {

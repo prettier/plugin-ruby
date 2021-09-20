@@ -3,7 +3,7 @@ const {
   hasPragma,
   locStart,
   locEnd
-} = require("../../../src/haml/parser");
+} = require("../../../src/haml/parser").default;
 
 describe("parser", () => {
   test("parse", () => {

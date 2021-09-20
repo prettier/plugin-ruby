@@ -1,4 +1,4 @@
-import { Plugin, RBS } from "../types";
+import type { Plugin, RBS } from "../types";
 import parseSync from "../parser/parseSync";
 
 const parser: Plugin.Parser<RBS.AnyNode> = {
