@@ -1,11 +1,14 @@
-const { spawn, spawnSync, execSync } = require("child_process");
-const { existsSync, mkdtempSync } = require("fs");
-const os = require("os");
-const path = require("path");
-const process = require("process");
+import type { Plugin } from "../types";
+import { spawn, spawnSync, execSync } from "child_process";
+import { existsSync, mkdtempSync } from "fs";
+import os from "os";
+import path from "path";
+import process from "process";
 
-let netcatConfig;
-let parserArgs = process.env.PRETTIER_RUBY_HOST;
+type NetcatConfig = { command: string, args: string[] };
+
+let netcatConfig: NetcatConfig;
+let parserArgs: undefined | string | string[] = process.env.PRETTIER_RUBY_HOST;
 
 const isWindows = os.type() === "Windows_NT";
 
@@ -31,16 +34,20 @@ function getLang() {
   // https://nodejs.org/api/process.html#process_process_platform
   return {
     aix: "C.UTF-8",
+    android: "C.UTF-8",
+    cygwin: "C.UTF-8",
     darwin: "en_US.UTF-8",
     freebsd: "C.UTF-8",
+    haiku: "C.UTF-8",
     linux: "C.UTF-8",
+    netbsd: "C.UTF-8",
     openbsd: "C.UTF-8",
     sunos: "C.UTF-8",
     win32: ".UTF-8"
   }[platform];
 }
 
-function spawnParseServerWithArgs(args) {
+function spawnParseServerWithArgs(args: string[]) {
   const server = spawn(
     "ruby",
     [path.join(__dirname, "./server.rb")].concat(args),
@@ -53,7 +60,9 @@ function spawnParseServerWithArgs(args) {
 
   process.on("exit", () => {
     try {
-      process.kill(-server.pid);
+      if (server.pid) {
+        process.kill(-server.pid);
+      }
     } catch (e) {
       // ignore
     }
@@ -67,10 +76,10 @@ function spawnUnixParseServer() {
   const tmpFile = path.join(tmpDir, `${process.pid}.sock`);
 
   spawnParseServerWithArgs(["--unix", tmpFile]);
-  const now = new Date();
+  const now = new Date().getTime();
 
   // Wait for server to go live.
-  while (!existsSync(tmpFile) && new Date() - now < 3000) {
+  while (!existsSync(tmpFile) && new Date().getTime() - now < 3000) {
     execSync("sleep 0.1");
   }
 
@@ -78,7 +87,7 @@ function spawnUnixParseServer() {
 }
 
 function spawnTCPParseServer() {
-  const port = 8912;
+  const port = "8912";
 
   spawnParseServerWithArgs(["--tcp", port]);
   execSync("sleep 1");
@@ -88,7 +97,7 @@ function spawnTCPParseServer() {
 
 // Finds a netcat-like adapter to use for sending data to a socket. We order
 // these by likelihood of being found so we can avoid some shell-outs.
-function findNetcatConfig(opts) {
+function findNetcatConfig(opts: Plugin.Options): NetcatConfig {
   if (opts.rubyNetcatCommand) {
     const splits = opts.rubyNetcatCommand.split(" ");
     return { command: splits[0], args: splits.slice(1) };
@@ -119,11 +128,15 @@ function findNetcatConfig(opts) {
   return { command: "node", args: [require.resolve("./netcat.js")] };
 }
 
+// You can optionally return location information from the source string when
+// raising an error that prettier will handle for you nicely.
+type LocatedError = Error & { loc?: any };
+
 // Formats and sends a request to the parser server. We use netcat (or something
 // like it) here since Prettier requires the results of `parse` to be
 // synchronous and Node.js does not offer a mechanism for synchronous socket
 // requests.
-function parseSync(parser, source, opts) {
+function parseSync(parser: string, source: string, opts: Plugin.Options) {
   if (!netcatConfig) {
     netcatConfig = findNetcatConfig(opts);
   }
@@ -131,11 +144,11 @@ function parseSync(parser, source, opts) {
   if (!parserArgs) {
     parserArgs = isWindows ? spawnTCPParseServer() : spawnUnixParseServer();
 
-    let ping = { status: 1 };
+    let ping: { status: null | number } = { status: 1 };
     while (ping.status !== 0) {
       ping = spawnSync(
         netcatConfig.command,
-        netcatConfig.args.concat(parserArgs),
+        [...netcatConfig.args, ...parserArgs],
         { input: "ping" }
       );
     }
@@ -181,7 +194,7 @@ function parseSync(parser, source, opts) {
   const parsed = JSON.parse(stdout);
 
   if (parsed.error) {
-    const error = new Error(parsed.error);
+    const error: LocatedError = new Error(parsed.error);
     if (parsed.loc) {
       error.loc = parsed.loc;
     }
@@ -192,4 +205,4 @@ function parseSync(parser, source, opts) {
   return parsed;
 }
 
-module.exports = parseSync;
+export default parseSync;

@@ -12,7 +12,6 @@ const hamlParser = require("./haml/parser");
  * https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
  * https://github.com/rubocop/rubocop/blob/master/spec/rubocop/target_finder_spec.rb
  */
-
 module.exports = {
   languages: [
     {

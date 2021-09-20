@@ -2,9 +2,6 @@ import type * as Prettier from "prettier";
 
 // This namespace contains everything to do with the Ruby prettier plugin.
 export namespace Plugin {
-  // We're doing weird things here with the types because if you pass a generic
-  // type to AstPath it gets overly restrictive.
-
   export type Doc = Prettier.doc.builders.Doc;
 
   export type Embed<T> = Required<Prettier.Printer<T>>["embed"];
@@ -19,7 +16,9 @@ export namespace Plugin {
     rubyToProc: boolean
   };
 
-  export type Parser<T> = Prettier.Parser<T>;
+  export type Parser<T> = Omit<Prettier.Parser<T>, "parse"> & {
+    parse: (text: string, parsers: { [name: string]: Prettier.Parser<any> }, options: Options) => any
+  };
 
   // We're overwriting call and map here because if you restrict the AST for the
   // main path then presumably you're printing a lower node in the tree that

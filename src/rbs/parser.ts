@@ -1,5 +1,5 @@
-import parseSync from "../parser/parseSync";
 import { Plugin, RBS } from "../types";
+import parseSync from "../parser/parseSync";
 
 const parser: Plugin.Parser<RBS.AnyNode> = {
   // This function is responsible for taking an input string of text and returning
@@ -29,4 +29,4 @@ const parser: Plugin.Parser<RBS.AnyNode> = {
   }
 };
 
-module.exports = parser;
+export default parser;

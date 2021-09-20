@@ -29,4 +29,4 @@ const parser: Plugin.Parser<Ruby.AnyNode> = {
   }
 };
 
-module.exports = parser;
+export default parser;

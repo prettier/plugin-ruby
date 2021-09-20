@@ -26,4 +26,4 @@ const parser: Plugin.Parser<HAML.AnyNode> = {
   }
 };
 
-module.exports = parser;
+export default parser;

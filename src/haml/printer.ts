@@ -411,4 +411,4 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
   }
 };
 
-module.exports = printer;
+export default printer;

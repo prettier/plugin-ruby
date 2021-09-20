@@ -137,4 +137,4 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
   }
 };
 
-module.exports = printer;
+export default printer;
