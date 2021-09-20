@@ -15,7 +15,7 @@ const noComments = [
   "mlhs_paren"
 ];
 
-const printer: Plugin.PrinterConfig = {
+const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
   // Certain nodes are used more for organizational purposed than for actually
   // displaying content, so we tell prettier that we don't want comments attached
   // to them.

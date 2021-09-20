@@ -34,10 +34,10 @@ export namespace Plugin {
   };
 
   // The Prettier Printer type is missing some options.
-  export type PrinterConfig = Omit<Prettier.Printer<Ruby.AnyNode>, "print"> & {
-    getCommentChildNodes: (node: any) => any[],
-    isBlockComment: (comment: any, options: Plugin.Options) => boolean,
-    print: Printer<Ruby.AnyNode>
+  export type PrinterConfig<T> = Omit<Prettier.Printer<T>, "print"> & {
+    getCommentChildNodes?: (node: any) => any[],
+    isBlockComment?: (comment: any, options: Plugin.Options) => boolean,
+    print: Printer<T>
   };
 
   // This is the regular print node, except it's not restricted by the AST that
