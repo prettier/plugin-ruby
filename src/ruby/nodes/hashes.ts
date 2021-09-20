@@ -81,7 +81,7 @@ const printHashKeyRocket: KeyPrinter = (path, print) => {
   return concat([doc, " =>"]);
 };
 
-const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (path, opts, print) => {
+export const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (path, opts, print) => {
   const [keyNode, valueNode] = path.getValue().body;
   const { keyPrinter } = path.getParentNode() as HashContents;
 
@@ -104,11 +104,11 @@ const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (path, opts, print) => {
   return group(concat(parts));
 };
 
-const printAssocSplat: Plugin.Printer<Ruby.AssocSplat> = (path, opts, print) => {
+export const printAssocSplat: Plugin.Printer<Ruby.AssocSplat> = (path, opts, print) => {
   return concat(["**", path.call(print, "body", 0)]);
 };
 
-const printHashContents: Plugin.Printer<HashContents> = (path, opts, print) => {
+export const printHashContents: Plugin.Printer<HashContents> = (path, opts, print) => {
   const node = path.getValue();
 
   // First determine which key printer we're going to use, so that the child
@@ -121,7 +121,7 @@ const printHashContents: Plugin.Printer<HashContents> = (path, opts, print) => {
   return join(concat([",", line]), path.map(print, "body"));
 };
 
-const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
+export const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
   const hashNode = path.getValue();
 
   // Hashes normally have a single assoclist_from_args child node. If it's
@@ -151,12 +151,4 @@ const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
   }
 
   return group(hashDoc);
-};
-
-module.exports = {
-  assoc_new: printAssocNew,
-  assoc_splat: printAssocSplat,
-  assoclist_from_args: printHashContents,
-  bare_assoc_hash: printHashContents,
-  hash: printHash
 };

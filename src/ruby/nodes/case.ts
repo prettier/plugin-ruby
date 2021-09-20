@@ -11,7 +11,7 @@ const {
   line
 } = require("../../prettier");
 
-const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
+export const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
   const statement: Plugin.Doc[] = ["case"];
 
   // You don't need to explicitly have something to test against in a case
@@ -25,7 +25,7 @@ const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
   );
 };
 
-const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
+export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
   const [_preds, _stmts, addition] = path.getValue().body;
 
   // The `fill` builder command expects an array of docs alternating with
@@ -60,9 +60,4 @@ const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
   }
 
   return group(concat(parts));
-};
-
-module.exports = {
-  case: printCase,
-  when: printWhen
 };

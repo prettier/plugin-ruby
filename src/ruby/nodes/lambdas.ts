@@ -53,7 +53,7 @@ function printLambdaParams(path: Plugin.Path<Ruby.Lambda>, print: Plugin.Print) 
 // for the single-line form. However, if we have an ancestor that is a command
 // or command_call node, then we'll need to use braces either way because of
 // operator precendence.
-const printLambda: Plugin.Printer<Ruby.Lambda> = (path, opts, print) => {
+export const printLambda: Plugin.Printer<Ruby.Lambda> = (path, opts, print) => {
   const params = printLambdaParams(path, print);
   const inCommand = hasAncestor(path, ["command", "command_call"]);
 
@@ -71,8 +71,4 @@ const printLambda: Plugin.Printer<Ruby.Lambda> = (path, opts, print) => {
       concat(["->", params, " { ", path.call(print, "body", 1), " }"])
     )
   );
-};
-
-module.exports = {
-  lambda: printLambda
 };

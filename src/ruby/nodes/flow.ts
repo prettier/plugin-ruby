@@ -41,7 +41,7 @@ function maybeHandleParens(path: Plugin.Path<Ruby.Break | Ruby.Next>, print: Plu
   return concat([keyword, path.call.apply(path, args)]);
 }
 
-const printBreak: Plugin.Printer<Ruby.Break> = (path, opts, print) => {
+export const printBreak: Plugin.Printer<Ruby.Break> = (path, opts, print) => {
   const content = path.getValue().body[0];
 
   if (content.body.length === 0) {
@@ -55,7 +55,7 @@ const printBreak: Plugin.Printer<Ruby.Break> = (path, opts, print) => {
   );
 };
 
-const printNext: Plugin.Printer<Ruby.Next> = (path, opts, print) => {
+export const printNext: Plugin.Printer<Ruby.Next> = (path, opts, print) => {
   const args = path.getValue().body[0].body[0];
 
   if (!args) {
@@ -69,7 +69,7 @@ const printNext: Plugin.Printer<Ruby.Next> = (path, opts, print) => {
   );
 };
 
-const printYield: Plugin.Printer<Ruby.Yield> = (path, opts, print) => {
+export const printYield: Plugin.Printer<Ruby.Yield> = (path, opts, print) => {
   if (path.getValue().body[0].type === "paren") {
     return concat(["yield", path.call(print, "body", 0)]);
   }
@@ -77,9 +77,4 @@ const printYield: Plugin.Printer<Ruby.Yield> = (path, opts, print) => {
   return concat(["yield ", join(", ", path.call(print, "body", 0))]);
 };
 
-module.exports = {
-  break: printBreak,
-  next: printNext,
-  yield: printYield,
-  yield0: literal("yield")
-};
+export const printYield0 = literal("yield");

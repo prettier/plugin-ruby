@@ -21,7 +21,7 @@ const {
 //
 //     foo[]
 //
-const printAref: Plugin.Printer<Ruby.Aref> = (path, opts, print) => {
+export const printAref: Plugin.Printer<Ruby.Aref> = (path, opts, print) => {
   const indexNode = path.getValue().body[1];
 
   if (!indexNode) {
@@ -45,7 +45,7 @@ const printAref: Plugin.Printer<Ruby.Aref> = (path, opts, print) => {
 //
 //     foo[bar] = baz
 //
-const printArefField: Plugin.Printer<Ruby.Aref | Ruby.ArefField> = (path, opts, print) => {
+export const printArefField: Plugin.Printer<Ruby.Aref | Ruby.ArefField> = (path, opts, print) => {
   const [printedArray, printedIndex] = path.map(print, "body");
 
   return group(
@@ -56,9 +56,4 @@ const printArefField: Plugin.Printer<Ruby.Aref | Ruby.ArefField> = (path, opts, 
       concat([softline, "]"])
     ])
   );
-};
-
-module.exports = {
-  aref: printAref,
-  aref_field: printArefField
 };

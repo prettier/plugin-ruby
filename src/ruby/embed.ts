@@ -1,3 +1,5 @@
+import type { Plugin } from "./nodes/types";
+
 const {
   concat,
   group,
@@ -8,9 +10,9 @@ const {
   stripTrailingHardline
 } = require("../prettier");
 
-const { literallineWithoutBreakParent } = require("../utils");
+import { literallineWithoutBreakParent } from "../utils";
 
-const parsers = {
+const parsers: Record<string, string> = {
   css: "css",
   javascript: "babel",
   js: "babel",
@@ -24,8 +26,8 @@ const parsers = {
 // have a test that exercises it because I'm not sure for which parser it is
 // necessary, but since it's in prettier core I'm keeping it here.
 /* istanbul ignore next */
-function replaceNewlines(doc) {
-  return mapDoc(doc, (currentDoc) =>
+function replaceNewlines(doc: Plugin.Doc) {
+  return mapDoc(doc, (currentDoc: Plugin.Doc) =>
     typeof currentDoc === "string" && currentDoc.includes("\n")
       ? concat(
           currentDoc
@@ -48,7 +50,7 @@ function replaceNewlines(doc) {
 //
 // then the return value of this function would be 2. If you indented every line
 // of the inner content 2 more spaces then this function would return 4.
-function getCommonLeadingWhitespace(content) {
+function getCommonLeadingWhitespace(content: string) {
   const pattern = /^\s+/;
 
   return content
@@ -59,19 +61,19 @@ function getCommonLeadingWhitespace(content) {
       const length = matched ? matched[0].length : 0;
 
       return minimum === null ? length : Math.min(minimum, length);
-    }, null);
+    }, content.length);
 }
 
 // Returns a new string with the common whitespace stripped out. Effectively it
 // emulates what a squiggly heredoc does in Ruby.
-function stripCommonLeadingWhitespace(content) {
+function stripCommonLeadingWhitespace(content: string) {
   const lines = content.split("\n");
   const minimum = getCommonLeadingWhitespace(content);
 
   return lines.map((line) => line.slice(minimum)).join("\n");
 }
 
-function embed(path, print, textToDoc, _opts) {
+const embed: Plugin.Embed = (path, print, textToDoc, _opts) => {
   const node = path.getValue();
   
   // Currently we only support embedded formatting on heredoc nodes
@@ -137,6 +139,6 @@ function embed(path, print, textToDoc, _opts) {
       )
     ])
   );
-}
+};
 
-module.exports = embed;
+export default embed;

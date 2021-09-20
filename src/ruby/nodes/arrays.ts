@@ -65,7 +65,7 @@ function isSymbolArray(args: Ruby.Args | Ruby.ArgsAddStar) {
 // Prints out a word that is a part of a special array literal that accepts
 // interpolation. The body is an array of either plain strings or interpolated
 // expressions.
-const printArrayLiteralWord: Plugin.Printer<Ruby.Word> = (path, opts, print) => {
+export const printWord: Plugin.Printer<Ruby.Word> = (path, opts, print) => {
   return concat(path.map(print, "body"));
 };
 
@@ -94,7 +94,7 @@ const arrayLiteralStarts = {
 // array literals as well as regular arrays. If it is a special array literal
 // then it will have one child that represents the special array, otherwise it
 // will have one child that contains all of the elements of the array.
-const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
+export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
   const array = path.getValue();
   const args = array.body[0];
 
@@ -158,9 +158,4 @@ const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
       "]"
     ])
   );
-};
-
-module.exports = {
-  array: printArray,
-  word: printArrayLiteralWord
 };

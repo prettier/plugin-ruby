@@ -75,7 +75,7 @@ function getClosingQuote(quote: string) {
 // Prints a @CHAR node. @CHAR nodes are special character strings that usually
 // are strings of length 1. If they're any longer than we'll try to apply the
 // correct quotes.
-const printChar: Plugin.Printer<Ruby.Char> = (path, { rubySingleQuote }, _print) => {
+export const printChar: Plugin.Printer<Ruby.Char> = (path, { rubySingleQuote }, _print) => {
   const { body } = path.getValue();
 
   if (body.length !== 2) {
@@ -143,7 +143,7 @@ function shouldPrintPercentSDynaSymbol(node: Ruby.DynaSymbol) {
 //
 // In the case of a plain dyna symbol, node.quote will be either :" or :'
 // For %s dyna symbols, node.quote will be %s[, %s(, %s{, or %s<
-const printDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (path, opts, print) => {
+export const printDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (path, opts, print) => {
   const node = path.getValue();
 
   if (shouldPrintPercentSDynaSymbol(node)) {
@@ -191,7 +191,7 @@ const printDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (path, opts, print) => 
   return concat(parts);
 };
 
-const printStringConcat: Plugin.Printer<Ruby.StringConcat> = (path, opts, print) => {
+export const printStringConcat: Plugin.Printer<Ruby.StringConcat> = (path, opts, print) => {
   const [leftDoc, rightDoc] = path.map(print, "body");
 
   return group(concat([leftDoc, " \\", indent(concat([hardline, rightDoc]))]));
@@ -199,11 +199,11 @@ const printStringConcat: Plugin.Printer<Ruby.StringConcat> = (path, opts, print)
 
 // Prints out an interpolated variable in the string by converting it into an
 // embedded expression.
-const printStringDVar: Plugin.Printer<Ruby.StringDVar> = (path, opts, print) => {
+export const printStringDVar: Plugin.Printer<Ruby.StringDVar> = (path, opts, print) => {
   return concat(["#{", path.call(print, "body", 0), "}"]);
 };
 
-const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (path, opts, print) => {
+export const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (path, opts, print) => {
   const node = path.getValue();
   const parts = path.call(print, "body", 0);
 
@@ -223,7 +223,7 @@ const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (path, opts, prin
 // wishes of the user with regards to single versus double quotes, but if the
 // string contains any escape expressions then it will just keep the original
 // quotes.
-const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (path, { rubySingleQuote }, print) => {
+export const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (path, { rubySingleQuote }, print) => {
   const node = path.getValue();
 
   // If the string is empty, it will not have any parts, so just print out the
@@ -255,23 +255,12 @@ const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (path, { rubySing
 
 // Prints out a symbol literal. Its child will always be the ident that
 // represents the string content of the symbol.
-const printSymbolLiteral: Plugin.Printer<Ruby.SymbolLiteral> = (path, opts, print) => {
+export const printSymbolLiteral: Plugin.Printer<Ruby.SymbolLiteral> = (path, opts, print) => {
   return concat([":", path.call(print, "body", 0)]);
 };
 
 // Prints out an xstring literal. Its child is an array of string parts,
 // including plain string content and interpolated content.
-const printXStringLiteral: Plugin.Printer<Ruby.XStringLiteral> = (path, opts, print) => {
+export const printXStringLiteral: Plugin.Printer<Ruby.XStringLiteral> = (path, opts, print) => {
   return concat((["`"] as Plugin.Doc[]).concat(path.map(print, "body")).concat("`"));
-};
-
-module.exports = {
-  "@CHAR": printChar,
-  dyna_symbol: printDynaSymbol,
-  string_concat: printStringConcat,
-  string_dvar: printStringDVar,
-  string_embexpr: printStringEmbExpr,
-  string_literal: printStringLiteral,
-  symbol_literal: printSymbolLiteral,
-  xstring_literal: printXStringLiteral
 };

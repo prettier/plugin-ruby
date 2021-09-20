@@ -73,7 +73,7 @@ function printLoop(keyword: string, modifier: boolean): Plugin.Printer<Ruby.Whil
   };
 }
 
-const printFor: Plugin.Printer<Ruby.For> = (path, opts, print) => {
+export const printFor: Plugin.Printer<Ruby.For> = (path, opts, print) => {
   const [varDoc, rangeDoc, stmtsDoc] = path.map(print, "body");
   const varsDoc =
     path.getValue().body[0].type === "mlhs" ? join(", ", varDoc) : varDoc;
@@ -90,10 +90,7 @@ const printFor: Plugin.Printer<Ruby.For> = (path, opts, print) => {
   );
 };
 
-module.exports = {
-  while: printLoop("while", false),
-  while_mod: printLoop("while", true),
-  until: printLoop("until", false),
-  until_mod: printLoop("until", true),
-  for: printFor
-};
+export const printWhile = printLoop("while", false);
+export const printWhileModifier = printLoop("while", true);
+export const printUntil = printLoop("until", false);
+export const printUntilModifer = printLoop("until", true);

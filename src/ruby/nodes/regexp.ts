@@ -32,7 +32,7 @@ function forwardSlashIsAmbiguous(path: Plugin.Path<Ruby.RegexpLiteral>) {
 //
 // We favor the use of forward slashes unless the regex contains a forward slash
 // itself. In that case we switch over to using %r with braces.
-const printRegexpLiteral: Plugin.Printer<Ruby.RegexpLiteral> = (path, opts, print) => {
+export const printRegexpLiteral: Plugin.Printer<Ruby.RegexpLiteral> = (path, opts, print) => {
   const node = path.getValue();
   const docs = path.map(print, "body");
 
@@ -51,8 +51,4 @@ const printRegexpLiteral: Plugin.Printer<Ruby.RegexpLiteral> = (path, opts, prin
       .concat(docs)
       .concat(useBraces ? "}" : "/", node.ending.slice(1))
   );
-};
-
-module.exports = {
-  regexp_literal: printRegexpLiteral
 };

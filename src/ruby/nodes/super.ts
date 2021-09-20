@@ -3,7 +3,7 @@ import type { Plugin, Ruby } from "./types";
 const { align, concat, group, join, line } = require("../../prettier");
 import { literal } from "../../utils";
 
-const printSuper: Plugin.Printer<Ruby.Super> = (path, opts, print) => {
+export const printSuper: Plugin.Printer<Ruby.Super> = (path, opts, print) => {
   const args = path.getValue().body[0];
 
   if (args.type === "arg_paren") {
@@ -29,9 +29,4 @@ const printSuper: Plugin.Printer<Ruby.Super> = (path, opts, print) => {
 };
 
 // Version of super without any parens or args.
-const printZSuper = literal("super");
-
-module.exports = {
-  super: printSuper,
-  zsuper: printZSuper
-};
+export const printZSuper = literal("super");

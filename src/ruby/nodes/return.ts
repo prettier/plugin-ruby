@@ -41,7 +41,7 @@ function canSkipParens(args: Ruby.Args | Ruby.ArgsAddStar) {
 
 type CallArgs = [Plugin.Print, ...PropertyKey[]];
 
-const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
+export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
   let args = path.getValue().body[0].body[0] as Ruby.Args | Ruby.ArgsAddStar;
   let steps = ["body", 0, "body", 0];
 
@@ -92,7 +92,4 @@ const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
   );
 };
 
-module.exports = {
-  return: printReturn,
-  return0: literal("return")
-};
+export const printReturn0 = literal("return");

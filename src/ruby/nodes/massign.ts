@@ -9,7 +9,7 @@ const {
   softline
 } = require("../../prettier");
 
-const printMAssign: Plugin.Printer<Ruby.Massign> = (path, opts, print) => {
+export const printMAssign: Plugin.Printer<Ruby.Massign> = (path, opts, print) => {
   let right = path.call(print, "body", 1);
 
   if (
@@ -30,15 +30,15 @@ const printMAssign: Plugin.Printer<Ruby.Massign> = (path, opts, print) => {
   );
 };
 
-const printMLHS: Plugin.Printer<Ruby.Mlhs> = (path, opts, print) => {
+export const printMLHS: Plugin.Printer<Ruby.Mlhs> = (path, opts, print) => {
   return path.map(print, "body");
 };
 
-const printMLHSAddPost: Plugin.Printer<Ruby.MlhsAddPost> = (path, opts, print) => {
+export const printMLHSAddPost: Plugin.Printer<Ruby.MlhsAddPost> = (path, opts, print) => {
   return (path.call(print, "body", 0) as Plugin.Doc[]).concat(path.call(print, "body", 1));
 };
 
-const printMLHSAddStar: Plugin.Printer<Ruby.MlhsAddStar> = (path, opts, print) => {
+export const printMLHSAddStar: Plugin.Printer<Ruby.MlhsAddStar> = (path, opts, print) => {
   const rightParts: Plugin.Doc[] = ["*"];
 
   if (path.getValue().body[1]) {
@@ -48,7 +48,7 @@ const printMLHSAddStar: Plugin.Printer<Ruby.MlhsAddStar> = (path, opts, print) =
   return (path.call(print, "body", 0) as Plugin.Doc[]).concat(concat(rightParts));
 };
 
-const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (path, opts, print) => {
+export const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (path, opts, print) => {
   if (["massign", "mlhs_paren"].includes(path.getParentNode().type)) {
     // If we're nested in brackets as part of the left hand side of an
     // assignment, i.e., (a, b, c) = 1, 2, 3
@@ -68,17 +68,17 @@ const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (path, opts, print) => {
   return group(concat(["(", indent(concat(parts)), concat([softline, ")"])]));
 };
 
-const printMRHS: Plugin.Printer<Ruby.Mrhs> = (path, opts, print) => {
+export const printMRHS: Plugin.Printer<Ruby.Mrhs> = (path, opts, print) => {
   return path.map(print, "body");
 };
 
-const printMRHSAddStar: Plugin.Printer<Ruby.MrhsAddStar> = (path, opts, print) => {
+export const printMRHSAddStar: Plugin.Printer<Ruby.MrhsAddStar> = (path, opts, print) => {
   const [leftDoc, rightDoc] = path.map(print, "body");
 
   return (leftDoc as Plugin.Doc[]).concat([concat(["*", rightDoc])]);
 };
 
-const printMRHSNewFromArgs: Plugin.Printer<Ruby.MrhsNewFromArgs> = (path, opts, print) => {
+export const printMRHSNewFromArgs: Plugin.Printer<Ruby.MrhsNewFromArgs> = (path, opts, print) => {
   const parts = path.call(print, "body", 0) as Plugin.Doc[];
 
   if (path.getValue().body[1]) {
@@ -86,15 +86,4 @@ const printMRHSNewFromArgs: Plugin.Printer<Ruby.MrhsNewFromArgs> = (path, opts, 
   }
 
   return parts;
-};
-
-module.exports = {
-  massign: printMAssign,
-  mlhs: printMLHS,
-  mlhs_add_post: printMLHSAddPost,
-  mlhs_add_star: printMLHSAddStar,
-  mlhs_paren: printMLHSParen,
-  mrhs: printMRHS,
-  mrhs_add_star: printMRHSAddStar,
-  mrhs_new_from_args: printMRHSNewFromArgs
 };

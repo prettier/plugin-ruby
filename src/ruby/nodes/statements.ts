@@ -16,7 +16,7 @@ const {
 
 import { isEmptyStmts } from "../../utils";
 
-const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (path, opts, print) => {
+export const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (path, opts, print) => {
   const [stmts, rescue, elseClause, ensure] = path.getValue().body;
   const parts = [];
 
@@ -48,7 +48,7 @@ const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (path, opts, print) => {
 
 const argNodeTypes = ["args", "args_add_star", "args_add_block"];
 
-const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
+export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
   const contentNode = path.getValue().body[0];
 
   if (!contentNode) {
@@ -74,20 +74,20 @@ const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
   );
 };
 
-const printEndContent: Plugin.Printer<Ruby.EndContent> = (path, opts, print) => {
+export const printEndContent: Plugin.Printer<Ruby.EndContent> = (path, opts, print) => {
   const { body } = path.getValue();
   return concat([trim, "__END__", literalline, body]);
 };
 
-const printComment: Plugin.Printer<Ruby.Comment> = (path, opts, print) => {
+export const printComment: Plugin.Printer<Ruby.Comment> = (path, opts, print) => {
   return opts.printer.printComment(path, opts);
 };
 
-const printProgram: Plugin.Printer<Ruby.Program> = (path, opts, print) => {
+export const printProgram: Plugin.Printer<Ruby.Program> = (path, opts, print) => {
   return concat([join(hardline, path.map(print, "body")), hardline]);
 };
 
-const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
+export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
   const stmts = path.getValue().body;
 
   // This is a special case where we have only comments inside a statement
@@ -141,13 +141,4 @@ const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
   });
 
   return concat(parts);
-};
-
-module.exports = {
-  "@__end__": printEndContent,
-  "@comment": printComment,
-  bodystmt: printBodyStmt,
-  paren: printParen,
-  program: printProgram,
-  stmts: printStmts
 };

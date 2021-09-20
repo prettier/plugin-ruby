@@ -112,4 +112,4 @@ function toProc(path: Plugin.Path<Ruby.Args | Ruby.MethodAddBlock>, node: Ruby.B
   return `&:${method.body}`;
 }
 
-module.exports = toProc;
+export default toProc;

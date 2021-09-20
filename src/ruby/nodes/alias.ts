@@ -28,7 +28,7 @@ const {
 // The `alias` node contains two children. The left and right align with the
 // arguments passed to the keyword. So, for the above example the left would be
 // the symbol literal `bar` and the right could be the symbol literal `foo`.
-const printAlias: Plugin.Printer<Ruby.Alias | Ruby.VarAlias> = (path, opts, print) => {
+export const printAlias: Plugin.Printer<Ruby.Alias | Ruby.VarAlias> = (path, opts, print) => {
   const keyword = "alias ";
 
   // In general, return the printed doc of the argument at the provided index.
@@ -67,9 +67,4 @@ const printAlias: Plugin.Printer<Ruby.Alias | Ruby.VarAlias> = (path, opts, prin
       group(align(keyword.length, rightSide))
     ])
   );
-};
-
-module.exports = {
-  alias: printAlias,
-  var_alias: printAlias
 };

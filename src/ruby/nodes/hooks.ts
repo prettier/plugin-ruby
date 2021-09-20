@@ -30,7 +30,5 @@ function printHook(name: string): Plugin.Printer<Ruby.BEGIN | Ruby.END> {
   };
 }
 
-module.exports = {
-  BEGIN: printHook("BEGIN"),
-  END: printHook("END")
-};
+export const printBEGIN = printHook("BEGIN");
+export const printEND = printHook("END");

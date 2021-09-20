@@ -9,9 +9,9 @@ const {
   join,
   softline
 } = require("../../prettier");
-import { makeCall, noIndent } from "../../utils";
 
-const toProc = require("../toProc");
+import { makeCall, noIndent } from "../../utils";
+import toProc from "../toProc";
 
 const chained = ["call", "method_add_arg", "method_add_block"];
 
@@ -28,7 +28,7 @@ type ChainedCall = Ruby.Call & Chain;
 type ChainedMethodAddArg = Ruby.MethodAddArg & Chain;
 type ChainedMethodAddBlock = Ruby.MethodAddBlock & Chain;
 
-const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
+export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   const node = path.getValue();
   const [receiverNode, _operatorNode, messageNode] = node.body;
 
@@ -90,7 +90,7 @@ const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   return group(concat([receiverDoc, group(indent(rightSideDoc))]));
 };
 
-const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (path, opts, print) => {
+export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (path, opts, print) => {
   const node = path.getValue();
 
   const [methodNode, argNode] = node.body;
@@ -199,7 +199,7 @@ const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (path, opts, prin
   return concat([methodDoc, " ", join(", ", argsDoc), " "]);
 };
 
-const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (path, opts, print) => {
+export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (path, opts, print) => {
   const node = path.getValue();
 
   const [callNode, blockNode] = node.body;
@@ -249,14 +249,6 @@ const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (path, opts, 
   return concat([callDoc, blockDoc]);
 };
 
-const printCallContainer: Plugin.Printer<Ruby.Fcall | Ruby.VCall> = (path, opts, print) => {
+export const printCallContainer: Plugin.Printer<Ruby.Fcall | Ruby.VCall> = (path, opts, print) => {
   return path.call(print, "body", 0);
-};
-
-module.exports = {
-  call: printCall,
-  fcall: printCallContainer,
-  method_add_arg: printMethodAddArg,
-  method_add_block: printMethodAddBlock,
-  vcall: printCallContainer
 };

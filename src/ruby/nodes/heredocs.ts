@@ -3,7 +3,7 @@ import type { Plugin, Ruby } from "./types";
 const { concat, group, lineSuffix, join } = require("../../prettier");
 import { literallineWithoutBreakParent } from "../../utils";
 
-const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (path, opts, print) => {
+export const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (path, opts, print) => {
   const { body, ending } = path.getValue();
 
   const parts = body.map((part, index) => {
@@ -31,8 +31,4 @@ const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (path, opts, print) => {
       )
     ])
   );
-};
-
-module.exports = {
-  heredoc: printHeredoc
 };

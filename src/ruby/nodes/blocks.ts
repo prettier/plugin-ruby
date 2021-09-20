@@ -12,7 +12,7 @@ const {
 } = require("../../prettier");
 import { hasAncestor } from "../../utils";
 
-const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (path, opts, print) => {
+export const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (path, opts, print) => {
   const parts = ["|", removeLines(path.call(print, "body", 0))];
 
   // The second part of this node is a list of optional block-local variables
@@ -85,8 +85,5 @@ function printBlock(braces: boolean): Plugin.Printer<Ruby.BraceBlock | Ruby.DoBl
   };
 }
 
-module.exports = {
-  block_var: printBlockVar,
-  brace_block: printBlock(true),
-  do_block: printBlock(false)
-};
+export const printBraceBlock = printBlock(true);
+export const printDoBlock = printBlock(false);

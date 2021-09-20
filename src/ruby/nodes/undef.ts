@@ -24,7 +24,7 @@ const printUndefSymbol: Plugin.Printer<Ruby.DynaSymbol | Ruby.SymbolLiteral> = (
   return path.call(print, "body", 0);
 };
 
-const printUndef: Plugin.Printer<Ruby.Undef> = (path, opts, print) => {
+export const printUndef: Plugin.Printer<Ruby.Undef> = (path, opts, print) => {
   const keyword = "undef ";
   const argNodes = path.map(
     (symbolPath) => printUndefSymbol(symbolPath, opts, print),
@@ -37,8 +37,4 @@ const printUndef: Plugin.Printer<Ruby.Undef> = (path, opts, print) => {
       align(keyword.length, join(concat([",", line]), argNodes))
     ])
   );
-};
-
-module.exports = {
-  undef: printUndef
 };

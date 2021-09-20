@@ -8,15 +8,9 @@ export namespace Plugin {
   // This is just a simple alias for the doc nodes.
   export type Doc = Prettier.doc.builders.Doc;
 
-  // We're overwriting call and map here because if you restrict the AST for the
-  // main path then presumably you're printing a lower node in the tree that
-  // won't match the current AST type.
-  export type Path<T> = Omit<Prettier.AstPath<T>, "call" | "each" | "getParentNode" | "map"> & {
-    call: <U>(callback: (path: Path<any>) => U, ...names: PropertyKey[]) => U,
-    each: (callback: (path: Path<any>, index: number, value: any) => void, ...names: PropertyKey[]) => void,
-    getParentNode: (count?: number | undefined) => any | null,
-    map: <U>(callback: (path: Path<any>, index: number, value: any) => U, ...names: PropertyKey[]) => U[]
-  };
+  // This is the regular embed except that it's required and it's restricted to
+  // our AST.
+  export type Embed = Required<Prettier.Printer<Ruby.AnyNode>>["embed"];
 
   // This is the regular prettier options + the options defined by this plugin.
   export type Options = Prettier.ParserOptions<any> & {
@@ -29,10 +23,29 @@ export namespace Plugin {
     rubyToProc: boolean
   };
 
+  // We're overwriting call and map here because if you restrict the AST for the
+  // main path then presumably you're printing a lower node in the tree that
+  // won't match the current AST type.
+  export type Path<T> = Omit<Prettier.AstPath<T>, "call" | "each" | "getParentNode" | "map"> & {
+    call: <U>(callback: (path: Path<any>) => U, ...names: PropertyKey[]) => U,
+    each: (callback: (path: Path<any>, index: number, value: any) => void, ...names: PropertyKey[]) => void,
+    getParentNode: (count?: number | undefined) => any | null,
+    map: <U>(callback: (path: Path<any>, index: number, value: any) => U, ...names: PropertyKey[]) => U[]
+  };
+
+  // The Prettier Printer type is missing some options.
+  export type PrinterConfig = Omit<Prettier.Printer<Ruby.AnyNode>, "print"> & {
+    getCommentChildNodes: (node: any) => any[],
+    isBlockComment: (comment: any, options: Plugin.Options) => boolean,
+    print: Printer<Ruby.AnyNode>
+  };
+
   // This is the regular print node, except it's not restricted by the AST that
   // is passed to the parent AST.
   export type Print = (path: Path<any>) => Doc;
 
+  // This is the regular printer, except it uses our overridden options and
+  // print types.
   export type Printer<T> = (path: Path<T>, options: Options, print: Print) => Doc;
 }
 
@@ -47,13 +60,9 @@ export namespace Ruby {
   type ParserEvent0<T extends string> = { type: T, body: string } & Comments & Location;
   type ParserEvent<T, V = {}> = { type: T } & Comments & Location & V;
 
-  // This is a useful node type to have around when you're just looking at
-  // comparing any generic node.
-  export type Node = { type: string } & Comments & Location;
-
   // This is the main expression type that goes in places where the AST will
   // accept just about anything.
-  export type AnyNode = AccessCtrl | Alias | Aref | ArefField | ArgsForward | Array | Assign | BEGIN | Backref | Begin | Binary | Break | CVar | Call | Case | Char | Class | Command | CommandCall | Const | ConstPathField | ConstPathRef | ConstRef | Def | Defined | Defs | Defsl | Dot2 | Dot3 | DynaSymbol | END | Fcall | Field | Float | For | GVar | Hash | Heredoc | IVar | Identifier | If | IfModifier | Ternary | Imaginary | Int | Keyword | Label | Lambda | Massign | MethodAddArg | MethodAddBlock | Mlhs | MlhsAddPost | MlhsAddStar | Module | Mrhs | MrhsAddStar | MrhsNewFromArgs | Next | Op | Opassign | Params | Paren | Qsymbols | Qwords | Rassign | Rational | Redo | RegexpLiteral | Rescue | RescueModifier | Retry | Return | Return0 | Sclass | String | StringConcat | StringLiteral | Super | SymbolLiteral | Symbols | TopConstField | TopConstRef | Unary | Undef | Unless | UnlessModifier | Until | UntilModifier | VarAlias | VarField | VarRef | VCall | VoidStmt | While | WhileModifier | Words | XStringLiteral | Yield | Yield0 | Zsuper;
+  export type AnyNode = AccessCtrl | Alias | Aref | ArefField | ArgParen | Args | ArgsAddBlock | ArgsAddStar | ArgsForward | Array | Aryptn | Assign | AssocNew | AssocSplat | AssoclistFromArgs | BEGIN | Backref | Backtick | BareAssocHash | Begin | Binary | BlockVar | Blockarg | Bodystmt | BraceBlock | Break | CVar | Call | Case | Char | Class | Command | CommandCall | Const | ConstPathField | ConstPathRef | ConstRef | Def | Defined | Defs | Defsl | DoBlock | Dot2 | Dot3 | DynaSymbol | END | Else | Elsif | EndContent | Ensure | ExcessedComma | Fcall | Field | Float | FndPtn | For | GVar | Hash | Heredoc | HeredocBegin | Hshptn | IVar | Identifier | If | IfModifier | Imaginary | In | Int | Keyword | KeywordRestParam | Label | Lambda | Lbrace | Massign | MethodAddArg | MethodAddBlock | Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen | Module | Mrhs | MrhsAddStar | MrhsNewFromArgs | Next | Op | Opassign | Params | Paren | Period | Program | Qsymbols | Qwords | Rassign | Rational | Redo | RegexpLiteral | Rescue | RescueEx | RescueModifier | RestParam | Retry | Return | Return0 | Sclass | Stmts | String | StringConcat | StringDVar | StringEmbExpr | StringLiteral | Super | SymbolLiteral | Symbols | TStringContent | Ternary | TopConstField | TopConstRef | Unary | Undef | Unless | UnlessModifier | Until | UntilModifier | VCall | VarAlias | VarField | VarRef | VoidStmt | When | While | WhileModifier | Word | Words | XStringLiteral | Yield | Yield0 | Zsuper
 
   // This is a special scanner event that contains a comment. It can be attached
   // to almost any kind of node, which is why it's pulled out here separately.

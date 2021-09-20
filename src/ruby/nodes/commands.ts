@@ -62,7 +62,7 @@ function hasTernaryArg(node: Ruby.Args | Ruby.ArgsAddBlock) {
   return (node.body[0] as any).body.some((child: Ruby.AnyNode) => child.type === "ifop");
 }
 
-const printCommand: Plugin.Printer<Ruby.Command> = (path, opts, print) => {
+export const printCommand: Plugin.Printer<Ruby.Command> = (path, opts, print) => {
   const node = path.getValue();
 
   const command = path.call(print, "body", 0);
@@ -92,7 +92,7 @@ const printCommand: Plugin.Printer<Ruby.Command> = (path, opts, print) => {
   );
 };
 
-const printCommandCall: Plugin.Printer<Ruby.CommandCall> = (path, opts, print) => {
+export const printCommandCall: Plugin.Printer<Ruby.CommandCall> = (path, opts, print) => {
   const node = path.getValue();
   const parts = [
     path.call(print, "body", 0),
@@ -126,9 +126,4 @@ const printCommandCall: Plugin.Printer<Ruby.CommandCall> = (path, opts, print) =
   const joinedDoc = parts.concat(argDocs);
 
   return group(ifBreak(concat(breakDoc), concat(joinedDoc)));
-};
-
-module.exports = {
-  command: printCommand,
-  command_call: printCommandCall
 };

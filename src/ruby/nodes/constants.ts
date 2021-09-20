@@ -3,15 +3,15 @@ import type { Plugin, Ruby } from "./types";
 const { concat, group, indent, join, softline } = require("../../prettier");
 import { makeCall } from "../../utils";
 
-const printConstPath: Plugin.Printer<Ruby.ConstPathField | Ruby.ConstPathRef> = (path, opts, print) => {
+export const printConstPath: Plugin.Printer<Ruby.ConstPathField | Ruby.ConstPathRef> = (path, opts, print) => {
   return join("::", path.map(print, "body"));
 };
 
-const printConstRef: Plugin.Printer<Ruby.ConstRef> = (path, opts, print) => {
+export const printConstRef: Plugin.Printer<Ruby.ConstRef> = (path, opts, print) => {
   return path.call(print, "body", 0);
 };
 
-const printDefined: Plugin.Printer<Ruby.Defined> = (path, opts, print) => {
+export const printDefined: Plugin.Printer<Ruby.Defined> = (path, opts, print) => {
   return group(
     concat([
       "defined?(",
@@ -21,7 +21,7 @@ const printDefined: Plugin.Printer<Ruby.Defined> = (path, opts, print) => {
   );
 };
 
-const printField: Plugin.Printer<Ruby.Field> = (path, opts, print) => {
+export const printField: Plugin.Printer<Ruby.Field> = (path, opts, print) => {
   return group(
     concat([
       path.call(print, "body", 0),
@@ -30,16 +30,6 @@ const printField: Plugin.Printer<Ruby.Field> = (path, opts, print) => {
   );
 };
 
-const printTopConst: Plugin.Printer<Ruby.TopConstField | Ruby.TopConstRef> = (path, opts, print) => {
+export const printTopConst: Plugin.Printer<Ruby.TopConstField | Ruby.TopConstRef> = (path, opts, print) => {
   return concat(["::", path.call(print, "body", 0)]);
-};
-
-module.exports = {
-  const_path_field: printConstPath,
-  const_path_ref: printConstPath,
-  const_ref: printConstRef,
-  defined: printDefined,
-  field: printField,
-  top_const_field: printTopConst,
-  top_const_ref: printTopConst
 };

@@ -10,7 +10,7 @@ const {
 } = require("../../prettier");
 import { literal } from "../../utils";
 
-function printRestParam(symbol: string): Plugin.Printer<Ruby.KeywordRestParam | Ruby.RestParam> {
+function printRestParamSymbol(symbol: string): Plugin.Printer<Ruby.KeywordRestParam | Ruby.RestParam> {
   return function printRestParamWithSymbol(path, opts, print) {
     return path.getValue().body[0]
       ? concat([symbol, path.call(print, "body", 0)])
@@ -18,7 +18,7 @@ function printRestParam(symbol: string): Plugin.Printer<Ruby.KeywordRestParam | 
   };
 }
 
-const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
+export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   const [reqs, optls, rest, post, kwargs, kwargRest, block] =
     path.getValue().body;
   let parts: Plugin.Doc[] = [];
@@ -100,9 +100,6 @@ const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   return group(concat(contents));
 };
 
-module.exports = {
-  args_forward: literal("..."),
-  kwrest_param: printRestParam("**"),
-  rest_param: printRestParam("*"),
-  params: printParams
-};
+export const printArgsForward = literal("...");
+export const printKeywordRestParam = printRestParamSymbol("**");
+export const printRestParam = printRestParamSymbol("*");

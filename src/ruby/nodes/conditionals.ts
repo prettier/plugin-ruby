@@ -74,7 +74,7 @@ function printTernaryClauses(keyword: string, truthyClause: Plugin.Doc, falsyCla
 
 // Handles ternary nodes. If it does not fit on one line, then we break out into
 // an if/else statement. Otherwise we remain as a ternary.
-const printTernary: Plugin.Printer<Ruby.Ternary> = (path, _opts, print) => {
+export const printTernary: Plugin.Printer<Ruby.Ternary> = (path, _opts, print) => {
   const [predicate, truthyClause, falsyClause] = path.map(print, "body");
   const ternaryClauses = printTernaryClauses("if", truthyClause, falsyClause);
 
@@ -270,7 +270,7 @@ function printConditional(keyword: string): Plugin.Printer<Ruby.If | Ruby.Unless
   };
 }
 
-const printElse: Plugin.Printer<Ruby.Else> = (path, opts, print) => {
+export const printElse: Plugin.Printer<Ruby.Else> = (path, opts, print) => {
   const stmts = path.getValue().body[0];
 
   return concat([
@@ -282,7 +282,7 @@ const printElse: Plugin.Printer<Ruby.Else> = (path, opts, print) => {
   ]);
 };
 
-const printElsif: Plugin.Printer<Ruby.Elsif> = (path, opts, print) => {
+export const printElsif: Plugin.Printer<Ruby.Elsif> = (path, opts, print) => {
   const [_predicate, _statements, addition] = path.getValue().body;
   const parts = [
     group(
@@ -301,12 +301,7 @@ const printElsif: Plugin.Printer<Ruby.Elsif> = (path, opts, print) => {
   return group(concat(parts));
 };
 
-module.exports = {
-  else: printElse,
-  elsif: printElsif,
-  if: printConditional("if"),
-  ifop: printTernary,
-  if_mod: printSingle("if", true),
-  unless: printConditional("unless"),
-  unless_mod: printSingle("unless", true)
-};
+export const printIf = printConditional("if");
+export const printIfModifier = printSingle("if", true);
+export const printUnless = printConditional("unless");
+export const printUnlessModifier = printSingle("unless", true);

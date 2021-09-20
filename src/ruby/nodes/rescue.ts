@@ -12,7 +12,7 @@ const {
 } = require("../../prettier");
 import { literal } from "../../utils";
 
-const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
+export const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
   return concat([
     "begin",
     indent(concat([hardline, concat(path.map(print, "body"))])),
@@ -21,14 +21,14 @@ const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
   ]);
 };
 
-const printEnsure: Plugin.Printer<Ruby.Ensure> = (path, opts, print) => {
+export const printEnsure: Plugin.Printer<Ruby.Ensure> = (path, opts, print) => {
   return concat([
     path.call(print, "body", 0),
     indent(concat([hardline, path.call(print, "body", 1)]))
   ]);
 };
 
-const printRescue: Plugin.Printer<Ruby.Rescue> = (path, opts, print) => {
+export const printRescue: Plugin.Printer<Ruby.Rescue> = (path, opts, print) => {
   const parts = ["rescue"];
 
   if (path.getValue().body[0]) {
@@ -57,7 +57,7 @@ const printRescue: Plugin.Printer<Ruby.Rescue> = (path, opts, print) => {
 
 // This is a container node that we're adding into the AST that isn't present in
 // Ripper solely so that we have a nice place to attach inline comments.
-const printRescueEx: Plugin.Printer<Ruby.RescueEx> = (path, opts, print) => {
+export const printRescueEx: Plugin.Printer<Ruby.RescueEx> = (path, opts, print) => {
   const [exception, variable] = path.getValue().body;
   const parts = [];
 
@@ -79,7 +79,7 @@ const printRescueEx: Plugin.Printer<Ruby.RescueEx> = (path, opts, print) => {
   return group(concat(parts));
 };
 
-const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (path, opts, print) => {
+export const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (path, opts, print) => {
   const [statementDoc, valueDoc] = path.map(print, "body");
 
   return concat([
@@ -93,12 +93,5 @@ const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (path, opts, print) 
   ]);
 };
 
-module.exports = {
-  begin: printBegin,
-  ensure: printEnsure,
-  redo: literal("redo"),
-  rescue: printRescue,
-  rescue_ex: printRescueEx,
-  rescue_mod: printRescueMod,
-  retry: literal("retry")
-};
+export const printRedo = literal("redo");
+export const printRetry = literal("retry");

@@ -26,7 +26,7 @@ const printPatternArg: Plugin.Printer<Ruby.AnyNode> = (path, opts, print) => {
   return path.call(print);
 };
 
-const printAryPtn: Plugin.Printer<Ruby.Aryptn> = (path, opts, print) => {
+export const printAryPtn: Plugin.Printer<Ruby.Aryptn> = (path, opts, print) => {
   const [constant, preargs, splatarg, postargs] = path.getValue().body;
   let args: Plugin.Doc[] = [];
 
@@ -57,7 +57,7 @@ const printAryPtn: Plugin.Printer<Ruby.Aryptn> = (path, opts, print) => {
   return args;
 };
 
-const printFndPtn: Plugin.Printer<Ruby.FndPtn> = (path, opts, print) => {
+export const printFndPtn: Plugin.Printer<Ruby.FndPtn> = (path, opts, print) => {
   const [constant] = path.getValue().body;
 
   let args = [concat(["*", path.call(print, "body", 1)])]
@@ -73,7 +73,7 @@ const printFndPtn: Plugin.Printer<Ruby.FndPtn> = (path, opts, print) => {
   return args;
 };
 
-const printHshPtn: Plugin.Printer<Ruby.Hshptn> = (path, opts, print) => {
+export const printHshPtn: Plugin.Printer<Ruby.Hshptn> = (path, opts, print) => {
   const [constant, keyValuePairs, keyValueRest] = path.getValue().body;
   let args: Plugin.Doc[] = [];
 
@@ -116,7 +116,7 @@ const printHshPtn: Plugin.Printer<Ruby.Hshptn> = (path, opts, print) => {
   return args;
 };
 
-const printIn: Plugin.Printer<Ruby.In> = (path, opts, print) => {
+export const printIn: Plugin.Printer<Ruby.In> = (path, opts, print) => {
   const parts = [
     "in ",
     align(
@@ -137,7 +137,7 @@ const printIn: Plugin.Printer<Ruby.In> = (path, opts, print) => {
   return group(concat(parts));
 };
 
-const printRAssign: Plugin.Printer<Ruby.Rassign> = (path, opts, print) => {
+export const printRAssign: Plugin.Printer<Ruby.Rassign> = (path, opts, print) => {
   const { keyword } = path.getValue();
   const [leftDoc, rightDoc] = path.map(print, "body");
 
@@ -148,12 +148,4 @@ const printRAssign: Plugin.Printer<Ruby.Rassign> = (path, opts, print) => {
       group(indent(concat([line, rightDoc])))
     ])
   );
-};
-
-module.exports = {
-  aryptn: printAryPtn,
-  fndptn: printFndPtn,
-  hshptn: printHshPtn,
-  in: printIn,
-  rassign: printRAssign
 };
