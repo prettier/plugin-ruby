@@ -3,6 +3,7 @@ import prettier from "prettier";
 
 import type { Plugin } from "../../src/types";
 import type { Code } from "./types";
+import plugin from "../../src/plugin";
 
 // eslint-disable-next-line no-underscore-dangle
 const { formatAST } = (prettier as any).__debug;
@@ -43,7 +44,7 @@ function checkFormat(before: Code, after: Code, config: Partial<Plugin.Options>)
   const parser = (before as any).parser || "ruby";
   const originalText = (before as any).code || before;
 
-  const opts = Object.assign({ parser, plugins: ["."], originalText }, config);
+  const opts = Object.assign({ parser, plugins: [plugin], originalText }, config);
 
   return new Promise((resolve, reject) => {
     if (
