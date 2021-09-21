@@ -32,8 +32,6 @@ function canSkipParens(args: Ruby.Args | Ruby.ArgsAddStar) {
   return true;
 }
 
-type CallArgs = [Plugin.Print, ...PropertyKey[]];
-
 export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
   let args = path.getValue().body[0].body[0] as Ruby.Args | Ruby.ArgsAddStar;
   let steps = ["body", 0, "body", 0];
@@ -63,10 +61,8 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
 
   // Now that we've established which actual node is the arguments to return,
   // we grab it out of the path by diving down the steps that we've set up.
-  const parts = path.call.apply(
-    path,
-    ([print] as CallArgs).concat(steps) as CallArgs
-  ) as Plugin.Doc[];
+  const parts = path.call(print, ...steps) as Plugin.Doc | Plugin.Doc[];
+  const useBrackets = Array.isArray(parts) && parts.length > 1;
 
   // If we got the value straight out of the parens, then `parts` would only
   // be a singular doc as opposed to an array.
@@ -80,10 +76,10 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
 
   return group([
     "return",
-    ifBreak(parts.length > 1 ? " [" : "(", " "),
+    ifBreak(useBrackets ? " [" : "(", " "),
     indent([softline, value]),
     softline,
-    ifBreak(parts.length > 1 ? "]" : ")", "")
+    ifBreak(useBrackets ? "]" : ")", "")
   ]);
 };
 

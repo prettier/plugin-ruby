@@ -57,6 +57,7 @@ function getClosingQuote(quote: string) {
     return quote;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const boundary = /%[Qq]?(.)/.exec(quote)![1];
   if (boundary in quotePairs) {
     return quotePairs[boundary as Quote];
