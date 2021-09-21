@@ -2,10 +2,11 @@
   "name": "@prettier/plugin-ruby",
   "version": "1.6.1",
   "description": "prettier plugin for the Ruby programming language",
-  "main": "src/plugin.js",
+  "main": "dist/plugin.js",
   "scripts": {
-    "check-format": "prettier --check '**/*'",
+    "checkFormat": "prettier --check '**/*'",
     "lint": "eslint --cache .",
+    "prepublishOnly": "tsc -p tsconfig.build.json && cp src/parser/netcat.js dist/parser && cp src/parser/server.rb dist/parser && cp src/haml/parser.rb dist/haml && cp src/rbs/parser.rb dist/rbs && cp src/ruby/parser.rb dist/ruby",
     "test": "jest"
   },
   "repository": {
@@ -22,15 +23,24 @@
     "prettier": ">=1.10"
   },
   "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.9.1",
+    "@types/prettier": "^2.3.2",
+    "@typescript-eslint/eslint-plugin": "^4.31.2",
+    "@typescript-eslint/parser": "^4.31.2",
     "eslint": "^7.22.0",
     "eslint-config-prettier": "^8.0.0",
     "husky": "^7.0.0",
     "jest": "^27.0.1",
-    "pretty-quick": "^3.1.0"
+    "pretty-quick": "^3.1.0",
+    "ts-jest": "^27.0.5",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
   },
   "eslintConfig": {
     "extends": [
       "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
       "prettier"
     ],
     "env": {
@@ -38,8 +48,21 @@
       "jest": true,
       "node": true
     },
+    "parser": "@typescript-eslint/parser",
     "rules": {
       "no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_"
+        }
+      ],
+      "prefer-spread": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-unused-vars": [
         "error",
         {
           "argsIgnorePattern": "^_",
@@ -49,12 +72,13 @@
     }
   },
   "jest": {
-    "globalSetup": "./test/js/globalSetup.js",
-    "globalTeardown": "./test/js/globalTeardown.js",
+    "globalSetup": "./test/js/globalSetup.ts",
+    "globalTeardown": "./test/js/globalTeardown.ts",
+    "preset": "ts-jest",
     "setupFilesAfterEnv": [
-      "./test/js/setupTests.js"
+      "./test/js/setupTests.ts"
     ],
-    "testRegex": ".test.js$"
+    "testRegex": ".test.ts$"
   },
   "husky": {
     "hooks": {

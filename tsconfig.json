@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "sourceMap": false,
+    "strict": true,
+    "target": "es2019"
+  }
+}
