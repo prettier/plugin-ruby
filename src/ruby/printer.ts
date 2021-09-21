@@ -4,7 +4,7 @@ import prettier from "../prettier";
 import embed from "./embed";
 import nodes from "./nodes";
 
-const { concat, trim } = prettier;
+const { trim } = prettier;
 
 const noComments = [
   "args",
@@ -140,7 +140,7 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
       return `#${comment.value}`;
     }
 
-    return concat([trim, comment.value]);
+    return [trim, comment.value];
   }
 };
 

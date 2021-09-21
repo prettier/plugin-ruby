@@ -2,7 +2,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { getTrailingComma, printEmptyCollection } from "../../utils";
 
-const { concat, group, ifBreak, indent, join, line, softline } = prettier;
+const { group, ifBreak, indent, join, line, softline } = prettier;
 
 // Checks that every argument within this args node is a string_literal node
 // that has no spaces or interpolations. This means we're dealing with an array
@@ -59,21 +59,20 @@ function isSymbolArray(args: Ruby.Args | Ruby.ArgsAddStar) {
 // interpolation. The body is an array of either plain strings or interpolated
 // expressions.
 export const printWord: Plugin.Printer<Ruby.Word> = (path, opts, print) => {
-  return concat(path.map(print, "body"));
+  return path.map(print, "body");
 };
 
 // Prints out a special array literal. Accepts the parts of the array literal as
 // an argument, where the first element of the parts array is a string that
 // contains the special start.
 function printArrayLiteral(start: string, parts: Plugin.Doc[]) {
-  return group(
-    concat([
-      start,
-      "[",
-      indent(concat([softline, join(line, parts)])),
-      concat([softline, "]"])
-    ])
-  );
+  return group([
+    start,
+    "[",
+    indent([softline, join(line, parts)]),
+    softline,
+    "]"
+  ]);
 }
 
 const arrayLiteralStarts = {
@@ -137,18 +136,14 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
 
   // Here we have a normal array of any type of object with no special literal
   // types or anything.
-  return group(
-    concat([
-      "[",
-      indent(
-        concat([
-          softline,
-          join(concat([",", line]), path.call(print, "body", 0)),
-          getTrailingComma(opts) ? ifBreak(",", "") : ""
-        ])
-      ),
+  return group([
+    "[",
+    indent([
       softline,
-      "]"
-    ])
-  );
+      join([",", line], path.call(print, "body", 0)),
+      getTrailingComma(opts) ? ifBreak(",", "") : ""
+    ]),
+    softline,
+    "]"
+  ]);
 };

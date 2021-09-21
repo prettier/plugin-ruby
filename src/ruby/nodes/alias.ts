@@ -1,7 +1,7 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 
-const { addTrailingComment, align, concat, group, hardline, line } = prettier;
+const { addTrailingComment, align, group, hardline, line } = prettier;
 
 // The `alias` keyword is used to make a method respond to another name as well
 // as the current one. For example, to get the method `foo` to also respond to
@@ -55,18 +55,16 @@ export const printAlias: Plugin.Printer<Ruby.Alias | Ruby.VarAlias> = (
     return print(argPath);
   };
 
-  const rightSide = concat([
-    // If the left child has any comments, then we need to explicitly break this
-    // into two lines
-    path.getValue().body[0].comments ? hardline : line,
-    path.call(printAliasArg, "body", 1)
+  return group([
+    keyword,
+    path.call(printAliasArg, "body", 0),
+    group(
+      align(keyword.length, [
+        // If the left child has any comments, then we need to explicitly break
+        // this into two lines
+        path.getValue().body[0].comments ? hardline : line,
+        path.call(printAliasArg, "body", 1)
+      ])
+    )
   ]);
-
-  return group(
-    concat([
-      keyword,
-      path.call(printAliasArg, "body", 0),
-      group(align(keyword.length, rightSide))
-    ])
-  );
 };

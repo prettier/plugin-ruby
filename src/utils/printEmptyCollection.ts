@@ -1,7 +1,7 @@
 import type { Plugin, Ruby } from "../types";
 import prettier from "../prettier";
 
-const { concat, group, hardline, indent, join, line } = prettier;
+const { group, hardline, indent, join, line } = prettier;
 
 function containedWithin(
   node: Ruby.Array | Ruby.Hash
@@ -46,14 +46,12 @@ function printEmptyCollection(
 
   path.each(printComment, "comments");
 
-  return group(
-    concat([
-      startToken,
-      indent(concat([hardline, join(hardline, comments)])),
-      line,
-      endToken
-    ])
-  );
+  return group([
+    startToken,
+    indent([hardline, join(hardline, comments)]),
+    line,
+    endToken
+  ]);
 }
 
 export default printEmptyCollection;

@@ -6,7 +6,7 @@ import {
   skipAssignIndent
 } from "../../utils";
 
-const { concat, group, ifBreak, indent, join, line } = prettier;
+const { group, ifBreak, indent, join, line } = prettier;
 
 type KeyPrinter = (
   _path: Plugin.Path<Ruby.Label | Ruby.SymbolLiteral | Ruby.DynaSymbol>,
@@ -57,9 +57,9 @@ const printHashKeyLabel: KeyPrinter = (path, print) => {
     case "@label":
       return print(path);
     case "symbol_literal":
-      return concat([path.call(print, "body", 0), ":"]);
+      return [path.call(print, "body", 0), ":"];
     case "dyna_symbol": {
-      return concat([print(path), ":"]);
+      return [print(path), ":"];
     }
   }
 };
@@ -70,12 +70,12 @@ const printHashKeyRocket: KeyPrinter = (path, print) => {
 
   if (node.type === "@label") {
     const sDoc = doc as string; // since we know this is a label
-    doc = concat([":", sDoc.slice(0, sDoc.length - 1)]);
+    doc = [":", sDoc.slice(0, sDoc.length - 1)];
   } else if (node.type === "dyna_symbol") {
-    doc = concat([":", doc]);
+    doc = [":", doc];
   }
 
-  return concat([doc, " =>"]);
+  return [doc, " =>"];
 };
 
 export const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (
@@ -93,16 +93,16 @@ export const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (
   // parent hash, so we don't group the parts.
   if (valueNode.type === "hash") {
     parts.push(" ", valueDoc);
-    return concat(parts);
+    return parts;
   }
 
   if (!skipAssignIndent(valueNode) || keyNode.comments) {
-    parts.push(indent(concat([line, valueDoc])));
+    parts.push(indent([line, valueDoc]));
   } else {
     parts.push(" ", valueDoc);
   }
 
-  return group(concat(parts));
+  return group(parts);
 };
 
 export const printAssocSplat: Plugin.Printer<Ruby.AssocSplat> = (
@@ -110,7 +110,7 @@ export const printAssocSplat: Plugin.Printer<Ruby.AssocSplat> = (
   opts,
   print
 ) => {
-  return concat(["**", path.call(print, "body", 0)]);
+  return ["**", path.call(print, "body", 0)];
 };
 
 export const printHashContents: Plugin.Printer<HashContents> = (
@@ -127,7 +127,7 @@ export const printHashContents: Plugin.Printer<HashContents> = (
       ? printHashKeyLabel
       : printHashKeyRocket;
 
-  return join(concat([",", line]), path.map(print, "body"));
+  return join([",", line], path.map(print, "body"));
 };
 
 export const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
@@ -140,18 +140,16 @@ export const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
     return printEmptyCollection(path, opts, "{", "}");
   }
 
-  const hashDoc = concat([
+  const hashDoc = [
     "{",
-    indent(
-      concat([
-        line,
-        path.call(print, "body", 0),
-        getTrailingComma(opts) ? ifBreak(",", "") : ""
-      ])
-    ),
+    indent([
+      line,
+      path.call(print, "body", 0),
+      getTrailingComma(opts) ? ifBreak(",", "") : ""
+    ]),
     line,
     "}"
-  ]);
+  ];
 
   // If we're inside another hash, then we don't want to group our contents
   // because we want this hash to break along with its parent hash.

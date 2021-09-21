@@ -2,7 +2,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { literal } from "../../utils";
 
-const { align, concat, group, join, line } = prettier;
+const { align, group, join, line } = prettier;
 
 export const printSuper: Plugin.Printer<Ruby.Super> = (path, opts, print) => {
   const args = path.getValue().body[0];
@@ -15,18 +15,16 @@ export const printSuper: Plugin.Printer<Ruby.Super> = (path, opts, print) => {
       return "super()";
     }
 
-    return concat(["super", path.call(print, "body", 0)]);
+    return ["super", path.call(print, "body", 0)];
   }
 
   const keyword = "super ";
   const argsDocs = path.call(print, "body", 0);
 
-  return group(
-    concat([
-      keyword,
-      align(keyword.length, group(join(concat([",", line]), argsDocs)))
-    ])
-  );
+  return group([
+    keyword,
+    align(keyword.length, group(join([",", line], argsDocs)))
+  ]);
 };
 
 // Version of super without any parens or args.

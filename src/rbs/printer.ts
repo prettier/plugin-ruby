@@ -1,9 +1,8 @@
-import type * as Prettier from "prettier";
+import type { util } from "prettier";
 import type { Plugin, RBS } from "../types";
 import prettier from "../prettier";
 
-const { concat, group, hardline, indent, makeString, join, line, softline } =
-  prettier;
+const { group, hardline, indent, makeString, join, line, softline } = prettier;
 
 // For some lists of entities in the AST, the parser returns them as an unsorted
 // object (presumably because Ruby hashes have implicit ordering). We do not
@@ -34,10 +33,10 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
     if (node.declarations) {
       // Prints out the root of the tree, which includes zero or more declarations.
-      return concat([
-        join(concat([hardline, hardline]), path.map(print, "declarations")),
+      return [
+        join([hardline, hardline], path.map(print, "declarations")),
         hardline
-      ]);
+      ];
     }
 
     /* istanbul ignore else */
@@ -46,14 +45,12 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         // Prints out a type alias, which is a declaration that looks like:
         // type foo = String
         case "alias": {
-          doc = group(
-            concat([
-              "type ",
-              node.name,
-              " =",
-              indent(group(concat([line, path.call(printType, "type")])))
-            ])
-          );
+          doc = group([
+            "type ",
+            node.name,
+            " =",
+            indent(group([line, path.call(printType, "type")]))
+          ]);
           break;
         }
         // Prints out a class declarations, which looks like:
@@ -66,7 +63,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           }
 
           parts.push(indent(printMembers()), hardline, "end");
-          doc = group(concat(parts));
+          doc = group(parts);
           break;
         }
         // Prints out a constant or a global declaration, which looks like:
@@ -74,21 +71,19 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         // $foo: String
         case "constant":
         case "global": {
-          doc = group(concat([node.name, ": ", path.call(printType, "type")]));
+          doc = group([node.name, ": ", path.call(printType, "type")]);
           break;
         }
         // Prints out an interface declaration, which looks like:
         // interface _Foo end
         case "interface": {
-          doc = group(
-            concat([
-              "interface ",
-              printNameAndTypeParams(node),
-              indent(printMembers()),
-              hardline,
-              "end"
-            ])
-          );
+          doc = group([
+            "interface ",
+            printNameAndTypeParams(node),
+            indent(printMembers()),
+            hardline,
+            "end"
+          ]);
           break;
         }
         // Prints out a module declaration, which looks like:
@@ -104,7 +99,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           }
 
           parts.push(indent(printMembers()), hardline, "end");
-          doc = group(concat(parts));
+          doc = group(parts);
           break;
         }
         /* istanbul ignore next */
@@ -118,14 +113,9 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         // alias self.foo self.bar
         case "alias": {
           if (node.kind === "singleton") {
-            doc = concat([
-              "alias self.",
-              node.new_name,
-              " self.",
-              node.old_name
-            ]);
+            doc = ["alias self.", node.new_name, " self.", node.old_name];
           } else {
-            doc = concat(["alias ", node.new_name, " ", node.old_name]);
+            doc = ["alias ", node.new_name, " ", node.old_name];
           }
           break;
         }
@@ -151,7 +141,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           }
 
           parts.push(": ", path.call(printType, "type"));
-          doc = group(concat(parts));
+          doc = group(parts);
           break;
         }
         // Prints out a class or instance variable member, which looks like:
@@ -159,18 +149,13 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         // @@foo: String
         case "class_variable":
         case "instance_variable": {
-          doc = group(concat([node.name, ": ", path.call(printType, "type")]));
+          doc = group([node.name, ": ", path.call(printType, "type")]);
           break;
         }
         // Prints out a class instance variable member, which looks like:
         // self.@foo: String
         case "class_instance_variable": {
-          doc = concat([
-            "self.",
-            node.name,
-            ": ",
-            path.call(printType, "type")
-          ]);
+          doc = ["self.", node.name, ": ", path.call(printType, "type")];
           break;
         }
         // Prints out a mixin, which looks like:
@@ -180,13 +165,11 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         case "include":
         case "extend":
         case "prepend": {
-          doc = group(
-            concat([
-              node.member,
-              " ",
-              printNameAndArgs(path as any as Plugin.Path<RBS.NameAndArgs>)
-            ])
-          );
+          doc = group([
+            node.member,
+            " ",
+            printNameAndArgs(path as any as Plugin.Path<RBS.NameAndArgs>)
+          ]);
           break;
         }
         case "public":
@@ -209,7 +192,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
     // An annotation can be attached to most kinds of nodes, and should be printed
     // using %a{}. Certain nodes can't have annotations at all.
     if (node.annotations && node.annotations.length > 0) {
-      doc = concat([
+      doc = [
         join(
           hardline,
           path.map((annotationPath: Plugin.Path<RBS.Annotation>) => {
@@ -222,18 +205,18 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
               return getSource(annotationNode, opts);
             }
 
-            return concat(["%a{", annotationNode.string, "}"]);
+            return ["%a{", annotationNode.string, "}"];
           }, "annotations")
         ),
         hardline,
         doc
-      ]);
+      ];
     }
 
     // Comments come in as one whole string, so here we split it up into
     // multiple lines and then prefix it with the pound sign.
     if (node.comment) {
-      doc = concat([
+      doc = [
         join(
           hardline,
           node.comment.string
@@ -243,7 +226,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         ),
         hardline,
         doc
-      ]);
+      ];
     }
 
     return doc;
@@ -267,11 +250,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         ? originalQuote
         : preferredQuote;
 
-      return makeString(
-        value.slice(1, -1),
-        quote as Prettier.util.Quote,
-        false
-      );
+      return makeString(value.slice(1, -1), quote as util.Quote, false);
     }
 
     // Certain nodes are names with optional arguments attached, as in Array[A].
@@ -283,9 +262,12 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         return node.name;
       }
 
-      return group(
-        concat([node.name, "[", join(", ", path.map(printType, "args")), "]"])
-      );
+      return group([
+        node.name,
+        "[",
+        join(", ", path.map(printType, "args")),
+        "]"
+      ]);
     }
 
     // This is the big function that prints out any individual type, which can
@@ -304,13 +286,13 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           }
           return node.literal;
         case "optional":
-          return concat([
+          return [
             path.call(
               (typePath) => printType(typePath, { forceParens: true }),
               "type"
             ),
             "?"
-          ]);
+          ];
         case "tuple":
           // If we don't have any sub types, we explicitly need the space in between
           // the brackets to not confuse the parser.
@@ -318,16 +300,12 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
             return "[ ]";
           }
 
-          return group(
-            concat(["[", join(", ", path.map(printType, "types")), "]"])
-          );
+          return group(["[", join(", ", path.map(printType, "types")), "]"]);
         case "union": {
-          const doc = group(
-            join(concat([line, "| "]), path.map(printType, "types"))
-          );
+          const doc = group(join([line, "| "], path.map(printType, "types")));
 
           if (forceParens) {
-            return concat(["(", doc, ")"]);
+            return ["(", doc, ")"];
           }
 
           return doc;
@@ -335,7 +313,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         case "intersection": {
           const doc = group(
             join(
-              concat([line, "& "]),
+              [line, "& "],
               path.map(
                 (typePath) => printType(typePath, { forceParens: true }),
                 "types"
@@ -344,18 +322,18 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           );
 
           if (forceParens) {
-            return concat(["(", doc, ")"]);
+            return ["(", doc, ")"];
           }
 
           return doc;
         }
         case "class_singleton":
-          return concat(["singleton(", node.name, ")"]);
+          return ["singleton(", node.name, ")"];
         case "proc":
-          return concat([
+          return [
             "^",
             printMethodSignature(path as Plugin.Path<RBS.MethodSignature>)
-          ]);
+          ];
         case "record": {
           const parts: Plugin.Doc[] = [];
 
@@ -369,17 +347,15 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
             }
 
             fieldParts.push(path.call(printType, "fields", field, "type"));
-            parts.push(concat(fieldParts));
+            parts.push(fieldParts);
           });
 
-          return group(
-            concat([
-              "{",
-              indent(concat([line, join(concat([",", line]), parts)])),
-              line,
-              "}"
-            ])
-          );
+          return group([
+            "{",
+            indent([line, join([",", line], parts)]),
+            line,
+            "}"
+          ]);
         }
         case "class_instance":
         case "interface":
@@ -415,7 +391,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           lastLine !== null &&
           memberNode.location.start.line - lastLine >= 2
         ) {
-          docs.push(concat([hardline, hardline]));
+          docs.push([hardline, hardline]);
         } else {
           docs.push(hardline);
         }
@@ -424,7 +400,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         lastLine = memberNode.location.end.line;
       }, "members");
 
-      return concat(docs);
+      return docs;
     }
 
     // Prints out the name of a class, interface, or module declaration.
@@ -450,13 +426,13 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
             parts.push("in");
           }
 
-          return join(" ", parts.concat(node.name));
+          return join(" ", [...parts, node.name]);
         },
         "type_params",
         "params"
       );
 
-      return concat([node.name, "[", join(", ", docs), "]"]);
+      return [node.name, "[", join(", ", docs), "]"];
     }
 
     // Returns an array of printed parameters so that the calling function can
@@ -471,16 +447,14 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
       // optional positionals, as in (?A)
       parts = parts.concat(
         path.map(
-          (paramPath) => concat(["?", printMethodParam(paramPath)]),
+          (paramPath) => ["?", printMethodParam(paramPath)],
           "optional_positionals"
         )
       );
 
       // rest positional, as in (*A)
       if (node.rest_positionals) {
-        parts.push(
-          concat(["*", path.call(printMethodParam, "rest_positionals")])
-        );
+        parts.push(["*", path.call(printMethodParam, "rest_positionals")]);
       }
 
       // trailing positionals are required positionals after a rest
@@ -488,32 +462,26 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
       // required keywords, as in (a: A)
       getSortedKeys(node.required_keywords).forEach((name) => {
-        parts.push(
-          concat([
-            name,
-            ": ",
-            path.call(printMethodParam, "required_keywords", name)
-          ])
-        );
+        parts.push([
+          name,
+          ": ",
+          path.call(printMethodParam, "required_keywords", name)
+        ]);
       });
 
       // optional keywords, as in (?a: A)
       getSortedKeys(node.optional_keywords).forEach((name) => {
-        parts.push(
-          concat([
-            "?",
-            name,
-            ": ",
-            path.call(printMethodParam, "optional_keywords", name)
-          ])
-        );
+        parts.push([
+          "?",
+          name,
+          ": ",
+          path.call(printMethodParam, "optional_keywords", name)
+        ]);
       });
 
       // rest keyword, as in (**A)
       if (node.rest_keywords) {
-        parts.push(
-          concat(["**", path.call(printMethodParam, "rest_keywords")])
-        );
+        parts.push(["**", path.call(printMethodParam, "rest_keywords")]);
       }
 
       return parts;
@@ -534,7 +502,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           }
         }
 
-        return concat(parts);
+        return parts;
       }
     }
 
@@ -556,7 +524,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
       if (params.length > 0) {
         parts.push(
           "(",
-          indent(concat([softline, join(concat([",", line]), params)])),
+          indent([softline, join([",", line], params)]),
           softline,
           ") "
         );
@@ -569,7 +537,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
         parts.push(
           "{",
-          indent(concat([line, path.call(printMethodSignature, "block")])),
+          indent([line, path.call(printMethodSignature, "block")]),
           line,
           "} "
         );
@@ -584,7 +552,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         )
       );
 
-      return group(concat(parts));
+      return group(parts);
     }
 
     // Prints out a method definition, which looks like:
@@ -597,11 +565,9 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
       }
 
       if (typeDocs.length === 1) {
-        typeDocs = concat([" ", typeDocs[0]]);
+        typeDocs = [" ", typeDocs[0]];
       } else {
-        typeDocs = indent(
-          group(concat([line, join(concat([line, "| "]), typeDocs)]))
-        );
+        typeDocs = indent(group([line, join([line, "| "], typeDocs)]));
       }
 
       const parts: Plugin.Doc[] = ["def "];
@@ -615,7 +581,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
       const escaped = isMethodNameEscaped();
       parts.push(escaped ? `\`${node.name}\`` : node.name, ":", typeDocs);
 
-      return group(concat(parts));
+      return group(parts);
 
       // Determine if a method name is escaped in the original source.
       function isMethodNameEscaped() {

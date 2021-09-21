@@ -23,7 +23,7 @@ function globalSetup() {
 
   (global as any).__ASYNC_PARSER__ = spawn(
     "ruby",
-    ["./src/parser/server.rb"].concat(parserArgs)
+    ["./src/parser/server.rb", ...parserArgs]
   );
 }
 

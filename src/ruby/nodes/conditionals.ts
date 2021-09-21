@@ -1,4 +1,3 @@
-import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import {
@@ -7,20 +6,8 @@ import {
   isEmptyStmts
 } from "../../utils";
 
-const {
-  align,
-  breakParent,
-  concat,
-  hardline,
-  group,
-  ifBreak,
-  indent,
-  softline
-} = prettier;
-
-function isConcat(doc: any): doc is Prettier.doc.builders.Concat {
-  return doc.type === "concat";
-}
+const { align, breakParent, hardline, group, ifBreak, indent, softline } =
+  prettier;
 
 // If the statements are just a single if/unless, in block or modifier form, or
 // a ternary
@@ -39,31 +26,31 @@ function printWithAddition(
   print: Plugin.Print,
   breaking: boolean
 ) {
-  return concat([
+  return [
     `${keyword} `,
     align(keyword.length + 1, path.call(print, "body", 0)),
-    indent(concat([softline, path.call(print, "body", 1)])),
-    concat([softline, path.call(print, "body", 2)]),
-    concat([softline, "end"]),
+    indent([softline, path.call(print, "body", 1)]),
+    [softline, path.call(print, "body", 2)],
+    [softline, "end"],
     breaking ? breakParent : ""
-  ]);
+  ];
 }
 
 // For the unary `not` operator, we need to explicitly add parentheses to it in
 // order for it to be valid from within a ternary. Otherwise if the clause of
 // the ternary isn't a unary `not`, we can just pass it along.
 function printTernaryClause(clause: Plugin.Doc) {
-  if (isConcat(clause)) {
-    const [part] = clause.parts;
+  if (Array.isArray(clause)) {
+    const [part] = clause;
 
-    if (isConcat(part) && part.parts[0] === "not") {
+    if (Array.isArray(part) && part[0] === "not") {
       // We are inside of a statements list and the statement is a unary `not`.
-      return concat(["not(", part.parts[2], ")"]);
+      return ["not(", part[2], ")"];
     }
 
-    if (clause.parts[0] === "not") {
+    if (clause[0] === "not") {
       // We are inside a ternary condition and the clause is a unary `not`.
-      return concat(["not(", clause.parts[2], ")"]);
+      return ["not(", clause[2], ")"];
     }
   }
 
@@ -99,15 +86,15 @@ export const printTernary: Plugin.Printer<Ruby.Ternary> = (
 
   return group(
     ifBreak(
-      concat([
+      [
         "if ",
         align(3, predicate),
-        indent(concat([softline, truthyClause])),
-        concat([softline, "else"]),
-        indent(concat([softline, falsyClause])),
-        concat([softline, "end"])
-      ]),
-      concat([predicate, " ? "].concat(ternaryClauses))
+        indent([softline, truthyClause]),
+        [softline, "else"],
+        indent([softline, falsyClause]),
+        [softline, "end"]
+      ],
+      [predicate, " ? ", ...ternaryClauses]
     )
   );
 };
@@ -129,7 +116,7 @@ function printSingle(
     const multilineParts = [
       `${keyword} `,
       align(keyword.length + 1, predicateDoc),
-      indent(concat([softline, statementsDoc])),
+      indent([softline, statementsDoc]),
       softline,
       "end"
     ];
@@ -141,16 +128,14 @@ function printSingle(
       !rubyModifier ||
       (!modifier && (statementsNode as Ruby.If | Ruby.Unless).body[0].comments)
     ) {
-      return concat([concat(multilineParts), breakParent]);
+      return [multilineParts, breakParent];
     }
 
-    const inline = concat(
-      inlineEnsureParens(path, [
-        path.call(print, "body", 1),
-        ` ${keyword} `,
-        path.call(print, "body", 0)
-      ])
-    );
+    const inline = inlineEnsureParens(path, [
+      path.call(print, "body", 1),
+      ` ${keyword} `,
+      path.call(print, "body", 0)
+    ]);
 
     // An expression with a conditional modifier (expression if true), the
     // conditional body is parsed before the predicate expression, meaning that
@@ -162,7 +147,7 @@ function printSingle(
       return inline;
     }
 
-    return group(ifBreak(concat(multilineParts), inline));
+    return group(ifBreak(multilineParts, inline));
   };
 }
 
@@ -241,23 +226,22 @@ function printConditional(
 ): Plugin.Printer<Ruby.If | Ruby.Unless> {
   return (path, opts, print) => {
     if (canTernary(path)) {
-      let ternaryParts = [path.call(print, "body", 0), " ? "].concat(
-        printTernaryClauses(
+      let ternaryParts = [
+        path.call(print, "body", 0),
+        " ? ",
+        ...printTernaryClauses(
           keyword,
           path.call(print, "body", 1),
           path.call(print, "body", 2, "body", 0)
         )
-      );
+      ];
 
       if (["binary", "call"].includes(path.getParentNode().type)) {
-        ternaryParts = (["("] as Plugin.Doc[]).concat(ternaryParts).concat(")");
+        ternaryParts = ["(", ...ternaryParts, ")"];
       }
 
       return group(
-        ifBreak(
-          printWithAddition(keyword, path, print, false),
-          concat(ternaryParts)
-        )
+        ifBreak(printWithAddition(keyword, path, print, false), ternaryParts)
       );
     }
 
@@ -272,11 +256,12 @@ function printConditional(
     // If the body of the conditional is empty, then we explicitly have to use the
     // block form.
     if (isEmptyStmts(statements)) {
-      return concat([
+      return [
         `${keyword} `,
         align(keyword.length + 1, path.call(print, "body", 0)),
-        concat([hardline, "end"])
-      ]);
+        hardline,
+        "end"
+      ];
     }
 
     // Two situations in which we need to use the block form:
@@ -290,12 +275,13 @@ function printConditional(
       containsAssignment(predicate) ||
       containsSingleConditional(statements)
     ) {
-      return concat([
+      return [
         `${keyword} `,
         align(keyword.length + 1, path.call(print, "body", 0)),
-        indent(concat([hardline, path.call(print, "body", 1)])),
-        concat([hardline, "end"])
-      ]);
+        indent([hardline, path.call(print, "body", 1)]),
+        hardline,
+        "end"
+      ];
     }
 
     return printSingle(keyword)(path, opts, print);
@@ -305,29 +291,27 @@ function printConditional(
 export const printElse: Plugin.Printer<Ruby.Else> = (path, opts, print) => {
   const stmts = path.getValue().body[0];
 
-  return concat([
+  return [
     stmts.body.length === 1 && stmts.body[0].type === "command"
       ? breakParent
       : "",
     "else",
-    indent(concat([softline, path.call(print, "body", 0)]))
-  ]);
+    indent([softline, path.call(print, "body", 0)])
+  ];
 };
 
 export const printElsif: Plugin.Printer<Ruby.Elsif> = (path, opts, print) => {
   const [_predicate, _statements, addition] = path.getValue().body;
   const parts = [
-    group(
-      concat(["elsif ", align("elsif".length - 1, path.call(print, "body", 0))])
-    ),
-    indent(concat([hardline, path.call(print, "body", 1)]))
+    group(["elsif ", align("elsif".length - 1, path.call(print, "body", 0))]),
+    indent([hardline, path.call(print, "body", 1)])
   ];
 
   if (addition) {
-    parts.push(group(concat([hardline, path.call(print, "body", 2)])));
+    parts.push(group([hardline, path.call(print, "body", 2)]));
   }
 
-  return group(concat(parts));
+  return group(parts);
 };
 
 export const printIf = printConditional("if");

@@ -1,8 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
-import prettier from "../../prettier";
 import { hasAncestor } from "../../utils";
-
-const { concat } = prettier;
 
 function hasContent(node: Ruby.RegexpLiteral, pattern: RegExp) {
   return node.body.some(
@@ -48,14 +45,8 @@ export const printRegexpLiteral: Plugin.Printer<Ruby.RegexpLiteral> = (
   // If we should be using braces but we have braces in the body of the regexp,
   // then we're just going to resort to using whatever the original content was.
   if (useBraces && hasContent(node, /[{}]/)) {
-    return concat(
-      ([node.beging] as Plugin.Doc[]).concat(docs).concat(node.ending)
-    );
+    return [node.beging, ...docs, node.ending];
   }
 
-  return concat(
-    ([useBraces ? "%r{" : "/"] as Plugin.Doc[])
-      .concat(docs)
-      .concat(useBraces ? "}" : "/", node.ending.slice(1))
-  );
+  return [useBraces ? "%r{" : "/", ...docs, useBraces ? "}" : "/", node.ending.slice(1)];
 };

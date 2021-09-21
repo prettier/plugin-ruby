@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/prettier/plugin-ruby#readme",
   "dependencies": {
-    "prettier": ">=1.10"
+    "prettier": ">=2.3.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
@@ -36,9 +36,6 @@
     "ts-jest": "^27.0.5",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.3"
-  },
-  "resolutions": {
-    "ansi-regex": "^6.0.1"
   },
   "eslintConfig": {
     "extends": [

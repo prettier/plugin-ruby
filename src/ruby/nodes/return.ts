@@ -2,7 +2,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { literal } from "../../utils";
 
-const { concat, group, ifBreak, indent, line, join, softline } = prettier;
+const { group, ifBreak, indent, line, join, softline } = prettier;
 
 // You can't skip the parentheses if you have comments or certain operators with
 // lower precedence than the return keyword.
@@ -70,22 +70,21 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
 
   // If we got the value straight out of the parens, then `parts` would only
   // be a singular doc as opposed to an array.
-  const value = Array.isArray(parts) ? join(concat([",", line]), parts) : parts;
+  const value = Array.isArray(parts) ? join([",", line], parts) : parts;
 
   // We only get here if we have comments somewhere that would prevent us from
   // skipping the parentheses.
   if (args.body.length === 1 && args.body[0].type === "paren") {
-    return concat(["return", value]);
+    return ["return", value];
   }
 
-  return group(
-    concat([
-      "return",
-      ifBreak(parts.length > 1 ? " [" : "(", " "),
-      indent(concat([softline, value])),
-      concat([softline, ifBreak(parts.length > 1 ? "]" : ")", "")])
-    ])
-  );
+  return group([
+    "return",
+    ifBreak(parts.length > 1 ? " [" : "(", " "),
+    indent([softline, value]),
+    softline,
+    ifBreak(parts.length > 1 ? "]" : ")", "")
+  ]);
 };
 
 export const printReturn0 = literal("return");
