@@ -178,10 +178,10 @@ function parseSync(parser: string, source: string, opts: Plugin.Options) {
       @prettier/plugin-ruby uses unix sockets to communicate between the node.js
       process running prettier and an underlying Ruby process used for parsing.
       Unfortunately the command that it tried to use to do that
-      (${netcatConfig.command}) does not support unix sockets. To solve this either
-      uninstall the version of ${netcatConfig.command} that you're using and use a
-      different implementation, or change the value of the rubyNetcatCommand
-      option in your prettier configuration.
+      (${netcatConfig.command}) does not support unix sockets. To solve this
+      either uninstall the version of ${netcatConfig.command} that you're using
+      and use a different implementation, or change the value of the
+      rubyNetcatCommand option in your prettier configuration.
     `);
   }
 

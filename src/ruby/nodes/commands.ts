@@ -6,7 +6,7 @@ const { align, group, ifBreak, indent, join, line, softline } = prettier;
 
 function throwBadDoc(_doc: never): never;
 function throwBadDoc(doc: Plugin.Doc) {
-    throw new Error(`Unknown doc ${doc}`);
+  throw new Error(`Unknown doc ${doc}`);
 }
 
 // Loop through the already created doc nodes and determine the overall length

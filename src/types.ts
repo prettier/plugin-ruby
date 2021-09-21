@@ -431,7 +431,7 @@ export namespace RBS {
     type_params: { params: Param[] }
   };
 
-  type Declaration = (
+  type Declaration = { location: Location } & (
     | { declaration: "alias", name: string, type: Type }
     | { declaration: "class", super_class?: NameAndArgs, members: Member[] } & NameAndTypeParams
     | { declaration: "constant", name: string, type: Type }
@@ -440,9 +440,7 @@ export namespace RBS {
     | { declaration: "module", self_types: NameAndArgs[], members: Member[] } & NameAndTypeParams
   );
 
-  type Root = (
-    { declarations: Declaration[] }
-  );
+  type Root = { declarations: Declaration[], location: Location };
 
   export type Annotation = { string: string, location: Location };
 

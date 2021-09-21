@@ -15,7 +15,7 @@ const {
 // necessary, but since it's in prettier core I'm keeping it here.
 /* istanbul ignore next */
 function replaceNewlines(doc: Plugin.Doc) {
-  return mapDoc(doc, (currentDoc: Plugin.Doc) =>
+  return mapDoc(doc, (currentDoc) =>
     typeof currentDoc === "string" && currentDoc.includes("\n")
       ? currentDoc.split(/(\n)/g).map((v, i) => (i % 2 === 0 ? v : literalline))
       : currentDoc

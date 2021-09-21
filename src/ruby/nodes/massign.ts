@@ -36,8 +36,8 @@ export const printMLHSAddPost: Plugin.Printer<Ruby.MlhsAddPost> = (
   print
 ) => {
   return [
-    ...path.call(print, "body", 0) as Plugin.Doc[],
-    ...path.call(print, "body", 1) as Plugin.Doc[]
+    ...(path.call(print, "body", 0) as Plugin.Doc[]),
+    ...(path.call(print, "body", 1) as Plugin.Doc[])
   ];
 };
 
@@ -52,7 +52,7 @@ export const printMLHSAddStar: Plugin.Printer<Ruby.MlhsAddStar> = (
     parts.push(path.call(print, "body", 1));
   }
 
-  return [...path.call(print, "body", 0) as Plugin.Doc[], parts];
+  return [...(path.call(print, "body", 0) as Plugin.Doc[]), parts];
 };
 
 export const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (
@@ -90,7 +90,7 @@ export const printMRHSAddStar: Plugin.Printer<Ruby.MrhsAddStar> = (
 ) => {
   const [leftDoc, rightDoc] = path.map(print, "body");
 
-  return [...leftDoc as Plugin.Doc[], ["*", rightDoc]];
+  return [...(leftDoc as Plugin.Doc[]), ["*", rightDoc]];
 };
 
 export const printMRHSNewFromArgs: Plugin.Printer<Ruby.MrhsNewFromArgs> = (

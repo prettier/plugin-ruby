@@ -233,22 +233,22 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
         const { attributes, dynamic_attributes } = value;
         const parts = [];
 
-        // If we have a tag that isn't a div, then we need to print out that name of
-        // that tag first. If it is a div, first we'll check if there are any other
-        // things that would force us to print out the div explicitly, and otherwise
-        // we'll leave it off.
+        // If we have a tag that isn't a div, then we need to print out that
+        // name of that tag first. If it is a div, first we'll check if there
+        // are any other things that would force us to print out the div
+        // explicitly, and otherwise we'll leave it off.
         if (value.name !== "div") {
           parts.push(`%${value.name}`);
         }
 
-        // If we have a class attribute, then we're going to print that here using
-        // the special class syntax.
+        // If we have a class attribute, then we're going to print that here
+        // using the special class syntax.
         if (attributes.class) {
           parts.push(`.${attributes.class.replace(/ /g, ".")}`);
         }
 
-        // If we have an id attribute, then we're going to print that here using the
-        // special id syntax.
+        // If we have an id attribute, then we're going to print that here using
+        // the special id syntax.
         if (attributes.id) {
           parts.push(`#${attributes.id}`);
         }
@@ -274,8 +274,9 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
           );
         }
 
-        // If there are any static attributes that are not class or id (because we
-        // already took care of those), then we're going to print them out here.
+        // If there are any static attributes that are not class or id (because
+        // we already took care of those), then we're going to print them out
+        // here.
         const staticAttributes = Object.keys(attributes).filter(
           (name) => !["class", "id"].includes(name)
         );
@@ -305,20 +306,17 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
           if (typeof dynamic_attributes.old === "string") {
             parts.push(dynamic_attributes.old);
           } else {
-            const attrOptions = {
-              // This is kind of a total hack in that I don't think you're really
-              // supposed to directly use `path.stack`, but it's the easiest way to
-              // get the root node without having to know how many levels deep we
-              // are.
-              supportsMultiline: (path.stack[0] as HAML.Root)
-                .supports_multiline,
-              headerLength: parts.join("").length
-            };
+            // This is kind of a total hack in that I don't think you're
+            // really supposed to directly use `path.stack`, but it's the
+            // easiest way to get the root node without having to know how
+            // many levels deep we are.
+            const root = path.stack[0] as HAML.Root;
 
             parts.push(
               printAttributes(dynamic_attributes.old, {
                 ...opts,
-                ...attrOptions
+                supportsMultiline: root.supports_multiline,
+                headerLength: parts.join("").length
               })
             );
           }
@@ -355,8 +353,8 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
           );
         }
 
-        // In case none of the other if statements have matched and we're printing
-        // a div, we need to explicitly add it back into the array.
+        // In case none of the other if statements have matched and we're
+        // printing a div, we need to explicitly add it back into the array.
         if (parts.length === 0 && value.name === "div") {
           parts.push("%div");
         }
@@ -368,8 +366,8 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
     }
 
     // It's common to a couple of nodes to attach nested child nodes on the
-    // children property. This utility prints them out grouped together with their
-    // parent node docs.
+    // children property. This utility prints them out grouped together with
+    // their parent node docs.
     function printWithChildren(
       node: HAML.Comment | HAML.Script | HAML.Tag,
       docs: Plugin.Doc
@@ -384,8 +382,8 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
       ]);
     }
   },
-  // This function handles adding the format pragma to a source string. This is an
-  // optional workflow for incremental adoption.
+  // This function handles adding the format pragma to a source string. This is
+  // an optional workflow for incremental adoption.
   insertPragma(text) {
     return `-# @format${text.startsWith("-#") ? "\n" : "\n\n"}${text}`;
   }

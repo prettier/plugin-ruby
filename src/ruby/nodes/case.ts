@@ -12,13 +12,7 @@ export const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
     parts.push(" ", path.call(print, "body", 0));
   }
 
-  return [
-    ...parts,
-    hardline,
-    path.call(print, "body", 1),
-    hardline,
-    "end"
-  ];
+  return [...parts, hardline, path.call(print, "body", 1), hardline, "end"];
 };
 
 export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
@@ -35,7 +29,12 @@ export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
 
         // Pull off the last element and make it concat with a comma so that
         // we can maintain alternating lines and docs.
-        return [...accum.slice(0, -1), [accum[accum.length - 1], ","], line, pred];
+        return [
+          ...accum.slice(0, -1),
+          [accum[accum.length - 1], ","],
+          line,
+          pred
+        ];
       },
       [] as Plugin.Doc[]
     )

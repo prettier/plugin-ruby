@@ -48,5 +48,10 @@ export const printRegexpLiteral: Plugin.Printer<Ruby.RegexpLiteral> = (
     return [node.beging, ...docs, node.ending];
   }
 
-  return [useBraces ? "%r{" : "/", ...docs, useBraces ? "}" : "/", node.ending.slice(1)];
+  return [
+    useBraces ? "%r{" : "/",
+    ...docs,
+    useBraces ? "}" : "/",
+    node.ending.slice(1)
+  ];
 };

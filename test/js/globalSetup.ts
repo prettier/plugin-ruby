@@ -21,10 +21,10 @@ function globalSetup() {
     process.env.PRETTIER_RUBY_HOST = parserArgs[1];
   }
 
-  (global as any).__ASYNC_PARSER__ = spawn(
-    "ruby",
-    ["./src/parser/server.rb", ...parserArgs]
-  );
+  (global as any).__ASYNC_PARSER__ = spawn("ruby", [
+    "./src/parser/server.rb",
+    ...parserArgs
+  ]);
 }
 
 export default globalSetup;

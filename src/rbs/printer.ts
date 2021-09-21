@@ -18,21 +18,20 @@ function getSortedKeys(object: Record<string, { type: RBS.Type }>) {
 
 // In some cases, we want to just defer to whatever was in the source.
 function getSource(node: { location: RBS.Location }, opts: Plugin.Options) {
-  return opts.originalText.slice(
-    node.location.start_pos,
-    node.location.end_pos
-  );
+  const { location } = node;
+  return opts.originalText.slice(location.start_pos, location.end_pos);
 }
 
 const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
-  // This is the generic node print function, used to convert any node in the AST
-  // into its equivalent Doc representation.
+  // This is the generic node print function, used to convert any node in the
+  // AST into its equivalent Doc representation.
   print(path, opts, print) {
     const node = path.getValue();
     let doc = null;
 
     if (node.declarations) {
-      // Prints out the root of the tree, which includes zero or more declarations.
+      // Prints out the root of the tree, which includes zero or more
+      // declarations.
       return [
         join([hardline, hardline], path.map(print, "declarations")),
         hardline
@@ -189,8 +188,8 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
       throw new Error(`Unsupported node encountered:\n${ast}`);
     }
 
-    // An annotation can be attached to most kinds of nodes, and should be printed
-    // using %a{}. Certain nodes can't have annotations at all.
+    // An annotation can be attached to most kinds of nodes, and should be
+    // printed using %a{}. Certain nodes can't have annotations at all.
     if (node.annotations && node.annotations.length > 0) {
       doc = [
         join(
@@ -198,9 +197,9 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           path.map((annotationPath: Plugin.Path<RBS.Annotation>) => {
             const annotationNode = annotationPath.getValue();
 
-            // If there are already braces inside the annotation, then we're just
-            // going to print out the original string to avoid having to escape
-            // anything.
+            // If there are already braces inside the annotation, then we're
+            // just going to print out the original string to avoid having to
+            // escape anything.
             if (/[{}]/.test(annotationNode.string)) {
               return getSource(annotationNode, opts);
             }
@@ -234,9 +233,9 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
     // Prints out a string in the source, which looks like:
     // 'foo'
     function printString(node: RBS.Literal) {
-      // We're going to go straight to the source here, as if we don't then we're
-      // going to end up with the result of String#inspect, which does weird
-      // things to escape sequences.
+      // We're going to go straight to the source here, as if we don't then
+      // we're going to end up with the result of String#inspect, which does
+      // weird things to escape sequences.
       const value = getSource(node, opts);
 
       // Get the quote that was used in the source and the quote that we want to
@@ -294,8 +293,8 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
             "?"
           ];
         case "tuple":
-          // If we don't have any sub types, we explicitly need the space in between
-          // the brackets to not confuse the parser.
+          // If we don't have any sub types, we explicitly need the space in
+          // between the brackets to not confuse the parser.
           if (node.types.length === 0) {
             return "[ ]";
           }
@@ -593,8 +592,8 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
     }
   },
   // This is an escape-hatch to ignore nodes in the tree. If you have a comment
-  // that includes this pattern, then the entire node will be ignored and just the
-  // original source will be printed out.
+  // that includes this pattern, then the entire node will be ignored and just
+  // the original source will be printed out.
   hasPrettierIgnore(path) {
     const node = path.getValue();
 
@@ -602,8 +601,8 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
       (node.comment && node.comment.string.includes("prettier-ignore")) || false
     );
   },
-  // This function handles adding the format pragma to a source string. This is an
-  // optional workflow for incremental adoption.
+  // This function handles adding the format pragma to a source string. This is
+  // an optional workflow for incremental adoption.
   insertPragma(text) {
     return `# @format\n${text}`;
   }
