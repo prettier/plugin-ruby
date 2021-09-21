@@ -2,37 +2,134 @@ import type { Plugin, Ruby } from "../types";
 
 import { printAlias } from "./nodes/alias";
 import { printAref, printArefField } from "./nodes/aref";
-import { printArgParen, printArgs, printArgsAddBlock, printArgsAddStar, printBlockArg } from "./nodes/args";
+import {
+  printArgParen,
+  printArgs,
+  printArgsAddBlock,
+  printArgsAddStar,
+  printBlockArg
+} from "./nodes/args";
 import { printArray, printWord } from "./nodes/arrays";
-import { printAssign, printOpAssign, printVarField, printVarRef } from "./nodes/assign";
+import {
+  printAssign,
+  printOpAssign,
+  printVarField,
+  printVarRef
+} from "./nodes/assign";
 import { printBlockVar, printBraceBlock, printDoBlock } from "./nodes/blocks";
-import { printCall, printCallContainer, printMethodAddArg, printMethodAddBlock } from "./nodes/calls";
+import {
+  printCall,
+  printCallContainer,
+  printMethodAddArg,
+  printMethodAddBlock
+} from "./nodes/calls";
 import { printCase, printWhen } from "./nodes/case";
 import { printClass, printModule, printSClass } from "./nodes/class";
 import { printCommand, printCommandCall } from "./nodes/commands";
-import { printElse, printElsif, printIf, printIfModifier, printTernary, printUnless, printUnlessModifier } from "./nodes/conditionals";
-import { printConstPath, printConstRef, printDefined, printField, printTopConst } from "./nodes/constants";
+import {
+  printElse,
+  printElsif,
+  printIf,
+  printIfModifier,
+  printTernary,
+  printUnless,
+  printUnlessModifier
+} from "./nodes/conditionals";
+import {
+  printConstPath,
+  printConstRef,
+  printDefined,
+  printField,
+  printTopConst
+} from "./nodes/constants";
 import { printBreak, printNext, printYield, printYield0 } from "./nodes/flow";
-import { printAssocNew, printAssocSplat, printHash, printHashContents } from "./nodes/hashes";
+import {
+  printAssocNew,
+  printAssocSplat,
+  printHash,
+  printHashContents
+} from "./nodes/hashes";
 import { printHeredoc } from "./nodes/heredocs";
 import { printBEGIN, printEND } from "./nodes/hooks";
 import { printInt } from "./nodes/ints";
 import { printLambda } from "./nodes/lambdas";
-import { printFor, printUntil, printUntilModifer, printWhile, printWhileModifier } from "./nodes/loops";
-import { printMAssign, printMLHS, printMLHSAddPost, printMLHSAddStar, printMLHSParen, printMRHS, printMRHSAddStar, printMRHSNewFromArgs } from "./nodes/massign";
-import { printAccessControl, printDef, printDefs, printSingleLineMethod } from "./nodes/methods";
-import { printBinary, printDot2, printDot3, printUnary } from "./nodes/operators";
-import { printArgsForward, printKeywordRestParam, printParams, printRestParam } from "./nodes/params";
-import { printAryPtn, printFndPtn, printHshPtn, printIn, printRAssign } from "./nodes/patterns";
+import {
+  printFor,
+  printUntil,
+  printUntilModifer,
+  printWhile,
+  printWhileModifier
+} from "./nodes/loops";
+import {
+  printMAssign,
+  printMLHS,
+  printMLHSAddPost,
+  printMLHSAddStar,
+  printMLHSParen,
+  printMRHS,
+  printMRHSAddStar,
+  printMRHSNewFromArgs
+} from "./nodes/massign";
+import {
+  printAccessControl,
+  printDef,
+  printDefs,
+  printSingleLineMethod
+} from "./nodes/methods";
+import {
+  printBinary,
+  printDot2,
+  printDot3,
+  printUnary
+} from "./nodes/operators";
+import {
+  printArgsForward,
+  printKeywordRestParam,
+  printParams,
+  printRestParam
+} from "./nodes/params";
+import {
+  printAryPtn,
+  printFndPtn,
+  printHshPtn,
+  printIn,
+  printRAssign
+} from "./nodes/patterns";
 import { printRegexpLiteral } from "./nodes/regexp";
-import { printBegin, printEnsure, printRedo, printRescue, printRescueEx, printRescueMod, printRetry } from "./nodes/rescue";
+import {
+  printBegin,
+  printEnsure,
+  printRedo,
+  printRescue,
+  printRescueEx,
+  printRescueMod,
+  printRetry
+} from "./nodes/rescue";
 import { printReturn, printReturn0 } from "./nodes/return";
-import { printBodyStmt, printComment, printEndContent, printParen, printProgram, printStmts } from "./nodes/statements";
-import { printChar, printDynaSymbol, printStringConcat, printStringDVar, printStringEmbExpr, printStringLiteral, printSymbolLiteral, printXStringLiteral } from "./nodes/strings";
+import {
+  printBodyStmt,
+  printComment,
+  printEndContent,
+  printParen,
+  printProgram,
+  printStmts
+} from "./nodes/statements";
+import {
+  printChar,
+  printDynaSymbol,
+  printStringConcat,
+  printStringDVar,
+  printStringEmbExpr,
+  printStringLiteral,
+  printSymbolLiteral,
+  printXStringLiteral
+} from "./nodes/strings";
 import { printSuper, printZSuper } from "./nodes/super";
 import { printUndef } from "./nodes/undef";
 
-const nodes: Partial<{ [_T in Ruby.AnyNode["type"] | "@comment"]: Plugin.Printer<any> }> = {
+const nodes: Partial<{
+  [_T in Ruby.AnyNode["type"] | "@comment"]: Plugin.Printer<any>;
+}> = {
   "@__end__": printEndContent,
   "@CHAR": printChar,
   "@comment": printComment,

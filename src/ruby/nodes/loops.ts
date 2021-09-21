@@ -1,6 +1,10 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { containsAssignment, inlineEnsureParens, isEmptyStmts } from "../../utils";
+import {
+  containsAssignment,
+  inlineEnsureParens,
+  isEmptyStmts
+} from "../../utils";
 
 const {
   align,
@@ -14,7 +18,12 @@ const {
   softline
 } = prettier;
 
-function printLoop(keyword: string, modifier: boolean): Plugin.Printer<Ruby.While | Ruby.WhileModifier | Ruby.Until | Ruby.UntilModifier> {
+function printLoop(
+  keyword: string,
+  modifier: boolean
+): Plugin.Printer<
+  Ruby.While | Ruby.WhileModifier | Ruby.Until | Ruby.UntilModifier
+> {
   return function printLoopWithOptions(path, { rubyModifier }, print) {
     const [_predicate, stmts] = path.getValue().body;
 

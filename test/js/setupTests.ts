@@ -40,11 +40,18 @@ function parseAsync(parser: string, source: string) {
   });
 }
 
-function checkFormat(before: Code, after: Code, config: Partial<Plugin.Options>) {
+function checkFormat(
+  before: Code,
+  after: Code,
+  config: Partial<Plugin.Options>
+) {
   const parser = (before as any).parser || "ruby";
   const originalText = (before as any).code || before;
 
-  const opts = Object.assign({ parser, plugins: [plugin], originalText }, config);
+  const opts = Object.assign(
+    { parser, plugins: [plugin], originalText },
+    config
+  );
 
   return new Promise((resolve, reject) => {
     if (
@@ -74,7 +81,11 @@ function checkFormat(before: Code, after: Code, config: Partial<Plugin.Options>)
 }
 
 expect.extend({
-  toChangeFormat(before: Code, after: Code, config: Partial<Plugin.Options> = {}) {
+  toChangeFormat(
+    before: Code,
+    after: Code,
+    config: Partial<Plugin.Options> = {}
+  ) {
     return checkFormat(before, (after as any).code || after, config);
   },
   toMatchFormat(before: Code, config: Partial<Plugin.Options> = {}) {
@@ -86,8 +97,13 @@ declare global {
   namespace jest {
     // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     interface Matchers<R> {
-      toChangeFormat(_after: Code, _config?: Partial<Plugin.Options>): Promise<CustomMatcherResult>;
-      toMatchFormat(_config?: Partial<Plugin.Options>): Promise<CustomMatcherResult>;
+      toChangeFormat(
+        _after: Code,
+        _config?: Partial<Plugin.Options>
+      ): Promise<CustomMatcherResult>;
+      toMatchFormat(
+        _config?: Partial<Plugin.Options>
+      ): Promise<CustomMatcherResult>;
     }
   }
 }

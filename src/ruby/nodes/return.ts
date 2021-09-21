@@ -2,15 +2,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { literal } from "../../utils";
 
-const {
-  concat,
-  group,
-  ifBreak,
-  indent,
-  line,
-  join,
-  softline
-} = prettier;
+const { concat, group, ifBreak, indent, line, join, softline } = prettier;
 
 // You can't skip the parentheses if you have comments or certain operators with
 // lower precedence than the return keyword.
@@ -71,7 +63,10 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
 
   // Now that we've established which actual node is the arguments to return,
   // we grab it out of the path by diving down the steps that we've set up.
-  const parts = path.call.apply(path, ([print] as CallArgs).concat(steps) as CallArgs) as Plugin.Doc[];
+  const parts = path.call.apply(
+    path,
+    ([print] as CallArgs).concat(steps) as CallArgs
+  ) as Plugin.Doc[];
 
   // If we got the value straight out of the parens, then `parts` would only
   // be a singular doc as opposed to an array.

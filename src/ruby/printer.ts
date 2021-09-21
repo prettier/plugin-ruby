@@ -38,7 +38,10 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
           .concat(node.body[3]);
       case "hshptn": {
         const pairs = node.body[1];
-        const values = pairs.reduce((left: any, right: any) => left.concat(right), []);
+        const values = pairs.reduce(
+          (left: any, right: any) => left.concat(right),
+          []
+        );
 
         return [node.body[0]].concat(values).concat(node.body[2]);
       }
@@ -76,7 +79,9 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
       }
       default: {
         if (Array.isArray(node.body)) {
-          return node.body.filter((child: any) => child && typeof child === "object");
+          return node.body.filter(
+            (child: any) => child && typeof child === "object"
+          );
         }
         return [];
       }
@@ -89,8 +94,10 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
     const node = path.getValue();
 
     return (
-      node.comments &&
-      node.comments.some((comment) => comment.value.includes("prettier-ignore")) ||
+      (node.comments &&
+        node.comments.some((comment) =>
+          comment.value.includes("prettier-ignore")
+        )) ||
       false
     );
   },

@@ -21,7 +21,10 @@ function isCall(node: Ruby.CallOperator) {
 //     [1, 2, 3].map(&:to_s)
 //
 // This works with `do` blocks as well.
-function toProc(path: Plugin.Path<Ruby.Args | Ruby.MethodAddBlock>, node: Ruby.BraceBlock | Ruby.DoBlock) {
+function toProc(
+  path: Plugin.Path<Ruby.Args | Ruby.MethodAddBlock>,
+  node: Ruby.BraceBlock | Ruby.DoBlock
+) {
   const [variables, blockContents] = node.body;
 
   // Ensure that there are variables being passed to this block.

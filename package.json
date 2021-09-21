@@ -4,9 +4,9 @@
   "description": "prettier plugin for the Ruby programming language",
   "main": "dist/plugin.js",
   "scripts": {
-    "check-format": "prettier --check '**/*'",
+    "checkFormat": "prettier --check '**/*'",
     "lint": "eslint --cache .",
-    "prepublishOnly": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "tsc -p tsconfig.build.json && cp src/parser/{netcat.js,server.rb} dist/parser && cp src/haml/parser.rb dist/haml && cp src/rbs/parser.rb dist/rbs && cp src/ruby/parser.rb dist/ruby",
     "test": "jest"
   },
   "repository": {

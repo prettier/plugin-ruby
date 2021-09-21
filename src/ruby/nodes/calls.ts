@@ -3,25 +3,17 @@ import prettier from "../../prettier";
 import { makeCall, noIndent } from "../../utils";
 import toProc from "../toProc";
 
-const {
-  concat,
-  group,
-  hardline,
-  ifBreak,
-  indent,
-  join,
-  softline
-} = prettier;
+const { concat, group, hardline, ifBreak, indent, join, softline } = prettier;
 
 const chained = ["call", "method_add_arg", "method_add_block"];
 
 // We decorate these nodes with a bunch of extra stuff so that we can display
 // nice method chains.
 type Chain = {
-  chain?: number,
-  callChain?: number,
-  breakDoc?: Plugin.Doc[],
-  firstReceiverType?: string
+  chain?: number;
+  callChain?: number;
+  breakDoc?: Plugin.Doc[];
+  firstReceiverType?: string;
 };
 
 type ChainedCall = Ruby.Call & Chain;
@@ -90,11 +82,18 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   return group(concat([receiverDoc, group(indent(rightSideDoc))]));
 };
 
-export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (path, opts, print) => {
+export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
+  path,
+  opts,
+  print
+) => {
   const node = path.getValue();
 
   const [methodNode, argNode] = node.body;
-  const [methodDoc, argsDoc] = path.map(print, "body") as [Plugin.Doc, Plugin.Doc[]];
+  const [methodDoc, argsDoc] = path.map(print, "body") as [
+    Plugin.Doc,
+    Plugin.Doc[]
+  ];
 
   // You can end up here if you have a method with a ? ending, presumably
   // because the parser knows that it cannot be a local variable. You can also
@@ -168,7 +167,11 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (path, opt
 
   // If we're at the top of a chain, then we're going to print out a nice
   // multi-line layout if this doesn't break into multiple lines.
-  if (!chained.includes(parentNode.type) && (node.chain || 0) >= threshold && node.breakDoc) {
+  if (
+    !chained.includes(parentNode.type) &&
+    (node.chain || 0) >= threshold &&
+    node.breakDoc
+  ) {
     // This is pretty specialized behavior. Basically if we're at the top of a
     // chain but we've only had method calls without arguments and now we have
     // arguments, then we're effectively trying to call a method with arguments
@@ -199,7 +202,11 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (path, opt
   return concat([methodDoc, " ", join(", ", argsDoc), " "]);
 };
 
-export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (path, opts, print) => {
+export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (
+  path,
+  opts,
+  print
+) => {
   const node = path.getValue();
 
   const [callNode, blockNode] = node.body;
@@ -249,6 +256,10 @@ export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (path,
   return concat([callDoc, blockDoc]);
 };
 
-export const printCallContainer: Plugin.Printer<Ruby.Fcall | Ruby.VCall> = (path, opts, print) => {
+export const printCallContainer: Plugin.Printer<Ruby.Fcall | Ruby.VCall> = (
+  path,
+  opts,
+  print
+) => {
   return path.call(print, "body", 0);
 };

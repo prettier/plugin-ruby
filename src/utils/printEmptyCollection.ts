@@ -3,7 +3,9 @@ import prettier from "../prettier";
 
 const { concat, group, hardline, indent, join, line } = prettier;
 
-function containedWithin(node: Ruby.Array | Ruby.Hash): (_comment: Ruby.Comment) => boolean {
+function containedWithin(
+  node: Ruby.Array | Ruby.Hash
+): (_comment: Ruby.Comment) => boolean {
   return function containedWithinNode(comment) {
     return comment.sc >= node.sc && comment.ec <= node.ec;
   };
@@ -14,7 +16,12 @@ function containedWithin(node: Ruby.Array | Ruby.Hash): (_comment: Ruby.Comment)
 // this by having a child node inside the array that gets the comments attached
 // to it, but that requires modifying the parser. Instead, we can just manually
 // print out the non-leading comments here.
-function printEmptyCollection(path: Plugin.Path<Ruby.Array | Ruby.Hash>, opts: Plugin.Options, startToken: string, endToken: string) {
+function printEmptyCollection(
+  path: Plugin.Path<Ruby.Array | Ruby.Hash>,
+  opts: Plugin.Options,
+  startToken: string,
+  endToken: string
+) {
   const node = path.getValue();
   const containedWithinNode = containedWithin(node);
 

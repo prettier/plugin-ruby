@@ -5,7 +5,7 @@ import os from "os";
 import path from "path";
 import process from "process";
 
-type NetcatConfig = { command: string, args: string[] };
+type NetcatConfig = { command: string; args: string[] };
 
 let netcatConfig: NetcatConfig;
 let parserArgs: undefined | string | string[] = process.env.PRETTIER_RUBY_HOST;

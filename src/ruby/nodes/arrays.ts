@@ -2,15 +2,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { getTrailingComma, printEmptyCollection } from "../../utils";
 
-const {
-  concat,
-  group,
-  ifBreak,
-  indent,
-  join,
-  line,
-  softline
-} = prettier;
+const { concat, group, ifBreak, indent, join, line, softline } = prettier;
 
 // Checks that every argument within this args node is a string_literal node
 // that has no spaces or interpolations. This means we're dealing with an array

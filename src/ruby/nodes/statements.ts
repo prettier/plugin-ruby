@@ -16,7 +16,11 @@ const {
   trim
 } = prettier;
 
-export const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (path, opts, print) => {
+export const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (
+  path,
+  opts,
+  print
+) => {
   const [stmts, rescue, elseClause, ensure] = path.getValue().body;
   const parts = [];
 
@@ -74,16 +78,28 @@ export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
   );
 };
 
-export const printEndContent: Plugin.Printer<Ruby.EndContent> = (path, _opts, _print) => {
+export const printEndContent: Plugin.Printer<Ruby.EndContent> = (
+  path,
+  _opts,
+  _print
+) => {
   const { body } = path.getValue();
   return concat([trim, "__END__", literalline, body]);
 };
 
-export const printComment: Plugin.Printer<Ruby.Comment> = (path, opts, _print) => {
+export const printComment: Plugin.Printer<Ruby.Comment> = (
+  path,
+  opts,
+  _print
+) => {
   return opts.printer.printComment(path, opts);
 };
 
-export const printProgram: Plugin.Printer<Ruby.Program> = (path, opts, print) => {
+export const printProgram: Plugin.Printer<Ruby.Program> = (
+  path,
+  opts,
+  print
+) => {
   return concat([join(hardline, path.map(print, "body")), hardline]);
 };
 

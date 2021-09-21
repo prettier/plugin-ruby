@@ -1,6 +1,6 @@
 #!./node_modules/.bin/ts-node
 
-import fs from "fs"
+import fs from "fs";
 import prettier from "prettier";
 
 import plugin from "../src/plugin";

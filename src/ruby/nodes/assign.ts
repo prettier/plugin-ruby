@@ -23,7 +23,11 @@ export const printAssign: Plugin.Printer<Ruby.Assign> = (path, opts, print) => {
   return group(concat([targetDoc, " =", indent(concat([line, rightSideDoc]))]));
 };
 
-export const printOpAssign: Plugin.Printer<Ruby.Opassign> = (path, opts, print) => {
+export const printOpAssign: Plugin.Printer<Ruby.Opassign> = (
+  path,
+  opts,
+  print
+) => {
   return group(
     concat([
       path.call(print, "body", 0),
@@ -34,7 +38,11 @@ export const printOpAssign: Plugin.Printer<Ruby.Opassign> = (path, opts, print) 
   );
 };
 
-export const printVarField: Plugin.Printer<Ruby.VarField> = (path, opts, print) => {
+export const printVarField: Plugin.Printer<Ruby.VarField> = (
+  path,
+  opts,
+  print
+) => {
   return path.getValue().body ? path.call(print, "body", 0) : "";
 };
 

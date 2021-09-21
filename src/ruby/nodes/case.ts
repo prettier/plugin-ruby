@@ -2,15 +2,7 @@ import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 
-const {
-  align,
-  concat,
-  fill,
-  group,
-  hardline,
-  indent,
-  line
-} = prettier;
+const { align, concat, fill, group, hardline, indent, line } = prettier;
 
 export const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
   const statement: Plugin.Doc[] = ["case"];
@@ -32,17 +24,20 @@ export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
   // The `fill` builder command expects an array of docs alternating with
   // line breaks. This is so it can loop through and determine where to break.
   const preds = fill(
-    (path.call(print, "body", 0) as Plugin.Doc[]).reduce((accum: Plugin.Doc[], pred, index) => {
-      if (index === 0) {
-        return [pred];
-      }
+    (path.call(print, "body", 0) as Plugin.Doc[]).reduce(
+      (accum: Plugin.Doc[], pred, index) => {
+        if (index === 0) {
+          return [pred];
+        }
 
-      // Pull off the last element and make it concat with a comma so that
-      // we can maintain alternating lines and docs.
-      return accum
-        .slice(0, -1)
-        .concat([concat([accum![accum.length - 1], ","]), line, pred]);
-    }, [] as Plugin.Doc[])
+        // Pull off the last element and make it concat with a comma so that
+        // we can maintain alternating lines and docs.
+        return accum
+          .slice(0, -1)
+          .concat([concat([accum![accum.length - 1], ","]), line, pred]);
+      },
+      [] as Plugin.Doc[]
+    )
   );
 
   const stmts = path.call(print, "body", 1) as Prettier.doc.builders.Concat;

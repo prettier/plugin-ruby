@@ -1,7 +1,7 @@
 import type { Plugin, Ruby } from "../types";
 
 type Callable = {
-  body: [any, Ruby.CallOperator, ...any[]]
+  body: [any, Ruby.CallOperator, ...any[]];
 };
 
 const makeCall: Plugin.Printer<Callable> = (path, opts, print) => {

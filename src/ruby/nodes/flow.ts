@@ -22,9 +22,14 @@ const unskippableParens = [
   "while_mod"
 ];
 
-type CallArgs = [Plugin.Print, ...(PropertyKey[])];
+type CallArgs = [Plugin.Print, ...PropertyKey[]];
 
-function maybeHandleParens(path: Plugin.Path<Ruby.Break | Ruby.Next>, print: Plugin.Print, keyword: string, steps: PropertyKey[]) {
+function maybeHandleParens(
+  path: Plugin.Path<Ruby.Break | Ruby.Next>,
+  print: Plugin.Print,
+  keyword: string,
+  steps: PropertyKey[]
+) {
   const node = nodeDive(path.getValue(), steps);
   if (node.type !== "paren") {
     return null;

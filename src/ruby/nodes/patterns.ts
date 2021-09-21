@@ -1,15 +1,7 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 
-const {
-  align,
-  concat,
-  group,
-  hardline,
-  indent,
-  join,
-  line
-} = prettier;
+const { align, concat, group, hardline, indent, join, line } = prettier;
 
 const patterns = ["aryptn", "binary", "fndptn", "hshptn", "rassign"];
 
@@ -137,7 +129,11 @@ export const printIn: Plugin.Printer<Ruby.In> = (path, opts, print) => {
   return group(concat(parts));
 };
 
-export const printRAssign: Plugin.Printer<Ruby.Rassign> = (path, opts, print) => {
+export const printRAssign: Plugin.Printer<Ruby.Rassign> = (
+  path,
+  opts,
+  print
+) => {
   const { keyword } = path.getValue();
   const [leftDoc, rightDoc] = path.map(print, "body");
 

@@ -13,7 +13,11 @@ const {
   softline
 } = prettier;
 
-export const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (path, opts, print) => {
+export const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (
+  path,
+  opts,
+  print
+) => {
   const parts = ["|", removeLines(path.call(print, "body", 0))];
 
   // The second part of this node is a list of optional block-local variables
@@ -25,7 +29,9 @@ export const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (path, opts, print) 
   return concat(parts);
 };
 
-function printBlock(braces: boolean): Plugin.Printer<Ruby.BraceBlock | Ruby.DoBlock> {
+function printBlock(
+  braces: boolean
+): Plugin.Printer<Ruby.BraceBlock | Ruby.DoBlock> {
   return function printBlockWithBraces(path, opts, print) {
     const [variables, statements] = path.getValue().body;
     const stmts =

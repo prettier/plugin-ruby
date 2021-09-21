@@ -3,15 +3,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { literal } from "../../utils";
 
-const {
-  align,
-  concat,
-  group,
-  hardline,
-  indent,
-  join,
-  line
-} = prettier;
+const { align, concat, group, hardline, indent, join, line } = prettier;
 
 export const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
   return concat([
@@ -58,7 +50,11 @@ export const printRescue: Plugin.Printer<Ruby.Rescue> = (path, opts, print) => {
 
 // This is a container node that we're adding into the AST that isn't present in
 // Ripper solely so that we have a nice place to attach inline comments.
-export const printRescueEx: Plugin.Printer<Ruby.RescueEx> = (path, opts, print) => {
+export const printRescueEx: Plugin.Printer<Ruby.RescueEx> = (
+  path,
+  opts,
+  print
+) => {
   const [exception, variable] = path.getValue().body;
   const parts = [];
 
@@ -80,7 +76,11 @@ export const printRescueEx: Plugin.Printer<Ruby.RescueEx> = (path, opts, print) 
   return group(concat(parts));
 };
 
-export const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (path, opts, print) => {
+export const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (
+  path,
+  opts,
+  print
+) => {
   const [statementDoc, valueDoc] = path.map(print, "body");
 
   return concat([

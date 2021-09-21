@@ -2,16 +2,11 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { literal } from "../../utils";
 
-const {
-  concat,
-  group,
-  join,
-  indent,
-  line,
-  softline
-} = prettier;
+const { concat, group, join, indent, line, softline } = prettier;
 
-function printRestParamSymbol(symbol: string): Plugin.Printer<Ruby.KeywordRestParam | Ruby.RestParam> {
+function printRestParamSymbol(
+  symbol: string
+): Plugin.Printer<Ruby.KeywordRestParam | Ruby.RestParam> {
   return function printRestParamWithSymbol(path, opts, print) {
     return path.getValue().body[0]
       ? concat([symbol, path.call(print, "body", 0)])
@@ -94,7 +89,12 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   // that we could handle them here and get nicer formatting.
   if (["lambda", "paren"].includes(path.getParentNode().type)) {
     return group(
-      concat(["(", indent(concat(([softline] as Plugin.Doc[]).concat(contents))), softline, ")"])
+      concat([
+        "(",
+        indent(concat(([softline] as Plugin.Doc[]).concat(contents))),
+        softline,
+        ")"
+      ])
     );
   }
 

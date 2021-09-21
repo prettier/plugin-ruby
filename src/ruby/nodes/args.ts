@@ -5,15 +5,7 @@ import prettier from "../../prettier";
 import { getTrailingComma } from "../../utils";
 import toProc from "../toProc";
 
-const {
-  concat,
-  group,
-  ifBreak,
-  indent,
-  join,
-  line,
-  softline
-} = prettier;
+const { concat, group, ifBreak, indent, join, line, softline } = prettier;
 
 const noTrailingComma = ["command", "command_call"];
 
@@ -33,7 +25,11 @@ function getArgParenTrailingComma(node: Ruby.Args | Ruby.ArgsAddBlock) {
   return ifBreak(",", "");
 }
 
-export const printArgParen: Plugin.Printer<Ruby.ArgParen> = (path, opts, print) => {
+export const printArgParen: Plugin.Printer<Ruby.ArgParen> = (
+  path,
+  opts,
+  print
+) => {
   const argsNode = path.getValue().body[0];
 
   if (argsNode === null) {
@@ -72,7 +68,11 @@ export const printArgParen: Plugin.Printer<Ruby.ArgParen> = (path, opts, print) 
   );
 };
 
-export const printArgs: Plugin.Printer<Ruby.Args> = (path, { rubyToProc }, print) => {
+export const printArgs: Plugin.Printer<Ruby.Args> = (
+  path,
+  { rubyToProc },
+  print
+) => {
   const args = path.map(print, "body");
 
   // Don't bother trying to do any kind of fancy toProc transform if the
@@ -111,7 +111,11 @@ export const printArgs: Plugin.Printer<Ruby.Args> = (path, { rubyToProc }, print
   return args;
 };
 
-export const printArgsAddBlock: Plugin.Printer<Ruby.ArgsAddBlock> = (path, opts, print) => {
+export const printArgsAddBlock: Plugin.Printer<Ruby.ArgsAddBlock> = (
+  path,
+  opts,
+  print
+) => {
   const node = path.getValue();
   const blockNode = node.body[1];
 
@@ -157,7 +161,11 @@ export const printArgsAddBlock: Plugin.Printer<Ruby.ArgsAddBlock> = (path, opts,
   return parts;
 };
 
-export const printArgsAddStar: Plugin.Printer<Ruby.ArgsAddStar> = (path, opts, print) => {
+export const printArgsAddStar: Plugin.Printer<Ruby.ArgsAddStar> = (
+  path,
+  opts,
+  print
+) => {
   let docs: Plugin.Doc[] = [];
 
   path.each((argPath, argIndex) => {
@@ -217,6 +225,10 @@ export const printArgsAddStar: Plugin.Printer<Ruby.ArgsAddStar> = (path, opts, p
   return docs;
 };
 
-export const printBlockArg: Plugin.Printer<Ruby.Blockarg> = (path, opts, print) => {
+export const printBlockArg: Plugin.Printer<Ruby.Blockarg> = (
+  path,
+  opts,
+  print
+) => {
   return concat(["&", path.call(print, "body", 0)]);
 };

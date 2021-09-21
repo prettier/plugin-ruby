@@ -6,17 +6,15 @@ import {
   skipAssignIndent
 } from "../../utils";
 
-const {
-  concat,
-  group,
-  ifBreak,
-  indent,
-  join,
-  line
-} = prettier;
+const { concat, group, ifBreak, indent, join, line } = prettier;
 
-type KeyPrinter = (_path: Plugin.Path<Ruby.Label | Ruby.SymbolLiteral | Ruby.DynaSymbol>, _print: Plugin.Print) => Plugin.Doc;
-type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & { keyPrinter: KeyPrinter };
+type KeyPrinter = (
+  _path: Plugin.Path<Ruby.Label | Ruby.SymbolLiteral | Ruby.DynaSymbol>,
+  _print: Plugin.Print
+) => Plugin.Doc;
+type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & {
+  keyPrinter: KeyPrinter;
+};
 
 // When attempting to convert a hash rocket into a hash label, you need to take
 // care because only certain patterns are allowed. Ruby source says that they
@@ -80,7 +78,11 @@ const printHashKeyRocket: KeyPrinter = (path, print) => {
   return concat([doc, " =>"]);
 };
 
-export const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (path, opts, print) => {
+export const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (
+  path,
+  opts,
+  print
+) => {
   const [keyNode, valueNode] = path.getValue().body;
   const { keyPrinter } = path.getParentNode() as HashContents;
 
@@ -103,11 +105,19 @@ export const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (path, opts, print) 
   return group(concat(parts));
 };
 
-export const printAssocSplat: Plugin.Printer<Ruby.AssocSplat> = (path, opts, print) => {
+export const printAssocSplat: Plugin.Printer<Ruby.AssocSplat> = (
+  path,
+  opts,
+  print
+) => {
   return concat(["**", path.call(print, "body", 0)]);
 };
 
-export const printHashContents: Plugin.Printer<HashContents> = (path, opts, print) => {
+export const printHashContents: Plugin.Printer<HashContents> = (
+  path,
+  opts,
+  print
+) => {
   const node = path.getValue();
 
   // First determine which key printer we're going to use, so that the child

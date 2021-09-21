@@ -59,7 +59,11 @@ function printHashValue(value: string | number, opts: Plugin.Options) {
 // This will print an attributes object to a Doc node. It handles nesting on
 // multiple levels and will print out according to whether or not the version of
 // HAML being used supports multi-line attributes.
-function printAttributes(object: HAML.TagAttrs, opts: Plugin.Options & { supportsMultiline: boolean, headerLength: number }, level = 0) {
+function printAttributes(
+  object: HAML.TagAttrs,
+  opts: Plugin.Options & { supportsMultiline: boolean; headerLength: number },
+  level = 0
+) {
   if (typeof object !== "object") {
     return printHashValue(object, opts);
   }
@@ -111,7 +115,10 @@ function printAttributes(object: HAML.TagAttrs, opts: Plugin.Options & { support
 // A utility function used in a silent script that is meant to determine if a
 // child node is a continuation of a parent node (as in a when clause within a
 // case statement or an else clause within an if).
-function isContinuation(parentNode: HAML.SilentScript, childNode: HAML.AnyNode) {
+function isContinuation(
+  parentNode: HAML.SilentScript,
+  childNode: HAML.AnyNode
+) {
   if (childNode.type !== "silent_script") {
     return false;
   }
@@ -176,7 +183,10 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
             ":",
             node.value.name,
             indent(
-              concat([hardline, join(hardline, node.value.text.trim().split("\n"))])
+              concat([
+                hardline,
+                join(hardline, node.value.text.trim().split("\n"))
+              ])
             )
           ])
         );
@@ -237,7 +247,9 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
                 const child = childPath.getValue();
                 const concated = concat([hardline, print(childPath)]);
 
-                return isContinuation(node, child) ? concated : indent(concated);
+                return isContinuation(node, child)
+                  ? concated
+                  : indent(concated);
               }, "children")
             )
           );
@@ -308,7 +320,9 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
           }, [] as Plugin.Doc[]);
 
           parts.push(
-            group(concat(["{", align(parts.join("").length + 1, fill(docs)), "}"]))
+            group(
+              concat(["{", align(parts.join("").length + 1, fill(docs)), "}"])
+            )
           );
         }
 
@@ -327,15 +341,16 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
               // supposed to directly use `path.stack`, but it's the easiest way to
               // get the root node without having to know how many levels deep we
               // are.
-              supportsMultiline: (path.stack[0] as HAML.Root).supports_multiline,
+              supportsMultiline: (path.stack[0] as HAML.Root)
+                .supports_multiline,
               headerLength: parts.join("").length
             };
 
             parts.push(
-              printAttributes(
-                dynamic_attributes.old,
-                { ...opts, ...attrOptions }
-              )
+              printAttributes(dynamic_attributes.old, {
+                ...opts,
+                ...attrOptions
+              })
             );
           }
         }
@@ -391,7 +406,10 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
     // It's common to a couple of nodes to attach nested child nodes on the
     // children property. This utility prints them out grouped together with their
     // parent node docs.
-    function printWithChildren(node: HAML.Comment | HAML.Script | HAML.Tag, docs: Plugin.Doc) {
+    function printWithChildren(
+      node: HAML.Comment | HAML.Script | HAML.Tag,
+      docs: Plugin.Doc
+    ) {
       if (node.children.length === 0) {
         return docs;
       }
@@ -399,7 +417,9 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
       return group(
         concat([
           docs,
-          indent(concat([hardline, join(hardline, path.map(print, "children"))]))
+          indent(
+            concat([hardline, join(hardline, path.map(print, "children"))])
+          )
         ])
       );
     }

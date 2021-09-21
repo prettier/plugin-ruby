@@ -1,5 +1,6 @@
 /.bundle/
 /coverage/
+/dist/
 /pkg/
 /playground/
 /vendor/
@@ -15,3 +16,8 @@
 /test.haml
 
 *.txt
+*.gem
+
+# I'm ignoring this for now because it's a dump of a bunch of types that I don't
+# want running onto multiple lines at the moment.
+/src/types.ts

@@ -1,16 +1,13 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 
-const {
-  addTrailingComment,
-  align,
-  concat,
-  group,
-  join,
-  line
-} = prettier;
+const { addTrailingComment, align, concat, group, join, line } = prettier;
 
-const printUndefSymbol: Plugin.Printer<Ruby.DynaSymbol | Ruby.SymbolLiteral> = (path, opts, print) => {
+const printUndefSymbol: Plugin.Printer<Ruby.DynaSymbol | Ruby.SymbolLiteral> = (
+  path,
+  opts,
+  print
+) => {
   const node = path.getValue();
 
   // Since we're going to descend into the symbol literal to grab out the ident

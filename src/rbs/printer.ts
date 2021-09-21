@@ -2,7 +2,8 @@ import type * as Prettier from "prettier";
 import type { Plugin, RBS } from "../types";
 import prettier from "../prettier";
 
-const { concat, group, hardline, indent, makeString, join, line, softline } = prettier;
+const { concat, group, hardline, indent, makeString, join, line, softline } =
+  prettier;
 
 // For some lists of entities in the AST, the parser returns them as an unsorted
 // object (presumably because Ruby hashes have implicit ordering). We do not
@@ -96,7 +97,10 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           const parts: Plugin.Doc[] = ["module ", printNameAndTypeParams(node)];
 
           if (node.self_types.length > 0) {
-            parts.push(" : ", join(", ", path.map(printNameAndArgs, "self_types")));
+            parts.push(
+              " : ",
+              join(", ", path.map(printNameAndArgs, "self_types"))
+            );
           }
 
           parts.push(indent(printMembers()), hardline, "end");
@@ -114,7 +118,12 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         // alias self.foo self.bar
         case "alias": {
           if (node.kind === "singleton") {
-            doc = concat(["alias self.", node.new_name, " self.", node.old_name]);
+            doc = concat([
+              "alias self.",
+              node.new_name,
+              " self.",
+              node.old_name
+            ]);
           } else {
             doc = concat(["alias ", node.new_name, " ", node.old_name]);
           }
@@ -156,7 +165,12 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         // Prints out a class instance variable member, which looks like:
         // self.@foo: String
         case "class_instance_variable": {
-          doc = concat(["self.", node.name, ": ", path.call(printType, "type")]);
+          doc = concat([
+            "self.",
+            node.name,
+            ": ",
+            path.call(printType, "type")
+          ]);
           break;
         }
         // Prints out a mixin, which looks like:
@@ -166,11 +180,13 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         case "include":
         case "extend":
         case "prepend": {
-          doc = group(concat([
-            node.member,
-            " ",
-            printNameAndArgs(path as any as Plugin.Path<RBS.NameAndArgs>)
-          ]));
+          doc = group(
+            concat([
+              node.member,
+              " ",
+              printNameAndArgs(path as any as Plugin.Path<RBS.NameAndArgs>)
+            ])
+          );
           break;
         }
         case "public":
@@ -194,18 +210,21 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
     // using %a{}. Certain nodes can't have annotations at all.
     if (node.annotations && node.annotations.length > 0) {
       doc = concat([
-        join(hardline, path.map((annotationPath: Plugin.Path<RBS.Annotation>) => {
-          const annotationNode = annotationPath.getValue();
+        join(
+          hardline,
+          path.map((annotationPath: Plugin.Path<RBS.Annotation>) => {
+            const annotationNode = annotationPath.getValue();
 
-          // If there are already braces inside the annotation, then we're just
-          // going to print out the original string to avoid having to escape
-          // anything.
-          if (/[{}]/.test(annotationNode.string)) {
-            return getSource(annotationNode, opts);
-          }
+            // If there are already braces inside the annotation, then we're just
+            // going to print out the original string to avoid having to escape
+            // anything.
+            if (/[{}]/.test(annotationNode.string)) {
+              return getSource(annotationNode, opts);
+            }
 
-          return concat(["%a{", annotationNode.string, "}"]);
-        }, "annotations")),
+            return concat(["%a{", annotationNode.string, "}"]);
+          }, "annotations")
+        ),
         hardline,
         doc
       ]);
@@ -215,7 +234,13 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
     // multiple lines and then prefix it with the pound sign.
     if (node.comment) {
       doc = concat([
-        join(hardline, node.comment.string.slice(0, -1).split("\n").map((segment) => `# ${segment}`)),
+        join(
+          hardline,
+          node.comment.string
+            .slice(0, -1)
+            .split("\n")
+            .map((segment) => `# ${segment}`)
+        ),
         hardline,
         doc
       ]);
@@ -238,9 +263,15 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
       // Determine if we're allowed to change the quote based on whether or not
       // there is an escape sequence in the source string.
-      const quote = node.literal.includes("\\") ? originalQuote : preferredQuote;
+      const quote = node.literal.includes("\\")
+        ? originalQuote
+        : preferredQuote;
 
-      return makeString(value.slice(1, -1), quote as Prettier.util.Quote, false);
+      return makeString(
+        value.slice(1, -1),
+        quote as Prettier.util.Quote,
+        false
+      );
     }
 
     // Certain nodes are names with optional arguments attached, as in Array[A].
@@ -259,7 +290,10 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
     // This is the big function that prints out any individual type, which can
     // look like all kinds of things, listed in the case statement below.
-    function printType(path: Plugin.Path<RBS.Type>, options?: number | { forceParens: boolean }): Plugin.Doc {
+    function printType(
+      path: Plugin.Path<RBS.Type>,
+      options?: number | { forceParens: boolean }
+    ): Plugin.Doc {
       const node = path.getValue();
       const forceParens = typeof options === "object" && options.forceParens;
 
@@ -318,7 +352,10 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         case "class_singleton":
           return concat(["singleton(", node.name, ")"]);
         case "proc":
-          return concat(["^", printMethodSignature(path as Plugin.Path<RBS.MethodSignature>)]);
+          return concat([
+            "^",
+            printMethodSignature(path as Plugin.Path<RBS.MethodSignature>)
+          ]);
         case "record": {
           const parts: Plugin.Doc[] = [];
 
@@ -374,7 +411,10 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
       path.each((memberPath) => {
         const memberNode = memberPath.getValue();
 
-        if (lastLine !== null && memberNode.location.start.line - lastLine >= 2) {
+        if (
+          lastLine !== null &&
+          memberNode.location.start.line - lastLine >= 2
+        ) {
           docs.push(concat([hardline, hardline]));
         } else {
           docs.push(hardline);
@@ -471,7 +511,9 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
       // rest keyword, as in (**A)
       if (node.rest_keywords) {
-        parts.push(concat(["**", path.call(printMethodParam, "rest_keywords")]));
+        parts.push(
+          concat(["**", path.call(printMethodParam, "rest_keywords")])
+        );
       }
 
       return parts;
@@ -498,7 +540,9 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
     // Prints out a specific method signature, which looks like:
     // (T t) -> void
-    function printMethodSignature(path: Plugin.Path<RBS.MethodSignature>): Plugin.Doc {
+    function printMethodSignature(
+      path: Plugin.Path<RBS.MethodSignature>
+    ): Plugin.Doc {
       const node = path.getValue();
       const parts = [];
 
@@ -588,7 +632,9 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
   hasPrettierIgnore(path) {
     const node = path.getValue();
 
-    return node.comment && node.comment.string.includes("prettier-ignore") || false;
+    return (
+      (node.comment && node.comment.string.includes("prettier-ignore")) || false
+    );
   },
   // This function handles adding the format pragma to a source string. This is an
   // optional workflow for incremental adoption.

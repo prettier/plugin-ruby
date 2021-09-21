@@ -3,16 +3,8 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { makeCall } from "../../utils";
 
-const {
-  align,
-  concat,
-  group,
-  ifBreak,
-  indent,
-  join,
-  line,
-  softline
-} = prettier;
+const { align, concat, group, ifBreak, indent, join, line, softline } =
+  prettier;
 
 function docLength(doc: any): number {
   if (doc.length) {
@@ -20,7 +12,10 @@ function docLength(doc: any): number {
   }
 
   if (doc.parts) {
-    return (doc as Prettier.doc.builders.Concat).parts.reduce((sum, child) => sum + docLength(child), 0);
+    return (doc as Prettier.doc.builders.Concat).parts.reduce(
+      (sum, child) => sum + docLength(child),
+      0
+    );
   }
 
   if (doc.contents) {
@@ -60,10 +55,16 @@ function skipArgsAlign(path: Plugin.Path<Ruby.CommandCall>) {
 // into multiple lines, then we're going to have to use parentheses around the
 // command in order to make sure operator precedence doesn't get messed up.
 function hasTernaryArg(node: Ruby.Args | Ruby.ArgsAddBlock) {
-  return (node.body[0] as any).body.some((child: Ruby.AnyNode) => child.type === "ifop");
+  return (node.body[0] as any).body.some(
+    (child: Ruby.AnyNode) => child.type === "ifop"
+  );
 }
 
-export const printCommand: Plugin.Printer<Ruby.Command> = (path, opts, print) => {
+export const printCommand: Plugin.Printer<Ruby.Command> = (
+  path,
+  opts,
+  print
+) => {
   const node = path.getValue();
 
   const command = path.call(print, "body", 0);
@@ -93,7 +94,11 @@ export const printCommand: Plugin.Printer<Ruby.Command> = (path, opts, print) =>
   );
 };
 
-export const printCommandCall: Plugin.Printer<Ruby.CommandCall> = (path, opts, print) => {
+export const printCommandCall: Plugin.Printer<Ruby.CommandCall> = (
+  path,
+  opts,
+  print
+) => {
   const node = path.getValue();
   const parts = [
     path.call(print, "body", 0),

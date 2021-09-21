@@ -4,7 +4,11 @@ import { literallineWithoutBreakParent } from "../../utils";
 
 const { concat, group, lineSuffix, join } = prettier;
 
-export const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (path, opts, print) => {
+export const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (
+  path,
+  opts,
+  print
+) => {
   const { body, ending } = path.getValue();
 
   const parts = body.map((part, index) => {

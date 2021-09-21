@@ -3,11 +3,15 @@ import parser from "../../../src/haml/parser";
 
 describe("parser", () => {
   test("parse", () => {
-    expect(parser.parse("= foo", {}, {} as Plugin.Options).type).toEqual("root");
+    expect(parser.parse("= foo", {}, {} as Plugin.Options).type).toEqual(
+      "root"
+    );
   });
 
   test("parse failure", () => {
-    expect(() => parser.parse(`%div("invalid ": 1)`, {}, {} as Plugin.Options)).toThrowError();
+    expect(() =>
+      parser.parse(`%div("invalid ": 1)`, {}, {} as Plugin.Options)
+    ).toThrowError();
   });
 
   test("hasPragma", () => {

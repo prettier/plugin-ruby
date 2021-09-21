@@ -51,7 +51,11 @@ function printMethod(offset: number): Plugin.Printer<Ruby.Def | Ruby.Defs> {
   };
 }
 
-export const printSingleLineMethod: Plugin.Printer<Ruby.Defsl> = (path, opts, print) => {
+export const printSingleLineMethod: Plugin.Printer<Ruby.Defsl> = (
+  path,
+  opts,
+  print
+) => {
   const parensNode = path.getValue().body[1];
   let paramsDoc: Plugin.Doc = "";
 
@@ -74,7 +78,11 @@ export const printSingleLineMethod: Plugin.Printer<Ruby.Defsl> = (path, opts, pr
   );
 };
 
-export const printAccessControl: Plugin.Printer<Ruby.AccessCtrl> = (path, opts, print) => {
+export const printAccessControl: Plugin.Printer<Ruby.AccessCtrl> = (
+  path,
+  opts,
+  print
+) => {
   return path.call(print, "body", 0);
 };
 

@@ -8,7 +8,10 @@ const { concat, group, ifBreak, indent, line } = prettier;
 // or if we have them wrapped in parens then they'll be one level deeper. Even
 // though it's possible to omit the parens if you only have one argument, we're
 // going to keep them in no matter what for consistency.
-function printLambdaParams(path: Plugin.Path<Ruby.Lambda>, print: Plugin.Print) {
+function printLambdaParams(
+  path: Plugin.Path<Ruby.Lambda>,
+  print: Plugin.Print
+) {
   let node = path.getValue().body[0];
 
   // In this case we had something like -> (foo) { bar } which would mean that

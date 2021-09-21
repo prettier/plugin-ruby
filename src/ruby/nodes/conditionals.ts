@@ -1,7 +1,11 @@
 import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { containsAssignment, inlineEnsureParens, isEmptyStmts } from "../../utils";
+import {
+  containsAssignment,
+  inlineEnsureParens,
+  isEmptyStmts
+} from "../../utils";
 
 const {
   align,
@@ -23,11 +27,18 @@ function isConcat(doc: any): doc is Prettier.doc.builders.Concat {
 function containsSingleConditional(stmts: Ruby.Stmts) {
   return (
     stmts.body.length === 1 &&
-    ["if", "if_mod", "ifop", "unless", "unless_mod"].includes(stmts.body[0].type)
+    ["if", "if_mod", "ifop", "unless", "unless_mod"].includes(
+      stmts.body[0].type
+    )
   );
 }
 
-function printWithAddition(keyword: string, path: Plugin.Path<Ruby.If | Ruby.Unless>, print: Plugin.Print, breaking: boolean) {
+function printWithAddition(
+  keyword: string,
+  path: Plugin.Path<Ruby.If | Ruby.Unless>,
+  print: Plugin.Print,
+  breaking: boolean
+) {
   return concat([
     `${keyword} `,
     align(keyword.length + 1, path.call(print, "body", 0)),
@@ -62,7 +73,11 @@ function printTernaryClause(clause: Plugin.Doc) {
 // The conditions for a ternary look like `foo : bar` where `foo` represents
 // the truthy clause and `bar` represents the falsy clause. In the case that the
 // parent node is an `unless`, these have to flip in order.
-function printTernaryClauses(keyword: string, truthyClause: Plugin.Doc, falsyClause: Plugin.Doc) {
+function printTernaryClauses(
+  keyword: string,
+  truthyClause: Plugin.Doc,
+  falsyClause: Plugin.Doc
+) {
   const parts = [
     printTernaryClause(truthyClause),
     " : ",
@@ -74,7 +89,11 @@ function printTernaryClauses(keyword: string, truthyClause: Plugin.Doc, falsyCla
 
 // Handles ternary nodes. If it does not fit on one line, then we break out into
 // an if/else statement. Otherwise we remain as a ternary.
-export const printTernary: Plugin.Printer<Ruby.Ternary> = (path, _opts, print) => {
+export const printTernary: Plugin.Printer<Ruby.Ternary> = (
+  path,
+  _opts,
+  print
+) => {
   const [predicate, truthyClause, falsyClause] = path.map(print, "body");
   const ternaryClauses = printTernaryClauses("if", truthyClause, falsyClause);
 
@@ -96,7 +115,12 @@ export const printTernary: Plugin.Printer<Ruby.Ternary> = (path, _opts, print) =
 // Prints an `if_mod` or `unless_mod` node. Because it was previously in the
 // modifier form, we're guaranteed to not have an additional node, so we can
 // just work with the predicate and the body.
-function printSingle(keyword: string, modifier = false): Plugin.Printer<Ruby.If | Ruby.IfModifier | Ruby.Unless | Ruby.UnlessModifier> {
+function printSingle(
+  keyword: string,
+  modifier = false
+): Plugin.Printer<
+  Ruby.If | Ruby.IfModifier | Ruby.Unless | Ruby.UnlessModifier
+> {
   return function printSingleWithKeyword(path, { rubyModifier }, print) {
     const [_predicateNode, statementsNode] = path.getValue().body;
     const predicateDoc = path.call(print, "body", 0);
@@ -113,7 +137,10 @@ function printSingle(keyword: string, modifier = false): Plugin.Printer<Ruby.If 
     // If we do not allow modifier form conditionals or there are comments
     // inside of the body of the conditional, then we must print in the
     // multiline form.
-    if (!rubyModifier || (!modifier && (statementsNode as Ruby.If | Ruby.Unless).body[0].comments)) {
+    if (
+      !rubyModifier ||
+      (!modifier && (statementsNode as Ruby.If | Ruby.Unless).body[0].comments)
+    ) {
       return concat([concat(multilineParts), breakParent]);
     }
 
@@ -209,7 +236,9 @@ function canTernary(path: Plugin.Path<Ruby.If | Ruby.Unless>) {
 }
 
 // A normalized print function for both `if` and `unless` nodes.
-function printConditional(keyword: string): Plugin.Printer<Ruby.If | Ruby.Unless> {
+function printConditional(
+  keyword: string
+): Plugin.Printer<Ruby.If | Ruby.Unless> {
   return (path, opts, print) => {
     if (canTernary(path)) {
       let ternaryParts = [path.call(print, "body", 0), " ? "].concat(
@@ -225,7 +254,10 @@ function printConditional(keyword: string): Plugin.Printer<Ruby.If | Ruby.Unless
       }
 
       return group(
-        ifBreak(printWithAddition(keyword, path, print, false), concat(ternaryParts))
+        ifBreak(
+          printWithAddition(keyword, path, print, false),
+          concat(ternaryParts)
+        )
       );
     }
 
@@ -286,10 +318,7 @@ export const printElsif: Plugin.Printer<Ruby.Elsif> = (path, opts, print) => {
   const [_predicate, _statements, addition] = path.getValue().body;
   const parts = [
     group(
-      concat([
-        "elsif ",
-        align("elsif".length - 1, path.call(print, "body", 0))
-      ])
+      concat(["elsif ", align("elsif".length - 1, path.call(print, "body", 0))])
     ),
     indent(concat([hardline, path.call(print, "body", 1)]))
   ];

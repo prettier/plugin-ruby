@@ -1,14 +1,7 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 
-const {
-  addTrailingComment,
-  align,
-  concat,
-  group,
-  hardline,
-  line
-} = prettier;
+const { addTrailingComment, align, concat, group, hardline, line } = prettier;
 
 // The `alias` keyword is used to make a method respond to another name as well
 // as the current one. For example, to get the method `foo` to also respond to
@@ -29,13 +22,21 @@ const {
 // The `alias` node contains two children. The left and right align with the
 // arguments passed to the keyword. So, for the above example the left would be
 // the symbol literal `bar` and the right could be the symbol literal `foo`.
-export const printAlias: Plugin.Printer<Ruby.Alias | Ruby.VarAlias> = (path, opts, print) => {
+export const printAlias: Plugin.Printer<Ruby.Alias | Ruby.VarAlias> = (
+  path,
+  opts,
+  print
+) => {
   const keyword = "alias ";
 
   // In general, return the printed doc of the argument at the provided index.
   // Special handling is given for symbol literals that are not bare words, as
   // we convert those into bare words by just pulling out the ident node.
-  const printAliasArg = (argPath: Plugin.Path<Ruby.Backref | Ruby.DynaSymbol | Ruby.GVar | Ruby.SymbolLiteral>) => {
+  const printAliasArg = (
+    argPath: Plugin.Path<
+      Ruby.Backref | Ruby.DynaSymbol | Ruby.GVar | Ruby.SymbolLiteral
+    >
+  ) => {
     const argNode = argPath.getValue();
 
     if (argNode.type === "symbol_literal") {
@@ -47,10 +48,10 @@ export const printAlias: Plugin.Printer<Ruby.Alias | Ruby.VarAlias> = (path, opt
           addTrailingComment(argNode.body[0], comment);
         });
       }
-  
+
       return argPath.call(print, "body", 0);
     }
-  
+
     return print(argPath);
   };
 

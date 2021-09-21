@@ -75,7 +75,7 @@ function stripCommonLeadingWhitespace(content: string) {
 
 const embed: Plugin.Embed<Ruby.AnyNode> = (path, print, textToDoc, _opts) => {
   const node = path.getValue();
-  
+
   // Currently we only support embedded formatting on heredoc nodes
   if (node.type !== "heredoc") {
     return null;
