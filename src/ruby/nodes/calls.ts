@@ -3,7 +3,7 @@ import prettier from "../../prettier";
 import { makeCall, noIndent } from "../../utils";
 import toProc from "../toProc";
 
-const { concat, group, hardline, ifBreak, indent, join, softline } = prettier;
+const { group, hardline, ifBreak, indent, join, softline } = prettier;
 
 const chained = ["call", "method_add_arg", "method_add_block"];
 
@@ -35,16 +35,16 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   // For certain left sides of the call nodes, we want to attach directly to
   // the } or end.
   if (noIndent.includes(receiverNode.type)) {
-    return concat([receiverDoc, operatorDoc, messageDoc]);
+    return [receiverDoc, operatorDoc, messageDoc];
   }
 
   // The right side of the call node, as in everything including the operator
   // and beyond.
-  let rightSideDoc = concat([
+  let rightSideDoc = [
     receiverNode.comments ? hardline : softline,
     operatorDoc,
     messageDoc
-  ]);
+  ];
 
   // This is very specialized behavior wherein we group .where.not calls
   // together because it looks better. For more information, see
@@ -55,7 +55,7 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
     receiverNode.body[2].body === "where" &&
     messageDoc === "not"
   ) {
-    rightSideDoc = concat([operatorDoc, messageDoc]);
+    rightSideDoc = [operatorDoc, messageDoc];
   }
 
   // Get a reference to the parent node so we can check if we're inside a chain
@@ -72,14 +72,18 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
 
   // If we're at the top of a chain, then we're going to print out a nice
   // multi-line layout if this doesn't break into multiple lines.
-  if (!chained.includes(parentNode.type) && (node.chain || 0) >= 3) {
-    return ifBreak(
-      group(indent(concat(node.breakDoc!.concat(rightSideDoc)))),
-      concat([receiverDoc, group(rightSideDoc)])
-    );
+  if (
+    !chained.includes(parentNode.type) &&
+    (node.chain || 0) >= 3 &&
+    node.breakDoc
+  ) {
+    return ifBreak(group(indent(node.breakDoc.concat(rightSideDoc))), [
+      receiverDoc,
+      group(rightSideDoc)
+    ]);
   }
 
-  return group(concat([receiverDoc, group(indent(rightSideDoc))]));
+  return group([receiverDoc, group(indent(rightSideDoc))]);
 };
 
 export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
@@ -104,7 +108,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
     // Ruby. For example, you could do something like Foo(), on which we would
     // need to keep the parentheses to make it look like a method call.
     if (methodNode.type === "fcall" && methodNode.body[0].type === "@const") {
-      return concat([methodDoc, "()"]);
+      return [methodDoc, "()"];
     }
 
     // If you're using an explicit set parentheses with the special call syntax,
@@ -113,7 +117,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
     // #call method on a new instance of the Foo class), then we have to print
     // out those parentheses, otherwise we'll end up with Foo.new.
     if (methodNode.type === "call" && methodNode.body[2] === "call") {
-      return concat([methodDoc, "()"]);
+      return [methodDoc, "()"];
     }
 
     return methodDoc;
@@ -122,7 +126,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
   // This case will ONLY be hit if we can successfully turn the block into a
   // to_proc call. In that case, we just explicitly add the parens around it.
   if (argNode.type === "args" && argsDoc.length > 0) {
-    return concat([methodDoc, "("].concat(argsDoc).concat(")"));
+    return [methodDoc, "(", ...argsDoc, ")"];
   }
 
   // Get a reference to the parent node so we can check if we're inside a chain
@@ -184,22 +188,22 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
     //     )
     //
     if (node.callChain === node.chain) {
-      return concat([group(indent(concat(node.breakDoc))), group(argsDoc)]);
+      return [group(indent(node.breakDoc)), group(argsDoc)];
     }
 
-    return ifBreak(
-      group(indent(concat(node.breakDoc.concat(argsDoc)))),
-      concat([methodDoc, argsDoc])
-    );
+    return ifBreak(group(indent(node.breakDoc.concat(argsDoc))), [
+      methodDoc,
+      argsDoc
+    ]);
   }
 
   // If there are already parentheses, then we can just use the doc that's
   // already printed.
   if (argNode.type == "arg_paren") {
-    return concat([methodDoc, argsDoc]);
+    return [methodDoc, argsDoc];
   }
 
-  return concat([methodDoc, " ", join(", ", argsDoc), " "]);
+  return [methodDoc, " ", join(", ", argsDoc), " "];
 };
 
 export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (
@@ -218,14 +222,12 @@ export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (
     const proc = toProc(path, blockNode);
 
     if (proc && callNode.type === "call") {
-      return group(
-        concat([
-          path.call(print, "body", 0),
-          "(",
-          indent(concat([softline, proc])),
-          concat([softline, ")"])
-        ])
-      );
+      return group([
+        path.call(print, "body", 0),
+        "(",
+        indent([softline, proc]),
+        [softline, ")"]
+      ]);
     }
 
     if (proc) {
@@ -246,14 +248,18 @@ export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (
 
   // If we're at the top of a chain, then we're going to print out a nice
   // multi-line layout if this doesn't break into multiple lines.
-  if (!chained.includes(parentNode.type) && (node.chain || 0) >= 3) {
-    return ifBreak(
-      group(indent(concat(node.breakDoc!.concat(blockDoc)))),
-      concat([callDoc, blockDoc])
-    );
+  if (
+    !chained.includes(parentNode.type) &&
+    (node.chain || 0) >= 3 &&
+    node.breakDoc
+  ) {
+    return ifBreak(group(indent(node.breakDoc.concat(blockDoc))), [
+      callDoc,
+      blockDoc
+    ]);
   }
 
-  return concat([callDoc, blockDoc]);
+  return [callDoc, blockDoc];
 };
 
 export const printCallContainer: Plugin.Printer<Ruby.Fcall | Ruby.VCall> = (

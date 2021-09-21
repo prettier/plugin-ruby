@@ -4,7 +4,7 @@ import prettier from "../prettier";
 import embed from "./embed";
 import nodes from "./nodes";
 
-const { concat, trim } = prettier;
+const { trim } = prettier;
 
 const noComments = [
   "args",
@@ -18,8 +18,8 @@ const noComments = [
 
 const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
   // Certain nodes are used more for organizational purposed than for actually
-  // displaying content, so we tell prettier that we don't want comments attached
-  // to them.
+  // displaying content, so we tell prettier that we don't want comments
+  // attached to them.
   canAttachComment(node) {
     return !noComments.includes(node.type);
   },
@@ -88,8 +88,8 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
     }
   },
   // This is an escape-hatch to ignore nodes in the tree. If you have a comment
-  // that includes this pattern, then the entire node will be ignored and just the
-  // original source will be printed out.
+  // that includes this pattern, then the entire node will be ignored and just
+  // the original source will be printed out.
   hasPrettierIgnore(path) {
     const node = path.getValue();
 
@@ -107,15 +107,15 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
   isBlockComment(comment) {
     return comment.type === "@embdoc";
   },
-  // This function handles adding the format pragma to a source string. This is an
-  // optional workflow for incremental adoption.
+  // This function handles adding the format pragma to a source string. This is
+  // an optional workflow for incremental adoption.
   insertPragma(text) {
     const boundary = text.startsWith("#") ? "\n" : "\n\n";
 
     return `# @format${boundary}${text}`;
   },
-  // This is the generic node print function, used to convert any node in the AST
-  // into its equivalent Doc representation.
+  // This is the generic node print function, used to convert any node in the
+  // AST into its equivalent Doc representation.
   print(path, opts, print) {
     const node = path.getValue();
     const printer = nodes[node.type];
@@ -140,7 +140,7 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
       return `#${comment.value}`;
     }
 
-    return concat([trim, comment.value]);
+    return [trim, comment.value];
   }
 };
 

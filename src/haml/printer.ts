@@ -2,18 +2,8 @@ import type { Plugin, HAML } from "../types";
 import prettier from "../prettier";
 import embed from "./embed";
 
-const {
-  align,
-  concat,
-  fill,
-  group,
-  hardline,
-  ifBreak,
-  indent,
-  join,
-  line,
-  softline
-} = prettier;
+const { align, fill, group, hardline, ifBreak, indent, join, line, softline } =
+  prettier;
 
 const docTypes = {
   basic: "Basic",
@@ -69,47 +59,38 @@ function printAttributes(
   }
 
   const boundary = level === 0 ? softline : line;
-  const parts: Plugin.Doc[] = Object.keys(object).map((key) =>
-    concat([
-      printHashKey(key, opts),
-      " ",
-      printAttributes(object[key], opts, level + 1)
-    ])
-  );
+  const parts: Plugin.Doc[] = Object.keys(object).map((key) => [
+    printHashKey(key, opts),
+    " ",
+    printAttributes(object[key], opts, level + 1)
+  ]);
 
   // If we have support for multi-line attributes laid out like a regular hash,
   // then we print them that way here.
   if (opts.supportsMultiline) {
-    return group(
-      concat([
-        "{",
-        indent(group(concat([boundary, join(concat([",", line]), parts)]))),
-        boundary,
-        "}"
-      ])
-    );
+    return group([
+      "{",
+      indent(group([boundary, join([",", line], parts)])),
+      boundary,
+      "}"
+    ]);
   }
 
   // Otherwise, if we only have one attribute, then just print it inline
   // regardless of how long it is.
   if (parts.length === 0) {
-    return group(concat(["{", parts[0], "}"]));
+    return group(["{", parts[0], "}"]);
   }
 
   // Otherwise, depending on how long the line is it will split the content into
   // multi-line attributes that old Haml understands.
-  return group(
-    concat([
-      "{",
-      parts[0],
-      ",",
-      align(
-        opts.headerLength + 1,
-        concat([line, join(concat([",", line]), parts.slice(1))])
-      ),
-      "}"
-    ])
-  );
+  return group([
+    "{",
+    parts[0],
+    ",",
+    align(opts.headerLength + 1, [line, join([",", line], parts.slice(1))]),
+    "}"
+  ]);
 }
 
 // A utility function used in a silent script that is meant to determine if a
@@ -155,7 +136,7 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
           parts.push(" ", value.text);
         }
 
-        return printWithChildren(node, group(concat(parts)));
+        return printWithChildren(node, group(parts));
       }
       // https://haml.info/docs/yardoc/file.REFERENCE.html#doctype-
       case "doctype": {
@@ -178,18 +159,11 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
       }
       // https://haml.info/docs/yardoc/file.REFERENCE.html#filters
       case "filter":
-        return group(
-          concat([
-            ":",
-            node.value.name,
-            indent(
-              concat([
-                hardline,
-                join(hardline, node.value.text.trim().split("\n"))
-              ])
-            )
-          ])
-        );
+        return group([
+          ":",
+          node.value.name,
+          indent([hardline, join(hardline, node.value.text.trim().split("\n"))])
+        ]);
       // https://haml.info/docs/yardoc/file.REFERENCE.html#haml-comments--
       case "haml_comment": {
         const { value } = node;
@@ -199,20 +173,20 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
           if (opts.originalText.split("\n")[node.line - 1].trim() === "-#") {
             const lines = value.text.trim().split("\n");
 
-            parts.push(indent(concat([hardline, join(hardline, lines)])));
+            parts.push(indent([hardline, join(hardline, lines)]));
           } else {
             parts.push(" ", value.text.trim());
           }
         }
 
-        return concat(parts);
+        return parts;
       }
       // https://haml.info/docs/yardoc/file.REFERENCE.html#plain-text
       case "plain":
         return node.value.text;
       // The root node in the AST that we build in the parser.
       case "root":
-        return concat([join(hardline, path.map(print, "children")), hardline]);
+        return [join(hardline, path.map(print, "children")), hardline];
       // https://haml.info/docs/yardoc/file.REFERENCE.html#inserting_ruby
       case "script": {
         const { value } = node;
@@ -234,7 +208,7 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
           parts.push(" ", value.text.trim());
         }
 
-        return printWithChildren(node, group(concat(parts)));
+        return printWithChildren(node, group(parts));
       }
       // https://haml.info/docs/yardoc/file.REFERENCE.html#running-ruby--
       case "silent_script": {
@@ -242,20 +216,16 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
 
         if (node.children.length > 0) {
           parts.push(
-            concat(
-              path.map((childPath) => {
-                const child = childPath.getValue();
-                const concated = concat([hardline, print(childPath)]);
+            path.map((childPath) => {
+              const child = childPath.getValue();
+              const concated = [hardline, print(childPath)];
 
-                return isContinuation(node, child)
-                  ? concated
-                  : indent(concated);
-              }, "children")
-            )
+              return isContinuation(node, child) ? concated : indent(concated);
+            }, "children")
           );
         }
 
-        return group(concat(parts));
+        return group(parts);
       }
       // https://haml.info/docs/yardoc/file.REFERENCE.html#element-name-
       case "tag": {
@@ -263,22 +233,22 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
         const { attributes, dynamic_attributes } = value;
         const parts = [];
 
-        // If we have a tag that isn't a div, then we need to print out that name of
-        // that tag first. If it is a div, first we'll check if there are any other
-        // things that would force us to print out the div explicitly, and otherwise
-        // we'll leave it off.
+        // If we have a tag that isn't a div, then we need to print out that
+        // name of that tag first. If it is a div, first we'll check if there
+        // are any other things that would force us to print out the div
+        // explicitly, and otherwise we'll leave it off.
         if (value.name !== "div") {
           parts.push(`%${value.name}`);
         }
 
-        // If we have a class attribute, then we're going to print that here using
-        // the special class syntax.
+        // If we have a class attribute, then we're going to print that here
+        // using the special class syntax.
         if (attributes.class) {
           parts.push(`.${attributes.class.replace(/ /g, ".")}`);
         }
 
-        // If we have an id attribute, then we're going to print that here using the
-        // special id syntax.
+        // If we have an id attribute, then we're going to print that here using
+        // the special id syntax.
         if (attributes.id) {
           parts.push(`#${attributes.id}`);
         }
@@ -287,24 +257,26 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
         // string that looks like the output of Hash#inspect from Ruby. So here
         // we're going to split it all up and print it out nicely.
         if (dynamic_attributes.new) {
-          const pairs = dynamic_attributes.new
+          const docs: Plugin.Doc[] = [];
+
+          dynamic_attributes.new
             .slice(1, -2)
             .split(",")
-            .map((pair) => join("=", pair.slice(1).split('" => ')));
+            .forEach((pair, index) => {
+              if (index !== 0) {
+                docs.push(line);
+              }
+              docs.push(join("=", pair.slice(1).split('" => ')));
+            });
 
           parts.push(
-            group(
-              concat([
-                "(",
-                align(parts.join("").length + 1, fill(join(line, pairs).parts)),
-                ")"
-              ])
-            )
+            group(["(", align(parts.join("").length + 1, fill(docs)), ")"])
           );
         }
 
-        // If there are any static attributes that are not class or id (because we
-        // already took care of those), then we're going to print them out here.
+        // If there are any static attributes that are not class or id (because
+        // we already took care of those), then we're going to print them out
+        // here.
         const staticAttributes = Object.keys(attributes).filter(
           (name) => !["class", "id"].includes(name)
         );
@@ -316,13 +288,11 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
               opts
             )}`;
 
-            return accum.length === 0 ? [doc] : accum.concat(",", line, doc);
+            return accum.length === 0 ? [doc] : [...accum, ",", line, doc];
           }, [] as Plugin.Doc[]);
 
           parts.push(
-            group(
-              concat(["{", align(parts.join("").length + 1, fill(docs)), "}"])
-            )
+            group(["{", align(parts.join("").length + 1, fill(docs)), "}"])
           );
         }
 
@@ -336,20 +306,17 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
           if (typeof dynamic_attributes.old === "string") {
             parts.push(dynamic_attributes.old);
           } else {
-            const attrOptions = {
-              // This is kind of a total hack in that I don't think you're really
-              // supposed to directly use `path.stack`, but it's the easiest way to
-              // get the root node without having to know how many levels deep we
-              // are.
-              supportsMultiline: (path.stack[0] as HAML.Root)
-                .supports_multiline,
-              headerLength: parts.join("").length
-            };
+            // This is kind of a total hack in that I don't think you're
+            // really supposed to directly use `path.stack`, but it's the
+            // easiest way to get the root node without having to know how
+            // many levels deep we are.
+            const root = path.stack[0] as HAML.Root;
 
             parts.push(
               printAttributes(dynamic_attributes.old, {
                 ...opts,
-                ...attrOptions
+                supportsMultiline: root.supports_multiline,
+                headerLength: parts.join("").length
               })
             );
           }
@@ -382,30 +349,25 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
 
           return printWithChildren(
             node,
-            group(
-              concat([
-                group(concat(parts)),
-                indent(concat([softline, prefix, value.value]))
-              ])
-            )
+            group([group(parts), indent([softline, prefix, value.value])])
           );
         }
 
-        // In case none of the other if statements have matched and we're printing
-        // a div, we need to explicitly add it back into the array.
+        // In case none of the other if statements have matched and we're
+        // printing a div, we need to explicitly add it back into the array.
         if (parts.length === 0 && value.name === "div") {
           parts.push("%div");
         }
 
-        return printWithChildren(node, group(concat(parts)));
+        return printWithChildren(node, group(parts));
       }
       default:
         throw new Error(`Unsupported node encountered: ${(node as any).type}`);
     }
 
     // It's common to a couple of nodes to attach nested child nodes on the
-    // children property. This utility prints them out grouped together with their
-    // parent node docs.
+    // children property. This utility prints them out grouped together with
+    // their parent node docs.
     function printWithChildren(
       node: HAML.Comment | HAML.Script | HAML.Tag,
       docs: Plugin.Doc
@@ -414,18 +376,14 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
         return docs;
       }
 
-      return group(
-        concat([
-          docs,
-          indent(
-            concat([hardline, join(hardline, path.map(print, "children"))])
-          )
-        ])
-      );
+      return group([
+        docs,
+        indent([hardline, join(hardline, path.map(print, "children"))])
+      ]);
     }
   },
-  // This function handles adding the format pragma to a source string. This is an
-  // optional workflow for incremental adoption.
+  // This function handles adding the format pragma to a source string. This is
+  // an optional workflow for incremental adoption.
   insertPragma(text) {
     return `-# @format${text.startsWith("-#") ? "\n" : "\n\n"}${text}`;
   }

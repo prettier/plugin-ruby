@@ -1,16 +1,8 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 
-const {
-  concat,
-  group,
-  hardline,
-  indent,
-  literalline,
-  removeLines,
-  softline,
-  join
-} = prettier;
+const { group, hardline, indent, literalline, removeLines, softline, join } =
+  prettier;
 
 // If there is some part of this string that matches an escape sequence or that
 // contains the interpolation pattern ("#{"), then we are locked into whichever
@@ -65,6 +57,7 @@ function getClosingQuote(quote: string) {
     return quote;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const boundary = /%[Qq]?(.)/.exec(quote)![1];
   if (boundary in quotePairs) {
     return quotePairs[boundary as Quote];
@@ -88,7 +81,7 @@ export const printChar: Plugin.Printer<Ruby.Char> = (
   }
 
   const quote = rubySingleQuote ? "'" : '"';
-  return concat([quote, body.slice(1), quote]);
+  return [quote, body.slice(1), quote];
 };
 
 const printPercentSDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
@@ -118,7 +111,7 @@ const printPercentSDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
   // character from the opening.
   parts.push(quotePairs[node.quote[2] as Quote]);
 
-  return concat(parts);
+  return parts;
 };
 
 // We don't actually want to print %s symbols, as they're much more rarely seen
@@ -201,7 +194,7 @@ export const printDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
     parts.unshift(":");
   }
 
-  return concat(parts);
+  return parts;
 };
 
 export const printStringConcat: Plugin.Printer<Ruby.StringConcat> = (
@@ -211,7 +204,7 @@ export const printStringConcat: Plugin.Printer<Ruby.StringConcat> = (
 ) => {
   const [leftDoc, rightDoc] = path.map(print, "body");
 
-  return group(concat([leftDoc, " \\", indent(concat([hardline, rightDoc]))]));
+  return group([leftDoc, " \\", indent([hardline, rightDoc])]);
 };
 
 // Prints out an interpolated variable in the string by converting it into an
@@ -221,7 +214,7 @@ export const printStringDVar: Plugin.Printer<Ruby.StringDVar> = (
   opts,
   print
 ) => {
-  return concat(["#{", path.call(print, "body", 0), "}"]);
+  return ["#{", path.call(print, "body", 0), "}"];
 };
 
 export const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (
@@ -236,12 +229,10 @@ export const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (
   // line in the source, then we're going to leave them in place and assume
   // that's the way the developer wanted this expression represented.
   if (node.sl === node.el) {
-    return concat(["#{", removeLines(parts), "}"]);
+    return ["#{", removeLines(parts), "}"];
   }
 
-  return group(
-    concat(["#{", indent(concat([softline, parts])), concat([softline, "}"])])
-  );
+  return group(["#{", indent([softline, parts]), [softline, "}"]]);
 };
 
 // Prints out a literal string. This function does its best to respect the
@@ -279,9 +270,7 @@ export const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (
     return join(literalline, normalizeQuotes(part.body, quote).split("\n"));
   });
 
-  return concat(
-    ([quote] as Plugin.Doc[]).concat(parts).concat(getClosingQuote(quote))
-  );
+  return [quote, ...parts, getClosingQuote(quote)];
 };
 
 // Prints out a symbol literal. Its child will always be the ident that
@@ -291,7 +280,7 @@ export const printSymbolLiteral: Plugin.Printer<Ruby.SymbolLiteral> = (
   opts,
   print
 ) => {
-  return concat([":", path.call(print, "body", 0)]);
+  return [":", path.call(print, "body", 0)];
 };
 
 // Prints out an xstring literal. Its child is an array of string parts,
@@ -301,7 +290,5 @@ export const printXStringLiteral: Plugin.Printer<Ruby.XStringLiteral> = (
   opts,
   print
 ) => {
-  return concat(
-    (["`"] as Plugin.Doc[]).concat(path.map(print, "body")).concat("`")
-  );
+  return ["`", ...path.map(print, "body"), "`"];
 };

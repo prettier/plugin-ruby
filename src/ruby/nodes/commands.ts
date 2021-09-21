@@ -1,28 +1,48 @@
-import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { makeCall } from "../../utils";
 
-const { align, concat, group, ifBreak, indent, join, line, softline } =
-  prettier;
+const { align, group, ifBreak, indent, join, line, softline } = prettier;
 
-function docLength(doc: any): number {
-  if (doc.length) {
+function throwBadDoc(_doc: never): never;
+function throwBadDoc(doc: Plugin.Doc) {
+  throw new Error(`Unknown doc ${doc}`);
+}
+
+// Loop through the already created doc nodes and determine the overall length
+// so that we can properly align the command arguments.
+function docLength(doc: Plugin.Doc): number {
+  if (Array.isArray(doc)) {
+    return doc.reduce((sum, child) => sum + docLength(child), 0);
+  }
+
+  if (typeof doc === "string") {
     return doc.length;
   }
 
-  if (doc.parts) {
-    return (doc as Prettier.doc.builders.Concat).parts.reduce(
-      (sum, child) => sum + docLength(child),
-      0
-    );
+  switch (doc.type) {
+    case "concat":
+    case "fill":
+      return doc.parts.reduce((sum, child) => sum + docLength(child), 0);
+    case "align":
+    case "group":
+    case "indent":
+    case "line-suffix":
+      return docLength(doc.contents);
+    case "if-break":
+      return docLength(doc.flatContents);
+    case "line":
+      return doc.soft ? 0 : 1;
+    case "break-parent":
+    case "cursor":
+    case "indent-if-break":
+    case "label":
+    case "line-suffix-boundary":
+    case "trim":
+      return 0;
+    default:
+      throwBadDoc(doc);
   }
-
-  if (doc.contents) {
-    return docLength(doc.contents);
-  }
-
-  return 0;
 }
 
 function hasDef(node: Ruby.Command) {
@@ -68,13 +88,13 @@ export const printCommand: Plugin.Printer<Ruby.Command> = (
   const node = path.getValue();
 
   const command = path.call(print, "body", 0);
-  const joinedArgs = join(concat([",", line]), path.call(print, "body", 1));
+  const joinedArgs = join([",", line], path.call(print, "body", 1));
 
   const hasTernary = hasTernaryArg(node.body[1]);
   let breakArgs;
 
   if (hasTernary) {
-    breakArgs = indent(concat([softline, joinedArgs]));
+    breakArgs = indent([softline, joinedArgs]);
   } else if (hasDef(node)) {
     breakArgs = joinedArgs;
   } else {
@@ -83,13 +103,13 @@ export const printCommand: Plugin.Printer<Ruby.Command> = (
 
   return group(
     ifBreak(
-      concat([
+      [
         command,
         hasTernary ? "(" : " ",
         breakArgs,
-        hasTernary ? concat([softline, ")"]) : ""
-      ]),
-      concat([command, " ", joinedArgs])
+        hasTernary ? [softline, ")"] : ""
+      ],
+      [command, " ", joinedArgs]
     )
   );
 };
@@ -107,29 +127,24 @@ export const printCommandCall: Plugin.Printer<Ruby.CommandCall> = (
   ];
 
   if (!node.body[3]) {
-    return concat(parts);
+    return parts;
   }
 
-  const argDocs = join(concat([",", line]), path.call(print, "body", 3));
+  const argDocs = join([",", line], path.call(print, "body", 3));
   let breakDoc;
 
   if (hasTernaryArg(node.body[3])) {
-    breakDoc = parts.concat(
-      "(",
-      indent(concat([softline, argDocs])),
-      softline,
-      ")"
-    );
+    breakDoc = parts.concat("(", indent([softline, argDocs]), softline, ")");
     parts.push(" ");
   } else if (skipArgsAlign(path)) {
     parts.push(" ");
     breakDoc = parts.concat(argDocs);
   } else {
     parts.push(" ");
-    breakDoc = parts.concat(align(docLength(concat(parts)), argDocs));
+    breakDoc = parts.concat(align(docLength(parts), argDocs));
   }
 
   const joinedDoc = parts.concat(argDocs);
 
-  return group(ifBreak(concat(breakDoc), concat(joinedDoc)));
+  return group(ifBreak(breakDoc, joinedDoc));
 };

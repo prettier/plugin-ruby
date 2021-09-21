@@ -2,7 +2,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { literal } from "../../utils";
 
-const { concat, group, ifBreak, indent, line, join, softline } = prettier;
+const { group, ifBreak, indent, line, join, softline } = prettier;
 
 // You can't skip the parentheses if you have comments or certain operators with
 // lower precedence than the return keyword.
@@ -31,8 +31,6 @@ function canSkipParens(args: Ruby.Args | Ruby.ArgsAddStar) {
 
   return true;
 }
-
-type CallArgs = [Plugin.Print, ...PropertyKey[]];
 
 export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
   let args = path.getValue().body[0].body[0] as Ruby.Args | Ruby.ArgsAddStar;
@@ -63,29 +61,26 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
 
   // Now that we've established which actual node is the arguments to return,
   // we grab it out of the path by diving down the steps that we've set up.
-  const parts = path.call.apply(
-    path,
-    ([print] as CallArgs).concat(steps) as CallArgs
-  ) as Plugin.Doc[];
+  const parts = path.call(print, ...steps) as Plugin.Doc | Plugin.Doc[];
+  const useBrackets = Array.isArray(parts) && parts.length > 1;
 
   // If we got the value straight out of the parens, then `parts` would only
   // be a singular doc as opposed to an array.
-  const value = Array.isArray(parts) ? join(concat([",", line]), parts) : parts;
+  const value = Array.isArray(parts) ? join([",", line], parts) : parts;
 
   // We only get here if we have comments somewhere that would prevent us from
   // skipping the parentheses.
   if (args.body.length === 1 && args.body[0].type === "paren") {
-    return concat(["return", value]);
+    return ["return", value];
   }
 
-  return group(
-    concat([
-      "return",
-      ifBreak(parts.length > 1 ? " [" : "(", " "),
-      indent(concat([softline, value])),
-      concat([softline, ifBreak(parts.length > 1 ? "]" : ")", "")])
-    ])
-  );
+  return group([
+    "return",
+    ifBreak(useBrackets ? " [" : "(", " "),
+    indent([softline, value]),
+    softline,
+    ifBreak(useBrackets ? "]" : ")", "")
+  ]);
 };
 
 export const printReturn0 = literal("return");

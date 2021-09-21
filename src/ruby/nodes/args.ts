@@ -1,11 +1,10 @@
-import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 
 import { getTrailingComma } from "../../utils";
 import toProc from "../toProc";
 
-const { concat, group, ifBreak, indent, join, line, softline } = prettier;
+const { group, ifBreak, indent, join, line, softline } = prettier;
 
 const noTrailingComma = ["command", "command_call"];
 
@@ -40,32 +39,26 @@ export const printArgParen: Plugin.Printer<Ruby.ArgParen> = (
   // an args_forward node, as we're guaranteed that there are no other arg
   // nodes.
   if (argsNode.type === "args_forward") {
-    return group(
-      concat([
-        "(",
-        indent(concat([softline, path.call(print, "body", 0)])),
-        softline,
-        ")"
-      ])
-    );
+    return group([
+      "(",
+      indent([softline, path.call(print, "body", 0)]),
+      softline,
+      ")"
+    ]);
   }
 
   // Now here we return a doc that represents the whole grouped expression,
   // including the surrouding parentheses.
-  return group(
-    concat([
-      "(",
-      indent(
-        concat([
-          softline,
-          join(concat([",", line]), path.call(print, "body", 0)),
-          getTrailingComma(opts) ? getArgParenTrailingComma(argsNode) : ""
-        ])
-      ),
+  return group([
+    "(",
+    indent([
       softline,
-      ")"
-    ])
-  );
+      join([",", line], path.call(print, "body", 0)),
+      getTrailingComma(opts) ? getArgParenTrailingComma(argsNode) : ""
+    ]),
+    softline,
+    ")"
+  ]);
 };
 
 export const printArgs: Plugin.Printer<Ruby.Args> = (
@@ -127,8 +120,8 @@ export const printArgsAddBlock: Plugin.Printer<Ruby.ArgsAddBlock> = (
     if (!(blockNode.comments || []).some(({ leading }) => leading)) {
       // If we don't have any leading comments, we can just prepend the
       // operator.
-      blockDoc = concat(["&", blockDoc]);
-    } else if (Array.isArray(blockDoc[0])) {
+      blockDoc = ["&", blockDoc];
+    } else {
       // If we have a method call like:
       //
       //     foo(
@@ -142,17 +135,7 @@ export const printArgsAddBlock: Plugin.Printer<Ruby.ArgsAddBlock> = (
       // In prettier >= 2.3.0, the comments are printed as an array before the
       // content. I don't love this kind of reflection, but it's the simplest
       // way at the moment to get this right.
-      blockDoc = blockDoc[0].concat(
-        concat(["&", blockDoc[1]]),
-        blockDoc.slice(2)
-      );
-    } else {
-      // In prettier < 2.3.0, the comments are printed as part of a concat, so
-      // we can reflect on how many leading comments there are to determine
-      // which doc node we should modify.
-      const index = blockNode.comments!.filter(({ leading }) => leading).length;
-      const cBlockDoc = blockDoc as any as Prettier.doc.builders.Concat;
-      cBlockDoc.parts[index] = concat(["&", cBlockDoc.parts[index]]);
+      blockDoc = blockDoc[0].concat(["&", blockDoc[1]], blockDoc.slice(2));
     }
 
     parts.push(blockDoc);
@@ -190,7 +173,7 @@ export const printArgsAddStar: Plugin.Printer<Ruby.ArgsAddStar> = (
     // If we don't have any leading comments, we can just prepend the operator.
     const argsNode = argPath.getValue() as Ruby.AnyNode;
     if (!(argsNode.comments || []).some(({ leading }) => leading)) {
-      docs.push(concat(["*", doc]));
+      docs.push(["*", doc]);
       return;
     }
 
@@ -207,19 +190,7 @@ export const printArgsAddStar: Plugin.Printer<Ruby.ArgsAddStar> = (
     // In prettier >= 2.3.0, the comments are printed as an array before the
     // content. I don't love this kind of reflection, but it's the simplest way
     // at the moment to get this right.
-    if (Array.isArray(doc[0])) {
-      docs.push(doc[0].concat(concat(["*", doc[1]]), doc.slice(2)));
-      return;
-    }
-
-    // In prettier < 2.3.0, the comments are printed as part of a concat, so
-    // we can reflect on how many leading comments there are to determine which
-    // doc node we should modify.
-    const index = argsNode.comments!.filter(({ leading }) => leading).length;
-    const cDoc = doc as any as Prettier.doc.builders.Concat;
-
-    cDoc.parts[index] = concat(["*", cDoc.parts[index]]);
-    docs = docs.concat(cDoc);
+    docs.push((doc[0] as Plugin.Doc[]).concat(["*", doc[1]], doc.slice(2)));
   }, "body");
 
   return docs;
@@ -230,5 +201,5 @@ export const printBlockArg: Plugin.Printer<Ruby.Blockarg> = (
   opts,
   print
 ) => {
-  return concat(["&", path.call(print, "body", 0)]);
+  return ["&", path.call(print, "body", 0)];
 };

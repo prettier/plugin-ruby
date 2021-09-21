@@ -4,7 +4,6 @@ import { isEmptyStmts } from "../../utils";
 
 const {
   breakParent,
-  concat,
   dedent,
   group,
   hardline,
@@ -29,7 +28,7 @@ export const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (
   }
 
   if (rescue) {
-    parts.push(dedent(concat([hardline, path.call(print, "body", 1)])));
+    parts.push(dedent([hardline, path.call(print, "body", 1)]));
   }
 
   if (elseClause) {
@@ -40,14 +39,14 @@ export const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (
         ? path.call(print, "body", 2, "body", 0)
         : path.call(print, "body", 2);
 
-    parts.push(concat([dedent(concat([hardline, "else"])), hardline, stmts]));
+    parts.push([dedent([hardline, "else"]), hardline, stmts]);
   }
 
   if (ensure) {
-    parts.push(dedent(concat([hardline, path.call(print, "body", 3)])));
+    parts.push(dedent([hardline, path.call(print, "body", 3)]));
   }
 
-  return group(concat(parts));
+  return group(parts);
 };
 
 const argNodeTypes = ["args", "args_add_star", "args_add_block"];
@@ -70,12 +69,10 @@ export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
   // If we have an arg type node as the contents, then it's going to return an
   // array, so we need to explicitly join that content here.
   if (argNodeTypes.includes(contentNode.type)) {
-    contentDoc = join(concat([",", line]), contentDoc);
+    contentDoc = join([",", line], contentDoc);
   }
 
-  return group(
-    concat(["(", indent(concat([softline, contentDoc])), softline, ")"])
-  );
+  return group(["(", indent([softline, contentDoc]), softline, ")"]);
 };
 
 export const printEndContent: Plugin.Printer<Ruby.EndContent> = (
@@ -84,7 +81,7 @@ export const printEndContent: Plugin.Printer<Ruby.EndContent> = (
   _print
 ) => {
   const { body } = path.getValue();
-  return concat([trim, "__END__", literalline, body]);
+  return [trim, "__END__", literalline, body];
 };
 
 export const printComment: Plugin.Printer<Ruby.Comment> = (
@@ -100,7 +97,7 @@ export const printProgram: Plugin.Printer<Ruby.Program> = (
   opts,
   print
 ) => {
-  return concat([join(hardline, path.map(print, "body")), hardline]);
+  return [join(hardline, path.map(print, "body")), hardline];
 };
 
 export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
@@ -124,7 +121,7 @@ export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
       "comments"
     );
 
-    return concat([breakParent, join(hardline, comments)]);
+    return [breakParent, join(hardline, comments)];
   }
 
   const parts: Plugin.Doc[] = [];
@@ -156,5 +153,5 @@ export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
     lineNo = stmt.el;
   });
 
-  return concat(parts);
+  return parts;
 };

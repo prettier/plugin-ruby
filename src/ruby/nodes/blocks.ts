@@ -2,16 +2,8 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { hasAncestor } from "../../utils";
 
-const {
-  breakParent,
-  concat,
-  group,
-  ifBreak,
-  indent,
-  join,
-  removeLines,
-  softline
-} = prettier;
+const { breakParent, group, ifBreak, indent, join, removeLines, softline } =
+  prettier;
 
 export const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (
   path,
@@ -26,7 +18,7 @@ export const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (
   }
 
   parts.push("| ");
-  return concat(parts);
+  return parts;
 };
 
 function printBlock(
@@ -43,7 +35,7 @@ function printBlock(
       stmts[0].type !== "void_stmt" ||
       stmts[0].comments
     ) {
-      doBlockBody = indent(concat([softline, path.call(print, "body", 1)]));
+      doBlockBody = indent([softline, path.call(print, "body", 1)]);
     }
 
     // If this block is nested underneath a command or command_call node, then
@@ -53,12 +45,12 @@ function printBlock(
     // switch to using braces instead.
     const useBraces = braces && hasAncestor(path, ["command", "command_call"]);
 
-    const doBlock = concat([
+    const doBlock = [
       useBraces ? " {" : " do",
-      variables ? concat([" ", path.call(print, "body", 0)]) : "",
+      variables ? [" ", path.call(print, "body", 0)] : "",
       doBlockBody,
-      concat([softline, useBraces ? "}" : "end"])
-    ]);
+      [softline, useBraces ? "}" : "end"]
+    ];
 
     // We can hit this next pattern if within the block the only statement is a
     // comment.
@@ -67,7 +59,7 @@ function printBlock(
       stmts[0].type === "void_stmt" &&
       stmts[0].comments
     ) {
-      return concat([breakParent, doBlock]);
+      return [breakParent, doBlock];
     }
 
     const blockReceiver = path.getParentNode().body[0];
@@ -75,18 +67,18 @@ function printBlock(
     // If the parent node is a command node, then there are no parentheses
     // around the arguments to that command, so we need to break the block
     if (["command", "command_call"].includes(blockReceiver.type)) {
-      return concat([breakParent, doBlock]);
+      return [breakParent, doBlock];
     }
 
     const hasBody = stmts.some(({ type }) => type !== "void_stmt");
-    const braceBlock = concat([
+    const braceBlock = [
       " {",
       hasBody || variables ? " " : "",
       variables ? path.call(print, "body", 0) : "",
       path.call(print, "body", 1),
       hasBody ? " " : "",
       "}"
-    ]);
+    ];
 
     return group(ifBreak(doBlock, braceBlock));
   };

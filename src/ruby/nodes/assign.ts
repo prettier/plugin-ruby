@@ -2,7 +2,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { skipAssignIndent } from "../../utils";
 
-const { concat, group, indent, join, line } = prettier;
+const { group, indent, join, line } = prettier;
 
 export const printAssign: Plugin.Printer<Ruby.Assign> = (path, opts, print) => {
   const [_targetNode, valueNode] = path.getValue().body;
@@ -13,14 +13,14 @@ export const printAssign: Plugin.Printer<Ruby.Assign> = (path, opts, print) => {
   // If the right side of this assignment is a multiple assignment, then we need
   // to join it together with commas.
   if (["mrhs_add_star", "mrhs_new_from_args"].includes(valueNode.type)) {
-    rightSideDoc = group(join(concat([",", line]), valueDoc));
+    rightSideDoc = group(join([",", line], valueDoc));
   }
 
   if (skipAssignIndent(valueNode)) {
-    return group(concat([targetDoc, " = ", rightSideDoc]));
+    return group([targetDoc, " = ", rightSideDoc]);
   }
 
-  return group(concat([targetDoc, " =", indent(concat([line, rightSideDoc]))]));
+  return group([targetDoc, " =", indent([line, rightSideDoc])]);
 };
 
 export const printOpAssign: Plugin.Printer<Ruby.Opassign> = (
@@ -28,14 +28,12 @@ export const printOpAssign: Plugin.Printer<Ruby.Opassign> = (
   opts,
   print
 ) => {
-  return group(
-    concat([
-      path.call(print, "body", 0),
-      " ",
-      path.call(print, "body", 1),
-      indent(concat([line, path.call(print, "body", 2)]))
-    ])
-  );
+  return group([
+    path.call(print, "body", 0),
+    " ",
+    path.call(print, "body", 1),
+    indent([line, path.call(print, "body", 2)])
+  ]);
 };
 
 export const printVarField: Plugin.Printer<Ruby.VarField> = (

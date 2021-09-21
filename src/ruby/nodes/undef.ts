@@ -1,7 +1,7 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 
-const { addTrailingComment, align, concat, group, join, line } = prettier;
+const { addTrailingComment, align, group, join, line } = prettier;
 
 const printUndefSymbol: Plugin.Printer<Ruby.DynaSymbol | Ruby.SymbolLiteral> = (
   path,
@@ -29,10 +29,5 @@ export const printUndef: Plugin.Printer<Ruby.Undef> = (path, opts, print) => {
     "body"
   );
 
-  return group(
-    concat([
-      keyword,
-      align(keyword.length, join(concat([",", line]), argNodes))
-    ])
-  );
+  return group([keyword, align(keyword.length, join([",", line], argNodes))]);
 };

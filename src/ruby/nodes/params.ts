@@ -2,14 +2,14 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { literal } from "../../utils";
 
-const { concat, group, join, indent, line, softline } = prettier;
+const { group, join, indent, line, softline } = prettier;
 
 function printRestParamSymbol(
   symbol: string
 ): Plugin.Printer<Ruby.KeywordRestParam | Ruby.RestParam> {
   return function printRestParamWithSymbol(path, opts, print) {
     return path.getValue().body[0]
-      ? concat([symbol, path.call(print, "body", 0)])
+      ? [symbol, path.call(print, "body", 0)]
       : symbol;
   };
 }
@@ -70,7 +70,7 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
     parts.push(path.call(print, "body", 6));
   }
 
-  const contents: Plugin.Doc[] = [join(concat([",", line]), parts)];
+  const contents: Plugin.Doc[] = [join([",", line], parts)];
 
   // You can put an extra comma at the end of block args between pipes to
   // change what it does. Below is the difference:
@@ -88,17 +88,10 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   // If the parent node is a paren then we skipped printing the parentheses so
   // that we could handle them here and get nicer formatting.
   if (["lambda", "paren"].includes(path.getParentNode().type)) {
-    return group(
-      concat([
-        "(",
-        indent(concat(([softline] as Plugin.Doc[]).concat(contents))),
-        softline,
-        ")"
-      ])
-    );
+    return group(["(", indent([softline, ...contents]), softline, ")"]);
   }
 
-  return group(concat(contents));
+  return group(contents);
 };
 
 export const printArgsForward = literal("...");

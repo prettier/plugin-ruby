@@ -2,7 +2,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { hasAncestor } from "../../utils";
 
-const { concat, group, ifBreak, indent, line } = prettier;
+const { group, ifBreak, indent, line } = prettier;
 
 // We can have our params coming in as the first child of the main lambda node,
 // or if we have them wrapped in parens then they'll be one level deeper. Even
@@ -63,16 +63,16 @@ export const printLambda: Plugin.Printer<Ruby.Lambda> = (path, opts, print) => {
 
   return group(
     ifBreak(
-      concat([
+      [
         "->",
         params,
         " ",
         inCommand ? "{" : "do",
-        indent(concat([line, path.call(print, "body", 1)])),
+        indent([line, path.call(print, "body", 1)]),
         line,
         inCommand ? "}" : "end"
-      ]),
-      concat(["->", params, " { ", path.call(print, "body", 1), " }"])
+      ],
+      ["->", params, " { ", path.call(print, "body", 1), " }"]
     )
   );
 };

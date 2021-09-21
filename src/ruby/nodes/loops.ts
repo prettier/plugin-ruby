@@ -6,17 +6,8 @@ import {
   isEmptyStmts
 } from "../../utils";
 
-const {
-  align,
-  breakParent,
-  concat,
-  group,
-  hardline,
-  ifBreak,
-  indent,
-  join,
-  softline
-} = prettier;
+const { align, breakParent, group, hardline, ifBreak, indent, join, softline } =
+  prettier;
 
 function printLoop(
   keyword: string,
@@ -30,22 +21,18 @@ function printLoop(
     // If the only statement inside this while loop is a void statement, then we
     // can shorten to just displaying the predicate and then a semicolon.
     if (isEmptyStmts(stmts)) {
-      return group(
-        concat([
-          group(concat([keyword, " ", path.call(print, "body", 0)])),
-          hardline,
-          "end"
-        ])
-      );
+      return group([
+        group([keyword, " ", path.call(print, "body", 0)]),
+        hardline,
+        "end"
+      ]);
     }
 
-    const inlineLoop = concat(
-      inlineEnsureParens(path, [
-        path.call(print, "body", 1),
-        ` ${keyword} `,
-        path.call(print, "body", 0)
-      ])
-    );
+    const inlineLoop = inlineEnsureParens(path, [
+      path.call(print, "body", 1),
+      ` ${keyword} `,
+      path.call(print, "body", 0)
+    ]);
 
     // If we're in the modifier form and we're modifying a `begin`, then this is
     // a special case where we need to explicitly use the modifier form because
@@ -61,21 +48,19 @@ function printLoop(
       return inlineLoop;
     }
 
-    const blockLoop = concat([
-      concat([
-        `${keyword} `,
-        align(keyword.length + 1, path.call(print, "body", 0))
-      ]),
-      indent(concat([softline, path.call(print, "body", 1)])),
-      concat([softline, "end"])
-    ]);
+    const blockLoop = [
+      [`${keyword} `, align(keyword.length + 1, path.call(print, "body", 0))],
+      indent([softline, path.call(print, "body", 1)]),
+      softline,
+      "end"
+    ];
 
     // If we're disallowing inline loops or if the predicate of the loop
     // contains an assignment (in which case we can't know for certain that that
     // assignment doesn't impact the statements inside the loop) then we can't
     // use the modifier form and we must use the block form.
     if (!rubyModifier || containsAssignment(path.getValue().body[0])) {
-      return concat([breakParent, blockLoop]);
+      return [breakParent, blockLoop];
     }
 
     return group(ifBreak(blockLoop, inlineLoop));
@@ -87,16 +72,15 @@ export const printFor: Plugin.Printer<Ruby.For> = (path, opts, print) => {
   const varsDoc =
     path.getValue().body[0].type === "mlhs" ? join(", ", varDoc) : varDoc;
 
-  return group(
-    concat([
-      "for ",
-      varsDoc,
-      " in ",
-      rangeDoc,
-      indent(concat([hardline, stmtsDoc])),
-      concat([hardline, "end"])
-    ])
-  );
+  return group([
+    "for ",
+    varsDoc,
+    " in ",
+    rangeDoc,
+    indent([hardline, stmtsDoc]),
+    hardline,
+    "end"
+  ]);
 };
 
 export const printWhile = printLoop("while", false);

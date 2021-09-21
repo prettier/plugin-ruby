@@ -18,11 +18,9 @@ export const printInt: Plugin.Printer<Ruby.Int> = (path, _opts, _print) => {
   // already formatted with underscores, then add them in in between the
   // numbers every three characters starting from the right.
   if (!body.startsWith("0") && body.length >= 5 && !body.includes("_")) {
-    return `  ${body}`
-      .slice((body.length + 2) % 3)
-      .match(/.{3}/g)!
-      .join("_")
-      .trim();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const segments = `  ${body}`.slice((body.length + 2) % 3).match(/.{3}/g)!;
+    return segments.join("_").trim();
   }
 
   return body;

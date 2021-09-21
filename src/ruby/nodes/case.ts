@@ -1,21 +1,18 @@
-import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 
-const { align, concat, fill, group, hardline, indent, line } = prettier;
+const { align, fill, group, hardline, indent, line } = prettier;
 
 export const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
-  const statement: Plugin.Doc[] = ["case"];
+  const parts: Plugin.Doc[] = ["case"];
 
   // You don't need to explicitly have something to test against in a case
   // statement (without it it effectively becomes an if/elsif chain).
   if (path.getValue().body[0]) {
-    statement.push(" ", path.call(print, "body", 0));
+    parts.push(" ", path.call(print, "body", 0));
   }
 
-  return concat(
-    statement.concat([hardline, path.call(print, "body", 1), hardline, "end"])
-  );
+  return [...parts, hardline, path.call(print, "body", 1), hardline, "end"];
 };
 
 export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
@@ -32,21 +29,24 @@ export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
 
         // Pull off the last element and make it concat with a comma so that
         // we can maintain alternating lines and docs.
-        return accum
-          .slice(0, -1)
-          .concat([concat([accum![accum.length - 1], ","]), line, pred]);
+        return [
+          ...accum.slice(0, -1),
+          [accum[accum.length - 1], ","],
+          line,
+          pred
+        ];
       },
       [] as Plugin.Doc[]
     )
   );
 
-  const stmts = path.call(print, "body", 1) as Prettier.doc.builders.Concat;
-  const parts: Plugin.Doc[] = [concat(["when ", align("when ".length, preds)])];
+  const stmts = path.call(print, "body", 1) as Plugin.Doc[];
+  const parts: Plugin.Doc[] = [["when ", align("when ".length, preds)]];
 
   // It's possible in a when to just have empty void statements, in which case
   // we would skip adding the body.
-  if (!stmts.parts.every((part) => !part)) {
-    parts.push(indent(concat([hardline, stmts])));
+  if (!stmts.every((part) => !part)) {
+    parts.push(indent([hardline, stmts]));
   }
 
   // This is the next clause on the case statement, either another `when` or
@@ -55,5 +55,5 @@ export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
     parts.push(hardline, path.call(print, "body", 2));
   }
 
-  return group(concat(parts));
+  return group(parts);
 };

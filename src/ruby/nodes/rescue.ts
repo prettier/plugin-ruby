@@ -1,24 +1,23 @@
-import type * as Prettier from "prettier";
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { literal } from "../../utils";
 
-const { align, concat, group, hardline, indent, join, line } = prettier;
+const { align, group, hardline, indent, join, line } = prettier;
 
 export const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
-  return concat([
+  return [
     "begin",
-    indent(concat([hardline, concat(path.map(print, "body"))])),
+    indent([hardline, path.map(print, "body")]),
     hardline,
     "end"
-  ]);
+  ];
 };
 
 export const printEnsure: Plugin.Printer<Ruby.Ensure> = (path, opts, print) => {
-  return concat([
+  return [
     path.call(print, "body", 0),
-    indent(concat([hardline, path.call(print, "body", 1)]))
-  ]);
+    indent([hardline, path.call(print, "body", 1)])
+  ];
 };
 
 export const printRescue: Plugin.Printer<Ruby.Rescue> = (path, opts, print) => {
@@ -33,19 +32,19 @@ export const printRescue: Plugin.Printer<Ruby.Rescue> = (path, opts, print) => {
     parts.push(" StandardError");
   }
 
-  const bodystmt = path.call(print, "body", 1) as Prettier.doc.builders.Concat;
+  const bodystmt = path.call(print, "body", 1) as Plugin.Doc[];
 
-  if (bodystmt.parts.length > 0) {
-    parts.push(indent(concat([hardline, bodystmt])));
+  if (bodystmt.length > 0) {
+    parts.push(indent([hardline, bodystmt]));
   }
 
   // This is the next clause on the `begin` statement, either another
   // `rescue`, and `ensure`, or an `else` clause.
   if (path.getValue().body[2]) {
-    parts.push(concat([hardline, path.call(print, "body", 2)]));
+    parts.push([hardline, path.call(print, "body", 2)]);
   }
 
-  return group(concat(parts));
+  return group(parts);
 };
 
 // This is a container node that we're adding into the AST that isn't present in
@@ -62,7 +61,7 @@ export const printRescueEx: Plugin.Printer<Ruby.RescueEx> = (
     let exceptionDoc = path.call(print, "body", 0);
 
     if (Array.isArray(exceptionDoc)) {
-      const joiner = concat([",", line]);
+      const joiner = [",", line];
       exceptionDoc = group(join(joiner, exceptionDoc));
     }
 
@@ -73,7 +72,7 @@ export const printRescueEx: Plugin.Printer<Ruby.RescueEx> = (
     parts.push(" => ", path.call(print, "body", 1));
   }
 
-  return group(concat(parts));
+  return group(parts);
 };
 
 export const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (
@@ -83,15 +82,15 @@ export const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (
 ) => {
   const [statementDoc, valueDoc] = path.map(print, "body");
 
-  return concat([
+  return [
     "begin",
-    indent(concat([hardline, statementDoc])),
+    indent([hardline, statementDoc]),
     hardline,
     "rescue StandardError",
-    indent(concat([hardline, valueDoc])),
+    indent([hardline, valueDoc]),
     hardline,
     "end"
-  ]);
+  ];
 };
 
 export const printRedo = literal("redo");

@@ -2,15 +2,8 @@ import type { Plugin, Ruby } from "../types";
 import prettier from "../prettier";
 import { literallineWithoutBreakParent } from "../utils";
 
-const {
-  concat,
-  group,
-  indent,
-  lineSuffix,
-  mapDoc,
-  markAsRoot,
-  stripTrailingHardline
-} = prettier;
+const { group, indent, lineSuffix, mapDoc, markAsRoot, stripTrailingHardline } =
+  prettier;
 
 const parsers: Record<string, string> = {
   css: "css",
@@ -29,11 +22,9 @@ const parsers: Record<string, string> = {
 function replaceNewlines(doc: Plugin.Doc) {
   return mapDoc(doc, (currentDoc: Plugin.Doc) =>
     typeof currentDoc === "string" && currentDoc.includes("\n")
-      ? concat(
-          currentDoc
-            .split(/(\n)/g)
-            .map((v, i) => (i % 2 === 0 ? v : literallineWithoutBreakParent))
-        )
+      ? currentDoc
+          .split(/(\n)/g)
+          .map((v, i) => (i % 2 === 0 ? v : literallineWithoutBreakParent))
       : currentDoc
   );
 }
@@ -107,38 +98,32 @@ const embed: Plugin.Embed<Ruby.AnyNode> = (path, print, textToDoc, _opts) => {
   }
 
   // Pass that content into the embedded parser. Get back the doc node.
-  const formatted = concat([
+  const formatted = [
     literallineWithoutBreakParent,
     replaceNewlines(stripTrailingHardline(textToDoc(content, { parser })))
-  ]);
+  ];
 
   // If we're using a squiggly heredoc, then we can properly handle indentation
   // ourselves.
   if (isSquiggly) {
-    return concat([
+    return [
       path.call(print, "beging"),
       lineSuffix(
-        group(
-          concat([
-            indent(markAsRoot(formatted)),
-            literallineWithoutBreakParent,
-            ending.trim()
-          ])
-        )
+        group([
+          indent(markAsRoot(formatted)),
+          literallineWithoutBreakParent,
+          ending.trim()
+        ])
       )
-    ]);
+    ];
   }
 
   // Otherwise, we need to just assume it's formatted correctly and return the
   // content as it is.
-  return markAsRoot(
-    concat([
-      path.call(print, "beging"),
-      lineSuffix(
-        group(concat([formatted, literallineWithoutBreakParent, ending.trim()]))
-      )
-    ])
-  );
+  return markAsRoot([
+    path.call(print, "beging"),
+    lineSuffix(group([formatted, literallineWithoutBreakParent, ending.trim()]))
+  ]);
 };
 
 export default embed;

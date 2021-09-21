@@ -2,7 +2,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { literallineWithoutBreakParent } from "../../utils";
 
-const { concat, group, lineSuffix, join } = prettier;
+const { group, lineSuffix, join } = prettier;
 
 export const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (
   path,
@@ -26,14 +26,8 @@ export const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (
   // break-parent, all ancestral groups are broken, and heredocs automatically
   // break lines in groups they appear in. We prefer them to appear in-line if
   // possible, so we use a literalline without the break-parent.
-  return group(
-    concat([
-      path.call(print, "beging"),
-      lineSuffix(
-        group(
-          concat([literallineWithoutBreakParent].concat(parts).concat(ending))
-        )
-      )
-    ])
-  );
+  return group([
+    path.call(print, "beging"),
+    lineSuffix(group([literallineWithoutBreakParent, ...parts, ending]))
+  ]);
 };

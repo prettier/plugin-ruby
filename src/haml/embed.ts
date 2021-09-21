@@ -2,7 +2,6 @@ import type { Plugin, HAML } from "../types";
 import prettier from "../prettier";
 
 const {
-  concat,
   hardline,
   indent,
   literalline,
@@ -16,13 +15,9 @@ const {
 // necessary, but since it's in prettier core I'm keeping it here.
 /* istanbul ignore next */
 function replaceNewlines(doc: Plugin.Doc) {
-  return mapDoc(doc, (currentDoc: Plugin.Doc) =>
+  return mapDoc(doc, (currentDoc) =>
     typeof currentDoc === "string" && currentDoc.includes("\n")
-      ? concat(
-          currentDoc
-            .split(/(\n)/g)
-            .map((v, i) => (i % 2 === 0 ? v : literalline))
-        )
+      ? currentDoc.split(/(\n)/g).map((v, i) => (i % 2 === 0 ? v : literalline))
       : currentDoc
   );
 }
@@ -65,20 +60,16 @@ const embed: Plugin.Embed<HAML.AnyNode> = (path, _print, textToDoc, opts) => {
   // If there is a plugin that has a parser that matches the name of this
   // filter, then we're going to assume that's correct for embedding and go
   // ahead and switch to that parser.
-  return markAsRoot(
-    concat([
-      ":",
-      node.value.name,
-      indent(
-        concat([
-          hardline,
-          replaceNewlines(
-            stripTrailingHardline(textToDoc(node.value.text, { parser }))
-          )
-        ])
+  return markAsRoot([
+    ":",
+    node.value.name,
+    indent([
+      hardline,
+      replaceNewlines(
+        stripTrailingHardline(textToDoc(node.value.text, { parser }))
       )
     ])
-  );
+  ]);
 };
 
 export default embed;

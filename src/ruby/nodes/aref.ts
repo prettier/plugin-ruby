@@ -1,7 +1,7 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 
-const { concat, group, indent, join, line, softline } = prettier;
+const { group, indent, join, line, softline } = prettier;
 
 // `aref` nodes are when you're pulling a value out of a collection at a
 // specific index. Put another way, it's any time you're calling the method
@@ -19,7 +19,7 @@ export const printAref: Plugin.Printer<Ruby.Aref> = (path, opts, print) => {
   const indexNode = path.getValue().body[1];
 
   if (!indexNode) {
-    return concat([path.call(print, "body", 0), "[]"]);
+    return [path.call(print, "body", 0), "[]"];
   }
 
   return printArefField(path, opts, print);
@@ -46,12 +46,11 @@ export const printArefField: Plugin.Printer<Ruby.Aref | Ruby.ArefField> = (
 ) => {
   const [printedArray, printedIndex] = path.map(print, "body");
 
-  return group(
-    concat([
-      printedArray,
-      "[",
-      indent(concat([softline, join(concat([",", line]), printedIndex)])),
-      concat([softline, "]"])
-    ])
-  );
+  return group([
+    printedArray,
+    "[",
+    indent([softline, join([",", line], printedIndex)]),
+    softline,
+    "]"
+  ]);
 };

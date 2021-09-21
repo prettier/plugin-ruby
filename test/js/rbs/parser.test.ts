@@ -30,20 +30,14 @@ describe("parser", () => {
   });
 
   test("locStart", () => {
-    expect(
-      parser.locStart({ location: { start_pos: 5 } } as RBS.AnyNode)
-    ).toEqual(5);
-    expect(
-      parser.locStart({ type: { location: { start_pos: 10 } } } as RBS.AnyNode)
-    ).toEqual(10);
+    const node = { location: { start_pos: 5 } } as RBS.AnyNode;
+
+    expect(parser.locStart(node)).toEqual(5);
   });
 
   test("locEnd", () => {
-    expect(parser.locEnd({ location: { end_pos: 5 } } as RBS.AnyNode)).toEqual(
-      5
-    );
-    expect(
-      parser.locEnd({ type: { location: { end_pos: 10 } } } as RBS.AnyNode)
-    ).toEqual(10);
+    const node = { location: { end_pos: 5 } } as RBS.AnyNode;
+
+    expect(parser.locEnd(node)).toEqual(5);
   });
 });

@@ -2,7 +2,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { isEmptyBodyStmt } from "../../utils";
 
-const { concat, group, hardline, indent, line } = prettier;
+const { group, hardline, indent, line } = prettier;
 
 function printMethod(offset: number): Plugin.Printer<Ruby.Def | Ruby.Defs> {
   return function printMethodWithOffset(path, opts, print) {
@@ -38,16 +38,15 @@ function printMethod(offset: number): Plugin.Printer<Ruby.Def | Ruby.Defs> {
     );
 
     if (isEmptyBodyStmt(bodystmt)) {
-      return group(concat(declaration.concat("; end")));
+      return group([...declaration, "; end"]);
     }
 
-    return group(
-      concat([
-        group(concat(declaration)),
-        indent(concat([hardline, path.call(print, "body", offset + 2)])),
-        group(concat([hardline, "end"]))
-      ])
-    );
+    return group([
+      group(declaration),
+      indent([hardline, path.call(print, "body", offset + 2)]),
+      hardline,
+      "end"
+    ]);
   };
 }
 
@@ -67,15 +66,13 @@ export const printSingleLineMethod: Plugin.Printer<Ruby.Defsl> = (
     }
   }
 
-  return group(
-    concat([
-      "def ",
-      path.call(print, "body", 0),
-      paramsDoc,
-      " =",
-      indent(group(concat([line, path.call(print, "body", 2)])))
-    ])
-  );
+  return group([
+    "def ",
+    path.call(print, "body", 0),
+    paramsDoc,
+    " =",
+    indent(group([line, path.call(print, "body", 2)]))
+  ]);
 };
 
 export const printAccessControl: Plugin.Printer<Ruby.AccessCtrl> = (

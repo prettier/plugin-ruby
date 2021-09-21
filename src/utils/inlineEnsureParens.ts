@@ -46,7 +46,7 @@ function inlineEnsureParens(
   parts: Plugin.Doc[]
 ) {
   if (needsParens.includes(path.getParentNode().type)) {
-    return (["("] as Plugin.Doc[]).concat(parts, ")");
+    return ["(", ...parts, ")"];
   }
 
   return parts;
