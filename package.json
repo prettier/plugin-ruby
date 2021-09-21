@@ -6,7 +6,7 @@
   "scripts": {
     "checkFormat": "prettier --check '**/*'",
     "lint": "eslint --cache .",
-    "prepublishOnly": "tsc -p tsconfig.build.json && cp src/parser/server.rb dist/parser && cp src/haml/parser.rb dist/haml && cp src/rbs/parser.rb dist/rbs && cp src/ruby/parser.rb dist/ruby",
+    "prepublishOnly": "tsc -p tsconfig.build.json && cp src/parser/netcat.js dist/parser && cp src/parser/server.rb dist/parser && cp src/haml/parser.rb dist/haml && cp src/rbs/parser.rb dist/rbs && cp src/ruby/parser.rb dist/ruby",
     "test": "jest"
   },
   "repository": {
