@@ -33,9 +33,9 @@ export function haml(code: string): Code {
 // explicitly allow it to be undefined by coalescing with the empty string.
 
 export function atLeastVersion(version: string) {
-  return process.env.RUBY_VERSION || "" >= version;
+  return (process.env.RUBY_VERSION || "") >= version;
 }
 
 export function atMostVersion(version: string) {
-  return process.env.RUBY_VERSION || "" < version;
+  return (process.env.RUBY_VERSION || "") < version;
 }
