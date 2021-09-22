@@ -5,7 +5,7 @@ import { skipAssignIndent } from "../../utils";
 const { group, indent, join, line } = prettier;
 
 export const printAssign: Plugin.Printer<Ruby.Assign> = (path, opts, print) => {
-  const [_targetNode, valueNode] = path.getValue().body;
+  const [, valueNode] = path.getValue().body;
   const [targetDoc, valueDoc] = path.map(print, "body");
 
   let rightSideDoc = valueDoc;

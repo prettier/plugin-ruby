@@ -185,8 +185,11 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
       case "plain":
         return node.value.text;
       // The root node in the AST that we build in the parser.
-      case "root":
-        return [join(hardline, path.map(print, "children")), hardline];
+      case "root": {
+        const nodePath = path as Plugin.Path<typeof node>;
+
+        return [join(hardline, nodePath.map(print, "children")), hardline];
+      }
       // https://haml.info/docs/yardoc/file.REFERENCE.html#inserting_ruby
       case "script": {
         const { value } = node;
@@ -215,8 +218,10 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
         const parts: Plugin.Doc[] = [`- ${node.value.text.trim()}`];
 
         if (node.children.length > 0) {
+          const nodePath = path as Plugin.Path<typeof node>;
+
           parts.push(
-            path.map((childPath) => {
+            nodePath.map((childPath) => {
               const child = childPath.getValue();
               const concated = [hardline, print(childPath)];
 
@@ -376,9 +381,11 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
         return docs;
       }
 
+      const nodePath = path as Plugin.Path<typeof node>;
+
       return group([
         docs,
-        indent([hardline, join(hardline, path.map(print, "children"))])
+        indent([hardline, join(hardline, nodePath.map(print, "children"))])
       ]);
     }
   },

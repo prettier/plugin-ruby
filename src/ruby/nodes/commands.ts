@@ -4,7 +4,7 @@ import { makeCall } from "../../utils";
 
 const { align, group, ifBreak, indent, join, line, softline } = prettier;
 
-function throwBadDoc(_doc: never): never;
+function throwBadDoc(doc: never): never;
 function throwBadDoc(doc: Plugin.Doc) {
   throw new Error(`Unknown doc ${doc}`);
 }

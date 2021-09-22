@@ -73,7 +73,6 @@ import {
 import {
   printAccessControl,
   printDef,
-  printDefs,
   printSingleLineMethod
 } from "./nodes/methods";
 import {
@@ -167,7 +166,7 @@ const nodes: Partial<{
   const_path_ref: printConstPath,
   const_ref: printConstRef,
   def: printDef,
-  defs: printDefs,
+  defs: printDef,
   defsl: printSingleLineMethod,
   defined: printDefined,
   do_block: printDoBlock,

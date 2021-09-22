@@ -35,10 +35,10 @@ function maybeHandleParens(
 
   const stmts = node.body[0].body;
   if (stmts.length === 1 && !unskippableParens.includes(stmts[0].type)) {
-    return [`${keyword} `, path.call(print, ...steps, "body", 0)];
+    return [`${keyword} `, (path as any).call(print, ...steps, "body", 0)];
   }
 
-  return [keyword, path.call(print, ...steps)];
+  return [keyword, (path as any).call(print, ...steps)];
 }
 
 export const printBreak: Plugin.Printer<Ruby.Break> = (path, opts, print) => {

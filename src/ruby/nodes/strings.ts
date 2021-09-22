@@ -69,18 +69,14 @@ function getClosingQuote(quote: string) {
 // Prints a @CHAR node. @CHAR nodes are special character strings that usually
 // are strings of length 1. If they're any longer than we'll try to apply the
 // correct quotes.
-export const printChar: Plugin.Printer<Ruby.Char> = (
-  path,
-  { rubySingleQuote },
-  _print
-) => {
+export const printChar: Plugin.Printer<Ruby.Char> = (path, opts) => {
   const { body } = path.getValue();
 
   if (body.length !== 2) {
     return body;
   }
 
-  const quote = rubySingleQuote ? "'" : '"';
+  const quote = opts.rubySingleQuote ? "'" : '"';
   return [quote, body.slice(1), quote];
 };
 
@@ -260,15 +256,17 @@ export const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (
     quote = rubySingleQuote && isSingleQuotable(node) ? "'" : '"';
   }
 
-  const parts = node.body.map((part, index) => {
+  const parts = path.map((partPath) => {
+    const part = partPath.getValue();
+
+    // In this case, the part of the string is an embedded expression
     if (part.type !== "@tstring_content") {
-      // In this case, the part of the string is an embedded expression
-      return path.call(print, "body", index);
+      return print(partPath);
     }
 
     // In this case, the part of the string is just regular string content
     return join(literalline, normalizeQuotes(part.body, quote).split("\n"));
-  });
+  }, "body");
 
   return [quote, ...parts, getClosingQuote(quote)];
 };

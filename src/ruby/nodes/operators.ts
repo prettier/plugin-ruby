@@ -5,7 +5,7 @@ import { noIndent } from "../../utils";
 const { group, indent, line, softline } = prettier;
 
 export const printBinary: Plugin.Printer<Ruby.Binary> = (path, opts, print) => {
-  const [_leftNode, operator, rightNode] = path.getValue().body;
+  const [, operator, rightNode] = path.getValue().body;
   const space = operator === "**" ? "" : " ";
 
   if (noIndent.includes(rightNode.type)) {

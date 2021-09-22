@@ -1,12 +1,10 @@
-import type { Plugin, Ruby } from "../types";
+import type { Plugin, Ruby, RequiredKeys } from "../types";
 import prettier from "../prettier";
 
 const { group, hardline, indent, join, line } = prettier;
 
-function containedWithin(
-  node: Ruby.Array | Ruby.Hash
-): (_comment: Ruby.Comment) => boolean {
-  return function containedWithinNode(comment) {
+function containedWithin(node: Ruby.Array | Ruby.Hash) {
+  return function containedWithinNode(comment: Ruby.Comment) {
     return comment.sc >= node.sc && comment.ec <= node.ec;
   };
 }
@@ -33,18 +31,17 @@ function printEmptyCollection(
   }
 
   const comments: Plugin.Doc[] = [];
+  const nodePath = path as Plugin.Path<RequiredKeys<typeof node, "comments">>;
 
   // For each comment, go through its path and print it out manually.
-  const printComment = (commentPath: Plugin.Path<Ruby.Comment>) => {
+  nodePath.each((commentPath) => {
     const comment = commentPath.getValue();
 
     if (containedWithinNode(comment)) {
       comment.printed = true;
       comments.push(opts.printer.printComment(commentPath, opts));
     }
-  };
-
-  path.each(printComment, "comments");
+  }, "comments");
 
   return group([
     startToken,

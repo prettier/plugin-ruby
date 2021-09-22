@@ -61,7 +61,9 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
 
   // Now that we've established which actual node is the arguments to return,
   // we grab it out of the path by diving down the steps that we've set up.
-  const parts = path.call(print, ...steps) as Plugin.Doc | Plugin.Doc[];
+  const parts = (path as any).call(print, ...steps) as
+    | Plugin.Doc
+    | Plugin.Doc[];
   const useBrackets = Array.isArray(parts) && parts.length > 1;
 
   // If we got the value straight out of the parens, then `parts` would only

@@ -22,7 +22,7 @@ type ChainedMethodAddBlock = Ruby.MethodAddBlock & Chain;
 
 export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   const node = path.getValue();
-  const [receiverNode, _operatorNode, messageNode] = node.body;
+  const [receiverNode, , messageNode] = node.body;
 
   const receiverDoc = path.call(print, "body", 0);
   const operatorDoc = makeCall(path, opts, print);

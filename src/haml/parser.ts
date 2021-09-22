@@ -18,10 +18,10 @@ const parser: Plugin.Parser<HAML.AnyNode> = {
   // These functions are just placeholders until we can actually perform this
   // properly. The functions are necessary otherwise the format with cursor
   // functions break.
-  locStart(_node) {
+  locStart() {
     return 0;
   },
-  locEnd(_node) {
+  locEnd() {
     return 0;
   }
 };

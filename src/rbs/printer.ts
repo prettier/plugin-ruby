@@ -1,5 +1,5 @@
 import type { util } from "prettier";
-import type { Plugin, RBS } from "../types";
+import type { RequiredKeys, Plugin, RBS } from "../types";
 import prettier from "../prettier";
 
 const { group, hardline, indent, makeString, join, line, softline } = prettier;
@@ -8,7 +8,9 @@ const { group, hardline, indent, makeString, join, line, softline } = prettier;
 // object (presumably because Ruby hashes have implicit ordering). We do not
 // have that in JavaScript, so here we sort each object by its position in the
 // source string.
-function getSortedKeys(object: Record<string, { type: RBS.Type }>) {
+function getSortedKeys<T extends Record<string, { type: RBS.Type }>>(
+  object: T
+): (keyof T)[] {
   return Object.keys(object).sort(
     (left, right) =>
       object[left].type.location.start_pos -
@@ -55,13 +57,20 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         // Prints out a class declarations, which looks like:
         // class Foo end
         case "class": {
-          const parts: Plugin.Doc[] = ["class ", printNameAndTypeParams(node)];
+          const nodePath = path as Plugin.Path<typeof node>;
+          const parts: Plugin.Doc[] = [
+            "class ",
+            printNameAndTypeParams(nodePath, node)
+          ];
 
           if (node.super_class) {
-            parts.push(" < ", path.call(printNameAndArgs, "super_class"));
+            const superPath = nodePath as Plugin.Path<
+              RequiredKeys<typeof node, "super_class">
+            >;
+            parts.push(" < ", superPath.call(printNameAndArgs, "super_class"));
           }
 
-          parts.push(indent(printMembers()), hardline, "end");
+          parts.push(indent(printMembers(nodePath)), hardline, "end");
           doc = group(parts);
           break;
         }
@@ -76,10 +85,12 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         // Prints out an interface declaration, which looks like:
         // interface _Foo end
         case "interface": {
+          const nodePath = path as Plugin.Path<typeof node>;
+
           doc = group([
             "interface ",
-            printNameAndTypeParams(node),
-            indent(printMembers()),
+            printNameAndTypeParams(nodePath, node),
+            indent(printMembers(nodePath)),
             hardline,
             "end"
           ]);
@@ -88,16 +99,20 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         // Prints out a module declaration, which looks like:
         // module Foo end
         case "module": {
-          const parts: Plugin.Doc[] = ["module ", printNameAndTypeParams(node)];
+          const nodePath = path as Plugin.Path<typeof node>;
+          const parts: Plugin.Doc[] = [
+            "module ",
+            printNameAndTypeParams(nodePath, node)
+          ];
 
           if (node.self_types.length > 0) {
             parts.push(
               " : ",
-              join(", ", path.map(printNameAndArgs, "self_types"))
+              join(", ", nodePath.map(printNameAndArgs, "self_types"))
             );
           }
 
-          parts.push(indent(printMembers()), hardline, "end");
+          parts.push(indent(printMembers(nodePath)), hardline, "end");
           doc = group(parts);
           break;
         }
@@ -164,11 +179,9 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
         case "include":
         case "extend":
         case "prepend": {
-          doc = group([
-            node.member,
-            " ",
-            printNameAndArgs(path as any as Plugin.Path<RBS.NameAndArgs>)
-          ]);
+          const nodePath = path as Plugin.Path<typeof node>;
+
+          doc = group([node.member, " ", printNameAndArgs(nodePath)]);
           break;
         }
         case "public":
@@ -176,9 +189,12 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           doc = node.member;
           break;
         }
-        case "method_definition":
-          doc = printMethodDefinition(node);
+        case "method_definition": {
+          const nodePath = path as Plugin.Path<typeof node>;
+
+          doc = printMethodDefinition(nodePath, node);
           break;
+        }
         /* istanbul ignore next */
         default:
           throw new Error(`unknown member: ${(node as any).member}`);
@@ -191,10 +207,14 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
     // An annotation can be attached to most kinds of nodes, and should be
     // printed using %a{}. Certain nodes can't have annotations at all.
     if (node.annotations && node.annotations.length > 0) {
+      const annotationsPath = path as Plugin.Path<{
+        annotations: RBS.Annotation[];
+      }>;
+
       doc = [
         join(
           hardline,
-          path.map((annotationPath: Plugin.Path<RBS.Annotation>) => {
+          annotationsPath.map((annotationPath) => {
             const annotationNode = annotationPath.getValue();
 
             // If there are already braces inside the annotation, then we're
@@ -284,24 +304,36 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
             return printString(node);
           }
           return node.literal;
-        case "optional":
+        case "optional": {
+          const nodePath = path as Plugin.Path<typeof node>;
+
           return [
-            path.call(
+            nodePath.call(
               (typePath) => printType(typePath, { forceParens: true }),
               "type"
             ),
             "?"
           ];
-        case "tuple":
+        }
+        case "tuple": {
           // If we don't have any sub types, we explicitly need the space in
           // between the brackets to not confuse the parser.
           if (node.types.length === 0) {
             return "[ ]";
           }
 
-          return group(["[", join(", ", path.map(printType, "types")), "]"]);
+          const nodePath = path as Plugin.Path<typeof node>;
+          return group([
+            "[",
+            join(", ", nodePath.map(printType, "types")),
+            "]"
+          ]);
+        }
         case "union": {
-          const doc = group(join([line, "| "], path.map(printType, "types")));
+          const nodePath = path as Plugin.Path<typeof node>;
+          const doc = group(
+            join([line, "| "], nodePath.map(printType, "types"))
+          );
 
           if (forceParens) {
             return ["(", doc, ")"];
@@ -310,10 +342,11 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           return doc;
         }
         case "intersection": {
+          const nodePath = path as Plugin.Path<typeof node>;
           const doc = group(
             join(
               [line, "& "],
-              path.map(
+              nodePath.map(
                 (typePath) => printType(typePath, { forceParens: true }),
                 "types"
               )
@@ -334,6 +367,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
             printMethodSignature(path as Plugin.Path<RBS.MethodSignature>)
           ];
         case "record": {
+          const nodePath = path as Plugin.Path<typeof node>;
           const parts: Plugin.Doc[] = [];
 
           getSortedKeys(node.fields).forEach((field) => {
@@ -345,7 +379,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
               fieldParts.push(`${field}: `);
             }
 
-            fieldParts.push(path.call(printType, "fields", field, "type"));
+            fieldParts.push(nodePath.call(printType, "fields", field, "type"));
             parts.push(fieldParts);
           });
 
@@ -357,8 +391,10 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           ]);
         }
         case "class_instance":
-        case "interface":
-          return printNameAndArgs(path as Plugin.Path<RBS.NameAndArgs>);
+        case "interface": {
+          const nodePath = path as Plugin.Path<typeof node>;
+          return printNameAndArgs(nodePath);
+        }
         case "alias":
         case "variable":
           return node.name;
@@ -379,7 +415,9 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
     }
 
     // Prints out the members of a class, module, or interface.
-    function printMembers() {
+    function printMembers(
+      path: Plugin.Path<RBS.Class | RBS.Interface | RBS.Module>
+    ) {
       let lastLine: number | null = null;
       const docs: Plugin.Doc[] = [];
 
@@ -405,7 +443,10 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
     // Prints out the name of a class, interface, or module declaration.
     // Additionally loops through each type parameter if there are any and print
     // them out joined by commas. Checks for validation and variance.
-    function printNameAndTypeParams(node: RBS.NameAndTypeParams) {
+    function printNameAndTypeParams(
+      path: Plugin.Path<RBS.NameAndTypeParams>,
+      node: RBS.NameAndTypeParams
+    ) {
       if (node.type_params.params.length === 0) {
         return node.name;
       }
@@ -453,7 +494,13 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
       // rest positional, as in (*A)
       if (node.rest_positionals) {
-        parts.push(["*", path.call(printMethodParam, "rest_positionals")]);
+        const restPositionalsPath = path as Plugin.Path<
+          RequiredKeys<typeof node, "rest_positionals">
+        >;
+        parts.push([
+          "*",
+          restPositionalsPath.call(printMethodParam, "rest_positionals")
+        ]);
       }
 
       // trailing positionals are required positionals after a rest
@@ -480,7 +527,13 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
       // rest keyword, as in (**A)
       if (node.rest_keywords) {
-        parts.push(["**", path.call(printMethodParam, "rest_keywords")]);
+        const restKeywordsPath = path as Plugin.Path<
+          RequiredKeys<typeof node, "rest_keywords">
+        >;
+        parts.push([
+          "**",
+          restKeywordsPath.call(printMethodParam, "rest_keywords")
+        ]);
       }
 
       return parts;
@@ -556,7 +609,10 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
     // Prints out a method definition, which looks like:
     // def t: (T t) -> void
-    function printMethodDefinition(node: RBS.MethodDefinition) {
+    function printMethodDefinition(
+      path: Plugin.Path<RBS.MethodDefinition>,
+      node: RBS.MethodDefinition
+    ) {
       let typeDocs: Plugin.Doc = path.map(printMethodSignature, "types");
 
       if (node.overload) {
