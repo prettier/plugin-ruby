@@ -133,7 +133,7 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
   // This is the generic print function for any comment in the AST. It handles
   // both regular comments that begin with a # and embdoc comments, which are
   // surrounded by =begin..=end.
-  printComment(path, _opts) {
+  printComment(path) {
     const comment = (path as any as Plugin.Path<Ruby.Comment>).getValue();
 
     if (comment.type === "@comment") {

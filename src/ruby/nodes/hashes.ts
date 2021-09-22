@@ -9,8 +9,8 @@ import {
 const { group, ifBreak, indent, join, line } = prettier;
 
 type KeyPrinter = (
-  _path: Plugin.Path<Ruby.Label | Ruby.SymbolLiteral | Ruby.DynaSymbol>,
-  _print: Plugin.Print
+  path: Plugin.Path<Ruby.AnyNode>,
+  print: Plugin.Print
 ) => Plugin.Doc;
 type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & {
   keyPrinter: KeyPrinter;
@@ -56,11 +56,16 @@ const printHashKeyLabel: KeyPrinter = (path, print) => {
   switch (node.type) {
     case "@label":
       return print(path);
-    case "symbol_literal":
-      return [path.call(print, "body", 0), ":"];
-    case "dyna_symbol": {
-      return [print(path), ":"];
+    case "symbol_literal": {
+      const nodePath = path as Plugin.Path<typeof node>;
+      return [nodePath.call(print, "body", 0), ":"];
     }
+    case "dyna_symbol":
+      return [print(path), ":"];
+    default:
+      // This should never happen, but keeping it here so that the two key
+      // printers can maintain the same signature.
+      return "";
   }
 };
 

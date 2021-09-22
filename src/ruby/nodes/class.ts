@@ -5,7 +5,7 @@ import { isEmptyBodyStmt } from "../../utils";
 const { group, hardline, indent } = prettier;
 
 export const printClass: Plugin.Printer<Ruby.Class> = (path, opts, print) => {
-  const [_constant, superclass, bodystmt] = path.getValue().body;
+  const [, superclass, bodystmt] = path.getValue().body;
 
   const parts = ["class ", path.call(print, "body", 0)];
   if (superclass) {

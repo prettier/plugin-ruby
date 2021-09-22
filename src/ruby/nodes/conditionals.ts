@@ -109,7 +109,7 @@ function printSingle(
   Ruby.If | Ruby.IfModifier | Ruby.Unless | Ruby.UnlessModifier
 > {
   return function printSingleWithKeyword(path, { rubyModifier }, print) {
-    const [_predicateNode, statementsNode] = path.getValue().body;
+    const [, statementsNode] = path.getValue().body;
     const predicateDoc = path.call(print, "body", 0);
     const statementsDoc = path.call(print, "body", 1);
 
@@ -301,7 +301,7 @@ export const printElse: Plugin.Printer<Ruby.Else> = (path, opts, print) => {
 };
 
 export const printElsif: Plugin.Printer<Ruby.Elsif> = (path, opts, print) => {
-  const [_predicate, _statements, addition] = path.getValue().body;
+  const [, , addition] = path.getValue().body;
   const parts = [
     group(["elsif ", align("elsif".length - 1, path.call(print, "body", 0))]),
     indent([hardline, path.call(print, "body", 1)])

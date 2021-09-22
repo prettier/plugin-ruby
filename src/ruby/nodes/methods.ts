@@ -4,51 +4,57 @@ import { isEmptyBodyStmt } from "../../utils";
 
 const { group, hardline, indent, line } = prettier;
 
-function printMethod(offset: number): Plugin.Printer<Ruby.Def | Ruby.Defs> {
-  return function printMethodWithOffset(path, opts, print) {
-    const node = path.getValue();
-    const declaration: Plugin.Doc[] = ["def "];
+export const printDef: Plugin.Printer<Ruby.Def | Ruby.Defs> = (
+  path,
+  opts,
+  print
+) => {
+  const node = path.getValue();
+  const declaration: Plugin.Doc[] = ["def "];
 
-    let params: Ruby.Params | Ruby.Paren;
-    let bodystmt: Ruby.Bodystmt;
+  let paramsNode: Ruby.Params | Ruby.Paren;
+  let bodystmtNode: Ruby.Bodystmt;
 
-    if (node.type === "def") {
-      params = node.body[1];
-      bodystmt = node.body[2];
-    } else {
-      // In this case, we're printing a method that's defined as a singleton, so
-      // we need to include the target and the operator
-      declaration.push(
-        path.call(print, "body", 0),
-        path.call(print, "body", 1)
-      );
+  let nameDoc: Plugin.Doc;
+  let paramsDoc: Plugin.Doc;
+  let bodystmtDoc: Plugin.Doc;
 
-      params = node.body[3];
-      bodystmt = node.body[4];
-    }
+  if (node.type === "def") {
+    paramsNode = node.body[1];
+    bodystmtNode = node.body[2];
 
-    // In case there are no parens but there are arguments
-    const parens = params.type === "params" && params.body.some((type) => type);
+    nameDoc = path.call(print, "body", 0);
+    paramsDoc = path.call(print, "body", 1);
+    bodystmtDoc = path.call(print, "body", 2);
+  } else {
+    // In this case, we're printing a method that's defined as a singleton, so
+    // we need to include the target and the operator
+    declaration.push(path.call(print, "body", 0), path.call(print, "body", 1));
 
-    declaration.push(
-      path.call(print, "body", offset),
-      parens ? "(" : "",
-      path.call(print, "body", offset + 1),
-      parens ? ")" : ""
-    );
+    paramsNode = node.body[3];
+    bodystmtNode = node.body[4];
 
-    if (isEmptyBodyStmt(bodystmt)) {
-      return group([...declaration, "; end"]);
-    }
+    nameDoc = path.call(print, "body", 2);
+    paramsDoc = path.call(print, "body", 3);
+    bodystmtDoc = path.call(print, "body", 4);
+  }
 
-    return group([
-      group(declaration),
-      indent([hardline, path.call(print, "body", offset + 2)]),
-      hardline,
-      "end"
-    ]);
-  };
-}
+  // In case there are no parens but there are arguments
+  const parens =
+    paramsNode.type === "params" && paramsNode.body.some((type) => type);
+  declaration.push(nameDoc, parens ? "(" : "", paramsDoc, parens ? ")" : "");
+
+  if (isEmptyBodyStmt(bodystmtNode)) {
+    return group([...declaration, "; end"]);
+  }
+
+  return group([
+    group(declaration),
+    indent([hardline, bodystmtDoc]),
+    hardline,
+    "end"
+  ]);
+};
 
 export const printSingleLineMethod: Plugin.Printer<Ruby.Defsl> = (
   path,
@@ -82,6 +88,3 @@ export const printAccessControl: Plugin.Printer<Ruby.AccessCtrl> = (
 ) => {
   return path.call(print, "body", 0);
 };
-
-export const printDef = printMethod(0);
-export const printDefs = printMethod(2);

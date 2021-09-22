@@ -16,7 +16,7 @@ function printLoop(
   Ruby.While | Ruby.WhileModifier | Ruby.Until | Ruby.UntilModifier
 > {
   return function printLoopWithOptions(path, { rubyModifier }, print) {
-    const [_predicate, stmts] = path.getValue().body;
+    const [, stmts] = path.getValue().body;
 
     // If the only statement inside this while loop is a void statement, then we
     // can shorten to just displaying the predicate and then a semicolon.

@@ -64,7 +64,7 @@ function stripCommonLeadingWhitespace(content: string) {
   return lines.map((line) => line.slice(minimum)).join("\n");
 }
 
-const embed: Plugin.Embed<Ruby.AnyNode> = (path, print, textToDoc, _opts) => {
+const embed: Plugin.Embed<Ruby.AnyNode> = (path, print, textToDoc) => {
   const node = path.getValue();
 
   // Currently we only support embedded formatting on heredoc nodes

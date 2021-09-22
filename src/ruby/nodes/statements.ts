@@ -75,20 +75,12 @@ export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
   return group(["(", indent([softline, contentDoc]), softline, ")"]);
 };
 
-export const printEndContent: Plugin.Printer<Ruby.EndContent> = (
-  path,
-  _opts,
-  _print
-) => {
+export const printEndContent: Plugin.Printer<Ruby.EndContent> = (path) => {
   const { body } = path.getValue();
   return [trim, "__END__", literalline, body];
 };
 
-export const printComment: Plugin.Printer<Ruby.Comment> = (
-  path,
-  opts,
-  _print
-) => {
+export const printComment: Plugin.Printer<Ruby.Comment> = (path, opts) => {
   return opts.printer.printComment(path, opts);
 };
 
@@ -98,6 +90,10 @@ export const printProgram: Plugin.Printer<Ruby.Program> = (
   print
 ) => {
   return [join(hardline, path.map(print, "body")), hardline];
+};
+
+type StmtsVoidWithComments = Ruby.Stmts & {
+  body: [{ type: "void_stmt"; comments: Ruby.Comment[] }];
 };
 
 export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
@@ -111,7 +107,8 @@ export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
     stmts[0].type === "void_stmt" &&
     stmts[0].comments
   ) {
-    const comments = path.map(
+    const nodePath = path as Plugin.Path<StmtsVoidWithComments>;
+    const comments = nodePath.map(
       (commentPath) => {
         commentPath.getValue().printed = true;
         return opts.printer.printComment(commentPath, opts);

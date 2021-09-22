@@ -11,7 +11,7 @@ import type { Plugin, Ruby } from "../../types";
 // If it's a decimal number, it can be optional separated by any number of
 // arbitrarily places underscores. This can be useful for dollars and cents
 // (34_99), dates (2020_11_30), and normal 3 digit separation (1_222_333).
-export const printInt: Plugin.Printer<Ruby.Int> = (path, _opts, _print) => {
+export const printInt: Plugin.Printer<Ruby.Int> = (path) => {
   const { body } = path.getValue();
 
   // If the number is a base 10 number, is sufficiently large, and is not

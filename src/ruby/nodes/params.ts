@@ -24,7 +24,7 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
       (reqPath) => {
         // For some very strange reason, if you have a comment attached to a
         // rest_param, it shows up here in the list of required params.
-        if (reqPath.getValue().type !== "rest_param") {
+        if ((reqPath.getValue().type as any) !== "rest_param") {
           parts.push(print(reqPath));
         }
       },

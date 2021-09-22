@@ -94,15 +94,16 @@ expect.extend({
 });
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface Matchers<R> {
       toChangeFormat(
-        _after: Code,
-        _config?: Partial<Plugin.Options>
+        after: Code,
+        config?: Partial<Plugin.Options>
       ): Promise<CustomMatcherResult>;
       toMatchFormat(
-        _config?: Partial<Plugin.Options>
+        config?: Partial<Plugin.Options>
       ): Promise<CustomMatcherResult>;
     }
   }

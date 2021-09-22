@@ -16,7 +16,7 @@ export const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
 };
 
 export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
-  const [_preds, _stmts, addition] = path.getValue().body;
+  const [, , addition] = path.getValue().body;
 
   // The `fill` builder command expects an array of docs alternating with
   // line breaks. This is so it can loop through and determine where to break.
