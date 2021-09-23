@@ -1273,15 +1273,22 @@ class Prettier::Parser < Ripper
   # loop. It accepts as arguments an ident which is the iterating variable,
   # an enumerable for that which is being enumerated, and a stmts event that
   # represents the statements inside the for loop.
-  def on_for(ident, enumerable, stmts)
+  def on_for(ident, enum, stmts)
     beging = find_scanner_event(:@kw, 'for')
     ending = find_scanner_event(:@kw, 'end')
 
-    stmts.bind(enumerable[:ec], ending[:sc])
+    # Consume the do keyword if it exists so that it doesn't get confused for
+    # some other block
+    do_event = find_scanner_event(:@kw, 'do', consume: false)
+    if do_event && do_event[:sc] > enum[:ec] && do_event[:ec] < ending[:sc]
+      scanner_events.delete(do_event)
+    end
+
+    stmts.bind((do_event || enum)[:ec], ending[:sc])
 
     {
       type: :for,
-      body: [ident, enumerable, stmts],
+      body: [ident, enum, stmts],
       sl: beging[:sl],
       sc: beging[:sc],
       el: ending[:el],
