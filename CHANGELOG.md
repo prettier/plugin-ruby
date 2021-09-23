@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [#958](https://github.com/prettier/plugin-ruby/issues/958) - mharris-figma, kddnewton - Handle optional `do` keyword in `for` loop expressions.
+
 ## [1.6.1] - 2021-06-30
 
 ### Changed

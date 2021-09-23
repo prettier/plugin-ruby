@@ -82,6 +82,28 @@ describe("blocks", () => {
 
       return expect(content).toMatchFormat();
     });
+
+    test("optional do keyword", () => {
+      const content = ruby(`
+        a do
+          # comment
+          for b in c do
+            puts b
+          end
+        end
+      `);
+
+      const expected = ruby(`
+        a do
+          # comment
+          for b in c
+            puts b
+          end
+        end
+      `);
+
+      return expect(content).toChangeFormat(expected);
+    });
   });
 
   // from ruby test/ruby/test_call.rb
