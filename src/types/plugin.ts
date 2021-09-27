@@ -82,7 +82,7 @@ export type Path<T> = Omit<Prettier.AstPath<T>, keyof StrictPath<T>> & StrictPat
 
 // The printer from prettier is missing a couple of keys. We should presumably
 // upstream this so that it's accurate in all plugins.
-export type PrinterConfig<T> = Omit<Prettier.Printer<T>, "print"> & {
+export type PrinterConfig<T> = Omit<Prettier.Printer<T>, "insertPragma" | "print"> & Required<Pick<Prettier.Printer<T>, "insertPragma">> & {
   getCommentChildNodes?: (node: any) => any[],
   isBlockComment?: (comment: any, options: Options) => boolean,
   print: Printer<T>

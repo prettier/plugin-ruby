@@ -13,7 +13,7 @@ const parser: Plugin.Parser<Ruby.AnyNode> = {
   // This function handles checking whether or not the source string has the
   // pragma for prettier. This is an optional workflow for incremental adoption.
   hasPragma(text) {
-    return /^\s*#[^\S\n]*@(format|prettier)\s*(\n|$)/.test(text);
+    return /^\s*#[^\S\n]*@(?:prettier|format)\s*?(?:\n|$)/m.test(text);
   },
   // This function is critical for comments and cursor support, and is
   // responsible for returning the index of the character within the source
