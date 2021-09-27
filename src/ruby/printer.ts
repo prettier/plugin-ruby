@@ -77,6 +77,8 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
 
         return parts;
       }
+      case "paren":
+        return [node.lparen, node.body[0]];
       default: {
         if (Array.isArray(node.body)) {
           return node.body.filter(

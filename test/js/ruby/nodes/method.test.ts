@@ -81,6 +81,18 @@ describe("method", () => {
       return expect(content).toChangeFormat(expected);
     });
 
+    test("with comments on method definition", () => {
+      const content = ruby(`
+        def foo( # bar
+          ${long}:
+        )
+          ${long}
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
     test("with comments on params", () => {
       const content = ruby(`
         def method(
