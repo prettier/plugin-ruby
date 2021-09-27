@@ -364,11 +364,25 @@ const printer: Plugin.PrinterConfig<HAML.AnyNode> = {
         }
 
         if (value.value) {
-          const prefix = value.parse ? "= " : ifBreak("", " ");
+          let contents: Plugin.Doc[];
+
+          if (value.parse && value.value.match(/#[{$@]/)) {
+            // There's a weird case here where if the value includes
+            // interpolation and it's marked as { parse: true }, then we don't
+            // actually want the = prefix, and we want to remove extra escaping.
+            contents = [
+              ifBreak("", " "),
+              value.value.slice(1, -1).replace(/\\"/g, '"')
+            ];
+          } else if (value.parse) {
+            contents = ["= ", value.value];
+          } else {
+            contents = [ifBreak("", " "), value.value];
+          }
 
           return printWithChildren(
             node,
-            group([group(parts), indent([softline, prefix, value.value])])
+            group([group(parts), indent([softline, ...contents])])
           );
         }
 

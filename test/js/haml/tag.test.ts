@@ -122,4 +122,10 @@ describe("tag", () => {
 
     return expect(content).toMatchFormat();
   });
+
+  test("with interpolation in the value", () => {
+    const content = haml(`%p <small>hello</small>"#{1 + 2} little pigs"`);
+
+    return expect(content).toMatchFormat();
+  });
 });
