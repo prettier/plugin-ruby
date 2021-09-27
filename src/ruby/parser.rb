@@ -893,28 +893,41 @@ class Prettier::Parser < Ripper
   # them back into the final representation. Comments come in including
   # their starting pound sign and the newline at the end, so we also chop
   # those off.
-  #
-  # If there is an encoding magic comment at the top of the file, ripper
-  # will actually change into that encoding for the storage of the string.
-  # This will break everything, so we need to force the encoding back into
-  # UTF-8 so that the JSON library won't break.
   def on_comment(value)
+    # If there is an encoding magic comment at the top of the file, ripper
+    # will actually change into that encoding for the storage of the string.
+    # This will break everything when we attempt to print as JSON, so we need to
+    # force the encoding back into UTF-8 so that it won't break.
+    body = value[1..-1].chomp.force_encoding('UTF-8')
+
+    start_line = lineno
+    start_char = char_pos
+
     # If we already had special handling of a magic comment, then we can just
     # skip and return the value of that node.
     if @magic_comment
       comment = @magic_comment
       @magic_comment = nil
 
-      @comments << comment
+      # At the moment, merging in the value of the string being passed into
+      # here. In the next major version I'd like to remove this and just use the
+      # value of the magic comment. At the moment though that would change
+      # comments like:
+      #
+      #     # -*- encoding: UTF-8 -*-
+      #
+      # into
+      #
+      #     # encoding: UTF-8
+      #
+      # so need to wait for a major version to do that.
+      @comments << comment.merge(value: body, ec: start_char + value.length - 1)
       return comment
     end
-    
-    start_line = lineno
-    start_char = char_pos
 
     @comments << {
       type: :@comment,
-      value: value[1..-1].chomp.force_encoding('UTF-8'),
+      value: body,
       inline: value.strip != lines[lineno - 1],
       sl: start_line,
       el: start_line,
