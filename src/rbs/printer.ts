@@ -660,7 +660,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
   // This function handles adding the format pragma to a source string. This is
   // an optional workflow for incremental adoption.
   insertPragma(text) {
-    return `# @format\n${text}`;
+    return `# @format${text[0] === "#" ? "\n" : "\n\n"}${text}`;
   }
 };
 

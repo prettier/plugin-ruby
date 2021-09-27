@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [#958](https://github.com/prettier/plugin-ruby/issues/958) - mharris-figma, kddnewton - Handle optional `do` keyword in `for` loop expressions.
 - [#926](https://github.com/prettier/plugin-ruby/issues/926) - jscheid, kddnewton - Better error handling in case certain expected keywords or operators are missing.
 - [#819](https://github.com/prettier/plugin-ruby/issues/819) - coisnepe, kddnewton - Ensure that comments placed immediately after the left parenthesis of a method definition are not moved into the body of the methods.
+- [#957](https://github.com/prettier/plugin-ruby/issues/957) - azz, kddnewton - Make it so that the format pragma does not have to be on the first line of the file.
 
 ## [1.6.1] - 2021-06-30
 
