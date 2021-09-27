@@ -2,8 +2,18 @@ import type { Plugin, HAML } from "../types";
 import prettier from "../prettier";
 import embed from "./embed";
 
-const { align, fill, group, hardline, ifBreak, indent, join, line, softline } =
-  prettier;
+const {
+  align,
+  fill,
+  group,
+  hardline,
+  ifBreak,
+  indent,
+  join,
+  line,
+  makeString,
+  softline
+} = prettier;
 
 const docTypes = {
   basic: "Basic",
@@ -42,8 +52,12 @@ function printHashValue(value: string | number, opts: Plugin.Options) {
     return value.slice(1);
   }
 
-  const quote = opts.rubySingleQuote && !value.includes("#{") ? "'" : '"';
-  return `${quote}${value}${quote}`;
+  const quote =
+    opts.rubySingleQuote && !value.includes("#{") && !value.includes("'")
+      ? "'"
+      : '"';
+
+  return makeString(value, quote);
 }
 
 // This will print an attributes object to a Doc node. It handles nesting on

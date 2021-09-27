@@ -116,4 +116,10 @@ describe("tag", () => {
 
     return expect(content).toChangeFormat(expected);
   });
+
+  test("with quotes in string", () => {
+    const content = haml(`%div{title: "escaping quotes, it's annoying"}`);
+
+    return expect(content).toMatchFormat();
+  });
 });
