@@ -84,6 +84,18 @@ class Prettier::Parser < Ripper
     end
   end
 
+  # A special parser error so that we can get nice syntax displays on the error
+  # message when prettier prints out the results.
+  class ParserError < StandardError
+    attr_reader :lineno, :column
+
+    def initialize(error, lineno, column)
+      super(error)
+      @lineno = lineno
+      @column = column
+    end
+  end
+
   attr_reader :source, :lines, :scanner_events
 
   # This is an attr_accessor so Stmts objects can grab comments out of this
@@ -201,7 +213,21 @@ class Prettier::Parser < Ripper
           (body == :any || (scanner_event[:body] == body))
       end
 
-    consume ? scanner_events.delete_at(index) : (index && scanner_events[index])
+    if consume
+      # If we're expecting to be able to find a scanner event and consume it,
+      # but can't actually find it, then we need to raise an error. This is
+      # _usually_ caused by a syntax error in the source that we're printing. It
+      # could also be caused by accidentally attempting to consume a scanner
+      # event twice by two different parser event handlers.
+      unless index
+        message = "Cannot find expected #{body == :any ? type : body}"
+        raise ParserError.new(message, lineno, column)
+      end
+
+      scanner_events.delete_at(index)
+    elsif index
+      scanner_events[index]
+    end
   end
 
   # A helper function to find a :: operator. We do special handling instead of
@@ -2343,18 +2369,6 @@ class Prettier::Parser < Ripper
       el: ending[:el],
       ec: ending[:ec]
     )
-  end
-
-  # A special parser error so that we can get nice syntax displays on the error
-  # message when prettier prints out the results.
-  class ParserError < StandardError
-    attr_reader :lineno, :column
-
-    def initialize(error, lineno, column)
-      super(error)
-      @lineno = lineno
-      @column = column
-    end
   end
 
   # If we encounter a parse error, just immediately bail out so that our runner
