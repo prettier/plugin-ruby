@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # We implement our own version checking here instead of using Gem::Version so
 # that we can use the --disable-gems flag.
@@ -99,6 +99,7 @@ class Prettier::Parser < Ripper
     @comments = []
     @embdoc = nil
     @__end__ = nil
+    @magic_comment = nil
 
     @heredocs = []
 
@@ -354,6 +355,20 @@ class Prettier::Parser < Ripper
       ec: ending[:ec]
     }
   end
+
+  # arg_ambiguous is a parser event that represents when the parser sees an
+  # argument as ambiguous. For example, in the following snippet:
+  #
+  #     foo //
+  #
+  # the question becomes if the forward slash is being used as a division
+  # operation or if it's the start of a regular expression. We don't need to
+  # track this event in the AST that we're generating, so we're not going to
+  # define an explicit handler for it.
+  #
+  #     def on_arg_ambiguous(value)
+  #       value
+  #     end
 
   # arg_paren is a parser event that represents wrapping arguments to a method
   # inside a set of parentheses. For example, in the follow snippet:
@@ -884,6 +899,16 @@ class Prettier::Parser < Ripper
   # This will break everything, so we need to force the encoding back into
   # UTF-8 so that the JSON library won't break.
   def on_comment(value)
+    # If we already had special handling of a magic comment, then we can just
+    # skip and return the value of that node.
+    if @magic_comment
+      comment = @magic_comment
+      @magic_comment = nil
+
+      @comments << comment
+      return comment
+    end
+    
     start_line = lineno
     start_char = char_pos
 
@@ -1912,6 +1937,24 @@ class Prettier::Parser < Ripper
     node
   end
 
+  # magic_comment is a scanner event that represents the use of a pragma at the
+  # beginning of the file. Usually it will inside something like
+  # frozen_string_literal (the key) with a value of true (the value). Both
+  # children come is a string literals.
+  def on_magic_comment(key, value)
+    start_line = lineno
+    start_char = char_pos
+
+    @magic_comment = {
+      type: :@comment,
+      value: " #{key}: #{value}",
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + @line_counts[start_line][-1]
+    }
+  end
+
   # massign is a parser event that is a parent node of any kind of multiple
   # assignment. This includes splitting out variables on the left like:
   #
@@ -2151,6 +2194,20 @@ class Prettier::Parser < Ripper
   #       value
   #     end
 
+  # nokw_param is a parser event that represents the use of the special 2.7+
+  # syntax to indicate a method should take no additional keyword arguments. For
+  # example in the following snippet:
+  #
+  #     def foo(**nil) end
+  #
+  # this is saying that foo should not accept any keyword arguments. Its value
+  # is always nil. We don't need to track this event in the AST that we're
+  # generating, so we're not going to define an explicit handler for it.
+  #
+  #     def on_nokw_param(value)
+  #       value
+  #     end
+
   # op is a scanner event representing an operator literal in the source. For
   # example, in the following snippet:
   #
@@ -2186,6 +2243,20 @@ class Prettier::Parser < Ripper
       ec: right[:ec]
     )
   end
+
+  # operator_ambiguous is a parser event that represents when the parsers sees
+  # an operator as ambiguous. For example, in the following snippet:
+  #
+  #     foo %[]
+  #
+  # the question becomes if the percent sign is being used as a method call or
+  # if it's the start of a string literal. We don't need to track this event in
+  # the AST that we're generating, so we're not going to define an explicit
+  # handler for it.
+  #
+  #     def on_operator_ambiguous(value)
+  #       value
+  #     end
 
   # params is a parser event that represents defining parameters on a
   # method. They have a somewhat interesting structure in that they are an
