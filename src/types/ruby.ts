@@ -29,10 +29,10 @@ export type Comment = UndecoratedComment & CommentDecorations;
 // are present in ripper include:
 //
 // comma, embdoc, embdoc_beg, embdoc_end, embexpr_beg, embexpr_end, embvar,
-// heredoc_end, ignored_nl, ignored_sp, label_end, lbracket, lparen, nl,
-// qsymbols_beg, qwords_beg, rbrace, rbracket, regexp_beg, regexp_end, rparen,
-// semicolon, sp, symbbeg, symbols_beg, tlambda, tlambeg, tstring_beg,
-// tstring_nd, words_beg, words_sep
+// heredoc_end, ignored_nl, ignored_sp, label_end, lbracket, nl, qsymbols_beg,
+// qwords_beg, rbrace, rbracket, regexp_beg, regexp_end, rparen, semicolon, sp,
+// symbbeg, symbols_beg, tlambda, tlambeg, tstring_beg, tstring_nd, words_beg,
+// words_sep
 //
 export type Backref = ScannerEvent<"backref">;
 export type Backtick = ScannerEvent<"backtick">;
@@ -50,6 +50,7 @@ export type IVar = ScannerEvent<"ivar">;
 export type Keyword = ScannerEvent<"kw">;
 export type Label = ScannerEvent<"label">;
 export type Lbrace = ScannerEvent<"lbrace">;
+export type Lparen = ScannerEvent<"lparen">;
 export type Op = ScannerEvent<"op">;
 export type Period = ScannerEvent<"period">;
 export type Rational = ScannerEvent<"rational">;
@@ -203,7 +204,7 @@ export type Defined = ParserEvent<"defined", { body: [AnyNode] }>;
 export type Dot2 = ParserEvent<"dot2", { body: [AnyNode, null] | [null, AnyNode] | [AnyNode, AnyNode] }>;
 export type Dot3 = ParserEvent<"dot3", { body: [AnyNode, null] | [null, AnyNode] | [AnyNode, AnyNode] }>;
 export type END = ParserEvent<"END", { body: [Lbrace, Stmts] }>;
-export type Paren = ParserEvent<"paren", { body: [AnyNode] }>;
+export type Paren = ParserEvent<"paren", { body: [AnyNode], lparen: Lparen }>;
 export type TopConstRef = ParserEvent<"top_const_ref", { body: [Const] }>;
 export type Unary = ParserEvent<"unary", { body: [AnyNode], oper: string, paren: boolean | undefined }>;
 export type VarRef = ParserEvent<"var_ref", { body: [Const | CVar | GVar | Identifier | IVar | Keyword] }>;

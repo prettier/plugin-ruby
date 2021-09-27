@@ -2,7 +2,7 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { literal } from "../../utils";
 
-const { group, join, indent, line, softline } = prettier;
+const { group, hardline, join, indent, line, lineSuffix, softline } = prettier;
 
 function printRestParamSymbol(
   symbol: string
@@ -87,8 +87,27 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
 
   // If the parent node is a paren then we skipped printing the parentheses so
   // that we could handle them here and get nicer formatting.
-  if (["lambda", "paren"].includes(path.getParentNode().type)) {
-    return group(["(", indent([softline, ...contents]), softline, ")"]);
+  const parentNode = path.getParentNode();
+
+  if (["lambda", "paren"].includes(parentNode.type)) {
+    const parts: Plugin.Doc[] = ["("];
+
+    // If the parent node is a paren and the paren has comments that are
+    // attached to the left paren, then we need to print those out explicitly
+    // here.
+    if (parentNode.type === "paren" && parentNode.lparen.comments) {
+      const comments: Plugin.Doc[] = [];
+
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      (parentNode as Ruby.Paren).lparen.comments!.forEach((comment, index) => {
+        comment.printed = true;
+        comments.push(lineSuffix(`${index === 0 ? " " : ""}#${comment.value}`));
+      });
+
+      parts.push(join(hardline, comments));
+    }
+
+    return group([...parts, indent([softline, ...contents]), softline, ")"]);
   }
 
   return group(contents);

@@ -55,7 +55,7 @@ export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
   const contentNode = path.getValue().body[0];
 
   if (!contentNode) {
-    return "()";
+    return [path.call(print, "lparen"), ")"];
   }
 
   let contentDoc = path.call(print, "body", 0);
@@ -72,7 +72,12 @@ export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
     contentDoc = join([",", line], contentDoc);
   }
 
-  return group(["(", indent([softline, contentDoc]), softline, ")"]);
+  return group([
+    path.call(print, "lparen"),
+    indent([softline, contentDoc]),
+    softline,
+    ")"
+  ]);
 };
 
 export const printEndContent: Plugin.Printer<Ruby.EndContent> = (path) => {
