@@ -93,23 +93,64 @@ class Prettier::Parser < Ripper
   def initialize(source, *args)
     super(source, *args)
 
+    # We keep the source around so that we can refer back to it when we're
+    # generating the AST. Sometimes it's easier to just reference the source
+    # string when you want to check if it contains a certain character, for
+    # example.
     @source = source
+
+    # Similarly, we keep the lines of the source string around to be able to
+    # check if certain lines contain certain characters. For example, we'll use
+    # this to generate the content that goes after the __END__ keyword. Or we'll
+    # use this to check if a comment has other content on its line.
     @lines = source.split("\n")
 
+    # This is the full set of comments that have been found by the parser. It's
+    # a running list. At the end of every block of statements, they will go in
+    # and attempt to grab any comments that are on their own line and turn them
+    # into regular statements. So at the end of parsing the only comments left
+    # in here will be comments on lines that also contain code.
     @comments = []
+
+    # This is the current embdoc (comments that start with =begin and end with
+    # =end). Since they can't be nested, there's no need for a stack here, as
+    # there can only be one active. These end up getting dumped into the
+    # comments list before getting picked up by the statements that surround
+    # them.
     @embdoc = nil
+
+    # This is an optional node that can be present if the __END__ keyword is
+    # used in the file. In that case, this will represent the content after that
+    # keyword.
     @__end__ = nil
+
+    # Magic comments are a certain kind of comment that can impact the way the
+    # file is parsed (encoding/string frozen default/etc.). These scanner events
+    # are immediately followed by a comment scanner event, so we only need the
+    # one variable to set/unset it immediately.
     @magic_comment = nil
 
+    # Heredocs can actually be nested together if you're using interpolation, so
+    # this is a stack of heredoc nodes that are currently being created. When we
+    # get to the scanner event that finishes off a heredoc node, we pop the top
+    # one off. If there are others surrounding it, then the body events will now
+    # be added to the correct nodes.
     @heredocs = []
 
+    # This is a running list of scanner events that have fired. It's useful
+    # mostly for maintaining location information. For example, if you're inside
+    # the handle of a def event, then in order to determine where the AST node
+    # started, you need to look backward in the scanner events to find a def
+    # keyword. Most of the time, when a parser event consumes one of these
+    # events, it will be deleted from the list. So ideally, this list stays
+    # pretty short over the course of parsing a source string.
     @scanner_events = []
-    @line_counts = []
 
     # Here we're going to build up a list of SingleByteString or MultiByteString
     # objects. They're each going to represent a string in the source. They are
     # used by the `char_pos` method to determine where we are in the source
     # string.
+    @line_counts = []
     last_index = 0
 
     @source.lines.each do |line|
@@ -292,7 +333,7 @@ class Prettier::Parser < Ripper
   end
 
   # alias is a parser event that represents the use of the alias keyword with
-  # regular arguments. This can be either symbol literals or bare words. You can 
+  # regular arguments. This can be either symbol literals or bare words. You can
   # optionally use parentheses with this keyword, so we either track the
   # location information based on those or the final argument to the alias
   # method.
@@ -912,15 +953,9 @@ class Prettier::Parser < Ripper
       # At the moment, merging in the value of the string being passed into
       # here. In the next major version I'd like to remove this and just use the
       # value of the magic comment. At the moment though that would change
-      # comments like:
-      #
-      #     # -*- encoding: UTF-8 -*-
-      #
-      # into
-      #
-      #     # encoding: UTF-8
-      #
-      # so need to wait for a major version to do that.
+      # comments like -*- encoding: UTF-8 -*- into encoding: UTF-8 so need to
+
+      # wait for a major version to do that.
       @comments << comment.merge(value: body, ec: start_char + value.length - 1)
       return comment
     end
@@ -977,10 +1012,8 @@ class Prettier::Parser < Ripper
 
   # A const_path_ref is a parser event that is a very similar to
   # const_path_field except that it is not involved in an assignment. It
-  # looks like the following example:
-  #
-  #     foo::X
-  #
+  # looks like the following example: foo::Bar, where left is foo and const is
+  # Bar.
   def on_const_path_ref(left, const)
     {
       type: :const_path_ref,
@@ -1462,7 +1495,7 @@ class Prettier::Parser < Ripper
       sc: start_char,
       ec: start_char + value.size
     }
-  
+
     scanner_events << node
     node
   end
@@ -1618,7 +1651,7 @@ class Prettier::Parser < Ripper
       sc: start_char,
       ec: start_char + value.size
     }
-  
+
     scanner_events << node
     node
   end
@@ -1813,7 +1846,7 @@ class Prettier::Parser < Ripper
   # associate with an object. You can find it in a hash key, as in:
   #
   #     { foo: bar }
-  # 
+  #
   # in this case "foo:" would be the body of the label. You can also find it in
   # pattern matching, as in:
   #
