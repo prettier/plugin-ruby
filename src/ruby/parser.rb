@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # We implement our own version checking here instead of using Gem::Version so
 # that we can use the --disable-gems flag.
@@ -16,6 +16,8 @@ end
 require 'json' unless defined?(JSON)
 require 'ripper'
 
+# Ensure the module is already defined. This is mostly so that we don't have to
+# indent the Parser definition one more time.
 module Prettier
 end
 
@@ -91,22 +93,64 @@ class Prettier::Parser < Ripper
   def initialize(source, *args)
     super(source, *args)
 
+    # We keep the source around so that we can refer back to it when we're
+    # generating the AST. Sometimes it's easier to just reference the source
+    # string when you want to check if it contains a certain character, for
+    # example.
     @source = source
+
+    # Similarly, we keep the lines of the source string around to be able to
+    # check if certain lines contain certain characters. For example, we'll use
+    # this to generate the content that goes after the __END__ keyword. Or we'll
+    # use this to check if a comment has other content on its line.
     @lines = source.split("\n")
 
+    # This is the full set of comments that have been found by the parser. It's
+    # a running list. At the end of every block of statements, they will go in
+    # and attempt to grab any comments that are on their own line and turn them
+    # into regular statements. So at the end of parsing the only comments left
+    # in here will be comments on lines that also contain code.
     @comments = []
+
+    # This is the current embdoc (comments that start with =begin and end with
+    # =end). Since they can't be nested, there's no need for a stack here, as
+    # there can only be one active. These end up getting dumped into the
+    # comments list before getting picked up by the statements that surround
+    # them.
     @embdoc = nil
+
+    # This is an optional node that can be present if the __END__ keyword is
+    # used in the file. In that case, this will represent the content after that
+    # keyword.
     @__end__ = nil
 
+    # Magic comments are a certain kind of comment that can impact the way the
+    # file is parsed (encoding/string frozen default/etc.). These scanner events
+    # are immediately followed by a comment scanner event, so we only need the
+    # one variable to set/unset it immediately.
+    @magic_comment = nil
+
+    # Heredocs can actually be nested together if you're using interpolation, so
+    # this is a stack of heredoc nodes that are currently being created. When we
+    # get to the scanner event that finishes off a heredoc node, we pop the top
+    # one off. If there are others surrounding it, then the body events will now
+    # be added to the correct nodes.
     @heredocs = []
 
+    # This is a running list of scanner events that have fired. It's useful
+    # mostly for maintaining location information. For example, if you're inside
+    # the handle of a def event, then in order to determine where the AST node
+    # started, you need to look backward in the scanner events to find a def
+    # keyword. Most of the time, when a parser event consumes one of these
+    # events, it will be deleted from the list. So ideally, this list stays
+    # pretty short over the course of parsing a source string.
     @scanner_events = []
-    @line_counts = []
 
     # Here we're going to build up a list of SingleByteString or MultiByteString
     # objects. They're each going to represent a string in the source. They are
     # used by the `char_pos` method to determine where we are in the source
     # string.
+    @line_counts = []
     last_index = 0
 
     @source.lines.each do |line|
@@ -160,111 +204,44 @@ class Prettier::Parser < Ripper
     consume ? scanner_events.delete_at(index) : (index && scanner_events[index])
   end
 
-  # Scanner events occur when the lexer hits a new token, like a keyword or an
-  # end. These nodes always contain just one argument which is a string
-  # representing the content. For the most part these can just be printed
-  # directly, which very few exceptions.
-  defined = %i[
-    comment
-    embdoc
-    embdoc_beg
-    embdoc_end
-    heredoc_beg
-    heredoc_end
-    ignored_nl
-  ]
+  # A helper function to find a :: operator. We do special handling instead of
+  # using find_scanner_event here because we don't pop off all of the ::
+  # operators so you could end up getting the wrong information if you have for
+  # instance ::X::Y::Z.
+  def find_colon2_before(const)
+    index =
+      scanner_events.rindex do |event|
+        event[:type] == :@op && event[:body] == '::' && event[:sc] < const[:sc]
+      end
 
-  (SCANNER_EVENTS - defined).each do |event|
-    define_method(:"on_#{event}") do |value|
-      ec = char_pos + value.size
-      node = {
-        type: :"@#{event}",
-        body: value,
-        sl: lineno,
-        el: lineno,
-        sc: char_pos,
-        ec: ec
-      }
+    scanner_events[index]
+  end
 
-      scanner_events << node
-      node
+  # Finds the next position in the source string that begins a statement. This
+  # is used to bind statements lists and make sure they don't include a
+  # preceding comment. For example, we want the following comment to be attached
+  # to the class node and not the statement node:
+  #
+  #     class Foo # :nodoc:
+  #       ...
+  #     end
+  #
+  # By finding the next non-space character, we can make sure that the bounds of
+  # the statement list are correct.
+  def find_next_statement_start(position)
+    remaining = source[position..-1]
+
+    if remaining.sub(/\A +/, '')[0] == '#'
+      return position + remaining.index("\n")
     end
+
+    position
   end
 
-  # We keep track of each comment as it comes in and then eventually add
-  # them to the top of the generated AST so that prettier can start adding
-  # them back into the final representation. Comments come in including
-  # their starting pound sign and the newline at the end, so we also chop
-  # those off.
-  #
-  # If there is an encoding magic comment at the top of the file, ripper
-  # will actually change into that encoding for the storage of the string.
-  # This will break everything, so we need to force the encoding back into
-  # UTF-8 so that the JSON library won't break.
-  def on_comment(value)
-    @comments << {
-      type: :@comment,
-      value: value[1..-1].chomp.force_encoding('UTF-8'),
-      inline: value.strip != lines[lineno - 1],
-      sl: lineno,
-      el: lineno,
-      sc: char_pos,
-      ec: char_pos + value.length - 1
-    }
-  end
-
-  # ignored_nl is a special kind of scanner event that passes nil as the value,
-  # so we can't do our normal tracking of value.size. Instead of adding a
-  # condition to the main SCANNER_EVENTS loop above, we'll just explicitly
-  # define the method here. You can trigger the ignored_nl event with the
-  # following snippet:
-  #
-  #     foo.bar
-  #        .baz
-  #
-  def on_ignored_nl(value)
-    {
-      type: :ignored_nl,
-      body: nil,
-      sl: lineno,
-      el: lineno,
-      sc: char_pos,
-      ec: char_pos
-    }
-  end
-
-  prepend(
-    Module.new do
-      private
-
-      # Handles __END__ syntax, which allows individual scripts to keep content
-      # after the main ruby code that can be read through DATA. It looks like:
-      #
-      # foo.bar
-      #
-      # __END__
-      # some other content that isn't normally read by ripper
-      def on___end__(*)
-        @__end__ = super(lines[lineno..-1].join("\n"))
-      end
-
-      # Like comments, we need to force the encoding here so JSON doesn't break.
-      def on_ident(value)
-        super(value.force_encoding('UTF-8'))
-      end
-
-      # Like comments, we need to force the encoding here so JSON doesn't break.
-      def on_tstring_content(value)
-        super(value.force_encoding('UTF-8'))
-      end
-    end
-  )
-
-  # A BEGIN node is a parser event that represents the use of the BEGIN
-  # keyword, which hooks into the lifecycle of the interpreter. It's a bit
-  # of a legacy from the stream operating days, and gets its inspiration
-  # from tools like awk. Whatever is inside the "block" will get executed
-  # when the program starts. The syntax looks like the following:
+  # BEGIN is a parser event that represents the use of the BEGIN keyword, which
+  # hooks into the lifecycle of the interpreter. Whatever is inside the "block"
+  # will get executed when the program starts. The syntax looks like the
+  # following:
   #
   #     BEGIN {
   #       # execute stuff here
@@ -284,11 +261,35 @@ class Prettier::Parser < Ripper
     )
   end
 
-  # A END node is a parser event that represents the use of the END keyword,
-  # which hooks into the lifecycle of the interpreter. It's a bit of a
-  # legacy from the stream operating days, and gets its inspiration from
-  # tools like awk. Whatever is inside the "block" will get executed when
-  # the program ends. The syntax looks like the following:
+  # CHAR is a parser event that represents a single codepoint in the script
+  # encoding. For example:
+  #
+  #     ?a
+  #
+  # is a representation of the string literal "a". You can use control
+  # characters with this as well, as in ?\C-a.
+  #
+  def on_CHAR(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@CHAR,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # END is a parser event that represents the use of the END keyword, which
+  # hooks into the lifecycle of the interpreter. Whatever is inside the "block"
+  # will get executed when the program ends. The syntax looks like the
+  # following:
   #
   #     END {
   #       # execute stuff here
@@ -308,11 +309,34 @@ class Prettier::Parser < Ripper
     )
   end
 
-  # alias is a parser event that represents when you're using the alias
-  # keyword with regular arguments. This can be either symbol literals or
-  # bare words. You can optionally use parentheses with this keyword, so we
-  # either track the location information based on those or the final
-  # argument to the alias method.
+  # __END__ is a scanner event that represents __END__ syntax, which allows
+  # individual scripts to keep content after the main ruby code that can be read
+  # through the DATA constant. It looks like:
+  #
+  #     puts DATA.read
+  #
+  #     __END__
+  #     some other content that isn't executed by the program
+  #
+  def on___end__(value)
+    start_line = lineno
+    start_char = char_pos
+
+    @__end__ = {
+      type: :@__end__,
+      body: lines[lineno..-1].join("\n"),
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+  end
+
+  # alias is a parser event that represents the use of the alias keyword with
+  # regular arguments. This can be either symbol literals or bare words. You can
+  # optionally use parentheses with this keyword, so we either track the
+  # location information based on those or the final argument to the alias
+  # method.
   def on_alias(left, right)
     beging = find_scanner_event(:@kw, 'alias')
 
@@ -329,7 +353,7 @@ class Prettier::Parser < Ripper
     }
   end
 
-  # aref nodes are when you're pulling a value out of a collection at a
+  # aref is a parser event when you're pulling a value out of a collection at a
   # specific index. Put another way, it's any time you're calling the method
   # #[]. As an example:
   #
@@ -373,26 +397,59 @@ class Prettier::Parser < Ripper
     }
   end
 
-  # args_new is a parser event that represents the beginning of a list of
-  # arguments to any method call or an array. It can be followed by any
-  # number of args_add events, which we'll append onto an array body.
-  def on_args_new
+  # arg_ambiguous is a parser event that represents when the parser sees an
+  # argument as ambiguous. For example, in the following snippet:
+  #
+  #     foo //
+  #
+  # the question becomes if the forward slash is being used as a division
+  # operation or if it's the start of a regular expression. We don't need to
+  # track this event in the AST that we're generating, so we're not going to
+  # define an explicit handler for it.
+  #
+  #     def on_arg_ambiguous(value)
+  #       value
+  #     end
+
+  # arg_paren is a parser event that represents wrapping arguments to a method
+  # inside a set of parentheses. For example, in the follow snippet:
+  #
+  #     foo(bar)
+  #
+  # there would be an arg_paren node around the args_add_block node that
+  # represents the set of arguments being sent to the foo method. The args child
+  # node can be nil if no arguments were passed, as in:
+  #
+  #     foo()
+  #
+  def on_arg_paren(args)
+    beging = find_scanner_event(:@lparen)
+    rparen = find_scanner_event(:@rparen)
+
+    # If the arguments exceed the ending of the parentheses, then we know we
+    # have a heredoc in the arguments, and we need to use the bounds of the
+    # arguments to determine how large the arg_paren is.
+    ending = (args && args[:el] > rparen[:el]) ? args : rparen
+
     {
-      type: :args,
-      body: [],
-      sl: lineno,
-      sc: char_pos,
-      el: lineno,
-      ec: char_pos
+      type: :arg_paren,
+      body: [args],
+      sl: beging[:sl],
+      sc: beging[:sc],
+      el: ending[:el],
+      ec: ending[:ec]
     }
   end
 
-  # args_add is a parser event that represents a single argument inside a
-  # list of arguments to any method call or an array. It accepts as
-  # arguments the parent args node as well as an arg which can be anything
-  # that could be passed as an argument.
+  # args_add is a parser event that represents a single argument inside a list
+  # of arguments to any method call or an array. It accepts as arguments the
+  # parent args node as well as an arg which can be anything that could be
+  # passed as an argument.
   def on_args_add(args, arg)
     if args[:body].empty?
+      # If this is the first argument being passed into the list of arguments,
+      # then we're going to use the bounds of the argument to override the
+      # parent node's location since this will be more accurate.
       arg.merge(type: :args, body: [arg])
     else
       args.merge!(body: args[:body] << arg, el: arg[:el], ec: arg[:ec])
@@ -401,7 +458,7 @@ class Prettier::Parser < Ripper
 
   # args_add_block is a parser event that represents a list of arguments and
   # potentially a block argument. If no block is passed, then the second
-  # argument will be false.
+  # argument will be the literal false.
   def on_args_add_block(args, block)
     ending = block || args
 
@@ -436,24 +493,17 @@ class Prettier::Parser < Ripper
     find_scanner_event(:@op, '...').merge!(type: :args_forward)
   end
 
-  # arg_paren is a parser event that represents wrapping arguments to a
-  # method inside a set of parentheses.
-  def on_arg_paren(args)
-    beging = find_scanner_event(:@lparen)
-    rparen = find_scanner_event(:@rparen)
-
-    # If the arguments exceed the ending of the parentheses, then we know we
-    # have a heredoc in the arguments, and we need to use the bounds of the
-    # arguments to determine how large the arg_paren is.
-    ending = (args && args[:el] > rparen[:el]) ? args : rparen
-
+  # args_new is a parser event that represents the beginning of a list of
+  # arguments to any method call or an array. It can be followed by any
+  # number of args_add events, which we'll append onto an array body.
+  def on_args_new
     {
-      type: :arg_paren,
-      body: [args],
-      sl: beging[:sl],
-      sc: beging[:sc],
-      el: ending[:el],
-      ec: ending[:ec]
+      type: :args,
+      body: [],
+      sl: lineno,
+      sc: char_pos,
+      el: lineno,
+      ec: char_pos
     }
   end
 
@@ -552,6 +602,45 @@ class Prettier::Parser < Ripper
       el: assocs[-1][:el],
       ec: assocs[-1][:ec]
     }
+  end
+
+  # backref is a scanner event that represents a global variable referencing a
+  # matched value. It comes in the form of a $ followed by a positive integer.
+  def on_backref(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@backref,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # backtick is a scanner event that represents the use of the ` operator. It's
+  # usually found being used for an xstring, but could also be found as the name
+  # of a method being defined.
+  def on_backtick(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@backtick,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
   end
 
   # bare_assoc_hash is a parser event that represents a hash of contents
@@ -768,27 +857,6 @@ class Prettier::Parser < Ripper
     )
   end
 
-  # Finds the next position in the source string that begins a statement. This
-  # is used to bind statements lists and make sure they don't include a
-  # preceding comment. For example, we want the following comment to be attached
-  # to the class node and not the statement node:
-  #
-  #     class Foo # :nodoc:
-  #       ...
-  #     end
-  #
-  # By finding the next non-space character, we can make sure that the bounds of
-  # the statement list are correct.
-  def find_next_statement_start(position)
-    remaining = source[position..-1]
-
-    if remaining.sub(/\A +/, '')[0] == '#'
-      return position + remaining.index("\n")
-    end
-
-    position
-  end
-
   # class is a parser event that represents defining a class. It accepts as
   # arguments the name of the class, the optional name of the superclass,
   # and the bodystmt event that represents the statements evaluated within
@@ -810,6 +878,24 @@ class Prettier::Parser < Ripper
       el: ending[:el],
       ec: ending[:ec]
     }
+  end
+
+  # comma is a scanner event that represents the use of the comma operator.
+  def on_comma(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@comma,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
   end
 
   # command is a parser event representing a method call with arguments and
@@ -843,6 +929,70 @@ class Prettier::Parser < Ripper
     }
   end
 
+  # We keep track of each comment as it comes in and then eventually add
+  # them to the top of the generated AST so that prettier can start adding
+  # them back into the final representation. Comments come in including
+  # their starting pound sign and the newline at the end, so we also chop
+  # those off.
+  def on_comment(value)
+    # If there is an encoding magic comment at the top of the file, ripper
+    # will actually change into that encoding for the storage of the string.
+    # This will break everything when we attempt to print as JSON, so we need to
+    # force the encoding back into UTF-8 so that it won't break.
+    body = value[1..-1].chomp.force_encoding('UTF-8')
+
+    start_line = lineno
+    start_char = char_pos
+
+    # If we already had special handling of a magic comment, then we can just
+    # skip and return the value of that node.
+    if @magic_comment
+      comment = @magic_comment
+      @magic_comment = nil
+
+      # At the moment, merging in the value of the string being passed into
+      # here. In the next major version I'd like to remove this and just use the
+      # value of the magic comment. At the moment though that would change
+      # comments like -*- encoding: UTF-8 -*- into encoding: UTF-8 so need to
+
+      # wait for a major version to do that.
+      @comments << comment.merge(value: body, ec: start_char + value.length - 1)
+      return comment
+    end
+
+    @comments << {
+      type: :@comment,
+      value: body,
+      inline: value.strip != lines[lineno - 1],
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.length - 1
+    }
+  end
+
+  # const is a scanner event that represents a literal value that _looks like_
+  # a constant. This could actually be a reference to a constant. It could also
+  # be something that looks like a constant in another context, as in a method
+  # call to a capitalized method, a symbol that starts with a capital letter,
+  # etc.
+  def on_const(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@const,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
   # A const_path_field is a parser event that is always the child of some
   # kind of assignment. It represents when you're assigning to a constant
   # that is being referenced as a child of another variable. For example:
@@ -862,10 +1012,8 @@ class Prettier::Parser < Ripper
 
   # A const_path_ref is a parser event that is a very similar to
   # const_path_field except that it is not involved in an assignment. It
-  # looks like the following example:
-  #
-  #     foo::X
-  #
+  # looks like the following example: foo::Bar, where left is foo and const is
+  # Bar.
   def on_const_path_ref(left, const)
     {
       type: :const_path_ref,
@@ -885,6 +1033,24 @@ class Prettier::Parser < Ripper
   #
   def on_const_ref(const)
     const.merge(type: :const_ref, body: [const])
+  end
+
+  # cvar is a scanner event that represents the use of a class variable.
+  def on_cvar(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@cvar,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
   end
 
   # A def is a parser event that represents defining a regular method on the
@@ -1113,25 +1279,22 @@ class Prettier::Parser < Ripper
     end
   end
 
-  # else can either end with an end keyword (in which case we'll want to
-  # consume that event) or it can end with an ensure keyword (in which case
-  # we'll leave that to the ensure to handle).
-  def find_else_ending
+  # else is a parser event that represents the end of a if, unless, or begin
+  # chain. It accepts as an argument the statements that are contained
+  # within the else clause.
+  def on_else(stmts)
+    beging = find_scanner_event(:@kw, 'else')
+
+    # else can either end with an end keyword (in which case we'll want to
+    # consume that event) or it can end with an ensure keyword (in which case
+    # we'll leave that to the ensure to handle).
     index =
       scanner_events.rindex do |event|
         event[:type] == :@kw && %w[end ensure].include?(event[:body])
       end
 
     event = scanner_events[index]
-    event[:body] == 'end' ? scanner_events.delete_at(index) : event
-  end
-
-  # else is a parser event that represents the end of a if, unless, or begin
-  # chain. It accepts as an argument the statements that are contained
-  # within the else clause.
-  def on_else(stmts)
-    beging = find_scanner_event(:@kw, 'else')
-    ending = find_else_ending
+    ending = event[:body] == 'end' ? scanner_events.delete_at(index) : event
 
     stmts.bind(beging[:ec], ending[:sc])
 
@@ -1165,6 +1328,14 @@ class Prettier::Parser < Ripper
     }
   end
 
+  # This is a scanner event that gets hit when we're inside an embdoc and
+  # receive a new line of content. Here we are guaranteed to already have
+  # initialized the @embdoc variable so we can just append the new line onto
+  # the existing content.
+  def on_embdoc(value)
+    @embdoc[:value] << value
+  end
+
   # embdocs are long comments that are surrounded by =begin..=end. They
   # cannot be nested, so we don't need to worry about keeping a stack around
   # like we do with heredocs. Instead we can just track the current embdoc
@@ -1172,14 +1343,6 @@ class Prettier::Parser < Ripper
   # event, so here we'll initialize the current embdoc.
   def on_embdoc_beg(value)
     @embdoc = { type: :@embdoc, value: value, sl: lineno, sc: char_pos }
-  end
-
-  # This is a scanner event that gets hit when we're inside an embdoc and
-  # receive a new line of content. Here we are guaranteed to already have
-  # initialized the @embdoc variable so we can just append the new line onto
-  # the existing content.
-  def on_embdoc(value)
-    @embdoc[:value] << value
   end
 
   # This is the final scanner event for embdocs. It receives the =end. Here
@@ -1195,6 +1358,72 @@ class Prettier::Parser < Ripper
       )
 
     @embdoc = nil
+  end
+
+  # embexpr_beg is a scanner event that represents using interpolation inside of
+  # a string, xstring, heredoc, or regexp. Its value is the string literal "#{".
+  def on_embexpr_beg(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@embexpr_beg,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # embexpr_end is a scanner event that represents the end of an interpolated
+  # expression in a string, xstring, heredoc, or regexp. Its value is the string
+  # literal "}".
+  def on_embexpr_end(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@embexpr_end,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # embvar is a scanner event that represents the use of shorthand interpolation
+  # for an instance, class, or global variable into a string, xstring, heredoc,
+  # or regexp. Its value is the string literal "#". For example, in the
+  # following snippet:
+  #
+  #     "#@foo"
+  #
+  # the embvar would be triggered by the "#", then an ivar event for the @foo
+  # instance variable. That would all get bound up into a string_dvar node in
+  # the final AST.
+  def on_embvar(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@embvar,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
   end
 
   # ensure is a parser event that represents the use of the ensure keyword
@@ -1253,6 +1482,24 @@ class Prettier::Parser < Ripper
     }
   end
 
+  # float is a scanner event that represents a floating point value literal.
+  def on_float(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@float,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
   # fndptn is a parser event that represents matching against a pattern where
   # you find a pattern in an array using the Ruby 3.0+ pattern matching syntax.
   def on_fndptn(const, presplat, args, postsplat)
@@ -1294,6 +1541,24 @@ class Prettier::Parser < Ripper
       el: ending[:el],
       ec: ending[:ec]
     }
+  end
+
+  # gvar is a scanner event that represents a global variable literal.
+  def on_gvar(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@gvar,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
   end
 
   # hash is a parser event that represents a hash literal. It accepts as an
@@ -1370,6 +1635,27 @@ class Prettier::Parser < Ripper
     }
   end
 
+  # ident is a scanner event that represents an identifier anywhere in code. It
+  # can actually represent a whole bunch of stuff, depending on where it is in
+  # the AST. Like comments, we need to force the encoding here so JSON doesn't
+  # break.
+  def on_ident(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@ident,
+      body: value.force_encoding('UTF-8'),
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
   # if is a parser event that represents the first clause in an if chain.
   # It accepts as arguments the predicate of the if, the statements that are
   # contained within the if clause, and the optional consequent clause.
@@ -1417,6 +1703,56 @@ class Prettier::Parser < Ripper
     }
   end
 
+  # ignored_nl is a special kind of scanner event that passes nil as the value.
+  # You can trigger the ignored_nl event with the following snippet:
+  #
+  #     foo.bar
+  #        .baz
+  #
+  # We don't need to track this event in the AST that we're generating, so we're
+  # not going to define an explicit handler for it.
+  #
+  #     def on_ignored_nl(value)
+  #       value
+  #     end
+
+  # ignored_sp is a scanner event that represents the space before the content
+  # of each line of a squiggly heredoc that will be removed from the string
+  # before it gets transformed into a string literal. For example, in the
+  # following snippet:
+  #
+  #     <<~HERE
+  #       foo
+  #         bar
+  #     HERE
+  #
+  # You would have two ignored_sp events, the first with two spaces and the
+  # second with four. We don't need to track this event in the AST that we're
+  # generating, so we're not going to define an explicit handler for it.
+  #
+  #     def on_ignored_sp(value)
+  #       value
+  #     end
+
+  # imaginary is a scanner event that represents an imaginary number literal.
+  # They become instances of the Complex class.
+  def on_imaginary(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@imaginary,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
   # in is a parser event that represents using the in keyword within the
   # Ruby 2.7+ pattern matching syntax. Alternatively in Ruby 3+ it is also used
   # to handle rightward assignment for pattern matching.
@@ -1437,6 +1773,61 @@ class Prettier::Parser < Ripper
     )
   end
 
+  # int is a scanner event the represents a number literal.
+  def on_int(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@int,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # ivar is a scanner event the represents an instance variable literal.
+  def on_ivar(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@ivar,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # kw is a scanner event the represents the use of a keyword. It can be
+  # anywhere in the AST, so you end up seeing it quite a lot.
+  def on_kw(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@kw,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
   # kwrest_param is a parser event that represents defining a parameter in a
   # method definition that accepts all remaining keyword parameters.
   def on_kwrest_param(ident)
@@ -1449,6 +1840,61 @@ class Prettier::Parser < Ripper
       el: ident[:el],
       ec: ident[:ec]
     )
+  end
+
+  # label is a scanner event that represents the use of an identifier to
+  # associate with an object. You can find it in a hash key, as in:
+  #
+  #     { foo: bar }
+  #
+  # in this case "foo:" would be the body of the label. You can also find it in
+  # pattern matching, as in:
+  #
+  #     case foo
+  #     in bar:
+  #       bar
+  #     end
+  #
+  # in this case "bar:" would be the body of the label.
+  def on_label(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@label,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # label_end is a scanner event that represents the end of a dynamic symbol. If
+  # for example you had the following hash:
+  #
+  #     { "foo": bar }
+  #
+  # then the string "\":" would be the value of this label_end. It's useful for
+  # determining the type of quote being used by the label.
+  def on_label_end(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@label_end,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
   end
 
   # lambda is a parser event that represents using a "stabby" lambda
@@ -1478,6 +1924,80 @@ class Prettier::Parser < Ripper
       sc: beging[:sc],
       el: closing[:el],
       ec: closing[:ec]
+    }
+  end
+
+  # lbrace is a scanner event representing the use of a left brace, i.e., "{".
+  def on_lbrace(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@lbrace,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # lbracket is a scanner event representing the use of a left bracket, i.e.,
+  # "[".
+  def on_lbracket(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@lbracket,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # lparen is a scanner event representing the use of a left parenthesis, i.e.,
+  # "(".
+  def on_lparen(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@lparen,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # magic_comment is a scanner event that represents the use of a pragma at the
+  # beginning of the file. Usually it will inside something like
+  # frozen_string_literal (the key) with a value of true (the value). Both
+  # children come is a string literals.
+  def on_magic_comment(key, value)
+    start_line = lineno
+    start_char = char_pos
+
+    @magic_comment = {
+      type: :@comment,
+      value: " #{key}: #{value}",
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + @line_counts[start_line][-1]
     }
   end
 
@@ -1711,6 +2231,52 @@ class Prettier::Parser < Ripper
     )
   end
 
+  # nl is a scanner event representing a newline in the source. As you can
+  # imagine, it will typically get triggered quite a few times. We don't need to
+  # track this event in the AST that we're generating, so we're not going to
+  # define an explicit handler for it.
+  #
+  #     def on_nl(value)
+  #       value
+  #     end
+
+  # nokw_param is a parser event that represents the use of the special 2.7+
+  # syntax to indicate a method should take no additional keyword arguments. For
+  # example in the following snippet:
+  #
+  #     def foo(**nil) end
+  #
+  # this is saying that foo should not accept any keyword arguments. Its value
+  # is always nil. We don't need to track this event in the AST that we're
+  # generating, so we're not going to define an explicit handler for it.
+  #
+  #     def on_nokw_param(value)
+  #       value
+  #     end
+
+  # op is a scanner event representing an operator literal in the source. For
+  # example, in the following snippet:
+  #
+  #     1 + 2
+  #
+  # the + sign is an operator.
+  def on_op(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@op,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
   # opassign is a parser event that represents assigning something to a
   # variable or constant using an operator like += or ||=. It accepts as
   # arguments the left side of the expression before the operator, the
@@ -1723,6 +2289,20 @@ class Prettier::Parser < Ripper
       ec: right[:ec]
     )
   end
+
+  # operator_ambiguous is a parser event that represents when the parsers sees
+  # an operator as ambiguous. For example, in the following snippet:
+  #
+  #     foo %[]
+  #
+  # the question becomes if the percent sign is being used as a method call or
+  # if it's the start of a string literal. We don't need to track this event in
+  # the AST that we're generating, so we're not going to define an explicit
+  # handler for it.
+  #
+  #     def on_operator_ambiguous(value)
+  #       value
+  #     end
 
   # params is a parser event that represents defining parameters on a
   # method. They have a somewhat interesting structure in that they are an
@@ -1787,6 +2367,22 @@ class Prettier::Parser < Ripper
   alias on_class_name_error on_parse_error
   alias on_param_error on_parse_error
 
+  # period is a scanner event that represents the use of the period operator. It
+  # is usually found in method calls.
+  def on_period(value)
+    start_line = lineno
+    start_char = char_pos
+
+    {
+      type: :@period,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+  end
+
   # The program node is the very top of the AST. Here we'll attach all of
   # the comments that we've gathered up over the course of parsing the
   # source string. We'll also attach on the __END__ content if there was
@@ -1798,6 +2394,29 @@ class Prettier::Parser < Ripper
     stmts.bind(0, source.length)
 
     range.merge(type: :program, body: [stmts], comments: @comments)
+  end
+
+  # qsymbols_beg is a scanner event that represents the beginning of a symbol
+  # literal array. For example in the following snippet:
+  #
+  #     %i[foo bar baz]
+  #
+  # a qsymbols_beg would be triggered with the value of "%i[".
+  def on_qsymbols_beg(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@qsymbols_beg,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
   end
 
   # qsymbols_new is a parser event that represents the beginning of a symbol
@@ -1819,6 +2438,29 @@ class Prettier::Parser < Ripper
     )
   end
 
+  # qwords_beg is a scanner event that represents the beginning of a word
+  # literal array. For example in the following snippet:
+  #
+  #     %w[foo bar baz]
+  #
+  # a qwords_beg would be triggered with the value of "%w[".
+  def on_qwords_beg(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@qwords_beg,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
   # qwords_new is a parser event that represents the beginning of a string
   # literal array, like %w[one two three]. It can be followed by any number
   # of qwords_add events, which we'll append onto an array body.
@@ -1838,30 +2480,116 @@ class Prettier::Parser < Ripper
     )
   end
 
+  # rational is a scanner event that represents a rational number literal.
+  def on_rational(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@rational,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # rbrace is a scanner event that represents the use of a right brace, i.e.,
+  # "}".
+  def on_rbrace(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@rbrace,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # rbracket is a scanner event that represents the use of a right bracket,
+  # i.e., "]".
+  def on_rbracket(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@rbracket,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
   # redo is a parser event that represents the bare redo keyword. It has no
   # body as it accepts no arguments.
   def on_redo
     find_scanner_event(:@kw, 'redo').merge!(type: :redo)
   end
 
-  # regexp_new is a parser event that represents the beginning of a regular
-  # expression literal, like /foo/. It can be followed by any number of
-  # regexp_add events, which we'll append onto an array body.
-  def on_regexp_new
-    beging = find_scanner_event(:@regexp_beg)
-    beging.merge!(type: :regexp, body: [], beging: beging[:body])
-  end
-
-  # regexp_add is a parser event that represents a piece of a regular
+  # regexp_add is a parser event that represents a piece of a regular expression
   # body. It accepts as arguments the parent regexp node as well as a
-  # tstring_content scanner event representing string content or a
-  # string_embexpr parser event representing interpolated content.
+  # tstring_content scanner event representing string content, a
+  # string_embexpr parser event representing interpolated content, or a
+  # string_dvar parser event representing an interpolated variable.
   def on_regexp_add(regexp, piece)
     regexp.merge!(
       body: regexp[:body] << piece,
       el: regexp[:el],
       ec: regexp[:ec]
     )
+  end
+
+  # regexp_beg is a scanner event that represents the start of a regular
+  # expression. It can take a couple of forms since regexp can either start with
+  # a forward slash or a %r.
+  def on_regexp_beg(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@regexp_beg,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # regexp_end is a scanner event that represents the end of a regular
+  # expression. It will contain the closing brace or slash, as well as any flags
+  # being passed to the regexp.
+  def on_regexp_end(value)
+    start_line = lineno
+    start_char = char_pos
+
+    {
+      type: :@regexp_end,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
   end
 
   # regexp_literal is a parser event that represents a regular expression.
@@ -1875,6 +2603,14 @@ class Prettier::Parser < Ripper
       el: ending[:el],
       ec: ending[:ec]
     )
+  end
+
+  # regexp_new is a parser event that represents the beginning of a regular
+  # expression literal, like /foo/. It can be followed by any number of
+  # regexp_add events, which we'll append onto an array body.
+  def on_regexp_new
+    beging = find_scanner_event(:@regexp_beg)
+    beging.merge!(type: :regexp, body: [], beging: beging[:body])
   end
 
   # rescue is a special kind of node where you have a rescue chain but it
@@ -1990,6 +2726,25 @@ class Prettier::Parser < Ripper
     find_scanner_event(:@kw, 'return').merge!(type: :return0)
   end
 
+  # rparen is a scanner event that represents the use of a right parenthesis,
+  # i.e., ")".
+  def on_rparen(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@rparen,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
   # sclass is a parser event that represents a block of statements that
   # should be evaluated within the context of the singleton class of an
   # object. It's frequently used to define singleton methods. It looks like
@@ -2014,6 +2769,31 @@ class Prettier::Parser < Ripper
       el: ending[:el],
       ec: ending[:ec]
     }
+  end
+
+  # semicolon is a scanner event that represents the use of a semicolon in the
+  # source. We don't need to track this event in the AST that we're generating,
+  # so we're not going to define an explicit handler for it.
+  #
+  #     def on_semicolon(value)
+  #       value
+  #     end
+
+  # sp is a scanner event that represents the use of a space in the source. As
+  # you can imagine, this event gets triggered quite often. We don't need to
+  # track this event in the AST that we're generating, so we're not going to
+  # define an explicit handler for it.
+  #
+  #     def on_sp(value)
+  #       value
+  #     end
+
+  # stmts_add is a parser event that represents a single statement inside a
+  # list of statements within any lexical block. It accepts as arguments the
+  # parent stmts node as well as an stmt which can be any expression in
+  # Ruby.
+  def on_stmts_add(stmts, stmt)
+    stmts << stmt
   end
 
   # Everything that has a block of code inside of it has a list of statements.
@@ -2081,12 +2861,12 @@ class Prettier::Parser < Ripper
     )
   end
 
-  # stmts_add is a parser event that represents a single statement inside a
-  # list of statements within any lexical block. It accepts as arguments the
-  # parent stmts node as well as an stmt which can be any expression in
-  # Ruby.
-  def on_stmts_add(stmts, stmt)
-    stmts << stmt
+  # string_add is a parser event that represents a piece of a string. It
+  # could be plain @tstring_content, string_embexpr, or string_dvar nodes.
+  # It accepts as arguments the parent string node as well as the additional
+  # piece of the string.
+  def on_string_add(string, piece)
+    string.merge!(body: string[:body] << piece, el: piece[:el], ec: piece[:ec])
   end
 
   # string_concat is a parser event that represents concatenating two
@@ -2120,14 +2900,6 @@ class Prettier::Parser < Ripper
       sc: char_pos,
       ec: char_pos
     }
-  end
-
-  # string_add is a parser event that represents a piece of a string. It
-  # could be plain @tstring_content, string_embexpr, or string_dvar nodes.
-  # It accepts as arguments the parent string node as well as the additional
-  # piece of the string.
-  def on_string_add(string, piece)
-    string.merge!(body: string[:body] << piece, el: piece[:el], ec: piece[:ec])
   end
 
   # string_dvar is a parser event that represents a very special kind of
@@ -2200,16 +2972,33 @@ class Prettier::Parser < Ripper
     )
   end
 
+  # symbeg is a scanner event that represents the beginning of a symbol literal.
+  # In most cases it will contain just ":" as in the value, but if its a dynamic
+  # symbol being defined it will contain ":'" or ":\"".
+  def on_symbeg(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@symbeg,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
   # A symbol is a parser event that immediately descends from a symbol
   # literal and contains an ident representing the contents of the symbol.
   def on_symbol(ident)
-    # What the heck is this here for you ask!? Turns out when Ripper is lexing
-    # source text, it turns symbols into keywords if their contents match, which
-    # will mess up the location information of all of our other nodes.
-    #
-    # So for example instead of { type: :@ident, body: "class" } you would
-    # instead get { type: :@kw, body: "class" } which is all kinds of
-    # problematic.
+    # When ripper is lexing source text, it turns symbols into keywords if their
+    # contents match, which will mess up the location information of all of our
+    # other nodes. So for example instead of { type: :@ident, body: "class" }
+    # you would instead get { type: :@kw, body: "class" }.
     #
     # In order to take care of this, we explicitly delete this scanner event
     # from the stack to make sure it doesn't screw things up.
@@ -2229,6 +3018,29 @@ class Prettier::Parser < Ripper
       beging = find_scanner_event(:@symbeg)
       contents.merge!(type: :symbol_literal, sc: beging[:sc])
     end
+  end
+
+  # symbols_beg is a scanner event that represents the start of a symbol literal
+  # array with interpolation. For example, in the following snippet:
+  #
+  #     %I[foo bar baz]
+  #
+  # symbols_beg would be triggered with the value of "%I".
+  def on_symbols_beg(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@symbols_beg,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
   end
 
   # symbols_new is a parser event that represents the beginning of a symbol
@@ -2251,17 +3063,42 @@ class Prettier::Parser < Ripper
     )
   end
 
-  # A helper function to find a :: operator for the next two nodes. We do
-  # special handling instead of using find_scanner_event here because we
-  # don't pop off all of the :: operators so you could end up getting the
-  # wrong information if you have for instance ::X::Y::Z.
-  def find_colon2_before(const)
-    index =
-      scanner_events.rindex do |event|
-        event[:type] == :@op && event[:body] == '::' && event[:sc] < const[:sc]
-      end
+  # tlambda is a scanner event that represents the beginning of a lambda
+  # literal. It always has the value of "->".
+  def on_tlambda(value)
+    start_line = lineno
+    start_char = char_pos
 
-    scanner_events[index]
+    node = {
+      type: :@tlambda,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # tlambeg is a scanner event that represents the beginning of the body of a
+  # lambda literal. It always has the value of "{".
+  def on_tlambeg(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@tlambeg,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
   end
 
   # A top_const_field is a parser event that is always the child of some
@@ -2294,6 +3131,63 @@ class Prettier::Parser < Ripper
       sl: beging[:sl],
       sc: beging[:sc]
     )
+  end
+
+  # tstring_beg is a scanner event that represents the beginning of a string
+  # literal. It can represent either of the quotes for its value, or it can have
+  # a %q/%Q with delimiter.
+  def on_tstring_beg(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@tstring_beg,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # tstring_content is a scanner event that represents plain characters inside
+  # of a string, heredoc, xstring, or regexp. Like comments, we need to force
+  # the encoding here so JSON doesn't break.
+  def on_tstring_content(value)
+    start_line = lineno
+    start_char = char_pos
+
+    {
+      type: :@tstring_content,
+      body: value.force_encoding('UTF-8'),
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+  end
+
+  # tstring_end is a scanner event that represents the end of a string literal.
+  # It can either contain quotes, or it can have the end delimiter of a %q/%Q
+  # literal.
+  def on_tstring_end(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@tstring_end,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
   end
 
   # A unary node represents a unary method being called on an expression, as
@@ -2592,6 +3486,48 @@ class Prettier::Parser < Ripper
       word.merge!(body: word[:body] << piece, el: piece[:el], ec: piece[:ec])
     end
   end
+
+  # words_beg is a scanner event that represents the start of a word literal
+  # array with interpolation. For example, in the following snippet:
+  #
+  #     %W[foo bar baz]
+  #
+  # words_beg would be triggered with the value of "%W".
+  def on_words_beg(value)
+    start_line = lineno
+    start_char = char_pos
+
+    node = {
+      type: :@words_beg,
+      body: value,
+      sl: start_line,
+      el: start_line,
+      sc: start_char,
+      ec: start_char + value.size
+    }
+
+    scanner_events << node
+    node
+  end
+
+  # words_sep is a scanner event that represents the separate between two words
+  # inside of a word literal array. It contains any amount of whitespace
+  # characters that are used to delimit the words. For example,
+  #
+  #     %w[
+  #       foo
+  #       bar
+  #       baz
+  #     ]
+  #
+  # in the snippet above there would be two words_sep events triggered, one
+  # between foo and bar and one between bar and baz. We don't need to track this
+  # event in the AST that we're generating, so we're not going to define an
+  # explicit handler for it.
+  #
+  #     def on_words_sep(value)
+  #       value
+  #     end
 
   # words_new is a parser event that represents the beginning of a string
   # literal array that accepts interpolation, like %W[one #{two} three]. It
