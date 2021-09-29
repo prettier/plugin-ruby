@@ -262,11 +262,11 @@ describe("rbs", () => {
 
   describe("non-ASCII", () => {
     test("emoji", () => {
-      expect(rbs(`{ "🌼" => Integer }`)).toMatchFormat();
+      expect(rbs(`T: { "🌼" => Integer }`)).toMatchFormat();
     });
 
     test("kanji", () => {
-      expect(rbs(`{ "日本語" => Integer }`)).toMatchFormat();
+      expect(rbs(`T: { "日本語" => Integer }`)).toMatchFormat();
     });
   });
 
