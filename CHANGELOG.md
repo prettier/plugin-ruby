@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- [#949](https://github.com/prettier/plugin-ruby/pull/949) - kddnewton - Converted over to using TypeScript for development.
+
 ### Changed
 
 - [#958](https://github.com/prettier/plugin-ruby/issues/958) - mharris-figma, kddnewton - Handle optional `do` keyword in `for` loop expressions.
