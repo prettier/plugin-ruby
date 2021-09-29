@@ -110,7 +110,7 @@ function spawnServer() {
 
     try {
       if (server.pid) {
-        server.kill(-server.pid);
+        process.kill(-server.pid);
       }
     } catch (e) {
       if (process.env.PLUGIN_RUBY_CI) {
