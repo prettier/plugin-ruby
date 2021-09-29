@@ -1,30 +1,47 @@
 import { spawn, spawnSync } from "child_process";
-import os from "os";
+import { unlinkSync } from "fs";
+import path from "path";
 
-// Set a RUBY_VERSION environment variable because certain tests will only run
-// for certain versions of Ruby.
-const args = ["--disable-gems", "-e", "puts RUBY_VERSION"];
-process.env.RUBY_VERSION = spawnSync("ruby", args).stdout.toString().trim();
+import { getLang } from "../../src/parser/parseSync";
 
-// Spawn the async parser process so that tests can send their content over to
-// it to get back the AST.
 function globalSetup() {
-  let parserArgs;
+  // Set a RUBY_VERSION environment variable because certain tests will only run
+  // for certain versions of Ruby.
+  const args = ["--disable-gems", "-e", "puts RUBY_VERSION"];
+  process.env.RUBY_VERSION = spawnSync("ruby", args).stdout.toString().trim();
 
-  if (os.type() === "Windows_NT") {
-    parserArgs = ["--tcp", "8912"];
-  } else {
-    parserArgs = ["--unix", `/tmp/prettier-ruby-test-${process.pid}.sock`];
-  }
+  // Set up just one parsing server for the entirety of the test suite.
+  const filepath = `/tmp/prettier-ruby-parser-${process.pid}.info`;
+  const server = spawn(
+    "ruby",
+    [path.join(__dirname, "../../src/parser/server.rb"), filepath],
+    {
+      env: Object.assign({}, process.env, { LANG: getLang() }),
+      detached: true,
+      stdio: "inherit"
+    }
+  );
 
-  if (!process.env.PRETTIER_RUBY_HOST) {
-    process.env.PRETTIER_RUBY_HOST = parserArgs[1];
-  }
-
-  (global as any).__ASYNC_PARSER__ = spawn("ruby", [
-    "./src/parser/server.rb",
-    ...parserArgs
+  // Get the connection information from the parsing server.
+  const info = spawnSync("node", [
+    path.join(__dirname, "../../src/parser/getInfo.js"),
+    filepath
   ]);
+
+  if (info.status !== 0) {
+    throw new Error(`
+      We failed to spawn our parser server. Please report this error on GitHub
+      at https://github.com/prettier/plugin-ruby. The error message was:
+
+        ${info.stderr.toString()}.
+    `);
+  }
+
+  process.env.PRETTIER_RUBY_HOST = info.stdout.toString();
+  process.env.PRETTIER_RUBY_PID = `${server.pid}`;
+
+  unlinkSync(filepath);
+  server.unref();
 }
 
 export default globalSetup;

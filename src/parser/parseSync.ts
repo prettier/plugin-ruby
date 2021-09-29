@@ -1,6 +1,6 @@
 import type { Plugin } from "../types";
 import { spawn, spawnSync } from "child_process";
-import fs, { readFileSync, unlinkSync } from "fs";
+import { unlinkSync } from "fs";
 import os from "os";
 import path from "path";
 import process from "process";
@@ -14,7 +14,7 @@ let parserArgs: undefined | string | string[] = process.env.PRETTIER_RUBY_HOST;
 // parse using UTF-8. Unfortunately, the way that you accomplish this looks
 // differently depending on your platform.
 /* istanbul ignore next */
-function getLang() {
+export function getLang() {
   const { env, platform } = process;
   const envValue = env.LC_ALL || env.LC_CTYPE || env.LANG;
 
@@ -43,6 +43,45 @@ function getLang() {
     sunos: "C.UTF-8",
     win32: ".UTF-8"
   }[platform];
+}
+
+function spawnServer() {
+  const filepath = `/tmp/prettier-ruby-parser-${process.pid}.info`;
+  const server = spawn(
+    "ruby",
+    [path.join(__dirname, "./server.rb"), filepath],
+    {
+      env: Object.assign({}, process.env, { LANG: getLang() }),
+      detached: true,
+      stdio: "inherit"
+    }
+  );
+
+  server.unref();
+  process.on("exit", () => {
+    unlinkSync(filepath);
+
+    if (server?.pid) {
+      try {
+        server.kill(-server.pid);
+      } catch (e) {
+        // ignore
+      }
+    }
+  });
+
+  const info = spawnSync("node", [path.join(__dirname, "./getInfo.js"), filepath]);
+  if (info.status !== 0) {
+    throw new Error(`
+      We failed to spawn our parser server. Please report this error on GitHub
+      at https://github.com/prettier/plugin-ruby. The error message was:
+
+        ${info.stderr.toString()}.
+    `);
+  }
+
+  parserArgs = info.stdout.toString();
+  return parserArgs;
 }
 
 // Finds a netcat-like adapter to use for sending data to a socket. We order
@@ -92,42 +131,7 @@ function parseSync(parser: string, source: string, opts: Plugin.Options) {
   }
 
   if (!parserArgs) {
-    const filepath = `/tmp/prettier-ruby-parser-${process.pid}`;
-    process.on("exit", () => unlinkSync(filepath));
-
-    const server = spawn(
-      "ruby",
-      [path.join(__dirname, "./server.rb"), filepath],
-      {
-        env: Object.assign({}, process.env, { LANG: getLang() }),
-        detached: true,
-        stdio: "inherit"
-      }
-    );
-  
-    process.on("exit", () => {
-      try {
-        if (server.pid) {
-          process.kill(-server.pid);
-        }
-      } catch (e) {
-        // ignore
-      }
-    });
-
-    server.unref();
-
-    const info = spawnSync("node", [path.join(__dirname, "./getInfo.js"), filepath]);
-    if (info.status !== 0) {
-      throw new Error(`
-        We failed to spawn our parser server. Please report this error on GitHub
-        at https://github.com/prettier/plugin-ruby. The error message was:
-
-          ${info.stderr.toString()}.
-      `);
-    }
-
-    parserArgs = info.stdout.toString();
+    parserArgs = spawnServer();
   }
 
   const response = spawnSync(
