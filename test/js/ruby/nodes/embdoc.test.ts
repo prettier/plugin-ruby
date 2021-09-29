@@ -14,7 +14,7 @@ describe("embdoc", () => {
       =end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("within a class", () => {
@@ -26,7 +26,7 @@ describe("embdoc", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("within a nested class", () => {
@@ -40,6 +40,6 @@ describe("embdoc", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 });

@@ -1,12 +1,15 @@
 import { long, ruby } from "../../utils";
 
 describe("binary", () => {
-  test("single line", () => expect("foo && bar && baz").toMatchFormat());
+  test("single line", () => {
+    expect("foo && bar && baz").toMatchFormat();
+  });
 
-  test("multi line", () =>
+  test("multi line", () => {
     expect(`${long} && ${long} && ${long}`).toChangeFormat(
       `${long} &&\n  ${long} &&\n  ${long}`
-    ));
+    );
+  });
 
   test("no indent on the right", () => {
     const content = `foo << [${long}]`;
@@ -16,7 +19,7 @@ describe("binary", () => {
       ]
     `);
 
-    return expect(content).toChangeFormat(expected);
+    expect(content).toChangeFormat(expected);
   });
 
   test("with heredoc and comment", () => {
@@ -26,8 +29,10 @@ describe("binary", () => {
       HERE
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
-  test("no spaces for **", () => expect("a**b").toMatchFormat());
+  test("no spaces for **", () => {
+    expect("a**b").toMatchFormat();
+  });
 });

@@ -7,6 +7,6 @@ describe("ignore", () => {
       class Foo; def bar; 1+1+1; end; end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 });

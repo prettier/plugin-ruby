@@ -8,7 +8,7 @@ describe("embed", () => {
       JAVA
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("formats correctly on straight heredocs", () => {
@@ -28,7 +28,7 @@ describe("embed", () => {
       JS
     `);
 
-    return expect(content).toChangeFormat(expected);
+    expect(content).toChangeFormat(expected);
   });
 
   test("formats correctly on squiggly heredocs", () => {
@@ -48,7 +48,7 @@ describe("embed", () => {
       JS
     `);
 
-    return expect(content).toChangeFormat(expected);
+    expect(content).toChangeFormat(expected);
   });
 
   test("does not format if the heredoc has an interpolation", () => {
@@ -60,7 +60,7 @@ describe("embed", () => {
       JS
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("removes whitespace so embedded parsers don't misinterpret", () => {
@@ -76,7 +76,7 @@ describe("embed", () => {
       MARKDOWN
     `);
 
-    return expect(content).toChangeFormat(expected);
+    expect(content).toChangeFormat(expected);
   });
 
   test("keeps parent indentation", () => {
@@ -92,7 +92,7 @@ describe("embed", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("correctly indents nested code while keeping parent indentation", () => {
@@ -106,6 +106,7 @@ describe("embed", () => {
         end
       end
     `);
+
     const expected = ruby(`
       some_block do
         another_block do
@@ -123,7 +124,7 @@ describe("embed", () => {
       end
     `);
 
-    return expect(content).toChangeFormat(expected);
+    expect(content).toChangeFormat(expected);
   });
 
   test("doesn't consider empty lines as part of the common leading whitespace", () => {
@@ -138,6 +139,6 @@ describe("embed", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 });

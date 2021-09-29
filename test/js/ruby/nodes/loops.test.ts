@@ -1,7 +1,7 @@
 import { long, ruby } from "../../utils";
 
 describe.each(["while", "until"])("%s", (keyword) => {
-  test("aligns predicates", () =>
+  test("aligns predicates", () => {
     expect(`foo ${keyword} ${long} || ${long}`).toChangeFormat(
       ruby(`
         ${keyword} ${long} ||
@@ -9,21 +9,27 @@ describe.each(["while", "until"])("%s", (keyword) => {
           foo
         end
       `)
-    ));
+    );
+  });
 
   describe("inlines allowed", () => {
-    test("transforms to inline", () =>
-      expect(`${keyword} a\n  1\nend`).toChangeFormat(`1 ${keyword} a`));
+    test("transforms to inline", () => {
+      expect(`${keyword} a\n  1\nend`).toChangeFormat(`1 ${keyword} a`);
+    });
 
-    test("maintains inlines", () => expect(`1 ${keyword} a`).toMatchFormat());
+    test("maintains inlines", () => {
+      expect(`1 ${keyword} a`).toMatchFormat();
+    });
 
-    test("breaks on large predicates", () =>
-      expect(`${keyword} ${long}\n  1\nend`).toMatchFormat());
+    test("breaks on large predicates", () => {
+      expect(`${keyword} ${long}\n  1\nend`).toMatchFormat();
+    });
 
-    test("breaks inlines on large predicates", () =>
+    test("breaks inlines on large predicates", () => {
       expect(`1 ${keyword} ${long}`).toChangeFormat(
         `${keyword} ${long}\n  1\nend`
-      ));
+      );
+    });
 
     test("does not break into block when modifying a begin", () => {
       const content = ruby(`
@@ -32,7 +38,7 @@ describe.each(["while", "until"])("%s", (keyword) => {
         end ${keyword} bar
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("breaks when an assignment is in the predicate", () => {
@@ -42,7 +48,7 @@ describe.each(["while", "until"])("%s", (keyword) => {
         end
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("breaks when a multi assignment is in the predicate", () => {
@@ -52,7 +58,7 @@ describe.each(["while", "until"])("%s", (keyword) => {
         end
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("breaks the parent when there is an assignment", () => {
@@ -64,13 +70,14 @@ describe.each(["while", "until"])("%s", (keyword) => {
         end
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
-    test("wraps single lines in parens when assigning", () =>
+    test("wraps single lines in parens when assigning", () => {
       expect(
         `hash[:key] = ${keyword} false do break :value end`
-      ).toChangeFormat(`hash[:key] = (break :value ${keyword} false)`));
+      ).toChangeFormat(`hash[:key] = (break :value ${keyword} false)`);
+    });
 
     test("empty body", () => {
       const content = ruby(`
@@ -78,7 +85,7 @@ describe.each(["while", "until"])("%s", (keyword) => {
         end
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("empty body, long predicate", () => {
@@ -87,31 +94,33 @@ describe.each(["while", "until"])("%s", (keyword) => {
         end
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
   });
 
   describe("inlines not allowed", () => {
-    test("maintains multiline", () =>
-      expect(`${keyword} a\n  1\nend`).toMatchFormat({ rubyModifier: false }));
+    test("maintains multiline", () => {
+      expect(`${keyword} a\n  1\nend`).toMatchFormat({ rubyModifier: false });
+    });
 
-    test("transforms to multiline", () =>
+    test("transforms to multiline", () => {
       expect(`1 ${keyword} a`).toChangeFormat(`${keyword} a\n  1\nend`, {
         rubyModifier: false
-      }));
+      });
+    });
 
-    test("breaks on large predicates", () =>
+    test("breaks on large predicates", () => {
       expect(`${keyword} ${long}\n  1\nend`).toMatchFormat({
         rubyModifier: false
-      }));
+      });
+    });
 
-    test("breaks inlines on large predicates", () =>
+    test("breaks inlines on large predicates", () => {
       expect(`1 ${keyword} ${long}`).toChangeFormat(
         `${keyword} ${long}\n  1\nend`,
-        {
-          rubyModifier: false
-        }
-      ));
+        { rubyModifier: false }
+      );
+    });
 
     test("does not break into block when modifying a begin", () => {
       const content = ruby(`
@@ -120,7 +129,7 @@ describe.each(["while", "until"])("%s", (keyword) => {
         end ${keyword} bar
       `);
 
-      return expect(content).toMatchFormat({ rubyModifier: false });
+      expect(content).toMatchFormat({ rubyModifier: false });
     });
 
     test("empty body", () => {
@@ -129,7 +138,7 @@ describe.each(["while", "until"])("%s", (keyword) => {
         end
       `);
 
-      return expect(content).toMatchFormat({ rubyModifier: false });
+      expect(content).toMatchFormat({ rubyModifier: false });
     });
 
     test("empty body, long predicate", () => {
@@ -138,37 +147,42 @@ describe.each(["while", "until"])("%s", (keyword) => {
         end
       `);
 
-      return expect(content).toMatchFormat({ rubyModifier: false });
+      expect(content).toMatchFormat({ rubyModifier: false });
     });
   });
 
   describe.each(["while", "until"])(
     "add parens when necessary %s",
     (keyword) => {
-      test("args", () =>
+      test("args", () => {
         expect(`[${keyword} foo? do bar end]`).toChangeFormat(
           `[(bar ${keyword} foo?)]`
-        ));
+        );
+      });
 
-      test("assign", () =>
+      test("assign", () => {
         expect(`foo = ${keyword} bar? do baz end`).toChangeFormat(
           `foo = (baz ${keyword} bar?)`
-        ));
+        );
+      });
 
-      test("assoc_new", () =>
+      test("assoc_new", () => {
         expect(`{ foo: ${keyword} bar? do baz end }`).toChangeFormat(
           `{ foo: (baz ${keyword} bar?) }`
-        ));
+        );
+      });
 
-      test("massign", () =>
+      test("massign", () => {
         expect(`f, o, o = ${keyword} bar? do baz end`).toChangeFormat(
           `f, o, o = (baz ${keyword} bar?)`
-        ));
+        );
+      });
 
-      test("opassign", () =>
+      test("opassign", () => {
         expect(`foo ||= ${keyword} bar? do baz end`).toChangeFormat(
           `foo ||= (baz ${keyword} bar?)`
-        ));
+        );
+      });
     }
   );
 
@@ -194,6 +208,6 @@ describe.each(["while", "until"])("%s", (keyword) => {
       end
     `);
 
-    return expect(content).toChangeFormat(expected);
+    expect(content).toChangeFormat(expected);
   });
 });

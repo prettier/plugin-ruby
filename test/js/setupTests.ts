@@ -4,28 +4,25 @@ import type { Plugin } from "../../src/types";
 import type { Code } from "./types";
 import plugin from "../../src/plugin";
 
-function checkFormat(
-  before: Code,
-  after: Code,
-  config: Partial<Plugin.Options>
-) {
-  const parser = (before as any).parser || "ruby";
+type Config = Partial<Plugin.Options>;
+
+function normalizeCode(code: Code) {
+  return (typeof code === "string" ? code : code.code).replace(/\r\n/g, "\n");
+}
+
+function checkFormat(before: Code, after: Code, config: Config) {
   const originalText = (before as any).code || before;
+  const formatted = prettier.format(originalText, {
+    parser: (before as any).parser || "ruby",
+    originalText,
+    plugins: [plugin as any as string],
+    ...config
+  });
 
-  const opts = Object.assign(
-    { parser, plugins: [plugin], originalText },
-    config
-  );
-
-  return new Promise((resolve) => resolve(prettier.format(originalText, opts)))
-    .then((formatted) => ({
-      pass: (formatted as string).replace(/\r\n/g, "\n") === `${after}\n`,
-      message: () => `Expected:\n${after}\nReceived:\n${formatted}`
-    }))
-    .catch((error) => ({
-      pass: false,
-      message: () => error.message
-    }));
+  return {
+    pass: normalizeCode(formatted) === `${normalizeCode(after)}\n`,
+    message: () => `Expected:\n${after}\nReceived:\n${formatted}`
+  };
 }
 
 expect.extend({
@@ -46,13 +43,8 @@ declare global {
   namespace jest {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface Matchers<R> {
-      toChangeFormat(
-        after: Code,
-        config?: Partial<Plugin.Options>
-      ): Promise<CustomMatcherResult>;
-      toMatchFormat(
-        config?: Partial<Plugin.Options>
-      ): Promise<CustomMatcherResult>;
+      toChangeFormat(after: Code, config?: Config): CustomMatcherResult;
+      toMatchFormat(config?: Config): CustomMatcherResult;
     }
   }
 }

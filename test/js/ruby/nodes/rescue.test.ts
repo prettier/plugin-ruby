@@ -10,7 +10,7 @@ describe("rescue", () => {
       end
     `);
 
-    return expect("a rescue nil").toChangeFormat(expected);
+    expect("a rescue nil").toChangeFormat(expected);
   });
 
   test("rescue just variable", () => {
@@ -22,7 +22,7 @@ describe("rescue", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   // from ruby spec/ruby/language/rescue_spec.rb
@@ -35,7 +35,7 @@ describe("rescue", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test.each(["begin", "def foo"])("%s with every clause", (declaration) => {
@@ -61,7 +61,7 @@ describe("rescue", () => {
       end
     `);
 
-    return expect(content).toChangeFormat(
+    expect(content).toChangeFormat(
       ruby(`
         ${declaration}
           1
@@ -95,7 +95,7 @@ describe("rescue", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("comment inline", () => {
@@ -107,7 +107,7 @@ describe("rescue", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("comment inline with multiple", () => {
@@ -119,7 +119,7 @@ describe("rescue", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("comment inline with splat", () => {
@@ -131,7 +131,7 @@ describe("rescue", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("one error with a comment", () => {
@@ -143,7 +143,7 @@ describe("rescue", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("two errors with a comment", () => {
@@ -155,6 +155,6 @@ describe("rescue", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 });

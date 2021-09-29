@@ -9,7 +9,7 @@ describe("heredocs", () => {
         HERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("with interpolation", () => {
@@ -21,7 +21,7 @@ describe("heredocs", () => {
         HERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("on an assignment", () => {
@@ -31,7 +31,7 @@ describe("heredocs", () => {
         HERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("nested within another", () => {
@@ -44,7 +44,7 @@ describe("heredocs", () => {
         PARENT
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("with embedded expressions", () => {
@@ -58,7 +58,7 @@ describe("heredocs", () => {
         HERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("with a call and indented", () => {
@@ -70,7 +70,7 @@ describe("heredocs", () => {
         end
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
   });
 
@@ -82,7 +82,7 @@ describe("heredocs", () => {
         HERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("with interpolation", () => {
@@ -94,7 +94,7 @@ describe("heredocs", () => {
         HERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("on an assignment", () => {
@@ -104,7 +104,7 @@ describe("heredocs", () => {
         HERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("nested within another", () => {
@@ -117,7 +117,7 @@ describe("heredocs", () => {
         PARENT
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("with a call and indented", () => {
@@ -129,7 +129,7 @@ describe("heredocs", () => {
         end
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
   });
 
@@ -141,7 +141,7 @@ describe("heredocs", () => {
         HERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("on calls with multiple", () => {
@@ -153,7 +153,7 @@ describe("heredocs", () => {
         THERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("on commands", () => {
@@ -163,7 +163,7 @@ describe("heredocs", () => {
         HERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("on commands with multiple", () => {
@@ -175,7 +175,7 @@ describe("heredocs", () => {
         THERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("on command calls", () => {
@@ -185,7 +185,7 @@ describe("heredocs", () => {
         HERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("on command calls with multiple", () => {
@@ -197,7 +197,7 @@ describe("heredocs", () => {
         THERE
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
   });
 
@@ -209,7 +209,7 @@ describe("heredocs", () => {
         TEXT
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("squiggly indent", () => {
@@ -219,7 +219,7 @@ describe("heredocs", () => {
         TEXT
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("straight no indent", () => {
@@ -229,7 +229,7 @@ describe("heredocs", () => {
         TEXT
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
   });
 
@@ -244,7 +244,7 @@ describe("heredocs", () => {
       )
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("arg w/ block", () => {
@@ -261,7 +261,7 @@ describe("heredocs", () => {
       TEXT
     `);
 
-    return expect(content).toChangeFormat(expected);
+    expect(content).toChangeFormat(expected);
   });
 
   test("in an activerecord scope arg w/ chaining", () => {
@@ -284,7 +284,7 @@ describe("heredocs", () => {
           EOS
     `);
 
-    return expect(content).toChangeFormat(expected);
+    expect(content).toChangeFormat(expected);
   });
 
   test("long breakable arg after heredoc literal", () => {
@@ -303,7 +303,7 @@ describe("heredocs", () => {
         ]
     `);
 
-    return expect(content).toChangeFormat(expected);
+    expect(content).toChangeFormat(expected);
   });
 
   test("call w/ short breakable arg after heredoc literal", () => {
@@ -313,7 +313,7 @@ describe("heredocs", () => {
       BAR
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("on calls", () => {
@@ -331,7 +331,7 @@ describe("heredocs", () => {
       HERE
     `);
 
-    return expect(content).toChangeFormat(expected);
+    expect(content).toChangeFormat(expected);
   });
 
   test("on calls with trailing arguments", () => {
@@ -341,7 +341,7 @@ describe("heredocs", () => {
       HERE
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("in parens args with trailing args after", () => {
@@ -352,7 +352,7 @@ describe("heredocs", () => {
       ARG1
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("in paren args with a call", () => {
@@ -363,7 +363,7 @@ describe("heredocs", () => {
       ARG1
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("on calls with multiple", () => {
@@ -375,7 +375,7 @@ describe("heredocs", () => {
       THERE
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("on commands", () => {
@@ -385,7 +385,7 @@ describe("heredocs", () => {
       HERE
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("on commands with multiple", () => {
@@ -397,7 +397,7 @@ describe("heredocs", () => {
         THERE
       `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("on command calls with trailing arg", () => {
@@ -407,7 +407,7 @@ describe("heredocs", () => {
       HERE
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("on command calls with multiple", () => {
@@ -419,7 +419,7 @@ describe("heredocs", () => {
       THERE
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("assign with call", () => {
@@ -429,7 +429,7 @@ describe("heredocs", () => {
       TEXT
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("assign with squiggly indent", () => {
@@ -440,7 +440,7 @@ describe("heredocs", () => {
       ).strip
     `);
 
-    return expect(content).toChangeFormat(
+    expect(content).toChangeFormat(
       ruby(`
         foo = (<<~TEXT).strip
           bar
@@ -456,7 +456,7 @@ describe("heredocs", () => {
       TEXT
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("with a call and indented", () => {
@@ -468,7 +468,7 @@ describe("heredocs", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("with a method call", () => {
@@ -479,7 +479,7 @@ describe("heredocs", () => {
       HERE
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("with two calls and indented", () => {
@@ -491,7 +491,7 @@ describe("heredocs", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("xstring", () => {
@@ -501,7 +501,7 @@ describe("heredocs", () => {
       SHELL
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("with a comment after the declaration", () => {
@@ -511,7 +511,7 @@ describe("heredocs", () => {
       HERE
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("with a comment after the declaration in a call", () => {
@@ -521,7 +521,7 @@ describe("heredocs", () => {
       HERE
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("spilling out from another node keeps subsequent formatting", () => {
@@ -532,6 +532,6 @@ describe("heredocs", () => {
       qaz
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 });
