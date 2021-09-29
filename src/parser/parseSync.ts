@@ -57,27 +57,27 @@ function findNetcatConfig(opts: Plugin.Options): NetcatConfig {
     return { command: splits[0], args: splits.slice(1) };
   }
 
-  if (os.type() === "Windows_NT") {
-    if (spawnSync("command", ["-v", "nc"]).status === 0) {
-      return { command: "nc", args: [] };
-    }
+  // if (os.type() === "Windows_NT") {
+  //   if (spawnSync("command", ["-v", "nc"]).status === 0) {
+  //     return { command: "nc", args: [] };
+  //   }
 
-    if (spawnSync("command", ["-v", "telnet"]).status === 0) {
-      return { command: "telnet", args: [] };
-    }
-  } else {
-    if (spawnSync("which", ["nc"]).status === 0) {
-      return { command: "nc", args: ["-U"] };
-    }
+  //   if (spawnSync("command", ["-v", "telnet"]).status === 0) {
+  //     return { command: "telnet", args: [] };
+  //   }
+  // } else {
+  //   if (spawnSync("which", ["nc"]).status === 0) {
+  //     return { command: "nc", args: ["-U"] };
+  //   }
 
-    if (spawnSync("which", ["telnet"]).status === 0) {
-      return { command: "telnet", args: ["-u"] };
-    }
+  //   if (spawnSync("which", ["telnet"]).status === 0) {
+  //     return { command: "telnet", args: ["-u"] };
+  //   }
 
-    if (spawnSync("which", ["ncat"]).status === 0) {
-      return { command: "ncat", args: ["-U"] };
-    }
-  }
+  //   if (spawnSync("which", ["ncat"]).status === 0) {
+  //     return { command: "ncat", args: ["-U"] };
+  //   }
+  // }
 
   return { command: "node", args: [require.resolve("./netcat.js")] };
 }
@@ -108,11 +108,13 @@ function spawnServer() {
   process.on("exit", () => {
     unlinkSync(filepath);
 
-    if (server?.pid) {
-      try {
+    try {
+      if (server.pid) {
         server.kill(-server.pid);
-      } catch (e) {
-        // ignore
+      }
+    } catch (e) {
+      if (process.env.PLUGIN_RUBY_CI) {
+        throw new Error(`Failed to kill the parser server: ${e}`)
       }
     }
   });

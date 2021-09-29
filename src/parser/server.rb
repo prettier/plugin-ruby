@@ -45,7 +45,7 @@ info =
 
 # Write out our connection information to the file given as the first argument
 # to this script.
-File.open(ARGV[0], "w") { |file| file.write(info) }
+File.write(ARGV[0], info)
 
 loop do
   break if quit
