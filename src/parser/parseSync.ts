@@ -78,12 +78,18 @@ function findNetcatConfig(opts: Plugin.Options): NetcatConfig {
   return { command: "node", args: [require.resolve("./netcat.js")] };
 }
 
+// Generate the filepath that should be used to communicate the connection
+// information between this process and the parser server.
+export function getInfoFilepath() {
+  return path.join(os.tmpdir(), `prettier-ruby-parser-${process.pid}.info`);
+}
+
 // Create a file that will act as a communication mechanism, spawn a parser
 // server with that filepath as an argument, then spawn another process that
 // will read that information in order to enable us to connect to it in the
 // spawnSync function.
 function spawnServer() {
-  const filepath = `/tmp/prettier-ruby-parser-${process.pid}.info`;
+  const filepath = getInfoFilepath();
   const server = spawn(
     "ruby",
     [path.join(__dirname, "./server.rb"), filepath],

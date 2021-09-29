@@ -2,7 +2,7 @@ import { spawn, spawnSync } from "child_process";
 import { unlinkSync } from "fs";
 import path from "path";
 
-import { getLang } from "../../src/parser/parseSync";
+import { getLang, getInfoFilepath } from "../../src/parser/parseSync";
 
 // This is somewhat similar to the spawnServer function in parseSync but
 // slightly different in that it logs its information into environment variables
@@ -14,7 +14,7 @@ function globalSetup() {
   process.env.RUBY_VERSION = spawnSync("ruby", args).stdout.toString().trim();
 
   // Set up just one parsing server for the entirety of the test suite.
-  const filepath = `/tmp/prettier-ruby-parser-${process.pid}.info`;
+  const filepath = getInfoFilepath();
   const server = spawn(
     "ruby",
     [path.join(__dirname, "../../src/parser/server.rb"), filepath],
