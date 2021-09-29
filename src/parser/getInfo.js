@@ -2,9 +2,16 @@
 const { existsSync, readFileSync } = require("fs");
 
 const filepath = process.argv[process.argv.length - 1];
-const timeout = setInterval(() => {
+
+const timeout = setTimeout(() => {
+  clearInterval(interval);
+  throw new Error("Failed to get information from parse server in time.");
+}, 3000);
+
+const interval = setInterval(() => {
   if (existsSync(filepath)) {
     process.stdout.write(readFileSync(filepath).toString("utf8"));
     clearTimeout(timeout);
+    clearInterval(interval);
   }
 }, 50);
