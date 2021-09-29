@@ -78,4 +78,66 @@ describe("embed", () => {
 
     return expect(content).toChangeFormat(expected);
   });
+
+  test("keeps parent indentation", () => {
+    const content = ruby(`
+      some_block do
+        another_block do
+          x += 1
+          description <<~JS
+            // This is a DSL method on the another_block inner block.
+            // This is another line of the string.
+          JS
+        end
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
+
+  test("correctly indents nested code while keeping parent indentation", () => {
+    const content = ruby(`
+      some_block do
+        another_block do
+          x += 1
+          description <<~JS
+            [1, function () { return 2; }, 3];
+          JS
+        end
+      end
+    `);
+    const expected = ruby(`
+      some_block do
+        another_block do
+          x += 1
+          description <<~JS
+            [
+              1,
+              function () {
+                return 2;
+              },
+              3
+            ];
+          JS
+        end
+      end
+    `);
+
+    return expect(content).toChangeFormat(expected);
+  });
+
+  test("doesn't consider empty lines as part of the common leading whitespace", () => {
+    const content = ruby(`
+      some_block do
+        x += 1
+        description <<~MARKDOWN
+          This is a line. It's followed by two literal line breaks.
+
+          This is another line of the string.
+        MARKDOWN
+      end
+    `);
+
+    return expect(content).toMatchFormat();
+  });
 });
