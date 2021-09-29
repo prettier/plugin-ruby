@@ -5,7 +5,11 @@ function globalTeardown() {
   const prettierRubyPID = process.env.PRETTIER_RUBY_PID;
 
   if (prettierRubyPID) {
-    process.kill(-parseInt(prettierRubyPID, 10));
+    try {
+      process.kill(parseInt(prettierRubyPID, 10), "SIGINT");
+    } catch (e) {
+      throw new Error("Failed to kill the parser process in globalTeardown.");
+    }
   }
 }
 
