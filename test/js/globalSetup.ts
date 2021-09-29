@@ -4,6 +4,9 @@ import path from "path";
 
 import { getLang } from "../../src/parser/parseSync";
 
+// This is somewhat similar to the spawnServer function in parseSync but
+// slightly different in that it logs its information into environment variables
+// so that it can be reused across the test suite.
 function globalSetup() {
   // Set a RUBY_VERSION environment variable because certain tests will only run
   // for certain versions of Ruby.
@@ -29,12 +32,7 @@ function globalSetup() {
   ]);
 
   if (info.status !== 0) {
-    throw new Error(`
-      We failed to spawn our parser server. Please report this error on GitHub
-      at https://github.com/prettier/plugin-ruby. The error message was:
-
-        ${info.stderr.toString()}.
-    `);
+    throw new Error("Failed to spawn parse server.");
   }
 
   process.env.PRETTIER_RUBY_HOST = info.stdout.toString();

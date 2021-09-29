@@ -45,6 +45,43 @@ export function getLang() {
   }[platform];
 }
 
+// Finds a netcat-like adapter to use for sending data to a socket. We order
+// these by likelihood of being found so we can avoid some shell-outs.
+function findNetcatConfig(opts: Plugin.Options): NetcatConfig {
+  if (opts.rubyNetcatCommand) {
+    const splits = opts.rubyNetcatCommand.split(" ");
+    return { command: splits[0], args: splits.slice(1) };
+  }
+
+  if (os.type() === "Windows_NT") {
+    if (spawnSync("command", ["-v", "nc"]).status === 0) {
+      return { command: "nc", args: [] };
+    }
+
+    if (spawnSync("command", ["-v", "telnet"]).status === 0) {
+      return { command: "telnet", args: [] };
+    }
+  } else {
+    if (spawnSync("which", ["nc"]).status === 0) {
+      return { command: "nc", args: ["-U"] };
+    }
+
+    if (spawnSync("which", ["telnet"]).status === 0) {
+      return { command: "telnet", args: ["-u"] };
+    }
+
+    if (spawnSync("which", ["ncat"]).status === 0) {
+      return { command: "ncat", args: ["-U"] };
+    }
+  }
+
+  return { command: "node", args: [require.resolve("./netcat.js")] };
+}
+
+// Create a file that will act as a communication mechanism, spawn a parser
+// server with that filepath as an argument, then spawn another process that
+// will read that information in order to enable us to connect to it in the
+// spawnSync function.
 function spawnServer() {
   const filepath = `/tmp/prettier-ruby-parser-${process.pid}.info`;
   const server = spawn(
@@ -83,41 +120,7 @@ function spawnServer() {
     `);
   }
 
-  parserArgs = info.stdout.toString();
-  return parserArgs;
-}
-
-// Finds a netcat-like adapter to use for sending data to a socket. We order
-// these by likelihood of being found so we can avoid some shell-outs.
-function findNetcatConfig(opts: Plugin.Options): NetcatConfig {
-  if (opts.rubyNetcatCommand) {
-    const splits = opts.rubyNetcatCommand.split(" ");
-    return { command: splits[0], args: splits.slice(1) };
-  }
-
-  if (os.type() === "Windows_NT") {
-    if (spawnSync("command", ["-v", "nc"]).status === 0) {
-      return { command: "nc", args: [] };
-    }
-
-    if (spawnSync("command", ["-v", "telnet"]).status === 0) {
-      return { command: "telnet", args: [] };
-    }
-  } else {
-    if (spawnSync("which", ["nc"]).status === 0) {
-      return { command: "nc", args: ["-U"] };
-    }
-
-    if (spawnSync("which", ["telnet"]).status === 0) {
-      return { command: "telnet", args: ["-u"] };
-    }
-
-    if (spawnSync("which", ["ncat"]).status === 0) {
-      return { command: "ncat", args: ["-U"] };
-    }
-  }
-
-  return { command: "node", args: [require.resolve("./netcat.js")] };
+  return info.stdout.toString();
 }
 
 // You can optionally return location information from the source string when
