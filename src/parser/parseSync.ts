@@ -114,7 +114,7 @@ function spawnServer() {
       }
     } catch (e) {
       if (process.env.PLUGIN_RUBY_CI) {
-        throw new Error(`Failed to kill the parser server: ${e}`)
+        throw new Error(`Failed to kill the parser server: ${e}`);
       }
     }
   });

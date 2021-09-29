@@ -7,13 +7,14 @@ import plugin from "../../src/plugin";
 type Config = Partial<Plugin.Options>;
 
 function normalize(code: Code) {
-  return (typeof code === "string" ? code : code.code).replace(/\r?\n/g, "\n").trim();
+  const string = typeof code === "string" ? code : code.code;
+  return string.replace(/\r?\n/g, "\n").trim();
 }
 
 function checkFormat(before: Code, after: Code, config: Config) {
-  const originalText = (before as any).code || before;
+  const originalText = typeof before === "string" ? before : before.code;
   const formatted = prettier.format(originalText, {
-    parser: (before as any).parser || "ruby",
+    parser: typeof before === "string" ? "ruby" : before.parser,
     originalText,
     plugins: [plugin as any as string],
     ...config

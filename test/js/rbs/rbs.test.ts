@@ -260,5 +260,15 @@ describe("rbs", () => {
 
   describeCases("record", (source) => `T: ${source}`);
 
+  describe("non-ASCII", () => {
+    test("emoji", () => {
+      expect(rbs(`{ "🌼" => Integer }`)).toMatchFormat();
+    });
+
+    test("kanji", () => {
+      expect(rbs(`{ "日本語" => Integer }`)).toMatchFormat();
+    });
+  });
+
   describeCases("tuple", (source) => `T: ${source}`);
 });
