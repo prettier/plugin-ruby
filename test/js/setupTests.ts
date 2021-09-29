@@ -6,8 +6,8 @@ import plugin from "../../src/plugin";
 
 type Config = Partial<Plugin.Options>;
 
-function normalizeCode(code: Code) {
-  return (typeof code === "string" ? code : code.code).trim();
+function normalize(code: Code) {
+  return (typeof code === "string" ? code : code.code).replace(/\r?\n/g, "\n").trim();
 }
 
 function checkFormat(before: Code, after: Code, config: Config) {
@@ -19,18 +19,21 @@ function checkFormat(before: Code, after: Code, config: Config) {
     ...config
   });
 
+  const expected = normalize(after);
+  const received = normalize(formatted);
+
   return {
-    pass: normalizeCode(formatted) === normalizeCode(after),
-    message: () => `Expected:\n${after}\nReceived:\n${formatted}`
+    pass: received === expected,
+    message: () => `Expected:\n${expected}\nReceived:\n${received}`
   };
 }
 
 expect.extend({
   toChangeFormat(before: Code, after: Code, config: Config = {}) {
-    return checkFormat(before, (after as any).code || after, config);
+    return checkFormat(before, after, config);
   },
   toMatchFormat(before: Code, config: Config = {}) {
-    return checkFormat(before, (before as any).code || before, config);
+    return checkFormat(before, before, config);
   }
 });
 
