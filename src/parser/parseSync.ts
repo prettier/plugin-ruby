@@ -111,6 +111,7 @@ function spawnServer() {
     path.join(__dirname, "./getInfo.js"),
     filepath
   ]);
+
   if (info.status !== 0) {
     throw new Error(`
       We failed to spawn our parser server. Please report this error on GitHub
