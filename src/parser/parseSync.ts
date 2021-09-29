@@ -8,7 +8,11 @@ import process from "process";
 type NetcatConfig = { command: string; args: string[] };
 
 let netcatConfig: NetcatConfig;
-let parserArgs: undefined | string | string[] = process.env.PRETTIER_RUBY_HOST;
+let parserArgs: undefined | string[];
+
+if (process.env.PRETTIER_RUBY_HOST) {
+  parserArgs = process.env.PRETTIER_RUBY_HOST.split(" ");
+}
 
 // In order to properly parse ruby code, we need to tell the ruby process to
 // parse using UTF-8. Unfortunately, the way that you accomplish this looks
@@ -127,7 +131,7 @@ function spawnServer() {
     `);
   }
 
-  return info.stdout.toString();
+  return info.stdout.toString().split(" ");
 }
 
 // You can optionally return location information from the source string when
