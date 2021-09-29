@@ -253,6 +253,22 @@ export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (
     (node.chain || 0) >= 3 &&
     node.breakDoc
   ) {
+    // This is pretty specialized behavior. Basically if we're at the top of a
+    // chain but we've only had method calls without arguments and now we have
+    // a method call with a block, then we're effectively trying to call a
+    // method with arguments that is nested under a bunch of stuff. So we group
+    // together to first part to make it so just the block breaks. This looks
+    // like, for example:
+    //
+    //     Rails.application.routes.draw do
+    //       root 'articles#index'
+    //       resources :articles
+    //     end
+    //
+    if (node.callChain === node.chain) {
+      return [group(indent(node.breakDoc)), group(blockDoc)];
+    }
+
     return ifBreak(group(indent(node.breakDoc.concat(blockDoc))), [
       callDoc,
       blockDoc
