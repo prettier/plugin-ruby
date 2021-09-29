@@ -1,6 +1,6 @@
 import type { Plugin } from "../types";
-import { spawn, spawnSync, execSync } from "child_process";
-import { existsSync, mkdtempSync } from "fs";
+import { spawn, spawnSync } from "child_process";
+import fs, { readFileSync, unlinkSync } from "fs";
 import os from "os";
 import path from "path";
 import process from "process";
@@ -9,8 +9,6 @@ type NetcatConfig = { command: string; args: string[] };
 
 let netcatConfig: NetcatConfig;
 let parserArgs: undefined | string | string[] = process.env.PRETTIER_RUBY_HOST;
-
-const isWindows = os.type() === "Windows_NT";
 
 // In order to properly parse ruby code, we need to tell the ruby process to
 // parse using UTF-8. Unfortunately, the way that you accomplish this looks
@@ -47,54 +45,6 @@ function getLang() {
   }[platform];
 }
 
-function spawnParseServerWithArgs(args: string[]) {
-  const server = spawn(
-    "ruby",
-    [path.join(__dirname, "./server.rb")].concat(args),
-    {
-      env: Object.assign({}, process.env, { LANG: getLang() }),
-      detached: true,
-      stdio: "inherit"
-    }
-  );
-
-  process.on("exit", () => {
-    try {
-      if (server.pid) {
-        process.kill(-server.pid);
-      }
-    } catch (e) {
-      // ignore
-    }
-  });
-
-  server.unref();
-}
-
-function spawnUnixParseServer() {
-  const tmpDir = mkdtempSync(path.join(os.tmpdir(), "prettier-ruby"));
-  const tmpFile = path.join(tmpDir, `${process.pid}.sock`);
-
-  spawnParseServerWithArgs(["--unix", tmpFile]);
-  const now = new Date().getTime();
-
-  // Wait for server to go live.
-  while (!existsSync(tmpFile) && new Date().getTime() - now < 3000) {
-    execSync("sleep 0.1");
-  }
-
-  return tmpFile;
-}
-
-function spawnTCPParseServer() {
-  const port = "8912";
-
-  spawnParseServerWithArgs(["--tcp", port]);
-  execSync("sleep 1");
-
-  return ["127.0.0.1", port];
-}
-
 // Finds a netcat-like adapter to use for sending data to a socket. We order
 // these by likelihood of being found so we can avoid some shell-outs.
 function findNetcatConfig(opts: Plugin.Options): NetcatConfig {
@@ -103,7 +53,7 @@ function findNetcatConfig(opts: Plugin.Options): NetcatConfig {
     return { command: splits[0], args: splits.slice(1) };
   }
 
-  if (isWindows) {
+  if (os.type() === "Windows_NT") {
     if (spawnSync("command", ["-v", "nc"]).status === 0) {
       return { command: "nc", args: [] };
     }
@@ -112,15 +62,15 @@ function findNetcatConfig(opts: Plugin.Options): NetcatConfig {
       return { command: "telnet", args: [] };
     }
   } else {
-    if (spawnSync("where", ["nc"]).status === 0) {
+    if (spawnSync("which", ["nc"]).status === 0) {
       return { command: "nc", args: ["-U"] };
     }
 
-    if (spawnSync("where", ["telnet"]).status === 0) {
+    if (spawnSync("which", ["telnet"]).status === 0) {
       return { command: "telnet", args: ["-u"] };
     }
 
-    if (spawnSync("where", ["ncat"]).status === 0) {
+    if (spawnSync("which", ["ncat"]).status === 0) {
       return { command: "ncat", args: ["-U"] };
     }
   }
@@ -142,16 +92,42 @@ function parseSync(parser: string, source: string, opts: Plugin.Options) {
   }
 
   if (!parserArgs) {
-    parserArgs = isWindows ? spawnTCPParseServer() : spawnUnixParseServer();
+    const filepath = `/tmp/prettier-ruby-parser-${process.pid}`;
+    process.on("exit", () => unlinkSync(filepath));
 
-    let ping: { status: null | number } = { status: 1 };
-    while (ping.status !== 0) {
-      ping = spawnSync(
-        netcatConfig.command,
-        [...netcatConfig.args, ...parserArgs],
-        { input: "ping" }
-      );
+    const server = spawn(
+      "ruby",
+      [path.join(__dirname, "./server.rb"), filepath],
+      {
+        env: Object.assign({}, process.env, { LANG: getLang() }),
+        detached: true,
+        stdio: "inherit"
+      }
+    );
+  
+    process.on("exit", () => {
+      try {
+        if (server.pid) {
+          process.kill(-server.pid);
+        }
+      } catch (e) {
+        // ignore
+      }
+    });
+
+    server.unref();
+
+    const info = spawnSync("node", [path.join(__dirname, "./getInfo.js"), filepath]);
+    if (info.status !== 0) {
+      throw new Error(`
+        We failed to spawn our parser server. Please report this error on GitHub
+        at https://github.com/prettier/plugin-ruby. The error message was:
+
+          ${info.stderr.toString()}.
+      `);
     }
+
+    parserArgs = info.stdout.toString();
   }
 
   const response = spawnSync(

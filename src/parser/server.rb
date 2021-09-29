@@ -3,13 +3,11 @@
 require 'bundler/setup' if ENV['PLUGIN_RUBY_CI']
 require 'socket'
 require 'json'
+require 'fileutils'
 
 require_relative '../ruby/parser'
 require_relative '../rbs/parser'
 require_relative '../haml/parser'
-
-# Set the program name so that it's easy to find if we need it
-$PROGRAM_NAME = 'prettier-ruby-parser'
 
 # Make sure we trap these signals to be sure we get the quit command coming from
 # the parent node process
@@ -18,25 +16,28 @@ trap(:INT) { quit = true }
 trap(:TERM) { quit = true }
 trap(:QUIT) { quit = true } if Signal.list.key?('QUIT')
 
-case ARGV[0]
-when '--tcp'
-  server = TCPServer.new('127.0.0.1', ARGV[1])
+if Gem.win_platform?
+  # If we're on windows, we're going to start up a TCP server. The 0 here means
+  # to bind to some available port.
+  server = TCPServer.new('127.0.0.1', 0)
+
+  address = server.local_address
+  File.write(ARGV[0], "#{address.ip_address} #{address.ip_port}")
+
   at_exit { server.close }
-when '--unix'
-  server = UNIXServer.new(ARGV[1])
+else
+  # If we're not on windows, then we're going to assume we can use unix socket
+  # files (since they're faster than a TCP server).
+  filepath = "/tmp/prettier-ruby-parser-#{Process.pid}.sock"
+  server = UNIXServer.new(filepath)
+
+  address = server.local_address
+  File.write(ARGV[0], address.unix_path)
 
   at_exit do
     server.close
-    File.unlink(ARGV[1])
+    File.unlink(filepath)
   end
-else
-  warn(<<~USAGE)
-    Run the server with one of:
-
-    ruby server.rb --tcp [PORT]
-    ruby server.rb --unix [PATH]
-  USAGE
-  exit 1
 end
 
 loop do
@@ -48,8 +49,6 @@ loop do
 
     response =
       case parser
-      when 'ping'
-        :ok
       when 'ruby'
         Prettier::Parser.parse(source)
       when 'rbs'
