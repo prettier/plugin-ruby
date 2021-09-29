@@ -7,7 +7,7 @@ import plugin from "../../src/plugin";
 type Config = Partial<Plugin.Options>;
 
 function normalizeCode(code: Code) {
-  return (typeof code === "string" ? code : code.code).replace(/\r\n/g, "\n");
+  return (typeof code === "string" ? code : code.code).trim();
 }
 
 function checkFormat(before: Code, after: Code, config: Config) {
@@ -20,20 +20,16 @@ function checkFormat(before: Code, after: Code, config: Config) {
   });
 
   return {
-    pass: normalizeCode(formatted) === `${normalizeCode(after)}\n`,
+    pass: normalizeCode(formatted) === normalizeCode(after),
     message: () => `Expected:\n${after}\nReceived:\n${formatted}`
   };
 }
 
 expect.extend({
-  toChangeFormat(
-    before: Code,
-    after: Code,
-    config: Partial<Plugin.Options> = {}
-  ) {
+  toChangeFormat(before: Code, after: Code, config: Config = {}) {
     return checkFormat(before, (after as any).code || after, config);
   },
-  toMatchFormat(before: Code, config: Partial<Plugin.Options> = {}) {
+  toMatchFormat(before: Code, config: Config = {}) {
     return checkFormat(before, (before as any).code || before, config);
   }
 });
