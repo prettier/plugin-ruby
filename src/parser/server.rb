@@ -108,7 +108,6 @@ listener =
   end
 
 # Map each candidate connection method to a thread that will check if it works.
-puts "DETECTING THE CANDIDATES! #{candidates}"
 candidates.map! do |candidate|
   Thread.new do
     Thread.current.report_on_exception = false
@@ -124,7 +123,6 @@ candidates.map! do |candidate|
 end
 
 # Find the first one prefix that successfully returned the correct value.
-puts "CANDIDATES SPAWNED!"
 prefix =
   candidates.detect do |candidate|
     value = candidate.value
@@ -134,11 +132,9 @@ prefix =
 # Default to running the netcat.js script that we ship with the plugin. It's a
 # good fallback as it will always work, but it is slower than the other options.
 prefix ||= "node #{File.expand_path('netcat.js', __dir__)}"
-puts "PREFIX DETERMINED: #{prefix}"
 
 # Write out our connection information to the file given as the first argument
 # to this script.
 File.write(ARGV[0], "#{prefix} #{information}")
-puts "WRITTEN OUT TO THE FILE!"
 
 listener.join
