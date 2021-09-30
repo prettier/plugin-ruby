@@ -19,7 +19,7 @@ trap(:QUIT) { quit = true } if Signal.list.key?('QUIT')
 
 # The information variable stores the actual connection information, which will
 # either be an IP address and port or a path to a unix socket file.
-information = ""
+information = ''
 
 # The candidates array is a list of potential programs that could be used to
 # connect to our server. We'll run through them after the server starts to find
@@ -116,7 +116,7 @@ candidates.map! do |candidate|
       Open3.capture2("#{candidate} #{information}", stdin_data: 'ping')
 
     candidate if JSON.parse(stdout) == 'pong' && status.exitstatus == 0
-  rescue
+  rescue StandardError
     # We don't actually care if this fails, because we'll just skip that
     # connection option.
   end
