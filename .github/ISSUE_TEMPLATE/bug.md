@@ -13,7 +13,6 @@ about: Issues with prettier crashing
   - `rubyArrayLiteral` - `true`
   - `rubyHashLabel` - `true`
   - `rubyModifier` - `true`
-  - `rubyNetcatCommand` - `null`
   - `rubySingleQuote` - `true`
   - `rubyToProc` - `false`
   - `trailingComma` - `"none"`

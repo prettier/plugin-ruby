@@ -121,13 +121,6 @@ const plugin = {
         "When it fits on one line, allows if, unless, while, and until statements to use the modifier form.",
       since: "1.0.0"
     },
-    rubyNetcatCommand: {
-      type: "string",
-      category: "Ruby",
-      description:
-        'The prefix of the command to execute to communicate between the node.js process and the Ruby process. (For example, "nc -U" or "telnet -u") Normally you should not set this option.',
-      since: "1.4.0"
-    },
     rubySingleQuote: {
       type: "boolean",
       category: "Ruby",
