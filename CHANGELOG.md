@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - [#949](https://github.com/prettier/plugin-ruby/pull/949) - kddnewton - Converted over to using TypeScript for development.
 - [#979](https://github.com/prettier/plugin-ruby/issues/979) - ronocod, kddnewton - Alignment of `to_not` is explicitly allowed to not indent to better support rspec.
+- [#894](https://github.com/prettier/plugin-ruby/issues/894) - mister-what, kddnewton - Add a warning that this plugin will not function with the plug'n'play filesystem provided by yarn berry.
 
 ### Changed
 

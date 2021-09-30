@@ -104,6 +104,20 @@ function spawnServer(): ParserArgs {
   return { cmd, args };
 }
 
+// If we're in a yarn Plug'n'Play environment, then the relative paths being
+// used by the parser server and the various scripts used to communicate
+// therein are not going to work with its virtual file system. Presumably
+// there's a way to fix this but I haven't figured out how yet.
+function checkPnP() {
+  if (process.versions.pnp) {
+    throw new Error(`
+      @prettier/plugin-ruby does not current work within the yarn Plug'n'Play
+      virtual file system. If you would like to help support the effort to fix
+      this, please see https://github.com/prettier/plugin-ruby/issues/894.
+    `);
+  }
+}
+
 // You can optionally return location information from the source string when
 // raising an error that prettier will handle for you nicely.
 type LocatedError = Error & { loc?: any };
@@ -114,6 +128,7 @@ type LocatedError = Error & { loc?: any };
 // requests.
 function parseSync(parser: string, source: string) {
   if (!parserArgs) {
+    checkPnP();
     parserArgs = spawnServer();
   }
 
