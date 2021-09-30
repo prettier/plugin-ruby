@@ -6,7 +6,7 @@ const filepath = process.argv[process.argv.length - 1];
 const timeout = setTimeout(() => {
   clearInterval(interval);
   throw new Error("Failed to get information from parse server in time.");
-}, 3000);
+}, 5000);
 
 const interval = setInterval(() => {
   if (existsSync(filepath)) {
@@ -14,4 +14,4 @@ const interval = setInterval(() => {
     clearTimeout(timeout);
     clearInterval(interval);
   }
-}, 50);
+}, 100);

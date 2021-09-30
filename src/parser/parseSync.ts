@@ -1,5 +1,5 @@
 import { spawn, spawnSync } from "child_process";
-import { unlinkSync } from "fs";
+import { existsSync, unlinkSync } from "fs";
 import os from "os";
 import path from "path";
 import process from "process";
@@ -71,7 +71,9 @@ function spawnServer(): ParserArgs {
 
   server.unref();
   process.on("exit", () => {
-    unlinkSync(filepath);
+    if (existsSync(filepath)) {
+      unlinkSync(filepath);
+    }
 
     try {
       if (server.pid) {

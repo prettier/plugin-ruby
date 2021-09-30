@@ -26,16 +26,16 @@ function globalSetup() {
   );
 
   // Get the connection information from the parsing server.
-  const info = spawnSync("node", [
+  const information = spawnSync("node", [
     path.join(__dirname, "../../src/parser/getInfo.js"),
     filepath
   ]);
 
-  if (info.status !== 0) {
-    throw new Error("Failed to spawn parse server.");
+  if (information.status !== 0) {
+    throw new Error(information.stderr.toString());
   }
 
-  process.env.PRETTIER_RUBY_HOST = info.stdout.toString();
+  process.env.PRETTIER_RUBY_HOST = information.stdout.toString();
   process.env.PRETTIER_RUBY_PID = `${server.pid}`;
 
   unlinkSync(filepath);
