@@ -6,13 +6,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [2.0.0-rc2]
+
+### Added
+
+- [#979](https://github.com/prettier/plugin-ruby/issues/979) - ronocod, kddnewton - Alignment of `to_not` is explicitly allowed to not indent to better support rspec.
+- [#894](https://github.com/prettier/plugin-ruby/issues/894) - mister-what, kddnewton - Add a warning that this plugin will not function with the plug'n'play filesystem provided by yarn berry.
+
+### Changed
+
+- [#943](https://github.com/prettier/plugin-ruby/issues/943) - valscion, kddnewton - Trailing call operators that are followed by comments should stay on the first line.
+
 ## [2.0.0-rc1]
 
 ### Added
 
 - [#949](https://github.com/prettier/plugin-ruby/pull/949) - kddnewton - Converted over to using TypeScript for development.
-- [#979](https://github.com/prettier/plugin-ruby/issues/979) - ronocod, kddnewton - Alignment of `to_not` is explicitly allowed to not indent to better support rspec.
-- [#894](https://github.com/prettier/plugin-ruby/issues/894) - mister-what, kddnewton - Add a warning that this plugin will not function with the plug'n'play filesystem provided by yarn berry.
 
 ### Changed
 
@@ -25,7 +34,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [#929](https://github.com/prettier/plugin-ruby/issues/929) - ryanb, kddnewton - Deeply nested blocks should not break their call chains.
 - [#935](https://github.com/prettier/plugin-ruby/pull/935) - nbudin, mlauter - Ensure embedded formatting heredocs are properly indented.
 - [#975](https://github.com/prettier/plugin-ruby/pull/975) - kddnewton - Refactor the way we determine how to connect to the parser server.
-- [#943](https://github.com/prettier/plugin-ruby/issues/943) - valscion, kddnewton - Trailing call operators that are followed by comments should stay on the first line.
 
 ### Removed
 
@@ -1154,7 +1162,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc1...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc2...HEAD
+[2.0.0-rc2]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc1...v2.0.0-rc2
 [2.0.0-rc1]: https://github.com/prettier/plugin-ruby/compare/v1.6.1...v2.0.0-rc1
 [1.6.1]: https://github.com/prettier/plugin-ruby/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/prettier/plugin-ruby/compare/v1.5.5...v1.6.0
