@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [2.0.0-rc1]
+
 ### Added
 
 - [#949](https://github.com/prettier/plugin-ruby/pull/949) - kddnewton - Converted over to using TypeScript for development.
@@ -1149,7 +1151,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v1.6.1...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc1...HEAD
+[2.0.0-rc1]: https://github.com/prettier/plugin-ruby/compare/v1.6.1...v2.0.0-rc1
 [1.6.1]: https://github.com/prettier/plugin-ruby/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/prettier/plugin-ruby/compare/v1.5.5...v1.6.0
 [1.5.5]: https://github.com/prettier/plugin-ruby/compare/v1.5.4...v1.5.5
