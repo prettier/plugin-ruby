@@ -1,9 +1,13 @@
 import { haml } from "../utils";
 
 describe("haml comment", () => {
-  test("empty", () => expect(haml("-#")).toMatchFormat());
+  test("empty", () => {
+    expect(haml("-#")).toMatchFormat();
+  });
 
-  test("same line", () => expect(haml("-# comment")).toMatchFormat());
+  test("same line", () => {
+    expect(haml("-# comment")).toMatchFormat();
+  });
 
   test("multi line", () => {
     const content = haml(`
@@ -13,9 +17,10 @@ describe("haml comment", () => {
         comment
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
-  test("weird spacing same line", () =>
-    expect(haml("-#     foobar    ")).toChangeFormat("-# foobar"));
+  test("weird spacing same line", () => {
+    expect(haml("-#     foobar    ")).toChangeFormat("-# foobar");
+  });
 });

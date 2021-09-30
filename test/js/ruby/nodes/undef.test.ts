@@ -1,9 +1,13 @@
 import { long, ruby } from "../../utils";
 
 describe("undef", () => {
-  test("single inline", () => expect("undef foo").toMatchFormat());
+  test("single inline", () => {
+    expect("undef foo").toMatchFormat();
+  });
 
-  test("multiple inline", () => expect("undef foo, bar").toMatchFormat());
+  test("multiple inline", () => {
+    expect("undef foo, bar").toMatchFormat();
+  });
 
   test("multiple breaking", () => {
     const expected = ruby(`
@@ -11,13 +15,16 @@ describe("undef", () => {
             a${long}
     `);
 
-    return expect(`undef ${long}, a${long}`).toChangeFormat(expected);
+    expect(`undef ${long}, a${long}`).toChangeFormat(expected);
   });
 
-  test("single with comment", () => expect("undef foo # bar").toMatchFormat());
+  test("single with comment", () => {
+    expect("undef foo # bar").toMatchFormat();
+  });
 
-  test("multiple inline with comment", () =>
-    expect("undef foo, bar # baz").toMatchFormat());
+  test("multiple inline with comment", () => {
+    expect("undef foo, bar # baz").toMatchFormat();
+  });
 
   test("multiple lines comment on first", () => {
     const content = ruby(`
@@ -25,7 +32,7 @@ describe("undef", () => {
             bar
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("multiple lines comment on each", () => {
@@ -34,7 +41,7 @@ describe("undef", () => {
             bar # bam
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("multiple breaking with comment", () => {
@@ -43,6 +50,6 @@ describe("undef", () => {
             a${long} # foo
     `);
 
-    return expect(`undef ${long}, a${long} # foo`).toChangeFormat(expected);
+    expect(`undef ${long}, a${long} # foo`).toChangeFormat(expected);
   });
 });

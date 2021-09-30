@@ -6,8 +6,8 @@ const parser: Plugin.Parser<HAML.AnyNode> = {
   // returning to prettier a JavaScript object that is the equivalent AST that
   // represents the code stored in that string. We accomplish this by spawning a
   // new process and reading JSON off STDOUT.
-  parse(text, _parsers, opts) {
-    return parseSync("haml", text, opts);
+  parse(text) {
+    return parseSync("haml", text);
   },
   astFormat: "haml",
   // This function handles checking whether or not the source string has the

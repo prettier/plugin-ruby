@@ -30,11 +30,9 @@ jobs:
         with:
           node-version: 12.x
           cache: yarn
-      - name: Test
-        run: |
-          yarn install --frozen-lockfile
-          yarn test
-          bundle exec rake test
+      - run: yarn install --frozen-lockfile
+      - run: yarn test
+      - run: bundle exec rake test
 
   lint:
     name: Lint
@@ -51,12 +49,10 @@ jobs:
         with:
           node-version: 12.x
           cache: yarn
-      - name: Check format and lint
-        run: |
-          yarn install --frozen-lockfile
-          yarn prepublishOnly
-          yarn checkFormat
-          yarn lint
+      - run: yarn install --frozen-lockfile
+      - run: yarn prepublishOnly
+      - run: yarn checkFormat
+      - run: yarn lint
 
   gem:
     name: Gem
@@ -71,12 +67,11 @@ jobs:
         with:
           node-version: 12.x
           cache: yarn
-      - run: |
-          yarn install --frozen-lockfile
-          yarn prepublishOnly
-          gem build -o prettier.gem
-          gem unpack prettier.gem
-          prettier/exe/rbprettier --help
+      - run: yarn install --frozen-lockfile
+      - run: yarn prepublishOnly
+      - run: gem build -o prettier.gem
+      - run: gem unpack prettier.gem
+      - run: prettier/exe/rbprettier --help
 
   # Saves pull request details for later workflow runs which can run in
   # a privileged environment

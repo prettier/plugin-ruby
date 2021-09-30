@@ -10,7 +10,7 @@ describe("comments", () => {
         a = 1
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("at the end of the file", () => {
@@ -21,7 +21,7 @@ describe("comments", () => {
         # the end of the file
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     const commentBlocks = [
@@ -46,7 +46,7 @@ describe("comments", () => {
           end
         `);
 
-        return expect(content).toMatchFormat();
+        expect(content).toMatchFormat();
       });
 
       test("as the first statement", () => {
@@ -58,7 +58,7 @@ describe("comments", () => {
           end
         `);
 
-        return expect(content).toMatchFormat();
+        expect(content).toMatchFormat();
       });
 
       test("as the last statement", () => {
@@ -70,7 +70,7 @@ describe("comments", () => {
           end
         `);
 
-        return expect(content).toMatchFormat();
+        expect(content).toMatchFormat();
       });
     });
 
@@ -91,7 +91,7 @@ describe("comments", () => {
         end
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("case/when/end statements", () => {
@@ -110,7 +110,7 @@ describe("comments", () => {
         end
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("begin/rescue/ensure/end statements", () => {
@@ -130,7 +130,7 @@ describe("comments", () => {
         end
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     /* eslint-disable no-useless-escape */
@@ -146,19 +146,22 @@ describe("comments", () => {
         /_/      /_/  /_/ /____/    /_/      /_/    /_____/ /____/ /_/  /_/
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
   });
 
   describe("inline", () => {
-    test("basic", () =>
-      expect("foo # this is an inline comment").toMatchFormat());
+    test("basic", () => {
+      expect("foo # this is an inline comment").toMatchFormat();
+    });
 
-    test("commands", () =>
-      expect("command 'foo' # this is an inline comment").toMatchFormat());
+    test("commands", () => {
+      expect("command 'foo' # this is an inline comment").toMatchFormat();
+    });
 
-    test("command calls", () =>
-      expect("command.call 'foo' # this is an inline comment").toMatchFormat());
+    test("command calls", () => {
+      expect("command.call 'foo' # this is an inline comment").toMatchFormat();
+    });
   });
 
   describe("arrays", () => {
@@ -173,7 +176,7 @@ describe("comments", () => {
         ]
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
   });
 
@@ -189,7 +192,7 @@ describe("comments", () => {
         }
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
   });
 
@@ -205,7 +208,7 @@ describe("comments", () => {
         )
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
   });
 
@@ -215,7 +218,7 @@ describe("comments", () => {
         .baz
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   describe("declaration style comments", () => {
@@ -234,7 +237,7 @@ describe("comments", () => {
         end
       `);
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
   });
 
@@ -246,6 +249,6 @@ describe("comments", () => {
       ]
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 });

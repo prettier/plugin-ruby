@@ -7,7 +7,7 @@ describe("filter", () => {
         -# comment
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("custom", () => {
@@ -17,7 +17,7 @@ describe("filter", () => {
           bar
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("css", () => {
@@ -26,7 +26,7 @@ describe("filter", () => {
         .foo { height: 100px; width: 100px; }
     `);
 
-    return expect(content).toChangeFormat(
+    expect(content).toChangeFormat(
       haml(`
         :css
           .foo {
@@ -43,7 +43,7 @@ describe("filter", () => {
         1+1
     `);
 
-    return expect(content).toChangeFormat(
+    expect(content).toChangeFormat(
       haml(`
         :javascript
           1 + 1;
@@ -57,7 +57,7 @@ describe("filter", () => {
         .foo { .bar { height: 100px; } }
     `);
 
-    return expect(content).toChangeFormat(
+    expect(content).toChangeFormat(
       haml(`
         :less
           .foo {
@@ -75,7 +75,7 @@ describe("filter", () => {
         *Hello, world!*
     `);
 
-    return expect(content).toChangeFormat(
+    expect(content).toChangeFormat(
       haml(`
         :markdown
           _Hello, world!_
@@ -89,7 +89,7 @@ describe("filter", () => {
         .foo { .bar { height: 100px; } }
     `);
 
-    return expect(content).toChangeFormat(
+    expect(content).toChangeFormat(
       haml(`
         :scss
           .foo {

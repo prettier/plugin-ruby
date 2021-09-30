@@ -2,15 +2,17 @@ import type { Plugin, RBS } from "../../../src/types";
 import { ruby } from "../utils";
 import parser from "../../../src/rbs/parser";
 
+function parse(source: string) {
+  return parser.parse(source, {}, {} as Plugin.Options);
+}
+
 describe("parser", () => {
   test("parse", () => {
-    expect(
-      parser.parse("class Foo end", {}, {} as Plugin.Options).declarations
-    ).toHaveLength(1);
+    expect(parse("class Foo end").declarations).toHaveLength(1);
   });
 
   test("parse failure", () => {
-    expect(() => parser.parse("<>", {}, {} as Plugin.Options)).toThrowError();
+    expect(() => parse("<>")).toThrowError();
   });
 
   test("hasPragma", () => {

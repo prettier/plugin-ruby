@@ -35,13 +35,13 @@ describe("patterns", () => {
     test("rassign", () => {
       const content = "{ db: { user: 'John' } } => { db: { user: } }";
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
 
     test("rassign with fndptn", () => {
       const content = "(1..10).to_a.shuffle => [*bef, 2..4 => thresh, *aft]";
 
-      return expect(content).toMatchFormat();
+      expect(content).toMatchFormat();
     });
   }
 
@@ -53,7 +53,7 @@ describe("patterns", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("with comments in an array pattern", () => {
@@ -65,7 +65,7 @@ describe("patterns", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("with comments in an array pattern", () => {
@@ -77,7 +77,7 @@ describe("patterns", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 
   test("multiple clauses", () => {
@@ -90,6 +90,6 @@ describe("patterns", () => {
       end
     `);
 
-    return expect(content).toMatchFormat();
+    expect(content).toMatchFormat();
   });
 });
