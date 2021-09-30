@@ -51,7 +51,7 @@ else
   end
 
   information = server.local_address.unix_path
-  candidates = ['nc -U', 'telnet -u', 'ncat -U']
+  candidates = ['nc -U', 'ncat -U']
 end
 
 # This is the actual listening thread that will be acting as our server. We have
@@ -88,7 +88,12 @@ listener =
         loc = { start: { line: error.lineno, column: error.column } }
         socket.write(JSON.fast_generate(error: error.message, loc: loc))
       rescue StandardError => error
-        socket.write(JSON.fast_generate(error: error.message))
+        begin
+          socket.write(JSON.fast_generate(error: error.message))
+        rescue Errno::EPIPE
+          # Do nothing, the pipe has been closed by the parent process so we don't
+          # actually care about writing to it anymore.
+        end
       ensure
         socket.close
       end
@@ -105,6 +110,8 @@ listener =
 # Map each candidate connection method to a thread that will check if it works.
 candidates.map! do |candidate|
   Thread.new do
+    Thread.current.report_on_exception = false
+
     stdout, status =
       Open3.capture2("#{candidate} #{information}", stdin_data: 'ping')
 
