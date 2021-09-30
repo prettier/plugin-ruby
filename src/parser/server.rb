@@ -51,7 +51,7 @@ else
   end
 
   information = server.local_address.unix_path
-  candidates = ['nc -U', 'ncat -U']
+  candidates = ['nc -w 3 -U', 'ncat -w 3 -U']
 end
 
 # This is the actual listening thread that will be acting as our server. We have
