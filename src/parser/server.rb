@@ -17,33 +17,47 @@ trap(:INT) { quit = true }
 trap(:TERM) { quit = true }
 trap(:QUIT) { quit = true } if Signal.list.key?('QUIT')
 
-information =
-  if Gem.win_platform?
-    # If we're on windows, we're going to start up a TCP server. The 0 here means
-    # to bind to some available port.
-    server = TCPServer.new('127.0.0.1', 0)
+# The information variable stores the actual connection information, which will
+# either be an IP address and port or a path to a unix socket file.
+information = ""
 
-    # Ensure that we close the server when this process exits.
-    at_exit { server.close }
+# The candidates array is a list of potential programs that could be used to
+# connect to our server. We'll run through them after the server starts to find
+# the best one to use.
+candidates = []
 
-    address = server.local_address
-    "#{address.ip_address} #{address.ip_port}"
-  else
-    # If we're not on windows, then we're going to assume we can use unix socket
-    # files (since they're faster than a TCP server).
-    filepath = "/tmp/prettier-ruby-parser-#{Process.pid}.sock"
-    server = UNIXServer.new(filepath)
+if Gem.win_platform?
+  # If we're on windows, we're going to start up a TCP server. The 0 here means
+  # to bind to some available port.
+  server = TCPServer.new('127.0.0.1', 0)
+  address = server.local_address
 
-    # Ensure that we close the server and delete the socket file when this
-    # process exits.
-    at_exit do
-      server.close
-      File.unlink(filepath)
-    end
+  # Ensure that we close the server when this process exits.
+  at_exit { server.close }
 
-    server.local_address.unix_path
+  information = "#{address.ip_address} #{address.ip_port}"
+  candidates = %w[nc telnet]
+else
+  # If we're not on windows, then we're going to assume we can use unix socket
+  # files (since they're faster than a TCP server).
+  filepath = "/tmp/prettier-ruby-parser-#{Process.pid}.sock"
+  server = UNIXServer.new(filepath)
+
+  # Ensure that we close the server and delete the socket file when this
+  # process exits.
+  at_exit do
+    server.close
+    File.unlink(filepath)
   end
 
+  information = server.local_address.unix_path
+  candidates = ['nc -U', 'telnet -u', 'ncat -U']
+end
+
+# This is the actual listening thread that will be acting as our server. We have
+# to start it in another thread to begin with so that we can run through our
+# candidate connection programs. Eventually we'll just join into this thread
+# though and it will act as a daemon.
 listener =
   Thread.new do
     loop do
@@ -79,45 +93,41 @@ listener =
         socket.close
       end
     rescue IO::WaitReadable, Errno::EINTR
-      # Wait for select(2) to give us a connection that has content for 1 second.
-      # Otherwise timeout and continue on (so that we hit our "break if quit"
-      # pretty often).
+      # Wait for select(2) to give us a connection that has content for 1
+      # second. Otherwise timeout and continue on (so that we hit our
+      # "break if quit" pretty often).
       IO.select([server], nil, nil, 1)
 
       retry unless quit
     end
   end
 
-# Enumerate all of the potential ways to communicate with the server.
-prefixes = Gem.win_platform? ? %w[nc telnet] : ['nc -U', 'telnet -u', 'ncat -U']
-
 # Map each candidate connection method to a thread that will check if it works.
-prefixes.map! do |prefix|
+candidates.map! do |candidate|
   Thread.new do
-    # We don't actually want the backtrace here. If it fails to connect then
-    # it's fine for this to just not work.
-    Thread.current.report_on_exception = false
-
     stdout, status =
-      Open3.capture2("#{prefix} #{information}", stdin_data: 'ping')
+      Open3.capture2("#{candidate} #{information}", stdin_data: 'ping')
 
-    prefix if JSON.parse(stdout) == 'pong' && status.exitstatus == 0
+    candidate if JSON.parse(stdout) == 'pong' && status.exitstatus == 0
+  rescue
+    # We don't actually care if this fails, because we'll just skip that
+    # connection option.
   end
 end
 
 # Find the first one prefix that successfully returned the correct value.
-connection =
-  prefixes.detect do |prefix|
-    value = prefix.value
+prefix =
+  candidates.detect do |candidate|
+    value = candidate.value
     break value if value
   end
 
 # Default to running the netcat.js script that we ship with the plugin. It's a
 # good fallback as it will always work, but it is slower than the other options.
-connection ||= "node #{File.expand_path('netcat.js', __dir__)}"
+prefix ||= "node #{File.expand_path('netcat.js', __dir__)}"
 
 # Write out our connection information to the file given as the first argument
 # to this script.
-File.write(ARGV[0], "#{connection} #{information}")
+File.write(ARGV[0], "#{prefix} #{information}")
 
 listener.join
