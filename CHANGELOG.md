@@ -20,6 +20,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [#900](https://github.com/prettier/plugin-ruby/issues/900) - rsslldnphy, kddnewton - Ensure that in a HAML line where you have interpolation inside of a tag content that you print it properly.
 - [#929](https://github.com/prettier/plugin-ruby/issues/929) - ryanb, kddnewton - Deeply nested blocks should not break their call chains.
 - [#935](https://github.com/prettier/plugin-ruby/pull/935) - nbudin, mlauter - Ensure embedded formatting heredocs are properly indented.
+- [#975](https://github.com/prettier/plugin-ruby/pull/975) - kddnewton - Refactor the way we determine how to connect to the parser server.
+
+### Removed
+
+- [#976](https://github.com/prettier/plugin-ruby/pull/976) - kddnewton - Remove the `rubyNetcatCommand` option, as it should no longer be necessary.
 
 ## [1.6.1] - 2021-06-30
 

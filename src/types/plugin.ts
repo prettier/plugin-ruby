@@ -61,7 +61,6 @@ export type Options = Prettier.ParserOptions<any> & {
   rubyArrayLiteral: boolean,
   rubyHashLabel: boolean,
   rubyModifier: boolean,
-  rubyNetcatCommand?: string,
   rubySingleQuote: boolean,
   rubyToProc: boolean
 };
