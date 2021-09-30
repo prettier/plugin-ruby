@@ -1,17 +1,15 @@
-import type { Plugin } from "../types";
 import { spawn, spawnSync } from "child_process";
 import { unlinkSync } from "fs";
 import os from "os";
 import path from "path";
 import process from "process";
 
-type NetcatConfig = { command: string; args: string[] };
-
-let netcatConfig: NetcatConfig;
-let parserArgs: undefined | string[];
+type ParserArgs = { cmd: string; args: string[] };
+let parserArgs: undefined | ParserArgs;
 
 if (process.env.PRETTIER_RUBY_HOST) {
-  parserArgs = process.env.PRETTIER_RUBY_HOST.split(" ");
+  const [cmd, ...args] = process.env.PRETTIER_RUBY_HOST.split(" ");
+  parserArgs = { cmd, args };
 }
 
 // In order to properly parse ruby code, we need to tell the ruby process to
@@ -49,39 +47,6 @@ export function getLang() {
   }[platform];
 }
 
-// Finds a netcat-like adapter to use for sending data to a socket. We order
-// these by likelihood of being found so we can avoid some shell-outs.
-function findNetcatConfig(opts: Plugin.Options): NetcatConfig {
-  if (opts.rubyNetcatCommand) {
-    const splits = opts.rubyNetcatCommand.split(" ");
-    return { command: splits[0], args: splits.slice(1) };
-  }
-
-  // if (os.type() === "Windows_NT") {
-  //   if (spawnSync("command", ["-v", "nc"]).status === 0) {
-  //     return { command: "nc", args: [] };
-  //   }
-
-  //   if (spawnSync("command", ["-v", "telnet"]).status === 0) {
-  //     return { command: "telnet", args: [] };
-  //   }
-  // } else {
-  //   if (spawnSync("which", ["nc"]).status === 0) {
-  //     return { command: "nc", args: ["-U"] };
-  //   }
-
-  //   if (spawnSync("which", ["telnet"]).status === 0) {
-  //     return { command: "telnet", args: ["-u"] };
-  //   }
-
-  //   if (spawnSync("which", ["ncat"]).status === 0) {
-  //     return { command: "ncat", args: ["-U"] };
-  //   }
-  // }
-
-  return { command: "node", args: [require.resolve("./netcat.js")] };
-}
-
 // Generate the filepath that should be used to communicate the connection
 // information between this process and the parser server.
 export function getInfoFilepath() {
@@ -92,7 +57,7 @@ export function getInfoFilepath() {
 // server with that filepath as an argument, then spawn another process that
 // will read that information in order to enable us to connect to it in the
 // spawnSync function.
-function spawnServer() {
+function spawnServer(): ParserArgs {
   const filepath = getInfoFilepath();
   const server = spawn(
     "ruby",
@@ -133,7 +98,8 @@ function spawnServer() {
     `);
   }
 
-  return info.stdout.toString().split(" ");
+  const [cmd, ...args] = info.stdout.toString().split(" ");
+  return { cmd, args };
 }
 
 // You can optionally return location information from the source string when
@@ -144,45 +110,19 @@ type LocatedError = Error & { loc?: any };
 // like it) here since Prettier requires the results of `parse` to be
 // synchronous and Node.js does not offer a mechanism for synchronous socket
 // requests.
-function parseSync(parser: string, source: string, opts: Plugin.Options) {
-  if (!netcatConfig) {
-    netcatConfig = findNetcatConfig(opts);
-  }
-
+function parseSync(parser: string, source: string) {
   if (!parserArgs) {
     parserArgs = spawnServer();
   }
 
-  const response = spawnSync(
-    netcatConfig.command,
-    netcatConfig.args.concat(parserArgs),
-    {
-      input: `${parser}|${source}`,
-      maxBuffer: 15 * 1024 * 1024
-    }
-  );
+  const response = spawnSync(parserArgs.cmd, parserArgs.args, {
+    input: `${parser}|${source}`,
+    maxBuffer: 15 * 1024 * 1024
+  });
 
   const stdout = response.stdout.toString();
   const stderr = response.stderr.toString();
   const { status } = response;
-
-  // We need special handling in case the user's version of nc doesn't support
-  // using unix sockets.
-  if (
-    stderr.includes("invalid option -- U") ||
-    stderr.includes("invalid option -- 'u'") ||
-    stderr.includes("Protocol not supported")
-  ) {
-    throw new Error(`
-      @prettier/plugin-ruby uses unix sockets to communicate between the node.js
-      process running prettier and an underlying Ruby process used for parsing.
-      Unfortunately the command that it tried to use to do that
-      (${netcatConfig.command}) does not support unix sockets. To solve this
-      either uninstall the version of ${netcatConfig.command} that you're using
-      and use a different implementation, or change the value of the
-      rubyNetcatCommand option in your prettier configuration.
-    `);
-  }
 
   // If we didn't receive anything over stdout or we have a bad exit status,
   // then throw whatever we can.

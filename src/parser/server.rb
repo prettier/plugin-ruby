@@ -4,6 +4,7 @@ require 'bundler/setup' if ENV['PLUGIN_RUBY_CI']
 require 'socket'
 require 'json'
 require 'fileutils'
+require 'open3'
 
 require_relative '../ruby/parser'
 require_relative '../rbs/parser'
@@ -16,7 +17,7 @@ trap(:INT) { quit = true }
 trap(:TERM) { quit = true }
 trap(:QUIT) { quit = true } if Signal.list.key?('QUIT')
 
-info =
+information =
   if Gem.win_platform?
     # If we're on windows, we're going to start up a TCP server. The 0 here means
     # to bind to some available port.
@@ -43,45 +44,80 @@ info =
     server.local_address.unix_path
   end
 
+listener =
+  Thread.new do
+    loop do
+      break if quit
+
+      # Start up a new thread that will handle each successive connection.
+      Thread.new(server.accept_nonblock) do |socket|
+        parser, source = socket.read.force_encoding('UTF-8').split('|', 2)
+
+        response =
+          case parser
+          when 'ping'
+            'pong'
+          when 'ruby'
+            Prettier::Parser.parse(source)
+          when 'rbs'
+            Prettier::RBSParser.parse(source)
+          when 'haml'
+            Prettier::HAMLParser.parse(source)
+          end
+
+        if response
+          socket.write(JSON.fast_generate(response))
+        else
+          socket.write('{ "error": true }')
+        end
+      rescue Prettier::Parser::ParserError => error
+        loc = { start: { line: error.lineno, column: error.column } }
+        socket.write(JSON.fast_generate(error: error.message, loc: loc))
+      rescue StandardError => error
+        socket.write(JSON.fast_generate(error: error.message))
+      ensure
+        socket.close
+      end
+    rescue IO::WaitReadable, Errno::EINTR
+      # Wait for select(2) to give us a connection that has content for 1 second.
+      # Otherwise timeout and continue on (so that we hit our "break if quit"
+      # pretty often).
+      IO.select([server], nil, nil, 1)
+
+      retry unless quit
+    end
+  end
+
+# Enumerate all of the potential ways to communicate with the server.
+prefixes = Gem.win_platform? ? %w[nc telnet] : ['nc -U', 'telnet -u', 'ncat -U']
+
+# Map each candidate connection method to a thread that will check if it works.
+prefixes.map! do |prefix|
+  Thread.new do
+    # We don't actually want the backtrace here. If it fails to connect then
+    # it's fine for this to just not work.
+    Thread.current.report_on_exception = false
+
+    stdout, status =
+      Open3.capture2("#{prefix} #{information}", stdin_data: 'ping')
+
+    prefix if JSON.parse(stdout) == 'pong' && status.exitstatus == 0
+  end
+end
+
+# Find the first one prefix that successfully returned the correct value.
+connection =
+  prefixes.detect do |prefix|
+    value = prefix.value
+    break value if value
+  end
+
+# Default to running the netcat.js script that we ship with the plugin. It's a
+# good fallback as it will always work, but it is slower than the other options.
+connection ||= "node #{File.expand_path('netcat.js', __dir__)}"
+
 # Write out our connection information to the file given as the first argument
 # to this script.
-File.write(ARGV[0], info)
+File.write(ARGV[0], "#{connection} #{information}")
 
-loop do
-  break if quit
-
-  # Start up a new thread that will handle each successive connection.
-  Thread.new(server.accept_nonblock) do |socket|
-    parser, source = socket.read.force_encoding('UTF-8').split('|', 2)
-
-    response =
-      case parser
-      when 'ruby'
-        Prettier::Parser.parse(source)
-      when 'rbs'
-        Prettier::RBSParser.parse(source)
-      when 'haml'
-        Prettier::HAMLParser.parse(source)
-      end
-
-    if response
-      socket.write(JSON.fast_generate(response))
-    else
-      socket.write('{ "error": true }')
-    end
-  rescue Prettier::Parser::ParserError => error
-    loc = { start: { line: error.lineno, column: error.column } }
-    socket.write(JSON.fast_generate(error: error.message, loc: loc))
-  rescue StandardError => error
-    socket.write(JSON.fast_generate(error: error.message))
-  ensure
-    socket.close
-  end
-rescue IO::WaitReadable, Errno::EINTR
-  # Wait for select(2) to give us a connection that has content for 1 second.
-  # Otherwise timeout and continue on (so that we hit our "break if quit"
-  # pretty often).
-  IO.select([server], nil, nil, 1)
-
-  retry unless quit
-end
+listener.join

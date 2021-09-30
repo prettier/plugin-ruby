@@ -6,8 +6,8 @@ const parser: Plugin.Parser<RBS.AnyNode> = {
   // returning to prettier a JavaScript object that is the equivalent AST that
   // represents the code stored in that string. We accomplish this by spawning a
   // new Ruby process of parser.rb and reading JSON off STDOUT.
-  parse(text, _parsers, opts) {
-    return parseSync("rbs", text, opts);
+  parse(text) {
+    return parseSync("rbs", text);
   },
   astFormat: "rbs",
   // This function handles checking whether or not the source string has the
