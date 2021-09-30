@@ -4,8 +4,11 @@ import { makeCall, noIndent } from "../../utils";
 import toProc from "../toProc";
 
 const { group, hardline, ifBreak, indent, join, softline } = prettier;
-
 const chained = ["call", "method_add_arg", "method_add_block"];
+
+function hasLeadingComments(node: Ruby.AnyNode) {
+  return node.comments?.some(({ leading }) => leading);
+}
 
 // We decorate these nodes with a bunch of extra stuff so that we can display
 // nice method chains.
@@ -32,30 +35,46 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   // call syntax so if `call` is implicit, we don't print it out.
   const messageDoc = messageNode === "call" ? "" : path.call(print, "body", 2);
 
+  // Create some arrays that are going to represent each side of our call.
+  let leftSideDoc = [receiverDoc];
+  let rightSideDoc = [operatorDoc, messageDoc];
+
+  // If there are leading comments on the right side of the call, then it means
+  // we have a structure where there's a receiver and an operator together, then
+  // a comment, then the message, as in:
+  //
+  //     foo.
+  //       # comment
+  //       baz
+  //
+  // In the case we need to group the receiver and the operator together or
+  // we'll end up with a syntax error.
+  const operatorIsTrailing =
+    messageNode !== "call" && hasLeadingComments(messageNode);
+
+  if (operatorIsTrailing) {
+    leftSideDoc = [receiverDoc, operatorDoc];
+    rightSideDoc = [messageDoc];
+  }
+
   // For certain left sides of the call nodes, we want to attach directly to
   // the } or end.
   if (noIndent.includes(receiverNode.type)) {
-    return [receiverDoc, operatorDoc, messageDoc];
+    return [leftSideDoc, rightSideDoc];
   }
 
-  // The right side of the call node, as in everything including the operator
-  // and beyond.
-  let rightSideDoc = [
-    receiverNode.comments ? hardline : softline,
-    operatorDoc,
-    messageDoc
-  ];
-
-  // This is very specialized behavior wherein we group .where.not calls
-  // together because it looks better. For more information, see
-  // https://github.com/prettier/plugin-ruby/issues/862.
   if (
     receiverNode.type === "call" &&
     receiverNode.body[2] !== "call" &&
     receiverNode.body[2].body === "where" &&
     messageDoc === "not"
   ) {
-    rightSideDoc = [operatorDoc, messageDoc];
+    // This is very specialized behavior wherein we group .where.not calls
+    // together because it looks better. For more information, see
+    // https://github.com/prettier/plugin-ruby/issues/862.
+  } else {
+    // Otherwise, we're going to put a line node into the right side doc.
+    rightSideDoc.unshift(receiverNode.comments ? hardline : softline);
   }
 
   // Get a reference to the parent node so we can check if we're inside a chain
@@ -66,8 +85,31 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   if (chained.includes(parentNode.type) && !node.comments) {
     parentNode.chain = (node.chain || 0) + 1;
     parentNode.callChain = (node.callChain || 0) + 1;
-    parentNode.breakDoc = (node.breakDoc || [receiverDoc]).concat(rightSideDoc);
     parentNode.firstReceiverType = node.firstReceiverType || receiverNode.type;
+
+    // Here we're going to determine what doc nodes to send up to the parent
+    // node to represent when we're in the multi-line form.
+    let breakDocLHS: Plugin.Doc[];
+
+    if (node.breakDoc && operatorIsTrailing) {
+      // Here we already have a child node that has passed up its
+      // representation. In this case node.breakDoc represents the receiver
+      // without any lines inserted. With regard to this node, it means it's
+      // everything up until the operator. So we're just going to append the
+      // operator.
+      breakDocLHS = node.breakDoc.concat(operatorDoc);
+    } else if (node.breakDoc) {
+      // Here we don't need a trailing operator, so we're just going to use the
+      // existing node.breakDoc. The operator will be a part of the rightSideDoc
+      // variable.
+      breakDocLHS = node.breakDoc;
+    } else {
+      // Here we're at the bottom of the chain, so there's no representation yet
+      // for the receiver. So we're just going to pass up the left side.
+      breakDocLHS = leftSideDoc;
+    }
+
+    parentNode.breakDoc = breakDocLHS.concat(rightSideDoc);
   }
 
   // If we're at the top of a chain, then we're going to print out a nice
@@ -78,12 +120,12 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
     node.breakDoc
   ) {
     return ifBreak(group(indent(node.breakDoc.concat(rightSideDoc))), [
-      receiverDoc,
+      leftSideDoc,
       group(rightSideDoc)
     ]);
   }
 
-  return group([receiverDoc, group(indent(rightSideDoc))]);
+  return group([leftSideDoc, group(indent(rightSideDoc))]);
 };
 
 export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
