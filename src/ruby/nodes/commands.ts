@@ -67,8 +67,8 @@ function hasDef(node: Ruby.Command) {
 //
 // In this case the arguments are aligned to the left side as opposed to being
 // aligned with the `receive` call.
-function skipArgsAlign(path: Plugin.Path<Ruby.CommandCall>) {
-  return ["to", "not_to"].includes(path.getValue().body[2].body);
+function skipArgsAlign(node: Ruby.CommandCall) {
+  return ["to", "not_to", "to_not"].includes(node.body[2].body);
 }
 
 // If there is a ternary argument to a command and it's going to get broken
@@ -136,7 +136,7 @@ export const printCommandCall: Plugin.Printer<Ruby.CommandCall> = (
   if (hasTernaryArg(node.body[3])) {
     breakDoc = parts.concat("(", indent([softline, argDocs]), softline, ")");
     parts.push(" ");
-  } else if (skipArgsAlign(path)) {
+  } else if (skipArgsAlign(node)) {
     parts.push(" ");
     breakDoc = parts.concat(argDocs);
   } else {
