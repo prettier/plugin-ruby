@@ -160,4 +160,47 @@ describe("calls", () => {
 
     expect(content).toMatchFormat();
   });
+
+  test("comments in a method chain get printed correctly", () => {
+    // https://github.com/prettier/plugin-ruby/issues/943
+    const content = ruby(`
+      Organization.includes(
+        :users,
+        :venues
+      )
+        .where(id: org_ids)
+        .flatten.
+        # first remove rows with duplicate names
+        uniq { |contact| "#{contact[:first_name]}#{contact[:last_name]}#{contact[:org_name]}" }.
+        # then remove remaining rows with duplicate emails
+        uniq { |contact| contact[:email] }
+        .tap { |res|
+          CSV.open(OUTPUT_PATH, "wb") { |csv|
+            csv << HEADERS
+            res.each { |d| csv << d.values }
+          }
+        }
+    `);
+
+    const expected = ruby(`
+      Organization
+        .includes(:users, :venues)
+        .where(id: org_ids)
+        .flatten.
+        # first remove rows with duplicate names
+        uniq do |contact|
+          "#{contact[:first_name]}#{contact[:last_name]}#{contact[:org_name]}"
+        end.
+        # then remove remaining rows with duplicate emails
+        uniq { |contact| contact[:email] }
+        .tap do |res|
+          CSV.open(OUTPUT_PATH, 'wb') do |csv|
+            csv << HEADERS
+            res.each { |d| csv << d.values }
+          end
+        end
+    `);
+
+    expect(content).toChangeFormat(expected);
+  });
 });
