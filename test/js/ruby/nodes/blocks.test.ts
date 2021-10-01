@@ -180,4 +180,15 @@ describe("blocks", () => {
       expect(`loop do |${long} = 1, a${long} = 2|\nend`).toMatchFormat();
     });
   });
+
+  // https://github.com/prettier/plugin-ruby/issues/989
+  test("comments on a do block", () => {
+    const content = ruby(`
+      RSpec.describe Api::V2::OAuth::TokensController, type: :api do # rubocop:disable RSpec/FilePath
+        foo
+      end
+    `);
+
+    expect(content).toMatchFormat();
+  });
 });

@@ -77,6 +77,10 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
 
         return parts;
       }
+      case "brace_block":
+        return [node.body[0], node.body[1], node.beging];
+      case "do_block":
+        return [node.body[0], node.body[1], node.beging];
       case "paren":
         return [node.lparen, node.body[0]];
       default: {
