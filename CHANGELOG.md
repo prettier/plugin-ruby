@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [#987](https://github.com/prettier/plugin-ruby/pull/9870) - valscion - Ignore stderr when checking for node <-> ruby connection clients, restoring the behavior of v1.x
+
 ## [2.0.0-rc2]
 
 ### Added
