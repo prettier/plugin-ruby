@@ -112,8 +112,9 @@ candidates.map! do |candidate|
   Thread.new do
     Thread.current.report_on_exception = false
 
-    stdout, status =
-      Open3.capture2("#{candidate} #{information}", stdin_data: 'ping')
+    # We do not care about stderr here, so throw it away
+    stdout, _stderr, status =
+      Open3.capture3("#{candidate} #{information}", stdin_data: 'ping')
 
     candidate if JSON.parse(stdout) == 'pong' && status.exitstatus == 0
   rescue StandardError
