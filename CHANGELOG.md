@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [2.0.0-rc3]
+
 ### Changed
 
 - [#987](https://github.com/prettier/plugin-ruby/pull/9870) - valscion - Ignore stderr when checking for node <-> ruby connection clients, restoring the behavior of v1.x
@@ -1167,7 +1169,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc2...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc3...HEAD
+[2.0.0-rc3]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc2...v2.0.0-rc3
 [2.0.0-rc2]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc1...v2.0.0-rc2
 [2.0.0-rc1]: https://github.com/prettier/plugin-ruby/compare/v1.6.1...v2.0.0-rc1
 [1.6.1]: https://github.com/prettier/plugin-ruby/compare/v1.6.0...v1.6.1
