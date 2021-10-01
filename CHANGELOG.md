@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- [#993](https://github.com/prettier/plugin-ruby/pull/993) - kddnewton - Nicer error message if you don't have the necessary JavaScript files to run prettier.
+
 ## [2.0.0-rc3]
 
 ### Changed
