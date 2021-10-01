@@ -136,12 +136,6 @@ class Prettier::Parser < Ripper
     # keyword.
     @__end__ = nil
 
-    # Magic comments are a certain kind of comment that can impact the way the
-    # file is parsed (encoding/string frozen default/etc.). These scanner events
-    # are immediately followed by a comment scanner event, so we only need the
-    # one variable to set/unset it immediately.
-    @magic_comment = nil
-
     # Heredocs can actually be nested together if you're using interpolation, so
     # this is a stack of heredoc nodes that are currently being created. When we
     # get to the scanner event that finishes off a heredoc node, we pop the top
@@ -969,22 +963,6 @@ class Prettier::Parser < Ripper
 
     start_line = lineno
     start_char = char_pos
-
-    # If we already had special handling of a magic comment, then we can just
-    # skip and return the value of that node.
-    if @magic_comment
-      comment = @magic_comment
-      @magic_comment = nil
-
-      # At the moment, merging in the value of the string being passed into
-      # here. In the next major version I'd like to remove this and just use the
-      # value of the magic comment. At the moment though that would change
-      # comments like -*- encoding: UTF-8 -*- into encoding: UTF-8 so need to
-
-      # wait for a major version to do that.
-      @comments << comment.merge(value: body, ec: start_char + value.length - 1)
-      return comment
-    end
 
     @comments << {
       type: :@comment,
@@ -2012,20 +1990,12 @@ class Prettier::Parser < Ripper
   # magic_comment is a scanner event that represents the use of a pragma at the
   # beginning of the file. Usually it will inside something like
   # frozen_string_literal (the key) with a value of true (the value). Both
-  # children come is a string literals.
-  def on_magic_comment(key, value)
-    start_line = lineno
-    start_char = char_pos
-
-    @magic_comment = {
-      type: :@comment,
-      value: " #{key}: #{value}",
-      sl: start_line,
-      el: start_line,
-      sc: start_char,
-      ec: start_char + @line_counts[start_line][-1]
-    }
-  end
+  # children come is a string literals. We're going to leave these alone as they
+  # come in all kinds of shapes and sizes.
+  #
+  #     def on_magic_comment(key, value)
+  #       @magic_comment = { value: " #{key}: #{value}" }
+  #     end
 
   # massign is a parser event that is a parent node of any kind of multiple
   # assignment. This includes splitting out variables on the left like:
