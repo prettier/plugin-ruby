@@ -4,5 +4,4 @@
 $:.unshift(File.expand_path(File.join('..', 'lib'), __dir__))
 require 'prettier'
 
-Prettier.run(ARGV)
-exit($?.exitstatus) if $?.exited?
+exit(Prettier.run(ARGV))
