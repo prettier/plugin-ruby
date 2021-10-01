@@ -21,9 +21,32 @@ export const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (
   return parts;
 };
 
-function printBlock(
-  braces: boolean
-): Plugin.Printer<Ruby.BraceBlock | Ruby.DoBlock> {
+// You have to go through the main print function if you could potentially have
+// comments attached. So we're doing this weird reflection on the printed docs
+// to retroactively change the printed keyword depending on if we're using
+// braces or not. Ideally we wouldn't do this, we would instead do this
+// reflection in the child printer, but this keeps the logic to just this file
+// and contains it, so keeping it here for now.
+function printBlockBeging(
+  path: Plugin.Path<Ruby.Lbrace | Ruby.Keyword>,
+  print: Plugin.Print,
+  useBraces: boolean
+) {
+  let docs = print(path);
+  const doc = useBraces ? "{" : "do";
+
+  if (Array.isArray(docs)) {
+    docs[1] = doc;
+  } else {
+    docs = doc;
+  }
+
+  return docs;
+}
+
+type Block = Ruby.BraceBlock | Ruby.DoBlock;
+
+function printBlock(braces: boolean): Plugin.Printer<Block> {
   return function printBlockWithBraces(path, opts, print) {
     const [variables, statements] = path.getValue().body;
     const stmts =
@@ -46,7 +69,11 @@ function printBlock(
     const useBraces = braces && hasAncestor(path, ["command", "command_call"]);
 
     const doBlock = [
-      useBraces ? " {" : " do",
+      " ",
+      path.call(
+        (begingPath) => printBlockBeging(begingPath, print, useBraces),
+        "beging"
+      ),
       variables ? [" ", path.call(print, "body", 0)] : "",
       doBlockBody,
       [softline, useBraces ? "}" : "end"]
@@ -72,7 +99,11 @@ function printBlock(
 
     const hasBody = stmts.some(({ type }) => type !== "void_stmt");
     const braceBlock = [
-      " {",
+      " ",
+      path.call(
+        (begingPath) => printBlockBeging(begingPath, print, true),
+        "beging"
+      ),
       hasBody || variables ? " " : "",
       variables ? path.call(print, "body", 0) : "",
       path.call(print, "body", 1),

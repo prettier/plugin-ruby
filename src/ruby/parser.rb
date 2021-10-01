@@ -793,11 +793,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.bind((block_var || beging)[:ec], ending[:sc])
+    stmts.bind(
+      find_next_statement_start((block_var || beging)[:ec]),
+      ending[:sc]
+    )
 
     {
       type: :brace_block,
       body: [block_var, stmts],
+      beging: beging,
       sl: beging[:sl],
       sc: beging[:sc],
       el: [ending[:el], stmts[:el]].max,
@@ -1186,11 +1190,15 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'do')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind((block_var || beging)[:ec], ending[:sc])
+    bodystmt.bind(
+      find_next_statement_start((block_var || beging)[:ec]),
+      ending[:sc]
+    )
 
     {
       type: :do_block,
       body: [block_var, bodystmt],
+      beging: beging,
       sl: beging[:sl],
       sc: beging[:sc],
       el: ending[:el],

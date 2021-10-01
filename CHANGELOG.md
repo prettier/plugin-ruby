@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [#987](https://github.com/prettier/plugin-ruby/pull/9870) - valscion - Ignore stderr when checking for node <-> ruby connection clients, restoring the behavior of v1.x
+- [#989](https://github.com/prettier/plugin-ruby/issues/989) - hubertjakubiak, kddnewton - Make sure comments after the keyword/lbrace are not moved inside the body of the statements of do and brace blocks.
 
 ## [2.0.0-rc2]
 
