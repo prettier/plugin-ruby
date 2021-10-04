@@ -109,11 +109,14 @@ function spawnServer(): ParserArgs {
 // therein are not going to work with its virtual file system. Presumably
 // there's a way to fix this but I haven't figured out how yet.
 function checkPnP() {
-  if (process.versions.pnp) {
+  if (process.versions.pnp && __dirname.includes(".zip")) {
     throw new Error(`
       @prettier/plugin-ruby does not current work within the yarn Plug'n'Play
       virtual file system. If you would like to help support the effort to fix
       this, please see https://github.com/prettier/plugin-ruby/issues/894.
+
+      If you want to use @prettier/plugin-ruby in a PnP environment before
+      this issue is fixed, please run \`yarn unplug @prettier/plugin-ruby\`.
     `);
   }
 }
