@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 
 - [#993](https://github.com/prettier/plugin-ruby/pull/993) - kddnewton - Nicer error message if you don't have the necessary JavaScript files to run prettier.
+- [#996](https://github.com/prettier/plugin-ruby/pull/996) - nbudin - Allow `@prettier/plugin-ruby` to run in yarn's plug'n'play mode.
 
 ## [2.0.0-rc3]
 
