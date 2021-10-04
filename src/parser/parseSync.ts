@@ -1,5 +1,12 @@
 import { spawn, spawnSync } from "child_process";
-import { existsSync, unlinkSync } from "fs";
+import {
+  existsSync,
+  unlinkSync,
+  mkdtempSync,
+  copyFileSync,
+  mkdirSync,
+  rmdirSync
+} from "fs";
 import os from "os";
 import path from "path";
 import process from "process";
@@ -58,21 +65,77 @@ export function getInfoFilepath() {
 // will read that information in order to enable us to connect to it in the
 // spawnSync function.
 function spawnServer(): ParserArgs {
+  const tempDir = mkdtempSync(path.join(os.tmpdir(), "prettier-plugin-ruby-"));
   const filepath = getInfoFilepath();
-  const server = spawn(
-    "ruby",
-    [path.join(__dirname, "./server.rb"), filepath],
-    {
-      env: Object.assign({}, process.env, { LANG: getLang() }),
-      detached: true,
-      stdio: "inherit"
-    }
-  );
+
+  let serverRbPath = path.join(__dirname, "./server.rb");
+  let getInfoJsPath = path.join(__dirname, "./getInfo.js");
+  let cleanupTempFiles: () => void | undefined;
+
+  if (runningInPnPZip()) {
+    // If we're running in a Yarn PnP environment inside a ZIP file, it's not possible to run
+    // the Ruby server or the getInfo.js script directly.  Instead, we need to copy them and all
+    // the files they depend on to a temporary directory.
+
+    const sourceFiles = [
+      "parser/server.rb",
+      "parser/getInfo.js",
+      "parser/netcat.js",
+      "ruby/parser.rb",
+      "rbs/parser.rb",
+      "haml/parser.rb"
+    ];
+    serverRbPath = path.join(tempDir, "parser", "server.rb");
+    getInfoJsPath = path.join(tempDir, "parser", "getInfo.js");
+
+    sourceFiles.forEach((rubyFile) => {
+      const destDir = path.join(tempDir, path.dirname(rubyFile));
+      if (!existsSync(destDir)) {
+        mkdirSync(destDir);
+      }
+      copyFileSync(
+        path.join(__dirname, "..", rubyFile),
+        path.join(tempDir, rubyFile)
+      );
+    });
+
+    cleanupTempFiles = () => {
+      [
+        getInfoJsPath,
+        ...sourceFiles.map((rubyFile) => path.join(tempDir, rubyFile))
+      ].forEach((tmpFilePath) => {
+        if (existsSync(tmpFilePath)) {
+          unlinkSync(tmpFilePath);
+        }
+      });
+
+      sourceFiles.forEach((rubyFile) => {
+        const tempSubdir = path.join(tempDir, path.dirname(rubyFile));
+        if (existsSync(tempSubdir)) {
+          rmdirSync(tempSubdir);
+        }
+      });
+
+      if (existsSync(tempDir)) {
+        rmdirSync(tempDir);
+      }
+    };
+  }
+
+  const server = spawn("ruby", [serverRbPath, filepath], {
+    env: Object.assign({}, process.env, { LANG: getLang() }),
+    detached: true,
+    stdio: "inherit"
+  });
 
   server.unref();
   process.on("exit", () => {
     if (existsSync(filepath)) {
       unlinkSync(filepath);
+    }
+
+    if (cleanupTempFiles != null) {
+      cleanupTempFiles();
     }
 
     try {
@@ -86,10 +149,7 @@ function spawnServer(): ParserArgs {
     }
   });
 
-  const info = spawnSync("node", [
-    path.join(__dirname, "./getInfo.js"),
-    filepath
-  ]);
+  const info = spawnSync("node", [getInfoJsPath, filepath]);
 
   if (info.status !== 0) {
     throw new Error(`
@@ -106,19 +166,9 @@ function spawnServer(): ParserArgs {
 
 // If we're in a yarn Plug'n'Play environment, then the relative paths being
 // used by the parser server and the various scripts used to communicate
-// therein are not going to work with its virtual file system. Presumably
-// there's a way to fix this but I haven't figured out how yet.
-function checkPnP() {
-  if (process.versions.pnp && __dirname.includes(".zip")) {
-    throw new Error(`
-      @prettier/plugin-ruby does not current work within the yarn Plug'n'Play
-      virtual file system. If you would like to help support the effort to fix
-      this, please see https://github.com/prettier/plugin-ruby/issues/894.
-
-      If you want to use @prettier/plugin-ruby in a PnP environment before
-      this issue is fixed, please run \`yarn unplug @prettier/plugin-ruby\`.
-    `);
-  }
+// therein are not going to work with its virtual file system.
+function runningInPnPZip() {
+  return process.versions.pnp && __dirname.includes(".zip");
 }
 
 // You can optionally return location information from the source string when
@@ -131,7 +181,6 @@ type LocatedError = Error & { loc?: any };
 // requests.
 function parseSync(parser: string, source: string) {
   if (!parserArgs) {
-    checkPnP();
     parserArgs = spawnServer();
   }
 

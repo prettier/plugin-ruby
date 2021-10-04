@@ -54,6 +54,50 @@ jobs:
       - run: yarn checkFormat
       - run: yarn lint
 
+  smoketest:
+    name: Yarn PnP smoke test
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        yarn:
+          - 2.x
+          - 3.x
+    runs-on: ${{ matrix.platform }}
+    env:
+      PLUGIN_RUBY_CI: true
+    steps:
+      - uses: actions/checkout@main
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          ruby-version: "3.0"
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn run prepublishOnly
+      - run: yarn pack
+      # Windows runners don't have /tmp, let's make sure it exists
+      - run: mkdir -p /tmp
+      - run: mv prettier-plugin-ruby-*.tgz /tmp/prettier-plugin-ruby.tgz
+      - run: mkdir /tmp/smoketest
+      - run: |
+          cd /tmp/smoketest
+          echo '{ "name": "smoketest" }' > package.json
+          yarn set version berry # workaround for https://github.com/yarnpkg/berry/issues/3180
+          yarn set version ${{ matrix.yarn }}
+          yarn add ../prettier-plugin-ruby.tgz
+          yarn add prettier
+          echo '{ "plugins": ["@prettier/plugin-ruby"] }' >.prettierrc.json
+          echo 'def add(a, b) ; a + b ; end' >smoketest.rb
+          yarn run prettier -w smoketest.rb
+          ruby -c smoketest.rb
+
   gem:
     name: Gem
     runs-on: ubuntu-latest
