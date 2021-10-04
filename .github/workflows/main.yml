@@ -86,13 +86,14 @@ jobs:
       - run: mkdir -p /tmp
       - run: mv prettier-plugin-ruby-*.tgz /tmp/prettier-plugin-ruby.tgz
       - run: mkdir /tmp/smoketest
-      - run: |
+      - name: Smoke test
+        run: |
           cd /tmp/smoketest
           echo '{ "name": "smoketest" }' > package.json
           yarn set version berry # workaround for https://github.com/yarnpkg/berry/issues/3180
           yarn set version ${{ matrix.yarn }}
-          yarn add ../prettier-plugin-ruby.tgz
-          yarn add prettier
+          yarn add prettier @prettier/plugin-ruby@file:/tmp/prettier-plugin-ruby.tgz
+          npx rimraf .yarn/unplugged # Make sure Yarn didn't unplug anything; this will deliberately break if it did
           echo '{ "plugins": ["@prettier/plugin-ruby"] }' >.prettierrc.json
           echo 'def add(a, b) ; a + b ; end' >smoketest.rb
           yarn run prettier -w smoketest.rb
