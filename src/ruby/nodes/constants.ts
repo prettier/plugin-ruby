@@ -42,5 +42,5 @@ export const printField: Plugin.Printer<Ruby.Field> = (path, opts, print) => {
 export const printTopConst: Plugin.Printer<
   Ruby.TopConstField | Ruby.TopConstRef
 > = (path, opts, print) => {
-  return ["::", path.call(print, "body", 0)];
+  return group(["::", path.call(print, "body", 0)], { shouldBreak: false });
 };

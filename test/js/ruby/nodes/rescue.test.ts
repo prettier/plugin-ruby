@@ -38,6 +38,18 @@ describe("rescue", () => {
     expect(content).toMatchFormat();
   });
 
+  test("errors with scope resolution operator", () => {
+    const content = ruby(`
+      def foo
+        a
+      rescue ::A
+        e
+      end
+    `);
+
+    expect(content).toMatchFormat();
+  });
+
   test.each(["begin", "def foo"])("%s with every clause", (declaration) => {
     const error = "BreakingBreakingBreakingBreakingBreakingError";
     const content = ruby(`
