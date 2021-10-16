@@ -29,9 +29,13 @@ module Prettier
         If you installed this dependency through git instead of from rubygems,
         it does not install the necessary files by default. To fix this you can
         either install them yourself by cd-ing into the directory where this gem
-        is located (#{File.expand_path('..', __dir__)}) and
-        running `yarn` or `npm install`, or you can change the source in your
-        Gemfile to point directly to rubygems.
+        is located (#{File.expand_path('..', __dir__)}) and running:
+          
+          `yarn && yarn prepublishOnly`
+           or
+           `npm install && npm run prepublishOnly`
+           or
+           you can change the source in your Gemfile to point directly to rubygems.
       MSG
     else
       # Otherwise, just print out the same error that prettier emitted, as it's
