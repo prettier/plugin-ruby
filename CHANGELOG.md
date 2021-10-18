@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [2.0.0-rc4]
+
 ### Added
 
 - [#993](https://github.com/prettier/plugin-ruby/pull/993) - kddnewton - Nicer error message if you don't have the necessary JavaScript files to run prettier.
@@ -1178,7 +1180,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc3...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc4...HEAD
+[2.0.0-rc4]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc3...v2.0.0-rc4
 [2.0.0-rc3]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc2...v2.0.0-rc3
 [2.0.0-rc2]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc1...v2.0.0-rc2
 [2.0.0-rc1]: https://github.com/prettier/plugin-ruby/compare/v1.6.1...v2.0.0-rc1
