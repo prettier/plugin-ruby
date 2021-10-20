@@ -56,6 +56,17 @@ describe("patterns", () => {
     expect(content).toMatchFormat();
   });
 
+  test("with a single array element", () => {
+    const content = ruby(`
+      case value
+      in [element]
+        matched
+      end
+    `);
+
+    expect(content).toMatchFormat();
+  });
+
   test("with comments in an array pattern", () => {
     const content = ruby(`
       case foo
