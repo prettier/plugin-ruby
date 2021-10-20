@@ -13,10 +13,14 @@ Layout:
 Layout/LineLength:
   Enabled: true
 
-# Disabling all of the following options because they could conflict with a
-# prettier configuration setting.
-
 Style/MultilineIfModifier: # rubyModifier
+  Enabled: false
+
+# When method chains with multiple blocks are chained together, rubocop will let
+# them pass if they're using braces but not if they're using do and end
+# keywords. Because we will break individual blocks down to using keywords if
+# they are multiline, this conflicts with rubocop.
+Style/MultilineBlockChain:
   Enabled: false
 
 Style/SymbolArray: # rubyArrayLiteral
@@ -34,5 +38,7 @@ Style/TrailingCommaInArrayLiteral: # trailingComma
 Style/TrailingCommaInHashLiteral: # trailingComma
   Enabled: false
 
+# lambdas that are constructed with the lambda method call cannot be safely
+# turned into lambda literals without removing a method call.
 Style/Lambda:
   Enabled: false

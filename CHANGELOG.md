@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [#1018](https://github.com/prettier/plugin-ruby/issues/1018) - rindek, kddnewton - Ensure brackets are used when matching an array pattern with a single element.
+- [#906](https://github.com/prettier/plugin-ruby/issues/906) - Hansenq, kddnewton - Turn off the `Style/MultilineBlockChain` rubocop rule in our shipped configuration because multiple chained method calls with blocks can potentially conflict with rubocop's desired output.
 
 ## [2.0.0-rc4]
 
