@@ -21,33 +21,47 @@ const printPatternArg: Plugin.Printer<Ruby.AnyNode> = (path, opts, print) => {
 
 export const printAryPtn: Plugin.Printer<Ruby.Aryptn> = (path, opts, print) => {
   const [constant, preargs, splatarg, postargs] = path.getValue().body;
-  let args: Plugin.Doc | Plugin.Doc[] = [];
+  let argDocs: Plugin.Doc[] = [];
 
   if (preargs) {
-    args = args.concat(
+    argDocs = argDocs.concat(
       path.map((argPath) => printPatternArg(argPath, opts, print), "body", 1)
     );
   }
 
   if (splatarg) {
-    args.push(["*", path.call(print, "body", 2)]);
+    argDocs.push(["*", path.call(print, "body", 2)]);
   }
 
   if (postargs) {
-    args = args.concat(path.map(print, "body", 3));
+    argDocs = argDocs.concat(path.map(print, "body", 3));
   }
 
-  args = group(join([",", line], args));
+  let argDoc: Plugin.Doc = group(join([",", line], argDocs));
 
-  if (constant || patterns.includes(path.getParentNode().type)) {
-    args = ["[", args, "]"];
+  // There are a couple of cases where we _must_ use brackets. They include:
+  //
+  // * When the number of arguments inside the array pattern is one 1, then we
+  //   have to include them, otherwise it matches the whole array. Consider the
+  //   difference between `in [elem]` and `in elem`.
+  // * If we have a wrapping constant, then we definitely need the brackets.
+  //   Consider the difference between `in Const[elem]` and `in Const elem`
+  // * If we're nested inside a parent pattern, then we have to have brackets.
+  //   Consider the difference between `in key: first, second` and
+  //   `in key: [first, second]`.
+  if (
+    argDocs.length === 1 ||
+    constant ||
+    patterns.includes(path.getParentNode().type)
+  ) {
+    argDoc = ["[", argDoc, "]"];
   }
 
   if (constant) {
-    return [path.call(print, "body", 0), args];
+    return [path.call(print, "body", 0), argDoc];
   }
 
-  return args;
+  return argDoc;
 };
 
 export const printFndPtn: Plugin.Printer<Ruby.FndPtn> = (path, opts, print) => {
@@ -118,10 +132,11 @@ export const printHshPtn: Plugin.Printer<Ruby.Hshptn> = (path, opts, print) => {
 };
 
 export const printIn: Plugin.Printer<Ruby.In> = (path, opts, print) => {
+  const keyword = "in ";
   const parts: Plugin.Doc[] = [
-    "in ",
+    keyword,
     align(
-      "in ".length,
+      keyword.length,
       path.call(
         (valuePath) => printPatternArg(valuePath, opts, print),
         "body",

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [#1018](https://github.com/prettier/plugin-ruby/issues/1018) - rindek, kddnewton - Ensure brackets are used when matching an array pattern with a single element.
+
 ## [2.0.0-rc4]
 
 ### Added
