@@ -139,12 +139,12 @@ export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
     if (lineNo === null) {
       parts.push(printed);
     } else if (
-      stmt.sl - lineNo > 1 ||
+      stmt.loc.sl - lineNo > 1 ||
       [stmt.type, stmts[index - 1].type].includes("access_ctrl")
     ) {
       parts.push(hardline, hardline, printed);
     } else if (
-      stmt.sl !== lineNo ||
+      stmt.loc.sl !== lineNo ||
       path.getParentNode().type !== "string_embexpr"
     ) {
       parts.push(hardline, printed);
@@ -152,7 +152,7 @@ export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
       parts.push("; ", printed);
     }
 
-    lineNo = stmt.el;
+    lineNo = stmt.loc.el;
   });
 
   return parts;

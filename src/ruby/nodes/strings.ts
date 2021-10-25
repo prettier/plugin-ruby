@@ -224,7 +224,7 @@ export const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (
   // If the contents of this embedded expression were originally on the same
   // line in the source, then we're going to leave them in place and assume
   // that's the way the developer wanted this expression represented.
-  if (node.sl === node.el) {
+  if (node.loc.sl === node.loc.el) {
     return ["#{", removeLines(parts), "}"];
   }
 

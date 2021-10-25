@@ -8,8 +8,8 @@ PP.prepend(
     def pp_hash(obj)
       group(1, '{', '}') do
         text obj[:type]
-        text "<L#{obj[:sl]}-#{obj[:el]},"
-        text "C#{obj[:sc]}-#{obj[:ec]}>"
+        text "<L#{obj[:loc].start_line}-#{obj[:loc].end_line},"
+        text "C#{obj[:loc].start_char}-#{obj[:loc].end_char}>"
 
         group(1) do
           breakable ' '

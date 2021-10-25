@@ -5,7 +5,7 @@ const { group, hardline, indent, join, line } = prettier;
 
 function containedWithin(node: Ruby.Array | Ruby.Hash) {
   return function containedWithinNode(comment: Ruby.Comment) {
-    return comment.sc >= node.sc && comment.ec <= node.ec;
+    return comment.loc.sc >= node.loc.sc && comment.loc.ec <= node.loc.ec;
   };
 }
 

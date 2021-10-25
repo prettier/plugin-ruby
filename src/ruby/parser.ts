@@ -19,13 +19,13 @@ const parser: Plugin.Parser<Ruby.AnyNode> = {
   // responsible for returning the index of the character within the source
   // string that is the beginning of the given node.
   locStart(node) {
-    return node.sc;
+    return node.loc.sc;
   },
   // This function is critical for comments and cursor support, and is
   // responsible for returning the index of the character within the source
   // string that is the ending of the given node.
   locEnd(node) {
-    return node.ec;
+    return node.loc.ec;
   }
 };
 
