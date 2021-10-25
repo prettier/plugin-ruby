@@ -1,6 +1,7 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { isEmptyStmts } from "../../utils";
+import { getEndLine, getStartLine } from "../location";
 
 const {
   breakParent,
@@ -139,12 +140,12 @@ export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
     if (lineNo === null) {
       parts.push(printed);
     } else if (
-      stmt.loc.sl - lineNo > 1 ||
+      getStartLine(stmt.loc) - lineNo > 1 ||
       [stmt.type, stmts[index - 1].type].includes("access_ctrl")
     ) {
       parts.push(hardline, hardline, printed);
     } else if (
-      stmt.loc.sl !== lineNo ||
+      getStartLine(stmt.loc) !== lineNo ||
       path.getParentNode().type !== "string_embexpr"
     ) {
       parts.push(hardline, printed);
@@ -152,7 +153,7 @@ export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
       parts.push("; ", printed);
     }
 
-    lineNo = stmt.loc.el;
+    lineNo = getEndLine(stmt.loc);
   });
 
   return parts;

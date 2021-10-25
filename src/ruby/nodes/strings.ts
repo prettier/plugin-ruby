@@ -1,5 +1,6 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
+import { getEndLine, getStartLine } from "../location";
 
 const { group, hardline, indent, literalline, removeLines, softline, join } =
   prettier;
@@ -224,7 +225,7 @@ export const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (
   // If the contents of this embedded expression were originally on the same
   // line in the source, then we're going to leave them in place and assume
   // that's the way the developer wanted this expression represented.
-  if (node.loc.sl === node.loc.el) {
+  if (getStartLine(node.loc) === getEndLine(node.loc)) {
     return ["#{", removeLines(parts), "}"];
   }
 

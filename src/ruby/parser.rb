@@ -66,7 +66,7 @@ class Prettier::Parser < Ripper
     end
 
     def to_json(*opts)
-      { sl: start_line, sc: start_char, el: end_line, ec: end_char }.to_json(*opts)
+      [start_line, start_char, end_line, end_char].to_json(*opts)
     end
 
     def self.range(from:, to:)

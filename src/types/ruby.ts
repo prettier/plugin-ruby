@@ -3,7 +3,7 @@
 
 // These are common additions to the various node types.
 type Comments = { comments?: Comment[] };
-type Location = { sl: number, el: number, sc: number, ec: number };
+export type Location = [number, number, number, number];
 
 // These are utility types used to construct the various node types.
 type ScannerEvent<T extends string> = { type: `@${T}`, body: string, loc: Location } & Comments;

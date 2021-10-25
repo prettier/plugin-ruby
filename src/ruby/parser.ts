@@ -1,5 +1,6 @@
 import type { Plugin, Ruby } from "../types";
 import parseSync from "../parser/parseSync";
+import { getEndChar, getStartChar } from "./location";
 
 const parser: Plugin.Parser<Ruby.AnyNode> = {
   // This function is responsible for taking an input string of text and
@@ -19,13 +20,13 @@ const parser: Plugin.Parser<Ruby.AnyNode> = {
   // responsible for returning the index of the character within the source
   // string that is the beginning of the given node.
   locStart(node) {
-    return node.loc.sc;
+    return getStartChar(node.loc);
   },
   // This function is critical for comments and cursor support, and is
   // responsible for returning the index of the character within the source
   // string that is the ending of the given node.
   locEnd(node) {
-    return node.loc.ec;
+    return getEndChar(node.loc);
   }
 };
 
