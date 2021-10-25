@@ -65,17 +65,17 @@ class Prettier::Parser < Ripper
       @end_char = end_char
     end
 
-    def to_json(*opts)
-      [start_line, start_char, end_line, end_char].to_json(*opts)
+    def to(other)
+      Location.new(
+        start_line: start_line,
+        start_char: start_char,
+        end_line: other.end_line,
+        end_char: other.end_char
+      )
     end
 
-    def self.range(from:, to:)
-      new(
-        start_line: from.start_line,
-        start_char: from.start_char,
-        end_line: to.end_line,
-        end_char: to.end_char
-      )
+    def to_json(*opts)
+      [start_line, start_char, end_line, end_char].to_json(*opts)
     end
 
     def self.token(line:, char:, size:)
@@ -319,7 +319,7 @@ class Prettier::Parser < Ripper
     {
       type: :BEGIN,
       body: [beging, stmts],
-      loc: Location.range(from: keyword[:loc], to: ending[:loc])
+      loc: keyword[:loc].to(ending[:loc])
     }
   end
 
@@ -361,7 +361,7 @@ class Prettier::Parser < Ripper
     {
       type: :END,
       body: [beging, stmts],
-      loc: Location.range(from: keyword[:loc], to: ending[:loc])
+      loc: keyword[:loc].to(ending[:loc])
     }
   end
 
@@ -396,7 +396,7 @@ class Prettier::Parser < Ripper
     {
       type: :alias,
       body: [left, right],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -421,7 +421,7 @@ class Prettier::Parser < Ripper
     {
       type: :aref,
       body: [collection, index],
-      loc: Location.range(from: collection[:loc], to: ending[:loc])
+      loc: collection[:loc].to(ending[:loc])
     }
   end
 
@@ -434,7 +434,7 @@ class Prettier::Parser < Ripper
     {
       type: :aref_field,
       body: [collection, index],
-      loc: Location.range(from: collection[:loc], to: ending[:loc])
+      loc: collection[:loc].to(ending[:loc])
     }
   end
 
@@ -475,7 +475,7 @@ class Prettier::Parser < Ripper
     {
       type: :arg_paren,
       body: [args],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -495,7 +495,7 @@ class Prettier::Parser < Ripper
       {
         type: args[:type],
         body: args[:body] << arg,
-        loc: Location.range(from: args[:loc], to: arg[:loc])
+        loc: args[:loc].to(arg[:loc])
       }
     end
   end
@@ -509,7 +509,7 @@ class Prettier::Parser < Ripper
     {
       type: :args_add_block,
       body: [args, block],
-      loc: Location.range(from: args[:loc], to: ending[:loc])
+      loc: args[:loc].to(ending[:loc])
     }
   end
 
@@ -523,7 +523,7 @@ class Prettier::Parser < Ripper
     {
       type: :args_add_star,
       body: [args, part],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -562,11 +562,11 @@ class Prettier::Parser < Ripper
       {
         type: :array,
         body: [contents],
-        loc: Location.range(from: beging[:loc], to: ending[:loc])
+        loc: beging[:loc].to(ending[:loc])
       }
     else
       ending = find_scanner_event(:@tstring_end)
-      contents[:loc] = Location.range(from: contents[:loc], to: ending[:loc])
+      contents[:loc] = contents[:loc].to(ending[:loc])
 
       {
         type: :array,
@@ -584,7 +584,7 @@ class Prettier::Parser < Ripper
     {
       type: :aryptn,
       body: [const, preargs, splatarg, postargs],
-      loc: Location.range(from: pieces[0][:loc], to: pieces[-1][:loc])
+      loc: pieces[0][:loc].to(pieces[-1][:loc])
     }
   end
 
@@ -595,7 +595,7 @@ class Prettier::Parser < Ripper
     {
       type: :assign,
       body: [left, right],
-      loc: Location.range(from: left[:loc], to: right[:loc])
+      loc: left[:loc].to(right[:loc])
     }
   end
 
@@ -606,7 +606,7 @@ class Prettier::Parser < Ripper
     {
       type: :assoc_new,
       body: [key, value],
-      loc: Location.range(from: key[:loc], to: value[:loc])
+      loc: key[:loc].to(value[:loc])
     }
   end
 
@@ -618,7 +618,7 @@ class Prettier::Parser < Ripper
     {
       type: :assoc_splat,
       body: [contents],
-      loc: Location.range(from: event[:loc], to: contents[:loc])
+      loc: event[:loc].to(contents[:loc])
     }
   end
 
@@ -630,7 +630,7 @@ class Prettier::Parser < Ripper
     {
       type: :assoclist_from_args,
       body: assocs,
-      loc: Location.range(from: assocs[0][:loc], to: assocs[-1][:loc])
+      loc: assocs[0][:loc].to(assocs[-1][:loc])
     }
   end
 
@@ -669,7 +669,7 @@ class Prettier::Parser < Ripper
     {
       type: :bare_assoc_hash,
       body: assoc_news,
-      loc: Location.range(from: assoc_news[0][:loc], to: assoc_news[-1][:loc])
+      loc: assoc_news[0][:loc].to(assoc_news[-1][:loc])
     }
   end
 
@@ -689,7 +689,7 @@ class Prettier::Parser < Ripper
     {
       type: :begin,
       body: [bodystmt],
-      loc: Location.range(from: beging[:loc], to: bodystmt[:loc])
+      loc: beging[:loc].to(bodystmt[:loc])
     }
   end
 
@@ -705,7 +705,7 @@ class Prettier::Parser < Ripper
     {
       type: :binary,
       body: [left, oper, right],
-      loc: Location.range(from: left[:loc], to: right[:loc])
+      loc: left[:loc].to(right[:loc])
     }
   end
 
@@ -724,7 +724,7 @@ class Prettier::Parser < Ripper
     {
       type: :block_var,
       body: [params, locals],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -736,7 +736,7 @@ class Prettier::Parser < Ripper
     {
       type: :blockarg,
       body: [ident],
-      loc: Location.range(from: event[:loc], to: ident[:loc])
+      loc: event[:loc].to(ident[:loc])
     }
   end
 
@@ -825,7 +825,7 @@ class Prettier::Parser < Ripper
       {
         type: :break,
         body: [args_add_block],
-        loc: Location.range(from: beging[:loc], to: args_add_block[:loc])
+        loc: beging[:loc].to(args_add_block[:loc])
       }
     end
   end
@@ -875,14 +875,14 @@ class Prettier::Parser < Ripper
       {
         type: :case,
         body: [switch, consequent],
-        loc: Location.range(from: event[:loc], to: consequent[:loc])
+        loc: event[:loc].to(consequent[:loc])
       }
     else
       {
         type: :rassign,
         body: [switch, consequent],
         keyword: find_scanner_event(:@kw, 'in', consume: false),
-        loc: Location.range(from: switch[:loc], to: consequent[:loc])
+        loc: switch[:loc].to(consequent[:loc])
       }
     end
   end
@@ -903,7 +903,7 @@ class Prettier::Parser < Ripper
     {
       type: :class,
       body: [const, superclass, bodystmt],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -926,7 +926,7 @@ class Prettier::Parser < Ripper
     {
       type: :command,
       body: [ident, args],
-      loc: Location.range(from: ident[:loc], to: args[:loc])
+      loc: ident[:loc].to(args[:loc])
     }
   end
 
@@ -940,7 +940,7 @@ class Prettier::Parser < Ripper
     {
       type: :command_call,
       body: [receiver, oper, ident, args],
-      loc: Location.range(from: receiver[:loc], to: ending[:loc])
+      loc: receiver[:loc].to(ending[:loc])
     }
   end
 
@@ -991,7 +991,7 @@ class Prettier::Parser < Ripper
     {
       type: :const_path_field,
       body: [left, const],
-      loc: Location.range(from: left[:loc], to: const[:loc])
+      loc: left[:loc].to(const[:loc])
     }
   end
 
@@ -1003,7 +1003,7 @@ class Prettier::Parser < Ripper
     {
       type: :const_path_ref,
       body: [left, const],
-      loc: Location.range(from: left[:loc], to: const[:loc])
+      loc: left[:loc].to(const[:loc])
     }
   end
 
@@ -1068,7 +1068,7 @@ class Prettier::Parser < Ripper
       defsl = {
         type: :defsl,
         body: [ident, params, bodystmt],
-        loc: Location.range(from: beging[:loc], to: bodystmt[:loc])
+        loc: beging[:loc].to(bodystmt[:loc])
       }
 
       return defsl
@@ -1094,7 +1094,7 @@ class Prettier::Parser < Ripper
     {
       type: :def,
       body: [ident, params, bodystmt],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1140,7 +1140,7 @@ class Prettier::Parser < Ripper
     {
       type: :defs,
       body: [target, oper, ident, params, bodystmt],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1157,7 +1157,7 @@ class Prettier::Parser < Ripper
     {
       type: :defined,
       body: [value],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1178,7 +1178,7 @@ class Prettier::Parser < Ripper
       type: :do_block,
       body: [block_var, bodystmt],
       beging: beging,
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1194,7 +1194,7 @@ class Prettier::Parser < Ripper
     {
       type: :dot2,
       body: [left, right],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1210,7 +1210,7 @@ class Prettier::Parser < Ripper
     {
       type: :dot3,
       body: [left, right],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1242,7 +1242,7 @@ class Prettier::Parser < Ripper
         type: :dyna_symbol,
         quote: beging[:body],
         body: string[:body],
-        loc: Location.range(from: beging[:loc], to: ending[:loc])
+        loc: beging[:loc].to(ending[:loc])
       }
     else
       # A dynamic symbol as a hash key
@@ -1253,7 +1253,7 @@ class Prettier::Parser < Ripper
         type: :dyna_symbol,
         body: string[:body],
         quote: ending[:body][0],
-        loc: Location.range(from: beging[:loc], to: ending[:loc])
+        loc: beging[:loc].to(ending[:loc])
       }
     end
   end
@@ -1280,7 +1280,7 @@ class Prettier::Parser < Ripper
     {
       type: :else,
       body: [stmts],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1297,7 +1297,7 @@ class Prettier::Parser < Ripper
     {
       type: :elsif,
       body: [predicate, stmts, consequent],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1411,7 +1411,7 @@ class Prettier::Parser < Ripper
     {
       type: :ensure,
       body: [beging, stmts],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1441,7 +1441,7 @@ class Prettier::Parser < Ripper
     {
       type: :field,
       body: [left, oper, right],
-      loc: Location.range(from: left[:loc], to: right[:loc])
+      loc: left[:loc].to(right[:loc])
     }
   end
 
@@ -1466,7 +1466,7 @@ class Prettier::Parser < Ripper
     {
       type: :fndptn,
       body: [const, presplat, args, postsplat],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1490,7 +1490,7 @@ class Prettier::Parser < Ripper
     {
       type: :for,
       body: [ident, enum, stmts],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1528,7 +1528,7 @@ class Prettier::Parser < Ripper
     {
       type: :hash,
       body: [assoclist_from_args],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1584,7 +1584,7 @@ class Prettier::Parser < Ripper
     {
       type: :hshptn,
       body: [const, kw, kwrest],
-      loc: Location.range(from: pieces[0][:loc], to: pieces[-1][:loc])
+      loc: pieces[0][:loc].to(pieces[-1][:loc])
     }
   end
 
@@ -1615,7 +1615,7 @@ class Prettier::Parser < Ripper
     {
       type: :if,
       body: [predicate, stmts, consequent],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1626,7 +1626,7 @@ class Prettier::Parser < Ripper
     {
       type: :ifop,
       body: [predicate, truthy, falsy],
-      loc: Location.range(from: predicate[:loc], to: falsy[:loc])
+      loc: predicate[:loc].to(falsy[:loc])
     }
   end
 
@@ -1639,7 +1639,7 @@ class Prettier::Parser < Ripper
     {
       type: :if_mod,
       body: [predicate, statement],
-      loc: Location.range(from: statement[:loc], to: predicate[:loc])
+      loc: statement[:loc].to(predicate[:loc])
     }
   end
 
@@ -1702,7 +1702,7 @@ class Prettier::Parser < Ripper
     {
       type: :in,
       body: [pattern, stmts, consequent],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1747,7 +1747,7 @@ class Prettier::Parser < Ripper
   # method definition that accepts all remaining keyword parameters.
   def on_kwrest_param(ident)
     location = find_scanner_event(:@op, '**')[:loc]
-    location = Location.range(from: location, to: ident[:loc]) if ident
+    location = location.to(ident[:loc]) if ident
 
     { type: :kwrest_param, body: [ident], loc: location }
   end
@@ -1818,7 +1818,7 @@ class Prettier::Parser < Ripper
     {
       type: :lambda,
       body: [params, stmts],
-      loc: Location.range(from: beging[:loc], to: closing[:loc])
+      loc: beging[:loc].to(closing[:loc])
     }
   end
 
@@ -1894,7 +1894,7 @@ class Prettier::Parser < Ripper
     {
       type: :massign,
       body: [left, right],
-      loc: Location.range(from: left[:loc], to: right[:loc])
+      loc: left[:loc].to(right[:loc])
     }
   end
 
@@ -1910,7 +1910,7 @@ class Prettier::Parser < Ripper
         # straight from the fcall.
         fcall[:loc]
       else
-        Location.range(from: fcall[:loc], to: arg_paren[:loc])
+        fcall[:loc].to(arg_paren[:loc])
       end
     
     { type: :method_add_arg, body: [fcall, arg_paren], loc: location }
@@ -1923,7 +1923,7 @@ class Prettier::Parser < Ripper
     {
       type: :method_add_block,
       body: [method_add_arg, block],
-      loc: Location.range(from: method_add_arg[:loc], to: block[:loc])
+      loc: method_add_arg[:loc].to(block[:loc])
     }
   end
 
@@ -1948,7 +1948,7 @@ class Prettier::Parser < Ripper
       {
         type: :mlhs,
         body: mlhs[:body] << part,
-        loc: Location.range(from: mlhs[:loc], to: part[:loc])
+        loc: mlhs[:loc].to(part[:loc])
       }
     end
   end
@@ -1962,7 +1962,7 @@ class Prettier::Parser < Ripper
     {
       type: :mlhs_add_post,
       body: [mlhs_add_star, mlhs],
-      loc: Location.range(from: mlhs_add_star[:loc], to: mlhs[:loc])
+      loc: mlhs_add_star[:loc].to(mlhs[:loc])
     }
   end
 
@@ -1977,7 +1977,7 @@ class Prettier::Parser < Ripper
     {
       type: :mlhs_add_star,
       body: [mlhs, part],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -1995,7 +1995,7 @@ class Prettier::Parser < Ripper
     {
       type: :mlhs_paren,
       body: [contents],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -2011,7 +2011,7 @@ class Prettier::Parser < Ripper
     {
       type: :module,
       body: [const, bodystmt],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -2036,7 +2036,7 @@ class Prettier::Parser < Ripper
       {
         type: mrhs[:type],
         body: mrhs[:body] << part,
-        loc: Location.range(from: mrhs[:loc], to: part[:loc])
+        loc: mrhs[:loc].to(part[:loc])
       }
     end
   end
@@ -2051,7 +2051,7 @@ class Prettier::Parser < Ripper
     {
       type: :mrhs_add_star,
       body: [mrhs, part],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -2076,7 +2076,7 @@ class Prettier::Parser < Ripper
     {
       type: :next,
       body: [args_add_block],
-      loc: Location.range(from: event[:loc], to: args_add_block[:loc])
+      loc: event[:loc].to(args_add_block[:loc])
     }
   end
 
@@ -2128,7 +2128,7 @@ class Prettier::Parser < Ripper
     {
       type: :opassign,
       body: [left, oper, right],
-      loc: Location.range(from: left[:loc], to: right[:loc])
+      loc: left[:loc].to(right[:loc])
     }
   end
 
@@ -2155,7 +2155,7 @@ class Prettier::Parser < Ripper
     flattened = types.flatten(2).select { |type| type.is_a?(Hash) }
     location =
       if flattened.any?
-        Location.range(from: flattened[0][:loc], to: flattened[-1][:loc])
+        flattened[0][:loc].to(flattened[-1][:loc])
       else
         Location.fixed(line: lineno, char: char_pos)
       end
@@ -2185,7 +2185,7 @@ class Prettier::Parser < Ripper
       type: :paren,
       lparen: lparen,
       body: [contents],
-      loc: Location.range(from: lparen[:loc], to: rparen[:loc])
+      loc: lparen[:loc].to(rparen[:loc])
     }
   end
 
@@ -2262,7 +2262,7 @@ class Prettier::Parser < Ripper
     {
       type: :qsymbols,
       body: qsymbols[:body] << tstring_content,
-      loc: Location.range(from: qsymbols[:loc], to: tstring_content[:loc])
+      loc: qsymbols[:loc].to(tstring_content[:loc])
     }
   end
 
@@ -2300,7 +2300,7 @@ class Prettier::Parser < Ripper
     {
       type: :qwords,
       body: qwords[:body] << tstring_content,
-      loc: Location.range(from: qwords[:loc], to: tstring_content[:loc])
+      loc: qwords[:loc].to(tstring_content[:loc])
     }
   end
 
@@ -2360,7 +2360,7 @@ class Prettier::Parser < Ripper
       type: :regexp,
       body: regexp[:body] << piece,
       beging: regexp[:beging],
-      loc: Location.range(from: regexp[:loc], to: piece[:loc])
+      loc: regexp[:loc].to(piece[:loc])
     }
   end
 
@@ -2399,7 +2399,7 @@ class Prettier::Parser < Ripper
       body: regexp[:body],
       beging: regexp[:beging],
       ending: ending[:body],
-      loc: Location.range(from: regexp[:loc], to: ending[:loc])
+      loc: regexp[:loc].to(ending[:loc])
     }
   end
 
@@ -2491,7 +2491,7 @@ class Prettier::Parser < Ripper
     {
       type: :rescue_mod,
       body: [statement, rescued],
-      loc: Location.range(from: statement[:loc], to: rescued[:loc])
+      loc: statement[:loc].to(rescued[:loc])
     }
   end
 
@@ -2501,7 +2501,7 @@ class Prettier::Parser < Ripper
   # is omitted, then we're just using the plain operator.
   def on_rest_param(ident)
     location = find_scanner_event(:@op, '*')[:loc]
-    location = Location.range(from: location, to: ident[:loc]) if ident
+    location = location.to(ident[:loc]) if ident
 
     { type: :rest_param, body: [ident], loc: location }
   end
@@ -2523,7 +2523,7 @@ class Prettier::Parser < Ripper
     {
       type: :return,
       body: [args_add_block],
-      loc: Location.range(from: event[:loc], to: args_add_block[:loc])
+      loc: event[:loc].to(args_add_block[:loc])
     }
   end
 
@@ -2569,7 +2569,7 @@ class Prettier::Parser < Ripper
     {
       type: :sclass,
       body: [target, bodystmt],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -2645,7 +2645,7 @@ class Prettier::Parser < Ripper
     def <<(statement)
       value[:loc] =
         if value[:body].any?
-          Location.range(from: value[:loc], to: statement[:loc])
+          value[:loc].to(statement[:loc])
         else
           statement[:loc]
         end
@@ -2691,7 +2691,7 @@ class Prettier::Parser < Ripper
     {
       type: :string,
       body: string[:body] << piece,
-      loc: Location.range(from: string[:loc], to: piece[:loc])
+      loc: string[:loc].to(piece[:loc])
     }
   end
 
@@ -2705,7 +2705,7 @@ class Prettier::Parser < Ripper
     {
       type: :string_concat,
       body: [left, right],
-      loc: Location.range(from: left[:loc], to: right[:loc])
+      loc: left[:loc].to(right[:loc])
     }
   end
 
@@ -2733,7 +2733,7 @@ class Prettier::Parser < Ripper
     {
       type: :string_dvar,
       body: [var_ref],
-      loc: Location.range(from: event[:loc], to: var_ref[:loc])
+      loc: event[:loc].to(var_ref[:loc])
     }
   end
 
@@ -2750,7 +2750,7 @@ class Prettier::Parser < Ripper
     {
       type: :string_embexpr,
       body: [stmts],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -2769,7 +2769,7 @@ class Prettier::Parser < Ripper
         type: :string_literal,
         body: string[:body],
         quote: beging[:body],
-        loc: Location.range(from: beging[:loc], to: ending[:loc])
+        loc: beging[:loc].to(ending[:loc])
       }
     end
   end
@@ -2784,7 +2784,7 @@ class Prettier::Parser < Ripper
     {
       type: :super,
       body: [contents],
-      loc: Location.range(from: event[:loc], to: contents[:loc])
+      loc: event[:loc].to(contents[:loc])
     }
   end
 
@@ -2834,7 +2834,7 @@ class Prettier::Parser < Ripper
       {
         type: :symbol_literal,
         body: contents[:body],
-        loc: Location.range(from: beging[:loc], to: contents[:loc])
+        loc: beging[:loc].to(contents[:loc])
       }
     end
   end
@@ -2847,7 +2847,7 @@ class Prettier::Parser < Ripper
     {
       type: :symbols,
       body: symbols[:body] << word_add,
-      loc: Location.range(from: symbols[:loc], to: word_add[:loc])
+      loc: symbols[:loc].to(word_add[:loc])
     }
   end
 
@@ -2916,7 +2916,7 @@ class Prettier::Parser < Ripper
     {
       type: :top_const_field,
       body: [const],
-      loc: Location.range(from: beging[:loc], to: const[:loc])
+      loc: beging[:loc].to(const[:loc])
     }
   end
 
@@ -2932,7 +2932,7 @@ class Prettier::Parser < Ripper
     {
       type: :top_const_ref,
       body: [const],
-      loc: Location.range(from: beging[:loc], to: const[:loc])
+      loc: beging[:loc].to(const[:loc])
     }
   end
 
@@ -2991,7 +2991,7 @@ class Prettier::Parser < Ripper
         oper: oper,
         body: [value],
         paren: paren,
-        loc: Location.range(from: node[:loc], to: ending[:loc])
+        loc: node[:loc].to(ending[:loc])
       }
     else
       # Special case instead of using find_scanner_event here. It turns out that
@@ -3010,7 +3010,7 @@ class Prettier::Parser < Ripper
         type: :unary,
         oper: oper[0],
         body: [value],
-        loc: Location.range(from: beging[:loc], to: value[:loc])
+        loc: beging[:loc].to(value[:loc])
       }
     end
   end
@@ -3025,7 +3025,7 @@ class Prettier::Parser < Ripper
     {
       type: :undef,
       body: symbol_literals,
-      loc: Location.range(from: event[:loc], to: symbol_literals.last[:loc])
+      loc: event[:loc].to(symbol_literals.last[:loc])
     }
   end
 
@@ -3042,7 +3042,7 @@ class Prettier::Parser < Ripper
     {
       type: :unless,
       body: [predicate, stmts, consequent],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -3055,7 +3055,7 @@ class Prettier::Parser < Ripper
     {
       type: :unless_mod,
       body: [predicate, statement],
-      loc: Location.range(from: statement[:loc], to: predicate[:loc])
+      loc: statement[:loc].to(predicate[:loc])
     }
   end
 
@@ -3078,7 +3078,7 @@ class Prettier::Parser < Ripper
     {
       type: :until,
       body: [predicate, stmts],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -3091,7 +3091,7 @@ class Prettier::Parser < Ripper
     {
       type: :until_mod,
       body: [predicate, statement],
-      loc: Location.range(from: statement[:loc], to: predicate[:loc])
+      loc: statement[:loc].to(predicate[:loc])
     }
   end
 
@@ -3108,7 +3108,7 @@ class Prettier::Parser < Ripper
     {
       type: :var_alias,
       body: [left, right],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -3184,7 +3184,7 @@ class Prettier::Parser < Ripper
     {
       type: :when,
       body: [predicate, stmts, consequent],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -3207,7 +3207,7 @@ class Prettier::Parser < Ripper
     {
       type: :while,
       body: [predicate, stmts],
-      loc: Location.range(from: beging[:loc], to: ending[:loc])
+      loc: beging[:loc].to(ending[:loc])
     }
   end
 
@@ -3220,7 +3220,7 @@ class Prettier::Parser < Ripper
     {
       type: :while_mod,
       body: [predicate, statement],
-      loc: Location.range(from: statement[:loc], to: predicate[:loc])
+      loc: statement[:loc].to(predicate[:loc])
     }
   end
 
@@ -3236,7 +3236,7 @@ class Prettier::Parser < Ripper
         # location information from the first piece.
         piece[:loc]
       else
-        Location.range(from: word[:loc], to: piece[:loc])
+        word[:loc].to(piece[:loc])
       end
 
     { type: :word, body: word[:body] << piece, loc: location }
@@ -3301,7 +3301,7 @@ class Prettier::Parser < Ripper
     {
       type: :words,
       body: words[:body] << word_add,
-      loc: Location.range(from: words[:loc], to: word_add[:loc])
+      loc: words[:loc].to(word_add[:loc])
     }
   end
 
@@ -3325,7 +3325,7 @@ class Prettier::Parser < Ripper
     {
       type: :xstring,
       body: xstring[:body] << piece,
-      loc: Location.range(from: xstring[:loc], to: piece[:loc])
+      loc: xstring[:loc].to(piece[:loc])
     }
   end
 
@@ -3383,7 +3383,7 @@ class Prettier::Parser < Ripper
       {
         type: :xstring_literal,
         body: xstring[:body],
-        loc: Location.range(from: xstring[:loc], to: ending[:loc])
+        loc: xstring[:loc].to(ending[:loc])
       }
     end
   end
@@ -3397,7 +3397,7 @@ class Prettier::Parser < Ripper
     {
       type: :yield,
       body: [args_add_block],
-      loc: Location.range(from: event[:loc], to: args_add_block[:loc])
+      loc: event[:loc].to(args_add_block[:loc])
     }
   end
 
