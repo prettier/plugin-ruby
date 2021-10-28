@@ -1,11 +1,15 @@
 import type { Plugin, Ruby, RequiredKeys } from "../types";
 import prettier from "../prettier";
+import { getEndChar, getStartChar } from "../ruby/location";
 
 const { group, hardline, indent, join, line } = prettier;
 
 function containedWithin(node: Ruby.Array | Ruby.Hash) {
   return function containedWithinNode(comment: Ruby.Comment) {
-    return comment.sc >= node.sc && comment.ec <= node.ec;
+    return (
+      getStartChar(comment.loc) >= getStartChar(node.loc) &&
+      getEndChar(comment.loc) <= getEndChar(node.loc)
+    );
   };
 }
 

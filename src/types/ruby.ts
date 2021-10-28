@@ -3,12 +3,12 @@
 
 // These are common additions to the various node types.
 type Comments = { comments?: Comment[] };
-type Location = { sl: number, el: number, sc: number, ec: number };
+export type Location = [number, number, number, number];
 
 // These are utility types used to construct the various node types.
-type ScannerEvent<T extends string> = { type: `@${T}`, body: string } & Comments & Location;
-type ParserEvent0<T extends string> = { type: T, body: string } & Comments & Location;
-type ParserEvent<T, V = Record<string, unknown>> = { type: T } & Comments & Location & V;
+type ScannerEvent<T extends string> = { type: `@${T}`, body: string, loc: Location } & Comments;
+type ParserEvent0<T extends string> = { type: T, body: string, loc: Location } & Comments;
+type ParserEvent<T, V = Record<string, unknown>> = { type: T, loc: Location } & Comments & V;
 
 // This is the main expression type that goes in places where the AST will
 // accept just about anything.
@@ -17,7 +17,7 @@ export type AnyNode = AccessCtrl | Alias | Aref | ArefField | ArgParen | Args | 
 
 // This is a special scanner event that contains a comment. It can be attached
 // to almost any kind of node, which is why it's pulled out here separately.
-type UndecoratedComment = { type: "@comment", value: string, inline: boolean } & Location;
+type UndecoratedComment = { type: "@comment", value: string, inline: boolean, loc: Location };
 
 // Prettier will attach various metadata to comment nodes, which we're adding in
 // to the type here.

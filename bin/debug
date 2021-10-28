@@ -5,6 +5,7 @@ require 'bundler/inline'
 gemfile do
   source 'https://rubygems.org'
   gem 'sinatra', require: 'sinatra/base'
+  gem 'webrick'
 end
 
 require_relative '../src/ruby/parser'
@@ -17,14 +18,10 @@ class App < Sinatra::Base
   end
 
   post '/ast' do
-    builder = Prettier::Parser.new(request.body.read)
-    response = builder.parse
-
-    if !response || builder.error?
-      halt 422
-    else
-      JSON.fast_generate(response)
-    end
+    response = Prettier::Parser.parse(request.body.read)
+    response ? JSON.fast_generate(response) : halt(422)
+  rescue Prettier::Parser::ParserError
+    halt 422
   end
 
   start!
@@ -122,10 +119,10 @@ const createTree = (parent, node) => {
   const button = document.createElement("button");
 
   button.onclick = highlight;
-  button.setAttribute("data-char-start", node.sc);
-  button.setAttribute("data-char-end", node.ec);
+  button.setAttribute("data-char-start", node.loc[1]);
+  button.setAttribute("data-char-end", node.loc[3]);
 
-  const label = `${node.type} (${node.sc}-${node.ec})`;
+  const label = `${node.type} (${node.loc[1]}-${node.loc[3]})`;
 
   if (node.type.startsWith("@")) {
     button.appendChild(document.createTextNode(`${label} = ${node.body}`));
