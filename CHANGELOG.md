@@ -6,12 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [2.0.0] - 2021-10-28
+
 ### Changed
 
 - [#1018](https://github.com/prettier/plugin-ruby/issues/1018) - rindek, kddnewton - Ensure brackets are used when matching an array pattern with a single element.
 - [#906](https://github.com/prettier/plugin-ruby/issues/906) - Hansenq, kddnewton - Turn off the `Style/MultilineBlockChain` rubocop rule in our shipped configuration because multiple chained method calls with blocks can potentially conflict with rubocop's desired output.
 
-## [2.0.0-rc4]
+## [2.0.0-rc4] - 2021-10-18
 
 ### Added
 
@@ -22,14 +24,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - [#1000](https://github.com/prettier/plugin-ruby/pull/1000) - nbudin, kddnewton - Fix for rescuing single top-level exceptions in `rescue` clauses.
 
-## [2.0.0-rc3]
+## [2.0.0-rc3] - 2021-10-01
 
 ### Changed
 
 - [#987](https://github.com/prettier/plugin-ruby/pull/9870) - valscion - Ignore stderr when checking for node <-> ruby connection clients, restoring the behavior of v1.x
 - [#989](https://github.com/prettier/plugin-ruby/issues/989) - hubertjakubiak, kddnewton - Make sure comments after the keyword/lbrace are not moved inside the body of the statements of do and brace blocks.
 
-## [2.0.0-rc2]
+## [2.0.0-rc2] - 2021-09-30
 
 ### Added
 
@@ -40,7 +42,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - [#943](https://github.com/prettier/plugin-ruby/issues/943) - valscion, kddnewton - Trailing call operators that are followed by comments should stay on the first line.
 
-## [2.0.0-rc1]
+## [2.0.0-rc1] - 2021-09-30
 
 ### Added
 
@@ -1185,7 +1187,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc4...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc4...v2.0.0
 [2.0.0-rc4]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc3...v2.0.0-rc4
 [2.0.0-rc3]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc2...v2.0.0-rc3
 [2.0.0-rc2]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc1...v2.0.0-rc2
