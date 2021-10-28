@@ -88,12 +88,7 @@ class Prettier::Parser < Ripper
     end
 
     def self.fixed(line:, char:)
-      new(
-        start_line: line,
-        start_char: char,
-        end_line: line,
-        end_char: char
-      )
+      new(start_line: line, start_char: char, end_line: line, end_char: char)
     end
   end
 
@@ -273,7 +268,8 @@ class Prettier::Parser < Ripper
   def find_colon2_before(const)
     index =
       scanner_events.rindex do |event|
-        event[:type] == :@op && event[:body] == '::' && event[:loc].start_char < const[:loc].start_char
+        event[:type] == :@op && event[:body] == '::' &&
+          event[:loc].start_char < const[:loc].start_char
       end
 
     scanner_events[index]
@@ -313,14 +309,13 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.bind(find_next_statement_start(beging[:loc].end_char), ending[:loc].start_char)
+    stmts.bind(
+      find_next_statement_start(beging[:loc].end_char),
+      ending[:loc].start_char
+    )
     keyword = find_scanner_event(:@kw, 'BEGIN')
 
-    {
-      type: :BEGIN,
-      body: [beging, stmts],
-      loc: keyword[:loc].to(ending[:loc])
-    }
+    { type: :BEGIN, body: [beging, stmts], loc: keyword[:loc].to(ending[:loc]) }
   end
 
   # CHAR is a parser event that represents a single codepoint in the script
@@ -355,14 +350,13 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@lbrace)
     ending = find_scanner_event(:@rbrace)
 
-    stmts.bind(find_next_statement_start(beging[:loc].end_char), ending[:loc].start_char)
+    stmts.bind(
+      find_next_statement_start(beging[:loc].end_char),
+      ending[:loc].start_char
+    )
     keyword = find_scanner_event(:@kw, 'END')
 
-    {
-      type: :END,
-      body: [beging, stmts],
-      loc: keyword[:loc].to(ending[:loc])
-    }
+    { type: :END, body: [beging, stmts], loc: keyword[:loc].to(ending[:loc]) }
   end
 
   # __END__ is a scanner event that represents __END__ syntax, which allows
@@ -393,11 +387,7 @@ class Prettier::Parser < Ripper
     paren = source[beging[:loc].end_char...left[:loc].start_char].include?('(')
     ending = paren ? find_scanner_event(:@rparen) : right
 
-    {
-      type: :alias,
-      body: [left, right],
-      loc: beging[:loc].to(ending[:loc])
-    }
+    { type: :alias, body: [left, right], loc: beging[:loc].to(ending[:loc]) }
   end
 
   # aref is a parser event when you're pulling a value out of a collection at a
@@ -470,13 +460,10 @@ class Prettier::Parser < Ripper
     # If the arguments exceed the ending of the parentheses, then we know we
     # have a heredoc in the arguments, and we need to use the bounds of the
     # arguments to determine how large the arg_paren is.
-    ending = (args && args[:loc].end_line > rparen[:loc].end_line) ? args : rparen
+    ending =
+      (args && args[:loc].end_line > rparen[:loc].end_line) ? args : rparen
 
-    {
-      type: :arg_paren,
-      body: [args],
-      loc: beging[:loc].to(ending[:loc])
-    }
+    { type: :arg_paren, body: [args], loc: beging[:loc].to(ending[:loc]) }
   end
 
   # args_add is a parser event that represents a single argument inside a list
@@ -532,22 +519,14 @@ class Prettier::Parser < Ripper
   def on_args_forward
     event = find_scanner_event(:@op, '...')
 
-    {
-      type: :args_forward,
-      body: event[:body],
-      loc: event[:loc]
-    }
+    { type: :args_forward, body: event[:body], loc: event[:loc] }
   end
 
   # args_new is a parser event that represents the beginning of a list of
   # arguments to any method call or an array. It can be followed by any
   # number of args_add events, which we'll append onto an array body.
   def on_args_new
-    {
-      type: :args,
-      body: [],
-      loc: Location.fixed(line: lineno, char: char_pos)
-    }
+    { type: :args, body: [], loc: Location.fixed(line: lineno, char: char_pos) }
   end
 
   # Array nodes can contain a myriad of subnodes because of the special
@@ -559,20 +538,12 @@ class Prettier::Parser < Ripper
       beging = find_scanner_event(:@lbracket)
       ending = find_scanner_event(:@rbracket)
 
-      {
-        type: :array,
-        body: [contents],
-        loc: beging[:loc].to(ending[:loc])
-      }
+      { type: :array, body: [contents], loc: beging[:loc].to(ending[:loc]) }
     else
       ending = find_scanner_event(:@tstring_end)
       contents[:loc] = contents[:loc].to(ending[:loc])
 
-      {
-        type: :array,
-        body: [contents],
-        loc: contents[:loc]
-      }
+      { type: :array, body: [contents], loc: contents[:loc] }
     end
   end
 
@@ -592,22 +563,14 @@ class Prettier::Parser < Ripper
   # variable or constant. It accepts as arguments the left side of the
   # expression before the equals sign and the right side of the expression.
   def on_assign(left, right)
-    {
-      type: :assign,
-      body: [left, right],
-      loc: left[:loc].to(right[:loc])
-    }
+    { type: :assign, body: [left, right], loc: left[:loc].to(right[:loc]) }
   end
 
   # assoc_new is a parser event that contains a key-value pair within a
   # hash. It is a child event of either an assoclist_from_args or a
   # bare_assoc_hash.
   def on_assoc_new(key, value)
-    {
-      type: :assoc_new,
-      body: [key, value],
-      loc: key[:loc].to(value[:loc])
-    }
+    { type: :assoc_new, body: [key, value], loc: key[:loc].to(value[:loc]) }
   end
 
   # assoc_splat is a parser event that represents splatting a value into a
@@ -686,11 +649,7 @@ class Prettier::Parser < Ripper
 
     bodystmt.bind(beging[:loc].end_char, end_char)
 
-    {
-      type: :begin,
-      body: [bodystmt],
-      loc: beging[:loc].to(bodystmt[:loc])
-    }
+    { type: :begin, body: [bodystmt], loc: beging[:loc].to(bodystmt[:loc]) }
   end
 
   # binary is a parser event that represents a binary operation between two
@@ -733,11 +692,7 @@ class Prettier::Parser < Ripper
   def on_blockarg(ident)
     event = find_scanner_event(:@op, '&')
 
-    {
-      type: :blockarg,
-      body: [ident],
-      loc: event[:loc].to(ident[:loc])
-    }
+    { type: :blockarg, body: [ident], loc: event[:loc].to(ident[:loc]) }
   end
 
   # bodystmt can't actually determine its bounds appropriately because it
@@ -757,12 +712,17 @@ class Prettier::Parser < Ripper
 
       # Here we're going to determine the bounds for the stmts
       consequent = parts[1..-1].compact.first
-      value[:body][0].bind(start_char, consequent ? consequent[:loc].start_char : end_char)
+      value[:body][0].bind(
+        start_char,
+        consequent ? consequent[:loc].start_char : end_char
+      )
 
       # Next we're going to determine the rescue clause if there is one
       if parts[1]
         consequent = parts[2..-1].compact.first
-        value[:body][1].bind_end(consequent ? consequent[:loc].start_char : end_char)
+        value[:body][1].bind_end(
+          consequent ? consequent[:loc].start_char : end_char
+        )
       end
     end
   end
@@ -816,11 +776,7 @@ class Prettier::Parser < Ripper
       # comment right after it. In that case we can just use the location
       # information straight from the keyword.
 
-      {
-        type: :break,
-        body: [args_add_block],
-        loc: beging[:loc]
-      }
+      { type: :break, body: [args_add_block], loc: beging[:loc] }
     else
       {
         type: :break,
@@ -923,11 +879,7 @@ class Prettier::Parser < Ripper
   # no parentheses. It accepts as arguments the name of the method and the
   # arguments being passed to the method.
   def on_command(ident, args)
-    {
-      type: :command,
-      body: [ident, args],
-      loc: ident[:loc].to(args[:loc])
-    }
+    { type: :command, body: [ident, args], loc: ident[:loc].to(args[:loc]) }
   end
 
   # command_call is a parser event representing a method call on an object
@@ -1014,11 +966,7 @@ class Prettier::Parser < Ripper
   #     class Foo; end
   #
   def on_const_ref(const)
-    {
-      type: :const_ref,
-      body: [const],
-      loc: const[:loc]
-    }
+    { type: :const_ref, body: [const], loc: const[:loc] }
   end
 
   # cvar is a scanner event that represents the use of a class variable.
@@ -1089,7 +1037,10 @@ class Prettier::Parser < Ripper
     end
 
     ending = find_scanner_event(:@kw, 'end')
-    bodystmt.bind(find_next_statement_start(params[:loc].end_char), ending[:loc].start_char)
+    bodystmt.bind(
+      find_next_statement_start(params[:loc].end_char),
+      ending[:loc].start_char
+    )
 
     {
       type: :def,
@@ -1135,7 +1086,10 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'def')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind(find_next_statement_start(params[:loc].end_char), ending[:loc].start_char)
+    bodystmt.bind(
+      find_next_statement_start(params[:loc].end_char),
+      ending[:loc].start_char
+    )
 
     {
       type: :defs,
@@ -1154,11 +1108,7 @@ class Prettier::Parser < Ripper
     paren = source[beging[:loc].end_char...value[:loc].start_char].include?('(')
     ending = paren ? find_scanner_event(:@rparen) : value
 
-    {
-      type: :defined,
-      body: [value],
-      loc: beging[:loc].to(ending[:loc])
-    }
+    { type: :defined, body: [value], loc: beging[:loc].to(ending[:loc]) }
   end
 
   # do_block is a parser event that represents passing a block to a method
@@ -1191,11 +1141,7 @@ class Prettier::Parser < Ripper
     beging = left || operator
     ending = right || operator
 
-    {
-      type: :dot2,
-      body: [left, right],
-      loc: beging[:loc].to(ending[:loc])
-    }
+    { type: :dot2, body: [left, right], loc: beging[:loc].to(ending[:loc]) }
   end
 
   # dot3 is a parser event that represents using the ... operator between two
@@ -1207,11 +1153,7 @@ class Prettier::Parser < Ripper
     beging = left || operator
     ending = right || operator
 
-    {
-      type: :dot3,
-      body: [left, right],
-      loc: beging[:loc].to(ending[:loc])
-    }
+    { type: :dot3, body: [left, right], loc: beging[:loc].to(ending[:loc]) }
   end
 
   # A dyna_symbol is a parser event that represents a symbol literal that
@@ -1277,11 +1219,7 @@ class Prettier::Parser < Ripper
 
     stmts.bind(beging[:loc].end_char, ending[:loc].start_char)
 
-    {
-      type: :else,
-      body: [stmts],
-      loc: beging[:loc].to(ending[:loc])
-    }
+    { type: :else, body: [stmts], loc: beging[:loc].to(ending[:loc]) }
   end
 
   # elsif is a parser event that represents another clause in an if chain.
@@ -1329,18 +1267,17 @@ class Prettier::Parser < Ripper
   def on_embdoc_end(value)
     location = @embdoc[:loc]
 
-    @comments <<
-      {
-        type: :@embdoc,
-        value: @embdoc[:value] << value.chomp,
-        loc:
-          Location.new(
-            start_line: location.start_line,
-            start_char: location.start_char,
-            end_line: lineno,
-            end_char: char_pos + value.length - 1
-          )
-      }
+    @comments << {
+      type: :@embdoc,
+      value: @embdoc[:value] << value.chomp,
+      loc:
+        Location.new(
+          start_line: location.start_line,
+          start_char: location.start_char,
+          end_line: lineno,
+          end_char: char_pos + value.length - 1
+        )
+    }
 
     @embdoc = nil
   end
@@ -1406,13 +1343,12 @@ class Prettier::Parser < Ripper
       end
 
     ending = scanner_events[index]
-    stmts.bind(find_next_statement_start(beging[:loc].end_char), ending[:loc].start_char)
+    stmts.bind(
+      find_next_statement_start(beging[:loc].end_char),
+      ending[:loc].start_char
+    )
 
-    {
-      type: :ensure,
-      body: [beging, stmts],
-      loc: beging[:loc].to(ending[:loc])
-    }
+    { type: :ensure, body: [beging, stmts], loc: beging[:loc].to(ending[:loc]) }
   end
 
   # An excessed_comma is a special kind of parser event that represents a comma
@@ -1438,11 +1374,7 @@ class Prettier::Parser < Ripper
   #     foo.x = 1
   #
   def on_field(left, oper, right)
-    {
-      type: :field,
-      body: [left, oper, right],
-      loc: left[:loc].to(right[:loc])
-    }
+    { type: :field, body: [left, oper, right], loc: left[:loc].to(right[:loc]) }
   end
 
   # float is a scanner event that represents a floating point value literal.
@@ -1481,7 +1413,8 @@ class Prettier::Parser < Ripper
     # Consume the do keyword if it exists so that it doesn't get confused for
     # some other block
     do_event = find_scanner_event(:@kw, 'do', consume: false)
-    if do_event && do_event[:loc].start_char > enum[:loc].end_char && do_event[:loc].end_char < ending[:loc].start_char
+    if do_event && do_event[:loc].start_char > enum[:loc].end_char &&
+         do_event[:loc].end_char < ending[:loc].start_char
       scanner_events.delete(do_event)
     end
 
@@ -1546,7 +1479,11 @@ class Prettier::Parser < Ripper
     # there are comments after the declaration of a heredoc, they get printed.
     node = {
       type: :heredoc,
-      beging: { type: :@heredoc_beg, body: beging, loc: location },
+      beging: {
+        type: :@heredoc_beg,
+        body: beging,
+        loc: location
+      },
       loc: location
     }
 
@@ -1891,11 +1828,7 @@ class Prettier::Parser < Ripper
     comma_range = left[:loc].end_char...right[:loc].start_char
     left[:comma] = true if source[comma_range].strip.start_with?(',')
 
-    {
-      type: :massign,
-      body: [left, right],
-      loc: left[:loc].to(right[:loc])
-    }
+    { type: :massign, body: [left, right], loc: left[:loc].to(right[:loc]) }
   end
 
   # method_add_arg is a parser event that represents a method call with
@@ -1912,7 +1845,7 @@ class Prettier::Parser < Ripper
       else
         fcall[:loc].to(arg_paren[:loc])
       end
-    
+
     { type: :method_add_arg, body: [fcall, arg_paren], loc: location }
   end
 
@@ -1931,11 +1864,7 @@ class Prettier::Parser < Ripper
   # side of a multiple assignment. It is followed by any number of mlhs_add
   # nodes that each represent another variable being assigned.
   def on_mlhs_new
-    {
-      type: :mlhs,
-      body: [],
-      loc: Location.fixed(line: lineno, char: char_pos)
-    }
+    { type: :mlhs, body: [], loc: Location.fixed(line: lineno, char: char_pos) }
   end
 
   # An mlhs_add is a parser event that represents adding another variable
@@ -1945,11 +1874,7 @@ class Prettier::Parser < Ripper
     if mlhs[:body].empty?
       { type: :mlhs, body: [part], loc: part[:loc] }
     else
-      {
-        type: :mlhs,
-        body: mlhs[:body] << part,
-        loc: mlhs[:loc].to(part[:loc])
-      }
+      { type: :mlhs, body: mlhs[:body] << part, loc: mlhs[:loc].to(part[:loc]) }
     end
   end
 
@@ -1992,11 +1917,7 @@ class Prettier::Parser < Ripper
     comma_range = beging[:loc].end_char...ending[:loc].start_char
     contents[:comma] = true if source[comma_range].strip.end_with?(',')
 
-    {
-      type: :mlhs_paren,
-      body: [contents],
-      loc: beging[:loc].to(ending[:loc])
-    }
+    { type: :mlhs_paren, body: [contents], loc: beging[:loc].to(ending[:loc]) }
   end
 
   # module is a parser event that represents defining a module. It accepts
@@ -2006,7 +1927,10 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'module')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind(find_next_statement_start(const[:loc].end_char), ending[:loc].start_char)
+    bodystmt.bind(
+      find_next_statement_start(const[:loc].end_char),
+      ending[:loc].start_char
+    )
 
     {
       type: :module,
@@ -2020,11 +1944,7 @@ class Prettier::Parser < Ripper
   # be followed by any number of mrhs_add nodes that we'll build up into an
   # array body.
   def on_mrhs_new
-    {
-      type: :mrhs,
-      body: [],
-      loc: Location.fixed(line: lineno, char: char_pos)
-    }
+    { type: :mrhs, body: [], loc: Location.fixed(line: lineno, char: char_pos) }
   end
 
   # An mrhs_add is a parser event that represents adding another value onto
@@ -2564,7 +2484,10 @@ class Prettier::Parser < Ripper
     beging = find_scanner_event(:@kw, 'class')
     ending = find_scanner_event(:@kw, 'end')
 
-    bodystmt.bind(find_next_statement_start(target[:loc].end_char), ending[:loc].start_char)
+    bodystmt.bind(
+      find_next_statement_start(target[:loc].end_char),
+      ending[:loc].start_char
+    )
 
     {
       type: :sclass,
@@ -2644,11 +2567,7 @@ class Prettier::Parser < Ripper
 
     def <<(statement)
       value[:loc] =
-        if value[:body].any?
-          value[:loc].to(statement[:loc])
-        else
-          statement[:loc]
-        end
+        value[:body].any? ? value[:loc].to(statement[:loc]) : statement[:loc]
 
       value[:body] << statement
       self
@@ -2660,14 +2579,16 @@ class Prettier::Parser < Ripper
       attachable =
         parser.comments.select do |comment|
           comment[:type] == :@comment && !comment[:inline] &&
-            start_char <= comment[:loc].start_char && end_char >= comment[:loc].end_char &&
+            start_char <= comment[:loc].start_char &&
+            end_char >= comment[:loc].end_char &&
             !comment[:value].include?('prettier-ignore')
         end
 
       return if attachable.empty?
 
       parser.comments -= attachable
-      value[:body] = (value[:body] + attachable).sort_by! { |node| node[:loc].start_char }
+      value[:body] =
+        (value[:body] + attachable).sort_by! { |node| node[:loc].start_char }
     end
   end
 
@@ -2730,11 +2651,7 @@ class Prettier::Parser < Ripper
   def on_string_dvar(var_ref)
     event = find_scanner_event(:@embvar)
 
-    {
-      type: :string_dvar,
-      body: [var_ref],
-      loc: event[:loc].to(var_ref[:loc])
-    }
+    { type: :string_dvar, body: [var_ref], loc: event[:loc].to(var_ref[:loc]) }
   end
 
   # string_embexpr is a parser event that represents interpolated content.
@@ -2747,11 +2664,7 @@ class Prettier::Parser < Ripper
 
     stmts.bind(beging[:loc].end_char, ending[:loc].start_char)
 
-    {
-      type: :string_embexpr,
-      body: [stmts],
-      loc: beging[:loc].to(ending[:loc])
-    }
+    { type: :string_embexpr, body: [stmts], loc: beging[:loc].to(ending[:loc]) }
   end
 
   # String literals are either going to be a normal string or they're going
@@ -2781,11 +2694,7 @@ class Prettier::Parser < Ripper
   def on_super(contents)
     event = find_scanner_event(:@kw, 'super')
 
-    {
-      type: :super,
-      body: [contents],
-      loc: event[:loc].to(contents[:loc])
-    }
+    { type: :super, body: [contents], loc: event[:loc].to(contents[:loc]) }
   end
 
   # symbeg is a scanner event that represents the beginning of a symbol literal.
@@ -2814,11 +2723,7 @@ class Prettier::Parser < Ripper
     # from the stack to make sure it doesn't screw things up.
     scanner_events.pop
 
-    {
-      type: :symbol,
-      body: [ident],
-      loc: ident[:loc]
-    }
+    { type: :symbol, body: [ident], loc: ident[:loc] }
   end
 
   # A symbol_literal represents a symbol in the system with no interpolation
@@ -2913,11 +2818,7 @@ class Prettier::Parser < Ripper
   def on_top_const_field(const)
     beging = find_colon2_before(const)
 
-    {
-      type: :top_const_field,
-      body: [const],
-      loc: beging[:loc].to(const[:loc])
-    }
+    { type: :top_const_field, body: [const], loc: beging[:loc].to(const[:loc]) }
   end
 
   # A top_const_ref is a parser event that is a very similar to
@@ -2929,11 +2830,7 @@ class Prettier::Parser < Ripper
   def on_top_const_ref(const)
     beging = find_colon2_before(const)
 
-    {
-      type: :top_const_ref,
-      body: [const],
-      loc: beging[:loc].to(const[:loc])
-    }
+    { type: :top_const_ref, body: [const], loc: beging[:loc].to(const[:loc]) }
   end
 
   # tstring_beg is a scanner event that represents the beginning of a string
@@ -3000,7 +2897,8 @@ class Prettier::Parser < Ripper
       # stack. So we need to explicitly disallow those operators.
       index =
         scanner_events.rindex do |scanner_event|
-          scanner_event[:type] == :@op && scanner_event[:loc].start_char < value[:loc].start_char &&
+          scanner_event[:type] == :@op &&
+            scanner_event[:loc].start_char < value[:loc].start_char &&
             !%w[.. ...].include?(scanner_event[:body])
         end
 
@@ -3069,7 +2967,8 @@ class Prettier::Parser < Ripper
     # Consume the do keyword if it exists so that it doesn't get confused for
     # some other block
     do_event = find_scanner_event(:@kw, 'do', consume: false)
-    if do_event && do_event[:loc].start_char > predicate[:loc].end_char && do_event[:loc].end_char < ending[:loc].start_char
+    if do_event && do_event[:loc].start_char > predicate[:loc].end_char &&
+         do_event[:loc].end_char < ending[:loc].start_char
       scanner_events.delete(do_event)
     end
 
@@ -3198,7 +3097,8 @@ class Prettier::Parser < Ripper
     # Consume the do keyword if it exists so that it doesn't get confused for
     # some other block
     do_event = find_scanner_event(:@kw, 'do', consume: false)
-    if do_event && do_event[:loc].start_char > predicate[:loc].end_char && do_event[:loc].end_char < ending[:loc].start_char
+    if do_event && do_event[:loc].start_char > predicate[:loc].end_char &&
+         do_event[:loc].end_char < ending[:loc].start_char
       scanner_events.delete(do_event)
     end
 

@@ -369,7 +369,12 @@ class MetadataTest < Minitest::Test
   end
 
   def test_fcall
-    assert_node_metadata(:fcall, parse('foo(bar)').dig(:body, 0), start_char: 0, end_char: 3)
+    assert_node_metadata(
+      :fcall,
+      parse('foo(bar)').dig(:body, 0),
+      start_char: 0,
+      end_char: 3
+    )
   end
 
   def test_field
@@ -848,7 +853,15 @@ class MetadataTest < Minitest::Test
     )
   end
 
-  def assert_node_metadata(type, node, start_char:, end_char:, start_line: 1, end_line: 1, **metadata)
+  def assert_node_metadata(
+    type,
+    node,
+    start_char:,
+    end_char:,
+    start_line: 1,
+    end_line: 1,
+    **metadata
+  )
     assert_equal(type, node[:type])
 
     assert_equal(start_line, node[:loc].start_line)
@@ -856,9 +869,7 @@ class MetadataTest < Minitest::Test
     assert_equal(end_line, node[:loc].end_line)
     assert_equal(end_char, node[:loc].end_char)
 
-    metadata.each do |key, value|
-      assert_equal(value, node[key])
-    end
+    metadata.each { |key, value| assert_equal(value, node[key]) }
   end
 
   def parse(ruby)

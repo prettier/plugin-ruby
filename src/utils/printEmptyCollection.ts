@@ -6,7 +6,10 @@ const { group, hardline, indent, join, line } = prettier;
 
 function containedWithin(node: Ruby.Array | Ruby.Hash) {
   return function containedWithinNode(comment: Ruby.Comment) {
-    return getStartChar(comment.loc) >= getStartChar(node.loc) && getEndChar(comment.loc) <= getEndChar(node.loc);
+    return (
+      getStartChar(comment.loc) >= getStartChar(node.loc) &&
+      getEndChar(comment.loc) <= getEndChar(node.loc)
+    );
   };
 }
 
