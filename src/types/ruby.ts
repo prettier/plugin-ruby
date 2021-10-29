@@ -174,10 +174,10 @@ export type Blockarg = ParserEvent<"blockarg", { name: Identifier }>;
 export type Def = ParserEvent<"def", { name: DefName, params: Params | Paren, bodystmt: Bodystmt }>;
 export type Defs = ParserEvent<"defs", { target: AnyNode, operator: Op | Period, name: DefName, params: Params | Paren, bodystmt: Bodystmt }>;
 export type Defsl = ParserEvent<"defsl", { name: DefName, paren: null | ParenAroundParams, stmt: AnyNode }>;
-export type KeywordRestParam = ParserEvent<"kwrest_param", { body: [null | Identifier] }>;
+export type KeywordRestParam = ParserEvent<"kwrest_param", { name: null | Identifier }>;
 export type Lambda = ParserEvent<"lambda", { body: [Params | ParenAroundParams, Bodystmt | Stmts] }>;
 export type Params = ParserEvent<"params", { body: [Identifier[], null | [Identifier, AnyNode][], null | ArgsForward | ExcessedComma | RestParam, Identifier[], null | [Label, AnyNode][], null | "nil" | KeywordRestParam, null | Blockarg] }>;
-export type RestParam = ParserEvent<"rest_param", { body: [null | Identifier] }>;
+export type RestParam = ParserEvent<"rest_param", { name: null | Identifier }>;
 
 // These are various parser events for method calls.
 export type CallOperator = Op | Period | "::";

@@ -1782,11 +1782,11 @@ class Prettier::Parser < Ripper
 
   # kwrest_param is a parser event that represents defining a parameter in a
   # method definition that accepts all remaining keyword parameters.
-  def on_kwrest_param(ident)
+  def on_kwrest_param(name)
     location = find_scanner_event(:@op, '**')[:loc]
-    location = location.to(ident[:loc]) if ident
+    location = location.to(name[:loc]) if name
 
-    { type: :kwrest_param, body: [ident], loc: location }
+    { type: :kwrest_param, name: name, loc: location }
   end
 
   # label is a scanner event that represents the use of an identifier to
@@ -2527,11 +2527,11 @@ class Prettier::Parser < Ripper
   # method definition that accepts all remaining positional parameters. It
   # accepts as an argument an optional identifier for the parameter. If it
   # is omitted, then we're just using the plain operator.
-  def on_rest_param(ident)
+  def on_rest_param(name)
     location = find_scanner_event(:@op, '*')[:loc]
-    location = location.to(ident[:loc]) if ident
+    location = location.to(name[:loc]) if name
 
-    { type: :rest_param, body: [ident], loc: location }
+    { type: :rest_param, name: name, loc: location }
   end
 
   # retry is a parser event that represents the bare retry keyword. It has

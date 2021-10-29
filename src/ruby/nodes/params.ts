@@ -4,13 +4,13 @@ import { literal } from "../../utils";
 
 const { group, hardline, join, indent, line, lineSuffix, softline } = prettier;
 
-function printRestParamSymbol(
-  symbol: string
-): Plugin.Printer<Ruby.KeywordRestParam | Ruby.RestParam> {
+type RestParam = Ruby.KeywordRestParam | Ruby.RestParam;
+
+function printRestParamSymbol(symbol: string): Plugin.Printer<RestParam> {
   return function printRestParamWithSymbol(path, opts, print) {
-    return path.getValue().body[0]
-      ? [symbol, path.call(print, "body", 0)]
-      : symbol;
+    const node = path.getValue();
+
+    return node.name ? [symbol, path.call(print, "name")] : symbol;
   };
 }
 

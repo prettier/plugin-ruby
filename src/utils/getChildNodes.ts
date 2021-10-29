@@ -125,6 +125,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.pred, node.tthy, node.flsy];
     case "if_mod":
       return [node.stmt, node.pred];
+    case "kwrest_param":
+      return [node.name];
     case "module":
       return [node.constant, node.bodystmt];
     case "next":
@@ -135,6 +137,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.stmts];
     case "rassign":
       return [node.value, node.operator, node.pattern];
+    case "rest_param":
+      return [node.name];
     case "return":
       return [node.args];
     case "sclass":
