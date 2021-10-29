@@ -16,6 +16,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.collection, node.index];
     case "aref_field":
       return [node.collection, node.index];
+    case "args_forward":
+      return [];
     case "aryptn":
       return [node.constant, ...node.reqs, node.rest, ...node.posts];
     case "assign":
@@ -145,10 +147,16 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [];
     case "rassign":
       return [node.value, node.operator, node.pattern];
+    case "redo":
+      return [];
     case "rest_param":
       return [node.name];
+    case "retry":
+      return [];
     case "return":
       return [node.args];
+    case "return0":
+      return [];
     case "sclass":
       return [node.target, node.bodystmt];
     case "symbols":
@@ -180,6 +188,10 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "while_mod":
       return [node.stmt, node.pred];
     case "words":
+      return [];
+    case "yield0":
+      return [];
+    case "zsuper":
       return [];
 
 

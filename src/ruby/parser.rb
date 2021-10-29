@@ -536,9 +536,9 @@ class Prettier::Parser < Ripper
   # args_forward is a parser event that represents forwarding all kinds of
   # arguments onto another method call.
   def on_args_forward
-    event = find_scanner_event(:@op, '...')
+    keyword = find_scanner_event(:@op, '...')
 
-    { type: :args_forward, body: event[:body], loc: event[:loc] }
+    { type: :args_forward, body: keyword[:body], loc: keyword[:loc] }
   end
 
   # args_new is a parser event that represents the beginning of a list of
@@ -2376,9 +2376,9 @@ class Prettier::Parser < Ripper
   # redo is a parser event that represents the bare redo keyword. It has no
   # body as it accepts no arguments.
   def on_redo
-    event = find_scanner_event(:@kw, 'redo')
+    keyword = find_scanner_event(:@kw, 'redo')
 
-    { type: :redo, body: event[:body], loc: event[:loc] }
+    { type: :redo, body: keyword[:body], loc: keyword[:loc] }
   end
 
   # regexp_add is a parser event that represents a piece of a regular expression
@@ -2540,9 +2540,9 @@ class Prettier::Parser < Ripper
   # retry is a parser event that represents the bare retry keyword. It has
   # no body as it accepts no arguments.
   def on_retry
-    event = find_scanner_event(:@kw, 'retry')
+    keyword = find_scanner_event(:@kw, 'retry')
 
-    { type: :retry, body: event[:body], loc: event[:loc] }
+    { type: :retry, body: keyword[:body], loc: keyword[:loc] }
   end
 
   # return is a parser event that represents using the return keyword with
@@ -2559,9 +2559,9 @@ class Prettier::Parser < Ripper
   # parser event, which is the version where you're returning one or more
   # values.
   def on_return0
-    event = find_scanner_event(:@kw, 'return')
+    keyword = find_scanner_event(:@kw, 'return')
 
-    { type: :return0, body: event[:body], loc: event[:loc] }
+    { type: :return0, body: keyword[:body], loc: keyword[:loc] }
   end
 
   # rparen is a scanner event that represents the use of a right parenthesis,
@@ -3431,9 +3431,9 @@ class Prettier::Parser < Ripper
   # parser event, which is the version where you're yielding one or more
   # values.
   def on_yield0
-    event = find_scanner_event(:@kw, 'yield')
+    keyword = find_scanner_event(:@kw, 'yield')
 
-    { type: :yield0, body: event[:body], loc: event[:loc] }
+    { type: :yield0, body: keyword[:body], loc: keyword[:loc] }
   end
 
   # zsuper is a parser event that represents the bare super keyword. It has
@@ -3441,8 +3441,8 @@ class Prettier::Parser < Ripper
   # parser event, which is the version where you're calling super with one
   # or more values.
   def on_zsuper
-    event = find_scanner_event(:@kw, 'super')
+    keyword = find_scanner_event(:@kw, 'super')
 
-    { type: :zsuper, body: event[:body], loc: event[:loc] }
+    { type: :zsuper, body: keyword[:body], loc: keyword[:loc] }
   end
 end
