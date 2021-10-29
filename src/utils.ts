@@ -2,6 +2,7 @@ export { default as containsAssignment } from "./utils/containsAssignment";
 export { default as getTrailingComma } from "./utils/getTrailingComma";
 export { default as isEmptyBodyStmt } from "./utils/isEmptyBodyStmt";
 export { default as isEmptyStmts } from "./utils/isEmptyStmts";
+export { default as getChildNodes } from "./utils/getChildNodes";
 export { default as hasAncestor } from "./utils/hasAncestor";
 export { default as inlineEnsureParens } from "./utils/inlineEnsureParens";
 export { default as literal } from "./utils/literal";

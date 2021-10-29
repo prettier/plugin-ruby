@@ -683,16 +683,21 @@ class Prettier::Parser < Ripper
 
   # binary is a parser event that represents a binary operation between two
   # values.
-  def on_binary(left, oper, right)
-    # On most Ruby implementations, oper is a Symbol that represents that
-    # operation being performed. For instance in the example `1 < 2`, the `oper`
-    # object would be `:<`. However, on JRuby, it's an `@op` node, so here we're
-    # going to explicitly convert it into the same normalized form.
-    oper = scanner_events.delete(oper)[:body] unless oper.is_a?(Symbol)
+  def on_binary(left, operator, right)
+    # On most Ruby implementations, operator is a Symbol that represents that
+    # operation being performed. For instance in the example `1 < 2`, the
+    # `operator` object would be `:<`. However, on JRuby, it's an `@op` node,
+    # so here we're going to explicitly convert it into the same normalized
+    # form.
+    unless operator.is_a?(Symbol)
+      operator = scanner_events.delete(operator)[:body]
+    end
 
     {
       type: :binary,
-      body: [left, oper, right],
+      left: left,
+      operator: operator,
+      right: right,
       loc: left[:loc].to(right[:loc])
     }
   end
@@ -1170,7 +1175,12 @@ class Prettier::Parser < Ripper
     beging = left || operator
     ending = right || operator
 
-    { type: :dot2, body: [left, right], loc: beging[:loc].to(ending[:loc]) }
+    {
+      type: :dot2,
+      left: left,
+      right: right,
+      loc: beging[:loc].to(ending[:loc])
+    }
   end
 
   # dot3 is a parser event that represents using the ... operator between two
@@ -1182,7 +1192,12 @@ class Prettier::Parser < Ripper
     beging = left || operator
     ending = right || operator
 
-    { type: :dot3, body: [left, right], loc: beging[:loc].to(ending[:loc]) }
+    {
+      type: :dot3,
+      left: left,
+      right: right,
+      loc: beging[:loc].to(ending[:loc])
+    }
   end
 
   # A dyna_symbol is a parser event that represents a symbol literal that

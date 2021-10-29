@@ -20,7 +20,7 @@ function canSkipParens(args: Ruby.Args | Ruby.ArgsAddStar) {
   const stmt = stmts.body[0];
 
   // return (a or b)
-  if (stmt.type === "binary" && ["and", "or"].includes(stmt.body[1])) {
+  if (stmt.type === "binary" && ["and", "or"].includes(stmt.operator)) {
     return false;
   }
 

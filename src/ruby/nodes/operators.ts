@@ -5,27 +5,27 @@ import { noIndent } from "../../utils";
 const { group, indent, line, softline } = prettier;
 
 export const printBinary: Plugin.Printer<Ruby.Binary> = (path, opts, print) => {
-  const [, operator, rightNode] = path.getValue().body;
-  const space = operator === "**" ? "" : " ";
+  const node = path.getValue();
+  const space = node.operator === "**" ? "" : " ";
 
-  if (noIndent.includes(rightNode.type)) {
+  if (noIndent.includes(node.right.type)) {
     return group([
-      group(path.call(print, "body", 0)),
+      group(path.call(print, "left")),
       space,
-      operator,
+      node.operator,
       space,
-      group(path.call(print, "body", 2))
+      group(path.call(print, "right"))
     ]);
   }
 
   return group([
-    group(path.call(print, "body", 0)),
+    group(path.call(print, "left")),
     space,
     group(
       indent([
-        operator,
+        node.operator,
         space === "" ? softline : line,
-        path.call(print, "body", 2)
+        path.call(print, "right")
       ])
     )
   ]);
@@ -34,24 +34,24 @@ export const printBinary: Plugin.Printer<Ruby.Binary> = (path, opts, print) => {
 // dot2 nodes are used with ranges (or flip-flops). They can optionally drop
 // their left side for beginless ranges or their right side for endless ranges.
 export const printDot2: Plugin.Printer<Ruby.Dot2> = (path, opts, print) => {
-  const [leftNode, rightNode] = path.getValue().body;
+  const node = path.getValue();
 
   return [
-    leftNode ? path.call(print, "body", 0) : "",
+    node.left ? path.call(print, "left") : "",
     "..",
-    rightNode ? path.call(print, "body", 1) : ""
+    node.right ? path.call(print, "right") : ""
   ];
 };
 
 // dot3 nodes are used with ranges (or flip-flops). They can optionally drop
 // their left side for beginless ranges or their right side for endless ranges.
 export const printDot3: Plugin.Printer<Ruby.Dot3> = (path, opts, print) => {
-  const [leftNode, rightNode] = path.getValue().body;
+  const node = path.getValue();
 
   return [
-    leftNode ? path.call(print, "body", 0) : "",
+    node.left ? path.call(print, "left") : "",
     "...",
-    rightNode ? path.call(print, "body", 1) : ""
+    node.right ? path.call(print, "right") : ""
   ];
 };
 

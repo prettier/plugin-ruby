@@ -195,14 +195,15 @@ export type MethodAddBlock = ParserEvent<"method_add_block", { body: [AnyNode, B
 export type VCall = ParserEvent<"vcall", { body: [Identifier] }>;
 
 // These are various parser events for statements you would find in a method body.
+type Dot = { left: AnyNode, right: AnyNode } | { left: null, right: AnyNode } | { left: AnyNode, right: null };
 export type Aref = ParserEvent<"aref", { collection: AnyNode, index: Args | ArgsAddBlock | null }>;
 export type BEGIN = ParserEvent<"BEGIN", { lbrace: Lbrace, stmts: Stmts }>;
-export type Binary = ParserEvent<"binary", { body: [AnyNode, string, AnyNode] }>;
+export type Binary = ParserEvent<"binary", { left: AnyNode, operator: string, right: AnyNode }>;
 export type ConstPathRef = ParserEvent<"const_path_ref", { body: [AnyNode, Const] }>;
 export type ConstRef = ParserEvent<"const_ref", { body: [Const] }>;
 export type Defined = ParserEvent<"defined", { body: [AnyNode] }>;
-export type Dot2 = ParserEvent<"dot2", { body: [AnyNode, null] | [null, AnyNode] | [AnyNode, AnyNode] }>;
-export type Dot3 = ParserEvent<"dot3", { body: [AnyNode, null] | [null, AnyNode] | [AnyNode, AnyNode] }>;
+export type Dot2 = ParserEvent<"dot2", Dot>;
+export type Dot3 = ParserEvent<"dot3", Dot>;
 export type END = ParserEvent<"END", { lbrace: Lbrace, stmts: Stmts }>;
 export type Paren = ParserEvent<"paren", { body: [AnyNode], lparen: Lparen }>;
 export type TopConstRef = ParserEvent<"top_const_ref", { body: [Const] }>;
