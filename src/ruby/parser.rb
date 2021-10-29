@@ -886,18 +886,20 @@ class Prettier::Parser < Ripper
   # arguments the name of the class, the optional name of the superclass,
   # and the bodystmt event that represents the statements evaluated within
   # the context of the class.
-  def on_class(const, superclass, bodystmt)
+  def on_class(constant, superclass, bodystmt)
     beging = find_scanner_event(:@kw, 'class')
     ending = find_scanner_event(:@kw, 'end')
 
     bodystmt.bind(
-      find_next_statement_start((superclass || const)[:loc].end_char),
+      find_next_statement_start((superclass || constant)[:loc].end_char),
       ending[:loc].start_char
     )
 
     {
       type: :class,
-      body: [const, superclass, bodystmt],
+      constant: constant,
+      superclass: superclass,
+      bodystmt: bodystmt,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -1973,18 +1975,19 @@ class Prettier::Parser < Ripper
   # module is a parser event that represents defining a module. It accepts
   # as arguments the name of the module and the bodystmt event that
   # represents the statements evaluated within the context of the module.
-  def on_module(const, bodystmt)
+  def on_module(constant, bodystmt)
     beging = find_scanner_event(:@kw, 'module')
     ending = find_scanner_event(:@kw, 'end')
 
     bodystmt.bind(
-      find_next_statement_start(const[:loc].end_char),
+      find_next_statement_start(constant[:loc].end_char),
       ending[:loc].start_char
     )
 
     {
       type: :module,
-      body: [const, bodystmt],
+      constant: constant,
+      bodystmt: bodystmt,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -2548,7 +2551,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :sclass,
-      body: [target, bodystmt],
+      target: target,
+      bodystmt: bodystmt,
       loc: beging[:loc].to(ending[:loc])
     }
   end

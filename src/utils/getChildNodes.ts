@@ -3,12 +3,13 @@ import type { Ruby } from "../types";
 function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
   switch (node.type) {
     case "BEGIN":
+      return [node.lbrace, node.stmts];
     case "END":
       return [node.lbrace, node.stmts];
     case "alias":
-    case "var_alias":
       return [node.left, node.right];
     case "aref":
+      return [node.collection, node.index];
     case "aref_field":
       return [node.collection, node.index];
     case "assign":
@@ -16,17 +17,14 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
     case "assoc_new":
       return [node.key, node.value];
     case "assoc_splat":
-    case "var_field":
-    case "var_ref":
       return [node.value];
     case "assoclist_from_args":
+      return node.assocs;
     case "bare_assoc_hash":
       return node.assocs;
     case "begin":
       return [node.bodystmt];
     case "binary":
-    case "dot2":
-    case "dot3":
       return [node.left, node.right];
     case "block_var":
       return [node.params, ...node.locals];
@@ -35,20 +33,37 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
     case "brace_block":
       return [node.lbrace, node.block_var, node.stmts];
     case "break":
-    case "next":
       return [node.args];
     case "case":
       return [node.value, node.consequent];
+    case "class":
+      return [node.constant, node.superclass, node.bodystmt];
     case "do_block":
       return [node.keyword, node.block_var, node.bodystmt];
+    case "dot2":
+      return [node.left, node.right];
+    case "dot3":
+      return [node.left, node.right];
     case "hash":
       return [node.contents];
+    case "module":
+      return [node.constant, node.bodystmt];
+    case "next":
+      return [node.args];
     case "opassign":
       return [node.target, node.operator, node.value];
     case "program":
       return [node.stmts];
     case "rassign":
       return [node.value, node.operator, node.pattern];
+    case "sclass":
+      return [node.target, node.bodystmt];
+    case "var_alias":
+      return [node.left, node.right];
+    case "var_field":
+      return [node.value];
+    case "var_ref":
+      return [node.value];
 
 
     case "heredoc":

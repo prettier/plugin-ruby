@@ -213,9 +213,9 @@ export type VarRef = ParserEvent<"var_ref", { value: Const | CVar | GVar | Ident
 // These are various parser events for statements you would find in a class definition body.
 export type AccessCtrl = ParserEvent<"access_ctrl", { body: [Identifier] }>;
 export type Alias = ParserEvent<"alias", { left: DynaSymbol | SymbolLiteral, right: DynaSymbol | SymbolLiteral }>;
-export type Class = ParserEvent<"class", { body: [ConstPathRef | ConstRef | TopConstRef, null | AnyNode, Bodystmt] }>;
-export type Module = ParserEvent<"module", { body: [ConstPathRef | ConstRef | TopConstRef, Bodystmt] }>;
-export type Sclass = ParserEvent<"sclass", { body: [AnyNode, Bodystmt] }>;
+export type Class = ParserEvent<"class", { constant: ConstPathRef | ConstRef | TopConstRef, superclass: null | AnyNode, bodystmt: Bodystmt }>;
+export type Module = ParserEvent<"module", { constant: ConstPathRef | ConstRef | TopConstRef, bodystmt: Bodystmt }>;
+export type Sclass = ParserEvent<"sclass", { target: AnyNode, bodystmt: Bodystmt }>;
 export type VarAlias = ParserEvent<"var_alias", { left: GVar, right: Backref | GVar }>;
 export type Undef = ParserEvent<"undef", { body: (DynaSymbol | SymbolLiteral)[] }>;
 
