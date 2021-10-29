@@ -54,7 +54,7 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return childNodes;
     }
     case "case":
-      return [node.value, node.consequent];
+      return [node.value, node.cons];
     case "class":
       return [node.constant, node.superclass, node.bodystmt];
     case "command":
@@ -86,7 +86,7 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "else":
       return [node.stmts];
     case "elsif":
-      return [node.predicate, node.stmts, node.consequent];
+      return [node.pred, node.stmts, node.cons];
     case "ensure":
       return [node.keyword, node.stmts];
     case "excessed_comma":
@@ -119,6 +119,12 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       childNodes.push(node.kwrest);
       return childNodes;
     }
+    case "if":
+      return [node.pred, node.stmts, node.cons];
+    case "ifop":
+      return [node.pred, node.tthy, node.flsy];
+    case "if_mod":
+      return [node.stmt, node.pred];
     case "module":
       return [node.constant, node.bodystmt];
     case "next":
@@ -137,10 +143,14 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.constant];
     case "top_const_ref":
       return [node.constant];
+    case "unless":
+      return [node.pred, node.stmts, node.cons];
+    case "unless_mod":
+      return [node.stmt, node.pred];
     case "until":
-      return [node.predicate, node.stmts];
+      return [node.pred, node.stmts];
     case "until_mod":
-      return [node.predicate, node.stmt];
+      return [node.stmt, node.pred];
     case "var_alias":
       return [node.left, node.right];
     case "var_field":
@@ -150,9 +160,9 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "vcall":
       return [node.value];
     case "while":
-      return [node.predicate, node.stmts];
+      return [node.pred, node.stmts];
     case "while_mod":
-      return [node.predicate, node.stmt];
+      return [node.stmt, node.pred];
 
 
 

@@ -869,7 +869,7 @@ class Prettier::Parser < Ripper
       {
         type: :case,
         value: value,
-        consequent: consequent,
+        cons: consequent,
         loc: keyword[:loc].to(consequent[:loc])
       }
     else
@@ -1309,9 +1309,9 @@ class Prettier::Parser < Ripper
 
     {
       type: :elsif,
-      predicate: predicate,
+      pred: predicate,
       stmts: stmts,
-      consequent: consequent,
+      cons: consequent,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -1646,7 +1646,9 @@ class Prettier::Parser < Ripper
 
     {
       type: :if,
-      body: [predicate, stmts, consequent],
+      pred: predicate,
+      stmts: stmts,
+      cons: consequent,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -1657,7 +1659,9 @@ class Prettier::Parser < Ripper
   def on_ifop(predicate, truthy, falsy)
     {
       type: :ifop,
-      body: [predicate, truthy, falsy],
+      pred: predicate,
+      tthy: truthy,
+      flsy: falsy,
       loc: predicate[:loc].to(falsy[:loc])
     }
   end
@@ -1670,7 +1674,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :if_mod,
-      body: [predicate, statement],
+      pred: predicate,
+      stmt: statement,
       loc: statement[:loc].to(predicate[:loc])
     }
   end
@@ -3047,7 +3052,9 @@ class Prettier::Parser < Ripper
 
     {
       type: :unless,
-      body: [predicate, stmts, consequent],
+      pred: predicate,
+      stmts: stmts,
+      cons: consequent,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -3060,7 +3067,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :unless_mod,
-      body: [predicate, statement],
+      pred: predicate,
+      stmt: statement,
       loc: statement[:loc].to(predicate[:loc])
     }
   end
@@ -3084,7 +3092,7 @@ class Prettier::Parser < Ripper
 
     {
       type: :until,
-      predicate: predicate,
+      pred: predicate,
       stmts: stmts,
       loc: beging[:loc].to(ending[:loc])
     }
@@ -3098,7 +3106,7 @@ class Prettier::Parser < Ripper
 
     {
       type: :until_mod,
-      predicate: predicate,
+      pred: predicate,
       stmt: statement,
       loc: statement[:loc].to(predicate[:loc])
     }
@@ -3216,7 +3224,7 @@ class Prettier::Parser < Ripper
 
     {
       type: :while,
-      predicate: predicate,
+      pred: predicate,
       stmts: stmts,
       loc: beging[:loc].to(ending[:loc])
     }
@@ -3230,7 +3238,7 @@ class Prettier::Parser < Ripper
 
     {
       type: :while_mod,
-      predicate: predicate,
+      pred: predicate,
       stmt: statement,
       loc: statement[:loc].to(predicate[:loc])
     }

@@ -12,7 +12,7 @@ export const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
     parts.push(" ", path.call(print, "value"));
   }
 
-  return [...parts, hardline, path.call(print, "consequent"), hardline, "end"];
+  return [...parts, hardline, path.call(print, "cons"), hardline, "end"];
 };
 
 export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {

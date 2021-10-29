@@ -18,19 +18,19 @@ function isModifier(node: Loop): node is Ruby.WhileModifier | Ruby.UntilModifier
 function printLoop(keyword: string): Plugin.Printer<Loop> {
   return function printLoopWithOptions(path, { rubyModifier }, print) {
     const node = path.getValue();
+    const predicateDoc = path.call(print, "pred");
 
     // If the only statement inside this while loop is a void statement, then we
     // can shorten to just displaying the predicate and then a semicolon.
     if (!isModifier(node) && isEmptyStmts(node.stmts)) {
       return group([
-        group([keyword, " ", path.call(print, "predicate")]),
+        group([keyword, " ", predicateDoc]),
         hardline,
         "end"
       ]);
     }
 
     const statementDoc = path.call(print, isModifier(node) ? "stmt" : "stmts");
-    const predicateDoc = path.call(print, "predicate");
     const inlineLoop = inlineEnsureParens(path, [statementDoc, ` ${keyword} `, predicateDoc]);
 
     // If we're in the modifier form and we're modifying a `begin`, then this is
@@ -58,7 +58,7 @@ function printLoop(keyword: string): Plugin.Printer<Loop> {
     // contains an assignment (in which case we can't know for certain that that
     // assignment doesn't impact the statements inside the loop) then we can't
     // use the modifier form and we must use the block form.
-    if (!rubyModifier || containsAssignment(node.predicate)) {
+    if (!rubyModifier || containsAssignment(node.pred)) {
       return [breakParent, blockLoop];
     }
 

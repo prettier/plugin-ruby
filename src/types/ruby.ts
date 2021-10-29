@@ -133,25 +133,25 @@ export type MrhsAddStar = ParserEvent<"mrhs_add_star", { body: [Mrhs | MrhsNewFr
 export type MrhsNewFromArgs = ParserEvent<"mrhs_new_from_args", { body: [Args | ArgsAddStar, AnyNode], oper: string }>;
 
 // These are various parser events for control flow constructs.
-export type Case = ParserEvent<"case", { value: AnyNode, consequent: In | When }>;
+export type Case = ParserEvent<"case", { value: AnyNode, cons: In | When }>;
 export type Else = ParserEvent<"else", { stmts: Stmts }>;
-export type Elsif = ParserEvent<"elsif", { predicate: AnyNode, stmts: Stmts, consequent: null | Elsif | Else }>;
+export type Elsif = ParserEvent<"elsif", { pred: AnyNode, stmts: Stmts, cons: null | Elsif | Else }>;
 export type Ensure = ParserEvent<"ensure", { keyword: Keyword, stmts: Stmts }>;
 export type For = ParserEvent<"for", { iterator: Mlhs | MlhsAddStar | VarField, enumerable: AnyNode, stmts: Stmts }>;
-export type If = ParserEvent<"if", { body: [AnyNode, Stmts, null | Elsif | Else] }>;
-export type IfModifier = ParserEvent<"if_mod", { body: [AnyNode, AnyNode] }>;
+export type If = ParserEvent<"if", { pred: AnyNode, stmts: Stmts, cons: null | Elsif | Else }>;
+export type IfModifier = ParserEvent<"if_mod", { pred: AnyNode, stmt: AnyNode }>;
 export type In = ParserEvent<"in", { body: [AnyNode, Stmts, null | In | Else] }>;
 export type Rescue = ParserEvent<"rescue", { body: [null | RescueEx, Stmts, null | Stmts] }>;
 export type RescueEx = ParserEvent<"rescue_ex", { body: [AnyNode, null | Field | VarField] }>;
 export type RescueModifier = ParserEvent<"rescue_mod", { body: [AnyNode, AnyNode] }>;
-export type Ternary = ParserEvent<"ifop", { body: [AnyNode, AnyNode, AnyNode] }>;
-export type Unless = ParserEvent<"unless", { body: [AnyNode, Stmts, null | Elsif | Else] }>;
-export type UnlessModifier = ParserEvent<"unless_mod", { body: [AnyNode, AnyNode] }>;
-export type Until = ParserEvent<"until", { predicate: AnyNode, stmts: Stmts }>;
-export type UntilModifier = ParserEvent<"until_mod", { predicate: AnyNode, stmt: AnyNode }>;
+export type Ternary = ParserEvent<"ifop", { pred: AnyNode, tthy: AnyNode, flsy: AnyNode }>;
+export type Unless = ParserEvent<"unless", { pred: AnyNode, stmts: Stmts, cons: null | Elsif | Else }>;
+export type UnlessModifier = ParserEvent<"unless_mod", { pred: AnyNode, stmt: AnyNode }>;
+export type Until = ParserEvent<"until", { pred: AnyNode, stmts: Stmts }>;
+export type UntilModifier = ParserEvent<"until_mod", { pred: AnyNode, stmt: AnyNode }>;
 export type When = ParserEvent<"when", { body: [Args | ArgsAddStar, Stmts, null | Else | When] }>;
-export type While = ParserEvent<"while", { predicate: AnyNode, stmts: Stmts }>;
-export type WhileModifier = ParserEvent<"while_mod", { predicate: AnyNode, stmt: AnyNode }>;
+export type While = ParserEvent<"while", { pred: AnyNode, stmts: Stmts }>;
+export type WhileModifier = ParserEvent<"while_mod", { pred: AnyNode, stmt: AnyNode }>;
 
 // These are various parser events for control flow keywords.
 export type Break = ParserEvent<"break", { args: Args | ArgsAddBlock }>;
