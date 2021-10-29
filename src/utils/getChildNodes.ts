@@ -137,6 +137,10 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.target, node.operator, node.value];
     case "program":
       return [node.stmts];
+    case "qsymbols":
+      return [];
+    case "qwords":
+      return [];
     case "rassign":
       return [node.value, node.operator, node.pattern];
     case "rest_param":
@@ -145,6 +149,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.args];
     case "sclass":
       return [node.target, node.bodystmt];
+    case "symbols":
+      return [];
     case "top_const_field":
       return [node.constant];
     case "top_const_ref":
@@ -169,6 +175,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.pred, node.stmts];
     case "while_mod":
       return [node.stmt, node.pred];
+    case "words":
+      return [];
 
 
 

@@ -98,11 +98,11 @@ export type XStringLiteral = ParserEvent<"xstring_literal", { body: StringConten
 
 // These are various parser events that have to do with arrays.
 export type Array = ParserEvent<"array", { body: [null | Args | ArgsAddStar | Qsymbols | Qwords | Symbols | Words] }>;
-export type Qsymbols = ParserEvent<"qsymbols", { body: TStringContent[] }>;
-export type Qwords = ParserEvent<"qwords", { body: TStringContent[] }>;
-export type Symbols = ParserEvent<"symbols", { body: Word[] }>;
+export type Qsymbols = ParserEvent<"qsymbols", { elems: TStringContent[] }>;
+export type Qwords = ParserEvent<"qwords", { elems: TStringContent[] }>;
+export type Symbols = ParserEvent<"symbols", { elems: Word[] }>;
 export type Word = ParserEvent<"word", { body: StringContent[] }>;
-export type Words = ParserEvent<"words", { body: Word[] }>;
+export type Words = ParserEvent<"words", { elems: Word[] }>;
 
 // These are various parser events that have to do with hashes.
 type HashContent = AssocNew | AssocSplat;

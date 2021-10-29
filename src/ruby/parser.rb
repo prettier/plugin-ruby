@@ -2280,7 +2280,7 @@ class Prettier::Parser < Ripper
   def on_qsymbols_new
     event = find_scanner_event(:@qsymbols_beg)
 
-    { type: :qsymbols, body: [], loc: event[:loc] }
+    { type: :qsymbols, elems: [], loc: event[:loc] }
   end
 
   # qsymbols_add is a parser event that represents an element inside of a
@@ -2290,7 +2290,7 @@ class Prettier::Parser < Ripper
   def on_qsymbols_add(qsymbols, tstring_content)
     {
       type: :qsymbols,
-      body: qsymbols[:body] << tstring_content,
+      elems: qsymbols[:elems] << tstring_content,
       loc: qsymbols[:loc].to(tstring_content[:loc])
     }
   end
@@ -2318,7 +2318,7 @@ class Prettier::Parser < Ripper
   def on_qwords_new
     event = find_scanner_event(:@qwords_beg)
 
-    { type: :qwords, body: [], loc: event[:loc] }
+    { type: :qwords, elems: [], loc: event[:loc] }
   end
 
   # qsymbols_add is a parser event that represents an element inside of a
@@ -2328,7 +2328,7 @@ class Prettier::Parser < Ripper
   def on_qwords_add(qwords, tstring_content)
     {
       type: :qwords,
-      body: qwords[:body] << tstring_content,
+      elems: qwords[:elems] << tstring_content,
       loc: qwords[:loc].to(tstring_content[:loc])
     }
   end
@@ -2857,7 +2857,7 @@ class Prettier::Parser < Ripper
   def on_symbols_add(symbols, word_add)
     {
       type: :symbols,
-      body: symbols[:body] << word_add,
+      elems: symbols[:elems] << word_add,
       loc: symbols[:loc].to(word_add[:loc])
     }
   end
@@ -2886,7 +2886,7 @@ class Prettier::Parser < Ripper
   def on_symbols_new
     event = find_scanner_event(:@symbols_beg)
 
-    { type: :symbols, body: [], loc: event[:loc] }
+    { type: :symbols, elems: [], loc: event[:loc] }
   end
 
   # tlambda is a scanner event that represents the beginning of a lambda
@@ -3321,7 +3321,7 @@ class Prettier::Parser < Ripper
   def on_words_add(words, word_add)
     {
       type: :words,
-      body: words[:body] << word_add,
+      elems: words[:elems] << word_add,
       loc: words[:loc].to(word_add[:loc])
     }
   end
@@ -3333,7 +3333,7 @@ class Prettier::Parser < Ripper
   def on_words_new
     event = find_scanner_event(:@words_beg)
 
-    { type: :words, body: [], loc: event[:loc] }
+    { type: :words, elems: [], loc: event[:loc] }
   end
 
   # xstring_add is a parser event that represents a piece of a string of

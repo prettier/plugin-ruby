@@ -61,13 +61,12 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
       // If we're returning an array literal that isn't a special array that has
       // at least 2 elements, then we want to grab the arguments so that we can
       // print them out as if they were normal return arguments.
-      if (
-        arg.type === "array" &&
-        arg.body[0] &&
-        ["args", "args_add_star"].includes(arg.body[0].type) &&
-        arg.body[0].body.length > 1
-      ) {
-        steps = steps.concat("body", 0, "body", 0);
+      if (arg.type === "array" && arg.body[0]) {
+        const contents = arg.body[0];
+
+        if ((contents.type === "args" || contents.type === "args_add_star") && contents.body.length > 1) {
+          steps = steps.concat("body", 0, "body", 0);
+        }
       }
     }
 

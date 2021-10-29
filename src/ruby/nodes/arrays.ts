@@ -105,7 +105,7 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
       (arrayPath) =>
         printArrayLiteral(
           arrayLiteralStarts[args.type],
-          arrayPath.map(print, "body")
+          arrayPath.map(print, "elems")
         ),
       "body",
       0
@@ -119,9 +119,7 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
       const printString = (stringPath: Plugin.Path<Ruby.StringLiteral>) =>
         stringPath.call(print, "body", 0);
 
-      const nodePath = path as Plugin.Path<{
-        body: [{ body: Ruby.StringLiteral[] }];
-      }>;
+      const nodePath = path as Plugin.Path<{ body: [{ body: Ruby.StringLiteral[] }] }>;
       const parts = nodePath.map(printString, "body", 0, "body");
 
       return printArrayLiteral("%w", parts);
@@ -133,9 +131,7 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
       const printSymbol = (symbolPath: Plugin.Path<Ruby.SymbolLiteral>) =>
         symbolPath.call(print, "body", 0);
 
-      const nodePath = path as Plugin.Path<{
-        body: [{ body: Ruby.SymbolLiteral[] }];
-      }>;
+      const nodePath = path as Plugin.Path<{ body: [{ body: Ruby.SymbolLiteral[] }] }>;
       const parts = nodePath.map(printSymbol, "body", 0, "body");
 
       return printArrayLiteral("%i", parts);
