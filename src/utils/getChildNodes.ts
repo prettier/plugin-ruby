@@ -127,6 +127,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.stmt, node.pred];
     case "kwrest_param":
       return [node.name];
+    case "lambda":
+      return [node.params, node.stmts];
     case "module":
       return [node.constant, node.bodystmt];
     case "next":

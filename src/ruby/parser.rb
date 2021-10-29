@@ -1834,7 +1834,7 @@ class Prettier::Parser < Ripper
 
   # lambda is a parser event that represents using a "stabby" lambda
   # literal. It accepts as arguments a params event that represents any
-  # parameters to the lambda and a stmts event that represents the
+  # parameters to the lambda and a stmts/bodystmt event that represents the
   # statements inside the lambda.
   #
   # It can be wrapped in either {..} or do..end so we look for either of
@@ -1854,7 +1854,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :lambda,
-      body: [params, stmts],
+      params: params,
+      stmts: stmts,
       loc: beging[:loc].to(closing[:loc])
     }
   end
