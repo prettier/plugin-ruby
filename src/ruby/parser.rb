@@ -568,12 +568,15 @@ class Prettier::Parser < Ripper
 
   # aryptn is a parser event that represents matching against an array pattern
   # using the Ruby 2.7+ pattern matching syntax.
-  def on_aryptn(const, preargs, splatarg, postargs)
-    pieces = [const, *preargs, splatarg, *postargs].compact
+  def on_aryptn(constant, reqs, rest, posts)
+    pieces = [constant, *reqs, rest, *posts].compact
 
     {
       type: :aryptn,
-      body: [const, preargs, splatarg, postargs],
+      constant: constant,
+      reqs: reqs || [],
+      rest: rest,
+      posts: posts || [],
       loc: pieces[0][:loc].to(pieces[-1][:loc])
     }
   end
@@ -1476,13 +1479,16 @@ class Prettier::Parser < Ripper
 
   # fndptn is a parser event that represents matching against a pattern where
   # you find a pattern in an array using the Ruby 3.0+ pattern matching syntax.
-  def on_fndptn(const, presplat, args, postsplat)
-    beging = const || find_scanner_event(:@lbracket)
+  def on_fndptn(constant, left, values, right)
+    beging = constant || find_scanner_event(:@lbracket)
     ending = find_scanner_event(:@rbracket)
 
     {
       type: :fndptn,
-      body: [const, presplat, args, postsplat],
+      constant: constant,
+      left: left,
+      values: values,
+      right: right,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -1600,12 +1606,14 @@ class Prettier::Parser < Ripper
 
   # hshptn is a parser event that represents matching against a hash pattern
   # using the Ruby 2.7+ pattern matching syntax.
-  def on_hshptn(const, kw, kwrest)
-    pieces = [const, kw, kwrest].flatten(2).compact
+  def on_hshptn(constant, keywords, kwrest)
+    pieces = [constant, keywords, kwrest].flatten(2).compact
 
     {
       type: :hshptn,
-      body: [const, kw, kwrest],
+      constant: constant,
+      keywords: keywords,
+      kwrest: kwrest,
       loc: pieces[0][:loc].to(pieces[-1][:loc])
     }
   end

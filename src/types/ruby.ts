@@ -161,9 +161,9 @@ export type Super = ParserEvent<"super", { body: [Args | ArgParen | ArgsAddBlock
 export type Yield = ParserEvent<"yield", { body: [ArgsAddBlock | Paren] }>;
 
 // These are various parser events for pattern matching.
-export type Aryptn = ParserEvent<"aryptn", { body: [null | VarRef, AnyNode[], null | VarField, null | AnyNode[]] }>;
-export type FndPtn = ParserEvent<"fndptn", { body: [null | AnyNode, VarField, AnyNode[], VarField] }>;
-export type Hshptn = ParserEvent<"hshptn", { body: [null | AnyNode, [Label, AnyNode][], null | VarField] }>;
+export type Aryptn = ParserEvent<"aryptn", { constant: null | VarRef, reqs: AnyNode[], rest: null | VarField, posts: AnyNode[] }>;
+export type FndPtn = ParserEvent<"fndptn", { constant: null | AnyNode, left: VarField, values: AnyNode[], right: VarField }>;
+export type Hshptn = ParserEvent<"hshptn", { constant: null | AnyNode, keywords: [Label, AnyNode][], kwrest: null | VarField }>;
 export type Rassign = ParserEvent<"rassign", { value: AnyNode, operator: Op | Keyword, pattern: AnyNode }>;
 
 // These are various parser events for method declarations.

@@ -16,6 +16,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.collection, node.index];
     case "aref_field":
       return [node.collection, node.index];
+    case "aryptn":
+      return [node.constant, ...node.reqs, node.rest, ...node.posts];
     case "assign":
       return [node.target, node.value];
     case "assoc_new":
@@ -101,8 +103,20 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       childNodes.push(node.name);
       return childNodes;
     }
+    case "fndptn":
+      return [node.constant, node.left, ...node.values, node.right];
     case "hash":
       return [node.contents];
+    case "hshptn": {
+      const childNodes: ChildNode[] = [node.constant];
+
+      node.keywords.forEach(([key, value]) => {
+        childNodes.push(key, value);
+      });
+
+      childNodes.push(node.kwrest);
+      return childNodes;
+    }
     case "module":
       return [node.constant, node.bodystmt];
     case "next":
@@ -131,25 +145,9 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.value];
 
 
+
     case "heredoc":
       return [node.beging];
-    case "aryptn": {
-      const parts: (Ruby.AnyNode | null)[] = [node.body[0]];
-
-      return parts
-        .concat(node.body[1])
-        .concat(node.body[2])
-        .concat(node.body[3]);
-    }
-    case "hshptn": {
-      const pairs = node.body[1];
-      const values = pairs.reduce(
-        (left: any, right: any) => left.concat(right),
-        []
-      );
-
-      return [node.body[0]].concat(values).concat(node.body[2]);
-    }
     case "params": {
       const [reqs, optls, rest, post, kwargs, kwargRest, block] = node.body;
       let parts: (Ruby.AnyNode | null)[] = reqs || [];
