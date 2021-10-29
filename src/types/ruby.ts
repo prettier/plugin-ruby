@@ -135,7 +135,7 @@ export type MrhsNewFromArgs = ParserEvent<"mrhs_new_from_args", { body: [Args | 
 // These are various parser events for control flow constructs.
 export type Case = ParserEvent<"case", { value: AnyNode, consequent: In | When }>;
 export type Else = ParserEvent<"else", { stmts: Stmts }>;
-export type Elsif = ParserEvent<"elsif", { body: [AnyNode, Stmts, null | Elsif | Else] }>;
+export type Elsif = ParserEvent<"elsif", { predicate: AnyNode, stmts: Stmts, consequent: null | Elsif | Else }>;
 export type Ensure = ParserEvent<"ensure", { body: [Keyword, Stmts] }>;
 export type For = ParserEvent<"for", { body: [Mlhs | MlhsAddStar | VarField, AnyNode, Stmts] }>;
 export type If = ParserEvent<"if", { body: [AnyNode, Stmts, null | Elsif | Else] }>;

@@ -1304,7 +1304,9 @@ class Prettier::Parser < Ripper
 
     {
       type: :elsif,
-      body: [predicate, stmts, consequent],
+      predicate: predicate,
+      stmts: stmts,
+      consequent: consequent,
       loc: beging[:loc].to(ending[:loc])
     }
   end

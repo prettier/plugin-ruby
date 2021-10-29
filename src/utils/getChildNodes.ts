@@ -66,6 +66,8 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return node.body;
     case "else":
       return [node.stmts];
+    case "elsif":
+      return [node.predicate, node.stmts, node.consequent];
     case "hash":
       return [node.contents];
     case "module":
