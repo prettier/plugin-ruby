@@ -1033,7 +1033,7 @@ class Prettier::Parser < Ripper
   end
 
   # A def is a parser event that represents defining a regular method on the
-  # current self object. It accepts as arguments the ident (the name of the
+  # current self object. It accepts as arguments the name (the name of the
   # method being defined), the params (the parameter declaration for the
   # method), and a bodystmt node which represents the statements inside the
   # method. As an example, here are the parts that go into this:
@@ -1042,7 +1042,7 @@ class Prettier::Parser < Ripper
   #          │   │       │
   #          │   │       └> bodystmt
   #          │   └> params
-  #          └> ident
+  #          └> name
   #
   # You can also have single-line methods since Ruby 3.0+, which have slightly
   # different syntax but still flow through this method. Those look like:
@@ -1050,13 +1050,13 @@ class Prettier::Parser < Ripper
   #     def foo = bar
   #          |     |
   #          |     └> stmt
-  #          └> ident
+  #          └> name
   #
-  def on_def(ident, params, bodystmt)
+  def on_def(name, params, bodystmt)
     # Make sure to delete this scanner event in case you're defining something
     # like def class which would lead to this being a kw and causing all kinds
     # of trouble
-    scanner_events.delete(ident)
+    scanner_events.delete(name)
 
     # Find the beginning of the method definition, which works for single-line
     # and normal method definitions.
@@ -1066,7 +1066,9 @@ class Prettier::Parser < Ripper
     if bodystmt[:type] != :bodystmt
       defsl = {
         type: :defsl,
-        body: [ident, params, bodystmt],
+        name: name,
+        paren: params,
+        stmt: bodystmt,
         loc: beging[:loc].to(bodystmt[:loc])
       }
 
@@ -1076,7 +1078,7 @@ class Prettier::Parser < Ripper
     # If there aren't any params then we need to correct the params node
     # location information
     if params[:type] == :params && !params[:body].any?
-      location = ident[:loc].end_char
+      location = name[:loc].end_char
 
       params[:loc] =
         Location.new(
@@ -1095,7 +1097,9 @@ class Prettier::Parser < Ripper
 
     {
       type: :def,
-      body: [ident, params, bodystmt],
+      name: name,
+      params: params,
+      bodystmt: bodystmt,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -1110,20 +1114,20 @@ class Prettier::Parser < Ripper
   #          │ │ │   │       │
   #          │ │ │   │       └> bodystmt
   #          │ │ │   └> params
-  #          │ │ └> ident
-  #          │ └> oper
+  #          │ │ └> name
+  #          │ └> operator
   #          └> target
   #
-  def on_defs(target, oper, ident, params, bodystmt)
+  def on_defs(target, operator, name, params, bodystmt)
     # Make sure to delete this scanner event in case you're defining something
     # like def class which would lead to this being a kw and causing all kinds
     # of trouble
-    scanner_events.delete(ident)
+    scanner_events.delete(name)
 
     # If there aren't any params then we need to correct the params node
     # location information
     if params[:type] == :params && !params[:body].any?
-      location = ident[:loc].end_char
+      location = name[:loc].end_char
 
       params[:loc] =
         Location.new(
@@ -1144,7 +1148,11 @@ class Prettier::Parser < Ripper
 
     {
       type: :defs,
-      body: [target, oper, ident, params, bodystmt],
+      target: target,
+      operator: operator,
+      name: name,
+      params: params,
+      bodystmt: bodystmt,
       loc: beging[:loc].to(ending[:loc])
     }
   end

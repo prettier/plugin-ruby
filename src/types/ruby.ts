@@ -167,11 +167,13 @@ export type Hshptn = ParserEvent<"hshptn", { body: [null | AnyNode, [Label, AnyN
 export type Rassign = ParserEvent<"rassign", { value: AnyNode, operator: Op | Keyword, pattern: AnyNode }>;
 
 // These are various parser events for method declarations.
+type DefName = Backtick | Const | Identifier | Keyword | Op;
 type ParenAroundParams = Omit<Paren, "body"> & { body: [Params] };
+
 export type Blockarg = ParserEvent<"blockarg", { name: Identifier }>;
-export type Def = ParserEvent<"def", { body: [Backtick | Const | Identifier | Keyword | Op, Params | Paren, Bodystmt] }>;
-export type Defs = ParserEvent<"defs", { body: [AnyNode, Op | Period, Const | Op | Identifier | Keyword, Params | Paren, Bodystmt] }>;
-export type Defsl = ParserEvent<"defsl", { body: [Identifier, null | ParenAroundParams, AnyNode] }>;
+export type Def = ParserEvent<"def", { name: DefName, params: Params | Paren, bodystmt: Bodystmt }>;
+export type Defs = ParserEvent<"defs", { target: AnyNode, operator: Op | Period, name: DefName, params: Params | Paren, bodystmt: Bodystmt }>;
+export type Defsl = ParserEvent<"defsl", { name: DefName, paren: null | ParenAroundParams, stmt: AnyNode }>;
 export type KeywordRestParam = ParserEvent<"kwrest_param", { body: [null | Identifier] }>;
 export type Lambda = ParserEvent<"lambda", { body: [Params | ParenAroundParams, Bodystmt | Stmts] }>;
 export type Params = ParserEvent<"params", { body: [Identifier[], null | [Identifier, AnyNode][], null | ArgsForward | ExcessedComma | RestParam, Identifier[], null | [Label, AnyNode][], null | "nil" | KeywordRestParam, null | Blockarg] }>;

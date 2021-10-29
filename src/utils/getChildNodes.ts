@@ -48,6 +48,12 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return [node.parent, node.constant];
     case "const_ref":
       return [node.constant];
+    case "def":
+      return [node.name, node.params, node.bodystmt];
+    case "defs":
+      return [node.target, node.operator, node.name, node.params, node.bodystmt];
+    case "defsl":
+      return [node.name, node.paren, node.stmt];
     case "do_block":
       return [node.keyword, node.block_var, node.bodystmt];
     case "dot2":

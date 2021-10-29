@@ -12,45 +12,30 @@ export const printDef: Plugin.Printer<Ruby.Def | Ruby.Defs> = (
   const node = path.getValue();
   const declaration: Plugin.Doc[] = ["def "];
 
-  let paramsNode: Ruby.Params | Ruby.Paren;
-  let bodystmtNode: Ruby.Bodystmt;
-
-  let nameDoc: Plugin.Doc;
-  let paramsDoc: Plugin.Doc;
-  let bodystmtDoc: Plugin.Doc;
-
-  if (node.type === "def") {
-    paramsNode = node.body[1];
-    bodystmtNode = node.body[2];
-
-    nameDoc = path.call(print, "body", 0);
-    paramsDoc = path.call(print, "body", 1);
-    bodystmtDoc = path.call(print, "body", 2);
-  } else {
-    // In this case, we're printing a method that's defined as a singleton, so
-    // we need to include the target and the operator
-    declaration.push(path.call(print, "body", 0), path.call(print, "body", 1));
-
-    paramsNode = node.body[3];
-    bodystmtNode = node.body[4];
-
-    nameDoc = path.call(print, "body", 2);
-    paramsDoc = path.call(print, "body", 3);
-    bodystmtDoc = path.call(print, "body", 4);
+  // In this case, we're printing a method that's defined as a singleton, so
+  // we need to include the target and the operator before the name.
+  if (node.type === "defs") {
+    declaration.push(path.call(print, "target"), path.call(print, "operator"));
   }
 
   // In case there are no parens but there are arguments
-  const parens =
-    paramsNode.type === "params" && paramsNode.body.some((type) => type);
-  declaration.push(nameDoc, parens ? "(" : "", paramsDoc, parens ? ")" : "");
+  const useParens =
+    node.params.type === "params" && node.params.body.some((type) => type);
 
-  if (isEmptyBodyStmt(bodystmtNode)) {
+  declaration.push(
+    path.call(print, "name"),
+    useParens ? "(" : "",
+    path.call(print, "params"),
+    useParens ? ")" : ""
+  );
+
+  if (isEmptyBodyStmt(node.bodystmt)) {
     return group([...declaration, "; end"]);
   }
 
   return group([
     group(declaration),
-    indent([hardline, bodystmtDoc]),
+    indent([hardline, path.call(print, "bodystmt")]),
     hardline,
     "end"
   ]);
@@ -61,23 +46,21 @@ export const printSingleLineMethod: Plugin.Printer<Ruby.Defsl> = (
   opts,
   print
 ) => {
-  const parensNode = path.getValue().body[1];
+  const node = path.getValue();
   let paramsDoc: Plugin.Doc = "";
 
-  if (parensNode) {
-    const paramsNode = parensNode.body[0];
-
-    if (paramsNode.body.some((type) => type)) {
-      paramsDoc = path.call(print, "body", 1);
-    }
+  // If we have any kind of parameters, we're going to print the whole
+  // parentheses. If we don't, then we're just going to skip them entirely.
+  if (node.paren && node.paren.body[0].body.some((type) => type)) {
+    paramsDoc = path.call(print, "paren");
   }
 
   return group([
     "def ",
-    path.call(print, "body", 0),
+    path.call(print, "name"),
     paramsDoc,
     " =",
-    indent(group([line, path.call(print, "body", 2)]))
+    indent(group([line, path.call(print, "stmt")]))
   ]);
 };
 
