@@ -16,7 +16,7 @@ export const printDefined: Plugin.Printer<Ruby.Defined> = (
 ) => {
   return group([
     "defined?(",
-    indent([softline, path.call(print, "body", 0)]),
+    indent([softline, path.call(print, "value")]),
     softline,
     ")"
   ]);

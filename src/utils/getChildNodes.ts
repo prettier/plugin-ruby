@@ -50,6 +50,8 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return [node.constant];
     case "def":
       return [node.name, node.params, node.bodystmt];
+    case "defined":
+      return [node.value];
     case "defs":
       return [node.target, node.operator, node.name, node.params, node.bodystmt];
     case "defsl":
@@ -60,6 +62,10 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return [node.left, node.right];
     case "dot3":
       return [node.left, node.right];
+    case "dyna_symbol":
+      return node.body;
+    case "else":
+      return [node.stmts];
     case "hash":
       return [node.contents];
     case "module":

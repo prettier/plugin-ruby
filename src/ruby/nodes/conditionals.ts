@@ -216,7 +216,8 @@ function canTernary(path: Plugin.Path<Ruby.If | Ruby.Unless>) {
     ) &&
     addition &&
     addition.type === "else" &&
-    [stmts, addition.body[0]].every(canTernaryStmts)
+    canTernaryStmts(stmts) &&
+    canTernaryStmts(addition.stmts)
   );
 }
 
@@ -232,7 +233,7 @@ function printConditional(
         ...printTernaryClauses(
           keyword,
           path.call(print, "body", 1),
-          path.call(print, "body", 2, "body", 0)
+          path.call(print, "body", 2, "stmts")
         )
       ];
 
@@ -289,14 +290,14 @@ function printConditional(
 }
 
 export const printElse: Plugin.Printer<Ruby.Else> = (path, opts, print) => {
-  const stmts = path.getValue().body[0];
+  const node = path.getValue();
 
   return [
-    stmts.body.length === 1 && stmts.body[0].type === "command"
+    node.stmts.body.length === 1 && node.stmts.body[0].type === "command"
       ? breakParent
       : "",
     "else",
-    indent([softline, path.call(print, "body", 0)])
+    indent([softline, path.call(print, "stmts")])
   ];
 };
 

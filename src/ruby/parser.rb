@@ -1167,7 +1167,7 @@ class Prettier::Parser < Ripper
     paren = source[beging[:loc].end_char...value[:loc].start_char].include?('(')
     ending = paren ? find_scanner_event(:@rparen) : value
 
-    { type: :defined, body: [value], loc: beging[:loc].to(ending[:loc]) }
+    { type: :defined, value: value, loc: beging[:loc].to(ending[:loc]) }
   end
 
   # do_block is a parser event that represents passing a block to a method
@@ -1289,7 +1289,7 @@ class Prettier::Parser < Ripper
 
     stmts.bind(beging[:loc].end_char, ending[:loc].start_char)
 
-    { type: :else, body: [stmts], loc: beging[:loc].to(ending[:loc]) }
+    { type: :else, stmts: stmts, loc: beging[:loc].to(ending[:loc]) }
   end
 
   # elsif is a parser event that represents another clause in an if chain.

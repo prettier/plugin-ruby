@@ -134,7 +134,7 @@ export type MrhsNewFromArgs = ParserEvent<"mrhs_new_from_args", { body: [Args | 
 
 // These are various parser events for control flow constructs.
 export type Case = ParserEvent<"case", { value: AnyNode, consequent: In | When }>;
-export type Else = ParserEvent<"else", { body: [Stmts] }>;
+export type Else = ParserEvent<"else", { stmts: Stmts }>;
 export type Elsif = ParserEvent<"elsif", { body: [AnyNode, Stmts, null | Elsif | Else] }>;
 export type Ensure = ParserEvent<"ensure", { body: [Keyword, Stmts] }>;
 export type For = ParserEvent<"for", { body: [Mlhs | MlhsAddStar | VarField, AnyNode, Stmts] }>;
@@ -203,7 +203,7 @@ export type BEGIN = ParserEvent<"BEGIN", { lbrace: Lbrace, stmts: Stmts }>;
 export type Binary = ParserEvent<"binary", { left: AnyNode, operator: string, right: AnyNode }>;
 export type ConstPathRef = ParserEvent<"const_path_ref", { parent: AnyNode, constant: Const }>;
 export type ConstRef = ParserEvent<"const_ref", { constant: Const }>;
-export type Defined = ParserEvent<"defined", { body: [AnyNode] }>;
+export type Defined = ParserEvent<"defined", { value: AnyNode }>;
 export type Dot2 = ParserEvent<"dot2", Dot>;
 export type Dot3 = ParserEvent<"dot3", Dot>;
 export type END = ParserEvent<"END", { lbrace: Lbrace, stmts: Stmts }>;
