@@ -116,10 +116,10 @@ export type Hash = ParserEvent<"hash", { contents: null | AssoclistFromArgs }>;
 type Assignable = ArefField | ConstPathField | Field | TopConstField | VarField;
 export type ArefField = ParserEvent<"aref_field", { collection: AnyNode, index: ArgsAddBlock | null }>;
 export type Assign = ParserEvent<"assign", { target: Assignable, value: AnyNode }>;
-export type ConstPathField = ParserEvent<"const_path_field", { body: [ConstPathRef | Paren | TopConstRef | VarRef, Const] }>;
+export type ConstPathField = ParserEvent<"const_path_field", { parent: ConstPathRef | Paren | TopConstRef | VarRef, constant: Const }>;
 export type Field = ParserEvent<"field", { body: [AnyNode, CallOperator, Const | Identifier] }>;
 export type Opassign = ParserEvent<"opassign", { target: Assignable, operator: Op, value: AnyNode }>;
-export type TopConstField = ParserEvent<"top_const_field", { body: [Const] }>;
+export type TopConstField = ParserEvent<"top_const_field", { constant: Const }>;
 export type VarField = ParserEvent<"var_field", { value: null | Const | CVar | GVar | Identifier | IVar }>;
 
 // These are various parser events that have to do with multiple assignment.
@@ -199,14 +199,14 @@ type Dot = { left: AnyNode, right: AnyNode } | { left: null, right: AnyNode } | 
 export type Aref = ParserEvent<"aref", { collection: AnyNode, index: Args | ArgsAddBlock | null }>;
 export type BEGIN = ParserEvent<"BEGIN", { lbrace: Lbrace, stmts: Stmts }>;
 export type Binary = ParserEvent<"binary", { left: AnyNode, operator: string, right: AnyNode }>;
-export type ConstPathRef = ParserEvent<"const_path_ref", { body: [AnyNode, Const] }>;
-export type ConstRef = ParserEvent<"const_ref", { body: [Const] }>;
+export type ConstPathRef = ParserEvent<"const_path_ref", { parent: AnyNode, constant: Const }>;
+export type ConstRef = ParserEvent<"const_ref", { constant: Const }>;
 export type Defined = ParserEvent<"defined", { body: [AnyNode] }>;
 export type Dot2 = ParserEvent<"dot2", Dot>;
 export type Dot3 = ParserEvent<"dot3", Dot>;
 export type END = ParserEvent<"END", { lbrace: Lbrace, stmts: Stmts }>;
 export type Paren = ParserEvent<"paren", { body: [AnyNode], lparen: Lparen }>;
-export type TopConstRef = ParserEvent<"top_const_ref", { body: [Const] }>;
+export type TopConstRef = ParserEvent<"top_const_ref", { constant: Const }>;
 export type Unary = ParserEvent<"unary", { body: [AnyNode], oper: string, paren: boolean | undefined }>;
 export type VarRef = ParserEvent<"var_ref", { value: Const | CVar | GVar | Identifier | IVar | Keyword }>;
 

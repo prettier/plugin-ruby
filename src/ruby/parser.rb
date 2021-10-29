@@ -988,11 +988,12 @@ class Prettier::Parser < Ripper
   #
   #     foo::X = 1
   #
-  def on_const_path_field(left, const)
+  def on_const_path_field(parent, constant)
     {
       type: :const_path_field,
-      body: [left, const],
-      loc: left[:loc].to(const[:loc])
+      parent: parent,
+      constant: constant,
+      loc: parent[:loc].to(constant[:loc])
     }
   end
 
@@ -1000,11 +1001,12 @@ class Prettier::Parser < Ripper
   # const_path_field except that it is not involved in an assignment. It
   # looks like the following example: foo::Bar, where left is foo and const is
   # Bar.
-  def on_const_path_ref(left, const)
+  def on_const_path_ref(parent, constant)
     {
       type: :const_path_ref,
-      body: [left, const],
-      loc: left[:loc].to(const[:loc])
+      parent: parent,
+      constant: constant,
+      loc: parent[:loc].to(constant[:loc])
     }
   end
 
@@ -1014,8 +1016,8 @@ class Prettier::Parser < Ripper
   #
   #     class Foo; end
   #
-  def on_const_ref(const)
-    { type: :const_ref, body: [const], loc: const[:loc] }
+  def on_const_ref(constant)
+    { type: :const_ref, constant: constant, loc: constant[:loc] }
   end
 
   # cvar is a scanner event that represents the use of a class variable.
@@ -2880,10 +2882,14 @@ class Prettier::Parser < Ripper
   #
   #     ::X = 1
   #
-  def on_top_const_field(const)
-    beging = find_colon2_before(const)
+  def on_top_const_field(constant)
+    operator = find_colon2_before(constant)
 
-    { type: :top_const_field, body: [const], loc: beging[:loc].to(const[:loc]) }
+    {
+      type: :top_const_field,
+      constant: constant,
+      loc: operator[:loc].to(constant[:loc])
+    }
   end
 
   # A top_const_ref is a parser event that is a very similar to
@@ -2892,10 +2898,14 @@ class Prettier::Parser < Ripper
   #
   #     ::X
   #
-  def on_top_const_ref(const)
-    beging = find_colon2_before(const)
+  def on_top_const_ref(constant)
+    operator = find_colon2_before(constant)
 
-    { type: :top_const_ref, body: [const], loc: beging[:loc].to(const[:loc]) }
+    {
+      type: :top_const_ref,
+      constant: constant,
+      loc: operator[:loc].to(constant[:loc])
+    }
   end
 
   # tstring_beg is a scanner event that represents the beginning of a string
