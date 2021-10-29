@@ -140,7 +140,7 @@ export type Ensure = ParserEvent<"ensure", { keyword: Keyword, stmts: Stmts }>;
 export type For = ParserEvent<"for", { iterator: Mlhs | MlhsAddStar | VarField, enumerable: AnyNode, stmts: Stmts }>;
 export type If = ParserEvent<"if", { pred: AnyNode, stmts: Stmts, cons: null | Elsif | Else }>;
 export type IfModifier = ParserEvent<"if_mod", { pred: AnyNode, stmt: AnyNode }>;
-export type In = ParserEvent<"in", { body: [AnyNode, Stmts, null | In | Else] }>;
+export type In = ParserEvent<"in", { pttn: AnyNode, stmts: Stmts, cons: null | In | Else }>;
 export type Rescue = ParserEvent<"rescue", { body: [null | RescueEx, Stmts, null | Stmts] }>;
 export type RescueEx = ParserEvent<"rescue_ex", { body: [AnyNode, null | Field | VarField] }>;
 export type RescueModifier = ParserEvent<"rescue_mod", { body: [AnyNode, AnyNode] }>;
@@ -149,7 +149,7 @@ export type Unless = ParserEvent<"unless", { pred: AnyNode, stmts: Stmts, cons: 
 export type UnlessModifier = ParserEvent<"unless_mod", { pred: AnyNode, stmt: AnyNode }>;
 export type Until = ParserEvent<"until", { pred: AnyNode, stmts: Stmts }>;
 export type UntilModifier = ParserEvent<"until_mod", { pred: AnyNode, stmt: AnyNode }>;
-export type When = ParserEvent<"when", { body: [Args | ArgsAddStar, Stmts, null | Else | When] }>;
+export type When = ParserEvent<"when", { args: Args | ArgsAddStar, stmts: Stmts, cons: null | Else | When }>;
 export type While = ParserEvent<"while", { pred: AnyNode, stmts: Stmts }>;
 export type WhileModifier = ParserEvent<"while_mod", { pred: AnyNode, stmt: AnyNode }>;
 

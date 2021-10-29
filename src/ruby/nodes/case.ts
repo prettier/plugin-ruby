@@ -16,12 +16,12 @@ export const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
 };
 
 export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
-  const [, , addition] = path.getValue().body;
+  const node = path.getValue();
 
   // The `fill` builder command expects an array of docs alternating with
   // line breaks. This is so it can loop through and determine where to break.
   const preds = fill(
-    (path.call(print, "body", 0) as Plugin.Doc[]).reduce(
+    (path.call(print, "args") as Plugin.Doc[]).reduce(
       (accum: Plugin.Doc[], pred, index) => {
         if (index === 0) {
           return [pred];
@@ -40,7 +40,7 @@ export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
     )
   );
 
-  const stmts = path.call(print, "body", 1) as Plugin.Doc[];
+  const stmts = path.call(print, "stmts") as Plugin.Doc[];
   const parts: Plugin.Doc[] = [["when ", align("when ".length, preds)]];
 
   // It's possible in a when to just have empty void statements, in which case
@@ -51,8 +51,8 @@ export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {
 
   // This is the next clause on the case statement, either another `when` or
   // an `else` clause.
-  if (addition) {
-    parts.push(hardline, path.call(print, "body", 2));
+  if (node.cons) {
+    parts.push(hardline, path.call(print, "cons"));
   }
 
   return group(parts);

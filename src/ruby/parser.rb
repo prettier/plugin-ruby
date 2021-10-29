@@ -1738,7 +1738,9 @@ class Prettier::Parser < Ripper
 
     {
       type: :in,
-      body: [pattern, stmts, consequent],
+      pttn: pattern,
+      stmts: stmts,
+      cons: consequent,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -3193,15 +3195,17 @@ class Prettier::Parser < Ripper
   # It accepts as arguments the predicate of the when, the statements that
   # are contained within the else if clause, and the optional consequent
   # clause.
-  def on_when(predicate, stmts, consequent)
+  def on_when(args, stmts, consequent)
     beging = find_scanner_event(:@kw, 'when')
     ending = consequent || find_scanner_event(:@kw, 'end')
 
-    stmts.bind(predicate[:loc].end_char, ending[:loc].start_char)
+    stmts.bind(args[:loc].end_char, ending[:loc].start_char)
 
     {
       type: :when,
-      body: [predicate, stmts, consequent],
+      args: args,
+      stmts: stmts,
+      cons: consequent,
       loc: beging[:loc].to(ending[:loc])
     }
   end

@@ -125,6 +125,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.pred, node.tthy, node.flsy];
     case "if_mod":
       return [node.stmt, node.pred];
+    case "in":
+      return [node.pttn, node.stmts, node.cons];
     case "kwrest_param":
       return [node.name];
     case "lambda":
@@ -171,6 +173,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.value];
     case "vcall":
       return [node.value];
+    case "when":
+      return [node.args, node.stmts, node.cons];
     case "while":
       return [node.pred, node.stmts];
     case "while_mod":

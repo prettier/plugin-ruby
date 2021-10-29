@@ -139,15 +139,14 @@ export const printIn: Plugin.Printer<Ruby.In> = (path, opts, print) => {
       keyword.length,
       path.call(
         (valuePath) => printPatternArg(valuePath, opts, print),
-        "body",
-        0
+        "pttn"
       )
     ),
-    indent([hardline, path.call(print, "body", 1)])
+    indent([hardline, path.call(print, "stmts")])
   ];
 
-  if (path.getValue().body[2]) {
-    parts.push(hardline, path.call(print, "body", 2));
+  if (path.getValue().cons) {
+    parts.push(hardline, path.call(print, "cons"));
   }
 
   return group(parts);
