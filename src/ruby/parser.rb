@@ -825,15 +825,15 @@ class Prettier::Parser < Ripper
   # the receiver (which can be another nested call as well).
   #
   # There is one esoteric syntax that comes into play here as well. If the
-  # sending argument to this method is the symbol :call, then it represents
+  # message argument to this method is the symbol :call, then it represents
   # calling a lambda in a very odd looking way, as in:
   #
   #     foo.(1, 2, 3)
   #
-  def on_call(receiver, operator, sending)
-    ending = sending
+  def on_call(receiver, operator, message)
+    ending = message
 
-    if sending == :call
+    if message == :call
       ending = operator
 
       # Special handling here for Ruby <= 2.5 because the operator argument to
@@ -843,7 +843,9 @@ class Prettier::Parser < Ripper
 
     {
       type: :call,
-      body: [receiver, operator, sending],
+      receiver: receiver,
+      operator: operator,
+      message: message,
       loc:
         Location.new(
           start_line: receiver[:loc].start_line,
@@ -1450,8 +1452,14 @@ class Prettier::Parser < Ripper
   #
   #     foo.x = 1
   #
-  def on_field(left, oper, right)
-    { type: :field, body: [left, oper, right], loc: left[:loc].to(right[:loc]) }
+  def on_field(parent, operator, name)
+    {
+      type: :field,
+      parent: parent,
+      operator: operator,
+      name: name,
+      loc: parent[:loc].to(name[:loc])
+    }
   end
 
   # float is a scanner event that represents a floating point value literal.

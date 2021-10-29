@@ -1,6 +1,6 @@
 import type { Plugin, Ruby } from "../types";
 
-function isCall(node: Ruby.CallOperator) {
+function isPeriod(node: Ruby.CallOperator) {
   // Older versions of Ruby didn't have a @period ripper event, so we need to
   // explicitly cast to any here.
   if (node === "::" || (node as any) === ".") {
@@ -61,20 +61,18 @@ function toProc(
   }
 
   // Ensure that statement is a call and that it has no comments attached
-  const [statement] = statements;
-  if (statement.type !== "call" || statement.comments) {
+  const [call] = statements;
+  if (call.type !== "call" || call.comments) {
     return null;
   }
 
   // Ensure the call is a method of the block argument
-  const [varRef, call, method] = statement.body;
-
   if (
-    varRef.type !== "var_ref" ||
-    varRef.value.body !== reqParams[0].body ||
-    !isCall(call) ||
-    method === "call" ||
-    method.type !== "@ident"
+    call.receiver.type !== "var_ref" ||
+    call.receiver.value.body !== reqParams[0].body ||
+    !isPeriod(call.operator) ||
+    call.message === "call" ||
+    call.message.type !== "@ident"
   ) {
     return null;
   }
@@ -106,7 +104,7 @@ function toProc(
     }
   }
 
-  return `&:${method.body}`;
+  return `&:${call.message.body}`;
 }
 
 export default toProc;

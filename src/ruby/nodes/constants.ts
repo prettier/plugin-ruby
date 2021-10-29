@@ -24,9 +24,9 @@ export const printDefined: Plugin.Printer<Ruby.Defined> = (
 
 export const printField: Plugin.Printer<Ruby.Field> = (path, opts, print) => {
   return group([
-    path.call(print, "body", 0),
+    path.call(print, "parent"),
     makeCall(path, opts, print),
-    path.call(print, "body", 2)
+    path.call(print, "name")
   ]);
 };
 

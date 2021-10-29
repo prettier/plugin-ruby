@@ -1,6 +1,8 @@
 import type { Ruby } from "../types";
 
-function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
+type ChildNode = Ruby.AnyNode | null;
+
+function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
   switch (node.type) {
     case "BEGIN":
       return [node.lbrace, node.stmts];
@@ -36,6 +38,19 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return [node.lbrace, node.block_var, node.stmts];
     case "break":
       return [node.args];
+    case "call": {
+      const childNodes: ChildNode[] = [node.receiver];
+
+      if (node.operator !== "::") {
+        childNodes.push(node.operator);
+      }
+
+      if (node.message !== "call") {
+        childNodes.push(node.message);
+      }
+
+      return childNodes;
+    }
     case "case":
       return [node.value, node.consequent];
     case "class":
@@ -76,6 +91,16 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return [];
     case "fcall":
       return [node.value];
+    case "field": {
+      const childNodes: ChildNode[] = [node.parent];
+
+      if (node.operator !== "::") {
+        childNodes.push(node.operator);
+      }
+
+      childNodes.push(node.name);
+      return childNodes;
+    }
     case "hash":
       return [node.contents];
     case "module":

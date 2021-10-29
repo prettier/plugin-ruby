@@ -25,15 +25,14 @@ type ChainedMethodAddBlock = Ruby.MethodAddBlock & Chain;
 
 export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   const node = path.getValue();
-  const [receiverNode, , messageNode] = node.body;
 
-  const receiverDoc = path.call(print, "body", 0);
+  const receiverDoc = path.call(print, "receiver");
   const operatorDoc = makeCall(path, opts, print);
 
   // You can call lambdas with a special syntax that looks like func.(*args).
   // In this case, "call" is returned for the 3rd child node. We don't alter
   // call syntax so if `call` is implicit, we don't print it out.
-  const messageDoc = messageNode === "call" ? "" : path.call(print, "body", 2);
+  const messageDoc = node.message === "call" ? "" : path.call(print, "message");
 
   // Create some arrays that are going to represent each side of our call.
   let leftSideDoc = [receiverDoc];
@@ -49,8 +48,7 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   //
   // In the case we need to group the receiver and the operator together or
   // we'll end up with a syntax error.
-  const operatorIsTrailing =
-    messageNode !== "call" && hasLeadingComments(messageNode);
+  const operatorIsTrailing = node.message !== "call" && hasLeadingComments(node.message);
 
   if (operatorIsTrailing) {
     leftSideDoc = [receiverDoc, operatorDoc];
@@ -59,14 +57,14 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
 
   // For certain left sides of the call nodes, we want to attach directly to
   // the } or end.
-  if (noIndent.includes(receiverNode.type)) {
+  if (noIndent.includes(node.receiver.type)) {
     return [leftSideDoc, rightSideDoc];
   }
 
   if (
-    receiverNode.type === "call" &&
-    receiverNode.body[2] !== "call" &&
-    receiverNode.body[2].body === "where" &&
+    node.receiver.type === "call" &&
+    node.receiver.message !== "call" &&
+    node.receiver.message.body === "where" &&
     messageDoc === "not"
   ) {
     // This is very specialized behavior wherein we group .where.not calls
@@ -74,7 +72,7 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
     // https://github.com/prettier/plugin-ruby/issues/862.
   } else {
     // Otherwise, we're going to put a line node into the right side doc.
-    rightSideDoc.unshift(receiverNode.comments ? hardline : softline);
+    rightSideDoc.unshift(node.receiver.comments ? hardline : softline);
   }
 
   // Get a reference to the parent node so we can check if we're inside a chain
@@ -85,7 +83,7 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   if (chained.includes(parentNode.type) && !node.comments) {
     parentNode.chain = (node.chain || 0) + 1;
     parentNode.callChain = (node.callChain || 0) + 1;
-    parentNode.firstReceiverType = node.firstReceiverType || receiverNode.type;
+    parentNode.firstReceiverType = node.firstReceiverType || node.receiver.type;
 
     // Here we're going to determine what doc nodes to send up to the parent
     // node to represent when we're in the multi-line form.
@@ -158,7 +156,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
     // example, if you call something like Foo.new.() (implicitly calling the
     // #call method on a new instance of the Foo class), then we have to print
     // out those parentheses, otherwise we'll end up with Foo.new.
-    if (methodNode.type === "call" && methodNode.body[2] === "call") {
+    if (methodNode.type === "call" && methodNode.message === "call") {
       return [methodDoc, "()"];
     }
 
