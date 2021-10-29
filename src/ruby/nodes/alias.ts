@@ -3,6 +3,8 @@ import prettier from "../../prettier";
 
 const { addTrailingComment, align, group, hardline, line } = prettier;
 
+type AliasArg = Ruby.Backref | Ruby.DynaSymbol | Ruby.GVar | Ruby.SymbolLiteral;
+
 // The `alias` keyword is used to make a method respond to another name as well
 // as the current one. For example, to get the method `foo` to also respond to
 // `bar`, you would:
@@ -28,15 +30,12 @@ export const printAlias: Plugin.Printer<Ruby.Alias | Ruby.VarAlias> = (
   print
 ) => {
   const keyword = "alias ";
+  const node = path.getValue();
 
   // In general, return the printed doc of the argument at the provided index.
   // Special handling is given for symbol literals that are not bare words, as
   // we convert those into bare words by just pulling out the ident node.
-  const printAliasArg = (
-    argPath: Plugin.Path<
-      Ruby.Backref | Ruby.DynaSymbol | Ruby.GVar | Ruby.SymbolLiteral
-    >
-  ) => {
+  const printAliasArg = (argPath: Plugin.Path<AliasArg>) => {
     const argNode = argPath.getValue();
 
     if (argNode.type === "symbol_literal") {
@@ -57,13 +56,13 @@ export const printAlias: Plugin.Printer<Ruby.Alias | Ruby.VarAlias> = (
 
   return group([
     keyword,
-    path.call(printAliasArg, "body", 0),
+    path.call(printAliasArg, "left"),
     group(
       align(keyword.length, [
         // If the left child has any comments, then we need to explicitly break
         // this into two lines
-        path.getValue().body[0].comments ? hardline : line,
-        path.call(printAliasArg, "body", 1)
+        node.left.comments ? hardline : line,
+        path.call(printAliasArg, "right")
       ])
     )
   ]);

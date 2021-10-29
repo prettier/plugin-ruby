@@ -313,9 +313,15 @@ class Prettier::Parser < Ripper
       find_next_statement_start(beging[:loc].end_char),
       ending[:loc].start_char
     )
+
     keyword = find_scanner_event(:@kw, 'BEGIN')
 
-    { type: :BEGIN, body: [beging, stmts], loc: keyword[:loc].to(ending[:loc]) }
+    {
+      type: :BEGIN,
+      lbrace: beging,
+      stmts: stmts,
+      loc: keyword[:loc].to(ending[:loc])
+    }
   end
 
   # CHAR is a parser event that represents a single codepoint in the script
@@ -354,9 +360,15 @@ class Prettier::Parser < Ripper
       find_next_statement_start(beging[:loc].end_char),
       ending[:loc].start_char
     )
+
     keyword = find_scanner_event(:@kw, 'END')
 
-    { type: :END, body: [beging, stmts], loc: keyword[:loc].to(ending[:loc]) }
+    {
+      type: :END,
+      lbrace: beging,
+      stmts: stmts,
+      loc: keyword[:loc].to(ending[:loc])
+    }
   end
 
   # __END__ is a scanner event that represents __END__ syntax, which allows
@@ -387,7 +399,12 @@ class Prettier::Parser < Ripper
     paren = source[beging[:loc].end_char...left[:loc].start_char].include?('(')
     ending = paren ? find_scanner_event(:@rparen) : right
 
-    { type: :alias, body: [left, right], loc: beging[:loc].to(ending[:loc]) }
+    {
+      type: :alias,
+      left: left,
+      right: right,
+      loc: beging[:loc].to(ending[:loc])
+    }
   end
 
   # aref is a parser event when you're pulling a value out of a collection at a
@@ -3006,7 +3023,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :var_alias,
-      body: [left, right],
+      left: left,
+      right: right,
       loc: beging[:loc].to(ending[:loc])
     }
   end

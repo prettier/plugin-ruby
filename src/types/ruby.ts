@@ -196,14 +196,14 @@ export type VCall = ParserEvent<"vcall", { body: [Identifier] }>;
 
 // These are various parser events for statements you would find in a method body.
 export type Aref = ParserEvent<"aref", { body: [AnyNode, Args | ArgsAddBlock | null] }>;
-export type BEGIN = ParserEvent<"BEGIN", { body: [Lbrace, Stmts] }>;
+export type BEGIN = ParserEvent<"BEGIN", { lbrace: Lbrace, stmts: Stmts }>;
 export type Binary = ParserEvent<"binary", { body: [AnyNode, string, AnyNode] }>;
 export type ConstPathRef = ParserEvent<"const_path_ref", { body: [AnyNode, Const] }>;
 export type ConstRef = ParserEvent<"const_ref", { body: [Const] }>;
 export type Defined = ParserEvent<"defined", { body: [AnyNode] }>;
 export type Dot2 = ParserEvent<"dot2", { body: [AnyNode, null] | [null, AnyNode] | [AnyNode, AnyNode] }>;
 export type Dot3 = ParserEvent<"dot3", { body: [AnyNode, null] | [null, AnyNode] | [AnyNode, AnyNode] }>;
-export type END = ParserEvent<"END", { body: [Lbrace, Stmts] }>;
+export type END = ParserEvent<"END", { lbrace: Lbrace, stmts: Stmts }>;
 export type Paren = ParserEvent<"paren", { body: [AnyNode], lparen: Lparen }>;
 export type TopConstRef = ParserEvent<"top_const_ref", { body: [Const] }>;
 export type Unary = ParserEvent<"unary", { body: [AnyNode], oper: string, paren: boolean | undefined }>;
@@ -211,11 +211,11 @@ export type VarRef = ParserEvent<"var_ref", { body: [Const | CVar | GVar | Ident
 
 // These are various parser events for statements you would find in a class definition body.
 export type AccessCtrl = ParserEvent<"access_ctrl", { body: [Identifier] }>;
-export type Alias = ParserEvent<"alias", { body: [DynaSymbol | SymbolLiteral, DynaSymbol | SymbolLiteral] }>;
+export type Alias = ParserEvent<"alias", { left: DynaSymbol | SymbolLiteral, right: DynaSymbol | SymbolLiteral }>;
 export type Class = ParserEvent<"class", { body: [ConstPathRef | ConstRef | TopConstRef, null | AnyNode, Bodystmt] }>;
 export type Module = ParserEvent<"module", { body: [ConstPathRef | ConstRef | TopConstRef, Bodystmt] }>;
 export type Sclass = ParserEvent<"sclass", { body: [AnyNode, Bodystmt] }>;
-export type VarAlias = ParserEvent<"var_alias", { body: [GVar, Backref | GVar] }>;
+export type VarAlias = ParserEvent<"var_alias", { left: GVar, right: Backref | GVar }>;
 export type Undef = ParserEvent<"undef", { body: (DynaSymbol | SymbolLiteral)[] }>;
 
 // These are various parser events for statement containers, generally pretty high in the tree.

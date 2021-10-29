@@ -27,15 +27,24 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
   // This function tells prettier how to recurse down our AST so that it can
   // find where it needs to attach the comments. The types on this are a little
   // abysmal, but we're going to leave it as is to get this out.
-  getCommentChildNodes(node) {
+  getCommentChildNodes(node: Ruby.AnyNode) {
     switch (node.type) {
+      case "BEGIN":
+      case "END":
+        return [node.lbrace, node.stmts];
+      case "alias":
+      case "var_alias":
+        return [node.left, node.right];
       case "heredoc":
         return [node.beging];
-      case "aryptn":
-        return [node.body[0]]
+      case "aryptn": {
+        const parts: (Ruby.AnyNode | null)[] = [node.body[0]];
+
+        return parts
           .concat(node.body[1])
           .concat(node.body[2])
           .concat(node.body[3]);
+      }
       case "hshptn": {
         const pairs = node.body[1];
         const values = pairs.reduce(
@@ -47,7 +56,7 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
       }
       case "params": {
         const [reqs, optls, rest, post, kwargs, kwargRest, block] = node.body;
-        let parts = reqs || [];
+        let parts: (Ruby.AnyNode | null)[] = reqs || [];
 
         (optls || []).forEach((optl: any) => {
           parts = parts.concat(optl);
