@@ -27,7 +27,7 @@ export const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (
 // braces or not. Ideally we wouldn't do this, we would instead do this
 // reflection in the child printer, but this keeps the logic to just this file
 // and contains it, so keeping it here for now.
-function printBlockBeging(
+function printBlockBegin(
   path: Plugin.Path<Ruby.Lbrace | Ruby.Keyword>,
   print: Plugin.Print,
   useBraces: boolean
@@ -48,17 +48,15 @@ type Block = Ruby.BraceBlock | Ruby.DoBlock;
 
 function printBlock(braces: boolean): Plugin.Printer<Block> {
   return function printBlockWithBraces(path, opts, print) {
-    const [variables, statements] = path.getValue().body;
-    const stmts =
-      statements.type === "stmts" ? statements.body : statements.body[0].body;
+    const node = path.getValue();
+    const stmts: Ruby.AnyNode[] = node.type === "brace_block" ? node.stmts.body : node.bodystmt.body[0].body;
 
     let doBlockBody: Plugin.Doc = "";
-    if (
-      stmts.length !== 1 ||
-      stmts[0].type !== "void_stmt" ||
-      stmts[0].comments
-    ) {
-      doBlockBody = indent([softline, path.call(print, "body", 1)]);
+    if (stmts.length !== 1 || stmts[0].type !== "void_stmt" || stmts[0].comments) {
+      doBlockBody = indent([
+        softline,
+        path.call(print, node.type === "brace_block" ? "stmts" : "bodystmt")
+      ]);
     }
 
     // If this block is nested underneath a command or command_call node, then
@@ -71,21 +69,17 @@ function printBlock(braces: boolean): Plugin.Printer<Block> {
     const doBlock = [
       " ",
       path.call(
-        (begingPath) => printBlockBeging(begingPath, print, useBraces),
-        "beging"
+        (beginPath) => printBlockBegin(beginPath, print, useBraces),
+        node.type === "brace_block" ? "lbrace" : "keyword"
       ),
-      variables ? [" ", path.call(print, "body", 0)] : "",
+      node.block_var ? [" ", path.call(print, "block_var")] : "",
       doBlockBody,
       [softline, useBraces ? "}" : "end"]
     ];
 
     // We can hit this next pattern if within the block the only statement is a
     // comment.
-    if (
-      stmts.length === 1 &&
-      stmts[0].type === "void_stmt" &&
-      stmts[0].comments
-    ) {
+    if (stmts.length === 1 && stmts[0].type === "void_stmt" && stmts[0].comments) {
       return [breakParent, doBlock];
     }
 
@@ -101,12 +95,12 @@ function printBlock(braces: boolean): Plugin.Printer<Block> {
     const braceBlock = [
       " ",
       path.call(
-        (begingPath) => printBlockBeging(begingPath, print, true),
-        "beging"
+        (beginPath) => printBlockBegin(beginPath, print, true),
+        node.type === "brace_block" ? "lbrace" : "keyword"
       ),
-      hasBody || variables ? " " : "",
-      variables ? path.call(print, "body", 0) : "",
-      path.call(print, "body", 1),
+      hasBody || node.block_var ? " " : "",
+      node.block_var ? path.call(print, "block_var") : "",
+      path.call(print, node.type === "brace_block" ? "stmts" : "bodystmt"),
       hasBody ? " " : "",
       "}"
     ];

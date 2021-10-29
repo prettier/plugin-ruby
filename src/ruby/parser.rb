@@ -788,8 +788,9 @@ class Prettier::Parser < Ripper
 
     {
       type: :brace_block,
-      body: [block_var, stmts],
-      beging: beging,
+      lbrace: beging,
+      block_var: block_var,
+      stmts: stmts,
       loc:
         Location.new(
           start_line: beging[:loc].start_line,
@@ -1161,8 +1162,9 @@ class Prettier::Parser < Ripper
 
     {
       type: :do_block,
-      body: [block_var, bodystmt],
-      beging: beging,
+      keyword: beging,
+      block_var: block_var,
+      bodystmt: bodystmt,
       loc: beging[:loc].to(ending[:loc])
     }
   end

@@ -25,17 +25,14 @@ function toProc(
   path: Plugin.Path<Ruby.Args | Ruby.MethodAddBlock>,
   node: Ruby.BraceBlock | Ruby.DoBlock
 ) {
-  const [variables, blockContents] = node.body;
-
   // Ensure that there are variables being passed to this block.
-  const params = variables && variables.params;
+  const params = node.block_var && node.block_var.params;
   if (!params) {
     return null;
   }
 
   // Ensure there is one and only one parameter, and that it is required.
-  const reqParams = params.body[0];
-  const otherParams = params.body.slice(1);
+  const [reqParams, ...otherParams] = params.body;
   if (
     !Array.isArray(reqParams) ||
     reqParams.length !== 1 ||
@@ -44,30 +41,27 @@ function toProc(
     return null;
   }
 
-  let statements: Ruby.Stmts;
-  if (blockContents.type === "bodystmt") {
-    // We’re in a `do` block
-    const blockStatements = blockContents.body[0];
-    const rescueElseEnsure = blockContents.body.slice(1);
+  let statements: Ruby.AnyNode[];
+  if (node.type === "do_block") {
+    const [blockStatements, ...rescueElseEnsure] = node.bodystmt.body;
 
     // You can’t use the to_proc shortcut if you’re rescuing
     if (rescueElseEnsure.some(Boolean)) {
       return null;
     }
 
-    statements = blockStatements;
+    statements = blockStatements.body;
   } else {
-    // We’re in a brace block
-    statements = blockContents;
+    statements = node.stmts.body;
   }
 
   // Ensure the block contains only one statement
-  if (statements.body.length !== 1) {
+  if (statements.length !== 1) {
     return null;
   }
 
   // Ensure that statement is a call and that it has no comments attached
-  const [statement] = statements.body;
+  const [statement] = statements;
   if (statement.type !== "call" || statement.comments) {
     return null;
   }
