@@ -38,6 +38,10 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return [node.value, node.consequent];
     case "class":
       return [node.constant, node.superclass, node.bodystmt];
+    case "command":
+      return [node.message, node.args];
+    case "command_call":
+      return [node.receiver, node.message, node.args];
     case "do_block":
       return [node.keyword, node.block_var, node.bodystmt];
     case "dot2":
@@ -56,6 +60,8 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return [node.stmts];
     case "rassign":
       return [node.value, node.operator, node.pattern];
+    case "return":
+      return [node.args];
     case "sclass":
       return [node.target, node.bodystmt];
     case "var_alias":

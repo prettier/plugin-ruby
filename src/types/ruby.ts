@@ -156,7 +156,7 @@ export type WhileModifier = ParserEvent<"while_mod", { body: [AnyNode, AnyNode] 
 // These are various parser events for control flow keywords.
 export type Break = ParserEvent<"break", { args: Args | ArgsAddBlock }>;
 export type Next = ParserEvent<"next", { args: Args | ArgsAddBlock }>;
-export type Return = ParserEvent<"return", { body: [Args | ArgsAddBlock] }>;
+export type Return = ParserEvent<"return", { args: Args | ArgsAddBlock }>;
 export type Super = ParserEvent<"super", { body: [Args | ArgParen | ArgsAddBlock] }>;
 export type Yield = ParserEvent<"yield", { body: [ArgsAddBlock | Paren] }>;
 
@@ -186,8 +186,8 @@ export type ArgsAddStar = ParserEvent<"args_add_star", { body: [Args | ArgsAddSt
 export type BlockVar = ParserEvent<"block_var", { params: Params, locals: Identifier[] }>;
 export type BraceBlock = ParserEvent<"brace_block", { lbrace: Lbrace, block_var: null | BlockVar, stmts: Stmts }>;
 export type Call = ParserEvent<"call", { body: [AnyNode, CallOperator, Backtick | Op | Identifier | Const | "call"] }>;
-export type Command = ParserEvent<"command", { body: [Const | Identifier, Args | ArgsAddBlock] }>;
-export type CommandCall = ParserEvent<"command_call", { body: [AnyNode, CallOperator, Op | Identifier | Const, Args | ArgsAddBlock] }>;
+export type Command = ParserEvent<"command", { message: Const | Identifier, args: Args | ArgsAddBlock }>;
+export type CommandCall = ParserEvent<"command_call", { receiver: AnyNode, operator: CallOperator, message: Op | Identifier | Const, args: Args | ArgsAddBlock }>;
 export type DoBlock = ParserEvent<"do_block", { keyword: Keyword, block_var: null | BlockVar, bodystmt: Bodystmt }>;
 export type Fcall = ParserEvent<"fcall", { body: [Const | Identifier] }>;
 export type MethodAddArg = ParserEvent<"method_add_arg", { body: [Call | Fcall, Args | ArgParen | ArgsAddBlock] }>;

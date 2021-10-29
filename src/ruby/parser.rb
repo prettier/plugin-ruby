@@ -919,20 +919,28 @@ class Prettier::Parser < Ripper
   # command is a parser event representing a method call with arguments and
   # no parentheses. It accepts as arguments the name of the method and the
   # arguments being passed to the method.
-  def on_command(ident, args)
-    { type: :command, body: [ident, args], loc: ident[:loc].to(args[:loc]) }
+  def on_command(message, args)
+    {
+      type: :command,
+      message: message,
+      args: args,
+      loc: message[:loc].to(args[:loc])
+    }
   end
 
   # command_call is a parser event representing a method call on an object
   # with arguments and no parentheses. It accepts as arguments the receiver
   # of the method, the operator being used to send the method, the name of
   # the method, and the arguments being passed to the method.
-  def on_command_call(receiver, oper, ident, args)
-    ending = args || ident
+  def on_command_call(receiver, operator, message, args)
+    ending = args || message
 
     {
       type: :command_call,
-      body: [receiver, oper, ident, args],
+      receiver: receiver,
+      operator: operator,
+      message: message,
+      args: args,
       loc: receiver[:loc].to(ending[:loc])
     }
   end
@@ -2497,14 +2505,10 @@ class Prettier::Parser < Ripper
   # return is a parser event that represents using the return keyword with
   # arguments. It accepts as an argument an args_add_block event that
   # contains all of the arguments being passed.
-  def on_return(args_add_block)
-    event = find_scanner_event(:@kw, 'return')
+  def on_return(args)
+    keyword = find_scanner_event(:@kw, 'return')
 
-    {
-      type: :return,
-      body: [args_add_block],
-      loc: event[:loc].to(args_add_block[:loc])
-    }
+    { type: :return, args: args, loc: keyword[:loc].to(args[:loc]) }
   end
 
   # return0 is a parser event that represents the bare return keyword. It
