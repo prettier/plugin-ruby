@@ -32,16 +32,16 @@ function isValidHashLabel(symbolLiteral: Ruby.SymbolLiteral) {
 }
 
 function canUseHashLabels(contentsNode: HashContents) {
-  return contentsNode.body.every((assocNode) => {
+  return contentsNode.assocs.every((assocNode) => {
     if (assocNode.type === "assoc_splat") {
       return true;
     }
 
-    switch (assocNode.body[0].type) {
+    switch (assocNode.key.type) {
       case "@label":
         return true;
       case "symbol_literal":
-        return isValidHashLabel(assocNode.body[0]);
+        return isValidHashLabel(assocNode.key);
       case "dyna_symbol":
         return true;
       default:
@@ -88,20 +88,20 @@ export const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (
   opts,
   print
 ) => {
-  const [keyNode, valueNode] = path.getValue().body;
+  const node = path.getValue();
   const { keyPrinter } = path.getParentNode() as HashContents;
 
-  const parts = [path.call((keyPath) => keyPrinter(keyPath, print), "body", 0)];
-  const valueDoc = path.call(print, "body", 1);
+  const parts = [path.call((keyPath) => keyPrinter(keyPath, print), "key")];
+  const valueDoc = path.call(print, "value");
 
   // If we're printing a child hash then we want it to break along with its
   // parent hash, so we don't group the parts.
-  if (valueNode.type === "hash") {
+  if (node.value.type === "hash") {
     parts.push(" ", valueDoc);
     return parts;
   }
 
-  if (!skipAssignIndent(valueNode) || keyNode.comments) {
+  if (!skipAssignIndent(node.value) || node.key.comments) {
     parts.push(indent([line, valueDoc]));
   } else {
     parts.push(" ", valueDoc);
@@ -114,9 +114,9 @@ export const printAssocSplat: Plugin.Printer<Ruby.AssocSplat> = (
   path,
   opts,
   print
-) => {
-  return ["**", path.call(print, "body", 0)];
-};
+) => (
+  ["**", path.call(print, "value")]
+);
 
 export const printHashContents: Plugin.Printer<HashContents> = (
   path,
@@ -132,24 +132,24 @@ export const printHashContents: Plugin.Printer<HashContents> = (
       ? printHashKeyLabel
       : printHashKeyRocket;
 
-  return join([",", line], path.map(print, "body"));
+  return join([",", line], path.map(print, "assocs"));
 };
 
 export const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
-  const hashNode = path.getValue();
+  const node = path.getValue();
 
   // Hashes normally have a single assoclist_from_args child node. If it's
   // missing, then it means we're dealing with an empty hash, so we can just
   // exit here and print.
-  if (hashNode.body[0] === null) {
+  if (node.contents === null) {
     return printEmptyCollection(path, opts, "{", "}");
   }
 
-  const hashDoc = [
+  const doc = [
     "{",
     indent([
       line,
-      path.call(print, "body", 0),
+      path.call(print, "contents"),
       getTrailingComma(opts) ? ifBreak(",", "") : ""
     ]),
     line,
@@ -159,8 +159,8 @@ export const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
   // If we're inside another hash, then we don't want to group our contents
   // because we want this hash to break along with its parent hash.
   if (path.getParentNode().type === "assoc_new") {
-    return hashDoc;
+    return doc;
   }
 
-  return group(hashDoc);
+  return group(doc);
 };

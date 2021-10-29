@@ -187,7 +187,7 @@ export const printDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
   // If we're inside of an assoc_new node as the key, then it will handle
   // printing the : on its own since it could change sides.
   const parentNode = path.getParentNode();
-  if (parentNode.type !== "assoc_new" || parentNode.body[0] !== node) {
+  if (parentNode.type !== "assoc_new" || parentNode.key !== node) {
     parts.unshift(":");
   }
 

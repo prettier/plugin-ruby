@@ -594,18 +594,23 @@ class Prettier::Parser < Ripper
   # hash. It is a child event of either an assoclist_from_args or a
   # bare_assoc_hash.
   def on_assoc_new(key, value)
-    { type: :assoc_new, body: [key, value], loc: key[:loc].to(value[:loc]) }
+    {
+      type: :assoc_new,
+      key: key,
+      value: value,
+      loc: key[:loc].to(value[:loc])
+    }
   end
 
   # assoc_splat is a parser event that represents splatting a value into a
   # hash (either a hash literal or a bare hash in a method call).
-  def on_assoc_splat(contents)
-    event = find_scanner_event(:@op, '**')
+  def on_assoc_splat(value)
+    operator = find_scanner_event(:@op, '**')
 
     {
       type: :assoc_splat,
-      body: [contents],
-      loc: event[:loc].to(contents[:loc])
+      value: value,
+      loc: operator[:loc].to(value[:loc])
     }
   end
 
@@ -616,7 +621,7 @@ class Prettier::Parser < Ripper
   def on_assoclist_from_args(assocs)
     {
       type: :assoclist_from_args,
-      body: assocs,
+      assocs: assocs,
       loc: assocs[0][:loc].to(assocs[-1][:loc])
     }
   end
@@ -652,11 +657,11 @@ class Prettier::Parser < Ripper
   # being passed as a method argument (and therefore has omitted braces). It
   # accepts as an argument an array of assoc events (either assoc_new or
   # assoc_splat).
-  def on_bare_assoc_hash(assoc_news)
+  def on_bare_assoc_hash(assocs)
     {
       type: :bare_assoc_hash,
-      body: assoc_news,
-      loc: assoc_news[0][:loc].to(assoc_news[-1][:loc])
+      assocs: assocs,
+      loc: assocs[0][:loc].to(assocs[-1][:loc])
     }
   end
 
@@ -1484,7 +1489,7 @@ class Prettier::Parser < Ripper
 
     {
       type: :hash,
-      body: [assoclist_from_args],
+      contents: assoclist_from_args,
       loc: beging[:loc].to(ending[:loc])
     }
   end

@@ -98,7 +98,7 @@ function toProc(
   }
 
   if (assocNode && assocNode.type === "assoc_new") {
-    const [key] = assocNode.body;
+    const key = assocNode.key;
 
     if (key.type === "@label" && ["if:", "unless:"].includes(key.body)) {
       return null;

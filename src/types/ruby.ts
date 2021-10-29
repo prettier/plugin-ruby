@@ -106,11 +106,11 @@ export type Words = ParserEvent<"words", { body: Word[] }>;
 
 // These are various parser events that have to do with hashes.
 type HashContent = AssocNew | AssocSplat;
-export type AssocNew = ParserEvent<"assoc_new", { body: [AnyNode, AnyNode] }>;
-export type AssocSplat = ParserEvent<"assoc_splat", { body: [AnyNode] }>;
-export type AssoclistFromArgs = ParserEvent<"assoclist_from_args", { body: HashContent[] }>;
-export type BareAssocHash = ParserEvent<"bare_assoc_hash", { body: HashContent[] }>;
-export type Hash = ParserEvent<"hash", { body: [null | AssoclistFromArgs] }>;
+export type AssocNew = ParserEvent<"assoc_new", { key: AnyNode, value: AnyNode }>;
+export type AssocSplat = ParserEvent<"assoc_splat", { value: AnyNode }>;
+export type AssoclistFromArgs = ParserEvent<"assoclist_from_args", { assocs: HashContent[] }>;
+export type BareAssocHash = ParserEvent<"bare_assoc_hash", { assocs: HashContent[] }>;
+export type Hash = ParserEvent<"hash", { contents: null | AssoclistFromArgs }>;
 
 // These are various parser events for assignment.
 type Assignable = ArefField | ConstPathField | Field | TopConstField | VarField;

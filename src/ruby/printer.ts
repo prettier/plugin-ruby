@@ -40,11 +40,20 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
         return [node.collection, node.index];
       case "assign":
         return [node.target, node.value];
-      case "opassign":
-        return [node.target, node.operator, node.value];
+      case "assoc_new":
+        return [node.key, node.value];
+      case "assoc_splat":
       case "var_field":
       case "var_ref":
         return [node.value];
+      case "assoclist_from_args":
+      case "bare_assoc_hash":
+        return node.assocs;
+      case "hash":
+        return [node.contents];
+      case "opassign":
+        return [node.target, node.operator, node.value];
+
 
       case "heredoc":
         return [node.beging];
