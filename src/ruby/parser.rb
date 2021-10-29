@@ -427,7 +427,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :aref,
-      body: [collection, index],
+      collection: collection,
+      index: index,
       loc: collection[:loc].to(ending[:loc])
     }
   end
@@ -440,7 +441,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :aref_field,
-      body: [collection, index],
+      collection: collection,
+      index: index,
       loc: collection[:loc].to(ending[:loc])
     }
   end

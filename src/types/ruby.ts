@@ -114,7 +114,7 @@ export type Hash = ParserEvent<"hash", { body: [null | AssoclistFromArgs] }>;
 
 // These are various parser events for assignment.
 type Assignable = ArefField | ConstPathField | Field | TopConstField | VarField;
-export type ArefField = ParserEvent<"aref_field", { body: [AnyNode, ArgsAddBlock | null] }>;
+export type ArefField = ParserEvent<"aref_field", { collection: AnyNode, index: ArgsAddBlock | null }>;
 export type Assign = ParserEvent<"assign", { body: [Assignable, AnyNode] }>;
 export type ConstPathField = ParserEvent<"const_path_field", { body: [ConstPathRef | Paren | TopConstRef | VarRef, Const] }>;
 export type Field = ParserEvent<"field", { body: [AnyNode, CallOperator, Const | Identifier] }>;
@@ -195,7 +195,7 @@ export type MethodAddBlock = ParserEvent<"method_add_block", { body: [AnyNode, B
 export type VCall = ParserEvent<"vcall", { body: [Identifier] }>;
 
 // These are various parser events for statements you would find in a method body.
-export type Aref = ParserEvent<"aref", { body: [AnyNode, Args | ArgsAddBlock | null] }>;
+export type Aref = ParserEvent<"aref", { collection: AnyNode, index: Args | ArgsAddBlock | null }>;
 export type BEGIN = ParserEvent<"BEGIN", { lbrace: Lbrace, stmts: Stmts }>;
 export type Binary = ParserEvent<"binary", { body: [AnyNode, string, AnyNode] }>;
 export type ConstPathRef = ParserEvent<"const_path_ref", { body: [AnyNode, Const] }>;
