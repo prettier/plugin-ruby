@@ -115,12 +115,12 @@ export type Hash = ParserEvent<"hash", { body: [null | AssoclistFromArgs] }>;
 // These are various parser events for assignment.
 type Assignable = ArefField | ConstPathField | Field | TopConstField | VarField;
 export type ArefField = ParserEvent<"aref_field", { collection: AnyNode, index: ArgsAddBlock | null }>;
-export type Assign = ParserEvent<"assign", { body: [Assignable, AnyNode] }>;
+export type Assign = ParserEvent<"assign", { target: Assignable, value: AnyNode }>;
 export type ConstPathField = ParserEvent<"const_path_field", { body: [ConstPathRef | Paren | TopConstRef | VarRef, Const] }>;
 export type Field = ParserEvent<"field", { body: [AnyNode, CallOperator, Const | Identifier] }>;
-export type Opassign = ParserEvent<"opassign", { body: [Assignable, Op, AnyNode] }>;
+export type Opassign = ParserEvent<"opassign", { target: Assignable, operator: Op, value: AnyNode }>;
 export type TopConstField = ParserEvent<"top_const_field", { body: [Const] }>;
-export type VarField = ParserEvent<"var_field", { body: [null | Const | CVar | GVar | Identifier | IVar] }>;
+export type VarField = ParserEvent<"var_field", { value: null | Const | CVar | GVar | Identifier | IVar }>;
 
 // These are various parser events that have to do with multiple assignment.
 export type Massign = ParserEvent<"massign", { body: [Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen, AnyNode] }>;
@@ -207,7 +207,7 @@ export type END = ParserEvent<"END", { lbrace: Lbrace, stmts: Stmts }>;
 export type Paren = ParserEvent<"paren", { body: [AnyNode], lparen: Lparen }>;
 export type TopConstRef = ParserEvent<"top_const_ref", { body: [Const] }>;
 export type Unary = ParserEvent<"unary", { body: [AnyNode], oper: string, paren: boolean | undefined }>;
-export type VarRef = ParserEvent<"var_ref", { body: [Const | CVar | GVar | Identifier | IVar | Keyword] }>;
+export type VarRef = ParserEvent<"var_ref", { value: Const | CVar | GVar | Identifier | IVar | Keyword }>;
 
 // These are various parser events for statements you would find in a class definition body.
 export type AccessCtrl = ParserEvent<"access_ctrl", { body: [Identifier] }>;

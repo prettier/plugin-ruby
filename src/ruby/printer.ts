@@ -38,6 +38,14 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
       case "aref":
       case "aref_field":
         return [node.collection, node.index];
+      case "assign":
+        return [node.target, node.value];
+      case "opassign":
+        return [node.target, node.operator, node.value];
+      case "var_field":
+      case "var_ref":
+        return [node.value];
+
       case "heredoc":
         return [node.beging];
       case "aryptn": {

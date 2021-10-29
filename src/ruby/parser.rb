@@ -581,8 +581,13 @@ class Prettier::Parser < Ripper
   # assign is a parser event that represents assigning something to a
   # variable or constant. It accepts as arguments the left side of the
   # expression before the equals sign and the right side of the expression.
-  def on_assign(left, right)
-    { type: :assign, body: [left, right], loc: left[:loc].to(right[:loc]) }
+  def on_assign(target, value)
+    {
+      type: :assign,
+      target: target,
+      value: value,
+      loc: target[:loc].to(value[:loc])
+    }
   end
 
   # assoc_new is a parser event that contains a key-value pair within a
@@ -2063,11 +2068,13 @@ class Prettier::Parser < Ripper
   # variable or constant using an operator like += or ||=. It accepts as
   # arguments the left side of the expression before the operator, the
   # operator itself, and the right side of the expression.
-  def on_opassign(left, oper, right)
+  def on_opassign(target, operator, value)
     {
       type: :opassign,
-      body: [left, oper, right],
-      loc: left[:loc].to(right[:loc])
+      target: target,
+      operator: operator,
+      value: value,
+      loc: target[:loc].to(value[:loc])
     }
   end
 
@@ -3033,8 +3040,8 @@ class Prettier::Parser < Ripper
 
   # var_ref is a parser event that represents using either a local variable,
   # a nil literal, a true or false literal, or a numbered block variable.
-  def on_var_ref(contents)
-    { type: :var_ref, body: [contents], loc: contents[:loc] }
+  def on_var_ref(value)
+    { type: :var_ref, value: value, loc: value[:loc] }
   end
 
   # var_field is a parser event that represents a variable that is being
@@ -3043,18 +3050,17 @@ class Prettier::Parser < Ripper
   #
   #     foo = 1
   #
-  def on_var_field(ident)
-    if ident
-      { type: :var_field, body: [ident], loc: ident[:loc] }
-    else
-      # You can hit this pattern if you're assigning to a splat using pattern
-      # matching syntax in Ruby 2.7+
-      {
-        type: :var_field,
-        body: nil,
-        loc: Location.fixed(line: lineno, char: char_pos)
-      }
-    end
+  def on_var_field(value)
+    location =
+      if value
+        value[:loc]
+      else
+        # You can hit this pattern if you're assigning to a splat using pattern
+        # matching syntax in Ruby 2.7+
+        Location.fixed(line: lineno, char: char_pos)
+      end
+
+    { type: :var_field, value: value, loc: location }
   end
 
   # vcall nodes are any plain named thing with Ruby that could be either a

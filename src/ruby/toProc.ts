@@ -77,7 +77,7 @@ function toProc(
 
   if (
     varRef.type !== "var_ref" ||
-    varRef.body[0].body !== reqParams[0].body ||
+    varRef.value.body !== reqParams[0].body ||
     !isCall(call) ||
     method === "call" ||
     method.type !== "@ident"
