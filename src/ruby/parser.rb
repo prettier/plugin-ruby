@@ -1405,7 +1405,7 @@ class Prettier::Parser < Ripper
   # ensure is a parser event that represents the use of the ensure keyword
   # and its subsequent statements.
   def on_ensure(stmts)
-    beging = find_scanner_event(:@kw, 'ensure')
+    keyword = find_scanner_event(:@kw, 'ensure')
 
     # Specifically not using find_scanner_event here because we don't want to
     # consume the :@end event, because that would break def..ensure..end chains.
@@ -1416,11 +1416,16 @@ class Prettier::Parser < Ripper
 
     ending = scanner_events[index]
     stmts.bind(
-      find_next_statement_start(beging[:loc].end_char),
+      find_next_statement_start(keyword[:loc].end_char),
       ending[:loc].start_char
     )
 
-    { type: :ensure, body: [beging, stmts], loc: beging[:loc].to(ending[:loc]) }
+    {
+      type: :ensure,
+      keyword: keyword,
+      stmts: stmts,
+      loc: keyword[:loc].to(ending[:loc])
+    }
   end
 
   # An excessed_comma is a special kind of parser event that represents a comma
@@ -1428,15 +1433,15 @@ class Prettier::Parser < Ripper
   # different number of arguments depending on Ruby version, which is why we
   # have the anonymous splat there.
   def on_excessed_comma(*)
-    event = find_scanner_event(:@comma)
+    comma = find_scanner_event(:@comma)
 
-    { type: :excessed_comma, body: event[:body], loc: event[:loc] }
+    { type: :excessed_comma, body: comma[:body], loc: comma[:loc] }
   end
 
   # An fcall is a parser event that represents the piece of a method call
   # that comes before any arguments (i.e., just the name of the method).
-  def on_fcall(ident)
-    { type: :fcall, body: [ident], loc: ident[:loc] }
+  def on_fcall(value)
+    { type: :fcall, value: value, loc: value[:loc] }
   end
 
   # A field is a parser event that is always the child of an assignment. It
@@ -3123,17 +3128,17 @@ class Prettier::Parser < Ripper
   end
 
   # vcall nodes are any plain named thing with Ruby that could be either a
-  # local variable or a method call. They accept as an argument the ident
-  # scanner event that contains their content.
+  # local variable or a method call. They accept as an argument the scanner
+  # event that contains their content.
   #
   # Access controls like private, protected, and public are reported as
   # vcall nodes since they're technically method calls. We want to be able
   # add new lines around them as necessary, so here we're going to
   # explicitly track those as a different node type.
-  def on_vcall(ident)
+  def on_vcall(value)
     @controls ||= %w[private protected public].freeze
 
-    body = ident[:body]
+    body = value[:body]
     type =
       if @controls.include?(body) && body == lines[lineno - 1].strip
         :access_ctrl
@@ -3141,7 +3146,7 @@ class Prettier::Parser < Ripper
         :vcall
       end
 
-    { type: type, body: [ident], loc: ident[:loc] }
+    { type: type, value: value, loc: value[:loc] }
   end
 
   # void_stmt is a special kind of parser event that represents an empty lexical

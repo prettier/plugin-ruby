@@ -15,8 +15,8 @@ export const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
 
 export const printEnsure: Plugin.Printer<Ruby.Ensure> = (path, opts, print) => {
   return [
-    path.call(print, "body", 0),
-    indent([hardline, path.call(print, "body", 1)])
+    path.call(print, "keyword"),
+    indent([hardline, path.call(print, "stmts")])
   ];
 };
 

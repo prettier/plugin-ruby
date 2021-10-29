@@ -68,6 +68,4 @@ export const printAccessControl: Plugin.Printer<Ruby.AccessCtrl> = (
   path,
   opts,
   print
-) => {
-  return path.call(print, "body", 0);
-};
+) => path.call(print, "value");

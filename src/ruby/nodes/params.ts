@@ -116,3 +116,7 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
 export const printArgsForward = literal("...");
 export const printKeywordRestParam = printRestParamSymbol("**");
 export const printRestParam = printRestParamSymbol("*");
+
+export const printExcessedComma: Plugin.Printer<Ruby.ExcessedComma> = (path, opts, print) => {
+  return path.call(print, "body");
+};

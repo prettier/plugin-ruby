@@ -136,7 +136,7 @@ export type MrhsNewFromArgs = ParserEvent<"mrhs_new_from_args", { body: [Args | 
 export type Case = ParserEvent<"case", { value: AnyNode, consequent: In | When }>;
 export type Else = ParserEvent<"else", { stmts: Stmts }>;
 export type Elsif = ParserEvent<"elsif", { predicate: AnyNode, stmts: Stmts, consequent: null | Elsif | Else }>;
-export type Ensure = ParserEvent<"ensure", { body: [Keyword, Stmts] }>;
+export type Ensure = ParserEvent<"ensure", { keyword: Keyword, stmts: Stmts }>;
 export type For = ParserEvent<"for", { body: [Mlhs | MlhsAddStar | VarField, AnyNode, Stmts] }>;
 export type If = ParserEvent<"if", { body: [AnyNode, Stmts, null | Elsif | Else] }>;
 export type IfModifier = ParserEvent<"if_mod", { body: [AnyNode, AnyNode] }>;
@@ -191,10 +191,10 @@ export type Call = ParserEvent<"call", { body: [AnyNode, CallOperator, Backtick 
 export type Command = ParserEvent<"command", { message: Const | Identifier, args: Args | ArgsAddBlock }>;
 export type CommandCall = ParserEvent<"command_call", { receiver: AnyNode, operator: CallOperator, message: Op | Identifier | Const, args: Args | ArgsAddBlock }>;
 export type DoBlock = ParserEvent<"do_block", { keyword: Keyword, block_var: null | BlockVar, bodystmt: Bodystmt }>;
-export type Fcall = ParserEvent<"fcall", { body: [Const | Identifier] }>;
+export type Fcall = ParserEvent<"fcall", { value: Const | Identifier }>;
 export type MethodAddArg = ParserEvent<"method_add_arg", { body: [Call | Fcall, Args | ArgParen | ArgsAddBlock] }>;
 export type MethodAddBlock = ParserEvent<"method_add_block", { body: [AnyNode, BraceBlock | DoBlock] }>;
-export type VCall = ParserEvent<"vcall", { body: [Identifier] }>;
+export type VCall = ParserEvent<"vcall", { value: Identifier }>;
 
 // These are various parser events for statements you would find in a method body.
 type Dot = { left: AnyNode, right: AnyNode } | { left: null, right: AnyNode } | { left: AnyNode, right: null };
@@ -213,7 +213,7 @@ export type Unary = ParserEvent<"unary", { body: [AnyNode], oper: string, paren:
 export type VarRef = ParserEvent<"var_ref", { value: Const | CVar | GVar | Identifier | IVar | Keyword }>;
 
 // These are various parser events for statements you would find in a class definition body.
-export type AccessCtrl = ParserEvent<"access_ctrl", { body: [Identifier] }>;
+export type AccessCtrl = ParserEvent<"access_ctrl", { value: Identifier }>;
 export type Alias = ParserEvent<"alias", { left: DynaSymbol | SymbolLiteral, right: DynaSymbol | SymbolLiteral }>;
 export type Class = ParserEvent<"class", { constant: ConstPathRef | ConstRef | TopConstRef, superclass: null | AnyNode, bodystmt: Bodystmt }>;
 export type Module = ParserEvent<"module", { constant: ConstPathRef | ConstRef | TopConstRef, bodystmt: Bodystmt }>;

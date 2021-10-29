@@ -149,7 +149,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
     // like a constant, then we need to match that in order to maintain valid
     // Ruby. For example, you could do something like Foo(), on which we would
     // need to keep the parentheses to make it look like a method call.
-    if (methodNode.type === "fcall" && methodNode.body[0].type === "@const") {
+    if (methodNode.type === "fcall" && methodNode.value.type === "@const") {
       return [methodDoc, "()"];
     }
 
@@ -200,14 +200,19 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
       sigBlock = path.getParentNode(3);
     }
 
-    if (
-      sigBlock.type === "method_add_block" &&
-      sigBlock.body[1] &&
-      sigBlock.body[0].type === "method_add_arg" &&
-      sigBlock.body[0].body[0].type === "fcall" &&
-      sigBlock.body[0].body[0].body[0].body === "sig"
-    ) {
-      threshold = 2;
+    if (sigBlock.type === "method_add_block") {
+      // Pulling this out into a separate variable so we can get back some of
+      // our type safety.
+      const sigBlockNode = sigBlock as Ruby.MethodAddBlock;
+
+      if (
+        sigBlockNode.body[1] &&
+        sigBlockNode.body[0].type === "method_add_arg" &&
+        sigBlockNode.body[0].body[0].type === "fcall" &&
+        sigBlockNode.body[0].body[0].value.body === "sig"
+      ) {
+        threshold = 2;
+      }
     }
   }
 
@@ -325,5 +330,5 @@ export const printCallContainer: Plugin.Printer<Ruby.Fcall | Ruby.VCall> = (
   opts,
   print
 ) => {
-  return path.call(print, "body", 0);
+  return path.call(print, "value");
 };

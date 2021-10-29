@@ -6,6 +6,8 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return [node.lbrace, node.stmts];
     case "END":
       return [node.lbrace, node.stmts];
+    case "access_ctrl":
+      return [node.value];
     case "alias":
       return [node.left, node.right];
     case "aref":
@@ -68,6 +70,12 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return [node.stmts];
     case "elsif":
       return [node.predicate, node.stmts, node.consequent];
+    case "ensure":
+      return [node.keyword, node.stmts];
+    case "excessed_comma":
+      return [];
+    case "fcall":
+      return [node.value];
     case "hash":
       return [node.contents];
     case "module":
@@ -93,6 +101,8 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
     case "var_field":
       return [node.value];
     case "var_ref":
+      return [node.value];
+    case "vcall":
       return [node.value];
 
 

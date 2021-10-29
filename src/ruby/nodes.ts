@@ -83,6 +83,7 @@ import {
 } from "./nodes/operators";
 import {
   printArgsForward,
+  printExcessedComma,
   printKeywordRestParam,
   printParams,
   printRestParam
@@ -177,6 +178,7 @@ const nodes: Partial<{
   elsif: printElsif,
   END: printEND,
   ensure: printEnsure,
+  excessed_comma: printExcessedComma,
   fcall: printCallContainer,
   fndptn: printFndPtn,
   field: printField,
