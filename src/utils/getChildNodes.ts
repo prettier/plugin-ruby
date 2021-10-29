@@ -28,6 +28,10 @@ function getChildNodes(node: Ruby.AnyNode) {
     case "dot2":
     case "dot3":
       return [node.left, node.right];
+    case "block_var":
+      return [node.params, ...node.locals];
+    case "blockarg":
+      return [node.name];
     case "hash":
       return [node.contents];
     case "opassign":

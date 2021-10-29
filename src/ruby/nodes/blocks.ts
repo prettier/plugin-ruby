@@ -10,11 +10,11 @@ export const printBlockVar: Plugin.Printer<Ruby.BlockVar> = (
   opts,
   print
 ) => {
-  const parts = ["|", removeLines(path.call(print, "body", 0))];
+  const parts = ["|", removeLines(path.call(print, "params"))];
 
   // The second part of this node is a list of optional block-local variables
-  if (path.getValue().body[1]) {
-    parts.push("; ", join(", ", path.map(print, "body", 1)));
+  if (path.getValue().locals.length > 0) {
+    parts.push("; ", join(", ", path.map(print, "locals")));
   }
 
   parts.push("| ");

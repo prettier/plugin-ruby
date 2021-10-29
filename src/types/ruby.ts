@@ -168,7 +168,7 @@ export type Rassign = ParserEvent<"rassign", { body: [AnyNode, AnyNode], keyword
 
 // These are various parser events for method declarations.
 type ParenAroundParams = Omit<Paren, "body"> & { body: [Params] };
-export type Blockarg = ParserEvent<"blockarg", { body: [Identifier] }>;
+export type Blockarg = ParserEvent<"blockarg", { name: Identifier }>;
 export type Def = ParserEvent<"def", { body: [Backtick | Const | Identifier | Keyword | Op, Params | Paren, Bodystmt] }>;
 export type Defs = ParserEvent<"defs", { body: [AnyNode, Op | Period, Const | Op | Identifier | Keyword, Params | Paren, Bodystmt] }>;
 export type Defsl = ParserEvent<"defsl", { body: [Identifier, null | ParenAroundParams, AnyNode] }>;
@@ -183,7 +183,7 @@ export type ArgParen = ParserEvent<"arg_paren", { body: [Args | ArgsAddBlock | A
 export type Args = ParserEvent<"args", { body: AnyNode[] }>;
 export type ArgsAddBlock = ParserEvent<"args_add_block", { body: [Args | ArgsAddStar, false | AnyNode] }>;
 export type ArgsAddStar = ParserEvent<"args_add_star", { body: [Args | ArgsAddStar, ...AnyNode[]] }>;
-export type BlockVar = ParserEvent<"block_var", { body: [Params, false | Identifier[]] }>;
+export type BlockVar = ParserEvent<"block_var", { params: Params, locals: Identifier[] }>;
 export type BraceBlock = ParserEvent<"brace_block", { body: [null | BlockVar, Stmts], beging: Lbrace }>;
 export type Call = ParserEvent<"call", { body: [AnyNode, CallOperator, Backtick | Op | Identifier | Const | "call"] }>;
 export type Command = ParserEvent<"command", { body: [Const | Identifier, Args | ArgsAddBlock] }>;

@@ -28,7 +28,7 @@ function toProc(
   const [variables, blockContents] = node.body;
 
   // Ensure that there are variables being passed to this block.
-  const params = variables && variables.body[0];
+  const params = variables && variables.params;
   if (!params) {
     return null;
   }

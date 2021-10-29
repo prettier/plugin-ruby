@@ -716,17 +716,18 @@ class Prettier::Parser < Ripper
 
     {
       type: :block_var,
-      body: [params, locals],
+      params: params,
+      locals: locals || [],
       loc: beging[:loc].to(ending[:loc])
     }
   end
 
   # blockarg is a parser event that represents defining a block variable on
   # a method definition.
-  def on_blockarg(ident)
-    event = find_scanner_event(:@op, '&')
+  def on_blockarg(name)
+    operator = find_scanner_event(:@op, '&')
 
-    { type: :blockarg, body: [ident], loc: event[:loc].to(ident[:loc]) }
+    { type: :blockarg, name: name, loc: operator[:loc].to(name[:loc]) }
   end
 
   # bodystmt can't actually determine its bounds appropriately because it

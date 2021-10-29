@@ -201,5 +201,5 @@ export const printBlockArg: Plugin.Printer<Ruby.Blockarg> = (
   opts,
   print
 ) => {
-  return ["&", path.call(print, "body", 0)];
+  return ["&", path.call(print, "name")];
 };
