@@ -56,9 +56,7 @@ import { printLambda } from "./nodes/lambdas";
 import {
   printFor,
   printUntil,
-  printUntilModifer,
   printWhile,
-  printWhileModifier
 } from "./nodes/loops";
 import {
   printMAssign,
@@ -233,14 +231,14 @@ const nodes: Partial<{
   unless: printUnless,
   unless_mod: printUnlessModifier,
   until: printUntil,
-  until_mod: printUntilModifer,
+  until_mod: printUntil,
   var_alias: printAlias,
   var_field: printVarField,
   var_ref: printVarRef,
   vcall: printCallContainer,
   when: printWhen,
   while: printWhile,
-  while_mod: printWhileModifier,
+  while_mod: printWhile,
   word: printWord,
   xstring_literal: printXStringLiteral,
   yield: printYield,

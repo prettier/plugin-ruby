@@ -1497,23 +1497,25 @@ class Prettier::Parser < Ripper
   # loop. It accepts as arguments an ident which is the iterating variable,
   # an enumerable for that which is being enumerated, and a stmts event that
   # represents the statements inside the for loop.
-  def on_for(ident, enum, stmts)
+  def on_for(iterator, enumerable, stmts)
     beging = find_scanner_event(:@kw, 'for')
     ending = find_scanner_event(:@kw, 'end')
 
     # Consume the do keyword if it exists so that it doesn't get confused for
     # some other block
     do_event = find_scanner_event(:@kw, 'do', consume: false)
-    if do_event && do_event[:loc].start_char > enum[:loc].end_char &&
+    if do_event && do_event[:loc].start_char > enumerable[:loc].end_char &&
          do_event[:loc].end_char < ending[:loc].start_char
       scanner_events.delete(do_event)
     end
 
-    stmts.bind((do_event || enum)[:loc].end_char, ending[:loc].start_char)
+    stmts.bind((do_event || enumerable)[:loc].end_char, ending[:loc].start_char)
 
     {
       type: :for,
-      body: [ident, enum, stmts],
+      iterator: iterator,
+      enumerable: enumerable,
+      stmts: stmts,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -3082,7 +3084,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :until,
-      body: [predicate, stmts],
+      predicate: predicate,
+      stmts: stmts,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -3095,7 +3098,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :until_mod,
-      body: [predicate, statement],
+      predicate: predicate,
+      stmt: statement,
       loc: statement[:loc].to(predicate[:loc])
     }
   end
@@ -3212,7 +3216,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :while,
-      body: [predicate, stmts],
+      predicate: predicate,
+      stmts: stmts,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -3225,7 +3230,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :while_mod,
-      body: [predicate, statement],
+      predicate: predicate,
+      stmt: statement,
       loc: statement[:loc].to(predicate[:loc])
     }
   end

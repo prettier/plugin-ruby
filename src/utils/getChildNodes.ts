@@ -105,6 +105,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     }
     case "fndptn":
       return [node.constant, node.left, ...node.values, node.right];
+    case "for":
+      return [node.iterator, node.enumerable, node.stmts];
     case "hash":
       return [node.contents];
     case "hshptn": {
@@ -135,6 +137,10 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.constant];
     case "top_const_ref":
       return [node.constant];
+    case "until":
+      return [node.predicate, node.stmts];
+    case "until_mod":
+      return [node.predicate, node.stmt];
     case "var_alias":
       return [node.left, node.right];
     case "var_field":
@@ -143,6 +149,10 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.value];
     case "vcall":
       return [node.value];
+    case "while":
+      return [node.predicate, node.stmts];
+    case "while_mod":
+      return [node.predicate, node.stmt];
 
 
 

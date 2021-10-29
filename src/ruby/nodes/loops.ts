@@ -9,30 +9,29 @@ import {
 const { align, breakParent, group, hardline, ifBreak, indent, join, softline } =
   prettier;
 
-function printLoop(
-  keyword: string,
-  modifier: boolean
-): Plugin.Printer<
-  Ruby.While | Ruby.WhileModifier | Ruby.Until | Ruby.UntilModifier
-> {
+type Loop = Ruby.While | Ruby.WhileModifier | Ruby.Until | Ruby.UntilModifier;
+
+function isModifier(node: Loop): node is Ruby.WhileModifier | Ruby.UntilModifier {
+  return node.type === "while_mod" || node.type === "until_mod";
+}
+
+function printLoop(keyword: string): Plugin.Printer<Loop> {
   return function printLoopWithOptions(path, { rubyModifier }, print) {
-    const [, stmts] = path.getValue().body;
+    const node = path.getValue();
 
     // If the only statement inside this while loop is a void statement, then we
     // can shorten to just displaying the predicate and then a semicolon.
-    if (isEmptyStmts(stmts)) {
+    if (!isModifier(node) && isEmptyStmts(node.stmts)) {
       return group([
-        group([keyword, " ", path.call(print, "body", 0)]),
+        group([keyword, " ", path.call(print, "predicate")]),
         hardline,
         "end"
       ]);
     }
 
-    const inlineLoop = inlineEnsureParens(path, [
-      path.call(print, "body", 1),
-      ` ${keyword} `,
-      path.call(print, "body", 0)
-    ]);
+    const statementDoc = path.call(print, isModifier(node) ? "stmt" : "stmts");
+    const predicateDoc = path.call(print, "predicate");
+    const inlineLoop = inlineEnsureParens(path, [statementDoc, ` ${keyword} `, predicateDoc]);
 
     // If we're in the modifier form and we're modifying a `begin`, then this is
     // a special case where we need to explicitly use the modifier form because
@@ -44,13 +43,13 @@ function printLoop(
     //
     // The above is effectively a `do...while` loop (which we don't have in
     // ruby).
-    if (modifier && path.getValue().body[1].type === "begin") {
+    if (isModifier(node) && node.stmt.type === "begin") {
       return inlineLoop;
     }
 
     const blockLoop = [
-      [`${keyword} `, align(keyword.length + 1, path.call(print, "body", 0))],
-      indent([softline, path.call(print, "body", 1)]),
+      [`${keyword} `, align(keyword.length + 1, predicateDoc)],
+      indent([softline, statementDoc]),
       softline,
       "end"
     ];
@@ -59,7 +58,7 @@ function printLoop(
     // contains an assignment (in which case we can't know for certain that that
     // assignment doesn't impact the statements inside the loop) then we can't
     // use the modifier form and we must use the block form.
-    if (!rubyModifier || containsAssignment(path.getValue().body[0])) {
+    if (!rubyModifier || containsAssignment(node.predicate)) {
       return [breakParent, blockLoop];
     }
 
@@ -68,22 +67,23 @@ function printLoop(
 }
 
 export const printFor: Plugin.Printer<Ruby.For> = (path, opts, print) => {
-  const [varDoc, rangeDoc, stmtsDoc] = path.map(print, "body");
-  const varsDoc =
-    path.getValue().body[0].type === "mlhs" ? join(", ", varDoc) : varDoc;
+  const node = path.getValue();
+
+  let iteratorDoc = path.call(print, "iterator");
+  if (node.iterator.type === "mlhs") {
+    iteratorDoc = join(", ", iteratorDoc);
+  }
 
   return group([
     "for ",
-    varsDoc,
+    iteratorDoc,
     " in ",
-    rangeDoc,
-    indent([hardline, stmtsDoc]),
+    path.call(print, "enumerable"),
+    indent([hardline, path.call(print, "stmts")]),
     hardline,
     "end"
   ]);
 };
 
-export const printWhile = printLoop("while", false);
-export const printWhileModifier = printLoop("while", true);
-export const printUntil = printLoop("until", false);
-export const printUntilModifer = printLoop("until", true);
+export const printWhile = printLoop("while");
+export const printUntil = printLoop("until");
