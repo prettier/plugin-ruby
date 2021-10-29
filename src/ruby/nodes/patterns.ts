@@ -157,13 +157,11 @@ export const printRAssign: Plugin.Printer<Ruby.Rassign> = (
   path,
   opts,
   print
-) => {
-  const { keyword } = path.getValue();
-  const [leftDoc, rightDoc] = path.map(print, "body");
-
-  return group([
-    leftDoc,
-    keyword ? " in" : " =>",
-    group(indent([line, rightDoc]))
-  ]);
-};
+) => (
+  group([
+    path.call(print, "value"),
+    " ",
+    path.call(print, "operator"),
+    group(indent([line, path.call(print, "pattern")]))
+  ])
+);

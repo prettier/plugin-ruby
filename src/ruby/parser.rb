@@ -857,21 +857,27 @@ class Prettier::Parser < Ripper
   # case is a parser event that represents the beginning of a case chain.
   # It accepts as arguments the switch of the case and the consequent
   # clause.
-  def on_case(switch, consequent)
-    if event = find_scanner_event(:@kw, 'case', consume: false)
-      scanner_events.delete(event)
+  def on_case(value, consequent)
+    if keyword = find_scanner_event(:@kw, 'case', consume: false)
+      scanner_events.delete(keyword)
 
       {
         type: :case,
-        body: [switch, consequent],
-        loc: event[:loc].to(consequent[:loc])
+        value: value,
+        consequent: consequent,
+        loc: keyword[:loc].to(consequent[:loc])
       }
     else
+      operator =
+        find_scanner_event(:@kw, 'in', consume: false) ||
+          find_scanner_event(:@op, '=>')
+
       {
         type: :rassign,
-        body: [switch, consequent],
-        keyword: find_scanner_event(:@kw, 'in', consume: false),
-        loc: switch[:loc].to(consequent[:loc])
+        value: value,
+        operator: operator,
+        pattern: consequent,
+        loc: value[:loc].to(consequent[:loc])
       }
     end
   end

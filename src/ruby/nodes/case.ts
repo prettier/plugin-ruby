@@ -8,11 +8,11 @@ export const printCase: Plugin.Printer<Ruby.Case> = (path, opts, print) => {
 
   // You don't need to explicitly have something to test against in a case
   // statement (without it it effectively becomes an if/elsif chain).
-  if (path.getValue().body[0]) {
-    parts.push(" ", path.call(print, "body", 0));
+  if (path.getValue().value) {
+    parts.push(" ", path.call(print, "value"));
   }
 
-  return [...parts, hardline, path.call(print, "body", 1), hardline, "end"];
+  return [...parts, hardline, path.call(print, "consequent"), hardline, "end"];
 };
 
 export const printWhen: Plugin.Printer<Ruby.When> = (path, opts, print) => {

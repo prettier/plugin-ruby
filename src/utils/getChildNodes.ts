@@ -37,6 +37,8 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
     case "break":
     case "next":
       return [node.args];
+    case "case":
+      return [node.value, node.consequent];
     case "do_block":
       return [node.keyword, node.block_var, node.bodystmt];
     case "hash":
@@ -45,6 +47,8 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return [node.target, node.operator, node.value];
     case "program":
       return [node.stmts];
+    case "rassign":
+      return [node.value, node.operator, node.pattern];
 
 
     case "heredoc":

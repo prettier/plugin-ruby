@@ -133,7 +133,7 @@ export type MrhsAddStar = ParserEvent<"mrhs_add_star", { body: [Mrhs | MrhsNewFr
 export type MrhsNewFromArgs = ParserEvent<"mrhs_new_from_args", { body: [Args | ArgsAddStar, AnyNode], oper: string }>;
 
 // These are various parser events for control flow constructs.
-export type Case = ParserEvent<"case", { body: [AnyNode, In | When] }>;
+export type Case = ParserEvent<"case", { value: AnyNode, consequent: In | When }>;
 export type Else = ParserEvent<"else", { body: [Stmts] }>;
 export type Elsif = ParserEvent<"elsif", { body: [AnyNode, Stmts, null | Elsif | Else] }>;
 export type Ensure = ParserEvent<"ensure", { body: [Keyword, Stmts] }>;
@@ -164,7 +164,7 @@ export type Yield = ParserEvent<"yield", { body: [ArgsAddBlock | Paren] }>;
 export type Aryptn = ParserEvent<"aryptn", { body: [null | VarRef, AnyNode[], null | VarField, null | AnyNode[]] }>;
 export type FndPtn = ParserEvent<"fndptn", { body: [null | AnyNode, VarField, AnyNode[], VarField] }>;
 export type Hshptn = ParserEvent<"hshptn", { body: [null | AnyNode, [Label, AnyNode][], null | VarField] }>;
-export type Rassign = ParserEvent<"rassign", { body: [AnyNode, AnyNode], keyword: boolean }>;
+export type Rassign = ParserEvent<"rassign", { value: AnyNode, operator: Op | Keyword, pattern: AnyNode }>;
 
 // These are various parser events for method declarations.
 type ParenAroundParams = Omit<Paren, "body"> & { body: [Params] };
