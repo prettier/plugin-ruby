@@ -34,6 +34,9 @@ function getChildNodes(node: Ruby.AnyNode): (Ruby.AnyNode | null)[] {
       return [node.name];
     case "brace_block":
       return [node.lbrace, node.block_var, node.stmts];
+    case "break":
+    case "next":
+      return [node.args];
     case "do_block":
       return [node.keyword, node.block_var, node.bodystmt];
     case "hash":

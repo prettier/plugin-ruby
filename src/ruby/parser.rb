@@ -804,22 +804,19 @@ class Prettier::Parser < Ripper
   # break is a parser event that represents using the break keyword. It
   # accepts as an argument an args or args_add_block event that contains all
   # of the arguments being passed to the break.
-  def on_break(args_add_block)
-    beging = find_scanner_event(:@kw, 'break')
+  def on_break(args)
+    keyword = find_scanner_event(:@kw, 'break')
+    location =
+      if args[:type] == :args
+        # You can hit this if you are passing no arguments to break but it has a
+        # comment right after it. In that case we can just use the location
+        # information straight from the keyword.
+        keyword[:loc]
+      else
+        keyword[:loc].to(args[:loc])
+      end
 
-    if args_add_block[:type] == :args
-      # You can hit this if you are passing no arguments to break but it has a
-      # comment right after it. In that case we can just use the location
-      # information straight from the keyword.
-
-      { type: :break, body: [args_add_block], loc: beging[:loc] }
-    else
-      {
-        type: :break,
-        body: [args_add_block],
-        loc: beging[:loc].to(args_add_block[:loc])
-      }
-    end
+    { type: :break, args: args, loc: location }
   end
 
   # call is a parser event representing a method call with no arguments. It
@@ -2037,14 +2034,19 @@ class Prettier::Parser < Ripper
   # next is a parser event that represents using the next keyword. It
   # accepts as an argument an args or args_add_block event that contains all
   # of the arguments being passed to the next.
-  def on_next(args_add_block)
-    event = find_scanner_event(:@kw, 'next')
+  def on_next(args)
+    keyword = find_scanner_event(:@kw, 'next')
+    location =
+      if args[:type] == :args
+        # You can hit this if you are passing no arguments to next but it has a
+        # comment right after it. In that case we can just use the location
+        # information straight from the keyword.
+        keyword[:loc]
+      else
+        keyword[:loc].to(args[:loc])
+      end
 
-    {
-      type: :next,
-      body: [args_add_block],
-      loc: event[:loc].to(args_add_block[:loc])
-    }
+    { type: :next, args: args, loc: location }
   end
 
   # nl is a scanner event representing a newline in the source. As you can

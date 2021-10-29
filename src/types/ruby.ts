@@ -154,8 +154,8 @@ export type While = ParserEvent<"while", { body: [AnyNode, Stmts] }>;
 export type WhileModifier = ParserEvent<"while_mod", { body: [AnyNode, AnyNode] }>;
 
 // These are various parser events for control flow keywords.
-export type Break = ParserEvent<"break", { body: [Args | ArgsAddBlock] }>;
-export type Next = ParserEvent<"next", { body: [Args | ArgsAddBlock] }>;
+export type Break = ParserEvent<"break", { args: Args | ArgsAddBlock }>;
+export type Next = ParserEvent<"next", { args: Args | ArgsAddBlock }>;
 export type Return = ParserEvent<"return", { body: [Args | ArgsAddBlock] }>;
 export type Super = ParserEvent<"super", { body: [Args | ArgParen | ArgsAddBlock] }>;
 export type Yield = ParserEvent<"yield", { body: [ArgsAddBlock | Paren] }>;
