@@ -219,7 +219,7 @@ export type VarAlias = ParserEvent<"var_alias", { left: GVar, right: Backref | G
 export type Undef = ParserEvent<"undef", { body: (DynaSymbol | SymbolLiteral)[] }>;
 
 // These are various parser events for statement containers, generally pretty high in the tree.
-export type Begin = ParserEvent<"begin", { body: [Bodystmt] }>;
+export type Begin = ParserEvent<"begin", { bodystmt: Bodystmt }>;
 export type Bodystmt = ParserEvent<"bodystmt", { body: [Stmts, null | Rescue, null | Stmts, null | Ensure] }>;
-export type Program = ParserEvent<"program", { body: [Stmts] }>;
+export type Program = ParserEvent<"program", { stmts: Stmts }>;
 export type Stmts = ParserEvent<"stmts", { body: AnyNode[] }>;

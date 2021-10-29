@@ -49,10 +49,14 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
       case "assoclist_from_args":
       case "bare_assoc_hash":
         return node.assocs;
+      case "begin":
+        return [node.bodystmt];
       case "hash":
         return [node.contents];
       case "opassign":
         return [node.target, node.operator, node.value];
+      case "program":
+        return [node.stmts];
 
 
       case "heredoc":

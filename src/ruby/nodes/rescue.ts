@@ -7,7 +7,7 @@ const { align, group, hardline, indent, join, line } = prettier;
 export const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
   return [
     "begin",
-    indent([hardline, path.map(print, "body")]),
+    indent([hardline, path.call(print, "bodystmt")]),
     hardline,
     "end"
   ];

@@ -94,9 +94,7 @@ export const printProgram: Plugin.Printer<Ruby.Program> = (
   path,
   opts,
   print
-) => {
-  return [join(hardline, path.map(print, "body")), hardline];
-};
+) => [path.call(print, "stmts"), hardline];
 
 type StmtsVoidWithComments = Ruby.Stmts & {
   body: [{ type: "void_stmt"; comments: Ruby.Comment[] }];

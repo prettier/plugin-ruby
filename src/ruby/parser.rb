@@ -678,7 +678,7 @@ class Prettier::Parser < Ripper
 
     bodystmt.bind(beging[:loc].end_char, end_char)
 
-    { type: :begin, body: [bodystmt], loc: beging[:loc].to(bodystmt[:loc]) }
+    { type: :begin, bodystmt: bodystmt, loc: beging[:loc].to(bodystmt[:loc]) }
   end
 
   # binary is a parser event that represents a binary operation between two
@@ -2176,7 +2176,7 @@ class Prettier::Parser < Ripper
     stmts[:body] << @__end__ if @__end__
     stmts.bind(0, source.length)
 
-    { type: :program, body: [stmts], comments: @comments, loc: location }
+    { type: :program, stmts: stmts, comments: @comments, loc: location }
   end
 
   # qsymbols_beg is a scanner event that represents the beginning of a symbol
