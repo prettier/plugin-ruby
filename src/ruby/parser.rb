@@ -2381,17 +2381,17 @@ class Prettier::Parser < Ripper
     { type: :redo, body: keyword[:body], loc: keyword[:loc] }
   end
 
-  # regexp_add is a parser event that represents a piece of a regular expression
+  # regexp_add is a parser event that represents a part of a regular expression
   # body. It accepts as arguments the parent regexp node as well as a
   # tstring_content scanner event representing string content, a
   # string_embexpr parser event representing interpolated content, or a
   # string_dvar parser event representing an interpolated variable.
-  def on_regexp_add(regexp, piece)
+  def on_regexp_add(regexp, part)
     {
       type: :regexp,
-      body: regexp[:body] << piece,
+      parts: regexp[:parts] << part,
       beging: regexp[:beging],
-      loc: regexp[:loc].to(piece[:loc])
+      loc: regexp[:loc].to(part[:loc])
     }
   end
 
@@ -2427,7 +2427,7 @@ class Prettier::Parser < Ripper
   def on_regexp_literal(regexp, ending)
     {
       type: :regexp_literal,
-      body: regexp[:body],
+      parts: regexp[:parts],
       beging: regexp[:beging],
       ending: ending[:body],
       loc: regexp[:loc].to(ending[:loc])
@@ -2440,7 +2440,7 @@ class Prettier::Parser < Ripper
   def on_regexp_new
     beging = find_scanner_event(:@regexp_beg)
 
-    { type: :regexp, body: [], beging: beging[:body], loc: beging[:loc] }
+    { type: :regexp, parts: [], beging: beging[:body], loc: beging[:loc] }
   end
 
   # rescue is a special kind of node where you have a rescue chain but it

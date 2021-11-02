@@ -149,6 +149,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.value, node.operator, node.pattern];
     case "redo":
       return [];
+    case "regexp_literal":
+      return node.parts;
     case "rest_param":
       return [node.name];
     case "retry":
