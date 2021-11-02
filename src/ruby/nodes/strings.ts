@@ -216,16 +216,16 @@ export const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (
   print
 ) => {
   const node = path.getValue();
-  const parts = path.call(print, "body", 0);
+  const doc = path.call(print, "stmts");
 
   // If the contents of this embedded expression were originally on the same
   // line in the source, then we're going to leave them in place and assume
   // that's the way the developer wanted this expression represented.
   if (getStartLine(node.loc) === getEndLine(node.loc)) {
-    return ["#{", removeLines(parts), "}"];
+    return ["#{", removeLines(doc), "}"];
   }
 
-  return group(["#{", indent([softline, parts]), [softline, "}"]]);
+  return group(["#{", indent([softline, doc]), [softline, "}"]]);
 };
 
 // Prints out a literal string. This function does its best to respect the

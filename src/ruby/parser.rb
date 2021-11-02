@@ -2774,7 +2774,7 @@ class Prettier::Parser < Ripper
 
     stmts.bind(beging[:loc].end_char, ending[:loc].start_char)
 
-    { type: :string_embexpr, body: [stmts], loc: beging[:loc].to(ending[:loc]) }
+    { type: :string_embexpr, stmts: stmts, loc: beging[:loc].to(ending[:loc]) }
   end
 
   # String literals are either going to be a normal string or they're going
