@@ -29,7 +29,7 @@ export const printArgParen: Plugin.Printer<Ruby.ArgParen> = (
   opts,
   print
 ) => {
-  const argsNode = path.getValue().body[0];
+  const argsNode = path.getValue().args;
 
   if (argsNode === null) {
     return "";
@@ -41,7 +41,7 @@ export const printArgParen: Plugin.Printer<Ruby.ArgParen> = (
   if (argsNode.type === "args_forward") {
     return group([
       "(",
-      indent([softline, path.call(print, "body", 0)]),
+      indent([softline, path.call(print, "args")]),
       softline,
       ")"
     ]);
@@ -53,7 +53,7 @@ export const printArgParen: Plugin.Printer<Ruby.ArgParen> = (
     "(",
     indent([
       softline,
-      join([",", line], path.call(print, "body", 0)),
+      join([",", line], path.call(print, "args")),
       getTrailingComma(opts) ? getArgParenTrailingComma(argsNode) : ""
     ]),
     softline,

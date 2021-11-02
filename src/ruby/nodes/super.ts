@@ -11,7 +11,7 @@ export const printSuper: Plugin.Printer<Ruby.Super> = (path, opts, print) => {
     // In case there are explicitly no arguments but they are using parens,
     // we assume they are attempting to override the initializer and pass no
     // arguments up.
-    if (args.body[0] === null) {
+    if (args.args === null) {
       return "super()";
     }
 

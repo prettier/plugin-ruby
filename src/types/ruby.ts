@@ -180,7 +180,7 @@ export type RestParam = ParserEvent<"rest_param", { name: null | Identifier }>;
 
 // These are various parser events for method calls.
 export type CallOperator = Op | Period | "::";
-export type ArgParen = ParserEvent<"arg_paren", { body: [Args | ArgsAddBlock | ArgsForward | null] }>;
+export type ArgParen = ParserEvent<"arg_paren", { args: Args | ArgsAddBlock | ArgsForward | null }>;
 export type Args = ParserEvent<"args", { body: AnyNode[] }>;
 export type ArgsAddBlock = ParserEvent<"args_add_block", { body: [Args | ArgsAddStar, false | AnyNode] }>;
 export type ArgsAddStar = ParserEvent<"args_add_star", { body: [Args | ArgsAddStar, ...AnyNode[]] }>;

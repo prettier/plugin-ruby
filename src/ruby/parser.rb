@@ -482,7 +482,7 @@ class Prettier::Parser < Ripper
     ending =
       (args && args[:loc].end_line > rparen[:loc].end_line) ? args : rparen
 
-    { type: :arg_paren, body: [args], loc: beging[:loc].to(ending[:loc]) }
+    { type: :arg_paren, args: args, loc: beging[:loc].to(ending[:loc]) }
   end
 
   # args_add is a parser event that represents a single argument inside a list

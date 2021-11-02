@@ -16,6 +16,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.collection, node.index];
     case "aref_field":
       return [node.collection, node.index];
+    case "arg_paren":
+      return [node.args];
     case "args_forward":
       return [];
     case "aryptn":
