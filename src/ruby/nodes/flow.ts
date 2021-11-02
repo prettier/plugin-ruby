@@ -57,11 +57,14 @@ export const printBreak = printFlowControl("break");
 export const printNext = printFlowControl("next");
 
 export const printYield: Plugin.Printer<Ruby.Yield> = (path, opts, print) => {
-  if (path.getValue().body[0].type === "paren") {
-    return ["yield", path.call(print, "body", 0)];
+  const node = path.getValue();
+  const argsDoc = path.call(print, "args");
+
+  if (node.args.type === "paren") {
+    return ["yield", argsDoc];
   }
 
-  return ["yield ", join(", ", path.call(print, "body", 0))];
+  return ["yield ", join(", ", argsDoc)];
 };
 
 export const printYield0 = literal("yield");

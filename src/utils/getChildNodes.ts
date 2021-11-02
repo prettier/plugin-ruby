@@ -199,6 +199,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [];
     case "xstring_literal":
       return node.parts;
+    case "yield":
+      return [node.args];
     case "yield0":
       return [];
     case "zsuper":

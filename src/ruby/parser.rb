@@ -3420,14 +3420,10 @@ class Prettier::Parser < Ripper
   # yield is a parser event that represents using the yield keyword with
   # arguments. It accepts as an argument an args_add_block event that
   # contains all of the arguments being passed.
-  def on_yield(args_add_block)
+  def on_yield(args)
     event = find_scanner_event(:@kw, 'yield')
 
-    {
-      type: :yield,
-      body: [args_add_block],
-      loc: event[:loc].to(args_add_block[:loc])
-    }
+    { type: :yield, args: args, loc: event[:loc].to(args[:loc]) }
   end
 
   # yield0 is a parser event that represents the bare yield keyword. It has

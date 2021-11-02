@@ -158,7 +158,7 @@ export type Break = ParserEvent<"break", { args: Args | ArgsAddBlock }>;
 export type Next = ParserEvent<"next", { args: Args | ArgsAddBlock }>;
 export type Return = ParserEvent<"return", { args: Args | ArgsAddBlock }>;
 export type Super = ParserEvent<"super", { body: [Args | ArgParen | ArgsAddBlock] }>;
-export type Yield = ParserEvent<"yield", { body: [ArgsAddBlock | Paren] }>;
+export type Yield = ParserEvent<"yield", { args: ArgsAddBlock | Paren }>;
 
 // These are various parser events for pattern matching.
 export type Aryptn = ParserEvent<"aryptn", { constant: null | VarRef, reqs: AnyNode[], rest: null | VarField, posts: AnyNode[] }>;
