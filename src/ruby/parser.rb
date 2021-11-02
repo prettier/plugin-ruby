@@ -2756,10 +2756,10 @@ class Prettier::Parser < Ripper
   # class variable, or global variable and omit the braces when
   # interpolating. For example, if you wanted to interpolate the instance
   # variable @foo into a string, you could do "#@foo".
-  def on_string_dvar(var_ref)
+  def on_string_dvar(variable)
     event = find_scanner_event(:@embvar)
 
-    { type: :string_dvar, body: [var_ref], loc: event[:loc].to(var_ref[:loc]) }
+    { type: :string_dvar, var: variable, loc: event[:loc].to(variable[:loc]) }
   end
 
   # string_embexpr is a parser event that represents interpolated content.

@@ -210,9 +210,7 @@ export const printStringDVar: Plugin.Printer<Ruby.StringDVar> = (
   path,
   opts,
   print
-) => {
-  return ["#{", path.call(print, "body", 0), "}"];
-};
+) => ["#{", path.call(print, "var"), "}"];
 
 export const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (
   path,

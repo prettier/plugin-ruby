@@ -159,6 +159,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [];
     case "sclass":
       return [node.target, node.bodystmt];
+    case "string_dvar":
+      return [node.var];
     case "symbols":
       return [];
     case "top_const_field":
