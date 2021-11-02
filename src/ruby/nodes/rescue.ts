@@ -83,14 +83,12 @@ export const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (
   opts,
   print
 ) => {
-  const [statementDoc, valueDoc] = path.map(print, "body");
-
   return [
     "begin",
-    indent([hardline, statementDoc]),
+    indent([hardline, path.call(print, "stmt")]),
     hardline,
     "rescue StandardError",
-    indent([hardline, valueDoc]),
+    indent([hardline, path.call(print, "val")]),
     hardline,
     "end"
   ];

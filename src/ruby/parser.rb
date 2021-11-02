@@ -2516,13 +2516,14 @@ class Prettier::Parser < Ripper
   # rescue_mod represents the modifier form of a rescue clause. It accepts as
   # arguments the statement that may raise an error and the value that should
   # be used if it does.
-  def on_rescue_mod(statement, rescued)
+  def on_rescue_mod(statement, value)
     find_scanner_event(:@kw, 'rescue')
 
     {
       type: :rescue_mod,
-      body: [statement, rescued],
-      loc: statement[:loc].to(rescued[:loc])
+      stmt: statement,
+      val: value,
+      loc: statement[:loc].to(value[:loc])
     }
   end
 
