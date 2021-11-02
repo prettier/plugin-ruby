@@ -167,6 +167,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.constant];
     case "top_const_ref":
       return [node.constant];
+    case "undef":
+      return node.syms;
     case "unless":
       return [node.pred, node.stmts, node.cons];
     case "unless_mod":

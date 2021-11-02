@@ -26,7 +26,7 @@ export const printUndef: Plugin.Printer<Ruby.Undef> = (path, opts, print) => {
   const keyword = "undef ";
   const argNodes = path.map(
     (symbolPath) => printUndefSymbol(symbolPath, opts, print),
-    "body"
+    "syms"
   );
 
   return group([keyword, align(keyword.length, join([",", line], argNodes))]);

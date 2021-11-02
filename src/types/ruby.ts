@@ -219,7 +219,7 @@ export type Class = ParserEvent<"class", { constant: ConstPathRef | ConstRef | T
 export type Module = ParserEvent<"module", { constant: ConstPathRef | ConstRef | TopConstRef, bodystmt: Bodystmt }>;
 export type Sclass = ParserEvent<"sclass", { target: AnyNode, bodystmt: Bodystmt }>;
 export type VarAlias = ParserEvent<"var_alias", { left: GVar, right: Backref | GVar }>;
-export type Undef = ParserEvent<"undef", { body: (DynaSymbol | SymbolLiteral)[] }>;
+export type Undef = ParserEvent<"undef", { syms: (DynaSymbol | SymbolLiteral)[] }>;
 
 // These are various parser events for statement containers, generally pretty high in the tree.
 export type Begin = ParserEvent<"begin", { bodystmt: Bodystmt }>;

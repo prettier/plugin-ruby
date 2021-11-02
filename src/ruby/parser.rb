@@ -3038,7 +3038,7 @@ class Prettier::Parser < Ripper
 
     {
       type: :undef,
-      body: symbol_literals,
+      syms: symbol_literals,
       loc: event[:loc].to(symbol_literals.last[:loc])
     }
   end
