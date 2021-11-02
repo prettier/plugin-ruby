@@ -287,5 +287,5 @@ export const printXStringLiteral: Plugin.Printer<Ruby.XStringLiteral> = (
   opts,
   print
 ) => {
-  return ["`", ...path.map(print, "body"), "`"];
+  return ["`", ...path.map(print, "parts"), "`"];
 };

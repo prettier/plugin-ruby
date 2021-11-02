@@ -94,7 +94,7 @@ export type StringDVar = ParserEvent<"string_dvar", { var: Backref | VarRef }>;
 export type StringEmbExpr = ParserEvent<"string_embexpr", { body: [Stmts] }>;
 export type StringLiteral = ParserEvent<"string_literal", { body: StringContent[], quote: string }>;
 export type SymbolLiteral = ParserEvent<"symbol_literal", { body: [Backtick | Const | CVar | GVar | Identifier | IVar | Keyword | Op] }>;
-export type XStringLiteral = ParserEvent<"xstring_literal", { body: StringContent[] }>;
+export type XStringLiteral = ParserEvent<"xstring_literal", { parts: StringContent[] }>;
 
 // These are various parser events that have to do with arrays.
 export type Array = ParserEvent<"array", { body: [null | Args | ArgsAddStar | Qsymbols | Qwords | Symbols | Words] }>;

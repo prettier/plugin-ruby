@@ -3344,17 +3344,17 @@ class Prettier::Parser < Ripper
     { type: :words, elems: [], loc: event[:loc] }
   end
 
-  # xstring_add is a parser event that represents a piece of a string of
+  # xstring_add is a parser event that represents a part of a string of
   # commands that gets sent out to the terminal, like `ls`. It accepts two
-  # arguments, the parent xstring node as well as the piece that is being
+  # arguments, the parent xstring node as well as the part that is being
   # added to the string. Because it supports interpolation this is either a
   # tstring_content scanner event representing bare string content or a
   # string_embexpr representing interpolated content.
-  def on_xstring_add(xstring, piece)
+  def on_xstring_add(xstring, part)
     {
       type: :xstring,
-      body: xstring[:body] << piece,
-      loc: xstring[:loc].to(piece[:loc])
+      parts: xstring[:parts] << part,
+      loc: xstring[:loc].to(part[:loc])
     }
   end
 
@@ -3378,7 +3378,7 @@ class Prettier::Parser < Ripper
         find_scanner_event(:@backtick)[:loc]
       end
 
-    { type: :xstring, body: [], loc: location }
+    { type: :xstring, parts: [], loc: location }
   end
 
   # xstring_literal is a parser event that represents a string of commands
@@ -3403,7 +3403,7 @@ class Prettier::Parser < Ripper
         type: :heredoc,
         beging: heredoc[:beging],
         ending: heredoc[:ending],
-        body: xstring[:body],
+        body: xstring[:parts],
         loc: heredoc[:loc]
       }
     else
@@ -3411,7 +3411,7 @@ class Prettier::Parser < Ripper
 
       {
         type: :xstring_literal,
-        body: xstring[:body],
+        parts: xstring[:parts],
         loc: xstring[:loc].to(ending[:loc])
       }
     end
