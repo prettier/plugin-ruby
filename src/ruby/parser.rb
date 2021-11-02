@@ -2733,7 +2733,8 @@ class Prettier::Parser < Ripper
   def on_string_concat(left, right)
     {
       type: :string_concat,
-      body: [left, right],
+      left: left,
+      right: right,
       loc: left[:loc].to(right[:loc])
     }
   end

@@ -199,9 +199,7 @@ export const printStringConcat: Plugin.Printer<Ruby.StringConcat> = (
   opts,
   print
 ) => {
-  const [leftDoc, rightDoc] = path.map(print, "body");
-
-  return group([leftDoc, " \\", indent([hardline, rightDoc])]);
+  return group([path.call(print, "left"), " \\", indent([hardline, path.call(print, "right")])]);
 };
 
 // Prints out an interpolated variable in the string by converting it into an
