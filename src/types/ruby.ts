@@ -101,7 +101,7 @@ export type Array = ParserEvent<"array", { body: [null | Args | ArgsAddStar | Qs
 export type Qsymbols = ParserEvent<"qsymbols", { elems: TStringContent[] }>;
 export type Qwords = ParserEvent<"qwords", { elems: TStringContent[] }>;
 export type Symbols = ParserEvent<"symbols", { elems: Word[] }>;
-export type Word = ParserEvent<"word", { body: StringContent[] }>;
+export type Word = ParserEvent<"word", { parts: StringContent[] }>;
 export type Words = ParserEvent<"words", { elems: Word[] }>;
 
 // These are various parser events that have to do with hashes.

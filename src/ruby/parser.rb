@@ -3249,22 +3249,22 @@ class Prettier::Parser < Ripper
     }
   end
 
-  # word_add is a parser event that represents a piece of a word within a
+  # word_add is a parser event that represents a part of a word within a
   # special array literal that accepts interpolation. It accepts as
-  # arguments the parent word node as well as the additional piece of the
+  # arguments the parent word node as well as the additional part of the
   # word, which can be either a @tstring_content node for a plain string
-  # piece or a string_embexpr for an interpolated piece.
-  def on_word_add(word, piece)
+  # part or a string_embexpr for an interpolated piece.
+  def on_word_add(word, part)
     location =
-      if word[:body].empty?
+      if word[:parts].empty?
         # Here we're making sure we get the correct bounds by using the
-        # location information from the first piece.
-        piece[:loc]
+        # location information from the first part.
+        part[:loc]
       else
-        word[:loc].to(piece[:loc])
+        word[:loc].to(part[:loc])
       end
 
-    { type: :word, body: word[:body] << piece, loc: location }
+    { type: :word, parts: word[:parts] << part, loc: location }
   end
 
   # word_new is a parser event that represents the beginning of a word
@@ -3279,7 +3279,11 @@ class Prettier::Parser < Ripper
   # purposes, we're going to report this as a word node and build up an
   # array body of our parts.
   def on_word_new
-    { type: :word, body: [], loc: Location.fixed(line: lineno, char: char_pos) }
+    {
+      type: :word,
+      parts: [],
+      loc: Location.fixed(line: lineno, char: char_pos)
+    }
   end
 
   # words_beg is a scanner event that represents the start of a word literal

@@ -189,6 +189,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.pred, node.stmts];
     case "while_mod":
       return [node.stmt, node.pred];
+    case "word":
+      return [];
     case "words":
       return [];
     case "yield0":

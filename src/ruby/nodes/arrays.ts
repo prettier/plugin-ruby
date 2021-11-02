@@ -59,7 +59,7 @@ function isSymbolArray(args: Ruby.Args | Ruby.ArgsAddStar) {
 // interpolation. The body is an array of either plain strings or interpolated
 // expressions.
 export const printWord: Plugin.Printer<Ruby.Word> = (path, opts, print) => {
-  return path.map(print, "body");
+  return path.map(print, "parts");
 };
 
 // Prints out a special array literal. Accepts the parts of the array literal as
