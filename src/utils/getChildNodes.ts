@@ -2,8 +2,35 @@ import type { Ruby } from "../types";
 
 type ChildNode = Ruby.AnyNode | null;
 
+function throwBadNode(node: never): never;
+function throwBadNode(node: Ruby.AnyNode) {
+  throw new Error(`Unknown node ${node.type}`);
+}
+
 function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
   switch (node.type) {
+    case "@CHAR":
+    case "@__end__":
+    case "@backref":
+    case "@backtick":
+    case "@const":
+    case "@cvar":
+    case "@float":
+    case "@gvar":
+    case "@heredoc_beg":
+    case "@ident":
+    case "@imaginary":
+    case "@int":
+    case "@ivar":
+    case "@kw":
+    case "@label":
+    case "@lbrace":
+    case "@lparen":
+    case "@op":
+    case "@period":
+    case "@rational":
+    case "@tstring_content":
+      return [];
     case "BEGIN":
       return [node.lbrace, node.stmts];
     case "END":
@@ -153,6 +180,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [];
     case "regexp_literal":
       return node.parts;
+    case "rescue_mod":
+      return [node.stmt, node.val];
     case "rest_param":
       return [node.name];
     case "retry":
@@ -167,6 +196,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.left, node.right];
     case "string_dvar":
       return [node.var];
+    case "string_embexpr":
+      return [node.stmts];
     case "symbols":
       return [];
     case "top_const_field":
@@ -191,6 +222,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.value];
     case "vcall":
       return [node.value];
+    case "void_stmt":
+      return [];
     case "when":
       return [node.args, node.stmts, node.cons];
     case "while":
@@ -248,7 +281,31 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     }
     case "paren":
       return [node.lparen, node.body[0]];
-    default: {
+
+
+
+    case "args":
+    case "args_add_block":
+    case "args_add_star":
+    case "array":
+    case "bodystmt":
+    case "massign":
+    case "method_add_arg":
+    case "method_add_block":
+    case "mlhs":
+    case "mlhs_add_post":
+    case "mlhs_add_star":
+    case "mlhs_paren":
+    case "mrhs":
+    case "mrhs_add_star":
+    case "mrhs_new_from_args":
+    case "stmts":
+    case "string_literal":
+    case "super":
+    case "symbol_literal":
+    case "rescue":
+    case "rescue_ex":
+    case "unary": {
       if (Array.isArray(node.body)) {
         return node.body.filter(
           (child: any) => child && typeof child === "object"
@@ -256,6 +313,10 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       }
       return [];
     }
+
+
+    default:
+      throwBadNode(node);
   }
 }
 

@@ -514,7 +514,7 @@ class Prettier::Parser < Ripper
 
     {
       type: :args_add_block,
-      body: [args, block],
+      body: [args, block || nil],
       loc: args[:loc].to(ending[:loc])
     }
   end
@@ -3188,7 +3188,6 @@ class Prettier::Parser < Ripper
   def on_void_stmt
     {
       type: :void_stmt,
-      body: nil,
       loc: Location.fixed(line: lineno, char: char_pos)
     }
   end
