@@ -25,7 +25,7 @@ function canSkipParens(paren: Ruby.Paren) {
   }
 
   // return (not a)
-  if (stmt.type === "unary" && stmt.oper === "not") {
+  if (stmt.type === "unary" && stmt.op === "not") {
     return false;
   }
 

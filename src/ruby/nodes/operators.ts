@@ -57,17 +57,17 @@ export const printDot3: Plugin.Printer<Ruby.Dot3> = (path, opts, print) => {
 
 export const printUnary: Plugin.Printer<Ruby.Unary> = (path, opts, print) => {
   const node = path.getValue();
-  const contentsDoc = path.call(print, "body", 0);
+  const valueDoc = path.call(print, "val");
 
-  if (node.oper === "not") {
+  if (node.op === "not") {
     // Here we defer to the original source, as it's kind of difficult to
     // determine if we can actually remove the parentheses being used.
     if (node.paren) {
-      return ["not", "(", contentsDoc, ")"];
+      return ["not", "(", valueDoc, ")"];
     } else {
-      return ["not", " ", contentsDoc];
+      return ["not", " ", valueDoc];
     }
   }
 
-  return [node.oper, contentsDoc];
+  return [node.op, valueDoc];
 };

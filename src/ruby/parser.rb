@@ -2994,8 +2994,8 @@ class Prettier::Parser < Ripper
   # in !, ~, or not. We have somewhat special handling of the not operator
   # since if it has parentheses they don't get reported as a paren node for
   # some reason.
-  def on_unary(oper, value)
-    if oper == :not
+  def on_unary(operator, value)
+    if operator == :not
       node = find_scanner_event(:@kw, 'not')
 
       paren = source[node[:loc].end_char...value[:loc].start_char].include?('(')
@@ -3003,8 +3003,8 @@ class Prettier::Parser < Ripper
 
       {
         type: :unary,
-        oper: oper,
-        body: [value],
+        op: operator,
+        val: value,
         paren: paren,
         loc: node[:loc].to(ending[:loc])
       }
@@ -3024,8 +3024,8 @@ class Prettier::Parser < Ripper
 
       {
         type: :unary,
-        oper: oper[0],
-        body: [value],
+        op: operator[0],
+        val: value,
         loc: beging[:loc].to(value[:loc])
       }
     end

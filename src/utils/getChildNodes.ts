@@ -206,6 +206,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.constant];
     case "top_const_ref":
       return [node.constant];
+    case "unary":
+      return [node.val];
     case "undef":
       return node.syms;
     case "unless":
@@ -305,8 +307,7 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "string_literal":
     case "symbol_literal":
     case "rescue":
-    case "rescue_ex":
-    case "unary": {
+    case "rescue_ex": {
       if (Array.isArray(node.body)) {
         return node.body.filter(
           (child: any) => child && typeof child === "object"

@@ -208,7 +208,7 @@ export type Dot3 = ParserEvent<"dot3", Dot>;
 export type END = ParserEvent<"END", { lbrace: Lbrace, stmts: Stmts }>;
 export type Paren = ParserEvent<"paren", { body: [AnyNode], lparen: Lparen }>;
 export type TopConstRef = ParserEvent<"top_const_ref", { constant: Const }>;
-export type Unary = ParserEvent<"unary", { body: [AnyNode], oper: string, paren: boolean | undefined }>;
+export type Unary = ParserEvent<"unary", { val: AnyNode, op: string, paren: boolean | undefined }>;
 export type VarRef = ParserEvent<"var_ref", { value: Const | CVar | GVar | Identifier | IVar | Keyword }>;
 
 // These are various parser events for statements you would find in a class definition body.
