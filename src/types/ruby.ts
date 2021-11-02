@@ -156,7 +156,7 @@ export type WhileModifier = ParserEvent<"while_mod", { pred: AnyNode, stmt: AnyN
 export type Break = ParserEvent<"break", { args: Args | ArgsAddBlock }>;
 export type Next = ParserEvent<"next", { args: Args | ArgsAddBlock }>;
 export type Return = ParserEvent<"return", { args: Args | ArgsAddBlock }>;
-export type Super = ParserEvent<"super", { body: [Args | ArgParen | ArgsAddBlock] }>;
+export type Super = ParserEvent<"super", { args: Args | ArgParen | ArgsAddBlock }>;
 export type Yield = ParserEvent<"yield", { args: ArgsAddBlock | Paren }>;
 
 // These are various parser events for pattern matching.

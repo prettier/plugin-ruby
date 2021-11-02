@@ -5,25 +5,20 @@ import { literal } from "../../utils";
 const { align, group, join, line } = prettier;
 
 export const printSuper: Plugin.Printer<Ruby.Super> = (path, opts, print) => {
-  const args = path.getValue().body[0];
+  const { args } = path.getValue();
 
   if (args.type === "arg_paren") {
     // In case there are explicitly no arguments but they are using parens,
-    // we assume they are attempting to override the initializer and pass no
+    // we assume they are attempting to override a parent method and pass no
     // arguments up.
-    if (args.args === null) {
-      return "super()";
-    }
-
-    return ["super", path.call(print, "body", 0)];
+    return args.args === null ? "super()" : ["super", path.call(print, "args")];
   }
 
   const keyword = "super ";
-  const argsDocs = path.call(print, "body", 0);
 
   return group([
     keyword,
-    align(keyword.length, group(join([",", line], argsDocs)))
+    align(keyword.length, group(join([",", line], path.call(print, "args"))))
   ]);
 };
 

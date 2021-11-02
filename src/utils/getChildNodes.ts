@@ -198,6 +198,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.var];
     case "string_embexpr":
       return [node.stmts];
+    case "super":
+      return [node.args];
     case "symbols":
       return [];
     case "top_const_field":
@@ -301,7 +303,6 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "mrhs_new_from_args":
     case "stmts":
     case "string_literal":
-    case "super":
     case "symbol_literal":
     case "rescue":
     case "rescue_ex":

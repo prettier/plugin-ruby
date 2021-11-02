@@ -2801,10 +2801,10 @@ class Prettier::Parser < Ripper
   # any number of arguments. It can optionally use parentheses (represented
   # by an arg_paren node) or just skip straight to the arguments (with an
   # args_add_block node).
-  def on_super(contents)
-    event = find_scanner_event(:@kw, 'super')
+  def on_super(args)
+    keyword = find_scanner_event(:@kw, 'super')
 
-    { type: :super, body: [contents], loc: event[:loc].to(contents[:loc]) }
+    { type: :super, args: args, loc: keyword[:loc].to(args[:loc]) }
   end
 
   # symbeg is a scanner event that represents the beginning of a symbol literal.
