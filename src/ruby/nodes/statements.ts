@@ -53,13 +53,13 @@ export const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (
 const argNodeTypes = ["args", "args_add_star", "args_add_block"];
 
 export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
-  const contentNode = path.getValue().body[0];
+  const contentNode = path.getValue().cnts;
 
   if (!contentNode) {
     return [path.call(print, "lparen"), ")"];
   }
 
-  let contentDoc = path.call(print, "body", 0);
+  let contentDoc = path.call(print, "cnts");
 
   // If the content is params, we're going to let it handle its own parentheses
   // so that it breaks nicely.

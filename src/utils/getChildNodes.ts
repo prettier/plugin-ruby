@@ -180,6 +180,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.args];
     case "opassign":
       return [node.target, node.operator, node.value];
+    case "paren":
+      return [node.lparen, node.cnts];
     case "program":
       return [node.stmts];
     case "qsymbols":
@@ -295,8 +297,6 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
 
       return parts;
     }
-    case "paren":
-      return [node.lparen, node.body[0]];
 
 
 

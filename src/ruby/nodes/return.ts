@@ -7,7 +7,7 @@ const { group, ifBreak, indent, line, join, softline } = prettier;
 // You can't skip the parentheses if you have comments or certain operators with
 // lower precedence than the return keyword.
 function canSkipParens(paren: Ruby.Paren) {
-  const stmts = paren.body[0] as Ruby.Stmts;
+  const stmts = paren.cnts as Ruby.Stmts;
 
   // return(
   //   # a
@@ -43,6 +43,7 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
     if (args.type === "args" && args.body.length === 1 && args.body[0]) {
       // This is the first and only argument being passed to the return keyword.
       let arg = args.body[0];
+      steps.push("body", 0);
 
       // If the body of the return contains parens, then just skip directly to
       // the content of the parens so that we can skip printing parens if we
@@ -54,8 +55,8 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
           return ["return", path.call(print, "args")];
         }
 
-        arg = (arg.body[0] as Ruby.Stmts).body[0];
-        steps.push("body", 0, "body", 0);
+        arg = (arg.cnts as Ruby.Stmts).body[0];
+        steps.push("cnts", "body", 0);
       }
 
       // If we're returning an array literal that isn't a special array that has
@@ -65,7 +66,7 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
         const contents = arg.cnts;
 
         if ((contents.type === "args" || contents.type === "args_add_star") && contents.body.length > 1) {
-          steps.push("body", 0, "cnts");
+          steps.push("cnts");
         }
       }
     }

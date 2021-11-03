@@ -167,7 +167,7 @@ export type Rassign = ParserEvent<"rassign", { value: AnyNode, operator: Op | Ke
 
 // These are various parser events for method declarations.
 type DefName = Backtick | Const | Identifier | Keyword | Op;
-type ParenAroundParams = Omit<Paren, "body"> & { body: [Params] };
+type ParenAroundParams = Omit<Paren, "cnts"> & { cnts: Params };
 
 export type Blockarg = ParserEvent<"blockarg", { name: Identifier }>;
 export type Def = ParserEvent<"def", { name: DefName, params: Params | Paren, bodystmt: Bodystmt }>;
@@ -206,7 +206,7 @@ export type Defined = ParserEvent<"defined", { value: AnyNode }>;
 export type Dot2 = ParserEvent<"dot2", Dot>;
 export type Dot3 = ParserEvent<"dot3", Dot>;
 export type END = ParserEvent<"END", { lbrace: Lbrace, stmts: Stmts }>;
-export type Paren = ParserEvent<"paren", { body: [AnyNode], lparen: Lparen }>;
+export type Paren = ParserEvent<"paren", { lparen: Lparen, cnts: AnyNode }>;
 export type TopConstRef = ParserEvent<"top_const_ref", { constant: Const }>;
 export type Unary = ParserEvent<"unary", { val: AnyNode, op: string, paren: boolean | undefined }>;
 export type VarRef = ParserEvent<"var_ref", { value: Const | CVar | GVar | Identifier | IVar | Keyword }>;

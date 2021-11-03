@@ -18,7 +18,7 @@ function printLambdaParams(
   // we're looking at a paren node, so we'll descend one level deeper to get at
   // the actual params node.
   if (node.type !== "params") {
-    node = node.body[0];
+    node = node.cnts;
   }
 
   // If we don't have any params at all, then we're just going to bail out and

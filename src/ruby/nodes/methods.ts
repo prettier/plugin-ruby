@@ -51,7 +51,7 @@ export const printSingleLineMethod: Plugin.Printer<Ruby.Defsl> = (
 
   // If we have any kind of parameters, we're going to print the whole
   // parentheses. If we don't, then we're just going to skip them entirely.
-  if (node.paren && node.paren.body[0].body.some((type) => type)) {
+  if (node.paren && node.paren.cnts.body.some((type) => type)) {
     paramsDoc = path.call(print, "paren");
   }
 

@@ -2222,7 +2222,7 @@ class Prettier::Parser < Ripper
     {
       type: :paren,
       lparen: lparen,
-      body: [contents],
+      cnts: contents,
       loc: lparen[:loc].to(rparen[:loc])
     }
   end
