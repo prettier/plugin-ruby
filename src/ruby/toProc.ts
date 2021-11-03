@@ -32,11 +32,14 @@ function toProc(
   }
 
   // Ensure there is one and only one parameter, and that it is required.
-  const [reqParams, ...otherParams] = params.body;
   if (
-    !Array.isArray(reqParams) ||
-    reqParams.length !== 1 ||
-    otherParams.some(Boolean)
+    params.reqs.length !== 1 ||
+    params.opts.length !== 0 ||
+    params.rest ||
+    params.posts.length !== 0 ||
+    params.keywords.length !== 0 ||
+    params.kwrest ||
+    params.block
   ) {
     return null;
   }
@@ -69,7 +72,7 @@ function toProc(
   // Ensure the call is a method of the block argument
   if (
     call.receiver.type !== "var_ref" ||
-    call.receiver.value.body !== reqParams[0].body ||
+    call.receiver.value.body !== params.reqs[0].body ||
     !isPeriod(call.operator) ||
     call.message === "call" ||
     call.message.type !== "@ident"

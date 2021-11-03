@@ -182,6 +182,34 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.args];
     case "opassign":
       return [node.target, node.operator, node.value];
+    case "params": {
+      let childNodes: ChildNode[] = [...node.reqs];
+
+      node.opts.forEach(([key, value]) => {
+        childNodes.push(key, value);
+      });
+
+      childNodes.push(node.rest);
+      childNodes = childNodes.concat(node.posts);
+
+      node.keywords.forEach(([key, value]) => {
+        childNodes.push(key);
+
+        if (value) {
+          childNodes.push(value);
+        }
+      });
+
+      if (node.kwrest && node.kwrest !== "nil") {
+        childNodes.push(node.kwrest);
+      }
+
+      if (node.block) {
+        childNodes.push(node.block);
+      }
+
+      return childNodes;
+    }
     case "paren":
       return [node.lparen, node.cnts];
     case "program":
@@ -272,41 +300,6 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [];
     case "zsuper":
       return [];
-
-
-
-    case "params": {
-      const [reqs, optls, rest, post, kwargs, kwargRest, block] = node.body;
-      let parts: (Ruby.AnyNode | null)[] = reqs || [];
-
-      (optls || []).forEach((optl: any) => {
-        parts = parts.concat(optl);
-      });
-
-      if (rest) {
-        parts.push(rest);
-      }
-
-      parts = parts.concat(post || []);
-
-      (kwargs || []).forEach((kwarg: any) => {
-        if (kwarg[1]) {
-          parts = parts.concat(kwarg);
-        } else {
-          parts.push(kwarg[0]);
-        }
-      });
-
-      if (kwargRest && kwargRest !== "nil") {
-        parts.push(kwargRest);
-      }
-
-      if (block) {
-        parts.push(block);
-      }
-
-      return parts;
-    }
 
 
 

@@ -15,11 +15,10 @@ function printRestParamSymbol(symbol: string): Plugin.Printer<RestParam> {
 }
 
 export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
-  const [reqs, optls, rest, post, kwargs, kwargRest, block] =
-    path.getValue().body;
+  const node = path.getValue();
   let parts: Plugin.Doc[] = [];
 
-  if (reqs) {
+  if (node.reqs) {
     path.each(
       (reqPath) => {
         // For some very strange reason, if you have a comment attached to a
@@ -28,46 +27,48 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
           parts.push(print(reqPath));
         }
       },
-      "body",
-      0
+      "reqs"
     );
   }
 
-  if (optls) {
+  if (node.opts) {
     parts = parts.concat(
-      path.map((optlPath) => join(" = ", optlPath.map(print)), "body", 1)
+      path.map((optlPath) => join(" = ", optlPath.map(print)), "opts")
     );
   }
 
-  if (rest && rest.type !== "excessed_comma") {
-    parts.push(path.call(print, "body", 2));
+  if (node.rest && node.rest.type !== "excessed_comma") {
+    parts.push(path.call(print, "rest"));
   }
 
-  if (post) {
-    parts = parts.concat(path.map(print, "body", 3));
+  if (node.posts) {
+    parts = parts.concat(path.map(print, "posts"));
   }
 
-  if (kwargs) {
+  if (node.keywords) {
     parts = parts.concat(
       path.map(
         (kwargPath) => {
-          if (!kwargPath.getValue()[1]) {
-            return kwargPath.call(print, 0);
+          const kwarg = kwargPath.getValue();
+          const keyDoc = kwargPath.call(print, 0);
+
+          if (kwarg[1]) {
+            return group([keyDoc, " ", kwargPath.call(print, 1)]);
           }
-          return group(join(" ", kwargPath.map(print)));
+
+          return keyDoc;
         },
-        "body",
-        4
+        "keywords"
       )
     );
   }
 
-  if (kwargRest) {
-    parts.push(kwargRest === "nil" ? "**nil" : path.call(print, "body", 5));
+  if (node.kwrest) {
+    parts.push(node.kwrest === "nil" ? "**nil" : path.call(print, "kwrest"));
   }
 
-  if (block) {
-    parts.push(path.call(print, "body", 6));
+  if (node.block) {
+    parts.push(path.call(print, "block"));
   }
 
   const contents: Plugin.Doc[] = [join([",", line], parts)];
@@ -81,7 +82,7 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   // In ruby 2.5, the excessed comma is indicated by having a 0 in the rest
   // param position. In ruby 2.6+ it's indicated by having an "excessed_comma"
   // node in the rest position. Seems odd, but it's true.
-  if ((rest as any) === 0 || (rest && rest.type === "excessed_comma")) {
+  if ((node.rest as any) === 0 || (node.rest && node.rest.type === "excessed_comma")) {
     contents.push(",");
   }
 

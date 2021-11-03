@@ -1,6 +1,6 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { isEmptyBodyStmt } from "../../utils";
+import { isEmptyBodyStmt, isEmptyParams } from "../../utils";
 
 const { group, hardline, indent, line } = prettier;
 
@@ -18,9 +18,8 @@ export const printDef: Plugin.Printer<Ruby.Def | Ruby.Defs> = (
     declaration.push(path.call(print, "target"), path.call(print, "operator"));
   }
 
-  // In case there are no parens but there are arguments
-  const useParens =
-    node.params.type === "params" && node.params.body.some((type) => type);
+  // In case there are no parens but there are parameters
+  const useParens = node.params.type === "params" && !isEmptyParams(node.params);
 
   declaration.push(
     path.call(print, "name"),
@@ -51,7 +50,7 @@ export const printSingleLineMethod: Plugin.Printer<Ruby.Defsl> = (
 
   // If we have any kind of parameters, we're going to print the whole
   // parentheses. If we don't, then we're just going to skip them entirely.
-  if (node.paren && node.paren.cnts.body.some((type) => type)) {
+  if (node.paren && !isEmptyParams(node.paren.cnts)) {
     paramsDoc = path.call(print, "paren");
   }
 

@@ -1,6 +1,6 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { hasAncestor } from "../../utils";
+import { hasAncestor, isEmptyParams } from "../../utils";
 
 const { group, ifBreak, indent, line } = prettier;
 
@@ -23,7 +23,7 @@ function printLambdaParams(
 
   // If we don't have any params at all, then we're just going to bail out and
   // print nothing. This is to avoid printing an empty set of parentheses.
-  if (node.body.every((type) => !type)) {
+  if (isEmptyParams(node)) {
     return "";
   }
 

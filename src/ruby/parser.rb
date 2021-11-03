@@ -225,6 +225,19 @@ class Prettier::Parser < Ripper
     @line_counts[lineno - 1][column]
   end
 
+  # Params nodes are the most complicated in the tree. Occasionally you want to
+  # know if they are "empty", which means not having any parameters declared.
+  # This logic accesses every kind of parameter and determines if it's missing.
+  def empty_params?(params)
+    params[:reqs].empty? &&
+      params[:opts].empty? &&
+      !params[:rest] &&
+      params[:posts].empty? &&
+      params[:keywords].empty? &&
+      !params[:kwrest] &&
+      !params[:block]
+  end
+
   # As we build up a list of scanner events, we'll periodically need to go
   # backwards and find the ones that we've already hit in order to determine the
   # location information for nodes that use them. For example, if you have a
@@ -1082,7 +1095,7 @@ class Prettier::Parser < Ripper
 
     # If there aren't any params then we need to correct the params node
     # location information
-    if params[:type] == :params && !params[:body].any?
+    if params[:type] == :params && empty_params?(params)
       location = name[:loc].end_char
 
       params[:loc] =
@@ -1131,7 +1144,7 @@ class Prettier::Parser < Ripper
 
     # If there aren't any params then we need to correct the params node
     # location information
-    if params[:type] == :params && !params[:body].any?
+    if params[:type] == :params && empty_params?(params)
       location = name[:loc].end_char
 
       params[:loc] =
@@ -2189,16 +2202,35 @@ class Prettier::Parser < Ripper
   # array of arrays where the position in the top-level array indicates the
   # type of param and the subarray is the list of parameters of that type.
   # We therefore have to flatten them down to get to the location.
-  def on_params(*types)
-    flattened = types.flatten(2).select { |type| type.is_a?(Hash) }
+  def on_params(reqs, opts, rest, posts, keywords, kwrest, block)
+    params = [
+      *reqs,
+      *opts&.flatten(1),
+      rest,
+      *posts,
+      *keywords&.flat_map { |(key, value)| [key, value || nil] },
+      (kwrest if kwrest != :nil),
+      block
+    ].compact
+
     location =
-      if flattened.any?
-        flattened[0][:loc].to(flattened[-1][:loc])
+      if params.any?
+        params[0][:loc].to(params[-1][:loc])
       else
         Location.fixed(line: lineno, char: char_pos)
       end
 
-    { type: :params, body: types, loc: location }
+    {
+      type: :params,
+      reqs: reqs || [],
+      opts: opts || [],
+      rest: rest,
+      posts: posts || [],
+      keywords: keywords || [],
+      kwrest: kwrest,
+      block: block,
+      loc: location
+    }
   end
 
   # A paren is a parser event that represents using parentheses pretty much
