@@ -83,7 +83,7 @@ function printBlock(braces: boolean): Plugin.Printer<Block> {
       return [breakParent, doBlock];
     }
 
-    const blockReceiver = path.getParentNode().body[0];
+    const blockReceiver = (path.getParentNode() as Ruby.MethodAddBlock).call;
 
     // If the parent node is a command node, then there are no parentheses
     // around the arguments to that command, so we need to break the block

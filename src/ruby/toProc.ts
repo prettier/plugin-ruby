@@ -46,12 +46,16 @@ function toProc(
 
   // Get the list of statements from the block
   let statements: Ruby.AnyNode[];
-  if (node.type !== "do_block") {
-    statements = node.stmts.body;
-  } else if (node.bodystmt.rsc || node.bodystmt.ens || node.bodystmt.els) {
-    return null;
-  } else {
+
+  if (node.type === "do_block") {
+    // If you have any other clauses on the bodystmt, then we can't transform.
+    if (node.bodystmt.rsc || node.bodystmt.els || node.bodystmt.ens) {
+      return null;
+    }
+
     statements = node.bodystmt.stmts.body;
+  } else {
+    statements = node.stmts.body;
   }
 
   // Ensure the block contains only one statement

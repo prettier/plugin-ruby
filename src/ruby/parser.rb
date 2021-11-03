@@ -1958,29 +1958,30 @@ class Prettier::Parser < Ripper
   # method_add_arg is a parser event that represents a method call with
   # arguments and parentheses. It accepts as arguments the method being called
   # and the arg_paren event that contains the arguments to the method.
-  def on_method_add_arg(fcall, arg_paren)
+  def on_method_add_arg(call, args)
     location =
-      if arg_paren[:type] == :args
+      if args[:type] == :args
         # You can hit this if you are passing no arguments to a method that ends
         # in a question mark. Because it knows it has to be a method and not a
         # local variable. In that case we can just use the location information
         # straight from the fcall.
-        fcall[:loc]
+        call[:loc]
       else
-        fcall[:loc].to(arg_paren[:loc])
+        call[:loc].to(args[:loc])
       end
 
-    { type: :method_add_arg, body: [fcall, arg_paren], loc: location }
+    { type: :method_add_arg, call: call, args: args, loc: location }
   end
 
   # method_add_block is a parser event that represents a method call with a
   # block argument. It accepts as arguments the method being called and the
   # block event.
-  def on_method_add_block(method_add_arg, block)
+  def on_method_add_block(call, block)
     {
       type: :method_add_block,
-      body: [method_add_arg, block],
-      loc: method_add_arg[:loc].to(block[:loc])
+      call: call,
+      block: block,
+      loc: call[:loc].to(block[:loc])
     }
   end
 

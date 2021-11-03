@@ -170,6 +170,10 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.params, node.stmts];
     case "massign":
       return [node.tgt, node.val];
+    case "method_add_arg":
+      return [node.call, node.args];
+    case "method_add_block":
+      return [node.call, node.block];
     case "mlhs":
       return node.parts;
     case "mlhs_add_post":
@@ -308,8 +312,6 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "args":
     case "args_add_block":
     case "args_add_star":
-    case "method_add_arg":
-    case "method_add_block":
     case "mrhs":
     case "mrhs_add_star":
     case "mrhs_new_from_args": {

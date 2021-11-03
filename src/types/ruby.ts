@@ -191,8 +191,8 @@ export type Command = ParserEvent<"command", { message: Const | Identifier, args
 export type CommandCall = ParserEvent<"command_call", { receiver: AnyNode, operator: CallOperator, message: Op | Identifier | Const, args: Args | ArgsAddBlock }>;
 export type DoBlock = ParserEvent<"do_block", { keyword: Keyword, block_var: null | BlockVar, bodystmt: Bodystmt }>;
 export type Fcall = ParserEvent<"fcall", { value: Const | Identifier }>;
-export type MethodAddArg = ParserEvent<"method_add_arg", { body: [Call | Fcall, Args | ArgParen | ArgsAddBlock] }>;
-export type MethodAddBlock = ParserEvent<"method_add_block", { body: [AnyNode, BraceBlock | DoBlock] }>;
+export type MethodAddArg = ParserEvent<"method_add_arg", { call: Call | Fcall, args: Args | ArgParen | ArgsAddBlock }>;
+export type MethodAddBlock = ParserEvent<"method_add_block", { call: AnyNode, block: BraceBlock | DoBlock }>;
 export type VCall = ParserEvent<"vcall", { value: Identifier }>;
 
 // These are various parser events for statements you would find in a method body.

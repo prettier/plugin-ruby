@@ -78,11 +78,11 @@ export const printArgs: Plugin.Printer<Ruby.Args> = (
     // associated with it. If it does, we're going to attempt to transform it
     // into the to_proc shorthand and add it to the list of arguments.
     [1, 2, 3].find((parent) => {
-      const parentNode = path.getParentNode(parent);
+      const parentNode = path.getParentNode(parent) as Ruby.AnyNode;
       blockNode =
         parentNode &&
         parentNode.type === "method_add_block" &&
-        parentNode.body[1];
+        parentNode.block;
 
       return blockNode;
     });

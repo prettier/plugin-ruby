@@ -133,11 +133,8 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
 ) => {
   const node = path.getValue();
 
-  const [methodNode, argNode] = node.body;
-  const [methodDoc, argsDoc] = path.map(print, "body") as [
-    Plugin.Doc,
-    Plugin.Doc[]
-  ];
+  const methodDoc = path.call(print, "call");
+  const argsDoc = path.call(print, "args") as Plugin.Doc[];
 
   // You can end up here if you have a method with a ? ending, presumably
   // because the parser knows that it cannot be a local variable. You can also
@@ -147,7 +144,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
     // like a constant, then we need to match that in order to maintain valid
     // Ruby. For example, you could do something like Foo(), on which we would
     // need to keep the parentheses to make it look like a method call.
-    if (methodNode.type === "fcall" && methodNode.value.type === "@const") {
+    if (node.call.type === "fcall" && node.call.value.type === "@const") {
       return [methodDoc, "()"];
     }
 
@@ -156,7 +153,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
     // example, if you call something like Foo.new.() (implicitly calling the
     // #call method on a new instance of the Foo class), then we have to print
     // out those parentheses, otherwise we'll end up with Foo.new.
-    if (methodNode.type === "call" && methodNode.message === "call") {
+    if (node.call.type === "call" && node.call.message === "call") {
       return [methodDoc, "()"];
     }
 
@@ -165,7 +162,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
 
   // This case will ONLY be hit if we can successfully turn the block into a
   // to_proc call. In that case, we just explicitly add the parens around it.
-  if (argNode.type === "args" && argsDoc.length > 0) {
+  if (node.args.type === "args" && argsDoc.length > 0) {
     return [methodDoc, "(", ...argsDoc, ")"];
   }
 
@@ -204,10 +201,10 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
       const sigBlockNode = sigBlock as Ruby.MethodAddBlock;
 
       if (
-        sigBlockNode.body[1] &&
-        sigBlockNode.body[0].type === "method_add_arg" &&
-        sigBlockNode.body[0].body[0].type === "fcall" &&
-        sigBlockNode.body[0].body[0].value.body === "sig"
+        sigBlockNode.block &&
+        sigBlockNode.call.type === "method_add_arg" &&
+        sigBlockNode.call.call.type === "fcall" &&
+        sigBlockNode.call.call.value.body === "sig"
       ) {
         threshold = 2;
       }
@@ -244,7 +241,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
 
   // If there are already parentheses, then we can just use the doc that's
   // already printed.
-  if (argNode.type == "arg_paren") {
+  if (node.args.type == "arg_paren") {
     return [methodDoc, argsDoc];
   }
 
@@ -258,17 +255,17 @@ export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (
 ) => {
   const node = path.getValue();
 
-  const [callNode, blockNode] = node.body;
-  const [callDoc, blockDoc] = path.map(print, "body");
+  const callDoc = path.call(print, "call");
+  const blockDoc = path.call(print, "block");
 
   // Don't bother trying to do any kind of fancy toProc transform if the option
   // is disabled.
   if (opts.rubyToProc) {
-    const proc = toProc(path, blockNode);
+    const proc = toProc(path, node.block);
 
-    if (proc && callNode.type === "call") {
+    if (proc && node.call.type === "call") {
       return group([
-        path.call(print, "body", 0),
+        path.call(print, "call"),
         "(",
         indent([softline, proc]),
         [softline, ")"]
@@ -276,7 +273,7 @@ export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (
     }
 
     if (proc) {
-      return path.call(print, "body", 0);
+      return path.call(print, "call");
     }
   }
 
