@@ -557,12 +557,12 @@ class Prettier::Parser < Ripper
       beging = find_scanner_event(:@lbracket)
       ending = find_scanner_event(:@rbracket)
 
-      { type: :array, body: [contents], loc: beging[:loc].to(ending[:loc]) }
+      { type: :array, cnts: contents, loc: beging[:loc].to(ending[:loc]) }
     else
       ending = find_scanner_event(:@tstring_end)
       contents[:loc] = contents[:loc].to(ending[:loc])
 
-      { type: :array, body: [contents], loc: contents[:loc] }
+      { type: :array, cnts: contents, loc: contents[:loc] }
     end
   end
 
@@ -1553,7 +1553,7 @@ class Prettier::Parser < Ripper
 
     {
       type: :hash,
-      contents: assoclist_from_args,
+      cnts: assoclist_from_args,
       loc: beging[:loc].to(ending[:loc])
     }
   end

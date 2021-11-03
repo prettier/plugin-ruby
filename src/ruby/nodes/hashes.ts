@@ -141,7 +141,7 @@ export const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
   // Hashes normally have a single assoclist_from_args child node. If it's
   // missing, then it means we're dealing with an empty hash, so we can just
   // exit here and print.
-  if (node.contents === null) {
+  if (node.cnts === null) {
     return printEmptyCollection(path, opts, "{", "}");
   }
 
@@ -149,7 +149,7 @@ export const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
     "{",
     indent([
       line,
-      path.call(print, "contents"),
+      path.call(print, "cnts"),
       getTrailingComma(opts) ? ifBreak(",", "") : ""
     ]),
     line,

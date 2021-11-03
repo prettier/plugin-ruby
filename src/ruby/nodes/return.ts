@@ -38,7 +38,7 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
 
   if (node.args.type === "args_add_block") {
     const args = node.args.body[0];
-    let steps = ["args", "body", 0];
+    const steps = ["args", "body", 0];
 
     if (args.type === "args" && args.body.length === 1 && args.body[0]) {
       // This is the first and only argument being passed to the return keyword.
@@ -55,17 +55,17 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
         }
 
         arg = (arg.body[0] as Ruby.Stmts).body[0];
-        steps = steps.concat("body", 0, "body", 0);
+        steps.push("body", 0, "body", 0);
       }
 
       // If we're returning an array literal that isn't a special array that has
       // at least 2 elements, then we want to grab the arguments so that we can
       // print them out as if they were normal return arguments.
-      if (arg.type === "array" && arg.body[0]) {
-        const contents = arg.body[0];
+      if (arg.type === "array" && arg.cnts) {
+        const contents = arg.cnts;
 
         if ((contents.type === "args" || contents.type === "args_add_star") && contents.body.length > 1) {
-          steps = steps.concat("body", 0, "body", 0);
+          steps.push("body", 0, "cnts");
         }
       }
     }

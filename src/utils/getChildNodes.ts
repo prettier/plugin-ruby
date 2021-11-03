@@ -47,6 +47,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.args];
     case "args_forward":
       return [];
+    case "array":
+      return [node.cnts];
     case "aryptn":
       return [node.constant, ...node.reqs, node.rest, ...node.posts];
     case "assign":
@@ -139,7 +141,7 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "for":
       return [node.iterator, node.enumerable, node.stmts];
     case "hash":
-      return [node.contents];
+      return [node.cnts];
     case "hshptn": {
       const childNodes: ChildNode[] = [node.constant];
 
@@ -301,7 +303,6 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "args":
     case "args_add_block":
     case "args_add_star":
-    case "array":
     case "bodystmt":
     case "method_add_arg":
     case "method_add_block":

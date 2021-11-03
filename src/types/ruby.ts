@@ -96,7 +96,7 @@ export type SymbolLiteral = ParserEvent<"symbol_literal", { body: [Backtick | Co
 export type XStringLiteral = ParserEvent<"xstring_literal", { parts: StringContent[] }>;
 
 // These are various parser events that have to do with arrays.
-export type Array = ParserEvent<"array", { body: [null | Args | ArgsAddStar | Qsymbols | Qwords | Symbols | Words] }>;
+export type Array = ParserEvent<"array", { cnts: null | Args | ArgsAddStar | Qsymbols | Qwords | Symbols | Words }>;
 export type Qsymbols = ParserEvent<"qsymbols", { elems: TStringContent[] }>;
 export type Qwords = ParserEvent<"qwords", { elems: TStringContent[] }>;
 export type Symbols = ParserEvent<"symbols", { elems: Word[] }>;
@@ -109,7 +109,7 @@ export type AssocNew = ParserEvent<"assoc_new", { key: AnyNode, value: AnyNode }
 export type AssocSplat = ParserEvent<"assoc_splat", { value: AnyNode }>;
 export type AssoclistFromArgs = ParserEvent<"assoclist_from_args", { assocs: HashContent[] }>;
 export type BareAssocHash = ParserEvent<"bare_assoc_hash", { assocs: HashContent[] }>;
-export type Hash = ParserEvent<"hash", { contents: null | AssoclistFromArgs }>;
+export type Hash = ParserEvent<"hash", { cnts: null | AssoclistFromArgs }>;
 
 // These are various parser events for assignment.
 type Assignable = ArefField | ConstPathField | Field | TopConstField | VarField;

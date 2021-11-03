@@ -88,11 +88,11 @@ const arrayLiteralStarts = {
 // will have one child that contains all of the elements of the array.
 export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
   const array = path.getValue();
-  const args = array.body[0];
+  const contents = array.cnts;
 
   // If there is no inner arguments node, then we're dealing with an empty
   // array, so we can go ahead and return.
-  if (args === null) {
+  if (contents === null) {
     return printEmptyCollection(path, opts, "[", "]");
   }
 
@@ -100,39 +100,38 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
   // array literal. In that case we're going to print out the body (which will
   // return to us an array with the first one being the start of the array) and
   // send that over to the printArrayLiteral function.
-  if (args.type !== "args" && args.type !== "args_add_star") {
+  if (contents.type !== "args" && contents.type !== "args_add_star") {
     return path.call(
       (arrayPath) =>
         printArrayLiteral(
-          arrayLiteralStarts[args.type],
+          arrayLiteralStarts[contents.type],
           arrayPath.map(print, "elems")
         ),
-      "body",
-      0
+      "cnts"
     );
   }
 
   if (opts.rubyArrayLiteral) {
     // If we have an array that contains only simple string literals with no
     // spaces or interpolation, then we're going to print a %w array.
-    if (isStringArray(args)) {
+    if (isStringArray(contents)) {
       const printString = (stringPath: Plugin.Path<Ruby.StringLiteral>) =>
         stringPath.call(print, "body", 0);
 
-      const nodePath = path as Plugin.Path<{ body: [{ body: Ruby.StringLiteral[] }] }>;
-      const parts = nodePath.map(printString, "body", 0, "body");
+      const nodePath = path as Plugin.Path<{ cnts: { body: Ruby.StringLiteral[] } }>;
+      const parts = nodePath.map(printString, "cnts", "body");
 
       return printArrayLiteral("%w", parts);
     }
 
     // If we have an array that contains only simple symbol literals with no
     // interpolation, then we're going to print a %i array.
-    if (isSymbolArray(args)) {
+    if (isSymbolArray(contents)) {
       const printSymbol = (symbolPath: Plugin.Path<Ruby.SymbolLiteral>) =>
         symbolPath.call(print, "body", 0);
 
-      const nodePath = path as Plugin.Path<{ body: [{ body: Ruby.SymbolLiteral[] }] }>;
-      const parts = nodePath.map(printSymbol, "body", 0, "body");
+      const nodePath = path as Plugin.Path<{ cnts: { body: Ruby.SymbolLiteral[] } }>;
+      const parts = nodePath.map(printSymbol, "cnts", "body");
 
       return printArrayLiteral("%i", parts);
     }
@@ -144,7 +143,7 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
     "[",
     indent([
       softline,
-      join([",", line], path.call(print, "body", 0)),
+      join([",", line], path.call(print, "cnts")),
       getTrailingComma(opts) ? ifBreak(",", "") : ""
     ]),
     softline,
