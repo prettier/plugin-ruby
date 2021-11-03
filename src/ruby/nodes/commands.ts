@@ -48,9 +48,9 @@ function docLength(doc: Plugin.Doc): number {
 function hasDef(node: Ruby.Command) {
   return (
     node.args.type === "args_add_block" &&
-    node.args.body[0].type === "args" &&
-    node.args.body[0].body[0] &&
-    ["def", "defs"].includes(node.args.body[0].body[0].type)
+    node.args.args.type === "args" &&
+    node.args.args.parts[0] &&
+    ["def", "defs"].includes(node.args.args.parts[0].type)
   );
 }
 
@@ -74,10 +74,15 @@ function skipArgsAlign(node: Ruby.CommandCall) {
 // If there is a ternary argument to a command and it's going to get broken
 // into multiple lines, then we're going to have to use parentheses around the
 // command in order to make sure operator precedence doesn't get messed up.
-function hasTernaryArg(node: Ruby.Args | Ruby.ArgsAddBlock) {
-  return (node.body[0] as any).body.some(
-    (child: Ruby.AnyNode) => child.type === "ifop"
-  );
+function hasTernaryArg(node: Ruby.Args | Ruby.ArgsAddBlock | Ruby.ArgsAddStar): boolean {
+  switch (node.type) {
+    case "args":
+      return node.parts.some((child) => child.type === "ifop");
+    case "args_add_block":
+      return hasTernaryArg(node.args) || node.block?.type === "ifop";
+    case "args_add_star":
+      return hasTernaryArg(node.args) || node.star.type === "ifop";
+  }
 }
 
 export const printCommand: Plugin.Printer<Ruby.Command> = (

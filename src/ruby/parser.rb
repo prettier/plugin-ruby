@@ -503,17 +503,21 @@ class Prettier::Parser < Ripper
   # parent args node as well as an arg which can be anything that could be
   # passed as an argument.
   def on_args_add(args, arg)
-    if args[:body].empty?
+    if args[:type] == :args_add_star
+      # If we're adding an argument after a splatted argument, then it's going
+      # to come in through this path.
+      { type: :args, parts: [args, arg], loc: args[:loc].to(arg[:loc]) }
+    elsif args[:parts].empty?
       # If this is the first argument being passed into the list of arguments,
       # then we're going to use the bounds of the argument to override the
       # parent node's location since this will be more accurate.
-      { type: :args, body: [arg], loc: arg[:loc] }
+      { type: :args, parts: [arg], loc: arg[:loc] }
     else
       # Otherwise we're going to update the existing list with the argument
       # being added as well as the new end bounds.
       {
         type: args[:type],
-        body: args[:body] << arg,
+        parts: args[:parts] << arg,
         loc: args[:loc].to(arg[:loc])
       }
     end
@@ -527,7 +531,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :args_add_block,
-      body: [args, block || nil],
+      args: args,
+      block: block || nil,
       loc: args[:loc].to(ending[:loc])
     }
   end
@@ -535,13 +540,14 @@ class Prettier::Parser < Ripper
   # args_add_star is a parser event that represents adding a splat of values
   # to a list of arguments. If accepts as arguments the parent args node as
   # well as the part that is being splatted.
-  def on_args_add_star(args, part)
+  def on_args_add_star(args, star)
     beging = find_scanner_event(:@op, '*')
-    ending = part || beging
+    ending = star || beging
 
     {
       type: :args_add_star,
-      body: [args, part],
+      args: args,
+      star: star,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -558,7 +564,7 @@ class Prettier::Parser < Ripper
   # arguments to any method call or an array. It can be followed by any
   # number of args_add events, which we'll append onto an array body.
   def on_args_new
-    { type: :args, body: [], loc: Location.fixed(line: lineno, char: char_pos) }
+    { type: :args, parts: [], loc: Location.fixed(line: lineno, char: char_pos) }
   end
 
   # Array nodes can contain a myriad of subnodes because of the special
@@ -2072,18 +2078,24 @@ class Prettier::Parser < Ripper
   # be followed by any number of mrhs_add nodes that we'll build up into an
   # array body.
   def on_mrhs_new
-    { type: :mrhs, body: [], loc: Location.fixed(line: lineno, char: char_pos) }
+    { type: :mrhs, parts: [], loc: Location.fixed(line: lineno, char: char_pos) }
   end
 
   # An mrhs_add is a parser event that represents adding another value onto
   # a list on the right hand side of a multiple assignment.
   def on_mrhs_add(mrhs, part)
-    if mrhs[:body].empty?
-      { type: :mrhs, body: [part], loc: mrhs[:loc] }
+    if mrhs[:type] == :mrhs_new_from_args
+      {
+        type: :mrhs,
+        parts: [*mrhs[:args][:parts], part],
+        loc: mrhs[:loc].to(part[:loc])
+      }
+    elsif mrhs[:parts].empty?
+      { type: :mrhs, parts: [part], loc: mrhs[:loc] }
     else
       {
         type: mrhs[:type],
-        body: mrhs[:body] << part,
+        parts: mrhs[:parts] << part,
         loc: mrhs[:loc].to(part[:loc])
       }
     end
@@ -2092,13 +2104,14 @@ class Prettier::Parser < Ripper
   # An mrhs_add_star is a parser event that represents using the splat
   # operator to expand out a value on the right hand side of a multiple
   # assignment.
-  def on_mrhs_add_star(mrhs, part)
+  def on_mrhs_add_star(mrhs, star)
     beging = find_scanner_event(:@op, '*')
-    ending = part || beging
+    ending = star || beging
 
     {
       type: :mrhs_add_star,
-      body: [mrhs, part],
+      mrhs: mrhs,
+      star: star,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -2112,7 +2125,7 @@ class Prettier::Parser < Ripper
   #     foo = 1, 2, 3
   #
   def on_mrhs_new_from_args(args)
-    { type: :mrhs_new_from_args, body: [args], loc: args[:loc] }
+    { type: :mrhs_new_from_args, args: args, loc: args[:loc] }
   end
 
   # next is a parser event that represents using the next keyword. It

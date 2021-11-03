@@ -37,13 +37,13 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
   let parts: Plugin.Doc | Plugin.Doc[] = "";
 
   if (node.args.type === "args_add_block") {
-    const args = node.args.body[0];
-    const steps = ["args", "body", 0];
+    const args = node.args.args;
+    const steps: PropertyKey[] = ["args", "args"];
 
-    if (args.type === "args" && args.body.length === 1 && args.body[0]) {
+    if (args.type === "args" && args.parts.length === 1 && args.parts[0]) {
       // This is the first and only argument being passed to the return keyword.
-      let arg = args.body[0];
-      steps.push("body", 0);
+      let arg = args.parts[0];
+      steps.push("parts", 0);
 
       // If the body of the return contains parens, then just skip directly to
       // the content of the parens so that we can skip printing parens if we
@@ -65,8 +65,17 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
       if (arg.type === "array" && arg.cnts) {
         const contents = arg.cnts;
 
-        if ((contents.type === "args" || contents.type === "args_add_star") && contents.body.length > 1) {
+        if (contents.type === "args" && contents.parts.length > 1) {
+          // If we have just regular arguments and we have more than 1.
           steps.push("cnts");
+        } else if (contents.type === "args_add_star") {
+          if (contents.args.type === "args_add_star") {
+            // If we have two splats.
+            steps.push("cnts");
+          } else if (contents.args.parts.length > 0) {
+            // If we have a splat and at least one pre argument.
+            steps.push("cnts");
+          }
         }
       }
     }

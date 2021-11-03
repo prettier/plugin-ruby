@@ -45,6 +45,12 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.collection, node.index];
     case "arg_paren":
       return [node.args];
+    case "args":
+      return node.parts;
+    case "args_add_block":
+      return [node.args, node.block];
+    case "args_add_star":
+      return [node.args, node.star];
     case "args_forward":
       return [];
     case "array":
@@ -184,6 +190,12 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.cnts];
     case "module":
       return [node.constant, node.bodystmt];
+    case "mrhs":
+      return node.parts;
+    case "mrhs_add_star":
+      return [node.mrhs, node.star];
+    case "mrhs_new_from_args":
+      return [node.args];
     case "next":
       return [node.args];
     case "opassign":
@@ -306,24 +318,6 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [];
     case "zsuper":
       return [];
-
-
-
-    case "args":
-    case "args_add_block":
-    case "args_add_star":
-    case "mrhs":
-    case "mrhs_add_star":
-    case "mrhs_new_from_args": {
-      if (Array.isArray(node.body)) {
-        return node.body.filter(
-          (child: any) => child && typeof child === "object"
-        );
-      }
-      return [];
-    }
-
-
     default:
       throwBadNode(node);
   }

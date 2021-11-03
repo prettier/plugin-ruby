@@ -29,7 +29,7 @@ function printFlowControl(keyword: string): Plugin.Printer<FlowControl> {
     // Special handling if we've got parentheses on this call to the keyword. If
     // we do and we can skip them, then we will. If we don't, then we'll print
     // them right after the keyword with no space.
-    const paren = node.args.body[0].body[0];
+    const paren = node.args.args.type === "args" && node.args.args.parts[0];
 
     if (paren && paren.type === "paren") {
       const stmts = (paren.cnts as Ruby.Stmts).body;
@@ -38,12 +38,12 @@ function printFlowControl(keyword: string): Plugin.Printer<FlowControl> {
       if (stmts.length === 1 && !unskippableParens.includes(stmts[0].type)) {
         return [
           `${keyword} `,
-          (path as any).call(print, "args", "body", 0, "body", 0, "cnts")
+          (path as any).call(print, "args", "args", "parts", 0, "cnts")
         ];
       }
 
       // Here we know we can't, so just printing out the parentheses as normal.
-      return [keyword, (path as any).call(print, "args", "body", 0, "body", 0)];
+      return [keyword, (path as any).call(print, "args", "args", "parts", 0)];
     }
 
     // If we didn't hit the super special handling, then we're just going to

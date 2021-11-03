@@ -65,7 +65,7 @@ export const printRescueEx: Plugin.Printer<Ruby.RescueEx> = (
 
     // If there are multiple exceptions being rescued, then we're going to have
     // multiple doc nodes returned as an array that we need to join together.
-    if (["mrhs_add_star", "mrhs_new_from_args"].includes(node.extns.type)) {
+    if (["mrhs", "mrhs_add_star", "mrhs_new_from_args"].includes(node.extns.type)) {
       exceptionDoc = group(join([",", line], exceptionDoc));
     }
 

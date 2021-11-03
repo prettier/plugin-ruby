@@ -14,7 +14,7 @@ export const printAssign: Plugin.Printer<Ruby.Assign> = (path, opts, print) => {
 
   // If the right side of this assignment is a multiple assignment, then we need
   // to join it together with commas.
-  if (["mrhs_add_star", "mrhs_new_from_args"].includes(valueNode.type)) {
+  if (["mrhs", "mrhs_add_star", "mrhs_new_from_args"].includes(valueNode.type)) {
     rightSideDoc = group(join([",", line], valueDoc));
   }
 

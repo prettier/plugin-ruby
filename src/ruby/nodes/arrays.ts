@@ -12,8 +12,9 @@ const { group, ifBreak, indent, join, line, softline } = prettier;
 //
 function isStringArray(args: Ruby.Args | Ruby.ArgsAddStar) {
   return (
-    args.body.length > 1 &&
-    args.body.every((arg) => {
+    args.type === "args" &&
+    args.parts.length > 1 &&
+    args.parts.every((arg) => {
       // We want to verify that every node inside of this array is a string
       // literal. We also want to make sure none of them have comments attached.
       if (arg.type !== "string_literal" || arg.comments) {
@@ -50,8 +51,9 @@ function isStringArray(args: Ruby.Args | Ruby.ArgsAddStar) {
 //
 function isSymbolArray(args: Ruby.Args | Ruby.ArgsAddStar) {
   return (
-    args.body.length > 1 &&
-    args.body.every((arg) => arg.type === "symbol_literal" && !arg.comments)
+    args.type === "args" &&
+    args.parts.length > 1 &&
+    args.parts.every((arg) => arg.type === "symbol_literal" && !arg.comments)
   );
 }
 
@@ -118,8 +120,8 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
       const printString = (stringPath: Plugin.Path<Ruby.StringLiteral>) =>
         stringPath.call(print, "parts", 0);
 
-      const nodePath = path as Plugin.Path<{ cnts: { body: Ruby.StringLiteral[] } }>;
-      const parts = nodePath.map(printString, "cnts", "body");
+      const nodePath = path as Plugin.Path<{ cnts: { parts: Ruby.StringLiteral[] } }>;
+      const parts = nodePath.map(printString, "cnts", "parts");
 
       return printArrayLiteral("%w", parts);
     }
@@ -130,8 +132,8 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
       const printSymbol = (symbolPath: Plugin.Path<Ruby.SymbolLiteral>) =>
         symbolPath.call(print, "val");
 
-      const nodePath = path as Plugin.Path<{ cnts: { body: Ruby.SymbolLiteral[] } }>;
-      const parts = nodePath.map(printSymbol, "cnts", "body");
+      const nodePath = path as Plugin.Path<{ cnts: { parts: Ruby.SymbolLiteral[] } }>;
+      const parts = nodePath.map(printSymbol, "cnts", "parts");
 
       return printArrayLiteral("%i", parts);
     }

@@ -11,7 +11,7 @@ export const printMAssign: Plugin.Printer<Ruby.Massign> = (
   const node = path.getValue();
   let valueDoc = path.call(print, "val");
 
-  if (["mrhs_add_star", "mrhs_new_from_args"].includes(node.val.type)) {
+  if (["mrhs", "mrhs_add_star", "mrhs_new_from_args"].includes(node.val.type)) {
     valueDoc = group(join([",", line], valueDoc));
   }
 
@@ -79,7 +79,7 @@ export const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (
 };
 
 export const printMRHS: Plugin.Printer<Ruby.Mrhs> = (path, opts, print) => {
-  return path.map(print, "body");
+  return path.map(print, "parts");
 };
 
 export const printMRHSAddStar: Plugin.Printer<Ruby.MrhsAddStar> = (
@@ -87,9 +87,10 @@ export const printMRHSAddStar: Plugin.Printer<Ruby.MrhsAddStar> = (
   opts,
   print
 ) => {
-  const [leftDoc, rightDoc] = path.map(print, "body");
-
-  return [...(leftDoc as Plugin.Doc[]), ["*", rightDoc]];
+  return [
+    ...(path.call(print, "mrhs") as Plugin.Doc[]),
+    ["*", path.call(print, "star")]
+  ];
 };
 
 export const printMRHSNewFromArgs: Plugin.Printer<Ruby.MrhsNewFromArgs> = (
@@ -97,11 +98,5 @@ export const printMRHSNewFromArgs: Plugin.Printer<Ruby.MrhsNewFromArgs> = (
   opts,
   print
 ) => {
-  const parts = path.call(print, "body", 0) as Plugin.Doc[];
-
-  if (path.getValue().body[1]) {
-    parts.push(path.call(print, "body", 1));
-  }
-
-  return parts;
+  return path.call(print, "args");
 };

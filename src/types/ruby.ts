@@ -127,9 +127,9 @@ export type Mlhs = ParserEvent<"mlhs", { parts: (ArefField | Field | Identifier 
 export type MlhsAddPost = ParserEvent<"mlhs_add_post", { star: MlhsAddStar, mlhs: Mlhs }>;
 export type MlhsAddStar = ParserEvent<"mlhs_add_star", { mlhs: Mlhs, star: null | ArefField | Field | Identifier | VarField }>;
 export type MlhsParen = ParserEvent<"mlhs_paren", { cnts: Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen }>;
-export type Mrhs = ParserEvent<"mrhs", { body: [] }>;
-export type MrhsAddStar = ParserEvent<"mrhs_add_star", { body: [Mrhs | MrhsNewFromArgs, AnyNode] }>;
-export type MrhsNewFromArgs = ParserEvent<"mrhs_new_from_args", { body: [Args | ArgsAddStar, AnyNode], oper: string }>;
+export type Mrhs = ParserEvent<"mrhs", { parts: AnyNode[] }>;
+export type MrhsAddStar = ParserEvent<"mrhs_add_star", { mrhs: Mrhs | MrhsNewFromArgs, star: AnyNode }>;
+export type MrhsNewFromArgs = ParserEvent<"mrhs_new_from_args", { args: Args | ArgsAddStar }>;
 
 // These are various parser events for control flow constructs.
 export type Case = ParserEvent<"case", { value: AnyNode, cons: In | When }>;
@@ -181,9 +181,9 @@ export type RestParam = ParserEvent<"rest_param", { name: null | Identifier }>;
 // These are various parser events for method calls.
 export type CallOperator = Op | Period | "::";
 export type ArgParen = ParserEvent<"arg_paren", { args: Args | ArgsAddBlock | ArgsForward | null }>;
-export type Args = ParserEvent<"args", { body: AnyNode[] }>;
-export type ArgsAddBlock = ParserEvent<"args_add_block", { body: [Args | ArgsAddStar, null | AnyNode] }>;
-export type ArgsAddStar = ParserEvent<"args_add_star", { body: [Args | ArgsAddStar, ...AnyNode[]] }>;
+export type Args = ParserEvent<"args", { parts: AnyNode[] }>;
+export type ArgsAddBlock = ParserEvent<"args_add_block", { args: Args | ArgsAddStar, block: null | AnyNode }>;
+export type ArgsAddStar = ParserEvent<"args_add_star", { args: Args | ArgsAddStar, star: AnyNode }>;
 export type BlockVar = ParserEvent<"block_var", { params: Params, locals: Identifier[] }>;
 export type BraceBlock = ParserEvent<"brace_block", { lbrace: Lbrace, block_var: null | BlockVar, stmts: Stmts }>;
 export type Call = ParserEvent<"call", { receiver: AnyNode, operator: CallOperator, message: Backtick | Op | Identifier | Const | "call" }>;
