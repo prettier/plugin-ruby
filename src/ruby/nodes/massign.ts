@@ -24,7 +24,7 @@ export const printMAssign: Plugin.Printer<Ruby.Massign> = (
 };
 
 export const printMLHS: Plugin.Printer<Ruby.Mlhs> = (path, opts, print) => {
-  return path.map(print, "body");
+  return path.map(print, "parts");
 };
 
 export const printMLHSAddPost: Plugin.Printer<Ruby.MlhsAddPost> = (
@@ -33,8 +33,8 @@ export const printMLHSAddPost: Plugin.Printer<Ruby.MlhsAddPost> = (
   print
 ) => {
   return [
-    ...(path.call(print, "body", 0) as Plugin.Doc[]),
-    ...(path.call(print, "body", 1) as Plugin.Doc[])
+    ...(path.call(print, "star") as Plugin.Doc[]),
+    ...(path.call(print, "mlhs") as Plugin.Doc[])
   ];
 };
 
@@ -43,13 +43,14 @@ export const printMLHSAddStar: Plugin.Printer<Ruby.MlhsAddStar> = (
   opts,
   print
 ) => {
+  const node = path.getValue();
   const parts: Plugin.Doc[] = ["*"];
 
-  if (path.getValue().body[1]) {
-    parts.push(path.call(print, "body", 1));
+  if (node.star) {
+    parts.push(path.call(print, "star"));
   }
 
-  return [...(path.call(print, "body", 0) as Plugin.Doc[]), parts];
+  return [...(path.call(print, "mlhs") as Plugin.Doc[]), parts];
 };
 
 export const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (
@@ -61,15 +62,16 @@ export const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (
     // If we're nested in brackets as part of the left hand side of an
     // assignment, i.e., (a, b, c) = 1, 2, 3
     // ignore the current node and just go straight to the content
-    return path.call(print, "body", 0);
+    return path.call(print, "cnts");
   }
 
+  const node = path.getValue();
   const parts: Plugin.Doc[] = [
     softline,
-    join([",", line], path.call(print, "body", 0))
+    join([",", line], path.call(print, "cnts"))
   ];
 
-  if ((path.getValue().body[0] as any).comma) {
+  if ((node.cnts as any).comma) {
     parts.push(",");
   }
 

@@ -123,10 +123,10 @@ export type VarField = ParserEvent<"var_field", { value: null | Const | CVar | G
 
 // These are various parser events that have to do with multiple assignment.
 export type Massign = ParserEvent<"massign", { tgt: Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen, val: AnyNode }>;
-export type Mlhs = ParserEvent<"mlhs", { body: (ArefField | Field | Identifier | MlhsParen | VarField)[], comma: undefined | true }>;
-export type MlhsAddPost = ParserEvent<"mlhs_add_post", { body: [MlhsAddStar, Mlhs] }>;
-export type MlhsAddStar = ParserEvent<"mlhs_add_star", { body: [Mlhs, null | ArefField | Field | Identifier | VarField] }>;
-export type MlhsParen = ParserEvent<"mlhs_paren", { body: [Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen] }>;
+export type Mlhs = ParserEvent<"mlhs", { parts: (ArefField | Field | Identifier | MlhsParen | VarField)[], comma: undefined | true }>;
+export type MlhsAddPost = ParserEvent<"mlhs_add_post", { star: MlhsAddStar, mlhs: Mlhs }>;
+export type MlhsAddStar = ParserEvent<"mlhs_add_star", { mlhs: Mlhs, star: null | ArefField | Field | Identifier | VarField }>;
+export type MlhsParen = ParserEvent<"mlhs_paren", { cnts: Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen }>;
 export type Mrhs = ParserEvent<"mrhs", { body: [] }>;
 export type MrhsAddStar = ParserEvent<"mrhs_add_star", { body: [Mrhs | MrhsNewFromArgs, AnyNode] }>;
 export type MrhsNewFromArgs = ParserEvent<"mrhs_new_from_args", { body: [Args | ArgsAddStar, AnyNode], oper: string }>;

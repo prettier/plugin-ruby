@@ -1972,17 +1972,17 @@ class Prettier::Parser < Ripper
   # side of a multiple assignment. It is followed by any number of mlhs_add
   # nodes that each represent another variable being assigned.
   def on_mlhs_new
-    { type: :mlhs, body: [], loc: Location.fixed(line: lineno, char: char_pos) }
+    { type: :mlhs, parts: [], loc: Location.fixed(line: lineno, char: char_pos) }
   end
 
   # An mlhs_add is a parser event that represents adding another variable
   # onto a list of assignments. It accepts as arguments the parent mlhs node
   # as well as the part that is being added to the list.
   def on_mlhs_add(mlhs, part)
-    if mlhs[:body].empty?
-      { type: :mlhs, body: [part], loc: part[:loc] }
+    if mlhs[:parts].empty?
+      { type: :mlhs, parts: [part], loc: part[:loc] }
     else
-      { type: :mlhs, body: mlhs[:body] << part, loc: mlhs[:loc].to(part[:loc]) }
+      { type: :mlhs, parts: mlhs[:parts] << part, loc: mlhs[:loc].to(part[:loc]) }
     end
   end
 
@@ -1994,7 +1994,8 @@ class Prettier::Parser < Ripper
   def on_mlhs_add_post(mlhs_add_star, mlhs)
     {
       type: :mlhs_add_post,
-      body: [mlhs_add_star, mlhs],
+      star: mlhs_add_star,
+      mlhs: mlhs,
       loc: mlhs_add_star[:loc].to(mlhs[:loc])
     }
   end
@@ -2009,7 +2010,8 @@ class Prettier::Parser < Ripper
 
     {
       type: :mlhs_add_star,
-      body: [mlhs, part],
+      mlhs: mlhs,
+      star: part,
       loc: beging[:loc].to(ending[:loc])
     }
   end
@@ -2025,7 +2027,7 @@ class Prettier::Parser < Ripper
     comma_range = beging[:loc].end_char...ending[:loc].start_char
     contents[:comma] = true if source[comma_range].strip.end_with?(',')
 
-    { type: :mlhs_paren, body: [contents], loc: beging[:loc].to(ending[:loc]) }
+    { type: :mlhs_paren, cnts: contents, loc: beging[:loc].to(ending[:loc]) }
   end
 
   # module is a parser event that represents defining a module. It accepts

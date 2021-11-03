@@ -164,6 +164,14 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.params, node.stmts];
     case "massign":
       return [node.tgt, node.val];
+    case "mlhs":
+      return node.parts;
+    case "mlhs_add_post":
+      return [node.star, node.mlhs];
+    case "mlhs_add_star":
+      return [node.mlhs, node.star];
+    case "mlhs_paren":
+      return [node.cnts];
     case "module":
       return [node.constant, node.bodystmt];
     case "next":
@@ -297,10 +305,6 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "bodystmt":
     case "method_add_arg":
     case "method_add_block":
-    case "mlhs":
-    case "mlhs_add_post":
-    case "mlhs_add_star":
-    case "mlhs_paren":
     case "mrhs":
     case "mrhs_add_star":
     case "mrhs_new_from_args":
