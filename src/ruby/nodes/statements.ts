@@ -21,30 +21,30 @@ export const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (
   opts,
   print
 ) => {
-  const [stmts, rescue, elseClause, ensure] = path.getValue().body;
+  const node = path.getValue();
   const parts = [];
 
-  if (!isEmptyStmts(stmts)) {
-    parts.push(path.call(print, "body", 0));
+  if (!isEmptyStmts(node.stmts)) {
+    parts.push(path.call(print, "stmts"));
   }
 
-  if (rescue) {
-    parts.push(dedent([hardline, path.call(print, "body", 1)]));
+  if (node.rsc) {
+    parts.push(dedent([hardline, path.call(print, "rsc")]));
   }
 
-  if (elseClause) {
+  if (node.els) {
     // Before Ruby 2.6, this piece of bodystmt was an explicit "else" node
     /* istanbul ignore next */
     const stmts =
-      (elseClause as any).type === "else"
-        ? path.call(print, "body", 2, "body", 0)
-        : path.call(print, "body", 2);
+      (node.els as any).type === "else"
+        ? (path as any).call(print, "els", "body", 0)
+        : path.call(print, "els");
 
     parts.push([dedent([hardline, "else"]), hardline, stmts]);
   }
 
-  if (ensure) {
-    parts.push(dedent([hardline, path.call(print, "body", 3)]));
+  if (node.ens) {
+    parts.push(dedent([hardline, path.call(print, "ens")]));
   }
 
   return group(parts);

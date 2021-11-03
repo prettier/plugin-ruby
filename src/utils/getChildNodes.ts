@@ -69,6 +69,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.params, ...node.locals];
     case "blockarg":
       return [node.name];
+    case "bodystmt":
+      return [node.stmts, node.rsc, node.els, node.ens];
     case "brace_block":
       return [node.lbrace, node.block_var, node.stmts];
     case "break":
@@ -306,7 +308,6 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "args":
     case "args_add_block":
     case "args_add_star":
-    case "bodystmt":
     case "method_add_arg":
     case "method_add_block":
     case "mrhs":

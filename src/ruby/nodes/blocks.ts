@@ -49,7 +49,7 @@ type Block = Ruby.BraceBlock | Ruby.DoBlock;
 function printBlock(braces: boolean): Plugin.Printer<Block> {
   return function printBlockWithBraces(path, opts, print) {
     const node = path.getValue();
-    const stmts: Ruby.AnyNode[] = node.type === "brace_block" ? node.stmts.body : node.bodystmt.body[0].body;
+    const stmts: Ruby.AnyNode[] = node.type === "brace_block" ? node.stmts.body : node.bodystmt.stmts.body;
 
     let doBlockBody: Plugin.Doc = "";
     if (stmts.length !== 1 || stmts[0].type !== "void_stmt" || stmts[0].comments) {

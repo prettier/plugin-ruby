@@ -222,6 +222,6 @@ export type Undef = ParserEvent<"undef", { syms: (DynaSymbol | SymbolLiteral)[] 
 
 // These are various parser events for statement containers, generally pretty high in the tree.
 export type Begin = ParserEvent<"begin", { bodystmt: Bodystmt }>;
-export type Bodystmt = ParserEvent<"bodystmt", { body: [Stmts, null | Rescue, null | Stmts, null | Ensure] }>;
+export type Bodystmt = ParserEvent<"bodystmt", { stmts: Stmts, rsc: null | Rescue, els: null | Stmts, ens: null | Ensure }>;
 export type Program = ParserEvent<"program", { stmts: Stmts }>;
 export type Stmts = ParserEvent<"stmts", { body: AnyNode[] }>;

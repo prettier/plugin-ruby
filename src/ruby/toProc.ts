@@ -44,18 +44,14 @@ function toProc(
     return null;
   }
 
+  // Get the list of statements from the block
   let statements: Ruby.AnyNode[];
-  if (node.type === "do_block") {
-    const [blockStatements, ...rescueElseEnsure] = node.bodystmt.body;
-
-    // You can’t use the to_proc shortcut if you’re rescuing
-    if (rescueElseEnsure.some(Boolean)) {
-      return null;
-    }
-
-    statements = blockStatements.body;
-  } else {
+  if (node.type !== "do_block") {
     statements = node.stmts.body;
+  } else if (node.bodystmt.rsc || node.bodystmt.ens || node.bodystmt.els) {
+    return null;
+  } else {
+    statements = node.bodystmt.stmts.body;
   }
 
   // Ensure the block contains only one statement

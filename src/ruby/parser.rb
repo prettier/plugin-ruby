@@ -686,7 +686,7 @@ class Prettier::Parser < Ripper
   def on_begin(bodystmt)
     beging = find_scanner_event(:@kw, 'begin')
     end_char =
-      if bodystmt[:body][1..-1].any?
+      if bodystmt[:rsc] || bodystmt[:ens] || bodystmt[:els]
         bodystmt[:loc].end_char
       else
         find_scanner_event(:@kw, 'end')[:loc].end_char
@@ -759,19 +759,19 @@ class Prettier::Parser < Ripper
           end_char: end_char
         )
 
-      parts = value[:body]
+      parts = [value[:rsc], value[:ens], value[:els]]
 
       # Here we're going to determine the bounds for the stmts
       consequent = parts[1..-1].compact.first
-      value[:body][0].bind(
+      value[:stmts].bind(
         start_char,
         consequent ? consequent[:loc].start_char : end_char
       )
 
       # Next we're going to determine the rescue clause if there is one
-      if parts[1]
-        consequent = parts[2..-1].compact.first
-        value[:body][1].bind_end(
+      if value[:rsc]
+        consequent = parts.drop(1).compact.first
+        value[:rsc].bind_end(
           consequent ? consequent[:loc].start_char : end_char
         )
       end
@@ -780,11 +780,14 @@ class Prettier::Parser < Ripper
 
   # bodystmt is a parser event that represents all of the possible combinations
   # of clauses within the body of a method or block.
-  def on_bodystmt(stmts, rescued, ensured, elsed)
+  def on_bodystmt(stmts, rescued, elsed, ensured)
     BodyStmt.new(
       self,
       type: :bodystmt,
-      body: [stmts, rescued, ensured, elsed],
+      stmts: stmts,
+      rsc: rescued,
+      els: elsed,
+      ens: ensured,
       loc: Location.fixed(line: lineno, char: char_pos)
     )
   end
