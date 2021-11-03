@@ -1927,11 +1927,16 @@ class Prettier::Parser < Ripper
   # In this case a would receive only the first value of the foo enumerable,
   # in which case we need to explicitly track the comma and add it onto the
   # child node.
-  def on_massign(left, right)
-    comma_range = left[:loc].end_char...right[:loc].start_char
-    left[:comma] = true if source[comma_range].strip.start_with?(',')
+  def on_massign(target, value)
+    comma_range = target[:loc].end_char...value[:loc].start_char
+    target[:comma] = true if source[comma_range].strip.start_with?(',')
 
-    { type: :massign, body: [left, right], loc: left[:loc].to(right[:loc]) }
+    {
+      type: :massign,
+      tgt: target,
+      val: value,
+      loc: target[:loc].to(value[:loc])
+    }
   end
 
   # method_add_arg is a parser event that represents a method call with

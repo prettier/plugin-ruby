@@ -122,7 +122,7 @@ export type TopConstField = ParserEvent<"top_const_field", { constant: Const }>;
 export type VarField = ParserEvent<"var_field", { value: null | Const | CVar | GVar | Identifier | IVar }>;
 
 // These are various parser events that have to do with multiple assignment.
-export type Massign = ParserEvent<"massign", { body: [Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen, AnyNode] }>;
+export type Massign = ParserEvent<"massign", { tgt: Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen, val: AnyNode }>;
 export type Mlhs = ParserEvent<"mlhs", { body: (ArefField | Field | Identifier | MlhsParen | VarField)[], comma: undefined | true }>;
 export type MlhsAddPost = ParserEvent<"mlhs_add_post", { body: [MlhsAddStar, Mlhs] }>;
 export type MlhsAddStar = ParserEvent<"mlhs_add_star", { body: [Mlhs, null | ArefField | Field | Identifier | VarField] }>;

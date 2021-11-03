@@ -8,22 +8,19 @@ export const printMAssign: Plugin.Printer<Ruby.Massign> = (
   opts,
   print
 ) => {
-  let right = path.call(print, "body", 1);
+  const node = path.getValue();
+  let valueDoc = path.call(print, "val");
 
-  if (
-    ["mrhs_add_star", "mrhs_new_from_args"].includes(
-      path.getValue().body[1].type
-    )
-  ) {
-    right = group(join([",", line], right));
+  if (["mrhs_add_star", "mrhs_new_from_args"].includes(node.val.type)) {
+    valueDoc = group(join([",", line], valueDoc));
   }
 
-  const parts: Plugin.Doc[] = [join([",", line], path.call(print, "body", 0))];
-  if ((path.getValue().body[0] as any).comma) {
-    parts.push(",");
+  const targetDoc: Plugin.Doc[] = [join([",", line], path.call(print, "tgt"))];
+  if ((node.tgt as any).comma) {
+    targetDoc.push(",");
   }
 
-  return group([group(parts), " =", indent([line, right])]);
+  return group([group(targetDoc), " =", indent([line, valueDoc])]);
 };
 
 export const printMLHS: Plugin.Printer<Ruby.Mlhs> = (path, opts, print) => {
