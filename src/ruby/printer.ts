@@ -63,15 +63,11 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
     const node = path.getValue();
     const printer = nodes[node.type];
 
-    if (printer) {
-      return printer(path, opts, print);
+    if (!printer) {
+      throw new Error(`Unsupported node type: ${node.type}`);
     }
 
-    if (node.type[0] === "@") {
-      return (node as any).body;
-    }
-
-    throw new Error(`Unsupported node encountered: ${node.type}`);
+    return printer(path, opts, print);
   },
   // This is the generic print function for any comment in the AST. It handles
   // both regular comments that begin with a # and embdoc comments, which are

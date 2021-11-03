@@ -67,7 +67,7 @@ export const printWord: Plugin.Printer<Ruby.Word> = (path, opts, print) => {
 // Prints out a special array literal. Accepts the parts of the array literal as
 // an argument, where the first element of the parts array is a string that
 // contains the special start.
-function printArrayLiteral(start: string, parts: Plugin.Doc[]) {
+function printArrayLiteralParts(start: string, parts: Plugin.Doc[]) {
   return group([
     start,
     "[",
@@ -77,12 +77,16 @@ function printArrayLiteral(start: string, parts: Plugin.Doc[]) {
   ]);
 }
 
-const arrayLiteralStarts = {
-  qsymbols: "%i",
-  qwords: "%w",
-  symbols: "%I",
-  words: "%W"
-};
+function printArrayLiteral<T>(start: string): Plugin.Printer<T> {
+  return function printArrayLiteralWithStart(path, opts, print) {
+    return printArrayLiteralParts(start, (path as any).map(print, "elems"));
+  }
+}
+
+export const printQsymbols = printArrayLiteral<Ruby.Qsymbols>("%i");
+export const printQwords = printArrayLiteral<Ruby.Qwords>("%w");
+export const printSymbols = printArrayLiteral<Ruby.Symbols>("%I");
+export const printWords = printArrayLiteral<Ruby.Words>("%W");
 
 // An array node is any literal array in Ruby. This includes all of the special
 // array literals as well as regular arrays. If it is a special array literal
@@ -99,18 +103,9 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
   }
 
   // If we don't have a regular args node at this point then we have a special
-  // array literal. In that case we're going to print out the body (which will
-  // return to us an array with the first one being the start of the array) and
-  // send that over to the printArrayLiteral function.
+  // array literal. In that case we're going to print out just the contents.
   if (contents.type !== "args" && contents.type !== "args_add_star") {
-    return path.call(
-      (arrayPath) =>
-        printArrayLiteral(
-          arrayLiteralStarts[contents.type],
-          arrayPath.map(print, "elems")
-        ),
-      "cnts"
-    );
+    return path.call(print, "cnts");
   }
 
   if (opts.rubyArrayLiteral) {
@@ -123,7 +118,7 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
       const nodePath = path as Plugin.Path<{ cnts: { parts: Ruby.StringLiteral[] } }>;
       const parts = nodePath.map(printString, "cnts", "parts");
 
-      return printArrayLiteral("%w", parts);
+      return printArrayLiteralParts("%w", parts);
     }
 
     // If we have an array that contains only simple symbol literals with no
@@ -135,7 +130,7 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
       const nodePath = path as Plugin.Path<{ cnts: { parts: Ruby.SymbolLiteral[] } }>;
       const parts = nodePath.map(printSymbol, "cnts", "parts");
 
-      return printArrayLiteral("%i", parts);
+      return printArrayLiteralParts("%i", parts);
     }
   }
 

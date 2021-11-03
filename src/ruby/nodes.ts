@@ -9,7 +9,7 @@ import {
   printArgsAddStar,
   printBlockArg
 } from "./nodes/args";
-import { printArray, printWord } from "./nodes/arrays";
+import { printArray, printQsymbols, printQwords, printSymbols, printWord, printWords } from "./nodes/arrays";
 import {
   printAssign,
   printOpAssign,
@@ -125,13 +125,55 @@ import {
 import { printSuper, printZSuper } from "./nodes/super";
 import { printUndef } from "./nodes/undef";
 
-const nodes: Partial<{
-  [_T in Ruby.AnyNode["type"] | "@comment"]: Plugin.Printer<any>;
-}> = {
+type Token = (
+  | Ruby.EndContent
+  | Ruby.Backref
+  | Ruby.Backtick
+  | Ruby.Const
+  | Ruby.CVar
+  | Ruby.Float
+  | Ruby.GVar
+  | Ruby.HeredocBegin
+  | Ruby.Identifier
+  | Ruby.Imaginary
+  | Ruby.Int
+  | Ruby.IVar
+  | Ruby.Keyword
+  | Ruby.Label
+  | Ruby.Lbrace
+  | Ruby.Lparen
+  | Ruby.Op
+  | Ruby.Period
+  | Ruby.Rational
+  | Ruby.TStringContent
+);
+
+const printToken: Plugin.Printer<Token> = (path) => path.getValue().body;
+const printVoidStmt: Plugin.Printer<Ruby.VoidStmt> = () => "";
+
+const nodes: Record<Ruby.AnyNode["type"] | "@comment", Plugin.Printer<any>> = {
   "@__end__": printEndContent,
   "@CHAR": printChar,
   "@comment": printComment,
+  "@backref": printToken,
+  "@backtick": printToken,
+  "@const": printToken,
+  "@cvar": printToken,
+  "@float": printToken,
+  "@gvar": printToken,
+  "@heredoc_beg": printToken,
+  "@ident": printToken,
+  "@imaginary": printToken,
   "@int": printInt,
+  "@ivar": printToken,
+  "@kw": printToken,
+  "@label": printToken,
+  "@lbrace": printToken,
+  "@lparen": printToken,
+  "@op": printToken,
+  "@period": printToken,
+  "@rational": printToken,
+  "@tstring_content": printToken,
   access_ctrl: printAccessControl,
   alias: printAlias,
   aref: printAref,
@@ -206,6 +248,8 @@ const nodes: Partial<{
   params: printParams,
   paren: printParen,
   program: printProgram,
+  qwords: printQwords,
+  qsymbols: printQsymbols,
   rassign: printRAssign,
   redo: printRedo,
   regexp_literal: printRegexpLiteral,
@@ -223,6 +267,7 @@ const nodes: Partial<{
   string_embexpr: printStringEmbExpr,
   string_literal: printStringLiteral,
   super: printSuper,
+  symbols: printSymbols,
   symbol_literal: printSymbolLiteral,
   top_const_field: printTopConst,
   top_const_ref: printTopConst,
@@ -236,10 +281,12 @@ const nodes: Partial<{
   var_field: printVarField,
   var_ref: printVarRef,
   vcall: printCallContainer,
+  void_stmt: printVoidStmt,
   when: printWhen,
   while: printWhile,
   while_mod: printWhile,
   word: printWord,
+  words: printWords,
   xstring_literal: printXStringLiteral,
   yield: printYield,
   yield0: printYield0,
