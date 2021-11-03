@@ -194,6 +194,10 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [];
     case "regexp_literal":
       return node.parts;
+    case "rescue":
+      return [node.extn, node.stmts, node.cons];
+    case "rescue_ex":
+      return [node.extns, node.var];
     case "rescue_mod":
       return [node.stmt, node.val];
     case "rest_param":
@@ -311,9 +315,7 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "mrhs_new_from_args":
     case "stmts":
     case "string_literal":
-    case "symbol_literal":
-    case "rescue":
-    case "rescue_ex": {
+    case "symbol_literal": {
       if (Array.isArray(node.body)) {
         return node.body.filter(
           (child: any) => child && typeof child === "object"

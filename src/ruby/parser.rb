@@ -2465,8 +2465,8 @@ class Prettier::Parser < Ripper
           end_char: end_char
         )
 
-      stmts = value[:body][1]
-      consequent = value[:body][2]
+      stmts = value[:stmts]
+      consequent = value[:cons]
 
       if consequent
         consequent.bind_end(end_char)
@@ -2487,13 +2487,14 @@ class Prettier::Parser < Ripper
     stmts.bind(find_next_statement_start(last_node[:loc].end_char), char_pos)
 
     # We add an additional inner node here that ripper doesn't provide so that
-    # we have a nice place to attach inline comment. But we only need it if we
+    # we have a nice place to attach inline comments. But we only need it if we
     # have an exception or a variable that we're rescuing.
     rescue_ex =
       if exceptions || variable
         {
           type: :rescue_ex,
-          body: [exceptions, variable],
+          extns: exceptions,
+          var: variable,
           loc:
             Location.new(
               start_line: beging[:loc].start_line,
@@ -2508,7 +2509,9 @@ class Prettier::Parser < Ripper
       self,
       {
         type: :rescue,
-        body: [rescue_ex, stmts, consequent],
+        extn: rescue_ex,
+        stmts: stmts,
+        cons: consequent,
         loc:
           Location.new(
             start_line: beging[:loc].start_line,
