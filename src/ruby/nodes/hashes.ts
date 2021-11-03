@@ -112,9 +112,7 @@ export const printAssocSplat: Plugin.Printer<Ruby.AssocSplat> = (
   path,
   opts,
   print
-) => (
-  ["**", path.call(print, "value")]
-);
+) => ["**", path.call(print, "value")];
 
 export const printHashContents: Plugin.Printer<HashContents> = (
   path,

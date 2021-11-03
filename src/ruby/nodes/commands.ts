@@ -74,7 +74,9 @@ function skipArgsAlign(node: Ruby.CommandCall) {
 // If there is a ternary argument to a command and it's going to get broken
 // into multiple lines, then we're going to have to use parentheses around the
 // command in order to make sure operator precedence doesn't get messed up.
-function hasTernaryArg(node: Ruby.Args | Ruby.ArgsAddBlock | Ruby.ArgsAddStar): boolean {
+function hasTernaryArg(
+  node: Ruby.Args | Ruby.ArgsAddBlock | Ruby.ArgsAddStar
+): boolean {
   switch (node.type) {
     case "args":
       return node.parts.some((child) => child.type === "ifop");

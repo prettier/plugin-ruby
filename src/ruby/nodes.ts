@@ -9,7 +9,14 @@ import {
   printArgsAddStar,
   printBlockArg
 } from "./nodes/args";
-import { printArray, printQsymbols, printQwords, printSymbols, printWord, printWords } from "./nodes/arrays";
+import {
+  printArray,
+  printQsymbols,
+  printQwords,
+  printSymbols,
+  printWord,
+  printWords
+} from "./nodes/arrays";
 import {
   printAssign,
   printOpAssign,
@@ -53,11 +60,7 @@ import { printHeredoc } from "./nodes/heredocs";
 import { printBEGIN, printEND } from "./nodes/hooks";
 import { printInt } from "./nodes/ints";
 import { printLambda } from "./nodes/lambdas";
-import {
-  printFor,
-  printUntil,
-  printWhile,
-} from "./nodes/loops";
+import { printFor, printUntil, printWhile } from "./nodes/loops";
 import {
   printMAssign,
   printMLHS,
@@ -125,7 +128,7 @@ import {
 import { printSuper, printZSuper } from "./nodes/super";
 import { printUndef } from "./nodes/undef";
 
-type Token = (
+type Token =
   | Ruby.EndContent
   | Ruby.Backref
   | Ruby.Backtick
@@ -145,8 +148,7 @@ type Token = (
   | Ruby.Op
   | Ruby.Period
   | Ruby.Rational
-  | Ruby.TStringContent
-);
+  | Ruby.TStringContent;
 
 const printToken: Plugin.Printer<Token> = (path) => path.getValue().body;
 const printVoidStmt: Plugin.Printer<Ruby.VoidStmt> = () => "";

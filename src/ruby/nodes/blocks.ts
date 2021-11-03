@@ -49,10 +49,15 @@ type Block = Ruby.BraceBlock | Ruby.DoBlock;
 function printBlock(braces: boolean): Plugin.Printer<Block> {
   return function printBlockWithBraces(path, opts, print) {
     const node = path.getValue();
-    const stmts: Ruby.AnyNode[] = node.type === "brace_block" ? node.stmts.body : node.bodystmt.stmts.body;
+    const stmts: Ruby.AnyNode[] =
+      node.type === "brace_block" ? node.stmts.body : node.bodystmt.stmts.body;
 
     let doBlockBody: Plugin.Doc = "";
-    if (stmts.length !== 1 || stmts[0].type !== "void_stmt" || stmts[0].comments) {
+    if (
+      stmts.length !== 1 ||
+      stmts[0].type !== "void_stmt" ||
+      stmts[0].comments
+    ) {
       doBlockBody = indent([
         softline,
         path.call(print, node.type === "brace_block" ? "stmts" : "bodystmt")
@@ -79,7 +84,11 @@ function printBlock(braces: boolean): Plugin.Printer<Block> {
 
     // We can hit this next pattern if within the block the only statement is a
     // comment.
-    if (stmts.length === 1 && stmts[0].type === "void_stmt" && stmts[0].comments) {
+    if (
+      stmts.length === 1 &&
+      stmts[0].type === "void_stmt" &&
+      stmts[0].comments
+    ) {
       return [breakParent, doBlock];
     }
 

@@ -12,7 +12,10 @@ PP.prepend(
         text "C#{obj[:loc].start_char}-#{obj[:loc].end_char}>"
 
         source = obj.respond_to?(:value) ? obj.value : obj
-        sliced = source.select { |key, value| !%i[type loc comments].include?(key) && value }.keys
+        sliced =
+          source.select do |key, value|
+            !%i[type loc comments].include?(key) && value
+          end.keys
 
         group(1) do
           breakable ' '

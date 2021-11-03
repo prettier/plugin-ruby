@@ -19,16 +19,13 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   let parts: Plugin.Doc[] = [];
 
   if (node.reqs) {
-    path.each(
-      (reqPath) => {
-        // For some very strange reason, if you have a comment attached to a
-        // rest_param, it shows up here in the list of required params.
-        if ((reqPath.getValue().type as any) !== "rest_param") {
-          parts.push(print(reqPath));
-        }
-      },
-      "reqs"
-    );
+    path.each((reqPath) => {
+      // For some very strange reason, if you have a comment attached to a
+      // rest_param, it shows up here in the list of required params.
+      if ((reqPath.getValue().type as any) !== "rest_param") {
+        parts.push(print(reqPath));
+      }
+    }, "reqs");
   }
 
   if (node.opts) {
@@ -47,19 +44,16 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
 
   if (node.keywords) {
     parts = parts.concat(
-      path.map(
-        (kwargPath) => {
-          const kwarg = kwargPath.getValue();
-          const keyDoc = kwargPath.call(print, 0);
+      path.map((kwargPath) => {
+        const kwarg = kwargPath.getValue();
+        const keyDoc = kwargPath.call(print, 0);
 
-          if (kwarg[1]) {
-            return group([keyDoc, " ", kwargPath.call(print, 1)]);
-          }
+        if (kwarg[1]) {
+          return group([keyDoc, " ", kwargPath.call(print, 1)]);
+        }
 
-          return keyDoc;
-        },
-        "keywords"
-      )
+        return keyDoc;
+      }, "keywords")
     );
   }
 
@@ -82,7 +76,10 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   // In ruby 2.5, the excessed comma is indicated by having a 0 in the rest
   // param position. In ruby 2.6+ it's indicated by having an "excessed_comma"
   // node in the rest position. Seems odd, but it's true.
-  if ((node.rest as any) === 0 || (node.rest && node.rest.type === "excessed_comma")) {
+  if (
+    (node.rest as any) === 0 ||
+    (node.rest && node.rest.type === "excessed_comma")
+  ) {
     contents.push(",");
   }
 
@@ -118,6 +115,10 @@ export const printArgsForward = literal("...");
 export const printKeywordRestParam = printRestParamSymbol("**");
 export const printRestParam = printRestParamSymbol("*");
 
-export const printExcessedComma: Plugin.Printer<Ruby.ExcessedComma> = (path, opts, print) => {
+export const printExcessedComma: Plugin.Printer<Ruby.ExcessedComma> = (
+  path,
+  opts,
+  print
+) => {
   return path.call(print, "body");
 };

@@ -48,8 +48,8 @@ function printFlowControl(keyword: string): Plugin.Printer<FlowControl> {
 
     // If we didn't hit the super special handling, then we're just going to
     // print out the arguments to the keyword like normal.
-    return [`${keyword} `, join(", ", path.call(print, "args"))]
-  }
+    return [`${keyword} `, join(", ", path.call(print, "args"))];
+  };
 }
 
 export const printBreak = printFlowControl("break");

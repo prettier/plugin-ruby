@@ -19,7 +19,8 @@ export const printDef: Plugin.Printer<Ruby.Def | Ruby.Defs> = (
   }
 
   // In case there are no parens but there are parameters
-  const useParens = node.params.type === "params" && !isEmptyParams(node.params);
+  const useParens =
+    node.params.type === "params" && !isEmptyParams(node.params);
 
   declaration.push(
     path.call(print, "name"),

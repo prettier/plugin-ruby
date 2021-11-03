@@ -80,7 +80,7 @@ function printArrayLiteralParts(start: string, parts: Plugin.Doc[]) {
 function printArrayLiteral<T>(start: string): Plugin.Printer<T> {
   return function printArrayLiteralWithStart(path, opts, print) {
     return printArrayLiteralParts(start, (path as any).map(print, "elems"));
-  }
+  };
 }
 
 export const printQsymbols = printArrayLiteral<Ruby.Qsymbols>("%i");
@@ -115,7 +115,9 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
       const printString = (stringPath: Plugin.Path<Ruby.StringLiteral>) =>
         stringPath.call(print, "parts", 0);
 
-      const nodePath = path as Plugin.Path<{ cnts: { parts: Ruby.StringLiteral[] } }>;
+      const nodePath = path as Plugin.Path<{
+        cnts: { parts: Ruby.StringLiteral[] };
+      }>;
       const parts = nodePath.map(printString, "cnts", "parts");
 
       return printArrayLiteralParts("%w", parts);
@@ -127,7 +129,9 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
       const printSymbol = (symbolPath: Plugin.Path<Ruby.SymbolLiteral>) =>
         symbolPath.call(print, "val");
 
-      const nodePath = path as Plugin.Path<{ cnts: { parts: Ruby.SymbolLiteral[] } }>;
+      const nodePath = path as Plugin.Path<{
+        cnts: { parts: Ruby.SymbolLiteral[] };
+      }>;
       const parts = nodePath.map(printSymbol, "cnts", "parts");
 
       return printArrayLiteralParts("%i", parts);

@@ -229,12 +229,8 @@ class Prettier::Parser < Ripper
   # know if they are "empty", which means not having any parameters declared.
   # This logic accesses every kind of parameter and determines if it's missing.
   def empty_params?(params)
-    params[:reqs].empty? &&
-      params[:opts].empty? &&
-      !params[:rest] &&
-      params[:posts].empty? &&
-      params[:keywords].empty? &&
-      !params[:kwrest] &&
+    params[:reqs].empty? && params[:opts].empty? && !params[:rest] &&
+      params[:posts].empty? && params[:keywords].empty? && !params[:kwrest] &&
       !params[:block]
   end
 
@@ -564,7 +560,11 @@ class Prettier::Parser < Ripper
   # arguments to any method call or an array. It can be followed by any
   # number of args_add events, which we'll append onto an array body.
   def on_args_new
-    { type: :args, parts: [], loc: Location.fixed(line: lineno, char: char_pos) }
+    {
+      type: :args,
+      parts: [],
+      loc: Location.fixed(line: lineno, char: char_pos)
+    }
   end
 
   # Array nodes can contain a myriad of subnodes because of the special
@@ -616,12 +616,7 @@ class Prettier::Parser < Ripper
   # hash. It is a child event of either an assoclist_from_args or a
   # bare_assoc_hash.
   def on_assoc_new(key, value)
-    {
-      type: :assoc_new,
-      key: key,
-      value: value,
-      loc: key[:loc].to(value[:loc])
-    }
+    { type: :assoc_new, key: key, value: value, loc: key[:loc].to(value[:loc]) }
   end
 
   # assoc_splat is a parser event that represents splatting a value into a
@@ -629,11 +624,7 @@ class Prettier::Parser < Ripper
   def on_assoc_splat(value)
     operator = find_scanner_event(:@op, '**')
 
-    {
-      type: :assoc_splat,
-      value: value,
-      loc: operator[:loc].to(value[:loc])
-    }
+    { type: :assoc_splat, value: value, loc: operator[:loc].to(value[:loc]) }
   end
 
   # assoclist_from_args is a parser event that contains a list of all of the
@@ -1995,7 +1986,11 @@ class Prettier::Parser < Ripper
   # side of a multiple assignment. It is followed by any number of mlhs_add
   # nodes that each represent another variable being assigned.
   def on_mlhs_new
-    { type: :mlhs, parts: [], loc: Location.fixed(line: lineno, char: char_pos) }
+    {
+      type: :mlhs,
+      parts: [],
+      loc: Location.fixed(line: lineno, char: char_pos)
+    }
   end
 
   # An mlhs_add is a parser event that represents adding another variable
@@ -2005,7 +2000,11 @@ class Prettier::Parser < Ripper
     if mlhs[:parts].empty?
       { type: :mlhs, parts: [part], loc: part[:loc] }
     else
-      { type: :mlhs, parts: mlhs[:parts] << part, loc: mlhs[:loc].to(part[:loc]) }
+      {
+        type: :mlhs,
+        parts: mlhs[:parts] << part,
+        loc: mlhs[:loc].to(part[:loc])
+      }
     end
   end
 
@@ -2078,7 +2077,11 @@ class Prettier::Parser < Ripper
   # be followed by any number of mrhs_add nodes that we'll build up into an
   # array body.
   def on_mrhs_new
-    { type: :mrhs, parts: [], loc: Location.fixed(line: lineno, char: char_pos) }
+    {
+      type: :mrhs,
+      parts: [],
+      loc: Location.fixed(line: lineno, char: char_pos)
+    }
   end
 
   # An mrhs_add is a parser event that represents adding another value onto
@@ -3245,10 +3248,7 @@ class Prettier::Parser < Ripper
   # block of code. It often will have comments attached to it, so it requires
   # some special handling.
   def on_void_stmt
-    {
-      type: :void_stmt,
-      loc: Location.fixed(line: lineno, char: char_pos)
-    }
+    { type: :void_stmt, loc: Location.fixed(line: lineno, char: char_pos) }
   end
 
   # when is a parser event that represents another clause in a case chain.

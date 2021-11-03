@@ -74,7 +74,9 @@ function stripCommonLeadingWhitespace(content: string) {
 
 // A type assertion so that TypeScript knows we're working with an array of
 // exclusively plain string content.
-function isTStringContentArray(body: Ruby.StringContent[]): body is Ruby.TStringContent[] {
+function isTStringContentArray(
+  body: Ruby.StringContent[]
+): body is Ruby.TStringContent[] {
   return body.every((part) => part.type === "@tstring_content");
 }
 

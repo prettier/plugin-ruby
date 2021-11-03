@@ -48,7 +48,8 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   //
   // In the case we need to group the receiver and the operator together or
   // we'll end up with a syntax error.
-  const operatorIsTrailing = node.message !== "call" && hasLeadingComments(node.message);
+  const operatorIsTrailing =
+    node.message !== "call" && hasLeadingComments(node.message);
 
   if (operatorIsTrailing) {
     leftSideDoc = [receiverDoc, operatorDoc];

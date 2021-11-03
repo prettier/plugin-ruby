@@ -114,7 +114,13 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "defined":
       return [node.value];
     case "defs":
-      return [node.target, node.operator, node.name, node.params, node.bodystmt];
+      return [
+        node.target,
+        node.operator,
+        node.name,
+        node.params,
+        node.bodystmt
+      ];
     case "defsl":
       return [node.name, node.paren, node.stmt];
     case "do_block":
@@ -268,7 +274,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "string_embexpr":
       return [node.stmts];
     case "string_literal":
-      return node.parts;  
+      return node.parts;
     case "super":
       return [node.args];
     case "symbol_literal":

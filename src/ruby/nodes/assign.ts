@@ -14,7 +14,9 @@ export const printAssign: Plugin.Printer<Ruby.Assign> = (path, opts, print) => {
 
   // If the right side of this assignment is a multiple assignment, then we need
   // to join it together with commas.
-  if (["mrhs", "mrhs_add_star", "mrhs_new_from_args"].includes(valueNode.type)) {
+  if (
+    ["mrhs", "mrhs_add_star", "mrhs_new_from_args"].includes(valueNode.type)
+  ) {
     rightSideDoc = group(join([",", line], valueDoc));
   }
 
@@ -29,23 +31,19 @@ export const printOpAssign: Plugin.Printer<Ruby.Opassign> = (
   path,
   opts,
   print
-) => (
+) =>
   group([
     path.call(print, "target"),
     " ",
     path.call(print, "operator"),
     indent([line, path.call(print, "value")])
-  ])
-);
+  ]);
 
 export const printVarField: Plugin.Printer<Ruby.VarField> = (
   path,
   opts,
   print
-) => (
-  path.getValue().value ? path.call(print, "value") : ""
-);
+) => (path.getValue().value ? path.call(print, "value") : "");
 
-export const printVarRef: Plugin.Printer<Ruby.VarRef> = (path, opts, print) => (
-  path.call(print, "value")
-);
+export const printVarRef: Plugin.Printer<Ruby.VarRef> = (path, opts, print) =>
+  path.call(print, "value");

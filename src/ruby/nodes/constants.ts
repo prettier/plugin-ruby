@@ -5,9 +5,17 @@ import { makeCall } from "../../utils";
 const { group, indent, softline } = prettier;
 
 type ConstPath = Ruby.ConstPathField | Ruby.ConstPathRef;
-export const printConstPath: Plugin.Printer<ConstPath> = (path, opts, print) => [path.call(print, "parent"), "::", path.call(print, "constant")];
+export const printConstPath: Plugin.Printer<ConstPath> = (
+  path,
+  opts,
+  print
+) => [path.call(print, "parent"), "::", path.call(print, "constant")];
 
-export const printConstRef: Plugin.Printer<Ruby.ConstRef> = (path, opts, print) => path.call(print, "constant");
+export const printConstRef: Plugin.Printer<Ruby.ConstRef> = (
+  path,
+  opts,
+  print
+) => path.call(print, "constant");
 
 export const printDefined: Plugin.Printer<Ruby.Defined> = (
   path,
@@ -31,4 +39,7 @@ export const printField: Plugin.Printer<Ruby.Field> = (path, opts, print) => {
 };
 
 type TopConst = Ruby.TopConstField | Ruby.TopConstRef;
-export const printTopConst: Plugin.Printer<TopConst> = (path, opts, print) => ["::", path.call(print, "constant")];
+export const printTopConst: Plugin.Printer<TopConst> = (path, opts, print) => [
+  "::",
+  path.call(print, "constant")
+];

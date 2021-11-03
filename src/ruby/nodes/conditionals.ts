@@ -22,7 +22,12 @@ function containsSingleConditional(stmts: Ruby.Stmts) {
   );
 }
 
-function printWithAddition(keyword: string, path: Plugin.Path<Conditional>, print: Plugin.Print, breaking: boolean) {
+function printWithAddition(
+  keyword: string,
+  path: Plugin.Path<Conditional>,
+  print: Plugin.Print,
+  breaking: boolean
+) {
   return [
     `${keyword} `,
     align(keyword.length + 1, path.call(print, "pred")),
@@ -97,14 +102,18 @@ export const printTernary: Plugin.Printer<Ruby.Ternary> = (
   );
 };
 
-function isModifier(node: Conditional | Ruby.IfModifier | Ruby.UnlessModifier): node is Ruby.IfModifier | Ruby.UnlessModifier {
+function isModifier(
+  node: Conditional | Ruby.IfModifier | Ruby.UnlessModifier
+): node is Ruby.IfModifier | Ruby.UnlessModifier {
   return node.type === "if_mod" || node.type === "unless_mod";
 }
 
 // Prints an `if_mod` or `unless_mod` node. Because it was previously in the
 // modifier form, we're guaranteed to not have an additional node, so we can
 // just work with the predicate and the body.
-function printSingle(keyword: string): Plugin.Printer<Conditional | Ruby.IfModifier | Ruby.UnlessModifier> {
+function printSingle(
+  keyword: string
+): Plugin.Printer<Conditional | Ruby.IfModifier | Ruby.UnlessModifier> {
   return function printSingleWithKeyword(path, { rubyModifier }, print) {
     const node = path.getValue();
 
@@ -122,10 +131,7 @@ function printSingle(keyword: string): Plugin.Printer<Conditional | Ruby.IfModif
     // If we do not allow modifier form conditionals or there are comments
     // inside of the body of the conditional, then we must print in the
     // multiline form.
-    if (
-      !rubyModifier ||
-      (!isModifier(node) && node.stmts.body[0].comments)
-    ) {
+    if (!rubyModifier || (!isModifier(node) && node.stmts.body[0].comments)) {
       return [multilineParts, breakParent];
     }
 
@@ -209,7 +215,9 @@ function canTernary(path: Plugin.Path<Conditional>) {
   const node = path.getValue();
 
   return (
-    !["assign", "opassign", "command_call", "command"].includes(node.pred.type) &&
+    !["assign", "opassign", "command_call", "command"].includes(
+      node.pred.type
+    ) &&
     node.cons &&
     node.cons.type === "else" &&
     canTernaryStmts(node.stmts) &&
@@ -266,7 +274,10 @@ function printConditional(keyword: string): Plugin.Printer<Conditional> {
     //
     // 2. If the conditional contains just another conditional, then collapsing
     // it would result in double modifiers on the same line.
-    if (containsAssignment(node.pred) || containsSingleConditional(node.stmts)) {
+    if (
+      containsAssignment(node.pred) ||
+      containsSingleConditional(node.stmts)
+    ) {
       return [
         `${keyword} `,
         align(keyword.length + 1, path.call(print, "pred")),

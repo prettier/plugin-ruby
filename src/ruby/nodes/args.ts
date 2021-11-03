@@ -8,7 +8,9 @@ const { group, ifBreak, indent, join, line, softline } = prettier;
 
 const noTrailingComma = ["command", "command_call"];
 
-function getArgs(node: Ruby.Args | Ruby.ArgsAddBlock | Ruby.ArgsAddStar): Ruby.AnyNode[] {
+function getArgs(
+  node: Ruby.Args | Ruby.ArgsAddBlock | Ruby.ArgsAddStar
+): Ruby.AnyNode[] {
   switch (node.type) {
     case "args":
       return node.parts;
@@ -196,7 +198,7 @@ export const printArgsAddStar: Plugin.Printer<Ruby.ArgsAddStar> = (
     doc = docs[0].concat(["*", docs[1]], docs.slice(2));
   }
 
-  return [...path.call(print, "args") as Plugin.Doc[], doc];
+  return [...(path.call(print, "args") as Plugin.Doc[]), doc];
 };
 
 export const printBlockArg: Plugin.Printer<Ruby.Blockarg> = (

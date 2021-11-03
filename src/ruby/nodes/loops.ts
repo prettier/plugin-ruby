@@ -11,7 +11,9 @@ const { align, breakParent, group, hardline, ifBreak, indent, join, softline } =
 
 type Loop = Ruby.While | Ruby.WhileModifier | Ruby.Until | Ruby.UntilModifier;
 
-function isModifier(node: Loop): node is Ruby.WhileModifier | Ruby.UntilModifier {
+function isModifier(
+  node: Loop
+): node is Ruby.WhileModifier | Ruby.UntilModifier {
   return node.type === "while_mod" || node.type === "until_mod";
 }
 
@@ -23,15 +25,15 @@ function printLoop(keyword: string): Plugin.Printer<Loop> {
     // If the only statement inside this while loop is a void statement, then we
     // can shorten to just displaying the predicate and then a semicolon.
     if (!isModifier(node) && isEmptyStmts(node.stmts)) {
-      return group([
-        group([keyword, " ", predicateDoc]),
-        hardline,
-        "end"
-      ]);
+      return group([group([keyword, " ", predicateDoc]), hardline, "end"]);
     }
 
     const statementDoc = path.call(print, isModifier(node) ? "stmt" : "stmts");
-    const inlineLoop = inlineEnsureParens(path, [statementDoc, ` ${keyword} `, predicateDoc]);
+    const inlineLoop = inlineEnsureParens(path, [
+      statementDoc,
+      ` ${keyword} `,
+      predicateDoc
+    ]);
 
     // If we're in the modifier form and we're modifying a `begin`, then this is
     // a special case where we need to explicitly use the modifier form because
