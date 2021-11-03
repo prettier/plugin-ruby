@@ -9,17 +9,18 @@ export const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (
   opts,
   print
 ) => {
-  const { body, ending } = path.getValue();
+  const node = path.getValue();
 
-  const parts = body.map((part, index) => {
+  // Print out each part of the heredoc to its own doc node.
+  const parts = path.map((partPath) => {
+    const part = partPath.getValue();
+
     if (part.type !== "@tstring_content") {
-      // In this case, the part of the string is an embedded expression
-      return path.call(print, "body", index);
+      return print(partPath);
     }
 
-    // In this case, the part of the string is just regular string content
     return join(literallineWithoutBreakParent, part.body.split(/\r?\n/));
-  });
+  }, "parts");
 
   // We use a literalline break because matching indentation is required
   // for the heredoc contents and ending. If the line suffix contains a
@@ -28,6 +29,6 @@ export const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (
   // possible, so we use a literalline without the break-parent.
   return group([
     path.call(print, "beging"),
-    lineSuffix(group([literallineWithoutBreakParent, ...parts, ending]))
+    lineSuffix(group([literallineWithoutBreakParent, ...parts, node.ending]))
   ]);
 };

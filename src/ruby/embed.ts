@@ -87,10 +87,10 @@ const embed: Plugin.Embed<Ruby.AnyNode> = (path, print, textToDoc) => {
   }
 
   // First, ensure that we don't have any interpolation
-  const { beging, body, ending } = node;
+  const { beging, parts, ending } = node;
   const isSquiggly = beging.body[2] === "~";
 
-  if (!isTStringContentArray(body)) {
+  if (!isTStringContentArray(parts)) {
     return null;
   }
 
@@ -102,7 +102,7 @@ const embed: Plugin.Embed<Ruby.AnyNode> = (path, print, textToDoc) => {
   }
 
   // Get the content as if it were a source string.
-  let content = body.map((part) => part.body).join("");
+  let content = parts.map((part) => part.body).join("");
 
   // If we're using a squiggly heredoc, then we're going to manually strip off
   // the leading whitespace of each line up to the minimum leading whitespace so

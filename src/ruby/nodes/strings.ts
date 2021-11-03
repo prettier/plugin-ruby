@@ -11,7 +11,7 @@ const { group, hardline, indent, literalline, removeLines, softline, join } =
 // would activate the escape sequence, and if they chose double quotes, then
 // single quotes would deactivate it.)
 function isQuoteLocked(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
-  return node.body.some(
+  return node.parts.some(
     (part) =>
       part.type === "@tstring_content" &&
       (part.body.includes("#{") || part.body.includes("\\"))
@@ -21,7 +21,7 @@ function isQuoteLocked(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
 // A string is considered to be able to use single quotes if it contains only
 // plain string content and that content does not contain a single quote.
 function isSingleQuotable(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
-  return node.body.every(
+  return node.parts.every(
     (part) => part.type === "@tstring_content" && !part.body.includes("'")
   );
 }
@@ -102,7 +102,7 @@ const printPercentSDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
       // Here we are printing plain string content.
       parts.push(join(literalline, childNode.body.split("\n")));
     }
-  }, "body");
+  }, "parts");
 
   // Push on the closing character, which is the opposite of the third
   // character from the opening.
@@ -126,7 +126,7 @@ function shouldPrintPercentSDynaSymbol(node: Ruby.DynaSymbol) {
   // get weird, so just bail out and stick to the original bounds in the source.
   const closing = quotePairs[node.quote[2] as Quote];
 
-  return node.body.some(
+  return node.parts.some(
     (child) =>
       child.type === "@tstring_content" &&
       (child.body.includes("\n") ||
@@ -180,7 +180,7 @@ export const printDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
         join(literalline, normalizeQuotes(child.body, quote).split("\n"))
       );
     }
-  }, "body");
+  }, "parts");
 
   parts.push(quote);
 
@@ -241,7 +241,7 @@ export const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (
 
   // If the string is empty, it will not have any parts, so just print out the
   // quotes corresponding to the config
-  if (node.body.length === 0) {
+  if (node.parts.length === 0) {
     return rubySingleQuote ? "''" : '""';
   }
 
@@ -263,7 +263,7 @@ export const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (
 
     // In this case, the part of the string is just regular string content
     return join(literalline, normalizeQuotes(part.body, quote).split("\n"));
-  }, "body");
+  }, "parts");
 
   return [quote, ...parts, getClosingQuote(quote)];
 };
@@ -275,7 +275,7 @@ export const printSymbolLiteral: Plugin.Printer<Ruby.SymbolLiteral> = (
   opts,
   print
 ) => {
-  return [":", path.call(print, "body", 0)];
+  return [":", path.call(print, "val")];
 };
 
 // Prints out an xstring literal. Its child is an array of string parts,

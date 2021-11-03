@@ -3,31 +3,32 @@ import prettier from "../../prettier";
 
 const { addTrailingComment, align, group, join, line } = prettier;
 
-const printUndefSymbol: Plugin.Printer<Ruby.DynaSymbol | Ruby.SymbolLiteral> = (
-  path,
-  opts,
-  print
-) => {
-  const node = path.getValue();
-
-  // Since we're going to descend into the symbol literal to grab out the ident
-  // node, then we need to make sure we copy over any comments as well,
-  // otherwise we could accidentally skip printing them.
-  if (node.comments) {
-    node.comments.forEach((comment) => {
-      addTrailingComment(node.body[0], comment);
-    });
-  }
-
-  return path.call(print, "body", 0);
-};
-
 export const printUndef: Plugin.Printer<Ruby.Undef> = (path, opts, print) => {
-  const keyword = "undef ";
-  const argNodes = path.map(
-    (symbolPath) => printUndefSymbol(symbolPath, opts, print),
+  const symsDocs = path.map(
+    (symbolPath) => {
+      const symbolNode = symbolPath.getValue();
+
+      // If we're not printing a symbol literal then it's a dyna symbol, so
+      // we're just going to print that node on its own.
+      if (symbolNode.type !== "symbol_literal") {
+        return print(symbolPath);
+      }
+
+      // We need to make sure we copy over any comments before we do the
+      // printing so they get printed as well.
+      if (symbolNode.comments) {
+        symbolNode.comments.forEach((comment) => {
+          addTrailingComment(symbolNode.val, comment);
+        });
+      }
+
+      // If we're printing a symbol literal, then we want to descend into it and
+      // just print the underlying contents so that it prints as a bare word.
+      return symbolPath.call(print, "val");
+    },
     "syms"
   );
 
-  return group([keyword, align(keyword.length, join([",", line], argNodes))]);
+  const keyword = "undef ";
+  return group([keyword, align(keyword.length, join([",", line], symsDocs))]);
 };

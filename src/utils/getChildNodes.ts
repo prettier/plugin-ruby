@@ -115,7 +115,7 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "dot3":
       return [node.left, node.right];
     case "dyna_symbol":
-      return node.body;
+      return node.parts;
     case "else":
       return [node.stmts];
     case "elsif":
@@ -142,6 +142,8 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [node.iterator, node.enumerable, node.stmts];
     case "hash":
       return [node.cnts];
+    case "heredoc":
+      return [node.beging, ...node.parts];
     case "hshptn": {
       const childNodes: ChildNode[] = [node.constant];
 
@@ -210,14 +212,20 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
       return [];
     case "sclass":
       return [node.target, node.bodystmt];
+    case "stmts":
+      return node.body;
     case "string_concat":
       return [node.left, node.right];
     case "string_dvar":
       return [node.var];
     case "string_embexpr":
       return [node.stmts];
+    case "string_literal":
+      return node.parts;  
     case "super":
       return [node.args];
+    case "symbol_literal":
+      return [node.val];
     case "symbols":
       return [];
     case "top_const_field":
@@ -267,8 +275,6 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
 
 
 
-    case "heredoc":
-      return [node.beging];
     case "params": {
       const [reqs, optls, rest, post, kwargs, kwargRest, block] = node.body;
       let parts: (Ruby.AnyNode | null)[] = reqs || [];
@@ -312,10 +318,7 @@ function getChildNodes(node: Ruby.AnyNode): ChildNode[] {
     case "method_add_block":
     case "mrhs":
     case "mrhs_add_star":
-    case "mrhs_new_from_args":
-    case "stmts":
-    case "string_literal":
-    case "symbol_literal": {
+    case "mrhs_new_from_args": {
       if (Array.isArray(node.body)) {
         return node.body.filter(
           (child: any) => child && typeof child === "object"

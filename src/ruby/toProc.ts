@@ -81,15 +81,16 @@ function toProc(
   // corresponds to `:if` or `:unless` to avoid problems with callbacks with
   // Rails. For more context, see:
   // https://github.com/prettier/plugin-ruby/issues/449
-  let assocNode = null;
+  let parentNode = null;
 
   if (path.getValue().type === "method_add_block") {
-    assocNode = path.getParentNode();
+    parentNode = path.getParentNode();
   } else {
-    assocNode = path.getParentNode(2);
+    parentNode = path.getParentNode(2);
   }
 
-  if (assocNode && assocNode.type === "assoc_new") {
+  if (parentNode && parentNode.type === "assoc_new") {
+    const assocNode = parentNode as Ruby.AssocNew;
     const key = assocNode.key;
 
     if (key.type === "@label" && ["if:", "unless:"].includes(key.body)) {
@@ -98,7 +99,7 @@ function toProc(
 
     if (
       key.type === "symbol_literal" &&
-      ["if", "unless"].includes(key.body[0].body)
+      ["if", "unless"].includes(key.val.body)
     ) {
       return null;
     }

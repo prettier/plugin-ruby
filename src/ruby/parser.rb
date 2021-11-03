@@ -1258,7 +1258,7 @@ class Prettier::Parser < Ripper
       {
         type: :dyna_symbol,
         quote: beging[:body],
-        body: string[:body],
+        parts: string[:parts],
         loc: beging[:loc].to(ending[:loc])
       }
     else
@@ -1268,7 +1268,7 @@ class Prettier::Parser < Ripper
 
       {
         type: :dyna_symbol,
-        body: string[:body],
+        parts: string[:parts],
         quote: ending[:body][0],
         loc: beging[:loc].to(ending[:loc])
       }
@@ -1588,7 +1588,7 @@ class Prettier::Parser < Ripper
   # tilde. These are considered `heredoc_dedent` nodes, whereas the hyphen
   # heredocs show up as string literals.
   def on_heredoc_dedent(string, _width)
-    @heredocs[-1].merge!(body: string[:body])
+    @heredocs[-1].merge!(parts: string[:parts])
   end
 
   # This is a scanner event that represents the end of the heredoc.
@@ -2723,15 +2723,15 @@ class Prettier::Parser < Ripper
     )
   end
 
-  # string_add is a parser event that represents a piece of a string. It
+  # string_add is a parser event that represents a part of a string. It
   # could be plain @tstring_content, string_embexpr, or string_dvar nodes.
   # It accepts as arguments the parent string node as well as the additional
-  # piece of the string.
-  def on_string_add(string, piece)
+  # part of the string.
+  def on_string_add(string, part)
     {
       type: :string,
-      body: string[:body] << piece,
-      loc: string[:loc].to(piece[:loc])
+      parts: string[:parts] << part,
+      loc: string[:loc].to(part[:loc])
     }
   end
 
@@ -2758,7 +2758,7 @@ class Prettier::Parser < Ripper
   def on_string_content
     {
       type: :string,
-      body: [],
+      parts: [],
       loc: Location.fixed(line: lineno, char: char_pos)
     }
   end
@@ -2793,14 +2793,14 @@ class Prettier::Parser < Ripper
     heredoc = @heredocs[-1]
 
     if heredoc && heredoc[:ending]
-      @heredocs.pop.merge!(body: string[:body])
+      @heredocs.pop.merge!(parts: string[:parts])
     else
       beging = find_scanner_event(:@tstring_beg)
       ending = find_scanner_event(:@tstring_end)
 
       {
         type: :string_literal,
-        body: string[:body],
+        parts: string[:parts],
         quote: beging[:body],
         loc: beging[:loc].to(ending[:loc])
       }
@@ -2833,7 +2833,7 @@ class Prettier::Parser < Ripper
 
   # A symbol is a parser event that immediately descends from a symbol
   # literal and contains an ident representing the contents of the symbol.
-  def on_symbol(ident)
+  def on_symbol(value)
     # When ripper is lexing source text, it turns symbols into keywords if their
     # contents match, which will mess up the location information of all of our
     # other nodes. So for example instead of { type: :@ident, body: "class" }
@@ -2843,7 +2843,7 @@ class Prettier::Parser < Ripper
     # from the stack to make sure it doesn't screw things up.
     scanner_events.pop
 
-    { type: :symbol, body: [ident], loc: ident[:loc] }
+    { type: :symbol, val: value, loc: value[:loc] }
   end
 
   # A symbol_literal represents a symbol in the system with no interpolation
@@ -2852,13 +2852,13 @@ class Prettier::Parser < Ripper
   # using bare words, as in an alias node like alias foo bar).
   def on_symbol_literal(contents)
     if scanner_events[-1] == contents
-      { type: :symbol_literal, body: [contents], loc: contents[:loc] }
+      { type: :symbol_literal, val: contents, loc: contents[:loc] }
     else
       beging = find_scanner_event(:@symbeg)
 
       {
         type: :symbol_literal,
-        body: contents[:body],
+        val: contents[:val],
         loc: beging[:loc].to(contents[:loc])
       }
     end
@@ -3414,7 +3414,7 @@ class Prettier::Parser < Ripper
         type: :heredoc,
         beging: heredoc[:beging],
         ending: heredoc[:ending],
-        body: xstring[:parts],
+        parts: xstring[:parts],
         loc: heredoc[:loc]
       }
     else

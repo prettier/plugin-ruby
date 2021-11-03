@@ -85,14 +85,14 @@ export type Zsuper = ParserEvent0<"zsuper">;
 // These are various parser events that have to do with string or string-like
 // nodes.
 export type StringContent = StringDVar | StringEmbExpr | TStringContent;
-export type DynaSymbol = ParserEvent<"dyna_symbol", { body: StringContent[], quote: string }>;
-export type Heredoc = ParserEvent<"heredoc", { beging: HeredocBegin, ending: string, body: StringContent[] }>;
+export type DynaSymbol = ParserEvent<"dyna_symbol", { parts: StringContent[], quote: string }>;
+export type Heredoc = ParserEvent<"heredoc", { beging: HeredocBegin, ending: string, parts: StringContent[] }>;
 export type RegexpLiteral = ParserEvent<"regexp_literal", { parts: StringContent[], beging: string, ending: string }>;
 export type StringConcat = ParserEvent<"string_concat", { left: StringConcat | StringLiteral, right: StringLiteral }>;
 export type StringDVar = ParserEvent<"string_dvar", { var: Backref | VarRef }>;
 export type StringEmbExpr = ParserEvent<"string_embexpr", { stmts: Stmts }>;
-export type StringLiteral = ParserEvent<"string_literal", { body: StringContent[], quote: string }>;
-export type SymbolLiteral = ParserEvent<"symbol_literal", { body: [Backtick | Const | CVar | GVar | Identifier | IVar | Keyword | Op] }>;
+export type StringLiteral = ParserEvent<"string_literal", { parts: StringContent[], quote: string }>;
+export type SymbolLiteral = ParserEvent<"symbol_literal", { val: Backtick | Const | CVar | GVar | Identifier | IVar | Keyword | Op }>;
 export type XStringLiteral = ParserEvent<"xstring_literal", { parts: StringContent[] }>;
 
 // These are various parser events that have to do with arrays.

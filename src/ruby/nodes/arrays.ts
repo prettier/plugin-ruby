@@ -22,11 +22,11 @@ function isStringArray(args: Ruby.Args | Ruby.ArgsAddStar) {
 
       // If the string has multiple parts (meaning plain string content but also
       // interpolated content) then we know it's not a simple string.
-      if (arg.body.length !== 1) {
+      if (arg.parts.length !== 1) {
         return false;
       }
 
-      const part = arg.body[0];
+      const part = arg.parts[0];
 
       // If the only part of this string is not @tstring_content then it's
       // interpolated, so again we can return false.
@@ -116,7 +116,7 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
     // spaces or interpolation, then we're going to print a %w array.
     if (isStringArray(contents)) {
       const printString = (stringPath: Plugin.Path<Ruby.StringLiteral>) =>
-        stringPath.call(print, "body", 0);
+        stringPath.call(print, "parts", 0);
 
       const nodePath = path as Plugin.Path<{ cnts: { body: Ruby.StringLiteral[] } }>;
       const parts = nodePath.map(printString, "cnts", "body");
@@ -128,7 +128,7 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
     // interpolation, then we're going to print a %i array.
     if (isSymbolArray(contents)) {
       const printSymbol = (symbolPath: Plugin.Path<Ruby.SymbolLiteral>) =>
-        symbolPath.call(print, "body", 0);
+        symbolPath.call(print, "val");
 
       const nodePath = path as Plugin.Path<{ cnts: { body: Ruby.SymbolLiteral[] } }>;
       const parts = nodePath.map(printSymbol, "cnts", "body");
