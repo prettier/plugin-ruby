@@ -243,7 +243,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
   // If there are already parentheses, then we can just use the doc that's
   // already printed.
   if (node.args.type == "arg_paren") {
-    return [methodDoc, argsDoc];
+    return group([methodDoc, argsDoc]);
   }
 
   return [methodDoc, " ", join(", ", argsDoc), " "];
