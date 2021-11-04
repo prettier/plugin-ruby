@@ -58,7 +58,7 @@ class MetadataTest < Minitest::Test
   def test_aref_field
     assert_node_metadata(
       :aref_field,
-      parse('foo[bar] = baz').dig(:body, 0),
+      parse('foo[bar] = baz')[:target],
       start_char: 0,
       end_char: 8
     )
@@ -67,7 +67,7 @@ class MetadataTest < Minitest::Test
   def test_args
     assert_node_metadata(
       :args,
-      parse('foo bar, baz').dig(:body, 1, :body, 0),
+      parse('foo bar, baz').dig(:args, :args),
       start_char: 4,
       end_char: 12
     )
@@ -76,7 +76,7 @@ class MetadataTest < Minitest::Test
   def test_args_add_block
     assert_node_metadata(
       :args_add_block,
-      parse('foo bar, baz').dig(:body, 1),
+      parse('foo bar, baz')[:args],
       start_char: 4,
       end_char: 12
     )
@@ -85,7 +85,7 @@ class MetadataTest < Minitest::Test
   def test_args_add_star
     assert_node_metadata(
       :args_add_star,
-      parse('foo *bar').dig(:body, 1, :body, 0),
+      parse('foo *bar').dig(:args, :args),
       start_char: 4,
       end_char: 8
     )
@@ -102,7 +102,7 @@ class MetadataTest < Minitest::Test
 
     assert_node_metadata(
       :arg_paren,
-      parse(content).dig(:body, 1),
+      parse(content)[:args],
       start_char: 3,
       end_char: 20,
       start_line: 1,
@@ -117,7 +117,7 @@ class MetadataTest < Minitest::Test
   def test_assoc_new
     assert_node_metadata(
       :assoc_new,
-      parse('{ foo: bar, bar: baz }').dig(:body, 0, :body, 0),
+      parse('{ foo: bar, bar: baz }').dig(:cnts, :assocs, 0),
       start_char: 2,
       end_char: 10
     )
@@ -126,7 +126,7 @@ class MetadataTest < Minitest::Test
   def test_assoc_splat
     assert_node_metadata(
       :assoc_splat,
-      parse('foo **bar').dig(:body, 1, :body, 0, :body, 0, :body, 0),
+      parse('foo **bar').dig(:args, :args, :parts, 0, :assocs, 0),
       start_char: 4,
       end_char: 9
     )
@@ -135,7 +135,7 @@ class MetadataTest < Minitest::Test
   def test_assoclist_from_args
     assert_node_metadata(
       :assoclist_from_args,
-      parse('{ foo => bar }').dig(:body, 0),
+      parse('{ foo => bar }')[:cnts],
       start_char: 1,
       end_char: 13
     )
@@ -144,7 +144,7 @@ class MetadataTest < Minitest::Test
   def test_bare_assoc_hash
     assert_node_metadata(
       :bare_assoc_hash,
-      parse('foo(bar: baz)').dig(:body, 1, :body, 0, :body, 0, :body, 0),
+      parse('foo(bar: baz)').dig(:args, :args, :args, :parts, 0),
       start_char: 4,
       end_char: 12
     )
@@ -165,7 +165,7 @@ class MetadataTest < Minitest::Test
   def test_blockarg
     assert_node_metadata(
       :blockarg,
-      parse('def foo(&bar) end').dig(:body, 1, :body, 0, :body, 6),
+      parse('def foo(&bar) end').dig(:params, :cnts, :block),
       start_char: 8,
       end_char: 12
     )
@@ -174,7 +174,7 @@ class MetadataTest < Minitest::Test
   def test_block_var
     assert_node_metadata(
       :block_var,
-      parse('foo { |bar| }').dig(:body, 1, :body, 0),
+      parse('foo { |bar| }').dig(:block, :block_var),
       start_char: 6,
       end_char: 11
     )
@@ -183,7 +183,7 @@ class MetadataTest < Minitest::Test
   def test_bodystmt
     assert_node_metadata(
       :bodystmt,
-      parse('class Foo; def foo; end; end').dig(:body, 2),
+      parse('class Foo; def foo; end; end')[:bodystmt],
       start_char: 9,
       end_char: 25
     )
@@ -192,7 +192,7 @@ class MetadataTest < Minitest::Test
   def test_brace_block
     assert_node_metadata(
       :brace_block,
-      parse('foo { bar }').dig(:body, 1),
+      parse('foo { bar }')[:block],
       start_char: 4,
       end_char: 11
     )
@@ -236,7 +236,7 @@ class MetadataTest < Minitest::Test
   def test_const_ref
     assert_node_metadata(
       :const_ref,
-      parse('class Foo; end').dig(:body, 0),
+      parse('class Foo; end')[:constant],
       start_char: 6,
       end_char: 9
     )
@@ -245,7 +245,7 @@ class MetadataTest < Minitest::Test
   def test_const_path_field
     assert_node_metadata(
       :const_path_field,
-      parse('Foo::Bar = baz').dig(:body, 0),
+      parse('Foo::Bar = baz')[:target],
       start_char: 0,
       end_char: 8
     )
@@ -282,7 +282,7 @@ class MetadataTest < Minitest::Test
   def test_do_block
     assert_node_metadata(
       :do_block,
-      parse('foo do; bar; end').dig(:body, 1),
+      parse('foo do; bar; end')[:block],
       start_char: 4,
       end_char: 16
     )
@@ -311,7 +311,7 @@ class MetadataTest < Minitest::Test
 
     assert_node_metadata(
       :else,
-      parse(content).dig(:body, 2),
+      parse(content)[:cons],
       start_char: 13,
       end_char: 27,
       start_line: 3,
@@ -330,7 +330,7 @@ class MetadataTest < Minitest::Test
 
     assert_node_metadata(
       :elsif,
-      parse(content).dig(:body, 2),
+      parse(content)[:cons],
       start_char: 13,
       end_char: 32,
       start_line: 3,
@@ -349,7 +349,7 @@ class MetadataTest < Minitest::Test
 
     assert_node_metadata(
       :ensure,
-      parse(content).dig(:body, 0, :body, 3),
+      parse(content).dig(:bodystmt, :ens),
       start_char: 12,
       end_char: 28,
       start_line: 3,
@@ -361,7 +361,7 @@ class MetadataTest < Minitest::Test
     def test_excessed_comma
       assert_node_metadata(
         :excessed_comma,
-        parse('foo { |bar,| }').dig(:body, 1, :body, 0, :body, 0, :body, 2),
+        parse('foo { |bar,| }').dig(:block, :block_var, :params, :rest),
         start_char: 10,
         end_char: 11
       )
@@ -371,7 +371,7 @@ class MetadataTest < Minitest::Test
   def test_fcall
     assert_node_metadata(
       :fcall,
-      parse('foo(bar)').dig(:body, 0),
+      parse('foo(bar)')[:call],
       start_char: 0,
       end_char: 3
     )
@@ -380,7 +380,7 @@ class MetadataTest < Minitest::Test
   def test_field
     assert_node_metadata(
       :field,
-      parse('foo.bar = baz').dig(:body, 0),
+      parse('foo.bar = baz')[:target],
       start_char: 0,
       end_char: 7
     )
@@ -422,7 +422,7 @@ class MetadataTest < Minitest::Test
   def test_kwrest_param
     assert_node_metadata(
       :kwrest_param,
-      parse('def foo(**bar); end').dig(:body, 1, :body, 0, :body, 5),
+      parse('def foo(**bar); end').dig(:params, :cnts, :kwrest),
       start_char: 8,
       end_char: 13
     )
@@ -451,7 +451,7 @@ class MetadataTest < Minitest::Test
   def test_mlhs
     assert_node_metadata(
       :mlhs,
-      parse('foo, bar, baz = 1, 2, 3').dig(:body, 0),
+      parse('foo, bar, baz = 1, 2, 3')[:tgt],
       start_char: 0,
       end_char: 13
     )
@@ -460,7 +460,7 @@ class MetadataTest < Minitest::Test
   def test_mlhs_add_post
     assert_node_metadata(
       :mlhs_add_post,
-      parse('foo, *bar, baz = 1, 2, 3').dig(:body, 0),
+      parse('foo, *bar, baz = 1, 2, 3')[:tgt],
       start_char: 5,
       end_char: 14
     )
@@ -469,7 +469,7 @@ class MetadataTest < Minitest::Test
   def test_mlhs_add_star
     assert_node_metadata(
       :mlhs_add_star,
-      parse('foo, *bar = 1, 2, 3').dig(:body, 0),
+      parse('foo, *bar = 1, 2, 3')[:tgt],
       start_char: 5,
       end_char: 9
     )
@@ -478,7 +478,7 @@ class MetadataTest < Minitest::Test
   def test_mlhs_paren
     assert_node_metadata(
       :mlhs_paren,
-      parse('(foo, bar) = baz').dig(:body, 0),
+      parse('(foo, bar) = baz')[:tgt],
       start_char: 0,
       end_char: 10
     )
@@ -495,18 +495,9 @@ class MetadataTest < Minitest::Test
   def test_mrhs_add_star
     assert_node_metadata(
       :mrhs_add_star,
-      parse('foo, bar = *baz').dig(:body, 1),
+      parse('foo, bar = *baz')[:val],
       start_char: 11,
       end_char: 15
-    )
-  end
-
-  def test_mrhs_new_from_args
-    assert_node_metadata(
-      :mrhs_new_from_args,
-      parse('foo, bar, baz = 1, 2, 3').dig(:body, 1),
-      start_char: 16,
-      end_char: 23
     )
   end
 
@@ -528,7 +519,7 @@ class MetadataTest < Minitest::Test
 
     assert_node_metadata(
       :params,
-      parse(content).dig(:body, 1, :body, 0),
+      parse(content).dig(:params, :cnts),
       start_char: 8,
       end_char: 22,
       start_line: 2,
@@ -543,7 +534,7 @@ class MetadataTest < Minitest::Test
   def test_qsymbols
     assert_node_metadata(
       :qsymbols,
-      parse('%i[foo bar baz]').dig(:body, 0),
+      parse('%i[foo bar baz]')[:cnts],
       start_char: 0,
       end_char: 15
     )
@@ -552,7 +543,7 @@ class MetadataTest < Minitest::Test
   def test_qwords
     assert_node_metadata(
       :qwords,
-      parse('%w[foo bar baz]').dig(:body, 0),
+      parse('%w[foo bar baz]')[:cnts],
       start_char: 0,
       end_char: 15
     )
@@ -580,7 +571,7 @@ class MetadataTest < Minitest::Test
   def test_rescue
     assert_node_metadata(
       :rescue,
-      parse('begin; foo; rescue => bar; baz; end').dig(:body, 0, :body, 1),
+      parse('begin; foo; rescue => bar; baz; end').dig(:bodystmt, :rsc),
       start_char: 12,
       end_char: 35
     )
@@ -593,7 +584,7 @@ class MetadataTest < Minitest::Test
   def test_rest_param
     assert_node_metadata(
       :rest_param,
-      parse('def foo(*bar); end').dig(:body, 1, :body, 0, :body, 2),
+      parse('def foo(*bar); end').dig(:params, :cnts, :rest),
       start_char: 8,
       end_char: 12
     )
@@ -629,7 +620,7 @@ class MetadataTest < Minitest::Test
   def test_string_dvar
     assert_node_metadata(
       :string_dvar,
-      parse('"#$foo"').dig(:body, 0),
+      parse('"#$foo"').dig(:parts, 0),
       start_char: 1,
       end_char: 6
     )
@@ -638,7 +629,7 @@ class MetadataTest < Minitest::Test
   def test_string_embexpr
     assert_node_metadata(
       :string_embexpr,
-      parse('"foo #{bar} baz"').dig(:body, 1),
+      parse('"foo #{bar} baz"').dig(:parts, 1),
       start_char: 5,
       end_char: 11
     )
@@ -659,7 +650,7 @@ class MetadataTest < Minitest::Test
   def test_symbols
     assert_node_metadata(
       :symbols,
-      parse('%I[f#{o}o b#{a}r b#{a}z]').dig(:body, 0),
+      parse('%I[f#{o}o b#{a}r b#{a}z]')[:cnts],
       start_char: 0,
       end_char: 24
     )
@@ -668,7 +659,7 @@ class MetadataTest < Minitest::Test
   def test_top_const_field
     assert_node_metadata(
       :top_const_field,
-      parse('::Foo = bar').dig(:body, 0),
+      parse('::Foo = bar')[:target],
       start_char: 0,
       end_char: 5
     )
@@ -726,7 +717,7 @@ class MetadataTest < Minitest::Test
   def test_var_field
     assert_node_metadata(
       :var_field,
-      parse('foo = 1').dig(:body, 0),
+      parse('foo = 1')[:target],
       start_char: 0,
       end_char: 3
     )
@@ -747,7 +738,7 @@ class MetadataTest < Minitest::Test
   def test_when
     assert_node_metadata(
       :when,
-      parse('case foo; when bar; baz; end').dig(:body, 1),
+      parse('case foo; when bar; baz; end')[:cons],
       start_char: 10,
       end_char: 28
     )
@@ -760,7 +751,7 @@ class MetadataTest < Minitest::Test
   def test_words
     assert_node_metadata(
       :words,
-      parse('%W[f#{o}o b#{a}r b#{a}z]').dig(:body, 0),
+      parse('%W[f#{o}o b#{a}r b#{a}z]')[:cnts],
       start_char: 0,
       end_char: 24
     )
@@ -797,7 +788,7 @@ class MetadataTest < Minitest::Test
 
       assert_node_metadata(
         :args_forward,
-        parse(content).dig(:body, 1, :body, 0, :body, 2),
+        parse(content).dig(:params, :cnts, :rest),
         start_char: 8,
         end_char: 11
       )
@@ -813,7 +804,7 @@ class MetadataTest < Minitest::Test
 
       assert_node_metadata(
         :aryptn,
-        parse(content).dig(:body, 1, :body, 0),
+        parse(content).dig(:cons, :pttn),
         start_char: 12,
         end_char: 20,
         start_line: 2,
@@ -831,7 +822,7 @@ class MetadataTest < Minitest::Test
 
       assert_node_metadata(
         :in,
-        parse(content).dig(:body, 1),
+        parse(content)[:cons],
         start_char: 9,
         end_char: 25,
         start_line: 2,
@@ -873,6 +864,6 @@ class MetadataTest < Minitest::Test
   end
 
   def parse(ruby)
-    Prettier::Parser.parse(ruby).dig(:body, 0, :body, 0)
+    Prettier::Parser.parse(ruby).dig(:stmts, :body, 0)
   end
 end
