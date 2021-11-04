@@ -65,7 +65,7 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   if (
     node.receiver.type === "call" &&
     node.receiver.message !== "call" &&
-    node.receiver.message.body === "where" &&
+    node.receiver.message.value === "where" &&
     messageDoc === "not"
   ) {
     // This is very specialized behavior wherein we group .where.not calls
@@ -205,7 +205,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
         sigBlockNode.block &&
         sigBlockNode.call.type === "method_add_arg" &&
         sigBlockNode.call.call.type === "fcall" &&
-        sigBlockNode.call.call.value.body === "sig"
+        sigBlockNode.call.call.value.value === "sig"
       ) {
         threshold = 2;
       }

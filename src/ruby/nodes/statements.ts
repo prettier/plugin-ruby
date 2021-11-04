@@ -82,8 +82,8 @@ export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
 };
 
 export const printEndContent: Plugin.Printer<Ruby.EndContent> = (path) => {
-  const { body } = path.getValue();
-  return [trim, "__END__", literalline, body];
+  const node = path.getValue();
+  return [trim, "__END__", literalline, node.value];
 };
 
 export const printComment: Plugin.Printer<Ruby.Comment> = (path, opts) => {

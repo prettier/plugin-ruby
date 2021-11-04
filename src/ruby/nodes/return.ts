@@ -1,6 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { literal } from "../../utils";
 
 const { group, ifBreak, indent, line, join, softline } = prettier;
 
@@ -108,4 +107,5 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
   ]);
 };
 
-export const printReturn0 = literal("return");
+export const printReturn0: Plugin.Printer<Ruby.Return0> = (path) =>
+  path.getValue().value;

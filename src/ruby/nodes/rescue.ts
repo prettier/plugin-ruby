@@ -1,6 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { literal } from "../../utils";
 
 const { align, group, hardline, indent, join, line } = prettier;
 
@@ -97,5 +96,8 @@ export const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (
   ];
 };
 
-export const printRedo = literal("redo");
-export const printRetry = literal("retry");
+export const printRedo: Plugin.Printer<Ruby.Redo> = (path) =>
+  path.getValue().value;
+
+export const printRetry: Plugin.Printer<Ruby.Retry> = (path) =>
+  path.getValue().value;

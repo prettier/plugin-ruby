@@ -90,7 +90,7 @@ const embed: Plugin.Embed<Ruby.AnyNode> = (path, print, textToDoc) => {
 
   // First, ensure that we don't have any interpolation
   const { beging, parts, ending } = node;
-  const isSquiggly = beging.body[2] === "~";
+  const isSquiggly = beging.value[2] === "~";
 
   if (!isTStringContentArray(parts)) {
     return null;
@@ -98,13 +98,13 @@ const embed: Plugin.Embed<Ruby.AnyNode> = (path, print, textToDoc) => {
 
   // Next, find the parser associated with this heredoc (if there is one). For
   // example, if you use <<~CSS, we'd hook it up to the css parser.
-  const parser = parsers[beging.body.slice(3).toLowerCase()];
+  const parser = parsers[beging.value.slice(3).toLowerCase()];
   if (!parser) {
     return null;
   }
 
   // Get the content as if it were a source string.
-  let content = parts.map((part) => part.body).join("");
+  let content = parts.map((part) => part.value).join("");
 
   // If we're using a squiggly heredoc, then we're going to manually strip off
   // the leading whitespace of each line up to the minimum leading whitespace so

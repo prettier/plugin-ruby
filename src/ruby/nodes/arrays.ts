@@ -38,7 +38,7 @@ function isStringArray(args: Ruby.Args | Ruby.ArgsAddStar) {
       // Finally, verify that the string doesn't contain a space, an escape
       // character, or brackets so that we know it can be put into a string
       // literal array.
-      return !/[\s\\[\]]/.test(part.body);
+      return !/[\s\\[\]]/.test(part.value);
     })
   );
 }

@@ -6,8 +6,8 @@ type Comments = { comments?: Comment[] };
 export type Location = [number, number, number, number];
 
 // These are utility types used to construct the various node types.
-type ScannerEvent<T extends string> = { type: `@${T}`, body: string, loc: Location } & Comments;
-type ParserEvent0<T extends string> = { type: T, body: string, loc: Location } & Comments;
+type ScannerEvent<T extends string> = { type: `@${T}`, value: string, loc: Location } & Comments;
+type ParserEvent0<T extends string> = { type: T, value: string, loc: Location } & Comments;
 type ParserEvent<T, V = Record<string, unknown>> = { type: T, loc: Location } & Comments & V;
 
 // This is the main expression type that goes in places where the AST will

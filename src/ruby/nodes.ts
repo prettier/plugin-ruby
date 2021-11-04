@@ -150,7 +150,7 @@ type Token =
   | Ruby.Rational
   | Ruby.TStringContent;
 
-const printToken: Plugin.Printer<Token> = (path) => path.getValue().body;
+const printToken: Plugin.Printer<Token> = (path) => path.getValue().value;
 const printVoidStmt: Plugin.Printer<Ruby.VoidStmt> = () => "";
 
 const nodes: Record<Ruby.AnyNode["type"] | "@comment", Plugin.Printer<any>> = {

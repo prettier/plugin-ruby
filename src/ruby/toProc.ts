@@ -72,7 +72,7 @@ function toProc(
   // Ensure the call is a method of the block argument
   if (
     call.receiver.type !== "var_ref" ||
-    call.receiver.value.body !== params.reqs[0].body ||
+    call.receiver.value.value !== params.reqs[0].value ||
     !isPeriod(call.operator) ||
     call.message === "call" ||
     call.message.type !== "@ident"
@@ -96,19 +96,19 @@ function toProc(
     const assocNode = parentNode as Ruby.AssocNew;
     const key = assocNode.key;
 
-    if (key.type === "@label" && ["if:", "unless:"].includes(key.body)) {
+    if (key.type === "@label" && ["if:", "unless:"].includes(key.value)) {
       return null;
     }
 
     if (
       key.type === "symbol_literal" &&
-      ["if", "unless"].includes(key.val.body)
+      ["if", "unless"].includes(key.val.value)
     ) {
       return null;
     }
   }
 
-  return `&:${call.message.body}`;
+  return `&:${call.message.value}`;
 }
 
 export default toProc;

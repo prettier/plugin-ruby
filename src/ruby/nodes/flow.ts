@@ -1,6 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { literal } from "../../utils";
 
 const { join } = prettier;
 
@@ -67,4 +66,5 @@ export const printYield: Plugin.Printer<Ruby.Yield> = (path, opts, print) => {
   return ["yield ", join(", ", argsDoc)];
 };
 
-export const printYield0 = literal("yield");
+export const printYield0: Plugin.Printer<Ruby.Yield0> = (path) =>
+  path.getValue().value;

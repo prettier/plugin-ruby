@@ -19,7 +19,7 @@ export const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (
       return print(partPath);
     }
 
-    return join(literallineWithoutBreakParent, part.body.split(/\r?\n/));
+    return join(literallineWithoutBreakParent, part.value.split(/\r?\n/));
   }, "parts");
 
   // We use a literalline break because matching indentation is required

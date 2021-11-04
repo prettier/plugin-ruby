@@ -1,6 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { literal } from "../../utils";
 
 const { group, hardline, join, indent, line, lineSuffix, softline } = prettier;
 
@@ -111,7 +110,8 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   return group(contents);
 };
 
-export const printArgsForward = literal("...");
+export const printArgsForward: Plugin.Printer<Ruby.ArgsForward> = (path) =>
+  path.getValue().value;
 export const printKeywordRestParam = printRestParamSymbol("**");
 export const printRestParam = printRestParamSymbol("*");
 
@@ -120,5 +120,5 @@ export const printExcessedComma: Plugin.Printer<Ruby.ExcessedComma> = (
   opts,
   print
 ) => {
-  return path.call(print, "body");
+  return path.call(print, "value");
 };

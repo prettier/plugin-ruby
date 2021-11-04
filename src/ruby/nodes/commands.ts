@@ -68,7 +68,7 @@ function hasDef(node: Ruby.Command) {
 // In this case the arguments are aligned to the left side as opposed to being
 // aligned with the `receive` call.
 function skipArgsAlign(node: Ruby.CommandCall) {
-  return ["to", "not_to", "to_not"].includes(node.message.body);
+  return ["to", "not_to", "to_not"].includes(node.message.value);
 }
 
 // If there is a ternary argument to a command and it's going to get broken

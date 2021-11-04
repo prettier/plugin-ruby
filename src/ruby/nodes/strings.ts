@@ -14,7 +14,7 @@ function isQuoteLocked(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
   return node.parts.some(
     (part) =>
       part.type === "@tstring_content" &&
-      (part.body.includes("#{") || part.body.includes("\\"))
+      (part.value.includes("#{") || part.value.includes("\\"))
   );
 }
 
@@ -22,7 +22,7 @@ function isQuoteLocked(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
 // plain string content and that content does not contain a single quote.
 function isSingleQuotable(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
   return node.parts.every(
-    (part) => part.type === "@tstring_content" && !part.body.includes("'")
+    (part) => part.type === "@tstring_content" && !part.value.includes("'")
   );
 }
 
@@ -71,14 +71,14 @@ function getClosingQuote(quote: string) {
 // are strings of length 1. If they're any longer than we'll try to apply the
 // correct quotes.
 export const printChar: Plugin.Printer<Ruby.Char> = (path, opts) => {
-  const { body } = path.getValue();
+  const { value } = path.getValue();
 
-  if (body.length !== 2) {
-    return body;
+  if (value.length !== 2) {
+    return value;
   }
 
   const quote = opts.rubySingleQuote ? "'" : '"';
-  return [quote, body.slice(1), quote];
+  return [quote, value.slice(1), quote];
 };
 
 const printPercentSDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
@@ -100,7 +100,7 @@ const printPercentSDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
       parts.push(print(childPath));
     } else {
       // Here we are printing plain string content.
-      parts.push(join(literalline, childNode.body.split("\n")));
+      parts.push(join(literalline, childNode.value.split("\n")));
     }
   }, "parts");
 
@@ -129,10 +129,10 @@ function shouldPrintPercentSDynaSymbol(node: Ruby.DynaSymbol) {
   return node.parts.some(
     (child) =>
       child.type === "@tstring_content" &&
-      (child.body.includes("\n") ||
-        child.body.includes(closing) ||
-        child.body.includes("'") ||
-        child.body.includes('"'))
+      (child.value.includes("\n") ||
+        child.value.includes(closing) ||
+        child.value.includes("'") ||
+        child.value.includes('"'))
   );
 }
 
@@ -177,7 +177,7 @@ export const printDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
       parts.push(print(childPath));
     } else {
       parts.push(
-        join(literalline, normalizeQuotes(child.body, quote).split("\n"))
+        join(literalline, normalizeQuotes(child.value, quote).split("\n"))
       );
     }
   }, "parts");
@@ -266,7 +266,7 @@ export const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (
     }
 
     // In this case, the part of the string is just regular string content
-    return join(literalline, normalizeQuotes(part.body, quote).split("\n"));
+    return join(literalline, normalizeQuotes(part.value, quote).split("\n"));
   }, "parts");
 
   return [quote, ...parts, getClosingQuote(quote)];

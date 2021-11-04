@@ -1,6 +1,5 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { literal } from "../../utils";
 
 const { align, group, join, line } = prettier;
 
@@ -23,4 +22,5 @@ export const printSuper: Plugin.Printer<Ruby.Super> = (path, opts, print) => {
 };
 
 // Version of super without any parens or args.
-export const printZSuper = literal("super");
+export const printZSuper: Plugin.Printer<Ruby.Zsuper> = (path) =>
+  path.getValue().value;

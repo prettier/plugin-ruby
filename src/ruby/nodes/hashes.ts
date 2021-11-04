@@ -27,7 +27,7 @@ type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & {
 // This function represents that check, as it determines if it can convert the
 // symbol node into a hash label.
 function isValidHashLabel(symbolLiteral: Ruby.SymbolLiteral) {
-  const label = symbolLiteral.val.body;
+  const label = symbolLiteral.val.value;
   return label.match(/^[_A-Za-z]/) && !label.endsWith("=");
 }
 
