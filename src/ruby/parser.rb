@@ -55,6 +55,7 @@ class Prettier::Parser < Ripper
     end
   end
 
+  # Represents the location of a node in the tree from the source code.
   class Location
     attr_reader :start_line, :start_char, :end_line, :end_char
 
@@ -89,35 +90,6 @@ class Prettier::Parser < Ripper
 
     def self.fixed(line:, char:)
       new(start_line: line, start_char: char, end_line: line, end_char: char)
-    end
-  end
-
-  # This is a small wrapper around the value of a node for those specific events
-  # that need extra handling. (For example: statement, body statement, and
-  # rescue nodes which all need extra information to determine their character
-  # boundaries.)
-  class Node
-    attr_reader :parser, :value
-
-    def initialize(parser, value)
-      @parser = parser
-      @value = value
-    end
-
-    def [](key)
-      value[key]
-    end
-
-    def dig(*keys)
-      value.dig(*keys)
-    end
-
-    def to_json(*opts)
-      value.to_json(*opts)
-    end
-
-    def pretty_print(q)
-      q.pp_hash(self)
     end
   end
 
@@ -216,6 +188,12 @@ class Prettier::Parser < Ripper
 
   private
 
+  # ----------------------------------------
+  # :section: Helper methods
+  # The following methods are used by the ripper event handlers to either
+  # determine their bounds or query other nodes.
+  # ----------------------------------------
+
   # This represents the current place in the source string that we've gotten to
   # so far. We have a memoized line_counts object that we can use to get the
   # number of characters that we've had to go through to get to the beginning of
@@ -223,15 +201,6 @@ class Prettier::Parser < Ripper
   # through.
   def char_pos
     @line_counts[lineno - 1][column]
-  end
-
-  # Params nodes are the most complicated in the tree. Occasionally you want to
-  # know if they are "empty", which means not having any parameters declared.
-  # This logic accesses every kind of parameter and determines if it's missing.
-  def empty_params?(params)
-    params[:reqs].empty? && params[:opts].empty? && !params[:rest] &&
-      params[:posts].empty? && params[:keywords].empty? && !params[:kwrest] &&
-      !params[:block]
   end
 
   # As we build up a list of scanner events, we'll periodically need to go
@@ -248,9 +217,8 @@ class Prettier::Parser < Ripper
   # their own stack.
   def find_scanner_event(type, value = :any, consume: true)
     index =
-      scanner_events.rindex do |scanner_event|
-        scanner_event[:type] == type &&
-          (value == :any || (scanner_event[:value] == value))
+      scanner_events.rindex do |node|
+        node.is_a?(type) && (value == :any || (node.value == value))
       end
 
     if consume
@@ -276,9 +244,9 @@ class Prettier::Parser < Ripper
   # instance ::X::Y::Z.
   def find_colon2_before(const)
     index =
-      scanner_events.rindex do |event|
-        event[:type] == :@op && event[:value] == '::' &&
-          event[:loc].start_char < const[:loc].start_char
+      scanner_events.rindex do |node|
+        node.is_a?(Op) && node.value == '::' &&
+          node.location.start_char < const.location.start_char
       end
 
     scanner_events[index]
@@ -305,397 +273,1271 @@ class Prettier::Parser < Ripper
     position
   end
 
-  # BEGIN is a parser event that represents the use of the BEGIN keyword, which
-  # hooks into the lifecycle of the interpreter. Whatever is inside the "block"
-  # will get executed when the program starts. The syntax looks like the
-  # following:
+  # ----------------------------------------
+  # :section: Ripper event handlers
+  # The following methods all handle a dispatched ripper event.
+  # ----------------------------------------
+
+  # BEGINBlock represents the use of the +BEGIN+ keyword, which hooks into the
+  # lifecycle of the interpreter. Whatever is inside the block will get executed
+  # when the program starts.
   #
   #     BEGIN {
-  #       # execute stuff here
   #     }
   #
-  def on_BEGIN(stmts)
-    beging = find_scanner_event(:@lbrace)
-    ending = find_scanner_event(:@rbrace)
+  # Interestingly, the BEGIN keyword doesn't allow the do and end keywords for
+  # the block. Only braces are permitted.
+  class BEGINBlock
+    # [LBrace] the left brace that is seen after the keyword
+    attr_reader :lbrace
 
-    stmts.bind(
-      find_next_statement_start(beging[:loc].end_char),
-      ending[:loc].start_char
-    )
+    # [Statements] the expressions to be executed
+    attr_reader :statements
 
-    keyword = find_scanner_event(:@kw, 'BEGIN')
+    # [Location] the location of this node
+    attr_reader :location
 
-    {
-      type: :BEGIN,
-      lbrace: beging,
-      stmts: stmts,
-      loc: keyword[:loc].to(ending[:loc])
-    }
+    def initialize(lbrace:, statements:, location:)
+      @lbrace = lbrace
+      @statements = statements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('BEGIN')
+        q.breakable
+        q.pp(statements)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :BEGIN,
+        lbrace: lbrace,
+        stmts: statements,
+        loc: location
+      }.to_json(*opts)
+    end
   end
 
-  # CHAR is a parser event that represents a single codepoint in the script
-  # encoding. For example:
+  # :call-seq:
+  #   on_BEGIN: (Statements statements) -> BEGINBlock
+  def on_BEGIN(statements)
+    lbrace = find_scanner_event(LBrace)
+    rbrace = find_scanner_event(RBrace)
+
+    statements.bind(
+      find_next_statement_start(lbrace.location.end_char),
+      rbrace.location.start_char
+    )
+
+    keyword = find_scanner_event(Kw, 'BEGIN')
+
+    BEGINBlock.new(
+      lbrace: lbrace,
+      statements: statements,
+      location: keyword.location.to(rbrace.location)
+    )
+  end
+
+  # CHAR irepresents a single codepoint in the script encoding.
   #
   #     ?a
   #
-  # is a representation of the string literal "a". You can use control
-  # characters with this as well, as in ?\C-a.
-  #
+  # In the example above, the CHAR node represents the string literal "a". You
+  # can use control characters with this as well, as in ?\C-a.
+  class CHAR
+    # [String] the value of the character literal
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('CHAR')
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@CHAR, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_CHAR: (String value) -> CHAR
   def on_CHAR(value)
-    node = {
-      type: :@CHAR,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      CHAR.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # END is a parser event that represents the use of the END keyword, which
-  # hooks into the lifecycle of the interpreter. Whatever is inside the "block"
-  # will get executed when the program ends. The syntax looks like the
-  # following:
+  # ENDBlock represents the use of the +END+ keyword, which hooks into the
+  # lifecycle of the interpreter. Whatever is inside the block will get executed
+  # when the program ends.
   #
   #     END {
-  #       # execute stuff here
   #     }
   #
-  def on_END(stmts)
-    beging = find_scanner_event(:@lbrace)
-    ending = find_scanner_event(:@rbrace)
+  # Interestingly, the END keyword doesn't allow the do and end keywords for the
+  # block. Only braces are permitted.
+  class ENDBlock
+    # [LBrace] the left brace that is seen after the keyword
+    attr_reader :lbrace
 
-    stmts.bind(
-      find_next_statement_start(beging[:loc].end_char),
-      ending[:loc].start_char
-    )
+    # [Statements] the expressions to be executed
+    attr_reader :statements
 
-    keyword = find_scanner_event(:@kw, 'END')
+    # [Location] the location of this node
+    attr_reader :location
 
-    {
-      type: :END,
-      lbrace: beging,
-      stmts: stmts,
-      loc: keyword[:loc].to(ending[:loc])
-    }
+    def initialize(lbrace:, statements:, location:)
+      @lbrace = lbrace
+      @statements = statements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('END')
+        q.breakable
+        q.pp(statements)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :END, lbrace: lbrace, stmts: statements, loc: location }.to_json(
+        *opts
+      )
+    end
   end
 
-  # __END__ is a scanner event that represents __END__ syntax, which allows
-  # individual scripts to keep content after the main ruby code that can be read
-  # through the DATA constant. It looks like:
+  # :call-seq:
+  #   on_END: (Statements statements) -> ENDBlock
+  def on_END(statements)
+    lbrace = find_scanner_event(LBrace)
+    rbrace = find_scanner_event(RBrace)
+
+    statements.bind(
+      find_next_statement_start(lbrace.location.end_char),
+      rbrace.location.start_char
+    )
+
+    keyword = find_scanner_event(Kw, 'END')
+
+    ENDBlock.new(
+      lbrace: lbrace,
+      statements: statements,
+      location: keyword.location.to(rbrace.location)
+    )
+  end
+
+  # EndContent represents the use of __END__ syntax, which allows individual
+  # scripts to keep content after the main ruby code that can be read through
+  # the DATA constant.
   #
   #     puts DATA.read
   #
   #     __END__
-  #     some other content that isn't executed by the program
+  #     some other content that is not executed by the program
   #
-  def on___end__(value)
-    @__end__ = {
-      type: :@__end__,
-      value: lines[lineno..-1].join("\n"),
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+  class EndContent
+    # [String] the content after the script
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('__end__')
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@__end__, value: value, loc: location }.to_json(*opts)
+    end
   end
 
-  # alias is a parser event that represents the use of the alias keyword with
-  # regular arguments. This can be either symbol literals or bare words. You can
-  # optionally use parentheses with this keyword, so we either track the
-  # location information based on those or the final argument to the alias
-  # method.
+  # :call-seq:
+  #   on___end__: (String value) -> EndContent
+  def on___end__(value)
+    @__end__ =
+      EndContent.new(
+        value: lines[lineno..-1].join("\n"),
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+  end
+
+  # Alias represents the use of the +alias+ keyword with regular arguments (not
+  # global variables). The +alias+ keyword is used to make a method respond to
+  # another name as well as the current one.
+  #
+  #     alias aliased_name name
+  #
+  # For the example above, in the current context you can now call aliased_name
+  # and it will execute the name method. When you're aliasing two methods, you
+  # can either provide bare words (like the example above) or you can provide
+  # symbols (note that this includes dynamic symbols like
+  # :"left-#{middle}-right").
+  class Alias
+    # [DynaSymbol | SymbolLiteral] the new name of the method
+    attr_reader :left
+
+    # [DynaSymbol | SymbolLiteral] the old name of the method
+    attr_reader :right
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(left:, right:, location:)
+      @left = left
+      @right = right
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('alias')
+        q.breakable
+        q.pp(left)
+        q.breakable
+        q.pp(right)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :alias, left: left, right: right, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_alias: (
+  #     (DynaSymbol | SymbolLiteral) left,
+  #     (DynaSymbol | SymbolLiteral) right
+  #   ) -> Alias
   def on_alias(left, right)
-    beging = find_scanner_event(:@kw, 'alias')
+    keyword = find_scanner_event(Kw, 'alias')
 
-    paren = source[beging[:loc].end_char...left[:loc].start_char].include?('(')
-    ending = paren ? find_scanner_event(:@rparen) : right
-
-    {
-      type: :alias,
+    Alias.new(
       left: left,
       right: right,
-      loc: beging[:loc].to(ending[:loc])
-    }
+      location: keyword.location.to(right.location)
+    )
   end
 
-  # aref is a parser event when you're pulling a value out of a collection at a
+  # ARef represents when you're pulling a value out of a collection at a
   # specific index. Put another way, it's any time you're calling the method
-  # #[]. As an example:
+  # #[].
   #
-  #     foo[index]
+  #     collection[index]
   #
-  # The nodes usually contains two children, the collection and the index.
-  # In some cases, you don't necessarily have the second child node, because
-  # you can call procs with a pretty esoteric syntax. In the following
-  # example, you wouldn't have a second child, and "foo" would be the first
-  # child:
+  # The nodes usually contains two children, the collection and the index. In
+  # some cases, you don't necessarily have the second child node, because you
+  # can call procs with a pretty esoteric syntax. In the following example, you
+  # wouldn't have a second child node:
   #
-  #     foo[]
+  #     collection[]
   #
+  class ARef
+    # [untyped] the value being indexed
+    attr_reader :collection
+
+    # [nil | Args | ArgsAddBlock] the value being passed within the brackets
+    attr_reader :index
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(collection:, index:, location:)
+      @collection = collection
+      @index = index
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('aref')
+        q.breakable
+        q.pp(collection)
+        q.breakable
+        q.pp(index)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :aref,
+        collection: collection,
+        index: index,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_aref: (untyped collection, (nil | Args | ArgsAddBlock) index) -> ARef
   def on_aref(collection, index)
-    find_scanner_event(:@lbracket)
-    ending = find_scanner_event(:@rbracket)
+    find_scanner_event(LBracket)
+    rbracket = find_scanner_event(RBracket)
 
-    {
-      type: :aref,
+    ARef.new(
       collection: collection,
       index: index,
-      loc: collection[:loc].to(ending[:loc])
-    }
+      location: collection.location.to(rbracket.location)
+    )
   end
 
-  # aref_field is a parser event that is very similar to aref except that it
-  # is being used inside of an assignment.
+  # ARefField represents assigning values into collections at specific indices.
+  # Put another way, it's any time you're calling the method #[]=. The
+  # ARefField node itself is just the left side of the assignment, and they're
+  # always wrapped in assign nodes.
+  #
+  #     collection[index] = value
+  #
+  class ARefField
+    # [untyped] the value being indexed
+    attr_reader :collection
+
+    # [nil | ArgsAddBlock] the value being passed within the brackets
+    attr_reader :index
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(collection:, index:, location:)
+      @collection = collection
+      @index = index
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('aref_field')
+        q.breakable
+        q.pp(collection)
+        q.breakable
+        q.pp(index)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :aref_field,
+        collection: collection,
+        index: index,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_aref_field: (
+  #     untyped collection,
+  #     (nil | ArgsAddBlock) index
+  #   ) -> ARefField
   def on_aref_field(collection, index)
-    find_scanner_event(:@lbracket)
-    ending = find_scanner_event(:@rbracket)
+    find_scanner_event(LBracket)
+    rbracket = find_scanner_event(RBracket)
 
-    {
-      type: :aref_field,
+    ARefField.new(
       collection: collection,
       index: index,
-      loc: collection[:loc].to(ending[:loc])
-    }
+      location: collection.location.to(rbracket.location)
+    )
   end
 
-  # arg_ambiguous is a parser event that represents when the parser sees an
-  # argument as ambiguous. For example, in the following snippet:
-  #
-  #     foo //
-  #
-  # the question becomes if the forward slash is being used as a division
-  # operation or if it's the start of a regular expression. We don't need to
-  # track this event in the AST that we're generating, so we're not going to
-  # define an explicit handler for it.
-  #
-  #     def on_arg_ambiguous(value)
-  #       value
-  #     end
+  # def on_arg_ambiguous(value)
+  #   value
+  # end
 
-  # arg_paren is a parser event that represents wrapping arguments to a method
-  # inside a set of parentheses. For example, in the follow snippet:
+  # ArgParen represents wrapping arguments to a method inside a set of
+  # parentheses.
   #
-  #     foo(bar)
+  #     method(argument)
   #
-  # there would be an arg_paren node around the args_add_block node that
-  # represents the set of arguments being sent to the foo method. The args child
-  # node can be nil if no arguments were passed, as in:
+  # In the example above, there would be an ArgParen node around the
+  # ArgsAddBlock node that represents the set of arguments being sent to the
+  # method method. The argument child node can be +nil+ if no arguments were
+  # passed, as in:
   #
-  #     foo()
+  #     method()
   #
-  def on_arg_paren(args)
-    beging = find_scanner_event(:@lparen)
-    rparen = find_scanner_event(:@rparen)
+  class ArgParen
+    # [nil | Args | ArgsAddBlock | ArgsForward] the arguments inside the
+    # parentheses
+    attr_reader :arguments
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(arguments:, location:)
+      @arguments = arguments
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('arg_paren')
+        q.breakable
+        q.pp(arguments)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :arg_paren, args: arguments, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_arg_paren: (
+  #     (nil | Args | ArgsAddBlock | ArgsForward) arguments
+  #   ) -> ArgParen
+  def on_arg_paren(arguments)
+    lparen = find_scanner_event(LParen)
+    rparen = find_scanner_event(RParen)
 
     # If the arguments exceed the ending of the parentheses, then we know we
     # have a heredoc in the arguments, and we need to use the bounds of the
     # arguments to determine how large the arg_paren is.
     ending =
-      (args && args[:loc].end_line > rparen[:loc].end_line) ? args : rparen
+      if arguments && arguments.location.end_line > rparen.location.end_line
+        arguments
+      else
+        rparen
+      end
 
-    { type: :arg_paren, args: args, loc: beging[:loc].to(ending[:loc]) }
+    ArgParen.new(
+      arguments: arguments,
+      location: lparen.location.to(ending.location)
+    )
   end
 
-  # args_add is a parser event that represents a single argument inside a list
-  # of arguments to any method call or an array. It accepts as arguments the
-  # parent args node as well as an arg which can be anything that could be
-  # passed as an argument.
-  def on_args_add(args, arg)
-    if args[:type] == :args_add_star
+  # Args represents a list of arguments being passed to a method call or array
+  # literal.
+  #
+  #     method(first, second, third)
+  #
+  class Args
+    # Array[untyped] the arguments that this node wraps
+    attr_reader :parts
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(parts:, location:)
+      @parts = parts
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('args')
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :args, parts: parts, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_args_add: ((Args | ArgsAddStar) arguments, untyped argument) -> Args
+  def on_args_add(arguments, argument)
+    if arguments.is_a?(ArgsAddStar)
       # If we're adding an argument after a splatted argument, then it's going
       # to come in through this path.
-      { type: :args, parts: [args, arg], loc: args[:loc].to(arg[:loc]) }
-    elsif args[:parts].empty?
+      Args.new(
+        parts: [arguments, argument],
+        location: arguments.location.to(argument.location)
+      )
+    elsif arguments.parts.empty?
       # If this is the first argument being passed into the list of arguments,
       # then we're going to use the bounds of the argument to override the
       # parent node's location since this will be more accurate.
-      { type: :args, parts: [arg], loc: arg[:loc] }
+      Args.new(parts: [argument], location: argument.location)
     else
       # Otherwise we're going to update the existing list with the argument
       # being added as well as the new end bounds.
+      Args.new(
+        parts: arguments.parts << argument,
+        location: arguments.location.to(argument.location)
+      )
+    end
+  end
+
+  # ArgsAddBlock represents a list of arguments and potentially a block
+  # argument. ArgsAddBlock is commonly seen being passed to any method where you
+  # use parentheses (wrapped in an ArgParen node). It’s also used to pass
+  # arguments to the various control-flow keywords like +return+.
+  #
+  #     method(argument, &block)
+  #
+  class ArgsAddBlock
+    # [Args | ArgsAddStar] the arguments before the optional block
+    attr_reader :arguments
+
+    # [nil | untyped] the optional block argument
+    attr_reader :block
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(arguments:, block:, location:)
+      @arguments = arguments
+      @block = block
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('args_add_block')
+        q.breakable
+        q.pp(arguments)
+        q.breakable
+        q.pp(block)
+      end
+    end
+
+    def to_json(*opts)
       {
-        type: args[:type],
-        parts: args[:parts] << arg,
-        loc: args[:loc].to(arg[:loc])
-      }
+        type: :args_add_block,
+        args: arguments,
+        block: block,
+        loc: location
+      }.to_json(*opts)
     end
   end
 
-  # args_add_block is a parser event that represents a list of arguments and
-  # potentially a block argument. If no block is passed, then the second
-  # argument will be the literal false.
-  def on_args_add_block(args, block)
-    ending = block || args
+  # :call-seq:
+  #   on_args_add_block: (
+  #     (Args | ArgsAddStar) arguments,
+  #     (false | untyped) block
+  #   ) -> ArgsAddBlock
+  def on_args_add_block(arguments, block)
+    ending = block || arguments
 
-    {
-      type: :args_add_block,
-      args: args,
+    ArgsAddBlock.new(
+      arguments: arguments,
       block: block || nil,
-      loc: args[:loc].to(ending[:loc])
-    }
+      location: arguments.location.to(ending.location)
+    )
   end
 
-  # args_add_star is a parser event that represents adding a splat of values
-  # to a list of arguments. If accepts as arguments the parent args node as
-  # well as the part that is being splatted.
-  def on_args_add_star(args, star)
-    beging = find_scanner_event(:@op, '*')
-    ending = star || beging
+  # ArgsAddStar represents adding a splat of values to a list of arguments.
+  #
+  #     method(prefix, *arguments, suffix)
+  #
+  class ArgsAddStar
+    # [Args | ArgsAddStar] the arguments before the starred argument
+    attr_reader :arguments
 
-    {
-      type: :args_add_star,
-      args: args,
-      star: star,
-      loc: beging[:loc].to(ending[:loc])
-    }
-  end
+    # [untyped] the expression being starred
+    attr_reader :star
 
-  # args_forward is a parser event that represents forwarding all kinds of
-  # arguments onto another method call.
-  def on_args_forward
-    keyword = find_scanner_event(:@op, '...')
+    # [Location] the location of this node
+    attr_reader :location
 
-    { type: :args_forward, value: keyword[:value], loc: keyword[:loc] }
-  end
+    def initialize(arguments:, star:, location:)
+      @arguments = arguments
+      @star = star
+      @location = location
+    end
 
-  # args_new is a parser event that represents the beginning of a list of
-  # arguments to any method call or an array. It can be followed by any
-  # number of args_add events, which we'll append onto an array body.
-  def on_args_new
-    {
-      type: :args,
-      parts: [],
-      loc: Location.fixed(line: lineno, char: char_pos)
-    }
-  end
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('args_add_star')
+        q.breakable
+        q.pp(arguments)
+        q.breakable
+        q.pp(star)
+      end
+    end
 
-  # Array nodes can contain a myriad of subnodes because of the special
-  # array literal syntax like %w and %i. As a result, we may be looking for
-  # an left bracket, or we may be just looking at the children to get the
-  # bounds.
-  def on_array(contents)
-    if !contents || %i[args args_add_star].include?(contents[:type])
-      beging = find_scanner_event(:@lbracket)
-      ending = find_scanner_event(:@rbracket)
-
-      { type: :array, cnts: contents, loc: beging[:loc].to(ending[:loc]) }
-    else
-      ending = find_scanner_event(:@tstring_end)
-      contents[:loc] = contents[:loc].to(ending[:loc])
-
-      { type: :array, cnts: contents, loc: contents[:loc] }
+    def to_json(*opts)
+      {
+        type: :args_add_star,
+        args: arguments,
+        star: star,
+        loc: location
+      }.to_json(*opts)
     end
   end
 
-  # aryptn is a parser event that represents matching against an array pattern
-  # using the Ruby 2.7+ pattern matching syntax.
-  def on_aryptn(constant, reqs, rest, posts)
-    pieces = [constant, *reqs, rest, *posts].compact
+  # :call-seq:
+  #   on_args_add_star: (
+  #     (Args | ArgsAddStar) arguments,
+  #     untyped star
+  #   ) -> ArgsAddStar
+  def on_args_add_star(arguments, star)
+    beginning = find_scanner_event(Op, '*')
+    ending = star || beginning
 
-    {
-      type: :aryptn,
+    ArgsAddStar.new(
+      arguments: arguments,
+      star: star,
+      location: beginning.location.to(ending.location)
+    )
+  end
+
+  # ArgsForward represents forwarding all kinds of arguments onto another method
+  # call.
+  #
+  #     def request(method, path, **headers, &block); end
+  #
+  #     def get(...)
+  #       request(:GET, ...)
+  #     end
+  #
+  #     def post(...)
+  #       request(:POST, ...)
+  #     end
+  #
+  # In the example above, both the get and post methods are forwarding all of
+  # their arguments (positional, keyword, and block) on to the request method.
+  # The ArgsForward node appears in both the caller (the request method calls)
+  # and the callee (the get and post definitions).
+  class ArgsForward
+    # [String] the value of the operator
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('args_forward')
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :args_forward, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_args_forward: () -> ArgsForward
+  def on_args_forward
+    op = find_scanner_event(Op, '...')
+
+    ArgsForward.new(value: op.value, location: op.location)
+  end
+
+  # :call-seq:
+  #   on_args_new: () -> Args
+  def on_args_new
+    Args.new(parts: [], location: Location.fixed(line: lineno, char: char_pos))
+  end
+
+  # ArrayLiteral represents any form of an array literal, and contains myriad
+  # child nodes because of the special array literal syntax like %w and %i.
+  #
+  #     []
+  #     [one, two, three]
+  #     [*one_two_three]
+  #     %i[one two three]
+  #     %w[one two three]
+  #     %I[one two three]
+  #     %W[one two three]
+  #
+  # Every line in the example above produces an ArrayLiteral node. In order, the
+  # child contents node of this ArrayLiteral node would be nil, Args,
+  # ArgsAddStar, QSymbols, QWords, Symbols, and Words.
+  class ArrayLiteral
+    # [nil | Args | ArgsAddStar | Qsymbols | Qwords | Symbols | Words] the
+    # contents of the array
+    attr_reader :contents
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(contents:, location:)
+      @contents = contents
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('array')
+        q.breakable
+        q.pp(contents)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :array, cnts: contents, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_array: (
+  #     (nil | Args | ArgsAddStar | Qsymbols | Qwords | Symbols | Words)
+  #       contents
+  #   ) -> ArrayLiteral
+  def on_array(contents)
+    if !contents || contents.is_a?(Args) || contents.is_a?(ArgsAddStar)
+      lbracket = find_scanner_event(LBracket)
+      rbracket = find_scanner_event(RBracket)
+
+      ArrayLiteral.new(
+        contents: contents,
+        location: lbracket.location.to(rbracket.location)
+      )
+    else
+      tstring_end = find_scanner_event(TStringEnd)
+      contents =
+        contents.class.new(
+          elements: contents.elements,
+          location: contents.location.to(tstring_end.location)
+        )
+
+      ArrayLiteral.new(contents: contents, location: contents.location)
+    end
+  end
+
+  # AryPtn represents matching against an array pattern using the Ruby 2.7+
+  # pattern matching syntax. It’s one of the more complicated nodes, because
+  # the four parameters that it accepts can almost all be nil.
+  #
+  #     case [1, 2, 3]
+  #     in [Integer, Integer]
+  #       "matched"
+  #     in Container[Integer, Integer]
+  #       "matched"
+  #     in [Integer, *, Integer]
+  #       "matched"
+  #     end
+  #
+  # An AryPtn node is created with four parameters: an optional constant
+  # wrapper, an array of positional matches, an optional splat with identifier,
+  # and an optional array of positional matches that occur after the splat.
+  # All of the in clauses above would create an AryPtn node.
+  class AryPtn
+    # [nil | VarRef] the optional constant wrapper
+    attr_reader :constant
+
+    # [Array[untyped]] the regular positional arguments that this array pattern
+    # is matching against
+    attr_reader :requireds
+
+    # [nil | VarField] the optional starred identifier that grabs up a list of
+    # positional arguments
+    attr_reader :rest
+
+    # [Array[untyped]] the list of positional arguments occurring after the
+    # optional star if there is one
+    attr_reader :posts
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(constant:, requireds:, rest:, posts:, location:)
+      @constant = constant
+      @requireds = requireds
+      @rest = rest
+      @posts = posts
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('aryptn')
+
+        if constant
+          q.breakable
+          q.pp(constant)
+        end
+
+        if requireds.any?
+          q.breakable
+          q.group(2, '(', ')') do
+            q.seplist(requireds) { |required| q.pp(required) }
+          end
+        end
+
+        if rest
+          q.breakable
+          q.pp(rest)
+        end
+
+        if posts.any?
+          q.breakable
+          q.group(2, '(', ')') { q.seplist(posts) { |post| q.pp(post) } }
+        end
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :aryptn,
+        constant: constant,
+        reqs: requireds,
+        rest: rest,
+        posts: posts,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_aryptn: (
+  #     (nil | VarRef) constant,
+  #     (nil | Array[untyped]) requireds,
+  #     (nil | VarField) rest,
+  #     (nil | Array[untyped]) posts
+  #   ) -> AryPtn
+  def on_aryptn(constant, requireds, rest, posts)
+    parts = [constant, *requireds, rest, *posts].compact
+
+    AryPtn.new(
       constant: constant,
-      reqs: reqs || [],
+      requireds: requireds || [],
       rest: rest,
       posts: posts || [],
-      loc: pieces[0][:loc].to(pieces[-1][:loc])
-    }
+      location: parts[0].location.to(parts[-1].location)
+    )
   end
 
-  # assign is a parser event that represents assigning something to a
-  # variable or constant. It accepts as arguments the left side of the
-  # expression before the equals sign and the right side of the expression.
+  # Assign represents assigning something to a variable or constant. Generally,
+  # the left side of the assignment is going to be any node that ends with the
+  # name "Field".
+  #
+  #     variable = value
+  #
+  class Assign
+    # [ArefField | ConstPathField | Field | TopConstField | VarField] the target
+    # to assign the result of the expression to
+    attr_reader :target
+
+    # [untyped] the expression to be assigned
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(target:, value:, location:)
+      @target = target
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('assign')
+        q.breakable
+        q.pp(target)
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :assign, target: target, value: value, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_assign: (
+  #     (ArefField | ConstPathField | Field | TopConstField | VarField) target,
+  #     untyped value
+  #   ) -> Assign
   def on_assign(target, value)
-    {
-      type: :assign,
+    Assign.new(
       target: target,
       value: value,
-      loc: target[:loc].to(value[:loc])
-    }
+      location: target.location.to(value.location)
+    )
   end
 
-  # assoc_new is a parser event that contains a key-value pair within a
-  # hash. It is a child event of either an assoclist_from_args or a
-  # bare_assoc_hash.
+  # AssocNew represents a key-value pair within a hash. It is a child node of
+  # either an AssocListFromArgs or a BareAssocHash.
+  #
+  #     { key1: value1, key2: value2 }
+  #
+  # In the above example, the would be two AssocNew nodes.
+  class AssocNew
+    # [untyped] the key of this pair
+    attr_reader :key
+
+    # [untyped] the value of this pair
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(key:, value:, location:)
+      @key = key
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('assoc_new')
+        q.breakable
+        q.pp(key)
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :assoc_new, key: key, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_assoc_new: (untyped key, untyped value) -> AssocNew
   def on_assoc_new(key, value)
-    { type: :assoc_new, key: key, value: value, loc: key[:loc].to(value[:loc]) }
+    AssocNew.new(
+      key: key,
+      value: value,
+      location: key.location.to(value.location)
+    )
   end
 
-  # assoc_splat is a parser event that represents splatting a value into a
-  # hash (either a hash literal or a bare hash in a method call).
+  # AssocSplat represents double-splatting a value into a hash (either a hash
+  # literal or a bare hash in a method call).
+  #
+  #     { **pairs }
+  #
+  class AssocSplat
+    # [untyped] the expression that is being splatted
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('assoc_splat')
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :assoc_splat, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_assoc_splat: (untyped value) -> AssocSplat
   def on_assoc_splat(value)
-    operator = find_scanner_event(:@op, '**')
+    operator = find_scanner_event(Op, '**')
 
-    { type: :assoc_splat, value: value, loc: operator[:loc].to(value[:loc]) }
+    AssocSplat.new(value: value, location: operator.location.to(value.location))
   end
 
-  # assoclist_from_args is a parser event that contains a list of all of the
-  # associations inside of a hash literal. Its parent node is always a hash.
-  # It accepts as an argument an array of assoc events (either assoc_new or
-  # assoc_splat).
+  # AssocListFromArgs represents the key-value pairs of a hash literal. Its
+  # parent node is always a hash.
+  #
+  #     { key1: value1, key2: value2 }
+  #
+  class AssocListFromArgs
+    # [Array[AssocNew | AssocSplat]]
+    attr_reader :assocs
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(assocs:, location:)
+      @assocs = assocs
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('assoclist_from_args')
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(assocs) { |assoc| q.pp(assoc) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :assoclist_from_args, assocs: assocs, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_assoclist_from_args: (
+  #     Array[AssocNew | AssocSplat] assocs
+  #   ) -> AssocListFromArgs
   def on_assoclist_from_args(assocs)
-    {
-      type: :assoclist_from_args,
+    AssocListFromArgs.new(
       assocs: assocs,
-      loc: assocs[0][:loc].to(assocs[-1][:loc])
-    }
+      location: assocs[0].location.to(assocs[-1].location)
+    )
   end
 
-  # backref is a scanner event that represents a global variable referencing a
-  # matched value. It comes in the form of a $ followed by a positive integer.
+  # Backref represents a global variable referencing a matched value. It comes
+  # in the form of a $ followed by a positive integer.
+  #
+  #     $1
+  #
+  class Backref
+    # [String] the name of the global backreference variable
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('backref')
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@backref, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_backref: (String value) -> Backref
   def on_backref(value)
-    node = {
-      type: :@backref,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      Backref.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # backtick is a scanner event that represents the use of the ` operator. It's
-  # usually found being used for an xstring, but could also be found as the name
-  # of a method being defined.
+  # Backtick represents the use of the ` operator. It's usually found being used
+  # for an XStringLiteral, but could also be found as the name of a method being
+  # defined.
+  class Backtick
+    # [String] the backtick in the string
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('backtick')
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@backtick, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_backtick: (String value) -> Backtick
   def on_backtick(value)
-    node = {
-      type: :@backtick,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      Backtick.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # bare_assoc_hash is a parser event that represents a hash of contents
-  # being passed as a method argument (and therefore has omitted braces). It
-  # accepts as an argument an array of assoc events (either assoc_new or
-  # assoc_splat).
-  def on_bare_assoc_hash(assocs)
-    {
-      type: :bare_assoc_hash,
-      assocs: assocs,
-      loc: assocs[0][:loc].to(assocs[-1][:loc])
-    }
+  # BareAssocHash represents a hash of contents being passed as a method
+  # argument (and therefore has omitted braces). It's very similar to an
+  # AssocListFromArgs node.
+  #
+  #     method(key1: value1, key2: value2)
+  #
+  class BareAssocHash
+    # [Array[AssocNew | AssocSplat]]
+    attr_reader :assocs
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(assocs:, location:)
+      @assocs = assocs
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('bare_assoc_hash')
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(assocs) { |assoc| q.pp(assoc) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :bare_assoc_hash, assocs: assocs, loc: location }.to_json(*opts)
+    end
   end
 
-  # begin is a parser event that represents the beginning of a begin..end chain.
-  # It includes a bodystmt event that has all of the consequent clauses.
+  # :call-seq:
+  #   on_bare_assoc_hash: (Array[AssocNew | AssocSplat] assocs) -> BareAssocHash
+  def on_bare_assoc_hash(assocs)
+    BareAssocHash.new(
+      assocs: assocs,
+      location: assocs[0].location.to(assocs[-1].location)
+    )
+  end
+
+  # Begin represents a begin..end chain.
+  #
+  #     begin
+  #       value
+  #     end
+  #
+  class Begin
+    # [BodyStmt] the bodystmt that contains the contents of this begin block
+    attr_reader :bodystmt
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(bodystmt:, location:)
+      @bodystmt = bodystmt
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('begin')
+        q.breakable
+        q.pp(bodystmt)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :begin, bodystmt: bodystmt, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_begin: (BodyStmt bodystmt) -> Begin
   def on_begin(bodystmt)
-    beging = find_scanner_event(:@kw, 'begin')
+    keyword = find_scanner_event(Kw, 'begin')
     end_char =
-      if bodystmt[:rsc] || bodystmt[:ens] || bodystmt[:els]
-        bodystmt[:loc].end_char
+      if bodystmt.rescue_clause || bodystmt.ensure_clause ||
+           bodystmt.else_clause
+        bodystmt.location.end_char
       else
-        find_scanner_event(:@kw, 'end')[:loc].end_char
+        find_scanner_event(Kw, 'end').location.end_char
       end
 
-    bodystmt.bind(beging[:loc].end_char, end_char)
+    bodystmt.bind(keyword.location.end_char, end_char)
 
-    { type: :begin, bodystmt: bodystmt, loc: beging[:loc].to(bodystmt[:loc]) }
+    Begin.new(
+      bodystmt: bodystmt,
+      location: keyword.location.to(bodystmt.location)
+    )
   end
 
-  # binary is a parser event that represents a binary operation between two
-  # values.
+  # Binary represents any expression that involves two sub-expressions with an
+  # operator in between. This can be something that looks like a mathematical
+  # operation:
+  #
+  #     1 + 1
+  #
+  # but can also be something like pushing a value onto an array:
+  #
+  #     array << value
+  #
+  class Binary
+    # [untyped] the left-hand side of the expression
+    attr_reader :left
+
+    # [String] the operator used between the two expressions
+    attr_reader :operator
+
+    # [untyped] the right-hand side of the expression
+    attr_reader :right
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(left:, operator:, right:, location:)
+      @left = left
+      @operator = operator
+      @right = right
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('binary')
+        q.breakable
+        q.pp(left)
+        q.breakable
+        q.text(operator)
+        q.breakable
+        q.pp(right)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :binary,
+        left: left,
+        operator: operator,
+        right: right,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_binary: (untyped left, (Op | Symbol) operator, untyped right) -> Binary
   def on_binary(left, operator, right)
     # On most Ruby implementations, operator is a Symbol that represents that
     # operation being performed. For instance in the example `1 < 2`, the
@@ -703,149 +1545,410 @@ class Prettier::Parser < Ripper
     # so here we're going to explicitly convert it into the same normalized
     # form.
     unless operator.is_a?(Symbol)
-      operator = scanner_events.delete(operator)[:value]
+      operator = scanner_events.delete(operator).value
     end
 
-    {
-      type: :binary,
+    Binary.new(
       left: left,
       operator: operator,
       right: right,
-      loc: left[:loc].to(right[:loc])
-    }
+      location: left.location.to(right.location)
+    )
   end
 
-  # block_var is a parser event that represents the parameters being passed to
-  # block. Effectively they're everything contained within the pipes.
+  # BlockVar represents the parameters being declared for a block. Effectively
+  # this node is everything contained within the pipes. This includes all of the
+  # various parameter types, as well as block-local variable declarations.
+  #
+  #     method do |positional, optional = value, keyword:, &block; local|
+  #     end
+  #
+  class BlockVar
+    # [Params] the parameters being declared with the block
+    attr_reader :params
+
+    # [Array[Ident]] the list of block-local variable declarations
+    attr_reader :locals
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(params:, locals:, location:)
+      @params = params
+      @locals = locals
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('block_var')
+        q.breakable
+        q.pp(params)
+
+        if locals.any?
+          q.breakable
+          q.group(2, '(', ')') { q.seplist(locals) { |local| q.pp(local) } }
+        end
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :block_var,
+        params: params,
+        locals: locals,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_block_var: (Params params, (nil | Array[Ident]) locals) -> BlockVar
   def on_block_var(params, locals)
     index =
-      scanner_events.rindex do |event|
-        event[:type] == :@op && %w[| ||].include?(event[:value]) &&
-          event[:loc].start_char < params[:loc].start_char
+      scanner_events.rindex do |node|
+        node.is_a?(Op) && %w[| ||].include?(node.value) &&
+          node.location.start_char < params.location.start_char
       end
 
-    beging = scanner_events[index]
+    beginning = scanner_events[index]
     ending = scanner_events[-1]
 
-    {
-      type: :block_var,
+    BlockVar.new(
       params: params,
       locals: locals || [],
-      loc: beging[:loc].to(ending[:loc])
-    }
+      location: beginning.location.to(ending.location)
+    )
   end
 
-  # blockarg is a parser event that represents defining a block variable on
-  # a method definition.
-  def on_blockarg(name)
-    operator = find_scanner_event(:@op, '&')
+  # BlockArg represents declaring a block parameter on a method definition.
+  #
+  #     def method(&block); end
+  #
+  class BlockArg
+    # [Ident] the name of the block argument
+    attr_reader :name
 
-    { type: :blockarg, name: name, loc: operator[:loc].to(name[:loc]) }
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(name:, location:)
+      @name = name
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('blockarg')
+        q.breakable
+        q.pp(name)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :blockarg, name: name, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_blockarg: (Ident name) -> BlockArg
+  def on_blockarg(name)
+    operator = find_scanner_event(Op, '&')
+
+    BlockArg.new(name: name, location: operator.location.to(name.location))
   end
 
   # bodystmt can't actually determine its bounds appropriately because it
   # doesn't necessarily know where it started. So the parent node needs to
   # report back down into this one where it goes.
-  class BodyStmt < Node
+  class BodyStmt
+    # [Statements] the list of statements inside the begin clause
+    attr_reader :statements
+
+    # [nil | Rescue] the optional rescue chain attached to the begin clause
+    attr_reader :rescue_clause
+
+    # [nil | Statements] the optional set of statements inside the else clause
+    attr_reader :else_clause
+
+    # [nil | Ensure] the optional ensure clause
+    attr_reader :ensure_clause
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(
+      statements:,
+      rescue_clause:,
+      else_clause:,
+      ensure_clause:,
+      location:
+    )
+      @statements = statements
+      @rescue_clause = rescue_clause
+      @else_clause = else_clause
+      @ensure_clause = ensure_clause
+      @location = location
+    end
+
     def bind(start_char, end_char)
-      value[:loc] =
+      @location =
         Location.new(
-          start_line: value[:loc].start_line,
+          start_line: location.start_line,
           start_char: start_char,
-          end_line: value[:loc].end_line,
+          end_line: location.end_line,
           end_char: end_char
         )
 
-      parts = [value[:rsc], value[:ens], value[:els]]
+      parts = [rescue_clause, else_clause, ensure_clause]
 
-      # Here we're going to determine the bounds for the stmts
-      consequent = parts[1..-1].compact.first
-      value[:stmts].bind(
+      # Here we're going to determine the bounds for the statements
+      consequent = parts.compact.first
+      statements.bind(
         start_char,
-        consequent ? consequent[:loc].start_char : end_char
+        consequent ? consequent.location.start_char : end_char
       )
 
       # Next we're going to determine the rescue clause if there is one
-      if value[:rsc]
+      if rescue_clause
         consequent = parts.drop(1).compact.first
-        value[:rsc].bind_end(
-          consequent ? consequent[:loc].start_char : end_char
+        rescue_clause.bind_end(
+          consequent ? consequent.location.start_char : end_char
         )
       end
     end
-  end
 
-  # bodystmt is a parser event that represents all of the possible combinations
-  # of clauses within the body of a method or block.
-  def on_bodystmt(stmts, rescued, elsed, ensured)
-    BodyStmt.new(
-      self,
-      type: :bodystmt,
-      stmts: stmts,
-      rsc: rescued,
-      els: elsed,
-      ens: ensured,
-      loc: Location.fixed(line: lineno, char: char_pos)
-    )
-  end
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('bodystmt')
+        q.breakable
+        q.pp(statements)
 
-  # brace_block is a parser event that represents passing a block to a
-  # method call using the {..} operators. It accepts as arguments an
-  # optional block_var event that represents any parameters to the block as
-  # well as a stmts event that represents the statements inside the block.
-  def on_brace_block(block_var, stmts)
-    beging = find_scanner_event(:@lbrace)
-    ending = find_scanner_event(:@rbrace)
+        if rescue_clause
+          q.breakable
+          q.pp(rescue_clause)
+        end
 
-    stmts.bind(
-      find_next_statement_start((block_var || beging)[:loc].end_char),
-      ending[:loc].start_char
-    )
+        if else_clause
+          q.breakable
+          q.pp(else_clause)
+        end
 
-    {
-      type: :brace_block,
-      lbrace: beging,
-      block_var: block_var,
-      stmts: stmts,
-      loc:
-        Location.new(
-          start_line: beging[:loc].start_line,
-          start_char: beging[:loc].start_char,
-          end_line: [ending[:loc].end_line, stmts[:loc].end_line].max,
-          end_char: ending[:loc].end_char
-        )
-    }
-  end
-
-  # break is a parser event that represents using the break keyword. It
-  # accepts as an argument an args or args_add_block event that contains all
-  # of the arguments being passed to the break.
-  def on_break(args)
-    keyword = find_scanner_event(:@kw, 'break')
-    location =
-      if args[:type] == :args
-        # You can hit this if you are passing no arguments to break but it has a
-        # comment right after it. In that case we can just use the location
-        # information straight from the keyword.
-        keyword[:loc]
-      else
-        keyword[:loc].to(args[:loc])
+        if ensure_clause
+          q.breakable
+          q.pp(ensure_clause)
+        end
       end
+    end
 
-    { type: :break, args: args, loc: location }
+    def to_json(*opts)
+      {
+        type: :bodystmt,
+        stmts: statements,
+        rsc: rescue_clause,
+        els: else_clause,
+        ens: ensure_clause,
+        loc: location
+      }.to_json(*opts)
+    end
   end
 
-  # call is a parser event representing a method call with no arguments. It
-  # accepts as arguments the receiver of the method, the operator being used
-  # to send the method (., ::, or &.), and the value that is being sent to
-  # the receiver (which can be another nested call as well).
+  # :call-seq:
+  #   on_bodystmt: (
+  #     Statements statements,
+  #     (nil | Rescue) rescue_clause,
+  #     (nil | Statements) else_clause,
+  #     (nil | Ensure) ensure_clause
+  #   ) -> BodyStmt
+  def on_bodystmt(statements, rescue_clause, else_clause, ensure_clause)
+    BodyStmt.new(
+      statements: statements,
+      rescue_clause: rescue_clause,
+      else_clause: else_clause,
+      ensure_clause: ensure_clause,
+      location: Location.fixed(line: lineno, char: char_pos)
+    )
+  end
+
+  # BraceBlock represents passing a block to a method call using the { }
+  # operators.
   #
-  # There is one esoteric syntax that comes into play here as well. If the
-  # message argument to this method is the symbol :call, then it represents
-  # calling a lambda in a very odd looking way, as in:
+  #     method { |variable| variable + 1 }
   #
-  #     foo.(1, 2, 3)
+  class BraceBlock
+    # [LBrace] the left brace that opens this block
+    attr_reader :lbrace
+
+    # [nil | BlockVar] the optional set of parameters to the block
+    attr_reader :block_var
+
+    # [Statements] the list of expressions to evaluate within the block
+    attr_reader :statements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(lbrace:, block_var:, statements:, location:)
+      @lbrace = lbrace
+      @block_var = block_var
+      @statements = statements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('brace_block')
+
+        if block_var
+          q.breakable
+          q.pp(block_var)
+        end
+
+        q.breakable
+        q.pp(statements)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :brace_block,
+        lbrace: lbrace,
+        block_var: block_var,
+        stmts: statements,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_brace_block: (
+  #     (nil | BlockVar) block_var,
+  #     Statements statements
+  #   ) -> BraceBlock
+  def on_brace_block(block_var, statements)
+    lbrace = find_scanner_event(LBrace)
+    rbrace = find_scanner_event(RBrace)
+
+    statements.bind(
+      find_next_statement_start((block_var || lbrace).location.end_char),
+      rbrace.location.start_char
+    )
+
+    location =
+      Location.new(
+        start_line: lbrace.location.start_line,
+        start_char: lbrace.location.start_char,
+        end_line: [rbrace.location.end_line, statements.location.end_line].max,
+        end_char: rbrace.location.end_char
+      )
+
+    BraceBlock.new(
+      lbrace: lbrace,
+      block_var: block_var,
+      statements: statements,
+      location: location
+    )
+  end
+
+  # Break represents using the +break+ keyword.
   #
+  #     break
+  #
+  # It can also optionally accept arguments, as in:
+  #
+  #     break 1
+  #
+  class Break
+    # [Args | ArgsAddBlock] the arguments being sent to the keyword
+    attr_reader :arguments
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(arguments:, location:)
+      @arguments = arguments
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('break')
+        q.breakable
+        q.pp(arguments)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :break, args: arguments, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_break: ((Args | ArgsAddBlock) arguments) -> Break
+  def on_break(arguments)
+    keyword = find_scanner_event(Kw, 'break')
+
+    location = keyword.location
+    location = location.to(arguments.location) unless arguments.is_a?(Args)
+
+    Break.new(arguments: arguments, location: location)
+  end
+
+  # Call represents a method call. This node doesn't contain the arguments being
+  # passed (if arguments are passed, this node will get nested under a
+  # MethodAddArg node).
+  #
+  #     receiver.message
+  #
+  class Call
+    # [untyped] the receiver of the method call
+    attr_reader :receiver
+
+    # [:"::" | Op | Period] the operator being used to send the message
+    attr_reader :operator
+
+    # [:call | Backtick | Const | Ident | Op] the message being sent
+    attr_reader :message
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(receiver:, operator:, message:, location:)
+      @receiver = receiver
+      @operator = operator
+      @message = message
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('call')
+        q.breakable
+        q.pp(receiver)
+        q.breakable
+        q.pp(operator)
+        q.breakable
+        q.pp(message)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :call,
+        receiver: receiver,
+        operator: operator,
+        message: message,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_call: (
+  #     untyped receiver,
+  #     (:"::" | Op | Period) operator,
+  #     (:call | Backtick | Const | Ident | Op) message
+  #   ) -> Call
   def on_call(receiver, operator, message)
     ending = message
 
@@ -857,219 +1960,823 @@ class Prettier::Parser < Ripper
       ending = receiver if RUBY_MAJOR <= 2 && RUBY_MINOR <= 5
     end
 
-    {
-      type: :call,
+    Call.new(
       receiver: receiver,
       operator: operator,
       message: message,
-      loc:
+      location:
         Location.new(
-          start_line: receiver[:loc].start_line,
-          start_char: receiver[:loc].start_char,
-          end_line: [ending[:loc].end_line, receiver[:loc].end_line].max,
-          end_char: ending[:loc].end_char
+          start_line: receiver.location.start_line,
+          start_char: receiver.location.start_char,
+          end_line: [ending.location.end_line, receiver.location.end_line].max,
+          end_char: ending.location.end_char
         )
-    }
+    )
   end
 
-  # case is a parser event that represents the beginning of a case chain.
-  # It accepts as arguments the switch of the case and the consequent
-  # clause.
-  def on_case(value, consequent)
-    if keyword = find_scanner_event(:@kw, 'case', consume: false)
-      scanner_events.delete(keyword)
+  # Case represents the beginning of a case chain.
+  #
+  #     case value
+  #     when 1
+  #       "one"
+  #     when 2
+  #       "two"
+  #     else
+  #       "number"
+  #     end
+  #
+  class Case
+    # [nil | untyped] optional value being switched on
+    attr_reader :value
 
-      {
-        type: :case,
-        value: value,
-        cons: consequent,
-        loc: keyword[:loc].to(consequent[:loc])
-      }
-    else
-      operator =
-        find_scanner_event(:@kw, 'in', consume: false) ||
-          find_scanner_event(:@op, '=>')
+    # [In | When] the next clause in the chain
+    attr_reader :consequent
 
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, consequent:, location:)
+      @value = value
+      @consequent = consequent
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('case')
+
+        if value
+          q.breakable
+          q.pp(value)
+        end
+
+        q.breakable
+        q.pp(consequent)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :case, value: value, cons: consequent, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # RAssign represents a single-line pattern match.
+  #
+  #     value in pattern
+  #     value => pattern
+  #
+  class RAssign
+    # [untyped] the left-hand expression
+    attr_reader :value
+
+    # [Kw | Op] the operator being used to match against the pattern, which is
+    # either => or in
+    attr_reader :operator
+
+    # [untyped] the pattern on the right-hand side of the expression
+    attr_reader :pattern
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, operator:, pattern:, location:)
+      @value = value
+      @operator = operator
+      @pattern = pattern
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('rassign')
+
+        q.breakable
+        q.pp(value)
+
+        q.breakable
+        q.pp(operator)
+
+        q.breakable
+        q.pp(pattern)
+      end
+    end
+
+    def to_json(*opts)
       {
         type: :rassign,
         value: value,
         operator: operator,
-        pattern: consequent,
-        loc: value[:loc].to(consequent[:loc])
-      }
+        pattern: pattern,
+        loc: location
+      }.to_json(*opts)
     end
   end
 
-  # class is a parser event that represents defining a class. It accepts as
-  # arguments the name of the class, the optional name of the superclass,
-  # and the bodystmt event that represents the statements evaluated within
-  # the context of the class.
+  # :call-seq:
+  #   on_case: (untyped value, untyped consequent) -> Case | RAssign
+  def on_case(value, consequent)
+    if keyword = find_scanner_event(Kw, 'case', consume: false)
+      scanner_events.delete(keyword)
+
+      Case.new(
+        value: value,
+        consequent: consequent,
+        location: keyword.location.to(consequent.location)
+      )
+    else
+      operator =
+        find_scanner_event(Kw, 'in', consume: false) ||
+          find_scanner_event(Op, '=>')
+
+      RAssign.new(
+        value: value,
+        operator: operator,
+        pattern: consequent,
+        location: value.location.to(consequent.location)
+      )
+    end
+  end
+
+  # Class represents defining a class using the +class+ keyword.
+  #
+  #     class Container
+  #     end
+  #
+  # Classes can have path names as their class name in case it's being nested
+  # under a namespace, as in:
+  #
+  #     class Namespace::Container
+  #     end
+  #
+  # Classes can also be defined as a top-level path, in the case that it's
+  # already in a namespace but you want to define it at the top-level instead,
+  # as in:
+  #
+  #     module OtherNamespace
+  #       class ::Namespace::Container
+  #       end
+  #     end
+  #
+  # All of these declarations can also have an optional superclass reference, as
+  # in:
+  #
+  #     class Child < Parent
+  #     end
+  #
+  # That superclass can actually be any Ruby expression, it doesn't necessarily
+  # need to be a constant, as in:
+  #
+  #     class Child < method
+  #     end
+  #
+  class ClassDeclaration
+    # [ConstPathRef | ConstRef | TopConstRef] the name of the class being
+    # defined
+    attr_reader :constant
+
+    # [nil | untyped] the optional superclass declaration
+    attr_reader :superclass
+
+    # [BodyStmt] the expressions to execute within the context of the class
+    attr_reader :bodystmt
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(constant:, superclass:, bodystmt:, location:)
+      @constant = constant
+      @superclass = superclass
+      @bodystmt = bodystmt
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('class')
+
+        q.breakable
+        q.pp(constant)
+
+        if superclass
+          q.breakable
+          q.pp(superclass)
+        end
+
+        q.breakable
+        q.pp(bodystmt)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :class,
+        constant: constant,
+        superclass: superclass,
+        bodystmt: bodystmt,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_class: (
+  #     (ConstPathRef | ConstRef | TopConstRef) constant,
+  #     untyped superclass,
+  #     BodyStmt bodystmt
+  #   ) -> ClassDeclaration
   def on_class(constant, superclass, bodystmt)
-    beging = find_scanner_event(:@kw, 'class')
-    ending = find_scanner_event(:@kw, 'end')
+    beginning = find_scanner_event(Kw, 'class')
+    ending = find_scanner_event(Kw, 'end')
 
     bodystmt.bind(
-      find_next_statement_start((superclass || constant)[:loc].end_char),
-      ending[:loc].start_char
+      find_next_statement_start((superclass || constant).location.end_char),
+      ending.location.start_char
     )
 
-    {
-      type: :class,
+    ClassDeclaration.new(
       constant: constant,
       superclass: superclass,
       bodystmt: bodystmt,
-      loc: beging[:loc].to(ending[:loc])
-    }
+      location: beginning.location.to(ending.location)
+    )
   end
 
-  # comma is a scanner event that represents the use of the comma operator.
+  # Comma represents the use of the , operator.
+  class Comma
+    # [String] the comma in the string
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('comma')
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@comma, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_comma: (String value) -> Comma
   def on_comma(value)
-    node = {
-      type: :@comma,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      Comma.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # command is a parser event representing a method call with arguments and
-  # no parentheses. It accepts as arguments the name of the method and the
-  # arguments being passed to the method.
-  def on_command(message, args)
-    {
-      type: :command,
-      message: message,
-      args: args,
-      loc: message[:loc].to(args[:loc])
-    }
+  # Command represents a method call with arguments and no parentheses. Note
+  # that Command nodes only happen when there is no explicit receiver for this
+  # method.
+  #
+  #     method argument
+  #
+  class Command
+    # [Const | Ident] the message being sent to the implicit receiver
+    attr_reader :message
+
+    # [Args | ArgsAddBlock] the arguments being sent with the message
+    attr_reader :arguments
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(message:, arguments:, location:)
+      @message = message
+      @arguments = arguments
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('command')
+
+        q.breakable
+        q.pp(message)
+
+        q.breakable
+        q.pp(arguments)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :command,
+        message: message,
+        args: arguments,
+        loc: location
+      }.to_json(*opts)
+    end
   end
 
-  # command_call is a parser event representing a method call on an object
-  # with arguments and no parentheses. It accepts as arguments the receiver
-  # of the method, the operator being used to send the method, the name of
-  # the method, and the arguments being passed to the method.
-  def on_command_call(receiver, operator, message, args)
-    ending = args || message
+  # :call-seq:
+  #   on_command: (
+  #     (Const | Ident) message,
+  #     (Args | ArgsAddBlock) arguments
+  #   ) -> Command
+  def on_command(message, arguments)
+    Command.new(
+      message: message,
+      arguments: arguments,
+      location: message.location.to(arguments.location)
+    )
+  end
 
-    {
-      type: :command_call,
+  # CommandCall represents a method call on an object with arguments and no
+  # parentheses.
+  #
+  #     object.method argument
+  #
+  class CommandCall
+    # [untyped] the receiver of the message
+    attr_reader :receiver
+
+    # [:"::" | Op | Period] the operator used to send the message
+    attr_reader :operator
+
+    # [Const | Ident | Op] the message being send
+    attr_reader :message
+
+    # [Args | ArgsAddBlock] the arguments going along with the message
+    attr_reader :arguments
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(receiver:, operator:, message:, arguments:, location:)
+      @receiver = receiver
+      @operator = operator
+      @message = message
+      @arguments = arguments
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('case')
+
+        q.breakable
+        q.pp(receiver)
+
+        q.breakable
+        q.pp(operator)
+
+        q.breakable
+        q.pp(message)
+
+        q.breakable
+        q.pp(arguments)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :command_call,
+        receiver: receiver,
+        operator: operator,
+        message: message,
+        args: arguments,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_command_call: (
+  #     untyped receiver,
+  #     (:"::" | Op | Period) operator,
+  #     (Const | Ident | Op) message,
+  #     (Args | ArgsAddBlock) arguments
+  #   ) -> CommandCall
+  def on_command_call(receiver, operator, message, arguments)
+    ending = arguments || message
+
+    CommandCall.new(
       receiver: receiver,
       operator: operator,
       message: message,
-      args: args,
-      loc: receiver[:loc].to(ending[:loc])
-    }
+      arguments: arguments,
+      location: receiver.location.to(ending.location)
+    )
   end
 
-  # We keep track of each comment as it comes in and then eventually add
-  # them to the top of the generated AST so that prettier can start adding
-  # them back into the final representation. Comments come in including
-  # their starting pound sign and the newline at the end, so we also chop
-  # those off.
+  # Comment represents a comment in the source.
+  #
+  #     # comment
+  #
+  class Comment
+    # [String] the contents of the comment
+    attr_reader :value
+
+    # [boolean] whether or not there is code on the same line as this comment.
+    # If there is, then inline will be true.
+    attr_reader :inline
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, inline:, location:)
+      @value = value
+      @inline = inline
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('comment')
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :@comment,
+        value: value.force_encoding('UTF-8'),
+        inline: inline,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_comment: (String value) -> Comment
   def on_comment(value)
-    # If there is an encoding magic comment at the top of the file, ripper
-    # will actually change into that encoding for the storage of the string.
-    # This will break everything when we attempt to print as JSON, so we need to
-    # force the encoding back into UTF-8 so that it won't break.
-    body = value[1..-1].chomp.force_encoding('UTF-8')
     line = lineno
+    comment =
+      Comment.new(
+        value: value[1..-1].chomp,
+        inline: value.strip != lines[line - 1],
+        location:
+          Location.token(line: line, char: char_pos, size: value.size - 1)
+      )
 
-    @comments << {
-      type: :@comment,
-      value: body,
-      inline: value.strip != lines[line - 1],
-      loc: Location.token(line: line, char: char_pos, size: value.size - 1)
-    }
+    @comments << comment
+    comment
   end
 
-  # const is a scanner event that represents a literal value that _looks like_
-  # a constant. This could actually be a reference to a constant. It could also
-  # be something that looks like a constant in another context, as in a method
-  # call to a capitalized method, a symbol that starts with a capital letter,
-  # etc.
+  # Const represents a literal value that _looks_ like a constant. This could
+  # actually be a reference to a constant:
+  #
+  #     Constant
+  #
+  # It could also be something that looks like a constant in another context, as
+  # in a method call to a capitalized method:
+  #
+  #     object.Constant
+  #
+  # or a symbol that starts with a capital letter:
+  #
+  #     :Constant
+  #
+  class Const
+    # [String] the name of the constant
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('const')
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@const, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_const: (String value) -> Const
   def on_const(value)
-    node = {
-      type: :@const,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      Const.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # A const_path_field is a parser event that is always the child of some
-  # kind of assignment. It represents when you're assigning to a constant
-  # that is being referenced as a child of another variable. For example:
+  # ConstPathField represents the child node of some kind of assignment. It
+  # represents when you're assigning to a constant that is being referenced as
+  # a child of another variable.
   #
-  #     foo::X = 1
+  #     object::Const = value
   #
+  class ConstPathField
+    # [untyped] the source of the constant
+    attr_reader :parent
+
+    # [Const] the constant itself
+    attr_reader :constant
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(parent:, constant:, location:)
+      @parent = parent
+      @constant = constant
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('const_path_field')
+
+        q.breakable
+        q.pp(parent)
+
+        q.breakable
+        q.pp(constant)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :const_path_field,
+        parent: parent,
+        constant: constant,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_const_path_field: (untyped parent, Const constant) -> ConstPathField
   def on_const_path_field(parent, constant)
-    {
-      type: :const_path_field,
+    ConstPathField.new(
       parent: parent,
       constant: constant,
-      loc: parent[:loc].to(constant[:loc])
-    }
+      location: parent.location.to(constant.location)
+    )
   end
 
-  # A const_path_ref is a parser event that is a very similar to
-  # const_path_field except that it is not involved in an assignment. It
-  # looks like the following example: foo::Bar, where left is foo and const is
-  # Bar.
+  # ConstPathRef represents referencing a constant by a path.
+  #
+  #     object::Const
+  #
+  class ConstPathRef
+    # [untyped] the source of the constant
+    attr_reader :parent
+
+    # [Const] the constant itself
+    attr_reader :constant
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(parent:, constant:, location:)
+      @parent = parent
+      @constant = constant
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('const_path_ref')
+
+        q.breakable
+        q.pp(parent)
+
+        q.breakable
+        q.pp(constant)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :const_path_ref,
+        parent: parent,
+        constant: constant,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_const_path_ref: (untyped parent, Const constant) -> ConstPathRef
   def on_const_path_ref(parent, constant)
-    {
-      type: :const_path_ref,
+    ConstPathRef.new(
       parent: parent,
       constant: constant,
-      loc: parent[:loc].to(constant[:loc])
-    }
+      location: parent.location.to(constant.location)
+    )
   end
 
-  # A const_ref is a parser event that represents the name of the constant
-  # being used in a class or module declaration. In the following example it
-  # is the @const scanner event that has the contents of Foo.
+  # ConstRef represents the name of the constant being used in a class or module
+  # declaration.
   #
-  #     class Foo; end
+  #     class Container
+  #     end
   #
+  class ConstRef
+    # [Const] the constant itself
+    attr_reader :constant
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(constant:, location:)
+      @constant = constant
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('const_ref')
+
+        q.breakable
+        q.pp(constant)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :const_ref, constant: constant, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_const_ref: (Const constant) -> ConstRef
   def on_const_ref(constant)
-    { type: :const_ref, constant: constant, loc: constant[:loc] }
+    ConstRef.new(constant: constant, location: constant.location)
   end
 
-  # cvar is a scanner event that represents the use of a class variable.
+  # CVar represents the use of a class variable.
+  #
+  #     @@variable
+  #
+  class CVar
+    # [String] the name of the class variable
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('cvar')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@cvar, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_cvar: (String value) -> CVar
   def on_cvar(value)
-    node = {
-      type: :@cvar,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      CVar.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # A def is a parser event that represents defining a regular method on the
-  # current self object. It accepts as arguments the name (the name of the
-  # method being defined), the params (the parameter declaration for the
-  # method), and a bodystmt node which represents the statements inside the
-  # method. As an example, here are the parts that go into this:
+  # Def represents defining a regular method on the current self object.
   #
-  #     def foo(bar) do baz end
-  #          │   │       │
-  #          │   │       └> bodystmt
-  #          │   └> params
-  #          └> name
+  #     def method(param) do result end
   #
-  # You can also have single-line methods since Ruby 3.0+, which have slightly
-  # different syntax but still flow through this method. Those look like:
+  class Def
+    # [Backtick | Const | Ident | Keyword | Op] the name of the method
+    attr_reader :name
+
+    # [Params | Paren] the parameter declaration for the method
+    attr_reader :params
+
+    # [BodyStmt] the expressions to be executed by the method
+    attr_reader :bodystmt
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(name:, params:, bodystmt:, location:)
+      @name = name
+      @params = params
+      @bodystmt = bodystmt
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('def')
+
+        q.breakable
+        q.pp(name)
+
+        q.breakable
+        q.pp(params)
+
+        q.breakable
+        q.pp(bodystmt)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :def,
+        name: name,
+        params: params,
+        bodystmt: bodystmt,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # DefEndless represents defining a single-line method since Ruby 3.0+.
   #
-  #     def foo = bar
-  #          |     |
-  #          |     └> stmt
-  #          └> name
+  #     def method = result
   #
+  class DefEndless
+    # [Backtick | Const | Ident | Keyword | Op] the name of the method
+    attr_reader :name
+
+    # [Paren] the parameter declaration for the method
+    attr_reader :paren
+
+    # [untyped] the expression to be executed by the method
+    attr_reader :statement
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(name:, paren:, statement:, location:)
+      @name = name
+      @paren = paren
+      @statement = statement
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('defsl')
+
+        q.breakable
+        q.pp(name)
+
+        q.breakable
+        q.pp(paren)
+
+        q.breakable
+        q.pp(statement)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :defsl,
+        name: name,
+        paren: paren,
+        stmt: statement,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_def: (
+  #     (Backtick | Const | Ident | Keyword | Op) name,
+  #     (Params | Paren) params,
+  #     untyped bodystmt
+  #   ) -> Def | DefEndless
   def on_def(name, params, bodystmt)
     # Make sure to delete this scanner event in case you're defining something
     # like def class which would lead to this being a kw and causing all kinds
@@ -1078,64 +2785,170 @@ class Prettier::Parser < Ripper
 
     # Find the beginning of the method definition, which works for single-line
     # and normal method definitions.
-    beging = find_scanner_event(:@kw, 'def')
+    beginning = find_scanner_event(Kw, 'def')
 
     # If we don't have a bodystmt node, then we have a single-line method
-    if bodystmt[:type] != :bodystmt
-      defsl = {
-        type: :defsl,
-        name: name,
-        paren: params,
-        stmt: bodystmt,
-        loc: beging[:loc].to(bodystmt[:loc])
-      }
+    unless bodystmt.is_a?(BodyStmt)
+      node =
+        DefEndless.new(
+          name: name,
+          paren: params,
+          statement: bodystmt,
+          location: beginning.location.to(bodystmt.location)
+        )
 
-      return defsl
+      return node
     end
 
     # If there aren't any params then we need to correct the params node
     # location information
-    if params[:type] == :params && empty_params?(params)
-      location = name[:loc].end_char
-
-      params[:loc] =
+    if params.is_a?(Params) && params.empty?
+      end_char = name.location.end_char
+      location =
         Location.new(
-          start_line: params[:loc].start_line,
-          start_char: location,
-          end_line: params[:loc].end_line,
-          end_char: location
+          start_line: params.location.start_line,
+          start_char: end_char,
+          end_line: params.location.end_line,
+          end_char: end_char
         )
+
+      params = Params.new(location: location)
     end
 
-    ending = find_scanner_event(:@kw, 'end')
+    ending = find_scanner_event(Kw, 'end')
     bodystmt.bind(
-      find_next_statement_start(params[:loc].end_char),
-      ending[:loc].start_char
+      find_next_statement_start(params.location.end_char),
+      ending.location.start_char
     )
 
-    {
-      type: :def,
+    Def.new(
       name: name,
       params: params,
       bodystmt: bodystmt,
-      loc: beging[:loc].to(ending[:loc])
-    }
+      location: beginning.location.to(ending.location)
+    )
   end
 
-  # A defs is a parser event that represents defining a singleton method on
-  # an object. It accepts the same arguments as the def event, as well as
-  # the target and operator that on which this method is being defined. As
-  # an example, here are the parts that go into this:
+  # Defined represents the use of the +defined?+ operator. It can be used with
+  # and without parentheses.
   #
-  #     def foo.bar(baz) do baz end
-  #          │ │ │   │       │
-  #          │ │ │   │       │
-  #          │ │ │   │       └> bodystmt
-  #          │ │ │   └> params
-  #          │ │ └> name
-  #          │ └> operator
-  #          └> target
+  #     defined?(variable)
   #
+  class Defined
+    # [untyped] the value being sent to the keyword
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('defined')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :defined, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_defined: (untyped value) -> Defined
+  def on_defined(value)
+    beginning = find_scanner_event(Kw, 'defined?')
+    ending = value
+
+    range = beginning.location.end_char...value.location.start_char
+    if source[range].include?('(')
+      find_scanner_event(LParen)
+      ending = find_scanner_event(RParen)
+    end
+
+    Defined.new(value: value, location: beginning.location.to(ending.location))
+  end
+
+  # Defs represents defining a singleton method on an object.
+  #
+  #     def object.method(param) do result end
+  #
+  class Defs
+    # [untyped] the target where the method is being defined
+    attr_reader :target
+
+    # [Op | Period] the operator being used to declare the method
+    attr_reader :operator
+
+    # [Backtick | Const | Ident | Keyword | Op] the name of the method
+    attr_reader :name
+
+    # [Params | Paren] the parameter declaration for the method
+    attr_reader :params
+
+    # [BodyStmt] the expressions to be executed by the method
+    attr_reader :bodystmt
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(target:, operator:, name:, params:, bodystmt:, location:)
+      @target = target
+      @operator = operator
+      @name = name
+      @params = params
+      @bodystmt = bodystmt
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('defs')
+
+        q.breakable
+        q.pp(target)
+
+        q.breakable
+        q.pp(operator)
+
+        q.breakable
+        q.pp(name)
+
+        q.breakable
+        q.pp(params)
+
+        q.breakable
+        q.pp(bodystmt)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :defs,
+        target: target,
+        operator: operator,
+        name: name,
+        params: params,
+        bodystmt: bodystmt,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_defs: (
+  #     untyped target,
+  #     (Op | Period) operator,
+  #     (Backtick | Const | Ident | Keyword | Op) name,
+  #     (Params | Paren) params,
+  #     BodyStmt bodystmt
+  #   ) -> Defs
   def on_defs(target, operator, name, params, bodystmt)
     # Make sure to delete this scanner event in case you're defining something
     # like def class which would lead to this being a kw and causing all kinds
@@ -1144,1139 +2957,3251 @@ class Prettier::Parser < Ripper
 
     # If there aren't any params then we need to correct the params node
     # location information
-    if params[:type] == :params && empty_params?(params)
-      location = name[:loc].end_char
-
-      params[:loc] =
+    if params.is_a?(Params) && params.empty?
+      end_char = name.location.end_char
+      location =
         Location.new(
-          start_line: params[:loc].start_line,
-          start_char: location,
-          end_line: params[:loc].end_line,
-          end_char: location
+          start_line: params.location.start_line,
+          start_char: end_char,
+          end_line: params.location.end_line,
+          end_char: end_char
         )
+
+      params = Params.new(location: location)
     end
 
-    beging = find_scanner_event(:@kw, 'def')
-    ending = find_scanner_event(:@kw, 'end')
+    beginning = find_scanner_event(Kw, 'def')
+    ending = find_scanner_event(Kw, 'end')
 
     bodystmt.bind(
-      find_next_statement_start(params[:loc].end_char),
-      ending[:loc].start_char
+      find_next_statement_start(params.location.end_char),
+      ending.location.start_char
     )
 
-    {
-      type: :defs,
+    Defs.new(
       target: target,
       operator: operator,
       name: name,
       params: params,
       bodystmt: bodystmt,
-      loc: beging[:loc].to(ending[:loc])
-    }
-  end
-
-  # A defined node represents the rather unique defined? operator. It can be
-  # used with and without parentheses. If they're present, we use them to
-  # determine our bounds, otherwise we use the value that's being passed to
-  # the operator.
-  def on_defined(value)
-    beging = find_scanner_event(:@kw, 'defined?')
-
-    paren = source[beging[:loc].end_char...value[:loc].start_char].include?('(')
-    ending = paren ? find_scanner_event(:@rparen) : value
-
-    { type: :defined, value: value, loc: beging[:loc].to(ending[:loc]) }
-  end
-
-  # do_block is a parser event that represents passing a block to a method
-  # call using the do..end keywords. It accepts as arguments an optional
-  # block_var event that represents any parameters to the block as well as
-  # a bodystmt event that represents the statements inside the block.
-  def on_do_block(block_var, bodystmt)
-    beging = find_scanner_event(:@kw, 'do')
-    ending = find_scanner_event(:@kw, 'end')
-
-    bodystmt.bind(
-      find_next_statement_start((block_var || beging)[:loc].end_char),
-      ending[:loc].start_char
+      location: beginning.location.to(ending.location)
     )
-
-    {
-      type: :do_block,
-      keyword: beging,
-      block_var: block_var,
-      bodystmt: bodystmt,
-      loc: beging[:loc].to(ending[:loc])
-    }
   end
 
-  # dot2 is a parser event that represents using the .. operator between two
-  # expressions. Usually this is to create a range object but sometimes it's to
-  # use the flip-flop operator.
-  def on_dot2(left, right)
-    operator = find_scanner_event(:@op, '..')
-
-    beging = left || operator
-    ending = right || operator
-
-    {
-      type: :dot2,
-      left: left,
-      right: right,
-      loc: beging[:loc].to(ending[:loc])
-    }
-  end
-
-  # dot3 is a parser event that represents using the ... operator between two
-  # expressions. Usually this is to create a range object but sometimes it's to
-  # use the flip-flop operator.
-  def on_dot3(left, right)
-    operator = find_scanner_event(:@op, '...')
-
-    beging = left || operator
-    ending = right || operator
-
-    {
-      type: :dot3,
-      left: left,
-      right: right,
-      loc: beging[:loc].to(ending[:loc])
-    }
-  end
-
-  # A dyna_symbol is a parser event that represents a symbol literal that
-  # uses quotes to interpolate its value. For example, if you had a variable
-  # foo and you wanted a symbol that contained its value, you would write:
+  # DoBlock represents passing a block to a method call using the +do+ and +end+
+  # keywords.
   #
-  #     :"#{foo}"
+  #     method do |value|
+  #     end
   #
-  # As such, they accept as one argument a string node, which is the same
-  # node that gets accepted into a string_literal (since we're basically
-  # talking about a string literal with a : character at the beginning).
-  #
-  # They can also come in another flavor which is a dynamic symbol as a hash
-  # key. This is kind of an interesting syntax which results in us having to
-  # look for a @label_end scanner event instead to get our bearings. That
-  # kind of code would look like:
-  #
-  #     { "#{foo}": bar }
-  #
-  # which would be the same symbol as above.
-  def on_dyna_symbol(string)
-    if find_scanner_event(:@symbeg, consume: false)
-      # A normal dynamic symbol
-      beging = find_scanner_event(:@symbeg)
-      ending = find_scanner_event(:@tstring_end)
+  class DoBlock
+    # [Kw] the do keyword that opens this block
+    attr_reader :keyword
 
+    # [nil | BlockVar] the optional variable declaration within this block
+    attr_reader :block_var
+
+    # [BodyStmt] the expressions to be executed within this block
+    attr_reader :bodystmt
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(keyword:, block_var:, bodystmt:, location:)
+      @keyword = keyword
+      @block_var = block_var
+      @bodystmt = bodystmt
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('do_block')
+
+        if block_var
+          q.breakable
+          q.pp(block_var)
+        end
+
+        q.breakable
+        q.pp(bodystmt)
+      end
+    end
+
+    def to_json(*opts)
       {
-        type: :dyna_symbol,
-        quote: beging[:value],
-        parts: string[:parts],
-        loc: beging[:loc].to(ending[:loc])
-      }
-    else
-      # A dynamic symbol as a hash key
-      beging = find_scanner_event(:@tstring_beg)
-      ending = find_scanner_event(:@label_end)
-
-      {
-        type: :dyna_symbol,
-        parts: string[:parts],
-        quote: ending[:value][0],
-        loc: beging[:loc].to(ending[:loc])
-      }
+        type: :do_block,
+        keyword: keyword,
+        block_var: block_var,
+        bodystmt: bodystmt,
+        loc: location
+      }.to_json(*opts)
     end
   end
 
-  # else is a parser event that represents the end of a if, unless, or begin
-  # chain. It accepts as an argument the statements that are contained
-  # within the else clause.
-  def on_else(stmts)
-    beging = find_scanner_event(:@kw, 'else')
+  # :call-seq:
+  #   on_do_block: (BlockVar block_var, BodyStmt bodystmt) -> DoBlock
+  def on_do_block(block_var, bodystmt)
+    beginning = find_scanner_event(Kw, 'do')
+    ending = find_scanner_event(Kw, 'end')
+
+    bodystmt.bind(
+      find_next_statement_start((block_var || beginning).location.end_char),
+      ending.location.start_char
+    )
+
+    DoBlock.new(
+      keyword: beginning,
+      block_var: block_var,
+      bodystmt: bodystmt,
+      location: beginning.location.to(ending.location)
+    )
+  end
+
+  # Dot2 represents using the .. operator between two expressions. Usually this
+  # is to create a range object.
+  #
+  #     1..2
+  #
+  # Sometimes this operator is used to create a flip-flop.
+  #
+  #     if value == 5 .. value == 10
+  #     end
+  #
+  # One of the sides of the expression may be nil, but not both.
+  class Dot2
+    # [nil | untyped] the left side of the expression
+    attr_reader :left
+
+    # [nil | untyped] the right side of the expression
+    attr_reader :right
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(left:, right:, location:)
+      @left = left
+      @right = right
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('dot2')
+
+        if left
+          q.breakable
+          q.pp(left)
+        end
+
+        if right
+          q.breakable
+          q.pp(right)
+        end
+      end
+    end
+
+    def to_json(*opts)
+      { type: :dot2, left: left, right: right, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_dot2: ((nil | untyped) left, (nil | untyped) right) -> Dot2
+  def on_dot2(left, right)
+    operator = find_scanner_event(Op, '..')
+
+    beginning = left || operator
+    ending = right || operator
+
+    Dot2.new(
+      left: left,
+      right: right,
+      location: beginning.location.to(ending.location)
+    )
+  end
+
+  # Dot3 represents using the ... operator between two expressions. Usually this
+  # is to create a range object. It's effectively the same event as the Dot2
+  # node but with this operator you're asking Ruby to omit the final value.
+  #
+  #     1...2
+  #
+  # Like Dot2 it can also be used to create a flip-flop.
+  #
+  #     if value == 5 ... value == 10
+  #     end
+  #
+  # One of the sides of the expression may be nil, but not both.
+  class Dot3
+    # [nil | untyped] the left side of the expression
+    attr_reader :left
+
+    # [nil | untyped] the right side of the expression
+    attr_reader :right
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(left:, right:, location:)
+      @left = left
+      @right = right
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('dot3')
+
+        if left
+          q.breakable
+          q.pp(left)
+        end
+
+        if right
+          q.breakable
+          q.pp(right)
+        end
+      end
+    end
+
+    def to_json(*opts)
+      { type: :dot3, left: left, right: right, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_dot3: ((nil | untyped) left, (nil | untyped) right) -> Dot3
+  def on_dot3(left, right)
+    operator = find_scanner_event(Op, '...')
+
+    beginning = left || operator
+    ending = right || operator
+
+    Dot3.new(
+      left: left,
+      right: right,
+      location: beginning.location.to(ending.location)
+    )
+  end
+
+  # DynaSymbol represents a symbol literal that uses quotes to dynamically
+  # define its value.
+  #
+  #     :"#{variable}"
+  #
+  # They can also be used as a special kind of dynamic hash key, as in:
+  #
+  #     { "#{key}": value }
+  #
+  class DynaSymbol
+    # [Array[StringDVar | StringEmbExpr | TStringContent]] the parts of the
+    # dynamic symbol
+    attr_reader :parts
+
+    # [String] the quote used to delimit the dynamic symbol
+    attr_reader :quote
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(parts:, quote:, location:)
+      @parts = parts
+      @quote = quote
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('dyna_symbol')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :dyna_symbol, parts: parts, quote: quote, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_dyna_symbol: (StringContent string_content) -> DynaSymbol
+  def on_dyna_symbol(string_content)
+    if find_scanner_event(SymBeg, consume: false)
+      # A normal dynamic symbol
+      symbeg = find_scanner_event(SymBeg)
+      tstring_end = find_scanner_event(TStringEnd)
+
+      DynaSymbol.new(
+        quote: symbeg.value,
+        parts: string_content.parts,
+        location: symbeg.location.to(tstring_end.location)
+      )
+    else
+      # A dynamic symbol as a hash key
+      tstring_beg = find_scanner_event(TStringBeg)
+      label_end = find_scanner_event(LabelEnd)
+
+      DynaSymbol.new(
+        parts: string_content.parts,
+        quote: label_end.value[0],
+        location: tstring_beg.location.to(label_end.location)
+      )
+    end
+  end
+
+  # Else represents the end of an +if+, +unless+, or +case+ chain.
+  #
+  #     if variable
+  #     else
+  #     end
+  #
+  class Else
+    # [Statements] the expressions to be executed
+    attr_reader :statements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(statements:, location:)
+      @statements = statements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('else')
+
+        q.breakable
+        q.pp(statements)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :else, stmts: statements, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_else: (Statements statements) -> Else
+  def on_else(statements)
+    beginning = find_scanner_event(Kw, 'else')
 
     # else can either end with an end keyword (in which case we'll want to
     # consume that event) or it can end with an ensure keyword (in which case
     # we'll leave that to the ensure to handle).
     index =
-      scanner_events.rindex do |event|
-        event[:type] == :@kw && %w[end ensure].include?(event[:value])
+      scanner_events.rindex do |node|
+        node.is_a?(Kw) && %w[end ensure].include?(node.value)
       end
 
-    event = scanner_events[index]
-    ending = event[:value] == 'end' ? scanner_events.delete_at(index) : event
+    node = scanner_events[index]
+    ending = node.value == 'end' ? scanner_events.delete_at(index) : node
 
-    stmts.bind(beging[:loc].end_char, ending[:loc].start_char)
+    statements.bind(beginning.location.end_char, ending.location.start_char)
 
-    { type: :else, stmts: stmts, loc: beging[:loc].to(ending[:loc]) }
+    Else.new(
+      statements: statements,
+      location: beginning.location.to(ending.location)
+    )
   end
 
-  # elsif is a parser event that represents another clause in an if chain.
-  # It accepts as arguments the predicate of the else if, the statements
-  # that are contained within the else if clause, and the optional
-  # consequent clause.
-  def on_elsif(predicate, stmts, consequent)
-    beging = find_scanner_event(:@kw, 'elsif')
-    ending = consequent || find_scanner_event(:@kw, 'end')
+  # Elsif represents another clause in an +if+ or +unless+ chain.
+  #
+  #     if variable
+  #     elsif other_variable
+  #     end
+  #
+  class Elsif
+    # [untyped] the expression to be checked
+    attr_reader :predicate
 
-    stmts.bind(predicate[:loc].end_char, ending[:loc].start_char)
+    # [Statements] the expressions to be executed
+    attr_reader :statements
 
-    {
-      type: :elsif,
-      pred: predicate,
-      stmts: stmts,
-      cons: consequent,
-      loc: beging[:loc].to(ending[:loc])
-    }
+    # [nil | Elsif | Else] the next clause in the chain
+    attr_reader :consequent
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(predicate:, statements:, consequent:, location:)
+      @predicate = predicate
+      @statements = statements
+      @consequent = consequent
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('elsif')
+
+        q.breakable
+        q.pp(predicate)
+
+        q.breakable
+        q.pp(statements)
+
+        if consequent
+          q.breakable
+          q.pp(consequent)
+        end
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :elsif,
+        pred: predicate,
+        stmts: statements,
+        cons: consequent,
+        loc: location
+      }.to_json(*opts)
+    end
   end
 
-  # This is a scanner event that gets hit when we're inside an embdoc and
-  # receive a new line of content. Here we are guaranteed to already have
-  # initialized the @embdoc variable so we can just append the new line onto
-  # the existing content.
+  # :call-seq:
+  #   on_elsif: (
+  #     untyped predicate,
+  #     Statements statements,
+  #     (nil | Elsif | Else) consequent
+  #   ) -> Elsif
+  def on_elsif(predicate, statements, consequent)
+    beginning = find_scanner_event(Kw, 'elsif')
+    ending = consequent || find_scanner_event(Kw, 'end')
+
+    statements.bind(predicate.location.end_char, ending.location.start_char)
+
+    Elsif.new(
+      predicate: predicate,
+      statements: statements,
+      consequent: consequent,
+      location: beginning.location.to(ending.location)
+    )
+  end
+
+  # EmbDoc represents a multi-line comment.
+  #
+  #     =begin
+  #     first line
+  #     second line
+  #     =end
+  #
+  class EmbDoc
+    # [String] the contents of the comment
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('embdoc')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@embdoc, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_embdoc: (String value) -> EmbDoc
   def on_embdoc(value)
-    @embdoc[:value] << value
+    @embdoc.value << value
+    @embdoc
   end
 
-  # embdocs are long comments that are surrounded by =begin..=end. They
-  # cannot be nested, so we don't need to worry about keeping a stack around
-  # like we do with heredocs. Instead we can just track the current embdoc
-  # and add to it as we get content. It always starts with this scanner
-  # event, so here we'll initialize the current embdoc.
+  # :call-seq:
+  #   on_embdoc_beg: (String value) -> EmbDoc
   def on_embdoc_beg(value)
-    @embdoc = {
-      type: :@embdoc,
-      value: value,
-      loc: Location.fixed(line: lineno, char: char_pos)
-    }
+    @embdoc =
+      EmbDoc.new(
+        value: value,
+        location: Location.fixed(line: lineno, char: char_pos)
+      )
   end
 
-  # This is the final scanner event for embdocs. It receives the =end. Here
-  # we can finalize the embdoc with its location information and the final
-  # piece of the string. We then add it to the list of comments so that
-  # prettier can place it into the final source string.
+  # :call-seq:
+  #   on_embdoc_end: (String value) -> EmbDoc
   def on_embdoc_end(value)
-    location = @embdoc[:loc]
+    location = @embdoc.location
+    embdoc =
+      EmbDoc.new(
+        value: @embdoc.value << value.chomp,
+        location:
+          Location.new(
+            start_line: location.start_line,
+            start_char: location.start_char,
+            end_line: lineno,
+            end_char: char_pos + value.length - 1
+          )
+      )
 
-    @comments << {
-      type: :@embdoc,
-      value: @embdoc[:value] << value.chomp,
-      loc:
-        Location.new(
-          start_line: location.start_line,
-          start_char: location.start_char,
-          end_line: lineno,
-          end_char: char_pos + value.length - 1
-        )
-    }
-
+    @comments << embdoc
     @embdoc = nil
+
+    embdoc
   end
 
-  # embexpr_beg is a scanner event that represents using interpolation inside of
-  # a string, xstring, heredoc, or regexp. Its value is the string literal "#{".
-  def on_embexpr_beg(value)
-    node = {
-      type: :@embexpr_beg,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
-
-    scanner_events << node
-    node
-  end
-
-  # embexpr_end is a scanner event that represents the end of an interpolated
-  # expression in a string, xstring, heredoc, or regexp. Its value is the string
-  # literal "}".
-  def on_embexpr_end(value)
-    node = {
-      type: :@embexpr_end,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
-
-    scanner_events << node
-    node
-  end
-
-  # embvar is a scanner event that represents the use of shorthand interpolation
-  # for an instance, class, or global variable into a string, xstring, heredoc,
-  # or regexp. Its value is the string literal "#". For example, in the
-  # following snippet:
+  # EmbExprBeg represents the beginning token for using interpolation inside of
+  # a parent node that accepts string content (like a string or regular
+  # expression).
   #
-  #     "#@foo"
+  #     "Hello, #{person}!"
   #
-  # the embvar would be triggered by the "#", then an ivar event for the @foo
-  # instance variable. That would all get bound up into a string_dvar node in
-  # the final AST.
-  def on_embvar(value)
-    node = {
-      type: :@embvar,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+  class EmbExprBeg
+    # [String] the #{ used in the string
+    attr_reader :value
 
-    scanner_events << node
-    node
-  end
+    # [Location] the location of this node
+    attr_reader :location
 
-  # ensure is a parser event that represents the use of the ensure keyword
-  # and its subsequent statements.
-  def on_ensure(stmts)
-    keyword = find_scanner_event(:@kw, 'ensure')
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
 
-    # Specifically not using find_scanner_event here because we don't want to
-    # consume the :@end event, because that would break def..ensure..end chains.
-    index =
-      scanner_events.rindex do |scanner_event|
-        scanner_event[:type] == :@kw && scanner_event[:value] == 'end'
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('embexpr_beg')
+
+        q.breakable
+        q.pp(value)
       end
+    end
 
-    ending = scanner_events[index]
-    stmts.bind(
-      find_next_statement_start(keyword[:loc].end_char),
-      ending[:loc].start_char
+    def to_json(*opts)
+      { type: :@embexpr_beg, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_embexpr_beg: (String value) -> EmbExprBeg
+  def on_embexpr_beg(value)
+    node =
+      EmbExprBeg.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # EmbExprEnd represents the ending token for using interpolation inside of a
+  # parent node that accepts string content (like a string or regular
+  # expression).
+  #
+  #     "Hello, #{person}!"
+  #
+  class EmbExprEnd
+    # [String] the } used in the string
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('embexpr_end')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@embexpr_end, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_embexpr_end: (String value) -> EmbExprEnd
+  def on_embexpr_end(value)
+    node =
+      EmbExprEnd.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # EmbVar represents the use of shorthand interpolation for an instance, class,
+  # or global variable into a parent node that accepts string content (like a
+  # string or regular expression).
+  #
+  #     "#@variable"
+  #
+  # In the example above, an EmbVar node represents the # because it forces
+  # @variable to be interpolated.
+  class EmbVar
+    # [String] the # used in the string
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('embvar')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@embvar, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_embvar: (String value) -> EmbVar
+  def on_embvar(value)
+    node =
+      EmbVar.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # Ensure represents the use of the +ensure+ keyword and its subsequent
+  # statements.
+  #
+  #     begin
+  #     ensure
+  #     end
+  #
+  class Ensure
+    # [Kw] the ensure keyword that began this node
+    attr_reader :keyword
+
+    # [Statements] the expressions to be executed
+    attr_reader :statements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(keyword:, statements:, location:)
+      @keyword = keyword
+      @statements = statements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('ensure')
+
+        q.breakable
+        q.pp(statements)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :ensure,
+        keyword: keyword,
+        stmts: statements,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_ensure: (Statements statements) -> Ensure
+  def on_ensure(statements)
+    keyword = find_scanner_event(Kw, 'ensure')
+
+    # We don't want to consume the :@kw event, because that would break
+    # def..ensure..end chains.
+    ending = find_scanner_event(Kw, 'end', consume: false)
+    statements.bind(
+      find_next_statement_start(keyword.location.end_char),
+      ending.location.start_char
     )
 
-    {
-      type: :ensure,
+    Ensure.new(
       keyword: keyword,
-      stmts: stmts,
-      loc: keyword[:loc].to(ending[:loc])
-    }
+      statements: statements,
+      location: keyword.location.to(ending.location)
+    )
   end
 
-  # An excessed_comma is a special kind of parser event that represents a comma
-  # at the end of a list of parameters. It's a very strange node. It accepts a
-  # different number of arguments depending on Ruby version, which is why we
-  # have the anonymous splat there.
+  # ExcessedComma represents a trailing comma in a list of block parameters. It
+  # changes the block parameters such that they will destructure.
+  #
+  #     [[1, 2, 3], [2, 3, 4]].each do |first, second,|
+  #     end
+  #
+  # In the above example, an ExcessedComma node would appear in the third
+  # position of the Params node that is used to declare that block. The third
+  # position typically represents a rest-type parameter, but in this case is
+  # used to indicate that a trailing comma was used.
+  class ExcessedComma
+    # [String] the comma
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('excessed_comma')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :excessed_comma, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # The handler for this event accepts no parameters (though in previous
+  # versions of Ruby it accepted a string literal with a value of ",").
+  #
+  # :call-seq:
+  #   on_excessed_comma: () -> ExcessedComma
   def on_excessed_comma(*)
-    comma = find_scanner_event(:@comma)
+    comma = find_scanner_event(Comma)
 
-    { type: :excessed_comma, value: comma[:value], loc: comma[:loc] }
+    ExcessedComma.new(value: comma.value, location: comma.location)
   end
 
-  # An fcall is a parser event that represents the piece of a method call
-  # that comes before any arguments (i.e., just the name of the method).
+  # FCall represents the piece of a method call that comes before any arguments
+  # (i.e., just the name of the method). It is used in places where the parser
+  # is sure that it is a method call and not potentially a local variable.
+  #
+  #     method(argument)
+  #
+  # In the above example, it's referring to the +method+ segment.
+  class FCall
+    # [Const | Ident] the name of the method
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('fcall')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :fcall, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_fcall: ((Const | Ident) value) -> FCall
   def on_fcall(value)
-    { type: :fcall, value: value, loc: value[:loc] }
+    FCall.new(value: value, location: value.location)
   end
 
-  # A field is a parser event that is always the child of an assignment. It
-  # accepts as arguments the left side of operation, the operator (. or ::),
-  # and the right side of the operation. For example:
+  # Field is always the child of an assignment. It represents assigning to a
+  # “field” on an object.
   #
-  #     foo.x = 1
+  #     object.variable = value
   #
+  class Field
+    # [untyped] the parent object that owns the field being assigned
+    attr_reader :parent
+
+    # [:"::" | Op | Period] the operator being used for the assignment
+    attr_reader :operator
+
+    # [Const | Ident] the name of the field being assigned
+    attr_reader :name
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(parent:, operator:, name:, location:)
+      @parent = parent
+      @operator = operator
+      @name = name
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('field')
+
+        q.breakable
+        q.pp(parent)
+
+        q.breakable
+        q.pp(operator)
+
+        q.breakable
+        q.pp(name)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :field,
+        parent: parent,
+        operator: operator,
+        name: name,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_field: (
+  #     untyped parent,
+  #     (:"::" | Op | Period) operator
+  #     (Const | Ident) name
+  #   ) -> Field
   def on_field(parent, operator, name)
-    {
-      type: :field,
+    Field.new(
       parent: parent,
       operator: operator,
       name: name,
-      loc: parent[:loc].to(name[:loc])
-    }
+      location: parent.location.to(name.location)
+    )
   end
 
-  # float is a scanner event that represents a floating point value literal.
+  # FloatLiteral represents a floating point number literal.
+  #
+  #     1.0
+  #
+  class FloatLiteral
+    # [String] the value of the floating point number literal
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('float')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@float, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_float: (String value) -> FloatLiteral
   def on_float(value)
-    node = {
-      type: :@float,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      FloatLiteral.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # fndptn is a parser event that represents matching against a pattern where
-  # you find a pattern in an array using the Ruby 3.0+ pattern matching syntax.
-  def on_fndptn(constant, left, values, right)
-    beging = constant || find_scanner_event(:@lbracket)
-    ending = find_scanner_event(:@rbracket)
+  # FndPtn represents matching against a pattern where you find a pattern in an
+  # array using the Ruby 3.0+ pattern matching syntax.
+  #
+  #     case value
+  #     in [*, 7, *]
+  #     end
+  #
+  class FndPtn
+    # [nil | untyped] the optional constant wrapper
+    attr_reader :constant
 
-    {
-      type: :fndptn,
+    # [VarField] the splat on the left-hand side
+    attr_reader :left
+
+    # [Array[untyped]] the list of positional expressions in the pattern that
+    # are being matched
+    attr_reader :values
+
+    # [VarField] the splat on the right-hand side
+    attr_reader :right
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(constant:, left:, values:, right:, location:)
+      @constant = constant
+      @left = left
+      @values = values
+      @right = right
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('fndptn')
+
+        if constant
+          q.breakable
+          q.pp(constant)
+        end
+
+        q.breakable
+        q.pp(left)
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(values) { |value| q.pp(value) } }
+
+        q.breakable
+        q.pp(right)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :fndptn,
+        constant: constant,
+        left: left,
+        values: values,
+        right: right,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_fndptn: (
+  #     (nil | untyped) constant,
+  #     VarField left,
+  #     Array[untyped] values,
+  #     VarField right
+  #   ) -> FndPtn
+  def on_fndptn(constant, left, values, right)
+    beginning = constant || find_scanner_event(LBracket)
+    ending = find_scanner_event(RBracket)
+
+    FndPtn.new(
       constant: constant,
       left: left,
       values: values,
       right: right,
-      loc: beging[:loc].to(ending[:loc])
-    }
+      location: beginning.location.to(ending.location)
+    )
   end
 
-  # for is a parser event that represents using the somewhat esoteric for
-  # loop. It accepts as arguments an ident which is the iterating variable,
-  # an enumerable for that which is being enumerated, and a stmts event that
-  # represents the statements inside the for loop.
-  def on_for(iterator, enumerable, stmts)
-    beging = find_scanner_event(:@kw, 'for')
-    ending = find_scanner_event(:@kw, 'end')
+  # For represents using a +for+ loop.
+  #
+  #     for value in list do
+  #     end
+  #
+  class For
+    # [MLHS | MLHSAddStar | VarField] the variable declaration being used to
+    # pull values out of the object being enumerated
+    attr_reader :iterator
+
+    # [untyped] the object being enumerated in the loop
+    attr_reader :enumerable
+
+    # [Statements] the statements to be executed
+    attr_reader :statements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(iterator:, enumerable:, statements:, location:)
+      @iterator = iterator
+      @enumerable = enumerable
+      @statements = statements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('for')
+
+        q.breakable
+        q.pp(iterator)
+
+        q.breakable
+        q.pp(enumerable)
+
+        q.breakable
+        q.pp(statements)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :for,
+        iterator: iterator,
+        enumerable: enumerable,
+        stmts: statements,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_for: (
+  #     (MLHS | MLHSAddStar | VarField) iterator,
+  #     untyped enumerable,
+  #     Statements statements
+  #   ) -> For
+  def on_for(iterator, enumerable, statements)
+    beginning = find_scanner_event(Kw, 'for')
+    ending = find_scanner_event(Kw, 'end')
 
     # Consume the do keyword if it exists so that it doesn't get confused for
     # some other block
-    do_event = find_scanner_event(:@kw, 'do', consume: false)
-    if do_event && do_event[:loc].start_char > enumerable[:loc].end_char &&
-         do_event[:loc].end_char < ending[:loc].start_char
-      scanner_events.delete(do_event)
+    keyword = find_scanner_event(Kw, 'do', consume: false)
+    if keyword && keyword.location.start_char > enumerable.location.end_char &&
+         keyword.location.end_char < ending.location.start_char
+      scanner_events.delete(keyword)
     end
 
-    stmts.bind((do_event || enumerable)[:loc].end_char, ending[:loc].start_char)
+    statements.bind(
+      (keyword || enumerable).location.end_char,
+      ending.location.start_char
+    )
 
-    {
-      type: :for,
+    For.new(
       iterator: iterator,
       enumerable: enumerable,
-      stmts: stmts,
-      loc: beging[:loc].to(ending[:loc])
-    }
+      statements: statements,
+      location: beginning.location.to(ending.location)
+    )
   end
 
-  # gvar is a scanner event that represents a global variable literal.
+  # GVar represents a global variable literal.
+  #
+  #     $variable
+  #
+  class GVar
+    # [String] the name of the global variable
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('gvar')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@gvar, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_gvar: (String value) -> GVar
   def on_gvar(value)
-    node = {
-      type: :@gvar,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      GVar.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # hash is a parser event that represents a hash literal. It accepts as an
-  # argument an optional assoclist_from_args event which contains the
-  # contents of the hash.
-  def on_hash(assoclist_from_args)
-    beging = find_scanner_event(:@lbrace)
-    ending = find_scanner_event(:@rbrace)
+  # HashLiteral represents a hash literal.
+  #
+  #     { key => value }
+  #
+  class HashLiteral
+    # [nil | AssocListFromArgs] the contents of the hash
+    attr_reader :contents
 
-    if assoclist_from_args
-      # Here we're going to expand out the location information for the assocs
-      # node so that it can grab up any remaining comments inside the hash.
-      assoclist_from_args[:loc] =
-        Location.new(
-          start_line: assoclist_from_args[:loc].start_line,
-          start_char: beging[:loc].end_char,
-          end_line: assoclist_from_args[:loc].end_line,
-          end_char: ending[:loc].start_char
-        )
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(contents:, location:)
+      @contents = contents
+      @location = location
     end
 
-    {
-      type: :hash,
-      cnts: assoclist_from_args,
-      loc: beging[:loc].to(ending[:loc])
-    }
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('hash')
+
+        q.breakable
+        q.pp(contents)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :hash, cnts: contents, loc: location }.to_json(*opts)
+    end
   end
 
-  # This is a scanner event that represents the beginning of the heredoc. It
-  # includes the declaration (which we call beging here, which is just short
-  # for beginning). The declaration looks something like <<-HERE or <<~HERE.
-  # If the downcased version of the declaration actually matches an existing
-  # prettier parser, we'll later attempt to print it using that parser and
-  # printer through our embed function.
-  def on_heredoc_beg(beging)
+  # :call-seq:
+  #   on_hash: ((nil | AssocListFromArgs) contents) -> HashLiteral
+  def on_hash(contents)
+    lbrace = find_scanner_event(LBrace)
+    rbrace = find_scanner_event(RBrace)
+
+    if contents
+      # Here we're going to expand out the location information for the contents
+      # node so that it can grab up any remaining comments inside the hash.
+      location =
+        Location.new(
+          start_line: contents.location.start_line,
+          start_char: lbrace.location.end_char,
+          end_line: contents.location.end_line,
+          end_char: rbrace.location.start_char
+        )
+
+      contents = contents.class.new(assocs: contents.assocs, location: location)
+    end
+
+    HashLiteral.new(
+      contents: contents,
+      location: lbrace.location.to(rbrace.location)
+    )
+  end
+
+  # Heredoc represents a heredoc string literal.
+  #
+  #     <<~DOC
+  #       contents
+  #     DOC
+  #
+  class Heredoc
+    # [HeredocBeg] the opening of the heredoc
+    attr_reader :beginning
+
+    # [String] the ending of the heredoc
+    attr_reader :ending
+
+    # [Array[StringEmbExpr | StringDVar | TStringContent]] the parts of the
+    # heredoc string literal
+    attr_reader :parts
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(beginning:, ending: nil, parts: [], location:)
+      @beginning = beginning
+      @ending = ending
+      @parts = parts
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('heredoc')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :heredoc,
+        beging: beginning,
+        ending: ending,
+        parts: parts,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # HeredocBeg represents the beginning declaration of a heredoc.
+  #
+  #     <<~DOC
+  #       contents
+  #     DOC
+  #
+  # In the example above the HeredocBeg node represents <<~DOC.
+  class HeredocBeg
+    # [String] the opening declaration of the heredoc
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('heredoc_beg')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@heredoc_beg, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_heredoc_beg: (String value) -> HeredocBeg
+  def on_heredoc_beg(value)
     location =
-      Location.token(line: lineno, char: char_pos, size: beging.size + 1)
+      Location.token(line: lineno, char: char_pos, size: value.size + 1)
 
     # Here we're going to artificially create an extra node type so that if
     # there are comments after the declaration of a heredoc, they get printed.
-    node = {
-      type: :heredoc,
-      beging: {
-        type: :@heredoc_beg,
-        value: beging,
-        loc: location
-      },
-      loc: location
-    }
+    beginning = HeredocBeg.new(value: value, location: location)
+    @heredocs << Heredoc.new(beginning: beginning, location: location)
 
-    @heredocs << node
-    node
+    beginning
   end
 
-  # This is a parser event that occurs when you're using a heredoc with a
-  # tilde. These are considered `heredoc_dedent` nodes, whereas the hyphen
-  # heredocs show up as string literals.
-  def on_heredoc_dedent(string, _width)
-    @heredocs[-1].merge!(parts: string[:parts])
-  end
+  # :call-seq:
+  #   on_heredoc_dedent: (StringContent string, Integer width) -> Heredoc
+  def on_heredoc_dedent(string, width)
+    heredoc = @heredocs[-1]
 
-  # This is a scanner event that represents the end of the heredoc.
-  def on_heredoc_end(ending)
-    location = @heredocs[-1][:loc]
-
-    @heredocs[-1][:loc] =
-      Location.new(
-        start_line: location.start_line,
-        start_char: location.start_char,
-        end_line: lineno,
-        end_char: char_pos
+    @heredocs[-1] =
+      Heredoc.new(
+        beginning: heredoc.beginning,
+        ending: heredoc.ending,
+        parts: string.parts,
+        location: heredoc.location
       )
-
-    @heredocs[-1].merge!(ending: ending.chomp)
   end
 
-  # hshptn is a parser event that represents matching against a hash pattern
-  # using the Ruby 2.7+ pattern matching syntax.
-  def on_hshptn(constant, keywords, kwrest)
-    pieces = [constant, keywords, kwrest].flatten(2).compact
+  # :call-seq:
+  #   on_heredoc_end: (String value) -> Heredoc
+  def on_heredoc_end(value)
+    heredoc = @heredocs[-1]
 
-    {
-      type: :hshptn,
-      constant: constant,
-      keywords: keywords,
-      kwrest: kwrest,
-      loc: pieces[0][:loc].to(pieces[-1][:loc])
-    }
+    @heredocs[-1] =
+      Heredoc.new(
+        beginning: heredoc.beginning,
+        ending: value.chomp,
+        parts: heredoc.parts,
+        location:
+          Location.new(
+            start_line: heredoc.location.start_line,
+            start_char: heredoc.location.start_char,
+            end_line: lineno,
+            end_char: char_pos
+          )
+      )
   end
 
-  # ident is a scanner event that represents an identifier anywhere in code. It
-  # can actually represent a whole bunch of stuff, depending on where it is in
-  # the AST. Like comments, we need to force the encoding here so JSON doesn't
-  # break.
-  def on_ident(value)
-    node = {
-      type: :@ident,
-      value: value.force_encoding('UTF-8'),
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
-
-    scanner_events << node
-    node
-  end
-
-  # if is a parser event that represents the first clause in an if chain.
-  # It accepts as arguments the predicate of the if, the statements that are
-  # contained within the if clause, and the optional consequent clause.
-  def on_if(predicate, stmts, consequent)
-    beging = find_scanner_event(:@kw, 'if')
-    ending = consequent || find_scanner_event(:@kw, 'end')
-
-    stmts.bind(predicate[:loc].end_char, ending[:loc].start_char)
-
-    {
-      type: :if,
-      pred: predicate,
-      stmts: stmts,
-      cons: consequent,
-      loc: beging[:loc].to(ending[:loc])
-    }
-  end
-
-  # ifop is a parser event that represents a ternary operator. It accepts as
-  # arguments the predicate to the ternary, the truthy clause, and the falsy
-  # clause.
-  def on_ifop(predicate, truthy, falsy)
-    {
-      type: :ifop,
-      pred: predicate,
-      tthy: truthy,
-      flsy: falsy,
-      loc: predicate[:loc].to(falsy[:loc])
-    }
-  end
-
-  # if_mod is a parser event that represents the modifier form of an if
-  # statement. It accepts as arguments the predicate of the if and the
-  # statement that are contained within the if clause.
-  def on_if_mod(predicate, statement)
-    find_scanner_event(:@kw, 'if')
-
-    {
-      type: :if_mod,
-      pred: predicate,
-      stmt: statement,
-      loc: statement[:loc].to(predicate[:loc])
-    }
-  end
-
-  # ignored_nl is a special kind of scanner event that passes nil as the value.
-  # You can trigger the ignored_nl event with the following snippet:
+  # HshPtn represents matching against a hash pattern using the Ruby 2.7+
+  # pattern matching syntax.
   #
-  #     foo.bar
-  #        .baz
-  #
-  # We don't need to track this event in the AST that we're generating, so we're
-  # not going to define an explicit handler for it.
-  #
-  #     def on_ignored_nl(value)
-  #       value
-  #     end
-
-  # ignored_sp is a scanner event that represents the space before the content
-  # of each line of a squiggly heredoc that will be removed from the string
-  # before it gets transformed into a string literal. For example, in the
-  # following snippet:
-  #
-  #     <<~HERE
-  #       foo
-  #         bar
-  #     HERE
-  #
-  # You would have two ignored_sp events, the first with two spaces and the
-  # second with four. We don't need to track this event in the AST that we're
-  # generating, so we're not going to define an explicit handler for it.
-  #
-  #     def on_ignored_sp(value)
-  #       value
-  #     end
-
-  # imaginary is a scanner event that represents an imaginary number literal.
-  # They become instances of the Complex class.
-  def on_imaginary(value)
-    node = {
-      type: :@imaginary,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
-
-    scanner_events << node
-    node
-  end
-
-  # in is a parser event that represents using the in keyword within the
-  # Ruby 2.7+ pattern matching syntax. Alternatively in Ruby 3+ it is also used
-  # to handle rightward assignment for pattern matching.
-  def on_in(pattern, stmts, consequent)
-    # Here we have a rightward assignment
-    return pattern unless stmts
-
-    beging = find_scanner_event(:@kw, 'in')
-    ending = consequent || find_scanner_event(:@kw, 'end')
-
-    stmts.bind(beging[:loc].end_char, ending[:loc].start_char)
-
-    {
-      type: :in,
-      pttn: pattern,
-      stmts: stmts,
-      cons: consequent,
-      loc: beging[:loc].to(ending[:loc])
-    }
-  end
-
-  # int is a scanner event the represents a number literal.
-  def on_int(value)
-    node = {
-      type: :@int,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
-
-    scanner_events << node
-    node
-  end
-
-  # ivar is a scanner event the represents an instance variable literal.
-  def on_ivar(value)
-    node = {
-      type: :@ivar,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
-
-    scanner_events << node
-    node
-  end
-
-  # kw is a scanner event the represents the use of a keyword. It can be
-  # anywhere in the AST, so you end up seeing it quite a lot.
-  def on_kw(value)
-    node = {
-      type: :@kw,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
-
-    scanner_events << node
-    node
-  end
-
-  # kwrest_param is a parser event that represents defining a parameter in a
-  # method definition that accepts all remaining keyword parameters.
-  def on_kwrest_param(name)
-    location = find_scanner_event(:@op, '**')[:loc]
-    location = location.to(name[:loc]) if name
-
-    { type: :kwrest_param, name: name, loc: location }
-  end
-
-  # label is a scanner event that represents the use of an identifier to
-  # associate with an object. You can find it in a hash key, as in:
-  #
-  #     { foo: bar }
-  #
-  # in this case "foo:" would be the body of the label. You can also find it in
-  # pattern matching, as in:
-  #
-  #     case foo
-  #     in bar:
-  #       bar
+  #     case value
+  #     in { key: }
   #     end
   #
-  # in this case "bar:" would be the body of the label.
-  def on_label(value)
-    node = {
-      type: :@label,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+  class HshPtn
+    # [nil | untyped] the optional constant wrapper
+    attr_reader :constant
 
-    scanner_events << node
-    node
-  end
+    # [Array[[Label, untyped]]] the set of tuples representing the keywords that
+    # should be matched against in the pattern
+    attr_reader :keywords
 
-  # label_end is a scanner event that represents the end of a dynamic symbol. If
-  # for example you had the following hash:
-  #
-  #     { "foo": bar }
-  #
-  # then the string "\":" would be the value of this label_end. It's useful for
-  # determining the type of quote being used by the label.
-  def on_label_end(value)
-    node = {
-      type: :@label_end,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    # [nil | VarField] an optional parameter to gather up all remaining keywords
+    attr_reader :keyword_rest
 
-    scanner_events << node
-    node
-  end
+    # [Location] the location of this node
+    attr_reader :location
 
-  # lambda is a parser event that represents using a "stabby" lambda
-  # literal. It accepts as arguments a params event that represents any
-  # parameters to the lambda and a stmts/bodystmt event that represents the
-  # statements inside the lambda.
-  #
-  # It can be wrapped in either {..} or do..end so we look for either of
-  # those combinations to get our bounds.
-  def on_lambda(params, stmts)
-    beging = find_scanner_event(:@tlambda)
-
-    if event = find_scanner_event(:@tlambeg, consume: false)
-      opening = scanner_events.delete(event)
-      closing = find_scanner_event(:@rbrace)
-    else
-      opening = find_scanner_event(:@kw, 'do')
-      closing = find_scanner_event(:@kw, 'end')
+    def initialize(constant:, keywords:, keyword_rest:, location:)
+      @constant = constant
+      @keywords = keywords
+      @keyword_rest = keyword_rest
+      @location = location
     end
 
-    stmts.bind(opening[:loc].end_char, closing[:loc].start_char)
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('hshptn')
 
-    {
-      type: :lambda,
-      params: params,
-      stmts: stmts,
-      loc: beging[:loc].to(closing[:loc])
-    }
+        if constant
+          q.breakable
+          q.pp(constant)
+        end
+
+        if keywords.any?
+          q.breakable
+          q.group(2, '(', ')') do
+            q.seplist(keywords) { |keyword| q.pp(keyword) }
+          end
+        end
+
+        if keyword_rest
+          q.breakable
+          q.pp(keyword_rest)
+        end
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :hshptn,
+        constant: constant,
+        keywords: keywords,
+        kwrest: keyword_rest,
+        loc: location
+      }.to_json(*opts)
+    end
   end
 
-  # lbrace is a scanner event representing the use of a left brace, i.e., "{".
-  def on_lbrace(value)
-    node = {
-      type: :@lbrace,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+  # :call-seq:
+  #   on_hshptn: (
+  #     (nil | untyped) constant,
+  #     Array[[Label, untyped]] keywords,
+  #     (nil | VarField) keyword_rest
+  #   ) -> HshPtn
+  def on_hshptn(constant, keywords, keyword_rest)
+    parts = [constant, keywords, keyword_rest].flatten(2).compact
 
-    scanner_events << node
-    node
+    HshPtn.new(
+      constant: constant,
+      keywords: keywords,
+      keyword_rest: keyword_rest,
+      location: parts[0].location.to(parts[-1].location)
+    )
   end
 
-  # lbracket is a scanner event representing the use of a left bracket, i.e.,
-  # "[".
-  def on_lbracket(value)
-    node = {
-      type: :@lbracket,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
-
-    scanner_events << node
-    node
-  end
-
-  # lparen is a scanner event representing the use of a left parenthesis, i.e.,
-  # "(".
-  def on_lparen(value)
-    node = {
-      type: :@lparen,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
-
-    scanner_events << node
-    node
-  end
-
-  # magic_comment is a scanner event that represents the use of a pragma at the
-  # beginning of the file. Usually it will inside something like
-  # frozen_string_literal (the key) with a value of true (the value). Both
-  # children come is a string literals. We're going to leave these alone as they
-  # come in all kinds of shapes and sizes.
+  # Ident represents an identifier anywhere in code. It can represent a very
+  # large number of things, depending on where it is in the syntax tree.
   #
-  #     def on_magic_comment(key, value)
-  #       @magic_comment = { value: " #{key}: #{value}" }
+  #     value
+  #
+  class Ident
+    # [String] the value of the identifier
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('ident')
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :@ident,
+        value: value.force_encoding('UTF-8'),
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_ident: (String value) -> Ident
+  def on_ident(value)
+    node =
+      Ident.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # If represents the first clause in an +if+ chain.
+  #
+  #     if predicate
   #     end
-
-  # massign is a parser event that is a parent node of any kind of multiple
-  # assignment. This includes splitting out variables on the left like:
   #
-  #     a, b, c = foo
+  class If
+    # [untyped] the expression to be checked
+    attr_reader :predicate
+
+    # [Statements] the expressions to be executed
+    attr_reader :statements
+
+    # [nil, Elsif, Else] the next clause in the chain
+    attr_reader :consequent
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(predicate:, statements:, consequent:, location:)
+      @predicate = predicate
+      @statements = statements
+      @consequent = consequent
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('if')
+
+        q.breakable
+        q.pp(predicate)
+
+        q.breakable
+        q.pp(statements)
+
+        if consequent
+          q.breakable
+          q.pp(consequent)
+        end
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :if,
+        pred: predicate,
+        stmts: statements,
+        cons: consequent,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_if: (
+  #     untyped predicate,
+  #     Statements statements,
+  #     (nil | Elsif | Else) consequent
+  #   ) -> If
+  def on_if(predicate, statements, consequent)
+    beginning = find_scanner_event(Kw, 'if')
+    ending = consequent || find_scanner_event(Kw, 'end')
+
+    statements.bind(predicate.location.end_char, ending.location.start_char)
+
+    If.new(
+      predicate: predicate,
+      statements: statements,
+      consequent: consequent,
+      location: beginning.location.to(ending.location)
+    )
+  end
+
+  # IfOp represents a ternary clause.
+  #
+  #     predicate ? truthy : falsy
+  #
+  class IfOp
+    # [untyped] the expression to be checked
+    attr_reader :predicate
+
+    # [untyped] the expression to be executed if the predicate is truthy
+    attr_reader :truthy
+
+    # [untyped] the expression to be executed if the predicate is falsy
+    attr_reader :falsy
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(predicate:, truthy:, falsy:, location:)
+      @predicate = predicate
+      @truthy = truthy
+      @falsy = falsy
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('ifop')
+
+        q.breakable
+        q.pp(predicate)
+
+        q.breakable
+        q.pp(truthy)
+
+        q.breakable
+        q.pp(falsy)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :ifop,
+        pred: predicate,
+        tthy: truthy,
+        flsy: falsy,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_ifop: (untyped predicate, untyped truthy, untyped falsy) -> IfOp
+  def on_ifop(predicate, truthy, falsy)
+    IfOp.new(
+      predicate: predicate,
+      truthy: truthy,
+      falsy: falsy,
+      location: predicate.location.to(falsy.location)
+    )
+  end
+
+  # IfMod represents the modifier form of an +if+ statement.
+  #
+  #     expression if predicate
+  #
+  class IfMod
+    # [untyped] the expression to be executed
+    attr_reader :statement
+
+    # [untyped] the expression to be checked
+    attr_reader :predicate
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(statement:, predicate:, location:)
+      @statement = statement
+      @predicate = predicate
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('if_mod')
+
+        q.breakable
+        q.pp(statement)
+
+        q.breakable
+        q.pp(predicate)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :if_mod,
+        stmt: statement,
+        pred: predicate,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_if_mod: (untyped predicate, untyped statement) -> IfMod
+  def on_if_mod(predicate, statement)
+    find_scanner_event(Kw, 'if')
+
+    IfMod.new(
+      statement: statement,
+      predicate: predicate,
+      location: statement.location.to(predicate.location)
+    )
+  end
+
+  # def on_ignored_nl(value)
+  #   value
+  # end
+
+  # def on_ignored_sp(value)
+  #   value
+  # end
+
+  # Imaginary represents an imaginary number literal.
+  #
+  #     1i
+  #
+  class Imaginary
+    # [String] the value of the imaginary number literal
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('imaginary')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@imaginary, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_imaginary: (String value) -> Imaginary
+  def on_imaginary(value)
+    node =
+      Imaginary.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # In represents using the +in+ keyword within the Ruby 2.7+ pattern matching
+  # syntax.
+  #
+  #     case value
+  #     in pattern
+  #     end
+  #
+  class In
+    # [untyped] the pattern to check against
+    attr_reader :pattern
+
+    # [Statements] the expressions to execute if the pattern matched
+    attr_reader :statements
+
+    # [nil | In | Else] the next clause in the chain
+    attr_reader :consequent
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(pattern:, statements:, consequent:, location:)
+      @pattern = pattern
+      @statements = statements
+      @consequent = consequent
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('in')
+
+        q.breakable
+        q.pp(pattern)
+
+        q.breakable
+        q.pp(statements)
+
+        if consequent
+          q.breakable
+          q.pp(consequent)
+        end
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :in,
+        pttn: pattern,
+        stmts: statements,
+        cons: consequent,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_in: (RAssign pattern, nil statements, nil consequent) -> RAssign
+  #        | (
+  #            untyped pattern,
+  #            Statements statements,
+  #            (nil | In | Else) consequent
+  #          ) -> In
+  def on_in(pattern, statements, consequent)
+    # Here we have a rightward assignment
+    return pattern unless statements
+
+    beginning = find_scanner_event(Kw, 'in')
+    ending = consequent || find_scanner_event(Kw, 'end')
+
+    statements.bind(beginning.location.end_char, ending.location.start_char)
+
+    In.new(
+      pattern: pattern,
+      statements: statements,
+      consequent: consequent,
+      location: beginning.location.to(ending.location)
+    )
+  end
+
+  # Int represents an integer number literal.
+  #
+  #     1
+  #
+  class Int
+    # [String] the value of the integer
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('int')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@int, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_int: (String value) -> Int
+  def on_int(value)
+    node =
+      Int.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # IVar represents an instance variable literal.
+  #
+  #     @variable
+  #
+  class IVar
+    # [String] the name of the instance variable
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('ivar')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@ivar, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_ivar: (String value) -> IVar
+  def on_ivar(value)
+    node =
+      IVar.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # Kw represents the use of a keyword. It can be almost anywhere in the syntax
+  # tree, so you end up seeing it quite a lot.
+  #
+  #     if value
+  #     end
+  #
+  # In the above example, there would be two Kw nodes: one for the if and one
+  # for the end. Note that anything that matches the list of keywords in Ruby
+  # will use a Kw, so if you use a keyword in a symbol literal for instance:
+  #
+  #     :if
+  #
+  # then the contents of the symbol node will contain a Kw node.
+  class Kw
+    # [String] the value of the keyword
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('kw')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@kw, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_kw: (String value) -> Kw
+  def on_kw(value)
+    node =
+      Kw.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # KwRestParam represents defining a parameter in a method definition that
+  # accepts all remaining keyword parameters.
+  #
+  #     def method(**kwargs) end
+  #
+  class KwRestParam
+    # [nil | Ident] the name of the parameter
+    attr_reader :name
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(name:, location:)
+      @name = name
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('kwrest_param')
+
+        q.breakable
+        q.pp(name)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :kwrest_param, name: name, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_kwrest_param: ((nil | Ident) name) -> KwRestParam
+  def on_kwrest_param(name)
+    location = find_scanner_event(Op, '**').location
+    location = location.to(name.location) if name
+
+    KwRestParam.new(name: name, location: location)
+  end
+
+  # Label represents the use of an identifier to associate with an object. You
+  # can find it in a hash key, as in:
+  #
+  #     { key: value }
+  #
+  # In this case "key:" would be the body of the label. You can also find it in
+  # pattern matching, as in:
+  #
+  #     case value
+  #     in key:
+  #     end
+  #
+  # In this case "key:" would be the body of the label.
+  class Label
+    # [String] the value of the label
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('label')
+
+        q.breakable
+        q.text(':')
+        q.text(value[0...-1])
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@label, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_label: (String value) -> Label
+  def on_label(value)
+    node =
+      Label.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # LabelEnd represents the end of a dynamic symbol.
+  #
+  #     { "key": value }
+  #
+  # In the example above, LabelEnd represents the "\":" token at the end of the
+  # hash key. This node is important for determining the type of quote being
+  # used by the label.
+  class LabelEnd
+    # [String] the end of the label
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('label_end')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@label_end, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_label_end: (String value) -> LabelEnd
+  def on_label_end(value)
+    node =
+      LabelEnd.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # Lambda represents using a lambda literal (not the lambda method call).
+  #
+  #     ->(value) { value * 2 }
+  #
+  class Lambda
+    # [Params | Paren] the parameter declaration for this lambda
+    attr_reader :params
+
+    # [BodyStmt | Statements] the expressions to be executed in this lambda
+    attr_reader :statements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(params:, statements:, location:)
+      @params = params
+      @statements = statements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('lambda')
+
+        q.breakable
+        q.pp(params)
+
+        q.breakable
+        q.pp(statements)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :lambda,
+        params: params,
+        stmts: statements,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_lambda: (
+  #     (Params | Paren) params,
+  #     (BodyStmt | Statements) statements
+  #   ) -> Lambda
+  def on_lambda(params, statements)
+    beginning = find_scanner_event(TLambda)
+
+    if node = find_scanner_event(TLamBeg, consume: false)
+      opening = scanner_events.delete(node)
+      closing = find_scanner_event(RBrace)
+    else
+      opening = find_scanner_event(Kw, 'do')
+      closing = find_scanner_event(Kw, 'end')
+    end
+
+    statements.bind(opening.location.end_char, closing.location.start_char)
+
+    Lambda.new(
+      params: params,
+      statements: statements,
+      location: beginning.location.to(closing.location)
+    )
+  end
+
+  # LBrace represents the use of a left brace, i.e., {.
+  class LBrace
+    # [String] the left brace
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('lbrace')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@lbrace, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_lbrace: (String value) -> LBrace
+  def on_lbrace(value)
+    node =
+      LBrace.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # LBracket represents the use of a left bracket, i.e., [.
+  class LBracket
+    # [String] the left bracket
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('lbracket')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@lbracket, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_lbracket: (String value) -> LBracket
+  def on_lbracket(value)
+    node =
+      LBracket.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # LParen represents the use of a left parenthesis, i.e., (.
+  class LParen
+    # [String] the left parenthesis
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('lparen')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@lparen, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_lparen: (String value) -> LParen
+  def on_lparen(value)
+    node =
+      LParen.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
+
+    scanner_events << node
+    node
+  end
+
+  # def on_magic_comment(key, value)
+  #   [key, value]
+  # end
+
+  # MAssign is a parent node of any kind of multiple assignment. This includes
+  # splitting out variables on the left like:
+  #
+  #     first, second, third = value
   #
   # as well as splitting out variables on the right, as in:
   #
-  #     foo = a, b, c
+  #     value = first, second, third
   #
-  # Both sides support splats, as well as variables following them. There's
-  # also slightly odd behavior that you can achieve with the following:
+  # Both sides support splats, as well as variables following them. There's also
+  # destructuring behavior that you can achieve with the following:
   #
-  #     a, = foo
+  #     first, = value
   #
-  # In this case a would receive only the first value of the foo enumerable,
-  # in which case we need to explicitly track the comma and add it onto the
-  # child node.
-  def on_massign(target, value)
-    comma_range = target[:loc].end_char...value[:loc].start_char
-    target[:comma] = true if source[comma_range].strip.start_with?(',')
+  class MAssign
+    # [Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen] the target of the multiple
+    # assignment
+    attr_reader :target
 
-    {
-      type: :massign,
-      tgt: target,
-      val: value,
-      loc: target[:loc].to(value[:loc])
-    }
-  end
+    # [untyped] the value being assigned
+    attr_reader :value
 
-  # method_add_arg is a parser event that represents a method call with
-  # arguments and parentheses. It accepts as arguments the method being called
-  # and the arg_paren event that contains the arguments to the method.
-  def on_method_add_arg(call, args)
-    location =
-      if args[:type] == :args
-        # You can hit this if you are passing no arguments to a method that ends
-        # in a question mark. Because it knows it has to be a method and not a
-        # local variable. In that case we can just use the location information
-        # straight from the fcall.
-        call[:loc]
-      else
-        call[:loc].to(args[:loc])
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(target:, value:, location:)
+      @target = target
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('massign')
+
+        q.breakable
+        q.pp(target)
+
+        q.breakable
+        q.pp(value)
       end
+    end
 
-    { type: :method_add_arg, call: call, args: args, loc: location }
+    def to_json(*opts)
+      { type: :massign, tgt: target, val: value, loc: location }.to_json(*opts)
+    end
   end
 
-  # method_add_block is a parser event that represents a method call with a
-  # block argument. It accepts as arguments the method being called and the
-  # block event.
+  # :call-seq:
+  #   on_massign: (
+  #     (Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen) target,
+  #     untyped value
+  #   ) -> MAssign
+  def on_massign(target, value)
+    comma_range = target.location.end_char...value.location.start_char
+    target.comma = true if source[comma_range].strip.start_with?(',')
+
+    MAssign.new(
+      target: target,
+      value: value,
+      location: target.location.to(value.location)
+    )
+  end
+
+  # MethodAddArg represents a method call with arguments and parentheses.
+  #
+  #     method(argument)
+  #
+  # MethodAddArg can also represent with a method on an object, as in:
+  #
+  #     object.method(argument)
+  #
+  # Finally, MethodAddArg can represent calling a method with no receiver that
+  # ends in a ?. In this case, the parser knows it's a method call and not a
+  # local variable, so it uses a MethodAddArg node as opposed to a VCall node,
+  # as in:
+  #
+  #     method?
+  #
+  class MethodAddArg
+    # [Call | FCall] the method call
+    attr_reader :call
+
+    # [ArgParen | Args | ArgsAddBlock] the arguments to the method call
+    attr_reader :arguments
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(call:, arguments:, location:)
+      @call = call
+      @arguments = arguments
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('method_add_arg')
+
+        q.breakable
+        q.pp(call)
+
+        q.breakable
+        q.pp(arguments)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :method_add_arg,
+        call: call,
+        args: arguments,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_method_add_arg: (
+  #     (Call | FCall) call,
+  #     (ArgParen | Args | ArgsAddBlock) arguments
+  #   ) -> MethodAddArg
+  def on_method_add_arg(call, arguments)
+    location = call.location
+
+    location = location.to(arguments.location) unless arguments.is_a?(Args)
+
+    MethodAddArg.new(call: call, arguments: arguments, location: location)
+  end
+
+  # MethodAddBlock represents a method call with a block argument.
+  #
+  #     method {}
+  #
+  class MethodAddBlock
+    # [Call | Command | CommandCall | FCall | MethodAddArg] the method call
+    attr_reader :call
+
+    # [BraceBlock | DoBlock] the block being sent with the method call
+    attr_reader :block
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(call:, block:, location:)
+      @call = call
+      @block = block
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('method_add_block')
+
+        q.breakable
+        q.pp(call)
+
+        q.breakable
+        q.pp(block)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :method_add_block,
+        call: call,
+        block: block,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_method_add_block: (
+  #     (Call | Command | CommandCall | FCall | MethodAddArg) call,
+  #     (BraceBlock | DoBlock) block
+  #   ) -> MethodAddBlock
   def on_method_add_block(call, block)
-    {
-      type: :method_add_block,
+    MethodAddBlock.new(
       call: call,
       block: block,
-      loc: call[:loc].to(block[:loc])
-    }
+      location: call.location.to(block.location)
+    )
   end
 
-  # An mlhs_new is a parser event that represents the beginning of the left
-  # side of a multiple assignment. It is followed by any number of mlhs_add
-  # nodes that each represent another variable being assigned.
-  def on_mlhs_new
-    {
-      type: :mlhs,
-      parts: [],
-      loc: Location.fixed(line: lineno, char: char_pos)
-    }
-  end
+  # MLHS represents a list of values being destructured on the left-hand side
+  # of a multiple assignment.
+  #
+  #     first, second, third = value
+  #
+  class MLHS
+    # Array[ArefField | Field | Identifier | MlhsParen | VarField] the parts of
+    # the left-hand side of a multiple assignment
+    attr_reader :parts
 
-  # An mlhs_add is a parser event that represents adding another variable
-  # onto a list of assignments. It accepts as arguments the parent mlhs node
-  # as well as the part that is being added to the list.
-  def on_mlhs_add(mlhs, part)
-    if mlhs[:parts].empty?
-      { type: :mlhs, parts: [part], loc: part[:loc] }
-    else
-      {
-        type: :mlhs,
-        parts: mlhs[:parts] << part,
-        loc: mlhs[:loc].to(part[:loc])
-      }
+    # [boolean] whether or not there is a trailing comma at the end of this
+    # list, which impacts destructuring. It's an attr_accessor so that while
+    # the syntax tree is being built it can be set by its parent node
+    attr_accessor :comma
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(parts:, comma: false, location:)
+      @parts = parts
+      @comma = comma
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('mlhs')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :mlhs, parts: parts, comma: comma, loc: location }.to_json(*opts)
     end
   end
 
-  # An mlhs_add_post is a parser event that represents adding another set of
-  # variables onto a list of assignments after a splat variable. It accepts
-  # as arguments the previous mlhs_add_star node that represented the splat
-  # as well another mlhs node that represents all of the variables after the
-  # splat.
-  def on_mlhs_add_post(mlhs_add_star, mlhs)
-    {
-      type: :mlhs_add_post,
-      star: mlhs_add_star,
-      mlhs: mlhs,
-      loc: mlhs_add_star[:loc].to(mlhs[:loc])
-    }
+  # :call-seq:
+  #   on_mlhs_add: (
+  #     MLHS mlhs,
+  #     (ArefField | Field | Identifier | MlhsParen | VarField) part
+  #   ) -> MLHS
+  def on_mlhs_add(mlhs, part)
+    if mlhs.parts.empty?
+      MLHS.new(parts: [part], location: part.location)
+    else
+      MLHS.new(
+        parts: mlhs.parts << part,
+        location: mlhs.location.to(part.location)
+      )
+    end
   end
 
-  # An mlhs_add_star is a parser event that represents a splatted variable
-  # inside of a multiple assignment on the left hand side. It accepts as
-  # arguments the parent mlhs node as well as the part that represents the
-  # splatted variable.
-  def on_mlhs_add_star(mlhs, part)
-    beging = find_scanner_event(:@op, '*')
-    ending = part || beging
+  # MLHSAddPost represents adding another set of variables onto a list of
+  # assignments after a splat variable within a multiple assignment.
+  #
+  #     left, *middle, right = values
+  #
+  class MLHSAddPost
+    # [MlhsAddStar] the value being starred
+    attr_reader :star
 
-    {
-      type: :mlhs_add_star,
+    # [Mlhs] the values after the star
+    attr_reader :mlhs
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(star:, mlhs:, location:)
+      @star = star
+      @mlhs = mlhs
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('mlhs_add_post')
+
+        q.breakable
+        q.pp(star)
+
+        q.breakable
+        q.pp(mlhs)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :mlhs_add_post, star: star, mlhs: mlhs, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_mlhs_add_post: (MLHSAddStar star, MLHS mlhs) -> MLHSAddPost
+  def on_mlhs_add_post(star, mlhs)
+    MLHSAddPost.new(
+      star: star,
+      mlhs: mlhs,
+      location: star.location.to(mlhs.location)
+    )
+  end
+
+  # MLHSAddStar represents a splatted variable inside of a multiple assignment
+  # on the left hand side.
+  #
+  #     first, *rest = values
+  #
+  class MLHSAddStar
+    # [MLHS] the values before the starred expression
+    attr_reader :mlhs
+
+    # [nil | ArefField | Field | Identifier | VarField] the expression being
+    # splatted
+    attr_reader :star
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(mlhs:, star:, location:)
+      @mlhs = mlhs
+      @star = star
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('mlhs_add_star')
+
+        q.breakable
+        q.pp(mlhs)
+
+        q.breakable
+        q.pp(star)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :mlhs_add_star, mlhs: mlhs, star: star, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_mlhs_add_star: (
+  #     MLHS mlhs,
+  #     (nil | ArefField | Field | Identifier | VarField) part
+  #   ) -> MLHSAddStar
+  def on_mlhs_add_star(mlhs, part)
+    beginning = find_scanner_event(Op, '*')
+    ending = part || beginning
+
+    MLHSAddStar.new(
       mlhs: mlhs,
       star: part,
-      loc: beging[:loc].to(ending[:loc])
-    }
-  end
-
-  # An mlhs_paren is a parser event that represents parentheses being used
-  # to deconstruct values in a multiple assignment on the left hand side. It
-  # accepts as arguments the contents of the inside of the parentheses,
-  # which is another mlhs node.
-  def on_mlhs_paren(contents)
-    beging = find_scanner_event(:@lparen)
-    ending = find_scanner_event(:@rparen)
-
-    comma_range = beging[:loc].end_char...ending[:loc].start_char
-    contents[:comma] = true if source[comma_range].strip.end_with?(',')
-
-    { type: :mlhs_paren, cnts: contents, loc: beging[:loc].to(ending[:loc]) }
-  end
-
-  # module is a parser event that represents defining a module. It accepts
-  # as arguments the name of the module and the bodystmt event that
-  # represents the statements evaluated within the context of the module.
-  def on_module(constant, bodystmt)
-    beging = find_scanner_event(:@kw, 'module')
-    ending = find_scanner_event(:@kw, 'end')
-
-    bodystmt.bind(
-      find_next_statement_start(constant[:loc].end_char),
-      ending[:loc].start_char
+      location: beginning.location.to(ending.location)
     )
-
-    {
-      type: :module,
-      constant: constant,
-      bodystmt: bodystmt,
-      loc: beging[:loc].to(ending[:loc])
-    }
   end
 
-  # An mrhs_new is a parser event that represents the beginning of a list of
-  # values that are being assigned within a multiple assignment node. It can
-  # be followed by any number of mrhs_add nodes that we'll build up into an
-  # array body.
-  def on_mrhs_new
-    {
-      type: :mrhs,
-      parts: [],
-      loc: Location.fixed(line: lineno, char: char_pos)
-    }
+  # :call-seq:
+  #   on_mlhs_new: () -> MLHS
+  def on_mlhs_new
+    MLHS.new(parts: [], location: Location.fixed(line: lineno, char: char_pos))
   end
 
-  # An mrhs_add is a parser event that represents adding another value onto
-  # a list on the right hand side of a multiple assignment.
-  def on_mrhs_add(mrhs, part)
-    if mrhs[:type] == :mrhs_new_from_args
-      {
-        type: :mrhs,
-        parts: [*mrhs[:args][:parts], part],
-        loc: mrhs[:loc].to(part[:loc])
-      }
-    elsif mrhs[:parts].empty?
-      { type: :mrhs, parts: [part], loc: mrhs[:loc] }
-    else
-      {
-        type: mrhs[:type],
-        parts: mrhs[:parts] << part,
-        loc: mrhs[:loc].to(part[:loc])
-      }
+  # MLHSParen represents parentheses being used to destruct values in a multiple
+  # assignment on the left hand side.
+  #
+  #     (left, right) = value
+  #
+  class MLHSParen
+    # [Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen] the contents inside of the
+    # parentheses
+    attr_reader :contents
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(contents:, location:)
+      @contents = contents
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('mlhs_paren')
+
+        q.breakable
+        q.pp(contents)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :mlhs_paren, cnts: contents, loc: location }.to_json(*opts)
     end
   end
 
-  # An mrhs_add_star is a parser event that represents using the splat
-  # operator to expand out a value on the right hand side of a multiple
-  # assignment.
-  def on_mrhs_add_star(mrhs, star)
-    beging = find_scanner_event(:@op, '*')
-    ending = star || beging
+  # :call-seq:
+  #   on_mlhs_paren: (
+  #     (Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen) contents
+  #   ) -> MLHSParen
+  def on_mlhs_paren(contents)
+    lparen = find_scanner_event(LParen)
+    rparen = find_scanner_event(RParen)
 
-    {
-      type: :mrhs_add_star,
+    comma_range = lparen.location.end_char...rparen.location.start_char
+    contents.comma = true if source[comma_range].strip.end_with?(',')
+
+    MLHSParen.new(
+      contents: contents,
+      location: lparen.location.to(rparen.location)
+    )
+  end
+
+  # ModuleDeclaration represents defining a module using the +module+ keyword.
+  #
+  #     module Namespace
+  #     end
+  #
+  class ModuleDeclaration
+    # [ConstPathRef | ConstRef | TopConstRef] the name of the module
+    attr_reader :constant
+
+    # [BodyStmt] the expressions to be executed in the context of the module
+    attr_reader :bodystmt
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(constant:, bodystmt:, location:)
+      @constant = constant
+      @bodystmt = bodystmt
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('module')
+
+        q.breakable
+        q.pp(constant)
+
+        q.breakable
+        q.pp(bodystmt)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :module,
+        constant: constant,
+        bodystmt: bodystmt,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_module: (
+  #     (ConstPathRef | ConstRef | TopConstRef) constant,
+  #     BodyStmt bodystmt
+  #   ) -> ModuleDeclaration
+  def on_module(constant, bodystmt)
+    beginning = find_scanner_event(Kw, 'module')
+    ending = find_scanner_event(Kw, 'end')
+
+    bodystmt.bind(
+      find_next_statement_start(constant.location.end_char),
+      ending.location.start_char
+    )
+
+    ModuleDeclaration.new(
+      constant: constant,
+      bodystmt: bodystmt,
+      location: beginning.location.to(ending.location)
+    )
+  end
+
+  # MRHS represents the values that are being assigned on the right-hand side of
+  # a multiple assignment.
+  #
+  #     values = first, second, third
+  #
+  class MRHS
+    # Array[untyped] the parts that are being assigned
+    attr_reader :parts
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(parts:, location:)
+      @parts = parts
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('mrhs')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :mrhs, parts: parts, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_mrhs_new: () -> MRHS
+  def on_mrhs_new
+    MRHS.new(parts: [], location: Location.fixed(line: lineno, char: char_pos))
+  end
+
+  # :call-seq:
+  #   on_mrhs_add: (MRHS mrhs, untyped part) -> MRHS
+  def on_mrhs_add(mrhs, part)
+    if mrhs.is_a?(MRHSNewFromArgs)
+      MRHS.new(
+        parts: [*mrhs.arguments.parts, part],
+        location: mrhs.location.to(part.location)
+      )
+    elsif mrhs.parts.empty?
+      MRHS.new(parts: [part], location: mrhs.location)
+    else
+      MRHS.new(parts: mrhs.parts << part, loc: mrhs.location.to(part.location))
+    end
+  end
+
+  # MRHSAddStar represents using the splat operator to expand out a value on the
+  # right hand side of a multiple assignment.
+  #
+  #     values = first, *rest
+  #
+  class MRHSAddStar
+    # [MRHS | MRHSNewFromArgs] the values before the splatted expression
+    attr_reader :mrhs
+
+    # [untyped] the splatted expression
+    attr_reader :star
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(mrhs:, star:, location:)
+      @mrhs = mrhs
+      @star = star
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('mrhs_add_star')
+
+        q.breakable
+        q.pp(mrhs)
+
+        q.breakable
+        q.pp(star)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :mrhs_add_star, mrhs: mrhs, star: star, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_mrhs_add_star: (
+  #     (MRHS | MRHSNewFromArgs) mrhs,
+  #     untyped star
+  #   ) -> MRHSAddStar
+  def on_mrhs_add_star(mrhs, star)
+    beginning = find_scanner_event(Op, '*')
+    ending = star || beginning
+
+    MRHSAddStar.new(
       mrhs: mrhs,
       star: star,
-      loc: beging[:loc].to(ending[:loc])
-    }
+      location: beginning.location.to(ending.location)
+    )
   end
 
-  # An mrhs_new_from_args is a parser event that represents the shorthand
-  # of a multiple assignment that allows you to assign values using just
-  # commas as opposed to assigning from an array. For example, in the
-  # following segment the right hand side of the assignment would trigger
-  # this event:
+  # MRHSNewFromArgs represents the shorthand of a multiple assignment that
+  # allows you to assign values using just commas as opposed to assigning from
+  # an array.
   #
-  #     foo = 1, 2, 3
+  #     values = first, second, third
   #
-  def on_mrhs_new_from_args(args)
-    { type: :mrhs_new_from_args, args: args, loc: args[:loc] }
-  end
+  class MRHSNewFromArgs
+    # [Args | ArgsAddStar] the arguments being used in the assignment
+    attr_reader :arguments
 
-  # next is a parser event that represents using the next keyword. It
-  # accepts as an argument an args or args_add_block event that contains all
-  # of the arguments being passed to the next.
-  def on_next(args)
-    keyword = find_scanner_event(:@kw, 'next')
-    location =
-      if args[:type] == :args
-        # You can hit this if you are passing no arguments to next but it has a
-        # comment right after it. In that case we can just use the location
-        # information straight from the keyword.
-        keyword[:loc]
-      else
-        keyword[:loc].to(args[:loc])
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(arguments:, location:)
+      @arguments = arguments
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('mrhs_new_from_args')
+
+        q.breakable
+        q.pp(arguments)
       end
+    end
 
-    { type: :next, args: args, loc: location }
+    def to_json(*opts)
+      { type: :mrhs_new_from_args, args: arguments, loc: location }.to_json(
+        *opts
+      )
+    end
   end
 
-  # nl is a scanner event representing a newline in the source. As you can
-  # imagine, it will typically get triggered quite a few times. We don't need to
-  # track this event in the AST that we're generating, so we're not going to
-  # define an explicit handler for it.
-  #
-  #     def on_nl(value)
-  #       value
-  #     end
+  # :call-seq:
+  #   on_mrhs_new_from_args: ((Args | ArgsAddStar) arguments) -> MRHSNewFromArgs
+  def on_mrhs_new_from_args(arguments)
+    MRHSNewFromArgs.new(arguments: arguments, location: arguments.location)
+  end
 
-  # nokw_param is a parser event that represents the use of the special 2.7+
-  # syntax to indicate a method should take no additional keyword arguments. For
-  # example in the following snippet:
+  # Next represents using the +next+ keyword.
   #
-  #     def foo(**nil) end
+  #     next
   #
-  # this is saying that foo should not accept any keyword arguments. Its value
-  # is always nil. We don't need to track this event in the AST that we're
-  # generating, so we're not going to define an explicit handler for it.
+  # The +next+ keyword can also optionally be called with an argument:
   #
-  #     def on_nokw_param(value)
-  #       value
-  #     end
+  #     next value
+  #
+  # +next+ can even be called with multiple arguments, but only if parentheses
+  # are omitted, as in:
+  #
+  #     next first, second, third
+  #
+  # If a single value is being given, parentheses can be used, as in:
+  #
+  #     next(value)
+  #
+  class Next
+    # [Args | ArgsAddBlock] the arguments passed to the next keyword
+    attr_reader :arguments
 
-  # op is a scanner event representing an operator literal in the source. For
-  # example, in the following snippet:
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(arguments:, location:)
+      @arguments = arguments
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('next')
+
+        q.breakable
+        q.pp(arguments)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :next, args: arguments, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_next: ((Args | ArgsAddBlock) arguments) -> Next
+  def on_next(arguments)
+    keyword = find_scanner_event(Kw, 'next')
+
+    location = keyword.location
+    location = location.to(arguments.location) unless arguments.is_a?(Args)
+
+    Next.new(arguments: arguments, location: location)
+  end
+
+  # def on_nl(value)
+  #   value
+  # end
+
+  # def on_nokw_param(value)
+  #   value
+  # end
+
+  # Op represents an operator literal in the source.
   #
   #     1 + 2
   #
-  # the + sign is an operator.
+  # In the example above, the Op node represents the + operator.
+  class Op
+    # [String] the operator
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('op')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@op, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_op: (String value) -> Op
   def on_op(value)
-    node = {
-      type: :@op,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      Op.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # opassign is a parser event that represents assigning something to a
-  # variable or constant using an operator like += or ||=. It accepts as
-  # arguments the left side of the expression before the operator, the
-  # operator itself, and the right side of the expression.
+  # OpAssign represents assigning a value to a variable or constant using an
+  # operator like += or ||=.
+  #
+  #     variable += value
+  #
+  class OpAssign
+    # [ArefField | ConstPathField | Field | TopConstField | VarField] the target
+    # to assign the result of the expression to
+    attr_reader :target
+
+    # [Op] the operator being used for the assignment
+    attr_reader :operator
+
+    # [untyped] the expression to be assigned
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(target:, operator:, value:, location:)
+      @target = target
+      @operator = operator
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('opassign')
+
+        q.breakable
+        q.pp(target)
+
+        q.breakable
+        q.pp(operator)
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :opassign,
+        target: target,
+        operator: operator,
+        value: value,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_opassign: (
+  #     (ArefField | ConstPathField | Field | TopConstField | VarField) target,
+  #     Op operator,
+  #     untyped value
+  #   ) -> OpAssign
   def on_opassign(target, operator, value)
-    {
-      type: :opassign,
+    OpAssign.new(
       target: target,
       operator: operator,
       value: value,
-      loc: target[:loc].to(value[:loc])
-    }
+      location: target.location.to(value.location)
+    )
   end
 
-  # operator_ambiguous is a parser event that represents when the parsers sees
-  # an operator as ambiguous. For example, in the following snippet:
-  #
-  #     foo %[]
-  #
-  # the question becomes if the percent sign is being used as a method call or
-  # if it's the start of a string literal. We don't need to track this event in
-  # the AST that we're generating, so we're not going to define an explicit
-  # handler for it.
-  #
-  #     def on_operator_ambiguous(value)
-  #       value
-  #     end
+  # def on_operator_ambiguous(value)
+  #   value
+  # end
 
-  # params is a parser event that represents defining parameters on a
-  # method. They have a somewhat interesting structure in that they are an
-  # array of arrays where the position in the top-level array indicates the
-  # type of param and the subarray is the list of parameters of that type.
-  # We therefore have to flatten them down to get to the location.
-  def on_params(reqs, opts, rest, posts, keywords, kwrest, block)
-    params = [
-      *reqs,
-      *opts&.flatten(1),
+  # Params represents defining parameters on a method or lambda.
+  #
+  #     def method(param) end
+  #
+  class Params
+    # [Array[Ident]] any required parameters
+    attr_reader :requireds
+
+    # [Array[[Ident, untyped]]] any optional parameters and their default values
+    attr_reader :optionals
+
+    # [nil | ArgsForward | ExcessedComma | RestParam] the optional rest
+    # parameter
+    attr_reader :rest
+
+    # Array[Ident] any positional parameters that exist after a rest parameter
+    attr_reader :posts
+
+    # Array[[Ident, nil | untyped]] any keyword parameters and their optional
+    # default values
+    attr_reader :keywords
+
+    # [nil | :nil | KwRestParam] the optional keyword rest parameter
+    attr_reader :keyword_rest
+
+    # [nil | BlockArg] the optional block parameter
+    attr_reader :block
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(
+      requireds: [],
+      optionals: [],
+      rest: nil,
+      posts: [],
+      keywords: [],
+      keyword_rest: nil,
+      block: nil,
+      location:
+    )
+      @requireds = requireds
+      @optionals = optionals
+      @rest = rest
+      @posts = posts
+      @keywords = keywords
+      @keyword_rest = keyword_rest
+      @block = block
+      @location = location
+    end
+
+    # Params nodes are the most complicated in the tree. Occasionally you want
+    # to know if they are "empty", which means not having any parameters
+    # declared. This logic accesses every kind of parameter and determines if
+    # it's missing.
+    def empty?
+      requireds.empty? && optionals.empty? && !rest && posts.empty? &&
+        keywords.empty? && !keyword_rest && !block
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('params')
+
+        if requireds.any?
+          q.breakable
+          q.group(2, '(', ')') { q.seplist(requireds) { |name| q.pp(name) } }
+        end
+
+        if optionals.any?
+          q.breakable
+          q.group(2, '(', ')') do
+            q.seplist(optionals) do |(name, default)|
+              q.pp(name)
+              q.text('=')
+              q.group(2) do
+                q.breakable('')
+                q.pp(default)
+              end
+            end
+          end
+        end
+
+        if rest
+          q.breakable
+          q.pp(rest)
+        end
+
+        if posts.any?
+          q.breakable
+          q.group(2, '(', ')') { q.seplist(posts) { |value| q.pp(value) } }
+        end
+
+        if keywords.any?
+          q.breakable
+          q.group(2, '(', ')') do
+            q.seplist(keywords) do |(name, default)|
+              q.pp(name)
+
+              if default
+                q.text('=')
+                q.group(2) do
+                  q.breakable('')
+                  q.pp(default)
+                end
+              end
+            end
+          end
+        end
+
+        if keyword_rest
+          q.breakable
+          q.pp(keyword_rest)
+        end
+
+        if block
+          q.breakable
+          q.pp(block)
+        end
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :params,
+        reqs: requireds,
+        opts: optionals,
+        rest: rest,
+        posts: posts,
+        keywords: keywords,
+        kwrest: keyword_rest,
+        block: block,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_params: (
+  #     (nil | Array[Ident]) requireds,
+  #     (nil | Array[[Ident, untyped]]) optionals,
+  #     (nil | ArgsForward | ExcessedComma | RestParam) rest,
+  #     (nil | Array[Ident]) posts,
+  #     (nil | Array[[Ident, nil | untyped]]) keywords,
+  #     (nil | :nil | KwRestParam) keyword_rest,
+  #     (nil | BlockArg) block
+  #   ) -> Params
+  def on_params(
+    requireds,
+    optionals,
+    rest,
+    posts,
+    keywords,
+    keyword_rest,
+    block
+  )
+    parts = [
+      *requireds,
+      *optionals&.flatten(1),
       rest,
       *posts,
       *keywords&.flat_map { |(key, value)| [key, value || nil] },
-      (kwrest if kwrest != :nil),
+      (keyword_rest if keyword_rest != :nil),
       block
     ].compact
 
     location =
-      if params.any?
-        params[0][:loc].to(params[-1][:loc])
+      if parts.any?
+        parts[0].location.to(parts[-1].location)
       else
         Location.fixed(line: lineno, char: char_pos)
       end
 
-    {
-      type: :params,
-      reqs: reqs || [],
-      opts: opts || [],
+    Params.new(
+      requireds: requireds || [],
+      optionals: optionals || [],
       rest: rest,
       posts: posts || [],
       keywords: keywords || [],
-      kwrest: kwrest,
+      keyword_rest: keyword_rest,
       block: block,
-      loc: location
-    }
+      location: location
+    )
   end
 
-  # A paren is a parser event that represents using parentheses pretty much
-  # anywhere in a Ruby program. It accepts as arguments the contents, which
-  # can be either params or statements.
-  def on_paren(contents)
-    lparen = find_scanner_event(:@lparen)
-    rparen = find_scanner_event(:@rparen)
+  # Paren represents using balanced parentheses in a couple places in a Ruby
+  # program. In general parentheses can be used anywhere a Ruby expression can
+  # be used.
+  #
+  #     (1 + 2)
+  #
+  class Paren
+    # [LParen] the left parenthesis that opened this statement
+    attr_reader :lparen
 
-    if contents && contents[:type] == :params
-      location = contents[:loc]
-      contents[:loc] =
+    # [untyped] the expression inside the parentheses
+    attr_reader :contents
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(lparen:, contents:, location:)
+      @lparen = lparen
+      @contents = contents
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('paren')
+
+        q.breakable
+        q.pp(contents)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :paren, lparen: lparen, cnts: contents, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_paren: (untyped contents) -> Paren
+  def on_paren(contents)
+    lparen = find_scanner_event(LParen)
+    rparen = find_scanner_event(RParen)
+
+    if contents && contents.is_a?(Params)
+      location = contents.location
+      location =
         Location.new(
           start_line: location.start_line,
-          start_char: find_next_statement_start(lparen[:loc].end_char),
+          start_char: find_next_statement_start(lparen.location.end_char),
           end_line: location.end_line,
-          end_char: rparen[:loc].start_char
+          end_char: rparen.location.start_char
+        )
+
+      contents =
+        Params.new(
+          requireds: contents.requireds,
+          optionals: contents.optionals,
+          rest: contents.rest,
+          posts: contents.posts,
+          keywords: contents.keywords,
+          keyword_rest: contents.keyword_rest,
+          block: contents.block,
+          location: location
         )
     end
 
-    {
-      type: :paren,
+    Paren.new(
       lparen: lparen,
-      cnts: contents,
-      loc: lparen[:loc].to(rparen[:loc])
-    }
+      contents: contents,
+      location: lparen.location.to(rparen.location)
+    )
   end
 
   # If we encounter a parse error, just immediately bail out so that our runner
@@ -2289,21 +6214,82 @@ class Prettier::Parser < Ripper
   alias on_class_name_error on_parse_error
   alias on_param_error on_parse_error
 
-  # period is a scanner event that represents the use of the period operator. It
-  # is usually found in method calls.
-  def on_period(value)
-    {
-      type: :@period,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+  # Period represents the use of the +.+ operator. It is usually found in method
+  # calls.
+  class Period
+    # [String] the period
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('period')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@period, value: value, loc: location }.to_json(*opts)
+    end
   end
 
-  # The program node is the very top of the AST. Here we'll attach all of
-  # the comments that we've gathered up over the course of parsing the
-  # source string. We'll also attach on the __END__ content if there was
-  # some found at the end of the source string.
-  def on_program(stmts)
+  # :call-seq:
+  #   on_period: (String value) -> Period
+  def on_period(value)
+    Period.new(
+      value: value,
+      location: Location.token(line: lineno, char: char_pos, size: value.size)
+    )
+  end
+
+  # Program represents the overall syntax tree.
+  class Program
+    # [Statements] the top-level expressions of the program
+    attr_reader :statements
+
+    # [Array[Comment | EmbDoc]] the comments inside the program
+    attr_reader :comments
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(statements:, comments:, location:)
+      @statements = statements
+      @comments = comments
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('program')
+
+        q.breakable
+        q.pp(statements)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :program,
+        stmts: statements,
+        comments: comments,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_program: (Statements statements) -> Program
+  def on_program(statements)
     location =
       Location.new(
         start_line: 1,
@@ -2312,204 +6298,648 @@ class Prettier::Parser < Ripper
         end_char: source.length
       )
 
-    stmts[:body] << @__end__ if @__end__
-    stmts.bind(0, source.length)
+    statements.body << @__end__ if @__end__
+    statements.bind(0, source.length)
 
-    { type: :program, stmts: stmts, comments: @comments, loc: location }
+    Program.new(statements: statements, comments: @comments, location: location)
   end
 
-  # qsymbols_beg is a scanner event that represents the beginning of a symbol
-  # literal array. For example in the following snippet:
+  # QSymbols represents a symbol literal array without interpolation.
   #
-  #     %i[foo bar baz]
+  #     %i[one two three]
   #
-  # a qsymbols_beg would be triggered with the value of "%i[".
+  class QSymbols
+    # [Array[TStringContent]] the elements of the array
+    attr_reader :elements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(elements:, location:)
+      @elements = elements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('qsymbols')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(elements) { |element| q.pp(element) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :qsymbols, elems: elements, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_qsymbols_add: (QSymbols qsymbols, TStringContent element) -> QSymbols
+  def on_qsymbols_add(qsymbols, element)
+    QSymbols.new(
+      elements: qsymbols.elements << element,
+      location: qsymbols.location.to(element.location)
+    )
+  end
+
+  # QSymbolsBeg represents the beginning of a symbol literal array.
+  #
+  #     %i[one two three]
+  #
+  # In the snippet above, QSymbolsBeg represents the "%i[" token. Note that
+  # these kinds of arrays can start with a lot of different delimiter types
+  # (e.g., %i| or %i<).
+  class QSymbolsBeg
+    # [String] the beginning of the array literal
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('qsymbols_beg')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@qsymbols_beg, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_qsymbols_beg: (String value) -> QSymbolsBeg
   def on_qsymbols_beg(value)
-    node = {
-      type: :@qsymbols_beg,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      QSymbolsBeg.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # qsymbols_new is a parser event that represents the beginning of a symbol
-  # literal array, like %i[one two three]. It can be followed by any number
-  # of qsymbols_add events, which we'll append onto an array body.
+  # :call-seq:
+  #   on_qsymbols_new: () -> QSymbols
   def on_qsymbols_new
-    event = find_scanner_event(:@qsymbols_beg)
+    qsymbols_beg = find_scanner_event(QSymbolsBeg)
 
-    { type: :qsymbols, elems: [], loc: event[:loc] }
+    QSymbols.new(elements: [], location: qsymbols_beg.location)
   end
 
-  # qsymbols_add is a parser event that represents an element inside of a
-  # symbol literal array like %i[one two three]. It accepts as arguments the
-  # parent qsymbols node as well as a tstring_content scanner event
-  # representing the bare words.
-  def on_qsymbols_add(qsymbols, tstring_content)
-    {
-      type: :qsymbols,
-      elems: qsymbols[:elems] << tstring_content,
-      loc: qsymbols[:loc].to(tstring_content[:loc])
-    }
+  # QWords represents a string literal array without interpolation.
+  #
+  #     %w[one two three]
+  #
+  class QWords
+    # [Array[TStringContent]] the elements of the array
+    attr_reader :elements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(elements:, location:)
+      @elements = elements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('qwords')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(elements) { |element| q.pp(element) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :qwords, elems: elements, loc: location }.to_json(*opts)
+    end
   end
 
-  # qwords_beg is a scanner event that represents the beginning of a word
-  # literal array. For example in the following snippet:
+  # :call-seq:
+  #   on_qwords_add: (QWords qwords, TStringContent element) -> QWords
+  def on_qwords_add(qwords, element)
+    QWords.new(
+      elements: qwords.elements << element,
+      location: qwords.location.to(element.location)
+    )
+  end
+
+  # QWordsBeg represents the beginning of a string literal array.
   #
-  #     %w[foo bar baz]
+  #     %w[one two three]
   #
-  # a qwords_beg would be triggered with the value of "%w[".
+  # In the snippet above, QWordsBeg represents the "%w[" token. Note that these
+  # kinds of arrays can start with a lot of different delimiter types (e.g.,
+  # %w| or %w<).
+  class QWordsBeg
+    # [String] the beginning of the array literal
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('qwords_beg')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@qwords_beg, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_qwords_beg: (String value) -> QWordsBeg
   def on_qwords_beg(value)
-    node = {
-      type: :@qwords_beg,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      QWordsBeg.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # qwords_new is a parser event that represents the beginning of a string
-  # literal array, like %w[one two three]. It can be followed by any number
-  # of qwords_add events, which we'll append onto an array body.
+  # :call-seq:
+  #   on_qwords_new: () -> QWords
   def on_qwords_new
-    event = find_scanner_event(:@qwords_beg)
+    qwords_beg = find_scanner_event(QWordsBeg)
 
-    { type: :qwords, elems: [], loc: event[:loc] }
+    QWords.new(elements: [], location: qwords_beg.location)
   end
 
-  # qsymbols_add is a parser event that represents an element inside of a
-  # symbol literal array like %i[one two three]. It accepts as arguments the
-  # parent qsymbols node as well as a tstring_content scanner event
-  # representing the bare words.
-  def on_qwords_add(qwords, tstring_content)
-    {
-      type: :qwords,
-      elems: qwords[:elems] << tstring_content,
-      loc: qwords[:loc].to(tstring_content[:loc])
-    }
+  # Rational represents the use of a rational number literal.
+  #
+  #     1r
+  #
+  class Rational
+    # [String] the rational number literal
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('rational')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@rational, value: value, loc: location }.to_json(*opts)
+    end
   end
 
-  # rational is a scanner event that represents a rational number literal.
+  # :call-seq:
+  #   on_rational: (String value) -> Rational
   def on_rational(value)
-    node = {
-      type: :@rational,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      Rational.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # rbrace is a scanner event that represents the use of a right brace, i.e.,
-  # "}".
+  # RBrace represents the use of a right brace, i.e., +++.
+  class RBrace
+    # [String] the right brace
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('rbrace')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@rbrace, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_rbrace: (String value) -> RBrace
   def on_rbrace(value)
-    node = {
-      type: :@rbrace,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      RBrace.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # rbracket is a scanner event that represents the use of a right bracket,
-  # i.e., "]".
+  # RBracket represents the use of a right bracket, i.e., +]+.
+  class RBracket
+    # [String] the right bracket
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('rbracket')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@rbracket, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_rbracket: (String value) -> RBracket
   def on_rbracket(value)
-    node = {
-      type: :@rbracket,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      RBracket.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # redo is a parser event that represents the bare redo keyword. It has no
-  # body as it accepts no arguments.
+  # Redo represents the use of the +redo+ keyword.
+  #
+  #     redo
+  #
+  class Redo
+    # [String] the value of the keyword
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('redo')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :redo, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_redo: () -> Redo
   def on_redo
-    keyword = find_scanner_event(:@kw, 'redo')
+    keyword = find_scanner_event(Kw, 'redo')
 
-    { type: :redo, value: keyword[:value], loc: keyword[:loc] }
+    Redo.new(value: keyword.value, location: keyword.location)
   end
 
-  # regexp_add is a parser event that represents a part of a regular expression
-  # body. It accepts as arguments the parent regexp node as well as a
-  # tstring_content scanner event representing string content, a
-  # string_embexpr parser event representing interpolated content, or a
-  # string_dvar parser event representing an interpolated variable.
-  def on_regexp_add(regexp, part)
-    {
-      type: :regexp,
-      parts: regexp[:parts] << part,
-      beging: regexp[:beging],
-      loc: regexp[:loc].to(part[:loc])
-    }
+  # RegexpContent represents the body of a regular expression.
+  #
+  #     /.+ #{pattern} .+/
+  #
+  # In the example above, a RegexpContent node represents everything contained
+  # within the forward slashes.
+  class RegexpContent
+    # [String] the opening of the regular expression
+    attr_reader :beginning
+
+    # [Array[StringDVar | StringEmbExpr | TStringContent]] the parts of the
+    # regular expression
+    attr_reader :parts
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(beginning:, parts:, location:)
+      @beginning = beginning
+      @parts = parts
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('regexp')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :regexp, beging: beginning, parts: parts, loc: location }.to_json(
+        *opts
+      )
+    end
   end
 
-  # regexp_beg is a scanner event that represents the start of a regular
-  # expression. It can take a couple of forms since regexp can either start with
-  # a forward slash or a %r.
+  # :call-seq:
+  #   on_regexp_add: (
+  #     RegexpContent regexp_content,
+  #     (StringDVar | StringEmbExpr | TStringContent) part
+  #   ) -> RegexpContent
+  def on_regexp_add(regexp_content, part)
+    RegexpContent.new(
+      beginning: regexp_content.beginning,
+      parts: regexp_content.parts << part,
+      location: regexp_content.location.to(part.location)
+    )
+  end
+
+  # RegexpBeg represents the start of a regular expression literal.
+  #
+  #     /.+/
+  #
+  # In the example above, RegexpBeg represents the first / token. Regular
+  # expression literals can also be declared using the %r syntax, as in:
+  #
+  #     %r{.+}
+  #
+  class RegexpBeg
+    # [String] the beginning of the regular expression
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('regexp_beg')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@regexp_beg, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_regexp_beg: (String value) -> RegexpBeg
   def on_regexp_beg(value)
-    node = {
-      type: :@regexp_beg,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      RegexpBeg.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # regexp_end is a scanner event that represents the end of a regular
-  # expression. It will contain the closing brace or slash, as well as any flags
-  # being passed to the regexp.
+  # RegexpEnd represents the end of a regular expression literal.
+  #
+  #     /.+/m
+  #
+  # In the example above, the RegexpEnd event represents the /m at the end of
+  # the regular expression literal. You can also declare regular expression
+  # literals using %r, as in:
+  #
+  #     %r{.+}m
+  #
+  class RegexpEnd
+    # [String] the end of the regular expression
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('regexp_end')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@regexp_end, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_regexp_end: (String value) -> RegexpEnd
   def on_regexp_end(value)
-    {
-      type: :@regexp_end,
+    RegexpEnd.new(
       value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+      location: Location.token(line: lineno, char: char_pos, size: value.size)
+    )
   end
 
-  # regexp_literal is a parser event that represents a regular expression.
-  # It accepts as arguments a regexp node which is a built-up array of
-  # pieces that go into the regexp content, as well as the ending used to
-  # close out the regexp which includes any modifiers.
-  def on_regexp_literal(regexp, ending)
-    {
-      type: :regexp_literal,
-      parts: regexp[:parts],
-      beging: regexp[:beging],
-      ending: ending[:value],
-      loc: regexp[:loc].to(ending[:loc])
-    }
+  # RegexpLiteral represents a regular expression literal.
+  #
+  #     /.+/
+  #
+  class RegexpLiteral
+    # [String] the beginning of the regular expression literal
+    attr_reader :beginning
+
+    # [String] the ending of the regular expression literal
+    attr_reader :ending
+
+    # [Array[StringEmbExpr | StringDVar | TStringContent]] the parts of the
+    # regular expression literal
+    attr_reader :parts
+
+    # [Locatione] the location of this node
+    attr_reader :location
+
+    def initialize(beginning:, ending:, parts:, location:)
+      @beginning = beginning
+      @ending = ending
+      @parts = parts
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('regexp_literal')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :regexp_literal,
+        beging: beginning,
+        ending: ending,
+        parts: parts,
+        loc: location
+      }.to_json(*opts)
+    end
   end
 
-  # regexp_new is a parser event that represents the beginning of a regular
-  # expression literal, like /foo/. It can be followed by any number of
-  # regexp_add events, which we'll append onto an array body.
+  # :call-seq:
+  #   on_regexp_literal: (
+  #     RegexpContent regexp_content,
+  #     RegexpEnd ending
+  #   ) -> RegexpLiteral
+  def on_regexp_literal(regexp_content, ending)
+    RegexpLiteral.new(
+      beginning: regexp_content.beginning,
+      ending: ending.value,
+      parts: regexp_content.parts,
+      location: regexp_content.location.to(ending.location)
+    )
+  end
+
+  # :call-seq:
+  #   on_regexp_new: () -> RegexpContent
   def on_regexp_new
-    beging = find_scanner_event(:@regexp_beg)
+    regexp_beg = find_scanner_event(RegexpBeg)
 
-    { type: :regexp, parts: [], beging: beging[:value], loc: beging[:loc] }
+    RegexpContent.new(
+      beginning: regexp_beg.value,
+      parts: [],
+      location: regexp_beg.location
+    )
   end
 
-  # rescue is a special kind of node where you have a rescue chain but it
-  # doesn't really have all of the information that it needs in order to
-  # determine its ending. Therefore it relies on its parent bodystmt node to
-  # report its ending to it.
-  class Rescue < Node
+  # RescueEx represents the list of exceptions being rescued in a rescue clause.
+  #
+  #     begin
+  #     rescue Exception => exception
+  #     end
+  #
+  class RescueEx
+    # [untyped] the list of exceptions being rescued
+    attr_reader :exceptions
+
+    # [nil | Field | VarField] the expression being used to capture the raised
+    # exception
+    attr_reader :variable
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(exceptions:, variable:, location:)
+      @exceptions = exceptions
+      @variable = variable
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('rescue_ex')
+
+        q.breakable
+        q.pp(exceptions)
+
+        q.breakable
+        q.pp(variable)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :rescue_ex,
+        extns: exceptions,
+        var: variable,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # Rescue represents the use of the rescue keyword inside of a BodyStmt node.
+  #
+  #     begin
+  #     rescue
+  #     end
+  #
+  class Rescue
+    # [RescueEx] the exceptions being rescued
+    attr_reader :exception
+
+    # [Statements] the expressions to evaluate when an error is rescued
+    attr_reader :statements
+
+    # [nil | Rescue] the optional next clause in the chain
+    attr_reader :consequent
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(exception:, statements:, consequent:, location:)
+      @exception = exception
+      @statements = statements
+      @consequent = consequent
+      @location = location
+    end
+
     def bind_end(end_char)
-      location = value[:loc]
-      value[:loc] =
+      @location =
         Location.new(
           start_line: location.start_line,
           start_char: location.start_char,
@@ -2517,179 +6947,418 @@ class Prettier::Parser < Ripper
           end_char: end_char
         )
 
-      stmts = value[:stmts]
-      consequent = value[:cons]
-
       if consequent
         consequent.bind_end(end_char)
-        stmts.bind_end(consequent[:loc].start_char)
+        statements.bind_end(consequent.location.start_char)
       else
-        stmts.bind_end(end_char)
+        statements.bind_end(end_char)
       end
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('rescue')
+
+        if exception
+          q.breakable
+          q.pp(exception)
+        end
+
+        q.breakable
+        q.pp(statements)
+
+        if consequent
+          q.breakable
+          q.pp(consequent)
+        end
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :rescue,
+        extn: exception,
+        stmts: statements,
+        cons: consequent,
+        loc: location
+      }.to_json(*opts)
     end
   end
 
-  # rescue is a parser event that represents the use of the rescue keyword
-  # inside of a bodystmt.
-  def on_rescue(exceptions, variable, stmts, consequent)
-    beging = find_scanner_event(:@kw, 'rescue')
+  # :call-seq:
+  #   on_rescue: (
+  #     (nil | [untyped] | MRHS | MRHSAddStar) exceptions,
+  #     (nil | Field | VarField) variable,
+  #     Statements statements,
+  #     (nil | Rescue) consequent
+  #   ) -> Rescue
+  def on_rescue(exceptions, variable, statements, consequent)
+    keyword = find_scanner_event(Kw, 'rescue')
     exceptions = exceptions[0] if exceptions.is_a?(Array)
 
-    last_node = variable || exceptions || beging
-    stmts.bind(find_next_statement_start(last_node[:loc].end_char), char_pos)
+    last_node = variable || exceptions || keyword
+    statements.bind(
+      find_next_statement_start(last_node.location.end_char),
+      char_pos
+    )
 
     # We add an additional inner node here that ripper doesn't provide so that
     # we have a nice place to attach inline comments. But we only need it if we
     # have an exception or a variable that we're rescuing.
     rescue_ex =
       if exceptions || variable
-        {
-          type: :rescue_ex,
-          extns: exceptions,
-          var: variable,
-          loc:
+        RescueEx.new(
+          exceptions: exceptions,
+          variable: variable,
+          location:
             Location.new(
-              start_line: beging[:loc].start_line,
-              start_char: beging[:loc].end_char + 1,
-              end_line: last_node[:loc].end_line,
-              end_char: last_node[:loc].end_char
+              start_line: keyword.location.start_line,
+              start_char: keyword.location.end_char + 1,
+              end_line: last_node.location.end_line,
+              end_char: last_node.location.end_char
             )
-        }
+        )
       end
 
     Rescue.new(
-      self,
-      {
-        type: :rescue,
-        extn: rescue_ex,
-        stmts: stmts,
-        cons: consequent,
-        loc:
-          Location.new(
-            start_line: beging[:loc].start_line,
-            start_char: beging[:loc].start_char,
-            end_line: lineno,
-            end_char: char_pos
-          )
-      }
+      exception: rescue_ex,
+      statements: statements,
+      consequent: consequent,
+      location:
+        Location.new(
+          start_line: keyword.location.start_line,
+          start_char: keyword.location.start_char,
+          end_line: lineno,
+          end_char: char_pos
+        )
     )
   end
 
-  # rescue_mod represents the modifier form of a rescue clause. It accepts as
-  # arguments the statement that may raise an error and the value that should
-  # be used if it does.
+  # RescueMod represents the use of the modifier form of a +rescue+ clause.
+  #
+  #     expression rescue value
+  #
+  class RescueMod
+    # [untyped] the expression to execute
+    attr_reader :statement
+
+    # [untyped] the value to use if the executed expression raises an error
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(statement:, value:, location:)
+      @statement = statement
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('rescue_mod')
+
+        q.breakable
+        q.pp(statement)
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :rescue_mod, stmt: statement, val: value, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_rescue_mod: (untyped statement, untyped value) -> RescueMod
   def on_rescue_mod(statement, value)
-    find_scanner_event(:@kw, 'rescue')
+    find_scanner_event(Kw, 'rescue')
 
-    {
-      type: :rescue_mod,
-      stmt: statement,
-      val: value,
-      loc: statement[:loc].to(value[:loc])
-    }
-  end
-
-  # rest_param is a parser event that represents defining a parameter in a
-  # method definition that accepts all remaining positional parameters. It
-  # accepts as an argument an optional identifier for the parameter. If it
-  # is omitted, then we're just using the plain operator.
-  def on_rest_param(name)
-    location = find_scanner_event(:@op, '*')[:loc]
-    location = location.to(name[:loc]) if name
-
-    { type: :rest_param, name: name, loc: location }
-  end
-
-  # retry is a parser event that represents the bare retry keyword. It has
-  # no body as it accepts no arguments.
-  def on_retry
-    keyword = find_scanner_event(:@kw, 'retry')
-
-    { type: :retry, value: keyword[:value], loc: keyword[:loc] }
-  end
-
-  # return is a parser event that represents using the return keyword with
-  # arguments. It accepts as an argument an args_add_block event that
-  # contains all of the arguments being passed.
-  def on_return(args)
-    keyword = find_scanner_event(:@kw, 'return')
-
-    { type: :return, args: args, loc: keyword[:loc].to(args[:loc]) }
-  end
-
-  # return0 is a parser event that represents the bare return keyword. It
-  # has no body as it accepts no arguments. This is as opposed to the return
-  # parser event, which is the version where you're returning one or more
-  # values.
-  def on_return0
-    keyword = find_scanner_event(:@kw, 'return')
-
-    { type: :return0, value: keyword[:value], loc: keyword[:loc] }
-  end
-
-  # rparen is a scanner event that represents the use of a right parenthesis,
-  # i.e., ")".
-  def on_rparen(value)
-    node = {
-      type: :@rparen,
+    RescueMod.new(
+      statement: statement,
       value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+      location: statement.location.to(value.location)
+    )
+  end
+
+  # RestParam represents defining a parameter in a method definition that
+  # accepts all remaining positional parameters.
+  #
+  #     def method(*rest) end
+  #
+  class RestParam
+    # [nil | Ident] the name of the parameter
+    attr_reader :name
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(name:, location:)
+      @name = name
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('rest_param')
+
+        q.breakable
+        q.pp(name)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :rest_param, name: name, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_rest_param: ((nil | Ident) name) -> RestParam
+  def on_rest_param(name)
+    location = find_scanner_event(Op, '*').location
+    location = location.to(name.location) if name
+
+    RestParam.new(name: name, location: location)
+  end
+
+  # Retry represents the use of the +retry+ keyword.
+  #
+  #     retry
+  #
+  class Retry
+    # [String] the value of the keyword
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('retry')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :retry, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_retry: () -> Retry
+  def on_retry
+    keyword = find_scanner_event(Kw, 'retry')
+
+    Retry.new(value: keyword.value, location: keyword.location)
+  end
+
+  # Return represents using the +return+ keyword with arguments.
+  #
+  #     return value
+  #
+  class Return
+    # [Args | ArgsAddBlock] the arguments being passed to the keyword
+    attr_reader :arguments
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(arguments:, location:)
+      @arguments = arguments
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('return')
+
+        q.breakable
+        q.pp(arguments)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :return, args: arguments, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_return: ((Args | ArgsAddBlock) arguments) -> Return
+  def on_return(arguments)
+    keyword = find_scanner_event(Kw, 'return')
+
+    Return.new(
+      arguments: arguments,
+      location: keyword.location.to(arguments.location)
+    )
+  end
+
+  # Return0 represents the bare +return+ keyword with no arguments.
+  #
+  #     return
+  #
+  class Return0
+    # [String] the value of the keyword
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('return0')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :return0, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_return0: () -> Return0
+  def on_return0
+    keyword = find_scanner_event(Kw, 'return')
+
+    Return0.new(value: keyword.value, location: keyword.location)
+  end
+
+  # RParen represents the use of a right parenthesis, i.e., +)+.
+  class RParen
+    # [String] the parenthesis
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('rparen')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@rparen, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_rparen: (String value) -> RParen
+  def on_rparen(value)
+    node =
+      RParen.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # sclass is a parser event that represents a block of statements that
-  # should be evaluated within the context of the singleton class of an
-  # object. It's frequently used to define singleton methods. It looks like
-  # the following example:
+  # SClass represents a block of statements that should be evaluated within the
+  # context of the singleton class of an object. It's frequently used to define
+  # singleton methods.
   #
-  #     class << self do foo end
-  #               │       │
-  #               │       └> bodystmt
-  #               └> target
+  #     class << self
+  #     end
   #
-  def on_sclass(target, bodystmt)
-    beging = find_scanner_event(:@kw, 'class')
-    ending = find_scanner_event(:@kw, 'end')
+  class SClass
+    # [untyped] the target of the singleton class to enter
+    attr_reader :target
 
-    bodystmt.bind(
-      find_next_statement_start(target[:loc].end_char),
-      ending[:loc].start_char
-    )
+    # [BodyStmt] the expressions to be executed
+    attr_reader :bodystmt
 
-    {
-      type: :sclass,
-      target: target,
-      bodystmt: bodystmt,
-      loc: beging[:loc].to(ending[:loc])
-    }
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(target:, bodystmt:, location:)
+      @target = target
+      @bodystmt = bodystmt
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('sclass')
+
+        q.breakable
+        q.pp(target)
+
+        q.breakable
+        q.pp(bodystmt)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :sclass,
+        target: target,
+        bodystmt: bodystmt,
+        loc: location
+      }.to_json(*opts)
+    end
   end
 
-  # semicolon is a scanner event that represents the use of a semicolon in the
-  # source. We don't need to track this event in the AST that we're generating,
-  # so we're not going to define an explicit handler for it.
-  #
-  #     def on_semicolon(value)
-  #       value
-  #     end
+  # :call-seq:
+  #   on_sclass: (untyped target, BodyStmt bodystmt) -> SClass
+  def on_sclass(target, bodystmt)
+    beginning = find_scanner_event(Kw, 'class')
+    ending = find_scanner_event(Kw, 'end')
 
-  # sp is a scanner event that represents the use of a space in the source. As
-  # you can imagine, this event gets triggered quite often. We don't need to
-  # track this event in the AST that we're generating, so we're not going to
-  # define an explicit handler for it.
-  #
-  #     def on_sp(value)
-  #       value
-  #     end
+    bodystmt.bind(
+      find_next_statement_start(target.location.end_char),
+      ending.location.start_char
+    )
+
+    SClass.new(
+      target: target,
+      bodystmt: bodystmt,
+      location: beginning.location.to(ending.location)
+    )
+  end
+
+  # def on_semicolon(value)
+  #   value
+  # end
+
+  # def on_sp(value)
+  #   value
+  # end
 
   # stmts_add is a parser event that represents a single statement inside a
   # list of statements within any lexical block. It accepts as arguments the
   # parent stmts node as well as an stmt which can be any expression in
   # Ruby.
-  def on_stmts_add(stmts, stmt)
-    stmts << stmt
+  def on_stmts_add(statements, statement)
+    statements << statement
   end
 
   # Everything that has a block of code inside of it has a list of statements.
@@ -2699,10 +7368,24 @@ class Prettier::Parser < Ripper
   # stmts nodes will report back down the location information. We then
   # propagate that onto void_stmt nodes inside the stmts in order to make sure
   # all comments get printed appropriately.
-  class Stmts < Node
+  class Statements
+    # [Prettier::Parser] the parser that created this node
+    attr_reader :parser
+
+    # [Array[untyped]] the list of expressions contained within this node
+    attr_reader :body
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(parser:, body:, location:)
+      @parser = parser
+      @body = body
+      @location = location
+    end
+
     def bind(start_char, end_char)
-      location = value[:loc]
-      value[:loc] =
+      @location =
         Location.new(
           start_line: location.start_line,
           start_char: start_char,
@@ -2710,24 +7393,24 @@ class Prettier::Parser < Ripper
           end_char: end_char
         )
 
-      if value[:body][0][:type] == :void_stmt
-        location = value[:body][0][:loc]
-        value[:body][0][:loc] =
+      if body[0].is_a?(VoidStmt)
+        location = body[0].location
+        location =
           Location.new(
             start_line: location.start_line,
             start_char: start_char,
             end_line: location.end_line,
             end_char: start_char
           )
+
+        body[0] = VoidStmt.new(location: location)
       end
 
       attach_comments(start_char, end_char)
     end
 
     def bind_end(end_char)
-      location = value[:loc]
-
-      value[:loc] =
+      @location =
         Location.new(
           start_line: location.start_line,
           start_char: location.start_char,
@@ -2737,11 +7420,24 @@ class Prettier::Parser < Ripper
     end
 
     def <<(statement)
-      value[:loc] =
-        value[:body].any? ? value[:loc].to(statement[:loc]) : statement[:loc]
+      @location =
+        body.any? ? location.to(statement.location) : statement.location
 
-      value[:body] << statement
+      body << statement
       self
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('statements')
+
+        q.breakable
+        q.seplist(body) { |statement| q.pp(statement) }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :stmts, body: body, loc: location }.to_json(*opts)
     end
 
     private
@@ -2749,760 +7445,2132 @@ class Prettier::Parser < Ripper
     def attach_comments(start_char, end_char)
       attachable =
         parser.comments.select do |comment|
-          comment[:type] == :@comment && !comment[:inline] &&
-            start_char <= comment[:loc].start_char &&
-            end_char >= comment[:loc].end_char &&
-            !comment[:value].include?('prettier-ignore')
+          comment.is_a?(Comment) && !comment.inline &&
+            start_char <= comment.location.start_char &&
+            end_char >= comment.location.end_char &&
+            !comment.value.include?('prettier-ignore')
         end
 
       return if attachable.empty?
 
       parser.comments -= attachable
-      value[:body] =
-        (value[:body] + attachable).sort_by! { |node| node[:loc].start_char }
+      @body = (body + attachable).sort_by! { |node| node.location.start_char }
     end
   end
 
-  # stmts_new is a parser event that represents the beginning of a list of
-  # statements within any lexical block. It can be followed by any number of
-  # stmts_add events, which we'll append onto an array body.
+  # :call-seq:
+  #   on_stmts_new: () -> Statements
   def on_stmts_new
-    Stmts.new(
-      self,
-      type: :stmts,
+    Statements.new(
+      parser: self,
       body: [],
-      loc: Location.fixed(line: lineno, char: char_pos)
+      location: Location.fixed(line: lineno, char: char_pos)
     )
   end
 
-  # string_add is a parser event that represents a part of a string. It
-  # could be plain @tstring_content, string_embexpr, or string_dvar nodes.
-  # It accepts as arguments the parent string node as well as the additional
-  # part of the string.
-  def on_string_add(string, part)
-    {
-      type: :string,
-      parts: string[:parts] << part,
-      loc: string[:loc].to(part[:loc])
-    }
-  end
-
-  # string_concat is a parser event that represents concatenating two
-  # strings together using a backward slash, as in the following example:
+  # StringContent represents the contents of a string-like value.
   #
-  #     'foo' \
-  #       'bar'
+  #     "string"
   #
-  def on_string_concat(left, right)
-    {
-      type: :string_concat,
-      left: left,
-      right: right,
-      loc: left[:loc].to(right[:loc])
-    }
-  end
+  class StringContent
+    # [Array[StringEmbExpr | StringDVar | TStringContent]] the parts of the
+    # string
+    attr_reader :parts
 
-  # string_content is a parser event that represents the beginning of the
-  # contents of a string, which will either be embedded inside of a
-  # string_literal or a dyna_symbol node. It will have an array body so that
-  # we can build up a list of @tstring_content, string_embexpr, and
-  # string_dvar nodes.
-  def on_string_content
-    {
-      type: :string,
-      parts: [],
-      loc: Location.fixed(line: lineno, char: char_pos)
-    }
-  end
+    # [Location] the location of this node
+    attr_reader :location
 
-  # string_dvar is a parser event that represents a very special kind of
-  # interpolation into string. It allows you to take an instance variable,
-  # class variable, or global variable and omit the braces when
-  # interpolating. For example, if you wanted to interpolate the instance
-  # variable @foo into a string, you could do "#@foo".
-  def on_string_dvar(variable)
-    event = find_scanner_event(:@embvar)
+    def initialize(parts:, location:)
+      @parts = parts
+      @location = location
+    end
 
-    { type: :string_dvar, var: variable, loc: event[:loc].to(variable[:loc]) }
-  end
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('string')
 
-  # string_embexpr is a parser event that represents interpolated content.
-  # It can go a bunch of different parent nodes, including regexp, strings,
-  # xstrings, heredocs, dyna_symbols, etc. Basically it's anywhere you see
-  # the #{} construct.
-  def on_string_embexpr(stmts)
-    beging = find_scanner_event(:@embexpr_beg)
-    ending = find_scanner_event(:@embexpr_end)
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
 
-    stmts.bind(beging[:loc].end_char, ending[:loc].start_char)
-
-    { type: :string_embexpr, stmts: stmts, loc: beging[:loc].to(ending[:loc]) }
-  end
-
-  # String literals are either going to be a normal string or they're going
-  # to be a heredoc if we've just closed a heredoc.
-  def on_string_literal(string)
-    heredoc = @heredocs[-1]
-
-    if heredoc && heredoc[:ending]
-      @heredocs.pop.merge!(parts: string[:parts])
-    else
-      beging = find_scanner_event(:@tstring_beg)
-      ending = find_scanner_event(:@tstring_end)
-
-      {
-        type: :string_literal,
-        parts: string[:parts],
-        quote: beging[:value],
-        loc: beging[:loc].to(ending[:loc])
-      }
+    def to_json(*opts)
+      { type: :string, parts: parts, loc: location }.to_json(*opts)
     end
   end
 
-  # A super is a parser event that represents using the super keyword with
-  # any number of arguments. It can optionally use parentheses (represented
-  # by an arg_paren node) or just skip straight to the arguments (with an
-  # args_add_block node).
-  def on_super(args)
-    keyword = find_scanner_event(:@kw, 'super')
+  # :call-seq:
+  #   on_string_add: (
+  #     String string,
+  #     (StringEmbExpr | StringDVar | TStringContent) part
+  #   ) -> StringContent
+  def on_string_add(string, part)
+    location =
+      string.parts.any? ? string.location.to(part.location) : part.location
 
-    { type: :super, args: args, loc: keyword[:loc].to(args[:loc]) }
+    StringContent.new(parts: string.parts << part, location: location)
+  end
+
+  # StringConcat represents concatenating two strings together using a backward
+  # slash.
+  #
+  #     "first" \
+  #       "second"
+  #
+  class StringConcat
+    # [StringConcat | StringLiteral] the left side of the concatenation
+    attr_reader :left
+
+    # [StringLiteral] the right side of the concatenation
+    attr_reader :right
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(left:, right:, location:)
+      @left = left
+      @right = right
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('string_concat')
+
+        q.breakable
+        q.pp(left)
+
+        q.breakable
+        q.pp(right)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :string_concat, left: left, right: right, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_string_concat: (
+  #     (StringConcat | StringLiteral) left,
+  #     StringLiteral right
+  #   ) -> StringConcat
+  def on_string_concat(left, right)
+    StringConcat.new(
+      left: left,
+      right: right,
+      location: left.location.to(right.location)
+    )
+  end
+
+  # :call-seq:
+  #   on_string_content: () -> StringContent
+  def on_string_content
+    StringContent.new(
+      parts: [],
+      location: Location.fixed(line: lineno, char: char_pos)
+    )
+  end
+
+  # StringDVar represents shorthand interpolation of a variable into a string.
+  # It allows you to take an instance variable, class variable, or global
+  # variable and omit the braces when interpolating.
+  #
+  #     "#@variable"
+  #
+  class StringDVar
+    # [Backref | VarRef] the variable being interpolated
+    attr_reader :variable
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(variable:, location:)
+      @variable = variable
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('string_dvar')
+
+        q.breakable
+        q.pp(variable)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :string_dvar, var: variable, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_string_dvar: ((Backref | VarRef) variable) -> StringDVar
+  def on_string_dvar(variable)
+    embvar = find_scanner_event(EmbVar)
+
+    StringDVar.new(
+      variable: variable,
+      location: embvar.location.to(variable.location)
+    )
+  end
+
+  # StringEmbExpr represents interpolated content. It can be contained within a
+  # couple of different parent nodes, including regular expressions, strings,
+  # and dynamic symbols.
+  #
+  #     "string #{expression}"
+  #
+  class StringEmbExpr
+    # [Statements] the expressions to be interpolated
+    attr_reader :statements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(statements:, location:)
+      @statements = statements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('string_embexpr')
+
+        q.breakable
+        q.pp(statements)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :string_embexpr, stmts: statements, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_string_embexpr: (Statements statements) -> StringEmbExpr
+  def on_string_embexpr(statements)
+    embexpr_beg = find_scanner_event(EmbExprBeg)
+    embexpr_end = find_scanner_event(EmbExprEnd)
+
+    statements.bind(
+      embexpr_beg.location.end_char,
+      embexpr_end.location.start_char
+    )
+
+    StringEmbExpr.new(
+      statements: statements,
+      location: embexpr_beg.location.to(embexpr_end.location)
+    )
+  end
+
+  # StringLiteral represents a string literal.
+  #
+  #     "string"
+  #
+  class StringLiteral
+    # [Array[StringEmbExpr | StringDVar | TStringContent]] the parts of the
+    # string literal
+    attr_reader :parts
+
+    # [String] which quote was used by the string literal
+    attr_reader :quote
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(parts:, quote:, location:)
+      @parts = parts
+      @quote = quote
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('string_literal')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :string_literal,
+        parts: parts,
+        quote: quote,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_string_literal: (String string) -> Heredoc | StringLiteral
+  def on_string_literal(string)
+    heredoc = @heredocs[-1]
+
+    if heredoc && heredoc.ending
+      heredoc = @heredocs.pop
+
+      Heredoc.new(
+        beginning: heredoc.beginning,
+        ending: heredoc.ending,
+        parts: string.parts,
+        location: heredoc.location
+      )
+    else
+      tstring_beg = find_scanner_event(TStringBeg)
+      tstring_end = find_scanner_event(TStringEnd)
+
+      StringLiteral.new(
+        parts: string.parts,
+        quote: tstring_beg.value,
+        location: tstring_beg.location.to(tstring_end.location)
+      )
+    end
+  end
+
+  # Super represents using the +super+ keyword with arguments. It can optionally
+  # use parentheses.
+  #
+  #     super(value)
+  #
+  class Super
+    # [ArgParen | Args | ArgsAddBlock] the arguments to the keyword
+    attr_reader :arguments
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(arguments:, location:)
+      @arguments = arguments
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('super')
+
+        q.breakable
+        q.pp(arguments)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :super, args: arguments, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_super: ((ArgParen | Args | ArgsAddBlock) arguments) -> Super
+  def on_super(arguments)
+    keyword = find_scanner_event(Kw, 'super')
+
+    Super.new(
+      arguments: arguments,
+      location: keyword.location.to(arguments.location)
+    )
+  end
+
+  # SymBeg represents the beginning of a symbol literal.
+  #
+  #     :symbol
+  #
+  # SymBeg is also used for dynamic symbols, as in:
+  #
+  #     :"symbol"
+  #
+  # Finally, SymBeg is also used for symbols using the %s syntax, as in:
+  #
+  #     %s[symbol]
+  #
+  # The value of this node is a string. In most cases (as in the first example
+  # above) it will contain just ":". In the case of dynamic symbols it will
+  # contain ":'" or ":\"". In the case of %s symbols, it will contain the start
+  # of the symbol including the %s and the delimiter.
+  class SymBeg
+    # [String] the beginning of the symbol
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('symbeg')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@symbeg, value: value, loc: location }.to_json(*opts)
+    end
   end
 
   # symbeg is a scanner event that represents the beginning of a symbol literal.
   # In most cases it will contain just ":" as in the value, but if its a dynamic
   # symbol being defined it will contain ":'" or ":\"".
   def on_symbeg(value)
-    node = {
-      type: :@symbeg,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      SymBeg.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # A symbol is a parser event that immediately descends from a symbol
-  # literal and contains an ident representing the contents of the symbol.
-  def on_symbol(value)
-    # When ripper is lexing source text, it turns symbols into keywords if their
-    # contents match, which will mess up the location information of all of our
-    # other nodes. So for example instead of { type: :@ident, value: "class" }
-    # you would instead get { type: :@kw, value: "class" }.
-    #
-    # In order to take care of this, we explicitly delete this scanner event
-    # from the stack to make sure it doesn't screw things up.
-    scanner_events.pop
+  # SymbolContent represents symbol contents and is always the child of a
+  # SymbolLiteral node.
+  #
+  #     :symbol
+  #
+  class SymbolContent
+    # [Backtick | Const | CVar | GVar | Ident | IVar | Kw | Op] the value of the
+    # symbol
+    attr_reader :value
 
-    { type: :symbol, val: value, loc: value[:loc] }
-  end
+    # [Location] the location of this node
+    attr_reader :location
 
-  # A symbol_literal represents a symbol in the system with no interpolation
-  # (as opposed to a dyna_symbol). As its only argument it accepts either a
-  # symbol node (for most cases) or an ident node (in the case that we're
-  # using bare words, as in an alias node like alias foo bar).
-  def on_symbol_literal(contents)
-    if scanner_events[-1] == contents
-      { type: :symbol_literal, val: contents, loc: contents[:loc] }
-    else
-      beging = find_scanner_event(:@symbeg)
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
 
-      {
-        type: :symbol_literal,
-        val: contents[:val],
-        loc: beging[:loc].to(contents[:loc])
-      }
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('symbol')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :symbol, val: value, loc: location }.to_json(*opts)
     end
   end
 
-  # symbols_add is a parser event that represents an element inside of a
-  # symbol literal array that accepts interpolation, like
-  # %I[one #{two} three]. It accepts as arguments the parent symbols node as
-  # well as a word_add parser event.
-  def on_symbols_add(symbols, word_add)
-    {
-      type: :symbols,
-      elems: symbols[:elems] << word_add,
-      loc: symbols[:loc].to(word_add[:loc])
-    }
+  # :call-seq:
+  #   on_symbol: (
+  #     (Backtick | Const | CVar | GVar | Ident | IVar | Kw | Op) value
+  #   ) -> SymbolContent
+  def on_symbol(value)
+    scanner_events.pop
+
+    SymbolContent.new(value: value, location: value.location)
   end
 
-  # symbols_beg is a scanner event that represents the start of a symbol literal
-  # array with interpolation. For example, in the following snippet:
+  # SymbolLiteral represents a symbol in the system with no interpolation
+  # (as opposed to a DynaSymbol which has interpolation).
   #
-  #     %I[foo bar baz]
+  #     :symbol
   #
-  # symbols_beg would be triggered with the value of "%I".
+  class SymbolLiteral
+    # [Backtick | Const | CVar | GVar | Ident | IVar | Kw | Op] the value of the
+    # symbol
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('symbol_literal')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :symbol_literal, val: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_symbol_literal: (
+  #     (
+  #       Backtick | Const | CVar | GVar | Ident |
+  #       IVar | Kw | Op | SymbolContent
+  #     ) value
+  #   ) -> SymbolLiteral
+  def on_symbol_literal(value)
+    if scanner_events[-1] == value
+      SymbolLiteral.new(value: scanner_events.pop, location: value.location)
+    else
+      symbeg = find_scanner_event(SymBeg)
+
+      SymbolLiteral.new(
+        value: value.value,
+        location: symbeg.location.to(value.location)
+      )
+    end
+  end
+
+  # Symbols represents a symbol array literal with interpolation.
+  #
+  #     %I[one two three]
+  #
+  class Symbols
+    # [Array[Word]] the words in the symbol array literal
+    attr_reader :elements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(elements:, location:)
+      @elements = elements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('symbols')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(elements) { |element| q.pp(element) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :symbols, elems: elements, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_symbols_add: (Symbols symbols, Word word) -> Symbols
+  def on_symbols_add(symbols, word)
+    Symbols.new(
+      elements: symbols.elements << word,
+      location: symbols.location.to(word.location)
+    )
+  end
+
+  # SymbolsBeg represents the start of a symbol array literal with
+  # interpolation.
+  #
+  #     %I[one two three]
+  #
+  # In the snippet above, SymbolsBeg represents the "%I[" token. Note that these
+  # kinds of arrays can start with a lot of different delimiter types
+  # (e.g., %I| or %I<).
+  class SymbolsBeg
+    # [String] the beginning of the symbol literal array
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('symbols_beg')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@symbols_beg, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_symbols_beg: (String value) -> SymbolsBeg
   def on_symbols_beg(value)
-    node = {
-      type: :@symbols_beg,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      SymbolsBeg.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # symbols_new is a parser event that represents the beginning of a symbol
-  # literal array that accepts interpolation, like %I[one #{two} three]. It
-  # can be followed by any number of symbols_add events, which we'll append
-  # onto an array body.
+  # :call-seq:
+  #   on_symbols_new: () -> Symbols
   def on_symbols_new
-    event = find_scanner_event(:@symbols_beg)
+    symbols_beg = find_scanner_event(SymbolsBeg)
 
-    { type: :symbols, elems: [], loc: event[:loc] }
+    Symbols.new(elements: [], location: symbols_beg.location)
   end
 
-  # tlambda is a scanner event that represents the beginning of a lambda
-  # literal. It always has the value of "->".
+  # TLambda represents the beginning of a lambda literal.
+  #
+  #     -> { value }
+  #
+  # In the example above the TLambda represents the +->+ operator.
+  class TLambda
+    # [String] the beginning of the lambda literal
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('tlambda')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@tlambda, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_tlambda: (String value) -> TLambda
   def on_tlambda(value)
-    node = {
-      type: :@tlambda,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      TLambda.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # tlambeg is a scanner event that represents the beginning of the body of a
-  # lambda literal. It always has the value of "{".
+  # TLamBeg represents the beginning of the body of a lambda literal using
+  # braces.
+  #
+  #     -> { value }
+  #
+  # In the example above the TLamBeg represents the +{+ operator.
+  class TLamBeg
+    # [String] the beginning of the body of the lambda literal
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('tlambeg')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@tlambeg, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_tlambeg: (String value) -> TLamBeg
   def on_tlambeg(value)
-    node = {
-      type: :@tlambeg,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      TLamBeg.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # A top_const_field is a parser event that is always the child of some
-  # kind of assignment. It represents when you're assigning to a constant
-  # that is being referenced at the top level. For example:
+  # TopConstField is always the child node of some kind of assignment. It
+  # represents when you're assigning to a constant that is being referenced at
+  # the top level.
   #
-  #     ::X = 1
+  #     ::Constant = value
   #
+  class TopConstField
+    # [Const] the constant being assigned
+    attr_reader :constant
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(constant:, location:)
+      @constant = constant
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('top_const_field')
+
+        q.breakable
+        q.pp(constant)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :top_const_field, constant: constant, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_top_const_field: (Const constant) -> TopConstRef
   def on_top_const_field(constant)
     operator = find_colon2_before(constant)
 
-    {
-      type: :top_const_field,
+    TopConstField.new(
       constant: constant,
-      loc: operator[:loc].to(constant[:loc])
-    }
+      location: operator.location.to(constant.location)
+    )
   end
 
-  # A top_const_ref is a parser event that is a very similar to
-  # top_const_field except that it is not involved in an assignment. It
-  # looks like the following example:
+  # TopConstRef is very similar to TopConstField except that it is not involved
+  # in an assignment.
   #
-  #     ::X
+  #     ::Constant
   #
+  class TopConstRef
+    # [Const] the constant being referenced
+    attr_reader :constant
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(constant:, location:)
+      @constant = constant
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('top_const_ref')
+
+        q.breakable
+        q.pp(constant)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :top_const_ref, constant: constant, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_top_const_ref: (Const constant) -> TopConstRef
   def on_top_const_ref(constant)
     operator = find_colon2_before(constant)
 
-    {
-      type: :top_const_ref,
+    TopConstRef.new(
       constant: constant,
-      loc: operator[:loc].to(constant[:loc])
-    }
+      location: operator.location.to(constant.location)
+    )
   end
 
-  # tstring_beg is a scanner event that represents the beginning of a string
-  # literal. It can represent either of the quotes for its value, or it can have
-  # a %q/%Q with delimiter.
+  # TStringBeg represents the beginning of a string literal.
+  #
+  #     "string"
+  #
+  # In the example above, TStringBeg represents the first set of quotes. Strings
+  # can also use single quotes. They can also be declared using the +%q+ and
+  # +%Q+ syntax, as in:
+  #
+  #     %q{string}
+  #
+  class TStringBeg
+    # [String] the beginning of the string
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('tstring_beg')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@tstring_beg, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_tstring_beg: (String value) -> TStringBeg
   def on_tstring_beg(value)
-    node = {
-      type: :@tstring_beg,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      TStringBeg.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # tstring_content is a scanner event that represents plain characters inside
-  # of a string, heredoc, xstring, or regexp. Like comments, we need to force
-  # the encoding here so JSON doesn't break.
+  # TStringContent represents plain characters inside of an entity that accepts
+  # string content like a string, heredoc, command string, or regular
+  # expression.
+  #
+  #     "string"
+  #
+  # In the example above, TStringContent represents the +string+ token contained
+  # within the string.
+  class TStringContent
+    # [String] the content of the string
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('tstring_content')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :@tstring_content,
+        value: value.force_encoding('UTF-8'),
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_tstring_content: (String value) -> TStringContent
   def on_tstring_content(value)
-    {
-      type: :@tstring_content,
-      value: value.force_encoding('UTF-8'),
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    TStringContent.new(
+      value: value,
+      location: Location.token(line: lineno, char: char_pos, size: value.size)
+    )
   end
 
-  # tstring_end is a scanner event that represents the end of a string literal.
-  # It can either contain quotes, or it can have the end delimiter of a %q/%Q
-  # literal.
+  # TStringEnd represents the end of a string literal.
+  #
+  #     "string"
+  #
+  # In the example above, TStringEnd represents the second set of quotes.
+  # Strings can also use single quotes. They can also be declared using the +%q+
+  # and +%Q+ syntax, as in:
+  #
+  #     %q{string}
+  #
+  class TStringEnd
+    # [String] the end of the string
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('tstring_end')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@tstring_end, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_tstring_end: (String value) -> TStringEnd
   def on_tstring_end(value)
-    node = {
-      type: :@tstring_end,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      TStringEnd.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # A unary node represents a unary method being called on an expression, as
-  # in !, ~, or not. We have somewhat special handling of the not operator
-  # since if it has parentheses they don't get reported as a paren node for
-  # some reason.
-  def on_unary(operator, value)
-    if operator == :not
-      node = find_scanner_event(:@kw, 'not')
+  # Not represents the unary +not+ method being called on an expression.
+  #
+  #     not value
+  #
+  class Not
+    # [untyped] the statement on which to operate
+    attr_reader :statement
 
-      paren = source[node[:loc].end_char...value[:loc].start_char].include?('(')
-      ending = paren ? find_scanner_event(:@rparen) : value
+    # [boolean] whether or not parentheses were used
+    attr_reader :parentheses
 
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(statement:, parentheses:, location:)
+      @statement = statement
+      @parentheses = parentheses
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('not')
+
+        q.breakable
+        q.pp(statement)
+      end
+    end
+
+    def to_json(*opts)
       {
         type: :unary,
-        op: operator,
-        val: value,
-        paren: paren,
-        loc: node[:loc].to(ending[:loc])
-      }
+        op: :not,
+        val: statement,
+        paren: parentheses,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # Unary represents a unary method being called on an expression, as in +!+ or
+  # +~+.
+  #
+  #     !value
+  #
+  class Unary
+    # [String] the operator being used
+    attr_reader :operator
+
+    # [untyped] the statement on which to operate
+    attr_reader :statement
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(operator:, statement:, location:)
+      @operator = operator
+      @statement = statement
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('unary')
+
+        q.breakable
+        q.pp(operator)
+
+        q.breakable
+        q.pp(statement)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :unary, op: operator, val: statement, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_unary: (:not operator, untyped statement) -> Not
+  #           | (Symbol operator, untyped statement) -> Unary
+  def on_unary(operator, statement)
+    if operator == :not
+      # We have somewhat special handling of the not operator since if it has
+      # parentheses they don't get reported as a paren node for some reason.
+
+      beginning = find_scanner_event(Kw, 'not')
+      ending = statement
+
+      range = beginning.location.end_char...statement.location.start_char
+      paren = source[range].include?('(')
+
+      if paren
+        find_scanner_event(LParen)
+        ending = find_scanner_event(RParen)
+      end
+
+      Not.new(
+        statement: statement,
+        parentheses: paren,
+        location: beginning.location.to(ending.location)
+      )
     else
       # Special case instead of using find_scanner_event here. It turns out that
       # if you have a range that goes from a negative number to a negative
       # number then you can end up with a .. or a ... that's higher in the
       # stack. So we need to explicitly disallow those operators.
       index =
-        scanner_events.rindex do |scanner_event|
-          scanner_event[:type] == :@op &&
-            scanner_event[:loc].start_char < value[:loc].start_char &&
-            !%w[.. ...].include?(scanner_event[:value])
+        scanner_events.rindex do |node|
+          node.is_a?(Op) &&
+            node.location.start_char < statement.location.start_char &&
+            !%w[.. ...].include?(node.value)
         end
 
-      beging = scanner_events.delete_at(index)
+      beginning = scanner_events.delete_at(index)
 
-      {
-        type: :unary,
-        op: operator[0],
-        val: value,
-        loc: beging[:loc].to(value[:loc])
-      }
+      Unary.new(
+        operator: operator[0], # :+@ -> "+"
+        statement: statement,
+        location: beginning.location.to(statement.location)
+      )
     end
   end
 
-  # undef nodes represent using the keyword undef. It accepts as an argument
-  # an array of symbol_literal nodes that represent each message that the
-  # user is attempting to undefine. We use the keyword to get the beginning
-  # location and the last symbol to get the ending.
-  def on_undef(symbol_literals)
-    event = find_scanner_event(:@kw, 'undef')
+  # Undef represents the use of the +undef+ keyword.
+  #
+  #     undef method
+  #
+  class Undef
+    # [Array[DynaSymbol | SymbolLiteral]] the symbols to undefine
+    attr_reader :symbols
 
-    {
-      type: :undef,
-      syms: symbol_literals,
-      loc: event[:loc].to(symbol_literals.last[:loc])
-    }
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(symbols:, location:)
+      @symbols = symbols
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('undef')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(symbols) { |symbol| q.pp(symbol) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :undef, syms: symbols, loc: location }.to_json(*opts)
+    end
   end
 
-  # unless is a parser event that represents the first clause in an unless
-  # chain. It accepts as arguments the predicate of the unless, the
-  # statements that are contained within the unless clause, and the optional
-  # consequent clause.
-  def on_unless(predicate, stmts, consequent)
-    beging = find_scanner_event(:@kw, 'unless')
-    ending = consequent || find_scanner_event(:@kw, 'end')
+  # :call-seq:
+  #   on_undef: (Array[DynaSymbol | SymbolLiteral] symbols) -> Undef
+  def on_undef(symbols)
+    keyword = find_scanner_event(Kw, 'undef')
 
-    stmts.bind(predicate[:loc].end_char, ending[:loc].start_char)
-
-    {
-      type: :unless,
-      pred: predicate,
-      stmts: stmts,
-      cons: consequent,
-      loc: beging[:loc].to(ending[:loc])
-    }
+    Undef.new(
+      symbols: symbols,
+      location: keyword.location.to(symbols.last.location)
+    )
   end
 
-  # unless_mod is a parser event that represents the modifier form of an
-  # unless statement. It accepts as arguments the predicate of the unless
-  # and the statement that are contained within the unless clause.
+  # Unless represents the first clause in an +unless+ chain.
+  #
+  #     unless predicate
+  #     end
+  #
+  class Unless
+    # [untyped] the expression to be checked
+    attr_reader :predicate
+
+    # [Statements] the expressions to be executed
+    attr_reader :statements
+
+    # [nil, Elsif, Else] the next clause in the chain
+    attr_reader :consequent
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(predicate:, statements:, consequent:, location:)
+      @predicate = predicate
+      @statements = statements
+      @consequent = consequent
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('unless')
+
+        q.breakable
+        q.pp(predicate)
+
+        q.breakable
+        q.pp(statements)
+
+        if consequent
+          q.breakable
+          q.pp(consequent)
+        end
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :unless,
+        pred: predicate,
+        stmts: statements,
+        cons: consequent,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_unless: (
+  #     untyped predicate,
+  #     Statements statements,
+  #     ((nil | Elsif | Else) consequent)
+  #   ) -> Unless
+  def on_unless(predicate, statements, consequent)
+    beginning = find_scanner_event(Kw, 'unless')
+    ending = consequent || find_scanner_event(Kw, 'end')
+
+    statements.bind(predicate.location.end_char, ending.location.start_char)
+
+    Unless.new(
+      predicate: predicate,
+      statements: statements,
+      consequent: consequent,
+      location: beginning.location.to(ending.location)
+    )
+  end
+
+  # UnlessMod represents the modifier form of an +unless+ statement.
+  #
+  #     expression unless predicate
+  #
+  class UnlessMod
+    # [untyped] the expression to be executed
+    attr_reader :statement
+
+    # [untyped] the expression to be checked
+    attr_reader :predicate
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(statement:, predicate:, location:)
+      @statement = statement
+      @predicate = predicate
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('unless_mod')
+
+        q.breakable
+        q.pp(statement)
+
+        q.breakable
+        q.pp(predicate)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :unless_mod,
+        stmt: statement,
+        pred: predicate,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_unless_mod: (untyped predicate, untyped statement) -> UnlessMod
   def on_unless_mod(predicate, statement)
-    find_scanner_event(:@kw, 'unless')
+    find_scanner_event(Kw, 'unless')
 
-    {
-      type: :unless_mod,
-      pred: predicate,
-      stmt: statement,
-      loc: statement[:loc].to(predicate[:loc])
-    }
+    UnlessMod.new(
+      statement: statement,
+      predicate: predicate,
+      location: statement.location.to(predicate.location)
+    )
   end
 
-  # until is a parser event that represents an until loop. It accepts as
-  # arguments the predicate to the until and the statements that are
-  # contained within the until clause.
-  def on_until(predicate, stmts)
-    beging = find_scanner_event(:@kw, 'until')
-    ending = find_scanner_event(:@kw, 'end')
+  # Until represents an +until+ loop.
+  #
+  #     until predicate
+  #     end
+  #
+  class Until
+    # [untyped] the expression to be checked
+    attr_reader :predicate
+
+    # [Statements] the expressions to be executed
+    attr_reader :statements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(predicate:, statements:, location:)
+      @predicate = predicate
+      @statements = statements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('until')
+
+        q.breakable
+        q.pp(predicate)
+
+        q.breakable
+        q.pp(statements)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :until,
+        pred: predicate,
+        stmts: statements,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_until: (untyped predicate, Statements statements) -> Until
+  def on_until(predicate, statements)
+    beginning = find_scanner_event(Kw, 'until')
+    ending = find_scanner_event(Kw, 'end')
 
     # Consume the do keyword if it exists so that it doesn't get confused for
     # some other block
-    do_event = find_scanner_event(:@kw, 'do', consume: false)
-    if do_event && do_event[:loc].start_char > predicate[:loc].end_char &&
-         do_event[:loc].end_char < ending[:loc].start_char
-      scanner_events.delete(do_event)
+    keyword = find_scanner_event(Kw, 'do', consume: false)
+    if keyword && keyword.location.start_char > predicate.location.end_char &&
+         keyword.location.end_char < ending.location.start_char
+      scanner_events.delete(keyword)
     end
 
-    stmts.bind(predicate[:loc].end_char, ending[:loc].start_char)
+    # Update the Statements location information
+    statements.bind(predicate.location.end_char, ending.location.start_char)
 
-    {
-      type: :until,
-      pred: predicate,
-      stmts: stmts,
-      loc: beging[:loc].to(ending[:loc])
-    }
+    Until.new(
+      predicate: predicate,
+      statements: statements,
+      location: beginning.location.to(ending.location)
+    )
   end
 
-  # until_mod is a parser event that represents the modifier form of an
-  # until loop. It accepts as arguments the predicate to the until and the
-  # statement that is contained within the until loop.
+  # UntilMod represents the modifier form of a +until+ loop.
+  #
+  #     expression until predicate
+  #
+  class UntilMod
+    # [untyped] the expression to be executed
+    attr_reader :statement
+
+    # [untyped] the expression to be checked
+    attr_reader :predicate
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(statement:, predicate:, location:)
+      @statement = statement
+      @predicate = predicate
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('until_mod')
+
+        q.breakable
+        q.pp(statement)
+
+        q.breakable
+        q.pp(predicate)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :until_mod,
+        stmt: statement,
+        pred: predicate,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_until_mod: (untyped predicate, untyped statement) -> UntilMod
   def on_until_mod(predicate, statement)
-    find_scanner_event(:@kw, 'until')
+    find_scanner_event(Kw, 'until')
 
-    {
-      type: :until_mod,
-      pred: predicate,
-      stmt: statement,
-      loc: statement[:loc].to(predicate[:loc])
-    }
+    UntilMod.new(
+      statement: statement,
+      predicate: predicate,
+      location: statement.location.to(predicate.location)
+    )
   end
 
-  # var_alias is a parser event that represents when you're using the alias
-  # keyword with global variable arguments. You can optionally use
-  # parentheses with this keyword, so we either track the location
-  # information based on those or the final argument to the alias method.
+  # VarAlias represents when you're using the +alias+ keyword with global
+  # variable arguments.
+  #
+  #     alias $new $old
+  #
+  class VarAlias
+    # [GVar] the new alias of the variable
+    attr_reader :left
+
+    # [Backref | GVar] the current name of the variable to be aliased
+    attr_reader :right
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(left:, right:, location:)
+      @left = left
+      @right = right
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('var_alias')
+
+        q.breakable
+        q.pp(left)
+
+        q.breakable
+        q.pp(right)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :var_alias, left: left, right: right, loc: location }.to_json(
+        *opts
+      )
+    end
+  end
+
+  # :call-seq:
+  #   on_var_alias: (GVar left, (Backref | GVar) right) -> VarAlias
   def on_var_alias(left, right)
-    beging = find_scanner_event(:@kw, 'alias')
+    keyword = find_scanner_event(Kw, 'alias')
 
-    paren = source[beging[:loc].end_char...left[:loc].start_char].include?('(')
-    ending = paren ? find_scanner_event(:@rparen) : right
-
-    {
-      type: :var_alias,
+    VarAlias.new(
       left: left,
       right: right,
-      loc: beging[:loc].to(ending[:loc])
-    }
+      location: keyword.location.to(right.location)
+    )
   end
 
-  # var_ref is a parser event that represents using either a local variable,
-  # a nil literal, a true or false literal, or a numbered block variable.
-  def on_var_ref(value)
-    { type: :var_ref, value: value, loc: value[:loc] }
+  # VarField represents a variable that is being assigned a value. As such, it
+  # is always a child of an assignment type node.
+  #
+  #     variable = value
+  #
+  # In the example above, the VarField node represents the +variable+ token.
+  class VarField
+    # [nil | Const | CVar | GVar | Ident | IVar] the target of this node
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('var_field')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :var_field, value: value, loc: location }.to_json(*opts)
+    end
   end
 
-  # var_field is a parser event that represents a variable that is being
-  # assigned a value. As such, it is always a child of an assignment type
-  # node. For example, in the following example foo is a var_field:
-  #
-  #     foo = 1
-  #
+  # :call-seq:
+  #   on_var_field: (
+  #     (nil | Const | CVar | GVar | Ident | IVar) value
+  #   ) -> VarField
   def on_var_field(value)
     location =
       if value
-        value[:loc]
+        value.location
       else
         # You can hit this pattern if you're assigning to a splat using pattern
         # matching syntax in Ruby 2.7+
         Location.fixed(line: lineno, char: char_pos)
       end
 
-    { type: :var_field, value: value, loc: location }
+    VarField.new(value: value, location: location)
   end
 
-  # vcall nodes are any plain named thing with Ruby that could be either a
-  # local variable or a method call. They accept as an argument the scanner
-  # event that contains their content.
+  # VarRef represents a variable reference.
   #
-  # Access controls like private, protected, and public are reported as
-  # vcall nodes since they're technically method calls. We want to be able
-  # add new lines around them as necessary, so here we're going to
-  # explicitly track those as a different node type.
-  def on_vcall(value)
+  #     variable
+  #
+  # This can be a plain local variable like the example above. It can also be a
+  # constant, a class variable, a global variable, an instance variable, a
+  # keyword (like +self+, +nil+, +true+, or +false+), or a numbered block
+  # variable.
+  class VarRef
+    # [Const | CVar | GVar | Ident | IVar | Kw] the value of this node
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('var_ref')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :var_ref, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_var_ref: ((Const | CVar | GVar | Ident | IVar | Kw) value) -> VarRef
+  def on_var_ref(value)
+    VarRef.new(value: value, location: value.location)
+  end
+
+  # AccessCtrl represents a call to a method visibility control, i.e., +public+,
+  # +protected+, or +private+.
+  #
+  #     private
+  #
+  class AccessCtrl
+    # [Ident] the value of this expression
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('access_ctrl')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :access_ctrl, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # VCall represent any plain named object with Ruby that could be either a
+  # local variable or a method call.
+  #
+  #     variable
+  #
+  class VCall
+    # [Ident] the value of this expression
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('vcall')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :vcall, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_vcall: (Ident ident) -> AccessCtrl | VCall
+  def on_vcall(ident)
     @controls ||= %w[private protected public].freeze
 
-    name = value[:value]
-    type =
-      if @controls.include?(name) && name == lines[lineno - 1].strip
-        :access_ctrl
-      else
-        :vcall
-      end
-
-    { type: type, value: value, loc: value[:loc] }
+    if @controls.include?(ident.value) && ident.value == lines[lineno - 1].strip
+      # Access controls like private, protected, and public are reported as
+      # vcall nodes since they're technically method calls. We want to be able
+      # add new lines around them as necessary, so here we're going to
+      # explicitly track those as a different node type.
+      AccessCtrl.new(value: ident, location: ident.location)
+    else
+      VCall.new(value: ident, location: ident.location)
+    end
   end
 
-  # void_stmt is a special kind of parser event that represents an empty lexical
-  # block of code. It often will have comments attached to it, so it requires
-  # some special handling.
+  # VoidStmt represents an empty lexical block of code.
+  #
+  #     ;;
+  #
+  class VoidStmt
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(location:)
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') { q.text('void_stmt') }
+    end
+
+    def to_json(*opts)
+      { type: :void_stmt, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_void_stmt: () -> VoidStmt
   def on_void_stmt
-    { type: :void_stmt, loc: Location.fixed(line: lineno, char: char_pos) }
+    VoidStmt.new(location: Location.fixed(line: lineno, char: char_pos))
   end
 
-  # when is a parser event that represents another clause in a case chain.
-  # It accepts as arguments the predicate of the when, the statements that
-  # are contained within the else if clause, and the optional consequent
-  # clause.
-  def on_when(args, stmts, consequent)
-    beging = find_scanner_event(:@kw, 'when')
-    ending = consequent || find_scanner_event(:@kw, 'end')
+  # When represents a +when+ clause in a +case+ chain.
+  #
+  #     case value
+  #     when predicate
+  #     end
+  #
+  class When
+    # [untyped] the arguments to the when clause
+    attr_reader :arguments
 
-    stmts.bind(args[:loc].end_char, ending[:loc].start_char)
+    # [Statements] the expressions to be executed
+    attr_reader :statements
 
-    {
-      type: :when,
-      args: args,
-      stmts: stmts,
-      cons: consequent,
-      loc: beging[:loc].to(ending[:loc])
-    }
+    # [nil | Else | When] the next clause in the chain
+    attr_reader :consequent
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(arguments:, statements:, consequent:, location:)
+      @arguments = arguments
+      @statements = statements
+      @consequent = consequent
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('when')
+
+        q.breakable
+        q.pp(arguments)
+
+        q.breakable
+        q.pp(statements)
+
+        if consequent
+          q.breakable
+          q.pp(consequent)
+        end
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :when,
+        args: arguments,
+        stmts: statements,
+        cons: consequent,
+        loc: location
+      }.to_json(*opts)
+    end
   end
 
-  # while is a parser event that represents a while loop. It accepts as
-  # arguments the predicate to the while and the statements that are
-  # contained within the while clause.
-  def on_while(predicate, stmts)
-    beging = find_scanner_event(:@kw, 'while')
-    ending = find_scanner_event(:@kw, 'end')
+  # :call-seq:
+  #   on_when: (
+  #     untyped arguments,
+  #     Statements statements,
+  #     (nil | Else | When) consequent
+  #   ) -> When
+  def on_when(arguments, statements, consequent)
+    beginning = find_scanner_event(Kw, 'when')
+    ending = consequent || find_scanner_event(Kw, 'end')
+
+    statements.bind(arguments.location.end_char, ending.location.start_char)
+
+    When.new(
+      arguments: arguments,
+      statements: statements,
+      consequent: consequent,
+      location: beginning.location.to(ending.location)
+    )
+  end
+
+  # While represents a +while+ loop.
+  #
+  #     while predicate
+  #     end
+  #
+  class While
+    # [untyped] the expression to be checked
+    attr_reader :predicate
+
+    # [Statements] the expressions to be executed
+    attr_reader :statements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(predicate:, statements:, location:)
+      @predicate = predicate
+      @statements = statements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('while')
+
+        q.breakable
+        q.pp(predicate)
+
+        q.breakable
+        q.pp(statements)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :while,
+        pred: predicate,
+        stmts: statements,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_while: (untyped predicate, Statements statements) -> While
+  def on_while(predicate, statements)
+    beginning = find_scanner_event(Kw, 'while')
+    ending = find_scanner_event(Kw, 'end')
 
     # Consume the do keyword if it exists so that it doesn't get confused for
     # some other block
-    do_event = find_scanner_event(:@kw, 'do', consume: false)
-    if do_event && do_event[:loc].start_char > predicate[:loc].end_char &&
-         do_event[:loc].end_char < ending[:loc].start_char
-      scanner_events.delete(do_event)
+    keyword = find_scanner_event(Kw, 'do', consume: false)
+    if keyword && keyword.location.start_char > predicate.location.end_char &&
+         keyword.location.end_char < ending.location.start_char
+      scanner_events.delete(keyword)
     end
 
-    stmts.bind(predicate[:loc].end_char, ending[:loc].start_char)
+    # Update the Statements location information
+    statements.bind(predicate.location.end_char, ending.location.start_char)
 
-    {
-      type: :while,
-      pred: predicate,
-      stmts: stmts,
-      loc: beging[:loc].to(ending[:loc])
-    }
+    While.new(
+      predicate: predicate,
+      statements: statements,
+      location: beginning.location.to(ending.location)
+    )
   end
 
-  # while_mod is a parser event that represents the modifier form of an
-  # while loop. It accepts as arguments the predicate to the while and the
-  # statement that is contained within the while loop.
+  # WhileMod represents the modifier form of a +while+ loop.
+  #
+  #     expression while predicate
+  #
+  class WhileMod
+    # [untyped] the expression to be executed
+    attr_reader :statement
+
+    # [untyped] the expression to be checked
+    attr_reader :predicate
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(statement:, predicate:, location:)
+      @statement = statement
+      @predicate = predicate
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('while_mod')
+
+        q.breakable
+        q.pp(statement)
+
+        q.breakable
+        q.pp(predicate)
+      end
+    end
+
+    def to_json(*opts)
+      {
+        type: :while_mod,
+        stmt: statement,
+        pred: predicate,
+        loc: location
+      }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_while_mod: (untyped predicate, untyped statement) -> WhileMod
   def on_while_mod(predicate, statement)
-    find_scanner_event(:@kw, 'while')
+    find_scanner_event(Kw, 'while')
 
-    {
-      type: :while_mod,
-      pred: predicate,
-      stmt: statement,
-      loc: statement[:loc].to(predicate[:loc])
-    }
+    WhileMod.new(
+      statement: statement,
+      predicate: predicate,
+      location: statement.location.to(predicate.location)
+    )
   end
 
-  # word_add is a parser event that represents a part of a word within a
-  # special array literal that accepts interpolation. It accepts as
-  # arguments the parent word node as well as the additional part of the
-  # word, which can be either a @tstring_content node for a plain string
-  # part or a string_embexpr for an interpolated piece.
+  # Word represents an element within a special array literal that accepts
+  # interpolation.
+  #
+  #     %w[a#{b}c xyz]
+  #
+  # In the example above, there would be two Word nodes within a parent Words
+  # node.
+  class Word
+    # [Array[StringEmbExpr | StringDVar | TStringContent]] the parts of the word
+    attr_reader :parts
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(parts:, location:)
+      @parts = parts
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('word')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :word, parts: parts, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_word_add: (
+  #     Word word,
+  #     (StringEmbExpr | StringDVar | TStringContent) part
+  #   ) -> Word
   def on_word_add(word, part)
     location =
-      if word[:parts].empty?
-        # Here we're making sure we get the correct bounds by using the
-        # location information from the first part.
-        part[:loc]
-      else
-        word[:loc].to(part[:loc])
-      end
+      word.parts.empty? ? part.location : word.location.to(part.location)
 
-    { type: :word, parts: word[:parts] << part, loc: location }
+    Word.new(parts: word.parts << part, location: location)
   end
 
-  # word_new is a parser event that represents the beginning of a word
-  # within a special array literal (either strings or symbols) that accepts
-  # interpolation. For example, in the following array, there are three
-  # word nodes:
-  #
-  #     %W[one a#{two}a three]
-  #
-  # Each word inside that array is represented as its own node, which is in
-  # terms of the parser a tree of word_new and word_add nodes. For our
-  # purposes, we're going to report this as a word node and build up an
-  # array body of our parts.
+  # :call-seq:
+  #   on_word_new: () -> Word
   def on_word_new
-    {
-      type: :word,
-      parts: [],
-      loc: Location.fixed(line: lineno, char: char_pos)
-    }
+    Word.new(parts: [], location: Location.fixed(line: lineno, char: char_pos))
   end
 
-  # words_beg is a scanner event that represents the start of a word literal
-  # array with interpolation. For example, in the following snippet:
+  # Words represents a string literal array with interpolation.
   #
-  #     %W[foo bar baz]
+  #     %W[one two three]
   #
-  # words_beg would be triggered with the value of "%W".
+  class Words
+    # [Array[Word]] the elements of this array
+    attr_reader :elements
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(elements:, location:)
+      @elements = elements
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('words')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(elements) { |element| q.pp(element) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :words, elems: elements, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_words_add: (Words words, Word word) -> Words
+  def on_words_add(words, word)
+    Words.new(
+      elements: words.elements << word,
+      location: words.location.to(word.location)
+    )
+  end
+
+  # WordsBeg represents the beginning of a string literal array with
+  # interpolation.
+  #
+  #     %W[one two three]
+  #
+  # In the snippet above, a WordsBeg would be created with the value of "%W[".
+  # Note that these kinds of arrays can start with a lot of different delimiter
+  # types (e.g., %W| or %W<).
+  class WordsBeg
+    # [String] the start of the word literal array
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('words_beg')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :@words_beg, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_words_beg: (String value) -> WordsBeg
   def on_words_beg(value)
-    node = {
-      type: :@words_beg,
-      value: value,
-      loc: Location.token(line: lineno, char: char_pos, size: value.size)
-    }
+    node =
+      WordsBeg.new(
+        value: value,
+        location: Location.token(line: lineno, char: char_pos, size: value.size)
+      )
 
     scanner_events << node
     node
   end
 
-  # words_sep is a scanner event that represents the separate between two words
-  # inside of a word literal array. It contains any amount of whitespace
-  # characters that are used to delimit the words. For example,
-  #
-  #     %w[
-  #       foo
-  #       bar
-  #       baz
-  #     ]
-  #
-  # in the snippet above there would be two words_sep events triggered, one
-  # between foo and bar and one between bar and baz. We don't need to track this
-  # event in the AST that we're generating, so we're not going to define an
-  # explicit handler for it.
-  #
-  #     def on_words_sep(value)
-  #       value
-  #     end
-
-  # words_add is a parser event that represents an element inside of a
-  # string literal array that accepts interpolation, like
-  # %W[one #{two} three]. It accepts as arguments the parent words node as
-  # well as a word_add parser event.
-  def on_words_add(words, word_add)
-    {
-      type: :words,
-      elems: words[:elems] << word_add,
-      loc: words[:loc].to(word_add[:loc])
-    }
-  end
-
-  # words_new is a parser event that represents the beginning of a string
-  # literal array that accepts interpolation, like %W[one #{two} three]. It
-  # can be followed by any number of words_add events, which we'll append
-  # onto an array body.
+  # :call-seq:
+  #   on_words_new: () -> Words
   def on_words_new
-    event = find_scanner_event(:@words_beg)
+    words_beg = find_scanner_event(WordsBeg)
 
-    { type: :words, elems: [], loc: event[:loc] }
+    Words.new(elements: [], location: words_beg.location)
   end
 
-  # xstring_add is a parser event that represents a part of a string of
-  # commands that gets sent out to the terminal, like `ls`. It accepts two
-  # arguments, the parent xstring node as well as the part that is being
-  # added to the string. Because it supports interpolation this is either a
-  # tstring_content scanner event representing bare string content or a
-  # string_embexpr representing interpolated content.
-  def on_xstring_add(xstring, part)
-    {
-      type: :xstring,
-      parts: xstring[:parts] << part,
-      loc: xstring[:loc].to(part[:loc])
-    }
-  end
+  # def on_words_sep(value)
+  #   value
+  # end
 
-  # xstring_new is a parser event that represents the beginning of a string
-  # of commands that gets sent out to the terminal, like `ls`. It can
-  # optionally include interpolation much like a regular string, so we're
-  # going to build up an array body.
+  # XString represents the contents of an XStringLiteral.
   #
-  # If the xstring actually starts with a heredoc declaration, then we're
-  # going to let heredocs continue to do their thing and instead just use
-  # its location information.
+  #     `ls`
+  #
+  class XString
+    # [Array[StringEmbExpr | StringDVar | TStringContent]] the parts of the
+    # xstring
+    attr_reader :parts
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(parts:, location:)
+      @parts = parts
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('xstring')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :xstring, parts: parts, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_xstring_add: (
+  #     XString xstring,
+  #     (StringEmbExpr | StringDVar | TStringContent) part
+  #   ) -> XString
+  def on_xstring_add(xstring, part)
+    XString.new(
+      parts: xstring.parts << part,
+      location: xstring.location.to(part.location)
+    )
+  end
+
+  # :call-seq:
+  #   on_xstring_new: () -> XString
   def on_xstring_new
     heredoc = @heredocs[-1]
 
     location =
-      if heredoc && heredoc[:beging][:value].include?('`')
-        heredoc[:loc]
+      if heredoc && heredoc.beginning.value.include?('`')
+        heredoc.location
       elsif RUBY_MAJOR <= 2 && RUBY_MINOR <= 5 && RUBY_PATCH < 7
         Location.fixed(line: lineno, char: char_pos)
       else
-        find_scanner_event(:@backtick)[:loc]
+        find_scanner_event(Backtick).location
       end
 
-    { type: :xstring, parts: [], loc: location }
+    XString.new(parts: [], location: location)
   end
 
-  # xstring_literal is a parser event that represents a string of commands
-  # that gets sent to the terminal, like `ls`. It accepts as its only
-  # argument an xstring node that is a built up array representation of all
-  # of the parts of the string (including the plain string content and the
-  # interpolated content).
+  # XStringLiteral represents a string that gets executed.
   #
-  # They can also use heredocs to present themselves, as in the example:
+  #     `ls`
   #
-  #     <<-`SHELL`
-  #       ls
-  #     SHELL
-  #
-  # In this case we need to change the node type to be a heredoc instead of
-  # an xstring_literal in order to get the right formatting.
-  def on_xstring_literal(xstring)
-    heredoc = @heredocs[-1]
+  class XStringLiteral
+    # [Array[StringEmbExpr | StringDVar | TStringContent]] the parts of the
+    # xstring
+    attr_reader :parts
 
-    if heredoc && heredoc[:beging][:value].include?('`')
-      {
-        type: :heredoc,
-        beging: heredoc[:beging],
-        ending: heredoc[:ending],
-        parts: xstring[:parts],
-        loc: heredoc[:loc]
-      }
-    else
-      ending = find_scanner_event(:@tstring_end)
+    # [Location] the location of this node
+    attr_reader :location
 
-      {
-        type: :xstring_literal,
-        parts: xstring[:parts],
-        loc: xstring[:loc].to(ending[:loc])
-      }
+    def initialize(parts:, location:)
+      @parts = parts
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('xstring_literal')
+
+        q.breakable
+        q.group(2, '(', ')') { q.seplist(parts) { |part| q.pp(part) } }
+      end
+    end
+
+    def to_json(*opts)
+      { type: :xstring_literal, parts: parts, loc: location }.to_json(*opts)
     end
   end
 
-  # yield is a parser event that represents using the yield keyword with
-  # arguments. It accepts as an argument an args_add_block event that
-  # contains all of the arguments being passed.
-  def on_yield(args)
-    event = find_scanner_event(:@kw, 'yield')
+  # :call-seq:
+  #   on_xstring_literal: (XString xstring) -> Heredoc | XStringLiteral
+  def on_xstring_literal(xstring)
+    heredoc = @heredocs[-1]
 
-    { type: :yield, args: args, loc: event[:loc].to(args[:loc]) }
+    if heredoc && heredoc.beginning.value.include?('`')
+      Heredoc.new(
+        beginning: heredoc.beginning,
+        ending: heredoc.ending,
+        parts: xstring.parts,
+        location: heredoc.location
+      )
+    else
+      ending = find_scanner_event(TStringEnd)
+
+      XStringLiteral.new(
+        parts: xstring.parts,
+        location: xstring.location.to(ending.location)
+      )
+    end
   end
 
-  # yield0 is a parser event that represents the bare yield keyword. It has
-  # no body as it accepts no arguments. This is as opposed to the yield
-  # parser event, which is the version where you're yielding one or more
-  # values.
+  # Yield represents using the +yield+ keyword with arguments.
+  #
+  #     yield value
+  #
+  class Yield
+    # [ArgsAddBlock | Paren] the arguments passed to the yield
+    attr_reader :arguments
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(arguments:, location:)
+      @arguments = arguments
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('yield')
+
+        q.breakable
+        q.pp(arguments)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :yield, args: arguments, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_yield: ((ArgsAddBlock | Paren) arguments) -> Yield
+  def on_yield(arguments)
+    keyword = find_scanner_event(Kw, 'yield')
+
+    Yield.new(
+      arguments: arguments,
+      location: keyword.location.to(arguments.location)
+    )
+  end
+
+  # Yield0 represents the bare +yield+ keyword with no arguments.
+  #
+  #     yield
+  #
+  class Yield0
+    # [String] the value of the keyword
+    attr_reader :value
+
+    # [Location] the location of this node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('yield0')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :yield0, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_yield0: () -> Yield0
   def on_yield0
-    keyword = find_scanner_event(:@kw, 'yield')
+    keyword = find_scanner_event(Kw, 'yield')
 
-    { type: :yield0, value: keyword[:value], loc: keyword[:loc] }
+    Yield0.new(value: keyword.value, location: keyword.location)
   end
 
-  # zsuper is a parser event that represents the bare super keyword. It has
-  # no body as it accepts no arguments. This is as opposed to the super
-  # parser event, which is the version where you're calling super with one
-  # or more values.
-  def on_zsuper
-    keyword = find_scanner_event(:@kw, 'super')
+  # ZSuper represents the bare +super+ keyword with no arguments.
+  #
+  #     super
+  #
+  class ZSuper
+    # [String] the value of the keyword
+    attr_reader :value
 
-    { type: :zsuper, value: keyword[:value], loc: keyword[:loc] }
+    # [Location] the location of the node
+    attr_reader :location
+
+    def initialize(value:, location:)
+      @value = value
+      @location = location
+    end
+
+    def pretty_print(q)
+      q.group(2, '(', ')') do
+        q.text('zsuper')
+
+        q.breakable
+        q.pp(value)
+      end
+    end
+
+    def to_json(*opts)
+      { type: :zsuper, value: value, loc: location }.to_json(*opts)
+    end
+  end
+
+  # :call-seq:
+  #   on_zsuper: () -> ZSuper
+  def on_zsuper
+    keyword = find_scanner_event(Kw, 'super')
+
+    ZSuper.new(value: keyword.value, location: keyword.location)
   end
 end

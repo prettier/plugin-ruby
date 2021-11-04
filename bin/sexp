@@ -1,30 +1,6 @@
 #!/usr/bin/env ruby
 
 require_relative '../src/ruby/parser'
-require 'pp'
-
-PP.prepend(
-  Module.new do
-    def pp_hash(obj)
-      group(1, '{', '}') do
-        text obj[:type]
-        text "<L#{obj[:loc].start_line}-#{obj[:loc].end_line},"
-        text "C#{obj[:loc].start_char}-#{obj[:loc].end_char}>"
-
-        source = obj.respond_to?(:value) ? obj.value : obj
-        sliced =
-          source.select do |key, value|
-            !%i[type loc comments].include?(key) && value
-          end.keys
-
-        group(1) do
-          breakable ' '
-          pp source.values_at(*sliced)
-        end
-      end
-    end
-  end
-)
 
 source =
   if !ARGV[0]
@@ -41,7 +17,7 @@ puts '=== SOURCE === '
 puts source
 
 puts "\n=== COMMENTS ==="
-puts parsed[:comments]
+pp parsed.comments
 
 puts "\n=== S-EXPS ==="
 pp parsed

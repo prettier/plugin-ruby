@@ -4,25 +4,25 @@ require 'test_helper'
 
 class MetadataTest < Minitest::Test
   def test_BEGIN
-    assert_metadata :BEGIN, <<~SOURCE
+    assert_metadata Prettier::Parser::BEGINBlock, <<~SOURCE
       BEGIN {
       }
     SOURCE
   end
 
   def test_END
-    assert_metadata :END, <<~SOURCE
+    assert_metadata Prettier::Parser::ENDBlock, <<~SOURCE
       END {
       }
     SOURCE
   end
 
   def test_alias
-    assert_metadata :alias, 'alias foo bar'
+    assert_metadata Prettier::Parser::Alias, 'alias foo bar'
   end
 
   def test_array_args
-    assert_metadata :array, <<~SOURCE
+    assert_metadata Prettier::Parser::ArrayLiteral, <<~SOURCE
       [
         foo,
         bar,
@@ -32,7 +32,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_array_args_add_star
-    assert_metadata :array, <<~SOURCE
+    assert_metadata Prettier::Parser::ArrayLiteral, <<~SOURCE
       [
         foo,
         *bar,
@@ -42,7 +42,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_array_qwords
-    assert_metadata :array, <<~SOURCE
+    assert_metadata Prettier::Parser::ArrayLiteral, <<~SOURCE
       %w[
         foo
         bar
@@ -52,13 +52,13 @@ class MetadataTest < Minitest::Test
   end
 
   def test_aref
-    assert_metadata :aref, 'foo[bar]'
+    assert_metadata Prettier::Parser::ARef, 'foo[bar]'
   end
 
   def test_aref_field
     assert_node_metadata(
-      :aref_field,
-      parse('foo[bar] = baz')[:target],
+      Prettier::Parser::ARefField,
+      parse('foo[bar] = baz').target,
       start_char: 0,
       end_char: 8
     )
@@ -66,8 +66,8 @@ class MetadataTest < Minitest::Test
 
   def test_args
     assert_node_metadata(
-      :args,
-      parse('foo bar, baz').dig(:args, :args),
+      Prettier::Parser::Args,
+      parse('foo bar, baz').arguments.arguments,
       start_char: 4,
       end_char: 12
     )
@@ -75,8 +75,8 @@ class MetadataTest < Minitest::Test
 
   def test_args_add_block
     assert_node_metadata(
-      :args_add_block,
-      parse('foo bar, baz')[:args],
+      Prettier::Parser::ArgsAddBlock,
+      parse('foo bar, baz').arguments,
       start_char: 4,
       end_char: 12
     )
@@ -84,8 +84,8 @@ class MetadataTest < Minitest::Test
 
   def test_args_add_star
     assert_node_metadata(
-      :args_add_star,
-      parse('foo *bar').dig(:args, :args),
+      Prettier::Parser::ArgsAddStar,
+      parse('foo *bar').arguments.arguments,
       start_char: 4,
       end_char: 8
     )
@@ -101,8 +101,8 @@ class MetadataTest < Minitest::Test
     SOURCE
 
     assert_node_metadata(
-      :arg_paren,
-      parse(content)[:args],
+      Prettier::Parser::ArgParen,
+      parse(content).arguments,
       start_char: 3,
       end_char: 20,
       start_line: 1,
@@ -111,13 +111,13 @@ class MetadataTest < Minitest::Test
   end
 
   def test_assign
-    assert_metadata :assign, 'foo = bar'
+    assert_metadata Prettier::Parser::Assign, 'foo = bar'
   end
 
   def test_assoc_new
     assert_node_metadata(
-      :assoc_new,
-      parse('{ foo: bar, bar: baz }').dig(:cnts, :assocs, 0),
+      Prettier::Parser::AssocNew,
+      parse('{ foo: bar, bar: baz }').contents.assocs.first,
       start_char: 2,
       end_char: 10
     )
@@ -125,8 +125,8 @@ class MetadataTest < Minitest::Test
 
   def test_assoc_splat
     assert_node_metadata(
-      :assoc_splat,
-      parse('foo **bar').dig(:args, :args, :parts, 0, :assocs, 0),
+      Prettier::Parser::AssocSplat,
+      parse('foo **bar').arguments.arguments.parts.first.assocs.first,
       start_char: 4,
       end_char: 9
     )
@@ -134,8 +134,8 @@ class MetadataTest < Minitest::Test
 
   def test_assoclist_from_args
     assert_node_metadata(
-      :assoclist_from_args,
-      parse('{ foo => bar }')[:cnts],
+      Prettier::Parser::AssocListFromArgs,
+      parse('{ foo => bar }').contents,
       start_char: 1,
       end_char: 13
     )
@@ -143,15 +143,15 @@ class MetadataTest < Minitest::Test
 
   def test_bare_assoc_hash
     assert_node_metadata(
-      :bare_assoc_hash,
-      parse('foo(bar: baz)').dig(:args, :args, :args, :parts, 0),
+      Prettier::Parser::BareAssocHash,
+      parse('foo(bar: baz)').arguments.arguments.arguments.parts.first,
       start_char: 4,
       end_char: 12
     )
   end
 
   def test_begin
-    assert_metadata :begin, <<~SOURCE
+    assert_metadata Prettier::Parser::Begin, <<~SOURCE
       begin
         begin; end
       end
@@ -159,13 +159,13 @@ class MetadataTest < Minitest::Test
   end
 
   def test_binary
-    assert_metadata :binary, 'foo + bar'
+    assert_metadata Prettier::Parser::Binary, 'foo + bar'
   end
 
   def test_blockarg
     assert_node_metadata(
-      :blockarg,
-      parse('def foo(&bar) end').dig(:params, :cnts, :block),
+      Prettier::Parser::BlockArg,
+      parse('def foo(&bar) end').params.contents.block,
       start_char: 8,
       end_char: 12
     )
@@ -173,8 +173,8 @@ class MetadataTest < Minitest::Test
 
   def test_block_var
     assert_node_metadata(
-      :block_var,
-      parse('foo { |bar| }').dig(:block, :block_var),
+      Prettier::Parser::BlockVar,
+      parse('foo { |bar| }').block.block_var,
       start_char: 6,
       end_char: 11
     )
@@ -182,8 +182,8 @@ class MetadataTest < Minitest::Test
 
   def test_bodystmt
     assert_node_metadata(
-      :bodystmt,
-      parse('class Foo; def foo; end; end')[:bodystmt],
+      Prettier::Parser::BodyStmt,
+      parse('class Foo; def foo; end; end').bodystmt,
       start_char: 9,
       end_char: 25
     )
@@ -191,23 +191,23 @@ class MetadataTest < Minitest::Test
 
   def test_brace_block
     assert_node_metadata(
-      :brace_block,
-      parse('foo { bar }')[:block],
+      Prettier::Parser::BraceBlock,
+      parse('foo { bar }').block,
       start_char: 4,
       end_char: 11
     )
   end
 
   def test_break
-    assert_metadata :break, 'break foo'
+    assert_metadata Prettier::Parser::Break, 'break foo'
   end
 
   def test_call
-    assert_metadata :call, 'foo.bar'
+    assert_metadata Prettier::Parser::Call, 'foo.bar'
   end
 
   def test_case
-    assert_metadata :case, <<~SOURCE
+    assert_metadata Prettier::Parser::Case, <<~SOURCE
       case foo
       when bar
         case baz
@@ -218,7 +218,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_class
-    assert_metadata :class, <<~SOURCE
+    assert_metadata Prettier::Parser::ClassDeclaration, <<~SOURCE
       class Foo
         class Bar; end
       end
@@ -226,17 +226,17 @@ class MetadataTest < Minitest::Test
   end
 
   def test_command
-    assert_metadata :command, 'foo bar'
+    assert_metadata Prettier::Parser::Command, 'foo bar'
   end
 
   def test_command_call
-    assert_metadata :command_call, 'foo.bar baz'
+    assert_metadata Prettier::Parser::CommandCall, 'foo.bar baz'
   end
 
   def test_const_ref
     assert_node_metadata(
-      :const_ref,
-      parse('class Foo; end')[:constant],
+      Prettier::Parser::ConstRef,
+      parse('class Foo; end').constant,
       start_char: 6,
       end_char: 9
     )
@@ -244,19 +244,19 @@ class MetadataTest < Minitest::Test
 
   def test_const_path_field
     assert_node_metadata(
-      :const_path_field,
-      parse('Foo::Bar = baz')[:target],
+      Prettier::Parser::ConstPathField,
+      parse('Foo::Bar = baz').target,
       start_char: 0,
       end_char: 8
     )
   end
 
   def test_const_path_ref
-    assert_metadata :const_path_ref, 'Foo::Bar'
+    assert_metadata Prettier::Parser::ConstPathRef, 'Foo::Bar'
   end
 
   def test_def
-    assert_metadata :def, <<~SOURCE
+    assert_metadata Prettier::Parser::Def, <<~SOURCE
       def foo
         def bar; end
       end
@@ -264,7 +264,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_defined
-    assert_metadata :defined, <<~SOURCE
+    assert_metadata Prettier::Parser::Defined, <<~SOURCE
       defined?(
         Foo
       )
@@ -272,7 +272,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_defs
-    assert_metadata :defs, <<~SOURCE
+    assert_metadata Prettier::Parser::Defs, <<~SOURCE
       def Object.foo
         def Object.bar; end
       end
@@ -281,23 +281,23 @@ class MetadataTest < Minitest::Test
 
   def test_do_block
     assert_node_metadata(
-      :do_block,
-      parse('foo do; bar; end')[:block],
+      Prettier::Parser::DoBlock,
+      parse('foo do; bar; end').block,
       start_char: 4,
       end_char: 16
     )
   end
 
   def test_dot2
-    assert_metadata :dot2, 'foo..bar'
+    assert_metadata Prettier::Parser::Dot2, 'foo..bar'
   end
 
   def test_dot3
-    assert_metadata :dot3, 'foo...bar'
+    assert_metadata Prettier::Parser::Dot3, 'foo...bar'
   end
 
   def test_dyna_symbol
-    assert_metadata :dyna_symbol, ':"foo #{bar} baz"'
+    assert_metadata Prettier::Parser::DynaSymbol, ':"foo #{bar} baz"'
   end
 
   def test_else
@@ -310,8 +310,8 @@ class MetadataTest < Minitest::Test
     SOURCE
 
     assert_node_metadata(
-      :else,
-      parse(content)[:cons],
+      Prettier::Parser::Else,
+      parse(content).consequent,
       start_char: 13,
       end_char: 27,
       start_line: 3,
@@ -329,8 +329,8 @@ class MetadataTest < Minitest::Test
     SOURCE
 
     assert_node_metadata(
-      :elsif,
-      parse(content)[:cons],
+      Prettier::Parser::Elsif,
+      parse(content).consequent,
       start_char: 13,
       end_char: 32,
       start_line: 3,
@@ -348,8 +348,8 @@ class MetadataTest < Minitest::Test
     SOURCE
 
     assert_node_metadata(
-      :ensure,
-      parse(content).dig(:bodystmt, :ens),
+      Prettier::Parser::Ensure,
+      parse(content).bodystmt.ensure_clause,
       start_char: 12,
       end_char: 28,
       start_line: 3,
@@ -360,8 +360,8 @@ class MetadataTest < Minitest::Test
   if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.6')
     def test_excessed_comma
       assert_node_metadata(
-        :excessed_comma,
-        parse('foo { |bar,| }').dig(:block, :block_var, :params, :rest),
+        Prettier::Parser::ExcessedComma,
+        parse('foo { |bar,| }').block.block_var.params.rest,
         start_char: 10,
         end_char: 11
       )
@@ -370,8 +370,8 @@ class MetadataTest < Minitest::Test
 
   def test_fcall
     assert_node_metadata(
-      :fcall,
-      parse('foo(bar)')[:call],
+      Prettier::Parser::FCall,
+      parse('foo(bar)').call,
       start_char: 0,
       end_char: 3
     )
@@ -379,15 +379,15 @@ class MetadataTest < Minitest::Test
 
   def test_field
     assert_node_metadata(
-      :field,
-      parse('foo.bar = baz')[:target],
+      Prettier::Parser::Field,
+      parse('foo.bar = baz').target,
       start_char: 0,
       end_char: 7
     )
   end
 
   def test_for
-    assert_metadata :for, <<~SOURCE
+    assert_metadata Prettier::Parser::For, <<~SOURCE
       for foo in bar do
         for baz in qux do
         end
@@ -396,7 +396,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_hash
-    assert_metadata :hash, <<~SOURCE
+    assert_metadata Prettier::Parser::HashLiteral, <<~SOURCE
       {
         foo: 'bar'
       }
@@ -404,7 +404,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_if
-    assert_metadata :if, <<~SOURCE
+    assert_metadata Prettier::Parser::If, <<~SOURCE
       if foo
         if bar; end
       end
@@ -412,24 +412,24 @@ class MetadataTest < Minitest::Test
   end
 
   def test_ifop
-    assert_metadata :ifop, 'foo ? bar : baz'
+    assert_metadata Prettier::Parser::IfOp, 'foo ? bar : baz'
   end
 
   def test_if_mod
-    assert_metadata :if_mod, 'foo if bar'
+    assert_metadata Prettier::Parser::IfMod, 'foo if bar'
   end
 
   def test_kwrest_param
     assert_node_metadata(
-      :kwrest_param,
-      parse('def foo(**bar); end').dig(:params, :cnts, :kwrest),
+      Prettier::Parser::KwRestParam,
+      parse('def foo(**bar); end').params.contents.keyword_rest,
       start_char: 8,
       end_char: 13
     )
   end
 
   def test_lambda
-    assert_metadata :lambda, <<~SOURCE
+    assert_metadata Prettier::Parser::Lambda, <<~SOURCE
       -> (foo, bar) {
         foo + bar
       }
@@ -437,21 +437,21 @@ class MetadataTest < Minitest::Test
   end
 
   def test_massign
-    assert_metadata :massign, 'foo, bar, baz = 1, 2, 3'
+    assert_metadata Prettier::Parser::MAssign, 'foo, bar, baz = 1, 2, 3'
   end
 
   def test_method_add_arg
-    assert_metadata :method_add_arg, 'foo(bar)'
+    assert_metadata Prettier::Parser::MethodAddArg, 'foo(bar)'
   end
 
   def test_method_add_block
-    assert_metadata :method_add_block, 'foo { bar }'
+    assert_metadata Prettier::Parser::MethodAddBlock, 'foo { bar }'
   end
 
   def test_mlhs
     assert_node_metadata(
-      :mlhs,
-      parse('foo, bar, baz = 1, 2, 3')[:tgt],
+      Prettier::Parser::MLHS,
+      parse('foo, bar, baz = 1, 2, 3').target,
       start_char: 0,
       end_char: 13
     )
@@ -459,8 +459,8 @@ class MetadataTest < Minitest::Test
 
   def test_mlhs_add_post
     assert_node_metadata(
-      :mlhs_add_post,
-      parse('foo, *bar, baz = 1, 2, 3')[:tgt],
+      Prettier::Parser::MLHSAddPost,
+      parse('foo, *bar, baz = 1, 2, 3').target,
       start_char: 5,
       end_char: 14
     )
@@ -468,8 +468,8 @@ class MetadataTest < Minitest::Test
 
   def test_mlhs_add_star
     assert_node_metadata(
-      :mlhs_add_star,
-      parse('foo, *bar = 1, 2, 3')[:tgt],
+      Prettier::Parser::MLHSAddStar,
+      parse('foo, *bar = 1, 2, 3').target,
       start_char: 5,
       end_char: 9
     )
@@ -477,15 +477,15 @@ class MetadataTest < Minitest::Test
 
   def test_mlhs_paren
     assert_node_metadata(
-      :mlhs_paren,
-      parse('(foo, bar) = baz')[:tgt],
+      Prettier::Parser::MLHSParen,
+      parse('(foo, bar) = baz').target,
       start_char: 0,
       end_char: 10
     )
   end
 
   def test_module
-    assert_metadata :module, <<~SOURCE
+    assert_metadata Prettier::Parser::ModuleDeclaration, <<~SOURCE
       module Foo
         module Bar; end
       end
@@ -494,19 +494,19 @@ class MetadataTest < Minitest::Test
 
   def test_mrhs_add_star
     assert_node_metadata(
-      :mrhs_add_star,
-      parse('foo, bar = *baz')[:val],
+      Prettier::Parser::MRHSAddStar,
+      parse('foo, bar = *baz').value,
       start_char: 11,
       end_char: 15
     )
   end
 
   def test_next
-    assert_metadata :next, 'next foo'
+    assert_metadata Prettier::Parser::Next, 'next foo'
   end
 
   def test_opassign
-    assert_metadata :opassign, 'foo ||= bar'
+    assert_metadata Prettier::Parser::OpAssign, 'foo ||= bar'
   end
 
   def test_params
@@ -518,8 +518,8 @@ class MetadataTest < Minitest::Test
     SOURCE
 
     assert_node_metadata(
-      :params,
-      parse(content).dig(:params, :cnts),
+      Prettier::Parser::Params,
+      parse(content).params.contents,
       start_char: 8,
       end_char: 22,
       start_line: 2,
@@ -528,13 +528,13 @@ class MetadataTest < Minitest::Test
   end
 
   def test_paren
-    assert_metadata :paren, '()'
+    assert_metadata Prettier::Parser::Paren, '()'
   end
 
   def test_qsymbols
     assert_node_metadata(
-      :qsymbols,
-      parse('%i[foo bar baz]')[:cnts],
+      Prettier::Parser::QSymbols,
+      parse('%i[foo bar baz]').contents,
       start_char: 0,
       end_char: 15
     )
@@ -542,26 +542,26 @@ class MetadataTest < Minitest::Test
 
   def test_qwords
     assert_node_metadata(
-      :qwords,
-      parse('%w[foo bar baz]')[:cnts],
+      Prettier::Parser::QWords,
+      parse('%w[foo bar baz]').contents,
       start_char: 0,
       end_char: 15
     )
   end
 
   def test_redo
-    assert_metadata :redo, 'redo'
+    assert_metadata Prettier::Parser::Redo, 'redo'
   end
 
   def test_regexp_literal
-    assert_metadata :regexp_literal, '/foo/'
-    assert_metadata :regexp_literal, '%r{foo}'
-    assert_metadata :regexp_literal, '%r(foo)'
+    assert_metadata Prettier::Parser::RegexpLiteral, '/foo/'
+    assert_metadata Prettier::Parser::RegexpLiteral, '%r{foo}'
+    assert_metadata Prettier::Parser::RegexpLiteral, '%r(foo)'
 
     assert_node_metadata(
-      :regexp_literal,
+      Prettier::Parser::RegexpLiteral,
       parse('%r(foo)'),
-      beging: '%r(',
+      beginning: '%r(',
       ending: ')',
       start_char: 0,
       end_char: 7
@@ -570,40 +570,40 @@ class MetadataTest < Minitest::Test
 
   def test_rescue
     assert_node_metadata(
-      :rescue,
-      parse('begin; foo; rescue => bar; baz; end').dig(:bodystmt, :rsc),
+      Prettier::Parser::Rescue,
+      parse('begin; foo; rescue => bar; baz; end').bodystmt.rescue_clause,
       start_char: 12,
       end_char: 35
     )
   end
 
   def test_rescue_mod
-    assert_metadata :rescue_mod, 'foo rescue bar'
+    assert_metadata Prettier::Parser::RescueMod, 'foo rescue bar'
   end
 
   def test_rest_param
     assert_node_metadata(
-      :rest_param,
-      parse('def foo(*bar); end').dig(:params, :cnts, :rest),
+      Prettier::Parser::RestParam,
+      parse('def foo(*bar); end').params.contents.rest,
       start_char: 8,
       end_char: 12
     )
   end
 
   def test_retry
-    assert_metadata :retry, 'retry'
+    assert_metadata Prettier::Parser::Retry, 'retry'
   end
 
   def test_return
-    assert_metadata :return, 'return foo'
+    assert_metadata Prettier::Parser::Return, 'return foo'
   end
 
   def test_return0
-    assert_metadata :return0, 'return'
+    assert_metadata Prettier::Parser::Return0, 'return'
   end
 
   def test_sclass
-    assert_metadata :sclass, <<~SOURCE
+    assert_metadata Prettier::Parser::SClass, <<~SOURCE
       class << Foo
         class << Bar; end
       end
@@ -611,7 +611,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_string_concat
-    assert_metadata :string_concat, <<~SOURCE
+    assert_metadata Prettier::Parser::StringConcat, <<~SOURCE
       'foo' \
         'bar'
     SOURCE
@@ -619,8 +619,8 @@ class MetadataTest < Minitest::Test
 
   def test_string_dvar
     assert_node_metadata(
-      :string_dvar,
-      parse('"#$foo"').dig(:parts, 0),
+      Prettier::Parser::StringDVar,
+      parse('"#$foo"').parts.first,
       start_char: 1,
       end_char: 6
     )
@@ -628,29 +628,29 @@ class MetadataTest < Minitest::Test
 
   def test_string_embexpr
     assert_node_metadata(
-      :string_embexpr,
-      parse('"foo #{bar} baz"').dig(:parts, 1),
+      Prettier::Parser::StringEmbExpr,
+      parse('"foo #{bar} baz"').parts[1],
       start_char: 5,
       end_char: 11
     )
   end
 
   def test_string_literal
-    assert_metadata :string_literal, '"foo"'
+    assert_metadata Prettier::Parser::StringLiteral, '"foo"'
   end
 
   def test_super
-    assert_metadata :super, 'super foo'
+    assert_metadata Prettier::Parser::Super, 'super foo'
   end
 
   def test_symbol_literal
-    assert_metadata :symbol_literal, ':foo'
+    assert_metadata Prettier::Parser::SymbolLiteral, ':foo'
   end
 
   def test_symbols
     assert_node_metadata(
-      :symbols,
-      parse('%I[f#{o}o b#{a}r b#{a}z]')[:cnts],
+      Prettier::Parser::Symbols,
+      parse('%I[f#{o}o b#{a}r b#{a}z]').contents,
       start_char: 0,
       end_char: 24
     )
@@ -658,28 +658,28 @@ class MetadataTest < Minitest::Test
 
   def test_top_const_field
     assert_node_metadata(
-      :top_const_field,
-      parse('::Foo = bar')[:target],
+      Prettier::Parser::TopConstField,
+      parse('::Foo = bar').target,
       start_char: 0,
       end_char: 5
     )
   end
 
   def test_top_const_ref
-    assert_metadata :top_const_ref, '::Foo'
+    assert_metadata Prettier::Parser::TopConstRef, '::Foo'
   end
 
   def test_unary
-    assert_metadata :unary, '-foo'
-    assert_metadata :unary, 'not foo'
+    assert_metadata Prettier::Parser::Unary, '-foo'
+    assert_metadata Prettier::Parser::Not, 'not foo'
   end
 
   def test_undef
-    assert_metadata :undef, 'undef foo, bar'
+    assert_metadata Prettier::Parser::Undef, 'undef foo, bar'
   end
 
   def test_unless
-    assert_metadata :unless, <<~SOURCE
+    assert_metadata Prettier::Parser::Unless, <<~SOURCE
       unless foo
         unless bar; end
       end
@@ -687,11 +687,11 @@ class MetadataTest < Minitest::Test
   end
 
   def test_unless_mod
-    assert_metadata :unless_mod, 'foo unless bar'
+    assert_metadata Prettier::Parser::UnlessMod, 'foo unless bar'
   end
 
   def test_until
-    assert_metadata :until, <<~SOURCE
+    assert_metadata Prettier::Parser::Until, <<~SOURCE
       until foo
         until bar; end
       end
@@ -699,11 +699,11 @@ class MetadataTest < Minitest::Test
   end
 
   def test_until_mod
-    assert_metadata :until_mod, 'foo until bar'
+    assert_metadata Prettier::Parser::UntilMod, 'foo until bar'
   end
 
   def test_while
-    assert_metadata :while, <<~SOURCE
+    assert_metadata Prettier::Parser::While, <<~SOURCE
       while foo
         while bar; end
       end
@@ -711,54 +711,59 @@ class MetadataTest < Minitest::Test
   end
 
   def test_var_alias
-    assert_metadata :var_alias, 'alias $foo $bar'
+    assert_metadata Prettier::Parser::VarAlias, 'alias $foo $bar'
   end
 
   def test_var_field
     assert_node_metadata(
-      :var_field,
-      parse('foo = 1')[:target],
+      Prettier::Parser::VarField,
+      parse('foo = 1').target,
       start_char: 0,
       end_char: 3
     )
   end
 
   def test_var_ref
-    assert_metadata :var_ref, 'true'
+    assert_metadata Prettier::Parser::VarRef, 'true'
   end
 
   def test_vcall
-    assert_metadata :vcall, 'foo'
+    assert_metadata Prettier::Parser::VCall, 'foo'
   end
 
   def test_void_stmt
-    assert_node_metadata(:void_stmt, parse('; ;'), start_char: 0, end_char: 0)
+    assert_node_metadata(
+      Prettier::Parser::VoidStmt,
+      parse('; ;'),
+      start_char: 0,
+      end_char: 0
+    )
   end
 
   def test_when
     assert_node_metadata(
-      :when,
-      parse('case foo; when bar; baz; end')[:cons],
+      Prettier::Parser::When,
+      parse('case foo; when bar; baz; end').consequent,
       start_char: 10,
       end_char: 28
     )
   end
 
   def test_while_mod
-    assert_metadata :while_mod, 'foo while bar'
+    assert_metadata Prettier::Parser::WhileMod, 'foo while bar'
   end
 
   def test_words
     assert_node_metadata(
-      :words,
-      parse('%W[f#{o}o b#{a}r b#{a}z]')[:cnts],
+      Prettier::Parser::Words,
+      parse('%W[f#{o}o b#{a}r b#{a}z]').contents,
       start_char: 0,
       end_char: 24
     )
   end
 
   def test_xstring
-    assert_metadata :xstring_literal, <<~SOURCE
+    assert_metadata Prettier::Parser::XStringLiteral, <<~SOURCE
       `
         foo
         bar
@@ -767,15 +772,15 @@ class MetadataTest < Minitest::Test
   end
 
   def test_yield
-    assert_metadata :yield, 'yield foo'
+    assert_metadata Prettier::Parser::Yield, 'yield foo'
   end
 
   def test_yield0
-    assert_metadata :yield0, 'yield'
+    assert_metadata Prettier::Parser::Yield0, 'yield'
   end
 
   def test_zsuper
-    assert_metadata :zsuper, 'super'
+    assert_metadata Prettier::Parser::ZSuper, 'super'
   end
 
   if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
@@ -787,8 +792,8 @@ class MetadataTest < Minitest::Test
       SOURCE
 
       assert_node_metadata(
-        :args_forward,
-        parse(content).dig(:params, :cnts, :rest),
+        Prettier::Parser::ArgsForward,
+        parse(content).params.contents.rest,
         start_char: 8,
         end_char: 11
       )
@@ -803,8 +808,8 @@ class MetadataTest < Minitest::Test
       SOURCE
 
       assert_node_metadata(
-        :aryptn,
-        parse(content).dig(:cons, :pttn),
+        Prettier::Parser::AryPtn,
+        parse(content).consequent.pattern,
         start_char: 12,
         end_char: 20,
         start_line: 2,
@@ -821,8 +826,8 @@ class MetadataTest < Minitest::Test
       SOURCE
 
       assert_node_metadata(
-        :in,
-        parse(content)[:cons],
+        Prettier::Parser::In,
+        parse(content).consequent,
         start_char: 9,
         end_char: 25,
         start_line: 2,
@@ -853,17 +858,17 @@ class MetadataTest < Minitest::Test
     end_line: 1,
     **metadata
   )
-    assert_equal(type, node[:type])
+    assert_kind_of(type, node)
 
-    assert_equal(start_line, node[:loc].start_line)
-    assert_equal(start_char, node[:loc].start_char)
-    assert_equal(end_line, node[:loc].end_line)
-    assert_equal(end_char, node[:loc].end_char)
+    assert_equal(start_line, node.location.start_line)
+    assert_equal(start_char, node.location.start_char)
+    assert_equal(end_line, node.location.end_line)
+    assert_equal(end_char, node.location.end_char)
 
-    metadata.each { |key, value| assert_equal(value, node[key]) }
+    metadata.each { |key, value| assert_equal(value, node.public_send(key)) }
   end
 
   def parse(ruby)
-    Prettier::Parser.parse(ruby).dig(:stmts, :body, 0)
+    Prettier::Parser.parse(ruby).statements.body.first
   end
 end
