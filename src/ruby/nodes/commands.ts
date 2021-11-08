@@ -9,11 +9,21 @@ function throwBadDoc(doc: Plugin.Doc) {
   throw new Error(`Unknown doc ${doc}`);
 }
 
+function reduceDocLength(sum: number, doc: Plugin.Doc) {
+  // If we've hit a line, then we're going to start the counting back at 0 since
+  // it will be starting from the beginning of a line.
+  if (typeof doc === "object" && !Array.isArray(doc) && doc.type === "line") {
+    return 0;
+  }
+
+  return sum + docBreakLength(doc);
+}
+
 // Loop through the already created doc nodes and determine the overall length
 // so that we can properly align the command arguments.
-function docLength(doc: Plugin.Doc): number {
+function docBreakLength(doc: Plugin.Doc): number {
   if (Array.isArray(doc)) {
-    return doc.reduce((sum, child) => sum + docLength(child), 0);
+    return doc.reduce(reduceDocLength, 0);
   }
 
   if (typeof doc === "string") {
@@ -23,16 +33,16 @@ function docLength(doc: Plugin.Doc): number {
   switch (doc.type) {
     case "concat":
     case "fill":
-      return doc.parts.reduce((sum, child) => sum + docLength(child), 0);
+      return doc.parts.reduce(reduceDocLength, 0);
     case "align":
     case "group":
     case "indent":
     case "line-suffix":
-      return docLength(doc.contents);
+      return docBreakLength(doc.contents);
     case "if-break":
-      return docLength(doc.flatContents);
+      return docBreakLength(doc.breakContents);
     case "line":
-      return doc.soft ? 0 : 1;
+      return 0;
     case "break-parent":
     case "cursor":
     case "indent-if-break":
@@ -98,7 +108,7 @@ export const printCommand: Plugin.Printer<Ruby.Command> = (
   } else if (hasDef(node)) {
     breakArgs = joinedArgs;
   } else {
-    breakArgs = align(docLength(command) + 1, joinedArgs);
+    breakArgs = align(docBreakLength(command) + 1, joinedArgs);
   }
 
   return group(
@@ -141,7 +151,7 @@ export const printCommandCall: Plugin.Printer<Ruby.CommandCall> = (
     breakDoc = parts.concat(argDocs);
   } else {
     parts.push(" ");
-    breakDoc = parts.concat(align(docLength(parts), argDocs));
+    breakDoc = parts.concat(align(docBreakLength(parts), argDocs));
   }
 
   const joinedDoc = parts.concat(argDocs);
