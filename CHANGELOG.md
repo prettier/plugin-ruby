@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [#1035](https://github.com/prettier/plugin-ruby/issues/1035) - qcn, kddnewton - Ensure we don't try to print `return` incorrectly when multiple statements are contained within parentheses.
+
 ## [2.0.0] - 2021-10-28
 
 ### Changed
