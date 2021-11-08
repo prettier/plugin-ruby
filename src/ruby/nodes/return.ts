@@ -10,6 +10,14 @@ function canSkipParens(args: Ruby.Args | Ruby.ArgsAddStar) {
   const stmts = (args.body[0] as any).body[0] as Ruby.Stmts;
 
   // return(
+  //   foo
+  //   bar
+  // )
+  if (stmts.body.length !== 1) {
+    return false;
+  }
+
+  // return(
   //   # a
   //   b
   // )

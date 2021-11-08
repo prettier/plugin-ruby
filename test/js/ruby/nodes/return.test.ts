@@ -81,4 +81,15 @@ describe("return", () => {
 
     expect(content).toMatchFormat();
   });
+
+  test("returning multiple statements", () => {
+    const content = ruby(`
+      return(
+        foo
+        bar
+      )
+    `);
+
+    expect(content).toMatchFormat();
+  });
 });
