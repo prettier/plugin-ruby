@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - [#1028](https://github.com/prettier/plugin-ruby/issues/1028) - levymetal, kddnewton - Fix up some nested formatting with very complicated RSpec assertions.
+- [#1035](https://github.com/prettier/plugin-ruby/issues/1035) - qcn, kddnewton - Ensure we don't try to print `return` incorrectly when multiple statements are contained within parentheses.
 
 ## [2.0.0] - 2021-10-28
 
