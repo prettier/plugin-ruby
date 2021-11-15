@@ -137,7 +137,7 @@ export const printIn: Plugin.Printer<Ruby.In> = (path, opts, print) => {
     keyword,
     align(
       keyword.length,
-      path.call((valuePath) => printPatternArg(valuePath, opts, print), "pttn")
+      path.call((valuePath) => printPatternArg(valuePath, opts, print), "pattern")
     ),
     indent([hardline, path.call(print, "stmts")])
   ];
@@ -153,6 +153,6 @@ export const printRAssign: Plugin.Printer<Ruby.Rassign> = (path, opts, print) =>
   group([
     path.call(print, "value"),
     " ",
-    path.call(print, "operator"),
+    path.call(print, "op"),
     group(indent([line, path.call(print, "pattern")]))
   ]);

@@ -85,8 +85,8 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "call": {
       const childNodes: ChildNode[] = [node.receiver];
 
-      if (node.operator !== "::") {
-        childNodes.push(node.operator);
+      if (node.op !== "::") {
+        childNodes.push(node.op);
       }
 
       if (node.message !== "call") {
@@ -116,7 +116,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "defs":
       return [
         node.target,
-        node.operator,
+        node.op,
         node.name,
         node.params,
         node.bodystmt
@@ -144,8 +144,8 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "field": {
       const childNodes: ChildNode[] = [node.parent];
 
-      if (node.operator !== "::") {
-        childNodes.push(node.operator);
+      if (node.op !== "::") {
+        childNodes.push(node.op);
       }
 
       childNodes.push(node.name);
@@ -154,7 +154,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "fndptn":
       return [node.constant, node.left, ...node.values, node.right];
     case "for":
-      return [node.iterator, node.enumerable, node.stmts];
+      return [node.index, node.collection, node.stmts];
     case "hash":
       return [node.cnts];
     case "heredoc":
@@ -176,13 +176,13 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "if_mod":
       return [node.stmt, node.pred];
     case "in":
-      return [node.pttn, node.stmts, node.cons];
+      return [node.pattern, node.stmts, node.cons];
     case "kwrest_param":
       return [node.name];
     case "lambda":
       return [node.params, node.stmts];
     case "massign":
-      return [node.tgt, node.val];
+      return [node.target, node.value];
     case "method_add_arg":
       return [node.call, node.args];
     case "method_add_block":
@@ -206,7 +206,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "next":
       return [node.args];
     case "opassign":
-      return [node.target, node.operator, node.value];
+      return [node.target, node.op, node.value];
     case "params": {
       let childNodes: ChildNode[] = [...node.reqs];
 
@@ -244,7 +244,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "qwords":
       return [];
     case "rassign":
-      return [node.value, node.operator, node.pattern];
+      return [node.value, node.op, node.pattern];
     case "redo":
       return [];
     case "regexp_literal":
@@ -254,7 +254,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "rescue_ex":
       return [node.extns, node.var];
     case "rescue_mod":
-      return [node.stmt, node.val];
+      return [node.stmt, node.value];
     case "rest_param":
       return [node.name];
     case "retry":
@@ -278,7 +278,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "super":
       return [node.args];
     case "symbol_literal":
-      return [node.val];
+      return [node.value];
     case "symbols":
       return [];
     case "top_const_field":
@@ -286,7 +286,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "top_const_ref":
       return [node.constant];
     case "unary":
-      return [node.val];
+      return [node.value];
     case "undef":
       return node.syms;
     case "unless":

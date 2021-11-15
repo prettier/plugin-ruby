@@ -15,7 +15,7 @@ export const printDef: Plugin.Printer<Ruby.Def | Ruby.Defs> = (
   // In this case, we're printing a method that's defined as a singleton, so
   // we need to include the target and the operator before the name.
   if (node.type === "defs") {
-    declaration.push(path.call(print, "target"), path.call(print, "operator"));
+    declaration.push(path.call(print, "target"), path.call(print, "op"));
   }
 
   // In case there are no parens but there are parameters

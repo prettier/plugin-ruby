@@ -17,13 +17,13 @@ export const printUndef: Plugin.Printer<Ruby.Undef> = (path, opts, print) => {
     // printing so they get printed as well.
     if (symbolNode.comments) {
       symbolNode.comments.forEach((comment) => {
-        addTrailingComment(symbolNode.val, comment);
+        addTrailingComment(symbolNode.value, comment);
       });
     }
 
     // If we're printing a symbol literal, then we want to descend into it and
     // just print the underlying contents so that it prints as a bare word.
-    return symbolPath.call(print, "val");
+    return symbolPath.call(print, "value");
   }, "syms");
 
   const keyword = "undef ";

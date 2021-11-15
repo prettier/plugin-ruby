@@ -73,7 +73,7 @@ function toProc(
   if (
     call.receiver.type !== "var_ref" ||
     call.receiver.value.value !== params.reqs[0].value ||
-    !isPeriod(call.operator) ||
+    !isPeriod(call.op) ||
     call.message === "call" ||
     call.message.type !== "@ident"
   ) {
@@ -102,7 +102,7 @@ function toProc(
 
     if (
       key.type === "symbol_literal" &&
-      ["if", "unless"].includes(key.val.value)
+      ["if", "unless"].includes(key.value.value)
     ) {
       return null;
     }

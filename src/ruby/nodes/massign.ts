@@ -9,14 +9,14 @@ export const printMAssign: Plugin.Printer<Ruby.Massign> = (
   print
 ) => {
   const node = path.getValue();
-  let valueDoc = path.call(print, "val");
+  let valueDoc = path.call(print, "value");
 
-  if (["mrhs", "mrhs_add_star", "mrhs_new_from_args"].includes(node.val.type)) {
+  if (["mrhs", "mrhs_add_star", "mrhs_new_from_args"].includes(node.value.type)) {
     valueDoc = group(join([",", line], valueDoc));
   }
 
-  const targetDoc: Plugin.Doc[] = [join([",", line], path.call(print, "tgt"))];
-  if ((node.tgt as any).comma) {
+  const targetDoc: Plugin.Doc[] = [join([",", line], path.call(print, "target"))];
+  if (node.target.type === "mlhs" && node.target.comma) {
     targetDoc.push(",");
   }
 

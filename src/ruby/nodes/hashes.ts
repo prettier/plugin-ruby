@@ -27,7 +27,7 @@ type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & {
 // This function represents that check, as it determines if it can convert the
 // symbol node into a hash label.
 function isValidHashLabel(symbolLiteral: Ruby.SymbolLiteral) {
-  const label = symbolLiteral.val.value;
+  const label = symbolLiteral.value.value;
   return label.match(/^[_A-Za-z]/) && !label.endsWith("=");
 }
 
@@ -57,7 +57,7 @@ const printHashKeyLabel: KeyPrinter = (path, print) => {
     case "@label":
       return print(path);
     case "symbol_literal":
-      return [(path as Plugin.Path<typeof node>).call(print, "val"), ":"];
+      return [(path as Plugin.Path<typeof node>).call(print, "value"), ":"];
     case "dyna_symbol":
       return [print(path), ":"];
     default:

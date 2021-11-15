@@ -197,7 +197,7 @@ function canTernaryStmts(stmts: Ruby.Stmts) {
 
   // If the user is using one of the lower precedence "and" or "or" operators,
   // then we can't use a ternary expression as it would break the flow control.
-  if (stmt.type === "binary" && ["and", "or"].includes(stmt.operator)) {
+  if (stmt.type === "binary" && ["and", "or"].includes(stmt.op)) {
     return false;
   }
 

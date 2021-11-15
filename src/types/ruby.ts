@@ -92,7 +92,7 @@ export type StringConcat = ParserEvent<"string_concat", { left: StringConcat | S
 export type StringDVar = ParserEvent<"string_dvar", { var: Backref | VarRef }>;
 export type StringEmbExpr = ParserEvent<"string_embexpr", { stmts: Stmts }>;
 export type StringLiteral = ParserEvent<"string_literal", { parts: StringContent[], quote: string }>;
-export type SymbolLiteral = ParserEvent<"symbol_literal", { val: Backtick | Const | CVar | GVar | Identifier | IVar | Keyword | Op }>;
+export type SymbolLiteral = ParserEvent<"symbol_literal", { value: Backtick | Const | CVar | GVar | Identifier | IVar | Keyword | Op }>;
 export type XStringLiteral = ParserEvent<"xstring_literal", { parts: StringContent[] }>;
 
 // These are various parser events that have to do with arrays.
@@ -116,13 +116,13 @@ type Assignable = ArefField | ConstPathField | Field | TopConstField | VarField;
 export type ArefField = ParserEvent<"aref_field", { collection: AnyNode, index: ArgsAddBlock | null }>;
 export type Assign = ParserEvent<"assign", { target: Assignable, value: AnyNode }>;
 export type ConstPathField = ParserEvent<"const_path_field", { parent: ConstPathRef | Paren | TopConstRef | VarRef, constant: Const }>;
-export type Field = ParserEvent<"field", { parent: AnyNode, operator: CallOperator, name: Const | Identifier }>;
-export type Opassign = ParserEvent<"opassign", { target: Assignable, operator: Op, value: AnyNode }>;
+export type Field = ParserEvent<"field", { parent: AnyNode, op: CallOperator, name: Const | Identifier }>;
+export type Opassign = ParserEvent<"opassign", { target: Assignable, op: Op, value: AnyNode }>;
 export type TopConstField = ParserEvent<"top_const_field", { constant: Const }>;
 export type VarField = ParserEvent<"var_field", { value: null | Const | CVar | GVar | Identifier | IVar }>;
 
 // These are various parser events that have to do with multiple assignment.
-export type Massign = ParserEvent<"massign", { tgt: Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen, val: AnyNode }>;
+export type Massign = ParserEvent<"massign", { target: Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen, value: AnyNode }>;
 export type Mlhs = ParserEvent<"mlhs", { parts: (ArefField | Field | Identifier | MlhsParen | VarField)[], comma: undefined | true }>;
 export type MlhsAddPost = ParserEvent<"mlhs_add_post", { star: MlhsAddStar, mlhs: Mlhs }>;
 export type MlhsAddStar = ParserEvent<"mlhs_add_star", { mlhs: Mlhs, star: null | ArefField | Field | Identifier | VarField }>;
@@ -136,13 +136,13 @@ export type Case = ParserEvent<"case", { value: AnyNode, cons: In | When }>;
 export type Else = ParserEvent<"else", { stmts: Stmts }>;
 export type Elsif = ParserEvent<"elsif", { pred: AnyNode, stmts: Stmts, cons: null | Elsif | Else }>;
 export type Ensure = ParserEvent<"ensure", { keyword: Keyword, stmts: Stmts }>;
-export type For = ParserEvent<"for", { iterator: Mlhs | MlhsAddStar | VarField, enumerable: AnyNode, stmts: Stmts }>;
+export type For = ParserEvent<"for", { index: Mlhs | MlhsAddStar | VarField, collection: AnyNode, stmts: Stmts }>;
 export type If = ParserEvent<"if", { pred: AnyNode, stmts: Stmts, cons: null | Elsif | Else }>;
 export type IfModifier = ParserEvent<"if_mod", { pred: AnyNode, stmt: AnyNode }>;
-export type In = ParserEvent<"in", { pttn: AnyNode, stmts: Stmts, cons: null | In | Else }>;
+export type In = ParserEvent<"in", { pattern: AnyNode, stmts: Stmts, cons: null | In | Else }>;
 export type Rescue = ParserEvent<"rescue", { extn: null | RescueEx, stmts: Stmts, cons: null | Rescue }>;
 export type RescueEx = ParserEvent<"rescue_ex", { extns: AnyNode, var: null | Field | VarField }>;
-export type RescueModifier = ParserEvent<"rescue_mod", { stmt: AnyNode, val: AnyNode }>;
+export type RescueModifier = ParserEvent<"rescue_mod", { stmt: AnyNode, value: AnyNode }>;
 export type Ternary = ParserEvent<"ifop", { pred: AnyNode, tthy: AnyNode, flsy: AnyNode }>;
 export type Unless = ParserEvent<"unless", { pred: AnyNode, stmts: Stmts, cons: null | Elsif | Else }>;
 export type UnlessModifier = ParserEvent<"unless_mod", { pred: AnyNode, stmt: AnyNode }>;
@@ -163,7 +163,7 @@ export type Yield = ParserEvent<"yield", { args: ArgsAddBlock | Paren }>;
 export type Aryptn = ParserEvent<"aryptn", { constant: null | VarRef, reqs: AnyNode[], rest: null | VarField, posts: AnyNode[] }>;
 export type FndPtn = ParserEvent<"fndptn", { constant: null | AnyNode, left: VarField, values: AnyNode[], right: VarField }>;
 export type Hshptn = ParserEvent<"hshptn", { constant: null | AnyNode, keywords: [Label, AnyNode][], kwrest: null | VarField }>;
-export type Rassign = ParserEvent<"rassign", { value: AnyNode, operator: Op | Keyword, pattern: AnyNode }>;
+export type Rassign = ParserEvent<"rassign", { value: AnyNode, op: Op | Keyword, pattern: AnyNode }>;
 
 // These are various parser events for method declarations.
 type DefName = Backtick | Const | Identifier | Keyword | Op;
@@ -171,7 +171,7 @@ type ParenAroundParams = Omit<Paren, "cnts"> & { cnts: Params };
 
 export type Blockarg = ParserEvent<"blockarg", { name: Identifier }>;
 export type Def = ParserEvent<"def", { name: DefName, params: Params | Paren, bodystmt: Bodystmt }>;
-export type Defs = ParserEvent<"defs", { target: AnyNode, operator: Op | Period, name: DefName, params: Params | Paren, bodystmt: Bodystmt }>;
+export type Defs = ParserEvent<"defs", { target: AnyNode, op: Op | Period, name: DefName, params: Params | Paren, bodystmt: Bodystmt }>;
 export type Defsl = ParserEvent<"defsl", { name: DefName, paren: null | ParenAroundParams, stmt: AnyNode }>;
 export type KeywordRestParam = ParserEvent<"kwrest_param", { name: null | Identifier }>;
 export type Lambda = ParserEvent<"lambda", { params: Params | ParenAroundParams, stmts: Bodystmt | Stmts }>;
@@ -186,9 +186,9 @@ export type ArgsAddBlock = ParserEvent<"args_add_block", { args: Args | ArgsAddS
 export type ArgsAddStar = ParserEvent<"args_add_star", { args: Args | ArgsAddStar, star: AnyNode }>;
 export type BlockVar = ParserEvent<"block_var", { params: Params, locals: Identifier[] }>;
 export type BraceBlock = ParserEvent<"brace_block", { lbrace: Lbrace, block_var: null | BlockVar, stmts: Stmts }>;
-export type Call = ParserEvent<"call", { receiver: AnyNode, operator: CallOperator, message: Backtick | Op | Identifier | Const | "call" }>;
+export type Call = ParserEvent<"call", { receiver: AnyNode, op: CallOperator, message: Backtick | Op | Identifier | Const | "call" }>;
 export type Command = ParserEvent<"command", { message: Const | Identifier, args: Args | ArgsAddBlock }>;
-export type CommandCall = ParserEvent<"command_call", { receiver: AnyNode, operator: CallOperator, message: Op | Identifier | Const, args: Args | ArgsAddBlock }>;
+export type CommandCall = ParserEvent<"command_call", { receiver: AnyNode, op: CallOperator, message: Op | Identifier | Const, args: Args | ArgsAddBlock }>;
 export type DoBlock = ParserEvent<"do_block", { keyword: Keyword, block_var: null | BlockVar, bodystmt: Bodystmt }>;
 export type Fcall = ParserEvent<"fcall", { value: Const | Identifier }>;
 export type MethodAddArg = ParserEvent<"method_add_arg", { call: Call | Fcall, args: Args | ArgParen | ArgsAddBlock }>;
@@ -199,7 +199,7 @@ export type VCall = ParserEvent<"vcall", { value: Identifier }>;
 type Dot = { left: AnyNode, right: AnyNode } | { left: null, right: AnyNode } | { left: AnyNode, right: null };
 export type Aref = ParserEvent<"aref", { collection: AnyNode, index: Args | ArgsAddBlock | null }>;
 export type BEGIN = ParserEvent<"BEGIN", { lbrace: Lbrace, stmts: Stmts }>;
-export type Binary = ParserEvent<"binary", { left: AnyNode, operator: string, right: AnyNode }>;
+export type Binary = ParserEvent<"binary", { left: AnyNode, op: string, right: AnyNode }>;
 export type ConstPathRef = ParserEvent<"const_path_ref", { parent: AnyNode, constant: Const }>;
 export type ConstRef = ParserEvent<"const_ref", { constant: Const }>;
 export type Defined = ParserEvent<"defined", { value: AnyNode }>;
@@ -208,7 +208,7 @@ export type Dot3 = ParserEvent<"dot3", Dot>;
 export type END = ParserEvent<"END", { lbrace: Lbrace, stmts: Stmts }>;
 export type Paren = ParserEvent<"paren", { lparen: Lparen, cnts: AnyNode }>;
 export type TopConstRef = ParserEvent<"top_const_ref", { constant: Const }>;
-export type Unary = ParserEvent<"unary", { val: AnyNode, op: string, paren: boolean | undefined }>;
+export type Unary = ParserEvent<"unary", { value: AnyNode, op: string, paren: boolean | undefined }>;
 export type VarRef = ParserEvent<"var_ref", { value: Const | CVar | GVar | Identifier | IVar | Keyword }>;
 
 // These are various parser events for statements you would find in a class definition body.

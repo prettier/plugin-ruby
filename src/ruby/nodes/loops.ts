@@ -71,16 +71,16 @@ function printLoop(keyword: string): Plugin.Printer<Loop> {
 export const printFor: Plugin.Printer<Ruby.For> = (path, opts, print) => {
   const node = path.getValue();
 
-  let iteratorDoc = path.call(print, "iterator");
-  if (node.iterator.type === "mlhs") {
-    iteratorDoc = join(", ", iteratorDoc);
+  let indexDoc = path.call(print, "index");
+  if (node.index.type === "mlhs") {
+    indexDoc = join(", ", indexDoc);
   }
 
   return group([
     "for ",
-    iteratorDoc,
+    indexDoc,
     " in ",
-    path.call(print, "enumerable"),
+    path.call(print, "collection"),
     indent([hardline, path.call(print, "stmts")]),
     hardline,
     "end"

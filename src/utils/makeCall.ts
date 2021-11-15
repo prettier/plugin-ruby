@@ -4,7 +4,7 @@ type Callable = Ruby.Call | Ruby.CommandCall | Ruby.Field;
 
 const makeCall: Plugin.Printer<Callable> = (path, opts, print) => {
   const node = path.getValue();
-  const operator = node.operator;
+  const operator = node.op;
 
   // Ignoring the next block for coverage information because it's only relevant
   // in Ruby 2.5 and below.
@@ -13,7 +13,7 @@ const makeCall: Plugin.Printer<Callable> = (path, opts, print) => {
     return operator as Plugin.Doc;
   }
 
-  return operator === "::" ? "." : path.call(print, "operator");
+  return operator === "::" ? "." : path.call(print, "op");
 };
 
 export default makeCall;

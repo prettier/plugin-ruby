@@ -44,11 +44,11 @@ export const printAlias: Plugin.Printer<Ruby.Alias | Ruby.VarAlias> = (
       // otherwise we could accidentally skip printing them.
       if (argNode.comments) {
         argNode.comments.forEach((comment) => {
-          addTrailingComment(argNode.val, comment);
+          addTrailingComment(argNode.value, comment);
         });
       }
 
-      return argPath.call(print, "val");
+      return argPath.call(print, "value");
     }
 
     return print(argPath);

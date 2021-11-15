@@ -6,13 +6,13 @@ const { group, indent, line, softline } = prettier;
 
 export const printBinary: Plugin.Printer<Ruby.Binary> = (path, opts, print) => {
   const node = path.getValue();
-  const space = node.operator === "**" ? "" : " ";
+  const space = node.op === "**" ? "" : " ";
 
   if (noIndent.includes(node.right.type)) {
     return group([
       group(path.call(print, "left")),
       space,
-      node.operator,
+      node.op,
       space,
       group(path.call(print, "right"))
     ]);
@@ -23,7 +23,7 @@ export const printBinary: Plugin.Printer<Ruby.Binary> = (path, opts, print) => {
     space,
     group(
       indent([
-        node.operator,
+        node.op,
         space === "" ? softline : line,
         path.call(print, "right")
       ])
@@ -57,7 +57,7 @@ export const printDot3: Plugin.Printer<Ruby.Dot3> = (path, opts, print) => {
 
 export const printUnary: Plugin.Printer<Ruby.Unary> = (path, opts, print) => {
   const node = path.getValue();
-  const valueDoc = path.call(print, "val");
+  const valueDoc = path.call(print, "value");
 
   if (node.op === "not") {
     // Here we defer to the original source, as it's kind of difficult to

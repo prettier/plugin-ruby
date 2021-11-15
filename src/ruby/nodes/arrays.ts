@@ -127,7 +127,7 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
     // interpolation, then we're going to print a %i array.
     if (isSymbolArray(contents)) {
       const printSymbol = (symbolPath: Plugin.Path<Ruby.SymbolLiteral>) =>
-        symbolPath.call(print, "val");
+        symbolPath.call(print, "value");
 
       const nodePath = path as Plugin.Path<{
         cnts: { parts: Ruby.SymbolLiteral[] };

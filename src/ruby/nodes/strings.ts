@@ -279,7 +279,7 @@ export const printSymbolLiteral: Plugin.Printer<Ruby.SymbolLiteral> = (
   opts,
   print
 ) => {
-  return [":", path.call(print, "val")];
+  return [":", path.call(print, "value")];
 };
 
 // Prints out an xstring literal. Its child is an array of string parts,

@@ -90,7 +90,7 @@ export const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (
     indent([hardline, path.call(print, "stmt")]),
     hardline,
     "rescue StandardError",
-    indent([hardline, path.call(print, "val")]),
+    indent([hardline, path.call(print, "value")]),
     hardline,
     "end"
   ];

@@ -19,7 +19,7 @@ function canSkipParens(paren: Ruby.Paren) {
   const stmt = stmts.body[0];
 
   // return (a or b)
-  if (stmt.type === "binary" && ["and", "or"].includes(stmt.operator)) {
+  if (stmt.type === "binary" && ["and", "or"].includes(stmt.op)) {
     return false;
   }
 

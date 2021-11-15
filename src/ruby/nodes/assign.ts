@@ -35,7 +35,7 @@ export const printOpAssign: Plugin.Printer<Ruby.Opassign> = (
   group([
     path.call(print, "target"),
     " ",
-    path.call(print, "operator"),
+    path.call(print, "op"),
     indent([line, path.call(print, "value")])
   ]);
 

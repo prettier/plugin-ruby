@@ -1529,7 +1529,7 @@ class Prettier::Parser < Ripper
       {
         type: :binary,
         left: left,
-        operator: operator,
+        op: operator,
         right: right,
         loc: location
       }.to_json(*opts)
@@ -1936,7 +1936,7 @@ class Prettier::Parser < Ripper
       {
         type: :call,
         receiver: receiver,
-        operator: operator,
+        op: operator,
         message: message,
         loc: location
       }.to_json(*opts)
@@ -2067,7 +2067,7 @@ class Prettier::Parser < Ripper
       {
         type: :rassign,
         value: value,
-        operator: operator,
+        op: operator,
         pattern: pattern,
         loc: location
       }.to_json(*opts)
@@ -2350,7 +2350,7 @@ class Prettier::Parser < Ripper
       {
         type: :command_call,
         receiver: receiver,
-        operator: operator,
+        op: operator,
         message: message,
         args: arguments,
         loc: location
@@ -2932,7 +2932,7 @@ class Prettier::Parser < Ripper
       {
         type: :defs,
         target: target,
-        operator: operator,
+        op: operator,
         name: name,
         params: params,
         bodystmt: bodystmt,
@@ -3784,7 +3784,7 @@ class Prettier::Parser < Ripper
       {
         type: :field,
         parent: parent,
-        operator: operator,
+        op: operator,
         name: name,
         loc: location
       }.to_json(*opts)
@@ -3941,10 +3941,10 @@ class Prettier::Parser < Ripper
   class For
     # [MLHS | MLHSAddStar | VarField] the variable declaration being used to
     # pull values out of the object being enumerated
-    attr_reader :iterator
+    attr_reader :index
 
     # [untyped] the object being enumerated in the loop
-    attr_reader :enumerable
+    attr_reader :collection
 
     # [Statements] the statements to be executed
     attr_reader :statements
@@ -3952,9 +3952,9 @@ class Prettier::Parser < Ripper
     # [Location] the location of this node
     attr_reader :location
 
-    def initialize(iterator:, enumerable:, statements:, location:)
-      @iterator = iterator
-      @enumerable = enumerable
+    def initialize(index:, collection:, statements:, location:)
+      @index = index
+      @collection = collection
       @statements = statements
       @location = location
     end
@@ -3964,10 +3964,10 @@ class Prettier::Parser < Ripper
         q.text('for')
 
         q.breakable
-        q.pp(iterator)
+        q.pp(index)
 
         q.breakable
-        q.pp(enumerable)
+        q.pp(collection)
 
         q.breakable
         q.pp(statements)
@@ -3977,8 +3977,8 @@ class Prettier::Parser < Ripper
     def to_json(*opts)
       {
         type: :for,
-        iterator: iterator,
-        enumerable: enumerable,
+        index: index,
+        collection: collection,
         stmts: statements,
         loc: location
       }.to_json(*opts)
@@ -3987,30 +3987,30 @@ class Prettier::Parser < Ripper
 
   # :call-seq:
   #   on_for: (
-  #     (MLHS | MLHSAddStar | VarField) iterator,
-  #     untyped enumerable,
+  #     (MLHS | MLHSAddStar | VarField) value,
+  #     untyped collection,
   #     Statements statements
   #   ) -> For
-  def on_for(iterator, enumerable, statements)
+  def on_for(index, collection, statements)
     beginning = find_scanner_event(Kw, 'for')
     ending = find_scanner_event(Kw, 'end')
 
     # Consume the do keyword if it exists so that it doesn't get confused for
     # some other block
     keyword = find_scanner_event(Kw, 'do', consume: false)
-    if keyword && keyword.location.start_char > enumerable.location.end_char &&
+    if keyword && keyword.location.start_char > collection.location.end_char &&
          keyword.location.end_char < ending.location.start_char
       scanner_events.delete(keyword)
     end
 
     statements.bind(
-      (keyword || enumerable).location.end_char,
+      (keyword || collection).location.end_char,
       ending.location.start_char
     )
 
     For.new(
-      iterator: iterator,
-      enumerable: enumerable,
+      index: index,
+      collection: collection,
       statements: statements,
       location: beginning.location.to(ending.location)
     )
@@ -4655,7 +4655,7 @@ class Prettier::Parser < Ripper
     def to_json(*opts)
       {
         type: :in,
-        pttn: pattern,
+        pattern: pattern,
         stmts: statements,
         cons: consequent,
         loc: location
@@ -5199,7 +5199,7 @@ class Prettier::Parser < Ripper
     end
 
     def to_json(*opts)
-      { type: :massign, tgt: target, val: value, loc: location }.to_json(*opts)
+      { type: :massign, target: target, value: value, loc: location }.to_json(*opts)
     end
   end
 
@@ -5919,7 +5919,7 @@ class Prettier::Parser < Ripper
       {
         type: :opassign,
         target: target,
-        operator: operator,
+        op: operator,
         value: value,
         loc: location
       }.to_json(*opts)
@@ -7067,7 +7067,7 @@ class Prettier::Parser < Ripper
     end
 
     def to_json(*opts)
-      { type: :rescue_mod, stmt: statement, val: value, loc: location }.to_json(
+      { type: :rescue_mod, stmt: statement, value: value, loc: location }.to_json(
         *opts
       )
     end
@@ -7858,7 +7858,7 @@ class Prettier::Parser < Ripper
     end
 
     def to_json(*opts)
-      { type: :symbol, val: value, loc: location }.to_json(*opts)
+      { type: :symbol, value: value, loc: location }.to_json(*opts)
     end
   end
 
@@ -7900,7 +7900,7 @@ class Prettier::Parser < Ripper
     end
 
     def to_json(*opts)
-      { type: :symbol_literal, val: value, loc: location }.to_json(*opts)
+      { type: :symbol_literal, value: value, loc: location }.to_json(*opts)
     end
   end
 
@@ -8372,7 +8372,7 @@ class Prettier::Parser < Ripper
       {
         type: :unary,
         op: :not,
-        val: statement,
+        value: statement,
         paren: parentheses,
         loc: location
       }.to_json(*opts)
@@ -8413,7 +8413,7 @@ class Prettier::Parser < Ripper
     end
 
     def to_json(*opts)
-      { type: :unary, op: operator, val: statement, loc: location }.to_json(
+      { type: :unary, op: operator, value: statement, loc: location }.to_json(
         *opts
       )
     end
