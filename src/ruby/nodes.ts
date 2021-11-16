@@ -71,11 +71,7 @@ import {
   printMRHSAddStar,
   printMRHSNewFromArgs
 } from "./nodes/massign";
-import {
-  printAccessControl,
-  printDef,
-  printDefEndless
-} from "./nodes/methods";
+import { printAccessControl, printDef, printDefEndless } from "./nodes/methods";
 import {
   printBinary,
   printDot2,
@@ -154,7 +150,10 @@ type Token =
 const printToken: Plugin.Printer<Token> = (path) => path.getValue().value;
 const printVoidStmt: Plugin.Printer<Ruby.VoidStmt> = () => "";
 
-const nodes: Record<Ruby.AnyNode["type"] | "comment" | "embdoc", Plugin.Printer<any>> = {
+const nodes: Record<
+  Ruby.AnyNode["type"] | "comment" | "embdoc",
+  Plugin.Printer<any>
+> = {
   BEGIN: printBEGIN,
   CHAR: printChar,
   END: printEND,

@@ -116,13 +116,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "defined":
       return [node.value];
     case "defs":
-      return [
-        node.target,
-        node.op,
-        node.name,
-        node.params,
-        node.bodystmt
-      ];
+      return [node.target, node.op, node.name, node.params, node.bodystmt];
     case "do_block":
       return [node.keyword, node.block_var, node.bodystmt];
     case "dot2":
