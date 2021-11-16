@@ -1,27 +1,8 @@
 # frozen_string_literal: true
 
-# We implement our own version checking here instead of using Gem::Version so
-# that we can use the --disable-gems flag.
-RUBY_MAJOR, RUBY_MINOR, RUBY_PATCH, * = RUBY_VERSION.split('.').map(&:to_i)
-
-if (RUBY_MAJOR < 2) || ((RUBY_MAJOR == 2) && (RUBY_MINOR < 5))
-  warn(
-    "Ruby version #{RUBY_VERSION} not supported. " \
-      'Please upgrade to 2.5.0 or above.'
-  )
-
-  exit 1
-end
-
-require 'json' unless defined?(JSON)
 require 'ripper'
 
-# Ensure the module is already defined. This is mostly so that we don't have to
-# indent the Parser definition one more time.
-module Prettier
-end
-
-class Prettier::Parser < Ripper
+class Ripper::ParseTree < Ripper
   # Represents a line in the source. If this class is being used, it means that
   # every character in the string is 1 byte in length, so we can just return the
   # start of the line + the index.
@@ -95,7 +76,7 @@ class Prettier::Parser < Ripper
 
   # A special parser error so that we can get nice syntax displays on the error
   # message when prettier prints out the results.
-  class ParserError < StandardError
+  class ParseError < StandardError
     attr_reader :lineno, :column
 
     def initialize(error, lineno, column)
@@ -105,7 +86,7 @@ class Prettier::Parser < Ripper
     end
   end
 
-  attr_reader :source, :lines, :scanner_events
+  attr_reader :source, :lines, :tokens
 
   # This is an attr_accessor so Stmts objects can grab comments out of this
   # array and attach them to themselves.
@@ -147,19 +128,19 @@ class Prettier::Parser < Ripper
 
     # Heredocs can actually be nested together if you're using interpolation, so
     # this is a stack of heredoc nodes that are currently being created. When we
-    # get to the scanner event that finishes off a heredoc node, we pop the top
+    # get to the token that finishes off a heredoc node, we pop the top
     # one off. If there are others surrounding it, then the body events will now
     # be added to the correct nodes.
     @heredocs = []
 
-    # This is a running list of scanner events that have fired. It's useful
+    # This is a running list of tokens that have fired. It's useful
     # mostly for maintaining location information. For example, if you're inside
     # the handle of a def event, then in order to determine where the AST node
-    # started, you need to look backward in the scanner events to find a def
+    # started, you need to look backward in the tokens to find a def
     # keyword. Most of the time, when a parser event consumes one of these
     # events, it will be deleted from the list. So ideally, this list stays
     # pretty short over the course of parsing a source string.
-    @scanner_events = []
+    @tokens = []
 
     # Here we're going to build up a list of SingleByteString or MultiByteString
     # objects. They're each going to represent a string in the source. They are
@@ -188,11 +169,11 @@ class Prettier::Parser < Ripper
 
   private
 
-  # ----------------------------------------
+  # ----------------------------------------------------------------------------
   # :section: Helper methods
   # The following methods are used by the ripper event handlers to either
   # determine their bounds or query other nodes.
-  # ----------------------------------------
+  # ----------------------------------------------------------------------------
 
   # This represents the current place in the source string that we've gotten to
   # so far. We have a memoized line_counts object that we can use to get the
@@ -203,53 +184,52 @@ class Prettier::Parser < Ripper
     @line_counts[lineno - 1][column]
   end
 
-  # As we build up a list of scanner events, we'll periodically need to go
-  # backwards and find the ones that we've already hit in order to determine the
-  # location information for nodes that use them. For example, if you have a
-  # module node then you'll look backward for a @module scanner event to
-  # determine your start location.
+  # As we build up a list of tokens, we'll periodically need to go backwards and
+  # find the ones that we've already hit in order to determine the location
+  # information for nodes that use them. For example, if you have a module node
+  # then you'll look backward for a kw token to determine your start location.
   #
-  # This works with nesting since we're deleting scanner events from the list
-  # once they've been used up. For example if you had nested module declarations
-  # then the innermost declaration would grab the last @module event (which
-  # would happen to be the innermost keyword). Then the outer one would only be
-  # able to grab the first one. In this way all of the scanner events act as
+  # This works with nesting since we're deleting tokens from the list once
+  # they've been used up. For example if you had nested module declarations then
+  # the innermost declaration would grab the last kw node that matches "module"
+  # (which would happen to be the innermost keyword). Then the outer one would
+  # only be able to grab the first one. In this way all of the tokens act as
   # their own stack.
-  def find_scanner_event(type, value = :any, consume: true)
+  def find_token(type, value = :any, consume: true)
     index =
-      scanner_events.rindex do |node|
-        node.is_a?(type) && (value == :any || (node.value == value))
+      tokens.rindex do |token|
+        token.is_a?(type) && (value == :any || (token.value == value))
       end
 
     if consume
-      # If we're expecting to be able to find a scanner event and consume it,
+      # If we're expecting to be able to find a token and consume it,
       # but can't actually find it, then we need to raise an error. This is
       # _usually_ caused by a syntax error in the source that we're printing. It
-      # could also be caused by accidentally attempting to consume a scanner
-      # event twice by two different parser event handlers.
+      # could also be caused by accidentally attempting to consume a token twice
+      # by two different parser event handlers.
       unless index
         message = "Cannot find expected #{value == :any ? type : value}"
-        raise ParserError.new(message, lineno, column)
+        raise ParseError.new(message, lineno, column)
       end
 
-      scanner_events.delete_at(index)
+      tokens.delete_at(index)
     elsif index
-      scanner_events[index]
+      tokens[index]
     end
   end
 
   # A helper function to find a :: operator. We do special handling instead of
-  # using find_scanner_event here because we don't pop off all of the ::
+  # using find_token here because we don't pop off all of the ::
   # operators so you could end up getting the wrong information if you have for
   # instance ::X::Y::Z.
   def find_colon2_before(const)
     index =
-      scanner_events.rindex do |node|
-        node.is_a?(Op) && node.value == '::' &&
-          node.location.start_char < const.location.start_char
+      tokens.rindex do |token|
+        token.is_a?(Op) && token.value == '::' &&
+          token.location.start_char < const.location.start_char
       end
 
-    scanner_events[index]
+    tokens[index]
   end
 
   # Finds the next position in the source string that begins a statement. This
@@ -273,10 +253,10 @@ class Prettier::Parser < Ripper
     position
   end
 
-  # ----------------------------------------
+  # ----------------------------------------------------------------------------
   # :section: Ripper event handlers
   # The following methods all handle a dispatched ripper event.
-  # ----------------------------------------
+  # ----------------------------------------------------------------------------
 
   # BEGINBlock represents the use of the +BEGIN+ keyword, which hooks into the
   # lifecycle of the interpreter. Whatever is inside the block will get executed
@@ -324,15 +304,15 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_BEGIN: (Statements statements) -> BEGINBlock
   def on_BEGIN(statements)
-    lbrace = find_scanner_event(LBrace)
-    rbrace = find_scanner_event(RBrace)
+    lbrace = find_token(LBrace)
+    rbrace = find_token(RBrace)
 
     statements.bind(
       find_next_statement_start(lbrace.location.end_char),
       rbrace.location.start_char
     )
 
-    keyword = find_scanner_event(Kw, 'BEGIN')
+    keyword = find_token(Kw, 'BEGIN')
 
     BEGINBlock.new(
       lbrace: lbrace,
@@ -381,7 +361,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -428,15 +408,15 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_END: (Statements statements) -> ENDBlock
   def on_END(statements)
-    lbrace = find_scanner_event(LBrace)
-    rbrace = find_scanner_event(RBrace)
+    lbrace = find_token(LBrace)
+    rbrace = find_token(RBrace)
 
     statements.bind(
       find_next_statement_start(lbrace.location.end_char),
       rbrace.location.start_char
     )
 
-    keyword = find_scanner_event(Kw, 'END')
+    keyword = find_token(Kw, 'END')
 
     ENDBlock.new(
       lbrace: lbrace,
@@ -537,7 +517,7 @@ class Prettier::Parser < Ripper
   #     (DynaSymbol | SymbolLiteral) right
   #   ) -> Alias
   def on_alias(left, right)
-    keyword = find_scanner_event(Kw, 'alias')
+    keyword = find_token(Kw, 'alias')
 
     Alias.new(
       left: left,
@@ -598,8 +578,8 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_aref: (untyped collection, (nil | Args | ArgsAddBlock) index) -> ARef
   def on_aref(collection, index)
-    find_scanner_event(LBracket)
-    rbracket = find_scanner_event(RBracket)
+    find_token(LBracket)
+    rbracket = find_token(RBracket)
 
     ARef.new(
       collection: collection,
@@ -657,8 +637,8 @@ class Prettier::Parser < Ripper
   #     (nil | ArgsAddBlock) index
   #   ) -> ARefField
   def on_aref_field(collection, index)
-    find_scanner_event(LBracket)
-    rbracket = find_scanner_event(RBracket)
+    find_token(LBracket)
+    rbracket = find_token(RBracket)
 
     ARefField.new(
       collection: collection,
@@ -714,8 +694,8 @@ class Prettier::Parser < Ripper
   #     (nil | Args | ArgsAddBlock | ArgsForward) arguments
   #   ) -> ArgParen
   def on_arg_paren(arguments)
-    lparen = find_scanner_event(LParen)
-    rparen = find_scanner_event(RParen)
+    lparen = find_token(LParen)
+    rparen = find_token(RParen)
 
     # If the arguments exceed the ending of the parentheses, then we know we
     # have a heredoc in the arguments, and we need to use the bounds of the
@@ -892,7 +872,7 @@ class Prettier::Parser < Ripper
   #     untyped star
   #   ) -> ArgsAddStar
   def on_args_add_star(arguments, star)
-    beginning = find_scanner_event(Op, '*')
+    beginning = find_token(Op, '*')
     ending = star || beginning
 
     ArgsAddStar.new(
@@ -947,7 +927,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_args_forward: () -> ArgsForward
   def on_args_forward
-    op = find_scanner_event(Op, '...')
+    op = find_token(Op, '...')
 
     ArgsForward.new(value: op.value, location: op.location)
   end
@@ -1005,15 +985,15 @@ class Prettier::Parser < Ripper
   #   ) -> ArrayLiteral
   def on_array(contents)
     if !contents || contents.is_a?(Args) || contents.is_a?(ArgsAddStar)
-      lbracket = find_scanner_event(LBracket)
-      rbracket = find_scanner_event(RBracket)
+      lbracket = find_token(LBracket)
+      rbracket = find_token(RBracket)
 
       ArrayLiteral.new(
         contents: contents,
         location: lbracket.location.to(rbracket.location)
       )
     else
-      tstring_end = find_scanner_event(TStringEnd)
+      tstring_end = find_token(TStringEnd)
       contents =
         contents.class.new(
           elements: contents.elements,
@@ -1260,7 +1240,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_assoc_splat: (untyped value) -> AssocSplat
   def on_assoc_splat(value)
-    operator = find_scanner_event(Op, '**')
+    operator = find_token(Op, '**')
 
     AssocSplat.new(value: value, location: operator.location.to(value.location))
   end
@@ -1347,7 +1327,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -1388,7 +1368,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -1466,13 +1446,13 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_begin: (BodyStmt bodystmt) -> Begin
   def on_begin(bodystmt)
-    keyword = find_scanner_event(Kw, 'begin')
+    keyword = find_token(Kw, 'begin')
     end_char =
       if bodystmt.rescue_clause || bodystmt.ensure_clause ||
            bodystmt.else_clause
         bodystmt.location.end_char
       else
-        find_scanner_event(Kw, 'end').location.end_char
+        find_token(Kw, 'end').location.end_char
       end
 
     bodystmt.bind(keyword.location.end_char, end_char)
@@ -1545,7 +1525,7 @@ class Prettier::Parser < Ripper
     # so here we're going to explicitly convert it into the same normalized
     # form.
     unless operator.is_a?(Symbol)
-      operator = scanner_events.delete(operator).value
+      operator = tokens.delete(operator).value
     end
 
     Binary.new(
@@ -1606,13 +1586,13 @@ class Prettier::Parser < Ripper
   #   on_block_var: (Params params, (nil | Array[Ident]) locals) -> BlockVar
   def on_block_var(params, locals)
     index =
-      scanner_events.rindex do |node|
+      tokens.rindex do |node|
         node.is_a?(Op) && %w[| ||].include?(node.value) &&
           node.location.start_char < params.location.start_char
       end
 
-    beginning = scanner_events[index]
-    ending = scanner_events[-1]
+    beginning = tokens[index]
+    ending = tokens[-1]
 
     BlockVar.new(
       params: params,
@@ -1653,7 +1633,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_blockarg: (Ident name) -> BlockArg
   def on_blockarg(name)
-    operator = find_scanner_event(Op, '&')
+    operator = find_token(Op, '&')
 
     BlockArg.new(name: name, location: operator.location.to(name.location))
   end
@@ -1826,8 +1806,8 @@ class Prettier::Parser < Ripper
   #     Statements statements
   #   ) -> BraceBlock
   def on_brace_block(block_var, statements)
-    lbrace = find_scanner_event(LBrace)
-    rbrace = find_scanner_event(RBrace)
+    lbrace = find_token(LBrace)
+    rbrace = find_token(RBrace)
 
     statements.bind(
       find_next_statement_start((block_var || lbrace).location.end_char),
@@ -1886,7 +1866,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_break: ((Args | ArgsAddBlock) arguments) -> Break
   def on_break(arguments)
-    keyword = find_scanner_event(Kw, 'break')
+    keyword = find_token(Kw, 'break')
 
     location = keyword.location
     location = location.to(arguments.location) unless arguments.is_a?(Args)
@@ -1951,14 +1931,7 @@ class Prettier::Parser < Ripper
   #   ) -> Call
   def on_call(receiver, operator, message)
     ending = message
-
-    if message == :call
-      ending = operator
-
-      # Special handling here for Ruby <= 2.5 because the operator argument to
-      # this method wasn't a parser event here it was just a plain symbol.
-      ending = receiver if RUBY_MAJOR <= 2 && RUBY_MINOR <= 5
-    end
+    ending = operator if message == :call
 
     Call.new(
       receiver: receiver,
@@ -2077,8 +2050,8 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_case: (untyped value, untyped consequent) -> Case | RAssign
   def on_case(value, consequent)
-    if keyword = find_scanner_event(Kw, 'case', consume: false)
-      scanner_events.delete(keyword)
+    if keyword = find_token(Kw, 'case', consume: false)
+      tokens.delete(keyword)
 
       Case.new(
         value: value,
@@ -2087,8 +2060,8 @@ class Prettier::Parser < Ripper
       )
     else
       operator =
-        find_scanner_event(Kw, 'in', consume: false) ||
-          find_scanner_event(Op, '=>')
+        find_token(Kw, 'in', consume: false) ||
+          find_token(Op, '=>')
 
       RAssign.new(
         value: value,
@@ -2187,8 +2160,8 @@ class Prettier::Parser < Ripper
   #     BodyStmt bodystmt
   #   ) -> ClassDeclaration
   def on_class(constant, superclass, bodystmt)
-    beginning = find_scanner_event(Kw, 'class')
-    ending = find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'class')
+    ending = find_token(Kw, 'end')
 
     bodystmt.bind(
       find_next_statement_start((superclass || constant).location.end_char),
@@ -2238,7 +2211,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -2480,7 +2453,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -2667,7 +2640,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -2778,14 +2751,13 @@ class Prettier::Parser < Ripper
   #     untyped bodystmt
   #   ) -> Def | DefEndless
   def on_def(name, params, bodystmt)
-    # Make sure to delete this scanner event in case you're defining something
-    # like def class which would lead to this being a kw and causing all kinds
-    # of trouble
-    scanner_events.delete(name)
+    # Make sure to delete this token in case you're defining something like def
+    # class which would lead to this being a kw and causing all kinds of trouble
+    tokens.delete(name)
 
     # Find the beginning of the method definition, which works for single-line
     # and normal method definitions.
-    beginning = find_scanner_event(Kw, 'def')
+    beginning = find_token(Kw, 'def')
 
     # If we don't have a bodystmt node, then we have a single-line method
     unless bodystmt.is_a?(BodyStmt)
@@ -2815,7 +2787,7 @@ class Prettier::Parser < Ripper
       params = Params.new(location: location)
     end
 
-    ending = find_scanner_event(Kw, 'end')
+    ending = find_token(Kw, 'end')
     bodystmt.bind(
       find_next_statement_start(params.location.end_char),
       ending.location.start_char
@@ -2863,13 +2835,13 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_defined: (untyped value) -> Defined
   def on_defined(value)
-    beginning = find_scanner_event(Kw, 'defined?')
+    beginning = find_token(Kw, 'defined?')
     ending = value
 
     range = beginning.location.end_char...value.location.start_char
     if source[range].include?('(')
-      find_scanner_event(LParen)
-      ending = find_scanner_event(RParen)
+      find_token(LParen)
+      ending = find_token(RParen)
     end
 
     Defined.new(value: value, location: beginning.location.to(ending.location))
@@ -2950,10 +2922,10 @@ class Prettier::Parser < Ripper
   #     BodyStmt bodystmt
   #   ) -> Defs
   def on_defs(target, operator, name, params, bodystmt)
-    # Make sure to delete this scanner event in case you're defining something
+    # Make sure to delete this token in case you're defining something
     # like def class which would lead to this being a kw and causing all kinds
     # of trouble
-    scanner_events.delete(name)
+    tokens.delete(name)
 
     # If there aren't any params then we need to correct the params node
     # location information
@@ -2970,8 +2942,8 @@ class Prettier::Parser < Ripper
       params = Params.new(location: location)
     end
 
-    beginning = find_scanner_event(Kw, 'def')
-    ending = find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'def')
+    ending = find_token(Kw, 'end')
 
     bodystmt.bind(
       find_next_statement_start(params.location.end_char),
@@ -3042,8 +3014,8 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_do_block: (BlockVar block_var, BodyStmt bodystmt) -> DoBlock
   def on_do_block(block_var, bodystmt)
-    beginning = find_scanner_event(Kw, 'do')
-    ending = find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'do')
+    ending = find_token(Kw, 'end')
 
     bodystmt.bind(
       find_next_statement_start((block_var || beginning).location.end_char),
@@ -3109,7 +3081,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_dot2: ((nil | untyped) left, (nil | untyped) right) -> Dot2
   def on_dot2(left, right)
-    operator = find_scanner_event(Op, '..')
+    operator = find_token(Op, '..')
 
     beginning = left || operator
     ending = right || operator
@@ -3173,7 +3145,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_dot3: ((nil | untyped) left, (nil | untyped) right) -> Dot3
   def on_dot3(left, right)
-    operator = find_scanner_event(Op, '...')
+    operator = find_token(Op, '...')
 
     beginning = left || operator
     ending = right || operator
@@ -3230,10 +3202,10 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_dyna_symbol: (StringContent string_content) -> DynaSymbol
   def on_dyna_symbol(string_content)
-    if find_scanner_event(SymBeg, consume: false)
+    if find_token(SymBeg, consume: false)
       # A normal dynamic symbol
-      symbeg = find_scanner_event(SymBeg)
-      tstring_end = find_scanner_event(TStringEnd)
+      symbeg = find_token(SymBeg)
+      tstring_end = find_token(TStringEnd)
 
       DynaSymbol.new(
         quote: symbeg.value,
@@ -3242,8 +3214,8 @@ class Prettier::Parser < Ripper
       )
     else
       # A dynamic symbol as a hash key
-      tstring_beg = find_scanner_event(TStringBeg)
-      label_end = find_scanner_event(LabelEnd)
+      tstring_beg = find_token(TStringBeg)
+      label_end = find_token(LabelEnd)
 
       DynaSymbol.new(
         parts: string_content.parts,
@@ -3288,18 +3260,18 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_else: (Statements statements) -> Else
   def on_else(statements)
-    beginning = find_scanner_event(Kw, 'else')
+    beginning = find_token(Kw, 'else')
 
     # else can either end with an end keyword (in which case we'll want to
     # consume that event) or it can end with an ensure keyword (in which case
     # we'll leave that to the ensure to handle).
     index =
-      scanner_events.rindex do |node|
-        node.is_a?(Kw) && %w[end ensure].include?(node.value)
+      tokens.rindex do |token|
+        token.is_a?(Kw) && %w[end ensure].include?(token.value)
       end
 
-    node = scanner_events[index]
-    ending = node.value == 'end' ? scanner_events.delete_at(index) : node
+    node = tokens[index]
+    ending = node.value == 'end' ? tokens.delete_at(index) : node
 
     statements.bind(beginning.location.end_char, ending.location.start_char)
 
@@ -3370,8 +3342,8 @@ class Prettier::Parser < Ripper
   #     (nil | Elsif | Else) consequent
   #   ) -> Elsif
   def on_elsif(predicate, statements, consequent)
-    beginning = find_scanner_event(Kw, 'elsif')
-    ending = consequent || find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'elsif')
+    ending = consequent || find_token(Kw, 'end')
 
     statements.bind(predicate.location.end_char, ending.location.start_char)
 
@@ -3496,7 +3468,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -3541,7 +3513,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -3588,7 +3560,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -3637,11 +3609,11 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_ensure: (Statements statements) -> Ensure
   def on_ensure(statements)
-    keyword = find_scanner_event(Kw, 'ensure')
+    keyword = find_token(Kw, 'ensure')
 
     # We don't want to consume the :@kw event, because that would break
     # def..ensure..end chains.
-    ending = find_scanner_event(Kw, 'end', consume: false)
+    ending = find_token(Kw, 'end', consume: false)
     statements.bind(
       find_next_statement_start(keyword.location.end_char),
       ending.location.start_char
@@ -3696,7 +3668,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_excessed_comma: () -> ExcessedComma
   def on_excessed_comma(*)
-    comma = find_scanner_event(Comma)
+    comma = find_token(Comma)
 
     ExcessedComma.new(value: comma.value, location: comma.location)
   end
@@ -3845,7 +3817,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -3921,8 +3893,8 @@ class Prettier::Parser < Ripper
   #     VarField right
   #   ) -> FndPtn
   def on_fndptn(constant, left, values, right)
-    beginning = constant || find_scanner_event(LBracket)
-    ending = find_scanner_event(RBracket)
+    beginning = constant || find_token(LBracket)
+    ending = find_token(RBracket)
 
     FndPtn.new(
       constant: constant,
@@ -3992,15 +3964,15 @@ class Prettier::Parser < Ripper
   #     Statements statements
   #   ) -> For
   def on_for(index, collection, statements)
-    beginning = find_scanner_event(Kw, 'for')
-    ending = find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'for')
+    ending = find_token(Kw, 'end')
 
     # Consume the do keyword if it exists so that it doesn't get confused for
     # some other block
-    keyword = find_scanner_event(Kw, 'do', consume: false)
+    keyword = find_token(Kw, 'do', consume: false)
     if keyword && keyword.location.start_char > collection.location.end_char &&
          keyword.location.end_char < ending.location.start_char
-      scanner_events.delete(keyword)
+      tokens.delete(keyword)
     end
 
     statements.bind(
@@ -4055,7 +4027,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -4092,8 +4064,8 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_hash: ((nil | AssocListFromArgs) contents) -> HashLiteral
   def on_hash(contents)
-    lbrace = find_scanner_event(LBrace)
-    rbrace = find_scanner_event(RBrace)
+    lbrace = find_token(LBrace)
+    rbrace = find_token(RBrace)
 
     if contents
       # Here we're going to expand out the location information for the contents
@@ -4365,7 +4337,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -4429,8 +4401,8 @@ class Prettier::Parser < Ripper
   #     (nil | Elsif | Else) consequent
   #   ) -> If
   def on_if(predicate, statements, consequent)
-    beginning = find_scanner_event(Kw, 'if')
-    ending = consequent || find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'if')
+    ending = consequent || find_token(Kw, 'end')
 
     statements.bind(predicate.location.end_char, ending.location.start_char)
 
@@ -4548,7 +4520,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_if_mod: (untyped predicate, untyped statement) -> IfMod
   def on_if_mod(predicate, statement)
-    find_scanner_event(Kw, 'if')
+    find_token(Kw, 'if')
 
     IfMod.new(
       statement: statement,
@@ -4604,7 +4576,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -4674,8 +4646,8 @@ class Prettier::Parser < Ripper
     # Here we have a rightward assignment
     return pattern unless statements
 
-    beginning = find_scanner_event(Kw, 'in')
-    ending = consequent || find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'in')
+    ending = consequent || find_token(Kw, 'end')
 
     statements.bind(beginning.location.end_char, ending.location.start_char)
 
@@ -4726,7 +4698,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -4769,7 +4741,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -4821,7 +4793,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -4859,7 +4831,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_kwrest_param: ((nil | Ident) name) -> KwRestParam
   def on_kwrest_param(name)
-    location = find_scanner_event(Op, '**').location
+    location = find_token(Op, '**').location
     location = location.to(name.location) if name
 
     KwRestParam.new(name: name, location: location)
@@ -4914,7 +4886,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -4960,7 +4932,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -5012,14 +4984,14 @@ class Prettier::Parser < Ripper
   #     (BodyStmt | Statements) statements
   #   ) -> Lambda
   def on_lambda(params, statements)
-    beginning = find_scanner_event(TLambda)
+    beginning = find_token(TLambda)
 
-    if node = find_scanner_event(TLamBeg, consume: false)
-      opening = scanner_events.delete(node)
-      closing = find_scanner_event(RBrace)
+    if token = find_token(TLamBeg, consume: false)
+      opening = tokens.delete(token)
+      closing = find_token(RBrace)
     else
-      opening = find_scanner_event(Kw, 'do')
-      closing = find_scanner_event(Kw, 'end')
+      opening = find_token(Kw, 'do')
+      closing = find_token(Kw, 'end')
     end
 
     statements.bind(opening.location.end_char, closing.location.start_char)
@@ -5067,7 +5039,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -5107,7 +5079,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -5147,7 +5119,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -5491,7 +5463,7 @@ class Prettier::Parser < Ripper
   #     (nil | ArefField | Field | Identifier | VarField) part
   #   ) -> MLHSAddStar
   def on_mlhs_add_star(mlhs, part)
-    beginning = find_scanner_event(Op, '*')
+    beginning = find_token(Op, '*')
     ending = part || beginning
 
     MLHSAddStar.new(
@@ -5544,8 +5516,8 @@ class Prettier::Parser < Ripper
   #     (Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen) contents
   #   ) -> MLHSParen
   def on_mlhs_paren(contents)
-    lparen = find_scanner_event(LParen)
-    rparen = find_scanner_event(RParen)
+    lparen = find_token(LParen)
+    rparen = find_token(RParen)
 
     comma_range = lparen.location.end_char...rparen.location.start_char
     contents.comma = true if source[comma_range].strip.end_with?(',')
@@ -5605,8 +5577,8 @@ class Prettier::Parser < Ripper
   #     BodyStmt bodystmt
   #   ) -> ModuleDeclaration
   def on_module(constant, bodystmt)
-    beginning = find_scanner_event(Kw, 'module')
-    ending = find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'module')
+    ending = find_token(Kw, 'end')
 
     bodystmt.bind(
       find_next_statement_start(constant.location.end_char),
@@ -5718,7 +5690,7 @@ class Prettier::Parser < Ripper
   #     untyped star
   #   ) -> MRHSAddStar
   def on_mrhs_add_star(mrhs, star)
-    beginning = find_scanner_event(Op, '*')
+    beginning = find_token(Op, '*')
     ending = star || beginning
 
     MRHSAddStar.new(
@@ -5814,7 +5786,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_next: ((Args | ArgsAddBlock) arguments) -> Next
   def on_next(arguments)
-    keyword = find_scanner_event(Kw, 'next')
+    keyword = find_token(Kw, 'next')
 
     location = keyword.location
     location = location.to(arguments.location) unless arguments.is_a?(Args)
@@ -5870,7 +5842,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -6171,8 +6143,8 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_paren: (untyped contents) -> Paren
   def on_paren(contents)
-    lparen = find_scanner_event(LParen)
-    rparen = find_scanner_event(RParen)
+    lparen = find_token(LParen)
+    rparen = find_token(RParen)
 
     if contents && contents.is_a?(Params)
       location = contents.location
@@ -6207,7 +6179,7 @@ class Prettier::Parser < Ripper
   # If we encounter a parse error, just immediately bail out so that our runner
   # can catch it.
   def on_parse_error(error, *)
-    raise ParserError.new(error, lineno, column)
+    raise ParseError.new(error, lineno, column)
   end
   alias on_alias_error on_parse_error
   alias on_assign_error on_parse_error
@@ -6385,14 +6357,14 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
   # :call-seq:
   #   on_qsymbols_new: () -> QSymbols
   def on_qsymbols_new
-    qsymbols_beg = find_scanner_event(QSymbolsBeg)
+    qsymbols_beg = find_token(QSymbolsBeg)
 
     QSymbols.new(elements: [], location: qsymbols_beg.location)
   end
@@ -6478,14 +6450,14 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
   # :call-seq:
   #   on_qwords_new: () -> QWords
   def on_qwords_new
-    qwords_beg = find_scanner_event(QWordsBeg)
+    qwords_beg = find_token(QWordsBeg)
 
     QWords.new(elements: [], location: qwords_beg.location)
   end
@@ -6529,7 +6501,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -6569,7 +6541,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -6609,7 +6581,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -6646,7 +6618,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_redo: () -> Redo
   def on_redo
-    keyword = find_scanner_event(Kw, 'redo')
+    keyword = find_token(Kw, 'redo')
 
     Redo.new(value: keyword.value, location: keyword.location)
   end
@@ -6747,7 +6719,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -6858,7 +6830,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_regexp_new: () -> RegexpContent
   def on_regexp_new
-    regexp_beg = find_scanner_event(RegexpBeg)
+    regexp_beg = find_token(RegexpBeg)
 
     RegexpContent.new(
       beginning: regexp_beg.value,
@@ -6993,7 +6965,7 @@ class Prettier::Parser < Ripper
   #     (nil | Rescue) consequent
   #   ) -> Rescue
   def on_rescue(exceptions, variable, statements, consequent)
-    keyword = find_scanner_event(Kw, 'rescue')
+    keyword = find_token(Kw, 'rescue')
     exceptions = exceptions[0] if exceptions.is_a?(Array)
 
     last_node = variable || exceptions || keyword
@@ -7076,7 +7048,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_rescue_mod: (untyped statement, untyped value) -> RescueMod
   def on_rescue_mod(statement, value)
-    find_scanner_event(Kw, 'rescue')
+    find_token(Kw, 'rescue')
 
     RescueMod.new(
       statement: statement,
@@ -7119,7 +7091,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_rest_param: ((nil | Ident) name) -> RestParam
   def on_rest_param(name)
-    location = find_scanner_event(Op, '*').location
+    location = find_token(Op, '*').location
     location = location.to(name.location) if name
 
     RestParam.new(name: name, location: location)
@@ -7158,7 +7130,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_retry: () -> Retry
   def on_retry
-    keyword = find_scanner_event(Kw, 'retry')
+    keyword = find_token(Kw, 'retry')
 
     Retry.new(value: keyword.value, location: keyword.location)
   end
@@ -7196,7 +7168,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_return: ((Args | ArgsAddBlock) arguments) -> Return
   def on_return(arguments)
-    keyword = find_scanner_event(Kw, 'return')
+    keyword = find_token(Kw, 'return')
 
     Return.new(
       arguments: arguments,
@@ -7237,7 +7209,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_return0: () -> Return0
   def on_return0
-    keyword = find_scanner_event(Kw, 'return')
+    keyword = find_token(Kw, 'return')
 
     Return0.new(value: keyword.value, location: keyword.location)
   end
@@ -7278,7 +7250,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -7330,8 +7302,8 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_sclass: (untyped target, BodyStmt bodystmt) -> SClass
   def on_sclass(target, bodystmt)
-    beginning = find_scanner_event(Kw, 'class')
-    ending = find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'class')
+    ending = find_token(Kw, 'end')
 
     bodystmt.bind(
       find_next_statement_start(target.location.end_char),
@@ -7369,7 +7341,7 @@ class Prettier::Parser < Ripper
   # propagate that onto void_stmt nodes inside the stmts in order to make sure
   # all comments get printed appropriately.
   class Statements
-    # [Prettier::Parser] the parser that created this node
+    # [Ripper::ParseTree] the parser that created this node
     attr_reader :parser
 
     # [Array[untyped]] the list of expressions contained within this node
@@ -7609,7 +7581,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_string_dvar: ((Backref | VarRef) variable) -> StringDVar
   def on_string_dvar(variable)
-    embvar = find_scanner_event(EmbVar)
+    embvar = find_token(EmbVar)
 
     StringDVar.new(
       variable: variable,
@@ -7652,8 +7624,8 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_string_embexpr: (Statements statements) -> StringEmbExpr
   def on_string_embexpr(statements)
-    embexpr_beg = find_scanner_event(EmbExprBeg)
-    embexpr_end = find_scanner_event(EmbExprEnd)
+    embexpr_beg = find_token(EmbExprBeg)
+    embexpr_end = find_token(EmbExprEnd)
 
     statements.bind(
       embexpr_beg.location.end_char,
@@ -7721,8 +7693,8 @@ class Prettier::Parser < Ripper
         location: heredoc.location
       )
     else
-      tstring_beg = find_scanner_event(TStringBeg)
-      tstring_end = find_scanner_event(TStringEnd)
+      tstring_beg = find_token(TStringBeg)
+      tstring_end = find_token(TStringEnd)
 
       StringLiteral.new(
         parts: string.parts,
@@ -7766,7 +7738,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_super: ((ArgParen | Args | ArgsAddBlock) arguments) -> Super
   def on_super(arguments)
-    keyword = find_scanner_event(Kw, 'super')
+    keyword = find_token(Kw, 'super')
 
     Super.new(
       arguments: arguments,
@@ -7816,7 +7788,7 @@ class Prettier::Parser < Ripper
     end
   end
 
-  # symbeg is a scanner event that represents the beginning of a symbol literal.
+  # symbeg is a token that represents the beginning of a symbol literal.
   # In most cases it will contain just ":" as in the value, but if its a dynamic
   # symbol being defined it will contain ":'" or ":\"".
   def on_symbeg(value)
@@ -7826,7 +7798,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -7867,7 +7839,7 @@ class Prettier::Parser < Ripper
   #     (Backtick | Const | CVar | GVar | Ident | IVar | Kw | Op) value
   #   ) -> SymbolContent
   def on_symbol(value)
-    scanner_events.pop
+    tokens.pop
 
     SymbolContent.new(value: value, location: value.location)
   end
@@ -7912,10 +7884,10 @@ class Prettier::Parser < Ripper
   #     ) value
   #   ) -> SymbolLiteral
   def on_symbol_literal(value)
-    if scanner_events[-1] == value
-      SymbolLiteral.new(value: scanner_events.pop, location: value.location)
+    if tokens[-1] == value
+      SymbolLiteral.new(value: tokens.pop, location: value.location)
     else
-      symbeg = find_scanner_event(SymBeg)
+      symbeg = find_token(SymBeg)
 
       SymbolLiteral.new(
         value: value.value,
@@ -8006,14 +7978,14 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
   # :call-seq:
   #   on_symbols_new: () -> Symbols
   def on_symbols_new
-    symbols_beg = find_scanner_event(SymbolsBeg)
+    symbols_beg = find_token(SymbolsBeg)
 
     Symbols.new(elements: [], location: symbols_beg.location)
   end
@@ -8058,7 +8030,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -8103,7 +8075,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -8239,7 +8211,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -8335,7 +8307,7 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
@@ -8427,15 +8399,15 @@ class Prettier::Parser < Ripper
       # We have somewhat special handling of the not operator since if it has
       # parentheses they don't get reported as a paren node for some reason.
 
-      beginning = find_scanner_event(Kw, 'not')
+      beginning = find_token(Kw, 'not')
       ending = statement
 
       range = beginning.location.end_char...statement.location.start_char
       paren = source[range].include?('(')
 
       if paren
-        find_scanner_event(LParen)
-        ending = find_scanner_event(RParen)
+        find_token(LParen)
+        ending = find_token(RParen)
       end
 
       Not.new(
@@ -8444,18 +8416,18 @@ class Prettier::Parser < Ripper
         location: beginning.location.to(ending.location)
       )
     else
-      # Special case instead of using find_scanner_event here. It turns out that
+      # Special case instead of using find_token here. It turns out that
       # if you have a range that goes from a negative number to a negative
       # number then you can end up with a .. or a ... that's higher in the
       # stack. So we need to explicitly disallow those operators.
       index =
-        scanner_events.rindex do |node|
-          node.is_a?(Op) &&
-            node.location.start_char < statement.location.start_char &&
-            !%w[.. ...].include?(node.value)
+        tokens.rindex do |token|
+          token.is_a?(Op) &&
+            token.location.start_char < statement.location.start_char &&
+            !%w[.. ...].include?(token.value)
         end
 
-      beginning = scanner_events.delete_at(index)
+      beginning = tokens.delete_at(index)
 
       Unary.new(
         operator: operator[0], # :+@ -> "+"
@@ -8498,7 +8470,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_undef: (Array[DynaSymbol | SymbolLiteral] symbols) -> Undef
   def on_undef(symbols)
-    keyword = find_scanner_event(Kw, 'undef')
+    keyword = find_token(Kw, 'undef')
 
     Undef.new(
       symbols: symbols,
@@ -8566,8 +8538,8 @@ class Prettier::Parser < Ripper
   #     ((nil | Elsif | Else) consequent)
   #   ) -> Unless
   def on_unless(predicate, statements, consequent)
-    beginning = find_scanner_event(Kw, 'unless')
-    ending = consequent || find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'unless')
+    ending = consequent || find_token(Kw, 'end')
 
     statements.bind(predicate.location.end_char, ending.location.start_char)
 
@@ -8624,7 +8596,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_unless_mod: (untyped predicate, untyped statement) -> UnlessMod
   def on_unless_mod(predicate, statement)
-    find_scanner_event(Kw, 'unless')
+    find_token(Kw, 'unless')
 
     UnlessMod.new(
       statement: statement,
@@ -8679,15 +8651,15 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_until: (untyped predicate, Statements statements) -> Until
   def on_until(predicate, statements)
-    beginning = find_scanner_event(Kw, 'until')
-    ending = find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'until')
+    ending = find_token(Kw, 'end')
 
     # Consume the do keyword if it exists so that it doesn't get confused for
     # some other block
-    keyword = find_scanner_event(Kw, 'do', consume: false)
+    keyword = find_token(Kw, 'do', consume: false)
     if keyword && keyword.location.start_char > predicate.location.end_char &&
          keyword.location.end_char < ending.location.start_char
-      scanner_events.delete(keyword)
+      tokens.delete(keyword)
     end
 
     # Update the Statements location information
@@ -8745,7 +8717,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_until_mod: (untyped predicate, untyped statement) -> UntilMod
   def on_until_mod(predicate, statement)
-    find_scanner_event(Kw, 'until')
+    find_token(Kw, 'until')
 
     UntilMod.new(
       statement: statement,
@@ -8797,7 +8769,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_var_alias: (GVar left, (Backref | GVar) right) -> VarAlias
   def on_var_alias(left, right)
-    keyword = find_scanner_event(Kw, 'alias')
+    keyword = find_token(Kw, 'alias')
 
     VarAlias.new(
       left: left,
@@ -9061,8 +9033,8 @@ class Prettier::Parser < Ripper
   #     (nil | Else | When) consequent
   #   ) -> When
   def on_when(arguments, statements, consequent)
-    beginning = find_scanner_event(Kw, 'when')
-    ending = consequent || find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'when')
+    ending = consequent || find_token(Kw, 'end')
 
     statements.bind(arguments.location.end_char, ending.location.start_char)
 
@@ -9120,15 +9092,15 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_while: (untyped predicate, Statements statements) -> While
   def on_while(predicate, statements)
-    beginning = find_scanner_event(Kw, 'while')
-    ending = find_scanner_event(Kw, 'end')
+    beginning = find_token(Kw, 'while')
+    ending = find_token(Kw, 'end')
 
     # Consume the do keyword if it exists so that it doesn't get confused for
     # some other block
-    keyword = find_scanner_event(Kw, 'do', consume: false)
+    keyword = find_token(Kw, 'do', consume: false)
     if keyword && keyword.location.start_char > predicate.location.end_char &&
          keyword.location.end_char < ending.location.start_char
-      scanner_events.delete(keyword)
+      tokens.delete(keyword)
     end
 
     # Update the Statements location information
@@ -9186,7 +9158,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_while_mod: (untyped predicate, untyped statement) -> WhileMod
   def on_while_mod(predicate, statement)
-    find_scanner_event(Kw, 'while')
+    find_token(Kw, 'while')
 
     WhileMod.new(
       statement: statement,
@@ -9328,14 +9300,14 @@ class Prettier::Parser < Ripper
         location: Location.token(line: lineno, char: char_pos, size: value.size)
       )
 
-    scanner_events << node
+    tokens << node
     node
   end
 
   # :call-seq:
   #   on_words_new: () -> Words
   def on_words_new
-    words_beg = find_scanner_event(WordsBeg)
+    words_beg = find_token(WordsBeg)
 
     Words.new(elements: [], location: words_beg.location)
   end
@@ -9395,10 +9367,8 @@ class Prettier::Parser < Ripper
     location =
       if heredoc && heredoc.beginning.value.include?('`')
         heredoc.location
-      elsif RUBY_MAJOR <= 2 && RUBY_MINOR <= 5 && RUBY_PATCH < 7
-        Location.fixed(line: lineno, char: char_pos)
       else
-        find_scanner_event(Backtick).location
+        find_token(Backtick).location
       end
 
     XString.new(parts: [], location: location)
@@ -9448,7 +9418,7 @@ class Prettier::Parser < Ripper
         location: heredoc.location
       )
     else
-      ending = find_scanner_event(TStringEnd)
+      ending = find_token(TStringEnd)
 
       XStringLiteral.new(
         parts: xstring.parts,
@@ -9490,7 +9460,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_yield: ((ArgsAddBlock | Paren) arguments) -> Yield
   def on_yield(arguments)
-    keyword = find_scanner_event(Kw, 'yield')
+    keyword = find_token(Kw, 'yield')
 
     Yield.new(
       arguments: arguments,
@@ -9531,7 +9501,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_yield0: () -> Yield0
   def on_yield0
-    keyword = find_scanner_event(Kw, 'yield')
+    keyword = find_token(Kw, 'yield')
 
     Yield0.new(value: keyword.value, location: keyword.location)
   end
@@ -9569,7 +9539,7 @@ class Prettier::Parser < Ripper
   # :call-seq:
   #   on_zsuper: () -> ZSuper
   def on_zsuper
-    keyword = find_scanner_event(Kw, 'super')
+    keyword = find_token(Kw, 'super')
 
     ZSuper.new(value: keyword.value, location: keyword.location)
   end

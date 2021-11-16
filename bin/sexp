@@ -11,7 +11,7 @@ source =
     ARGV[0].gsub('\\n', "\n")
   end
 
-parsed = Prettier::Parser.new(source).parse
+parsed = Ripper::ParseTree.parse(source)
 
 puts '=== SOURCE === '
 puts source
