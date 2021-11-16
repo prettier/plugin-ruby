@@ -77,7 +77,7 @@ function stripCommonLeadingWhitespace(content: string) {
 function isTStringContentArray(
   body: Ruby.StringContent[]
 ): body is Ruby.TStringContent[] {
-  return body.every((part) => part.type === "@tstring_content");
+  return body.every((part) => part.type === "tstring_content");
 }
 
 const embed: Plugin.Embed<Ruby.AnyNode> = (path, print, textToDoc) => {

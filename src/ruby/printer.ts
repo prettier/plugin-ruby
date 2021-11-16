@@ -48,7 +48,7 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
   // *feels* like a block comment equivalent in JavaScript so I'm going to leave
   // it in place for now.
   isBlockComment(comment) {
-    return comment.type === "@embdoc";
+    return comment.type === "embdoc";
   },
   // This function handles adding the format pragma to a source string. This is
   // an optional workflow for incremental adoption.
@@ -75,7 +75,7 @@ const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
   printComment(path) {
     const comment = (path as any as Plugin.Path<Ruby.Comment>).getValue();
 
-    if (comment.type === "@comment") {
+    if (comment.type === "comment") {
       return `#${comment.value}`;
     }
 

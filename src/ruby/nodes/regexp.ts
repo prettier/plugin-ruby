@@ -3,7 +3,7 @@ import { hasAncestor } from "../../utils";
 
 function hasContent(node: Ruby.RegexpLiteral, pattern: RegExp) {
   return node.parts.some(
-    (part) => part.type === "@tstring_content" && pattern.test(part.value)
+    (part) => part.type === "tstring_content" && pattern.test(part.value)
   );
 }
 
@@ -17,7 +17,7 @@ function forwardSlashIsAmbiguous(path: Plugin.Path<Ruby.RegexpLiteral>) {
 
   return (
     firstPart &&
-    firstPart.type === "@tstring_content" &&
+    firstPart.type === "tstring_content" &&
     [" ", "="].includes(firstPart.value[0]) &&
     hasAncestor(path, ["command", "command_call"])
   );

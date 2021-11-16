@@ -13,7 +13,7 @@ const { group, hardline, indent, literalline, removeLines, softline, join } =
 function isQuoteLocked(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
   return node.parts.some(
     (part) =>
-      part.type === "@tstring_content" &&
+      part.type === "tstring_content" &&
       (part.value.includes("#{") || part.value.includes("\\"))
   );
 }
@@ -22,7 +22,7 @@ function isQuoteLocked(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
 // plain string content and that content does not contain a single quote.
 function isSingleQuotable(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
   return node.parts.every(
-    (part) => part.type === "@tstring_content" && !part.value.includes("'")
+    (part) => part.type === "tstring_content" && !part.value.includes("'")
   );
 }
 
@@ -95,7 +95,7 @@ const printPercentSDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
   path.each((childPath) => {
     const childNode = childPath.getValue();
 
-    if (childNode.type !== "@tstring_content") {
+    if (childNode.type !== "tstring_content") {
       // Here we are printing an embedded variable or expression.
       parts.push(print(childPath));
     } else {
@@ -128,7 +128,7 @@ function shouldPrintPercentSDynaSymbol(node: Ruby.DynaSymbol) {
 
   return node.parts.some(
     (child) =>
-      child.type === "@tstring_content" &&
+      child.type === "tstring_content" &&
       (child.value.includes("\n") ||
         child.value.includes(closing) ||
         child.value.includes("'") ||
@@ -173,7 +173,7 @@ export const printDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
   path.each((childPath) => {
     const child = childPath.getValue() as Ruby.StringContent;
 
-    if (child.type !== "@tstring_content") {
+    if (child.type !== "tstring_content") {
       parts.push(print(childPath));
     } else {
       parts.push(
@@ -261,7 +261,7 @@ export const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (
     const part = partPath.getValue();
 
     // In this case, the part of the string is an embedded expression
-    if (part.type !== "@tstring_content") {
+    if (part.type !== "tstring_content") {
       return print(partPath);
     }
 

@@ -41,7 +41,7 @@ export const printDef: Plugin.Printer<Ruby.Def | Ruby.Defs> = (
   ]);
 };
 
-export const printSingleLineMethod: Plugin.Printer<Ruby.Defsl> = (
+export const printDefEndless: Plugin.Printer<Ruby.DefEndless> = (
   path,
   opts,
   print

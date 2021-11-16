@@ -7,7 +7,7 @@ function isPeriod(node: Ruby.CallOperator) {
     return true;
   }
 
-  return node.type === "@period";
+  return node.type === "period";
 }
 
 // If you have a simple block that only calls a method on the single required
@@ -75,7 +75,7 @@ function toProc(
     call.receiver.value.value !== params.reqs[0].value ||
     !isPeriod(call.op) ||
     call.message === "call" ||
-    call.message.type !== "@ident"
+    call.message.type !== "ident"
   ) {
     return null;
   }
@@ -96,7 +96,7 @@ function toProc(
     const assocNode = parentNode as Ruby.AssocNew;
     const key = assocNode.key;
 
-    if (key.type === "@label" && ["if:", "unless:"].includes(key.value)) {
+    if (key.type === "label" && ["if:", "unless:"].includes(key.value)) {
       return null;
     }
 

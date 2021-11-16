@@ -15,7 +15,7 @@ export const printHeredoc: Plugin.Printer<Ruby.Heredoc> = (
   const parts = path.map((partPath) => {
     const part = partPath.getValue();
 
-    if (part.type !== "@tstring_content") {
+    if (part.type !== "tstring_content") {
       return print(partPath);
     }
 

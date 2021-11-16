@@ -96,11 +96,11 @@ export const printProgram: Plugin.Printer<Ruby.Program> = (
   print
 ) => [path.call(print, "stmts"), hardline];
 
-type StmtsVoidWithComments = Ruby.Stmts & {
+type StmtsVoidWithComments = Ruby.Statements & {
   body: [{ type: "void_stmt"; comments: Ruby.Comment[] }];
 };
 
-export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
+export const printStatements: Plugin.Printer<Ruby.Statements> = (path, opts, print) => {
   const stmts = path.getValue().body;
 
   // This is a special case where we have only comments inside a statement

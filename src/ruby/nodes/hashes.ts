@@ -38,7 +38,7 @@ function canUseHashLabels(contentsNode: HashContents) {
     }
 
     switch (assocNode.key.type) {
-      case "@label":
+      case "label":
         return true;
       case "symbol_literal":
         return isValidHashLabel(assocNode.key);
@@ -54,7 +54,7 @@ const printHashKeyLabel: KeyPrinter = (path, print) => {
   const node = path.getValue();
 
   switch (node.type) {
-    case "@label":
+    case "label":
       return print(path);
     case "symbol_literal":
       return [(path as Plugin.Path<typeof node>).call(print, "value"), ":"];
@@ -71,7 +71,7 @@ const printHashKeyRocket: KeyPrinter = (path, print) => {
   const node = path.getValue();
   let doc = print(path);
 
-  if (node.type === "@label") {
+  if (node.type === "label") {
     const sDoc = doc as string; // since we know this is a label
     doc = [":", sDoc.slice(0, sDoc.length - 1)];
   } else if (node.type === "dyna_symbol") {

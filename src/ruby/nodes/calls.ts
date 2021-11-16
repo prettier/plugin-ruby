@@ -145,7 +145,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
     // like a constant, then we need to match that in order to maintain valid
     // Ruby. For example, you could do something like Foo(), on which we would
     // need to keep the parentheses to make it look like a method call.
-    if (node.call.type === "fcall" && node.call.value.type === "@const") {
+    if (node.call.type === "fcall" && node.call.value.type === "const") {
       return [methodDoc, "()"];
     }
 

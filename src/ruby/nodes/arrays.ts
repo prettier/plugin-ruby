@@ -31,7 +31,7 @@ function isStringArray(args: Ruby.Args | Ruby.ArgsAddStar) {
 
       // If the only part of this string is not @tstring_content then it's
       // interpolated, so again we can return false.
-      if (part.type !== "@tstring_content") {
+      if (part.type !== "tstring_content") {
         return false;
       }
 

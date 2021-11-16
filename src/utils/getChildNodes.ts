@@ -10,27 +10,27 @@ function throwBadNode(node: AnyNode) {
 
 function getChildNodes(node: AnyNode): ChildNode[] {
   switch (node.type) {
-    case "@CHAR":
-    case "@__end__":
-    case "@backref":
-    case "@backtick":
-    case "@const":
-    case "@cvar":
-    case "@float":
-    case "@gvar":
-    case "@heredoc_beg":
-    case "@ident":
-    case "@imaginary":
-    case "@int":
-    case "@ivar":
-    case "@kw":
-    case "@label":
-    case "@lbrace":
-    case "@lparen":
-    case "@op":
-    case "@period":
-    case "@rational":
-    case "@tstring_content":
+    case "CHAR":
+    case "__end__":
+    case "backref":
+    case "backtick":
+    case "const":
+    case "cvar":
+    case "float":
+    case "gvar":
+    case "heredoc_beg":
+    case "ident":
+    case "imaginary":
+    case "int":
+    case "ivar":
+    case "kw":
+    case "label":
+    case "lbrace":
+    case "lparen":
+    case "op":
+    case "period":
+    case "rational":
+    case "tstring_content":
       return [];
     case "BEGIN":
       return [node.lbrace, node.stmts];
@@ -111,6 +111,8 @@ function getChildNodes(node: AnyNode): ChildNode[] {
       return [node.constant];
     case "def":
       return [node.name, node.params, node.bodystmt];
+    case "def_endless":
+      return [node.name, node.paren, node.stmt];
     case "defined":
       return [node.value];
     case "defs":
@@ -121,8 +123,6 @@ function getChildNodes(node: AnyNode): ChildNode[] {
         node.params,
         node.bodystmt
       ];
-    case "defsl":
-      return [node.name, node.paren, node.stmt];
     case "do_block":
       return [node.keyword, node.block_var, node.bodystmt];
     case "dot2":
@@ -205,6 +205,8 @@ function getChildNodes(node: AnyNode): ChildNode[] {
       return [node.args];
     case "next":
       return [node.args];
+    case "not":
+      return [node.value];
     case "opassign":
       return [node.target, node.op, node.value];
     case "params": {
@@ -265,7 +267,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
       return [];
     case "sclass":
       return [node.target, node.bodystmt];
-    case "stmts":
+    case "statements":
       return node.body;
     case "string_concat":
       return [node.left, node.right];

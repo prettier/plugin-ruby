@@ -31,7 +31,7 @@ function printFlowControl(keyword: string): Plugin.Printer<FlowControl> {
     const paren = node.args.args.type === "args" && node.args.args.parts[0];
 
     if (paren && paren.type === "paren") {
-      const stmts = (paren.cnts as Ruby.Stmts).body;
+      const stmts = (paren.cnts as Ruby.Statements).body;
 
       // Here we're checking if we can skip past the parentheses entirely.
       if (stmts.length === 1 && !unskippableParens.includes(stmts[0].type)) {

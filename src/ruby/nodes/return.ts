@@ -6,7 +6,7 @@ const { group, ifBreak, indent, line, join, softline } = prettier;
 // You can't skip the parentheses if you have comments or certain operators with
 // lower precedence than the return keyword.
 function canSkipParens(paren: Ruby.Paren) {
-  const stmts = paren.cnts as Ruby.Stmts;
+  const stmts = paren.cnts as Ruby.Statements;
 
   // return(
   //   # a
@@ -24,7 +24,7 @@ function canSkipParens(paren: Ruby.Paren) {
   }
 
   // return (not a)
-  if (stmt.type === "unary" && stmt.op === "not") {
+  if (stmt.type === "not") {
     return false;
   }
 
@@ -54,7 +54,7 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
           return ["return", path.call(print, "args")];
         }
 
-        arg = (arg.cnts as Ruby.Stmts).body[0];
+        arg = (arg.cnts as Ruby.Statements).body[0];
         steps.push("cnts", "body", 0);
       }
 

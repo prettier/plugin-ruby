@@ -124,11 +124,7 @@ const createTree = (parent, node) => {
 
   const label = `${node.type} (${node.loc[1]}-${node.loc[3]})`;
 
-  if (node.type.startsWith("@")) {
-    button.appendChild(document.createTextNode(`${label} = ${node.body}`));
-    li.appendChild(button);
-    parent.appendChild(li);
-  } else if (Array.isArray(node.body)) {
+  if (Array.isArray(node.body)) {
     const ul = document.createElement("ul");
     node.body.forEach(child => {
       createTree(ul, child);

@@ -13,7 +13,7 @@ type Conditional = Ruby.If | Ruby.Unless;
 
 // If the statements are just a single if/unless, in block or modifier form, or
 // a ternary
-function containsSingleConditional(stmts: Ruby.Stmts) {
+function containsSingleConditional(stmts: Ruby.Statements) {
   return (
     stmts.body.length === 1 &&
     ["if", "if_mod", "ifop", "unless", "unless_mod"].includes(
@@ -188,7 +188,7 @@ const noTernary = [
 // Certain expressions cannot be reduced to a ternary without adding parens
 // around them. In this case we say they cannot be ternaried and default instead
 // to breaking them into multiple lines.
-function canTernaryStmts(stmts: Ruby.Stmts) {
+function canTernaryStmts(stmts: Ruby.Statements) {
   if (stmts.body.length !== 1) {
     return false;
   }

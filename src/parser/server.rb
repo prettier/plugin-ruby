@@ -72,7 +72,7 @@ listener =
           when 'ping'
             'pong'
           when 'ruby'
-            Ripper::ParseTree.parse(source)
+            SyntaxTree.parse(source)
           when 'rbs'
             Prettier::RBSParser.parse(source)
           when 'haml'
@@ -84,7 +84,7 @@ listener =
         else
           socket.write('{ "error": true }')
         end
-      rescue Ripper::ParseTree::ParseError => error
+      rescue SyntaxTree::ParseError => error
         loc = { start: { line: error.lineno, column: error.column } }
         socket.write(JSON.fast_generate(error: error.message, loc: loc))
       rescue StandardError => error
