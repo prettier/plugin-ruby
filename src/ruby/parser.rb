@@ -829,7 +829,7 @@ class SyntaxTree < Ripper
   #
   #     method(*arguments)
   #
-  class Star
+  class ArgStar
     # [untyped] the expression being splatted
     attr_reader :value
 
@@ -843,7 +843,7 @@ class SyntaxTree < Ripper
 
     def pretty_print(q)
       q.group(2, '(', ')') do
-        q.text('star')
+        q.text('arg_star')
 
         q.breakable
         q.pp(value)
@@ -851,7 +851,7 @@ class SyntaxTree < Ripper
     end
 
     def to_json(*opts)
-      { type: :star, value: value, loc: location }.to_json(*opts)
+      { type: :arg_star, value: value, loc: location }.to_json(*opts)
     end
   end
 
@@ -868,13 +868,13 @@ class SyntaxTree < Ripper
         arguments.location.to(ending.location)
       end
 
-    star =
-      Star.new(
+    arg_star =
+      ArgStar.new(
         value: argument,
         location: beginning.location.to(ending.location)
       )
 
-    Args.new(parts: arguments.parts << star, location: location)
+    Args.new(parts: arguments.parts << arg_star, location: location)
   end
 
   # ArgsForward represents forwarding all kinds of arguments onto another method

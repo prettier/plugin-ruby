@@ -162,6 +162,10 @@ export const printBlockArg: Plugin.Printer<Ruby.Blockarg> = (
   return ["&", path.call(print, "name")];
 };
 
-export const printStar: Plugin.Printer<Ruby.Star> = (path, opts, print) => {
+export const printArgStar: Plugin.Printer<Ruby.ArgStar> = (
+  path,
+  opts,
+  print
+) => {
   return ["*", path.call(print, "value")];
 };
