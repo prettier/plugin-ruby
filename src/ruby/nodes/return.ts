@@ -67,14 +67,6 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
         if (contents.type === "args" && contents.parts.length > 1) {
           // If we have just regular arguments and we have more than 1.
           steps.push("cnts");
-        } else if (contents.type === "args_add_star") {
-          if (contents.args.type === "args_add_star") {
-            // If we have two splats.
-            steps.push("cnts");
-          } else if (contents.args.parts.length > 0) {
-            // If we have a splat and at least one pre argument.
-            steps.push("cnts");
-          }
         }
       }
     }

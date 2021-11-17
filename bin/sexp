@@ -11,7 +11,7 @@ source =
     ARGV[0].gsub('\\n', "\n")
   end
 
-parsed = Ripper::ParseTree.parse(source)
+parsed = SyntaxTree.parse(source)
 
 puts '=== SOURCE === '
 puts source

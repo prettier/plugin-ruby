@@ -8,9 +8,7 @@ const { group, ifBreak, indent, join, line, softline } = prettier;
 
 const noTrailingComma = ["command", "command_call"];
 
-function getArgs(
-  node: Ruby.Args | Ruby.ArgsAddBlock | Ruby.ArgsAddStar
-): Ruby.AnyNode[] {
+function getArgs(node: Ruby.Args | Ruby.ArgsAddBlock): Ruby.AnyNode[] {
   switch (node.type) {
     case "args":
       return node.parts;
@@ -18,8 +16,6 @@ function getArgs(
       const args = getArgs(node.args);
       return node.block ? [...args, node.block] : args;
     }
-    case "args_add_star":
-      return [...getArgs(node.args), node.star];
   }
 }
 
@@ -82,18 +78,7 @@ export const printArgs: Plugin.Printer<Ruby.Args> = (
   { rubyToProc },
   print
 ) => {
-  let args: Plugin.Doc[] = [];
-
-  // Loop through each part of this node and print out the docs for it. If it's
-  // an args_add_star, then we're going to flatten it into the main array so
-  // that we can get ome nice joining later.
-  path.each((partPath) => {
-    if (partPath.getValue().type === "args_add_star") {
-      args = args.concat(print(partPath));
-    } else {
-      args.push(print(partPath));
-    }
-  }, "parts");
+  const args = path.map(print, "parts");
 
   // Don't bother trying to do any kind of fancy toProc transform if the
   // option is disabled.
@@ -169,42 +154,14 @@ export const printArgsAddBlock: Plugin.Printer<Ruby.ArgsAddBlock> = (
   return parts;
 };
 
-export const printArgsAddStar: Plugin.Printer<Ruby.ArgsAddStar> = (
-  path,
-  opts,
-  print
-) => {
-  const node = path.getValue();
-  let doc = path.call(print, "star");
-
-  if (!(node.star.comments || []).some(({ leading }) => leading)) {
-    // If we don't have any leading comments, we can just prepend the operator.
-    doc = ["*", doc];
-  } else {
-    // If we have an array like:
-    //
-    //     [
-    //       # comment
-    //       *values
-    //     ]
-    //
-    // then we need to make sure we don't accidentally prepend the operator
-    // before the comment(s).
-    //
-    // In prettier >= 2.3.0, the comments are printed as an array before the
-    // content. I don't love this kind of reflection, but it's the simplest way
-    // at the moment to get this right.
-    const docs = doc as [Plugin.Doc[], ...Plugin.Doc[]];
-    doc = docs[0].concat(["*", docs[1]], docs.slice(2));
-  }
-
-  return [...(path.call(print, "args") as Plugin.Doc[]), doc];
-};
-
 export const printBlockArg: Plugin.Printer<Ruby.Blockarg> = (
   path,
   opts,
   print
 ) => {
   return ["&", path.call(print, "name")];
+};
+
+export const printStar: Plugin.Printer<Ruby.Star> = (path, opts, print) => {
+  return ["*", path.call(print, "value")];
 };

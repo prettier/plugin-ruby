@@ -6,8 +6,8 @@ import {
   printArgParen,
   printArgs,
   printArgsAddBlock,
-  printArgsAddStar,
-  printBlockArg
+  printBlockArg,
+  printStar
 } from "./nodes/args";
 import {
   printArray,
@@ -165,7 +165,6 @@ const nodes: Record<
   arg_paren: printArgParen,
   args: printArgs,
   args_add_block: printArgsAddBlock,
-  args_add_star: printArgsAddStar,
   args_forward: printArgsForward,
   array: printArray,
   aryptn: printAryPtn,
@@ -264,6 +263,7 @@ const nodes: Record<
   return0: printReturn0,
   return: printReturn,
   sclass: printSClass,
+  star: printStar,
   statements: printStatements,
   string_concat: printStringConcat,
   string_dvar: printStringDVar,

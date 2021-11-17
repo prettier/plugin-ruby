@@ -50,7 +50,7 @@ export const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (
   return group(parts);
 };
 
-const argNodeTypes = ["args", "args_add_star", "args_add_block"];
+const argNodeTypes = ["args", "args_add_block"];
 
 export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
   const contentNode = path.getValue().cnts;

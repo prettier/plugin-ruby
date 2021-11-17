@@ -10,7 +10,6 @@ const { trim } = prettier;
 const noComments = [
   "args",
   "args_add_block",
-  "args_add_star",
   "mlhs",
   "mlhs_add_post",
   "mlhs_add_star",

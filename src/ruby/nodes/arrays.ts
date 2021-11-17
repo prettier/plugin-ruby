@@ -10,9 +10,8 @@ const { group, ifBreak, indent, join, line, softline } = prettier;
 //
 //     ['a', 'b', 'c']
 //
-function isStringArray(args: Ruby.Args | Ruby.ArgsAddStar) {
+function isStringArray(args: Ruby.Args) {
   return (
-    args.type === "args" &&
     args.parts.length > 1 &&
     args.parts.every((arg) => {
       // We want to verify that every node inside of this array is a string
@@ -49,9 +48,8 @@ function isStringArray(args: Ruby.Args | Ruby.ArgsAddStar) {
 //
 //     [:a, :b, :c]
 //
-function isSymbolArray(args: Ruby.Args | Ruby.ArgsAddStar) {
+function isSymbolArray(args: Ruby.Args) {
   return (
-    args.type === "args" &&
     args.parts.length > 1 &&
     args.parts.every((arg) => arg.type === "symbol_literal" && !arg.comments)
   );
@@ -104,7 +102,7 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
 
   // If we don't have a regular args node at this point then we have a special
   // array literal. In that case we're going to print out just the contents.
-  if (contents.type !== "args" && contents.type !== "args_add_star") {
+  if (contents.type !== "args") {
     return path.call(print, "cnts");
   }
 

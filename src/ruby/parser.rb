@@ -750,16 +750,9 @@ class SyntaxTree < Ripper
   end
 
   # :call-seq:
-  #   on_args_add: ((Args | ArgsAddStar) arguments, untyped argument) -> Args
+  #   on_args_add: (Args arguments, untyped argument) -> Args
   def on_args_add(arguments, argument)
-    if arguments.is_a?(ArgsAddStar)
-      # If we're adding an argument after a splatted argument, then it's going
-      # to come in through this path.
-      Args.new(
-        parts: [arguments, argument],
-        location: arguments.location.to(argument.location)
-      )
-    elsif arguments.parts.empty?
+    if arguments.parts.empty?
       # If this is the first argument being passed into the list of arguments,
       # then we're going to use the bounds of the argument to override the
       # parent node's location since this will be more accurate.
@@ -782,7 +775,7 @@ class SyntaxTree < Ripper
   #     method(argument, &block)
   #
   class ArgsAddBlock
-    # [Args | ArgsAddStar] the arguments before the optional block
+    # [Args] the arguments before the optional block
     attr_reader :arguments
 
     # [nil | untyped] the optional block argument
@@ -819,7 +812,7 @@ class SyntaxTree < Ripper
 
   # :call-seq:
   #   on_args_add_block: (
-  #     (Args | ArgsAddStar) arguments,
+  #     Args arguments,
   #     (false | untyped) block
   #   ) -> ArgsAddBlock
   def on_args_add_block(arguments, block)
@@ -832,60 +825,56 @@ class SyntaxTree < Ripper
     )
   end
 
-  # ArgsAddStar represents adding a splat of values to a list of arguments.
+  # Star represents using a splat operator on an expression.
   #
-  #     method(prefix, *arguments, suffix)
+  #     method(*arguments)
   #
-  class ArgsAddStar
-    # [Args | ArgsAddStar] the arguments before the starred argument
-    attr_reader :arguments
-
-    # [untyped] the expression being starred
-    attr_reader :star
+  class Star
+    # [untyped] the expression being splatted
+    attr_reader :value
 
     # [Location] the location of this node
     attr_reader :location
 
-    def initialize(arguments:, star:, location:)
-      @arguments = arguments
-      @star = star
+    def initialize(value:, location:)
+      @value = value
       @location = location
     end
 
     def pretty_print(q)
       q.group(2, '(', ')') do
-        q.text('args_add_star')
+        q.text('star')
+
         q.breakable
-        q.pp(arguments)
-        q.breakable
-        q.pp(star)
+        q.pp(value)
       end
     end
 
     def to_json(*opts)
-      {
-        type: :args_add_star,
-        args: arguments,
-        star: star,
-        loc: location
-      }.to_json(*opts)
+      { type: :star, value: value, loc: location }.to_json(*opts)
     end
   end
 
   # :call-seq:
-  #   on_args_add_star: (
-  #     (Args | ArgsAddStar) arguments,
-  #     untyped star
-  #   ) -> ArgsAddStar
-  def on_args_add_star(arguments, star)
+  #   on_args_add_star: (Args arguments, untyped star) -> Args
+  def on_args_add_star(arguments, argument)
     beginning = find_token(Op, '*')
-    ending = star || beginning
+    ending = argument || beginning
 
-    ArgsAddStar.new(
-      arguments: arguments,
-      star: star,
-      location: beginning.location.to(ending.location)
-    )
+    location =
+      if arguments.parts.empty?
+        ending.location
+      else
+        arguments.location.to(ending.location)
+      end
+
+    star =
+      Star.new(
+        value: argument,
+        location: beginning.location.to(ending.location)
+      )
+
+    Args.new(parts: arguments.parts << star, location: location)
   end
 
   # ArgsForward represents forwarding all kinds of arguments onto another method
@@ -956,10 +945,10 @@ class SyntaxTree < Ripper
   #     %W[one two three]
   #
   # Every line in the example above produces an ArrayLiteral node. In order, the
-  # child contents node of this ArrayLiteral node would be nil, Args,
-  # ArgsAddStar, QSymbols, QWords, Symbols, and Words.
+  # child contents node of this ArrayLiteral node would be nil, Args, QSymbols,
+  # QWords, Symbols, and Words.
   class ArrayLiteral
-    # [nil | Args | ArgsAddStar | QSymbols | QWords | Symbols | Words] the
+    # [nil | Args | QSymbols | QWords | Symbols | Words] the
     # contents of the array
     attr_reader :contents
 
@@ -986,11 +975,10 @@ class SyntaxTree < Ripper
 
   # :call-seq:
   #   on_array: (
-  #     (nil | Args | ArgsAddStar | QSymbols | QWords | Symbols | Words)
-  #       contents
+  #     (nil | Args | QSymbols | QWords | Symbols | Words) contents
   #   ) -> ArrayLiteral
   def on_array(contents)
-    if !contents || contents.is_a?(Args) || contents.is_a?(ArgsAddStar)
+    if !contents || contents.is_a?(Args)
       lbracket = find_token(LBracket)
       rbracket = find_token(RBracket)
 
@@ -5639,7 +5627,7 @@ class SyntaxTree < Ripper
   #     values = first, second, third
   #
   class MRHSNewFromArgs
-    # [Args | ArgsAddStar] the arguments being used in the assignment
+    # [Args] the arguments being used in the assignment
     attr_reader :arguments
 
     # [Location] the location of this node
@@ -5667,7 +5655,7 @@ class SyntaxTree < Ripper
   end
 
   # :call-seq:
-  #   on_mrhs_new_from_args: ((Args | ArgsAddStar) arguments) -> MRHSNewFromArgs
+  #   on_mrhs_new_from_args: (Args arguments) -> MRHSNewFromArgs
   def on_mrhs_new_from_args(arguments)
     MRHSNewFromArgs.new(arguments: arguments, location: arguments.location)
   end

@@ -50,8 +50,6 @@ function getChildNodes(node: AnyNode): ChildNode[] {
       return node.parts;
     case "args_add_block":
       return [node.args, node.block];
-    case "args_add_star":
-      return [node.args, node.star];
     case "args_forward":
       return [];
     case "array":
@@ -261,6 +259,8 @@ function getChildNodes(node: AnyNode): ChildNode[] {
       return [];
     case "sclass":
       return [node.target, node.bodystmt];
+    case "star":
+      return [node.value];
     case "statements":
       return node.body;
     case "string_concat":

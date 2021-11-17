@@ -13,7 +13,7 @@ type ParserEvent<T, V = Record<string, unknown>> = { type: T, loc: Location } & 
 // This is the main expression type that goes in places where the AST will
 // accept just about anything.
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type AnyNode = AccessCtrl | Alias | Aref | ArefField | ArgParen | Args | ArgsAddBlock | ArgsAddStar | ArgsForward | Array | Aryptn | Assign | AssocNew | AssocSplat | AssoclistFromArgs | BEGIN | Backref | Backtick | BareAssocHash | Begin | Binary | BlockVar | Blockarg | Bodystmt | BraceBlock | Break | CVar | Call | Case | Char | Class | Command | CommandCall | Const | ConstPathField | ConstPathRef | ConstRef | Def | Defined | Defs | DefEndless | DoBlock | Dot2 | Dot3 | DynaSymbol | END | Else | Elsif | EndContent | Ensure | ExcessedComma | Fcall | Field | Float | FndPtn | For | GVar | Hash | Heredoc | HeredocBegin | Hshptn | IVar | Identifier | If | IfModifier | Imaginary | In | Int | Keyword | KeywordRestParam | Label | Lambda | Lbrace | Lparen | Massign | MethodAddArg | MethodAddBlock | Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen | Module | Mrhs | MrhsAddStar | MrhsNewFromArgs | Next | Not | Op | Opassign | Params | Paren | Period | Program | Qwords | Qsymbols | Rassign | Rational | Redo | RegexpLiteral | Rescue | RescueEx | RescueModifier | RestParam | Retry | Return | Return0 | Sclass | Statements | StringConcat | StringDVar | StringEmbExpr | StringLiteral | Super | Symbols | SymbolLiteral | TStringContent | Ternary | TopConstField | TopConstRef | Unary | Undef | Unless | UnlessModifier | Until | UntilModifier | VCall | VarAlias | VarField | VarRef | VoidStmt | When | While | WhileModifier | Word | Words | XStringLiteral | Yield | Yield0 | Zsuper
+export type AnyNode = AccessCtrl | Alias | Aref | ArefField | ArgParen | Args | ArgsAddBlock | ArgsForward | Array | Aryptn | Assign | AssocNew | AssocSplat | AssoclistFromArgs | BEGIN | Backref | Backtick | BareAssocHash | Begin | Binary | BlockVar | Blockarg | Bodystmt | BraceBlock | Break | CVar | Call | Case | Char | Class | Command | CommandCall | Const | ConstPathField | ConstPathRef | ConstRef | Def | Defined | Defs | DefEndless | DoBlock | Dot2 | Dot3 | DynaSymbol | END | Else | Elsif | EndContent | Ensure | ExcessedComma | Fcall | Field | Float | FndPtn | For | GVar | Hash | Heredoc | HeredocBegin | Hshptn | IVar | Identifier | If | IfModifier | Imaginary | In | Int | Keyword | KeywordRestParam | Label | Lambda | Lbrace | Lparen | Massign | MethodAddArg | MethodAddBlock | Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen | Module | Mrhs | MrhsAddStar | MrhsNewFromArgs | Next | Not | Op | Opassign | Params | Paren | Period | Program | Qwords | Qsymbols | Rassign | Rational | Redo | RegexpLiteral | Rescue | RescueEx | RescueModifier | RestParam | Retry | Return | Return0 | Sclass | Star | Statements | StringConcat | StringDVar | StringEmbExpr | StringLiteral | Super | Symbols | SymbolLiteral | TStringContent | Ternary | TopConstField | TopConstRef | Unary | Undef | Unless | UnlessModifier | Until | UntilModifier | VCall | VarAlias | VarField | VarRef | VoidStmt | When | While | WhileModifier | Word | Words | XStringLiteral | Yield | Yield0 | Zsuper
 
 // This is a special scanner event that contains a comment. It can be attached
 // to almost any kind of node, which is why it's pulled out here separately.
@@ -98,7 +98,7 @@ export type SymbolLiteral = ParserEvent<"symbol_literal", { value: Backtick | Co
 export type XStringLiteral = ParserEvent<"xstring_literal", { parts: StringContent[] }>;
 
 // These are various parser events that have to do with arrays.
-export type Array = ParserEvent<"array", { cnts: null | Args | ArgsAddStar | Qsymbols | Qwords | Symbols | Words }>;
+export type Array = ParserEvent<"array", { cnts: null | Args | Qsymbols | Qwords | Symbols | Words }>;
 export type Qsymbols = ParserEvent<"qsymbols", { elems: TStringContent[] }>;
 export type Qwords = ParserEvent<"qwords", { elems: TStringContent[] }>;
 export type Symbols = ParserEvent<"symbols", { elems: Word[] }>;
@@ -131,7 +131,7 @@ export type MlhsAddStar = ParserEvent<"mlhs_add_star", { mlhs: Mlhs, star: null 
 export type MlhsParen = ParserEvent<"mlhs_paren", { cnts: Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen }>;
 export type Mrhs = ParserEvent<"mrhs", { parts: AnyNode[] }>;
 export type MrhsAddStar = ParserEvent<"mrhs_add_star", { mrhs: Mrhs | MrhsNewFromArgs, star: AnyNode }>;
-export type MrhsNewFromArgs = ParserEvent<"mrhs_new_from_args", { args: Args | ArgsAddStar }>;
+export type MrhsNewFromArgs = ParserEvent<"mrhs_new_from_args", { args: Args }>;
 
 // These are various parser events for control flow constructs.
 export type Case = ParserEvent<"case", { value: AnyNode, cons: In | When }>;
@@ -150,7 +150,7 @@ export type Unless = ParserEvent<"unless", { pred: AnyNode, stmts: Statements, c
 export type UnlessModifier = ParserEvent<"unless_mod", { pred: AnyNode, stmt: AnyNode }>;
 export type Until = ParserEvent<"until", { pred: AnyNode, stmts: Statements }>;
 export type UntilModifier = ParserEvent<"until_mod", { pred: AnyNode, stmt: AnyNode }>;
-export type When = ParserEvent<"when", { args: Args | ArgsAddStar, stmts: Statements, cons: null | Else | When }>;
+export type When = ParserEvent<"when", { args: Args, stmts: Statements, cons: null | Else | When }>;
 export type While = ParserEvent<"while", { pred: AnyNode, stmts: Statements }>;
 export type WhileModifier = ParserEvent<"while_mod", { pred: AnyNode, stmt: AnyNode }>;
 
@@ -184,8 +184,8 @@ export type RestParam = ParserEvent<"rest_param", { name: null | Identifier }>;
 export type CallOperator = Op | Period | "::";
 export type ArgParen = ParserEvent<"arg_paren", { args: Args | ArgsAddBlock | ArgsForward | null }>;
 export type Args = ParserEvent<"args", { parts: AnyNode[] }>;
-export type ArgsAddBlock = ParserEvent<"args_add_block", { args: Args | ArgsAddStar, block: null | AnyNode }>;
-export type ArgsAddStar = ParserEvent<"args_add_star", { args: Args | ArgsAddStar, star: AnyNode }>;
+export type ArgsAddBlock = ParserEvent<"args_add_block", { args: Args, block: null | AnyNode }>;
+export type Star = ParserEvent<"star", { value: AnyNode }>;
 export type BlockVar = ParserEvent<"block_var", { params: Params, locals: Identifier[] }>;
 export type BraceBlock = ParserEvent<"brace_block", { lbrace: Lbrace, block_var: null | BlockVar, stmts: Statements }>;
 export type Call = ParserEvent<"call", { receiver: AnyNode, op: CallOperator, message: Backtick | Op | Identifier | Const | "call" }>;
