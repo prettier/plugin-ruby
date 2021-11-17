@@ -31,16 +31,6 @@ class MetadataTest < Minitest::Test
     SOURCE
   end
 
-  def test_array_qwords
-    assert_metadata SyntaxTree::ArrayLiteral, <<~SOURCE
-      %w[
-        foo
-        bar
-        baz
-      ]
-    SOURCE
-  end
-
   def test_aref
     assert_metadata SyntaxTree::ARef, 'foo[bar]'
   end
@@ -513,21 +503,11 @@ class MetadataTest < Minitest::Test
   end
 
   def test_qsymbols
-    assert_node_metadata(
-      SyntaxTree::QSymbols,
-      parse('%i[foo bar baz]').contents,
-      start_char: 0,
-      end_char: 15
-    )
+    assert_metadata SyntaxTree::QSymbols, '%i[foo bar baz]'
   end
 
   def test_qwords
-    assert_node_metadata(
-      SyntaxTree::QWords,
-      parse('%w[foo bar baz]').contents,
-      start_char: 0,
-      end_char: 15
-    )
+    assert_metadata SyntaxTree::QWords, '%w[foo bar baz]'
   end
 
   def test_redo
@@ -629,12 +609,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_symbols
-    assert_node_metadata(
-      SyntaxTree::Symbols,
-      parse('%I[f#{o}o b#{a}r b#{a}z]').contents,
-      start_char: 0,
-      end_char: 24
-    )
+    assert_metadata SyntaxTree::Symbols, '%I[f#{o}o b#{a}r b#{a}z]'
   end
 
   def test_top_const_field
@@ -735,12 +710,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_words
-    assert_node_metadata(
-      SyntaxTree::Words,
-      parse('%W[f#{o}o b#{a}r b#{a}z]').contents,
-      start_char: 0,
-      end_char: 24
-    )
+    assert_metadata SyntaxTree::Words, '%W[f#{o}o b#{a}r b#{a}z]'
   end
 
   def test_xstring

@@ -974,9 +974,8 @@ class SyntaxTree < Ripper
   end
 
   # :call-seq:
-  #   on_array: (
-  #     (nil | Args | QSymbols | QWords | Symbols | Words) contents
-  #   ) -> ArrayLiteral
+  #   on_array: ((nil | Args) contents) ->
+  #     ArrayLiteral | QSymbols | QWords | Symbols | Words
   def on_array(contents)
     if !contents || contents.is_a?(Args)
       lbracket = find_token(LBracket)
@@ -988,13 +987,11 @@ class SyntaxTree < Ripper
       )
     else
       tstring_end = find_token(TStringEnd)
-      contents =
-        contents.class.new(
-          elements: contents.elements,
-          location: contents.location.to(tstring_end.location)
-        )
 
-      ArrayLiteral.new(contents: contents, location: contents.location)
+      contents.class.new(
+        elements: contents.elements,
+        location: contents.location.to(tstring_end.location)
+      )
     end
   end
 

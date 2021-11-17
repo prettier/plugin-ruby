@@ -100,12 +100,6 @@ export const printArray: Plugin.Printer<Ruby.Array> = (path, opts, print) => {
     return printEmptyCollection(path, opts, "[", "]");
   }
 
-  // If we don't have a regular args node at this point then we have a special
-  // array literal. In that case we're going to print out just the contents.
-  if (contents.type !== "args") {
-    return path.call(print, "cnts");
-  }
-
   if (opts.rubyArrayLiteral) {
     // If we have an array that contains only simple string literals with no
     // spaces or interpolation, then we're going to print a %w array.

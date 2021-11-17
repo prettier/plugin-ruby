@@ -98,7 +98,7 @@ export type SymbolLiteral = ParserEvent<"symbol_literal", { value: Backtick | Co
 export type XStringLiteral = ParserEvent<"xstring_literal", { parts: StringContent[] }>;
 
 // These are various parser events that have to do with arrays.
-export type Array = ParserEvent<"array", { cnts: null | Args | Qsymbols | Qwords | Symbols | Words }>;
+export type Array = ParserEvent<"array", { cnts: null | Args }>;
 export type Qsymbols = ParserEvent<"qsymbols", { elems: TStringContent[] }>;
 export type Qwords = ParserEvent<"qwords", { elems: TStringContent[] }>;
 export type Symbols = ParserEvent<"symbols", { elems: Word[] }>;
