@@ -740,7 +740,7 @@ describe("conditionals", () => {
       );
     });
 
-    test("assoc_new", () => {
+    test("assoc", () => {
       expect(`{ foo: ${keyword} bar? then baz end }`).toChangeFormat(
         `{ foo: (baz ${keyword} bar?) }`
       );

@@ -1154,13 +1154,13 @@ class SyntaxTree < Ripper
     )
   end
 
-  # AssocNew represents a key-value pair within a hash. It is a child node of
+  # Assoc represents a key-value pair within a hash. It is a child node of
   # either an AssocListFromArgs or a BareAssocHash.
   #
   #     { key1: value1, key2: value2 }
   #
   # In the above example, the would be two AssocNew nodes.
-  class AssocNew
+  class Assoc
     # [untyped] the key of this pair
     attr_reader :key
 
@@ -1178,7 +1178,7 @@ class SyntaxTree < Ripper
 
     def pretty_print(q)
       q.group(2, '(', ')') do
-        q.text('assoc_new')
+        q.text('assoc')
         q.breakable
         q.pp(key)
         q.breakable
@@ -1187,14 +1187,14 @@ class SyntaxTree < Ripper
     end
 
     def to_json(*opts)
-      { type: :assoc_new, key: key, value: value, loc: location }.to_json(*opts)
+      { type: :assoc, key: key, value: value, loc: location }.to_json(*opts)
     end
   end
 
   # :call-seq:
-  #   on_assoc_new: (untyped key, untyped value) -> AssocNew
+  #   on_assoc_new: (untyped key, untyped value) -> Assoc
   def on_assoc_new(key, value)
-    AssocNew.new(
+    Assoc.new(
       key: key,
       value: value,
       location: key.location.to(value.location)

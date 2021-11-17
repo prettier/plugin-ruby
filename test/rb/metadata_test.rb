@@ -95,9 +95,9 @@ class MetadataTest < Minitest::Test
     assert_metadata SyntaxTree::Assign, 'foo = bar'
   end
 
-  def test_assoc_new
+  def test_assoc
     assert_node_metadata(
-      SyntaxTree::AssocNew,
+      SyntaxTree::Assoc,
       parse('{ foo: bar, bar: baz }').contents.assocs.first,
       start_char: 2,
       end_char: 10

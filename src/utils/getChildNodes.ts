@@ -60,7 +60,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
       return [node.constant, ...node.reqs, node.rest, ...node.posts];
     case "assign":
       return [node.target, node.value];
-    case "assoc_new":
+    case "assoc":
       return [node.key, node.value];
     case "assoc_splat":
       return [node.value];

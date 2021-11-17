@@ -51,7 +51,7 @@ import {
 } from "./nodes/constants";
 import { printBreak, printNext, printYield, printYield0 } from "./nodes/flow";
 import {
-  printAssocNew,
+  printAssoc,
   printAssocSplat,
   printHash,
   printHashContents
@@ -170,7 +170,7 @@ const nodes: Record<
   array: printArray,
   aryptn: printAryPtn,
   assign: printAssign,
-  assoc_new: printAssocNew,
+  assoc: printAssoc,
   assoc_splat: printAssocSplat,
   assoclist_from_args: printHashContents,
   backref: printToken,

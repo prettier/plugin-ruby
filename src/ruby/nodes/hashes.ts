@@ -12,6 +12,7 @@ type KeyPrinter = (
   path: Plugin.Path<Ruby.AnyNode>,
   print: Plugin.Print
 ) => Plugin.Doc;
+
 type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & {
   keyPrinter: KeyPrinter;
 };
@@ -81,11 +82,7 @@ const printHashKeyRocket: KeyPrinter = (path, print) => {
   return [doc, " =>"];
 };
 
-export const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (
-  path,
-  opts,
-  print
-) => {
+export const printAssoc: Plugin.Printer<Ruby.Assoc> = (path, opts, print) => {
   const node = path.getValue();
   const { keyPrinter } = path.getParentNode() as HashContents;
 
@@ -154,7 +151,7 @@ export const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
 
   // If we're inside another hash, then we don't want to group our contents
   // because we want this hash to break along with its parent hash.
-  if (path.getParentNode().type === "assoc_new") {
+  if (path.getParentNode().type === "assoc") {
     return doc;
   }
 

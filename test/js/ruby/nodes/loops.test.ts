@@ -166,7 +166,7 @@ describe.each(["while", "until"])("%s", (keyword) => {
         );
       });
 
-      test("assoc_new", () => {
+      test("assoc", () => {
         expect(`{ foo: ${keyword} bar? do baz end }`).toChangeFormat(
           `{ foo: (baz ${keyword} bar?) }`
         );

@@ -3,7 +3,7 @@ import type { Plugin, Ruby } from "../types";
 const needsParens = [
   "args",
   "assign",
-  "assoc_new",
+  "assoc",
   "binary",
   "call",
   "massign",

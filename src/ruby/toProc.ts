@@ -92,8 +92,8 @@ function toProc(
     parentNode = path.getParentNode(2);
   }
 
-  if (parentNode && parentNode.type === "assoc_new") {
-    const assocNode = parentNode as Ruby.AssocNew;
+  if (parentNode && parentNode.type === "assoc") {
+    const assocNode = parentNode as Ruby.Assoc;
     const key = assocNode.key;
 
     if (key.type === "label" && ["if:", "unless:"].includes(key.value)) {
