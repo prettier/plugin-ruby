@@ -440,7 +440,7 @@ class MetadataTest < Minitest::Test
 
   def test_mlhs_add_post
     assert_node_metadata(
-      SyntaxTree::MLHSAddPost,
+      SyntaxTree::MLHS,
       parse('foo, *bar, baz = 1, 2, 3').target,
       start_char: 0,
       end_char: 14

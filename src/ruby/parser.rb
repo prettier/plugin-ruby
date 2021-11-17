@@ -5060,8 +5060,7 @@ class SyntaxTree < Ripper
   #     first, = value
   #
   class MAssign
-    # [Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen] the target of the multiple
-    # assignment
+    # [Mlhs | MlhsParen] the target of the multiple assignment
     attr_reader :target
 
     # [untyped] the value being assigned
@@ -5096,10 +5095,7 @@ class SyntaxTree < Ripper
   end
 
   # :call-seq:
-  #   on_massign: (
-  #     (Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen) target,
-  #     untyped value
-  #   ) -> MAssign
+  #   on_massign: ((Mlhs | MlhsParen) target, untyped value) -> MAssign
   def on_massign(target, value)
     comma_range = target.location.end_char...value.location.start_char
     target.comma = true if source[comma_range].strip.start_with?(',')
@@ -5286,53 +5282,12 @@ class SyntaxTree < Ripper
     MLHS.new(parts: mlhs.parts << part, location: location)
   end
 
-  # MLHSAddPost represents adding another set of variables onto a list of
-  # assignments after a splat variable within a multiple assignment.
-  #
-  #     left, *middle, right = values
-  #
-  class MLHSAddPost
-    # [MlhsAddStar] the value being starred
-    attr_reader :star
-
-    # [Mlhs] the values after the star
-    attr_reader :mlhs
-
-    # [Location] the location of this node
-    attr_reader :location
-
-    def initialize(star:, mlhs:, location:)
-      @star = star
-      @mlhs = mlhs
-      @location = location
-    end
-
-    def pretty_print(q)
-      q.group(2, '(', ')') do
-        q.text('mlhs_add_post')
-
-        q.breakable
-        q.pp(star)
-
-        q.breakable
-        q.pp(mlhs)
-      end
-    end
-
-    def to_json(*opts)
-      { type: :mlhs_add_post, star: star, mlhs: mlhs, loc: location }.to_json(
-        *opts
-      )
-    end
-  end
-
   # :call-seq:
-  #   on_mlhs_add_post: (MLHS star, MLHS mlhs) -> MLHSAddPost
-  def on_mlhs_add_post(star, mlhs)
-    MLHSAddPost.new(
-      star: star,
-      mlhs: mlhs,
-      location: star.location.to(mlhs.location)
+  #   on_mlhs_add_post: (MLHS left, MLHS right) -> MLHS
+  def on_mlhs_add_post(left, right)
+    MLHS.new(
+      parts: left.parts + right.parts,
+      location: left.location.to(right.location)
     )
   end
 
@@ -5364,8 +5319,7 @@ class SyntaxTree < Ripper
   #     (left, right) = value
   #
   class MLHSParen
-    # [Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen] the contents inside of the
-    # parentheses
+    # [Mlhs | MlhsParen] the contents inside of the parentheses
     attr_reader :contents
 
     # [Location] the location of this node
@@ -5391,9 +5345,7 @@ class SyntaxTree < Ripper
   end
 
   # :call-seq:
-  #   on_mlhs_paren: (
-  #     (Mlhs | MlhsAddPost | MlhsAddStar | MlhsParen) contents
-  #   ) -> MLHSParen
+  #   on_mlhs_paren: ((Mlhs | MlhsParen) contents) -> MLHSParen
   def on_mlhs_paren(contents)
     lparen = find_token(LParen)
     rparen = find_token(RParen)

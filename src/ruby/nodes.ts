@@ -64,7 +64,6 @@ import { printFor, printUntil, printWhile } from "./nodes/loops";
 import {
   printMAssign,
   printMLHS,
-  printMLHSAddPost,
   printMLHSParen,
   printMRHS,
   printMRHSAddStar,
@@ -234,7 +233,6 @@ const nodes: Record<
   method_add_arg: printMethodAddArg,
   method_add_block: printMethodAddBlock,
   mlhs: printMLHS,
-  mlhs_add_post: printMLHSAddPost,
   mlhs_paren: printMLHSParen,
   module: printModule,
   mrhs: printMRHS,
