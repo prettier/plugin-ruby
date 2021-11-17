@@ -167,5 +167,6 @@ export const printArgStar: Plugin.Printer<Ruby.ArgStar> = (
   opts,
   print
 ) => {
-  return ["*", path.call(print, "value")];
+  const node = path.getValue();
+  return node.value ? ["*", path.call(print, "value")] : "*";
 };

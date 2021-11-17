@@ -12,7 +12,6 @@ const noComments = [
   "args_add_block",
   "mlhs",
   "mlhs_add_post",
-  "mlhs_add_star",
   "mlhs_paren"
 ];
 

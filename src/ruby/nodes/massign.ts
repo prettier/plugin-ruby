@@ -42,21 +42,6 @@ export const printMLHSAddPost: Plugin.Printer<Ruby.MlhsAddPost> = (
   ];
 };
 
-export const printMLHSAddStar: Plugin.Printer<Ruby.MlhsAddStar> = (
-  path,
-  opts,
-  print
-) => {
-  const node = path.getValue();
-  const parts: Plugin.Doc[] = ["*"];
-
-  if (node.star) {
-    parts.push(path.call(print, "star"));
-  }
-
-  return [...(path.call(print, "mlhs") as Plugin.Doc[]), parts];
-};
-
 export const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (
   path,
   opts,

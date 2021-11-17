@@ -830,7 +830,7 @@ class SyntaxTree < Ripper
   #     method(*arguments)
   #
   class ArgStar
-    # [untyped] the expression being splatted
+    # [nil | untyped] the expression being splatted
     attr_reader :value
 
     # [Location] the location of this node
@@ -3855,7 +3855,7 @@ class SyntaxTree < Ripper
   #     end
   #
   class For
-    # [MLHS | MLHSAddStar | VarField] the variable declaration being used to
+    # [MLHS | VarField] the variable declaration being used to
     # pull values out of the object being enumerated
     attr_reader :index
 
@@ -3903,7 +3903,7 @@ class SyntaxTree < Ripper
 
   # :call-seq:
   #   on_for: (
-  #     (MLHS | MLHSAddStar | VarField) value,
+  #     (MLHS | VarField) value,
   #     untyped collection,
   #     Statements statements
   #   ) -> For
@@ -5238,8 +5238,8 @@ class SyntaxTree < Ripper
   #     first, second, third = value
   #
   class MLHS
-    # Array[ARefField | Field | Ident | MlhsParen | VarField] the parts of
-    # the left-hand side of a multiple assignment
+    # Array[ARefField | ArgStar | Field | Ident | MlhsParen | VarField] the
+    # parts of the left-hand side of a multiple assignment
     attr_reader :parts
 
     # [boolean] whether or not there is a trailing comma at the end of this
@@ -5276,14 +5276,14 @@ class SyntaxTree < Ripper
   #     (ARefField | Field | Ident | MlhsParen | VarField) part
   #   ) -> MLHS
   def on_mlhs_add(mlhs, part)
-    if mlhs.parts.empty?
-      MLHS.new(parts: [part], location: part.location)
-    else
-      MLHS.new(
-        parts: mlhs.parts << part,
-        location: mlhs.location.to(part.location)
-      )
-    end
+    location =
+      if mlhs.parts.empty?
+        part.location
+      else
+        mlhs.location.to(part.location)
+      end
+
+    MLHS.new(parts: mlhs.parts << part, location: location)
   end
 
   # MLHSAddPost represents adding another set of variables onto a list of
@@ -5327,7 +5327,7 @@ class SyntaxTree < Ripper
   end
 
   # :call-seq:
-  #   on_mlhs_add_post: (MLHSAddStar star, MLHS mlhs) -> MLHSAddPost
+  #   on_mlhs_add_post: (MLHS star, MLHS mlhs) -> MLHSAddPost
   def on_mlhs_add_post(star, mlhs)
     MLHSAddPost.new(
       star: star,
@@ -5336,61 +5336,20 @@ class SyntaxTree < Ripper
     )
   end
 
-  # MLHSAddStar represents a splatted variable inside of a multiple assignment
-  # on the left hand side.
-  #
-  #     first, *rest = values
-  #
-  class MLHSAddStar
-    # [MLHS] the values before the starred expression
-    attr_reader :mlhs
-
-    # [nil | ARefField | Field | Ident | VarField] the expression being
-    # splatted
-    attr_reader :star
-
-    # [Location] the location of this node
-    attr_reader :location
-
-    def initialize(mlhs:, star:, location:)
-      @mlhs = mlhs
-      @star = star
-      @location = location
-    end
-
-    def pretty_print(q)
-      q.group(2, '(', ')') do
-        q.text('mlhs_add_star')
-
-        q.breakable
-        q.pp(mlhs)
-
-        q.breakable
-        q.pp(star)
-      end
-    end
-
-    def to_json(*opts)
-      { type: :mlhs_add_star, mlhs: mlhs, star: star, loc: location }.to_json(
-        *opts
-      )
-    end
-  end
-
   # :call-seq:
   #   on_mlhs_add_star: (
   #     MLHS mlhs,
   #     (nil | ARefField | Field | Ident | VarField) part
-  #   ) -> MLHSAddStar
+  #   ) -> MLHS
   def on_mlhs_add_star(mlhs, part)
     beginning = find_token(Op, '*')
     ending = part || beginning
 
-    MLHSAddStar.new(
-      mlhs: mlhs,
-      star: part,
-      location: beginning.location.to(ending.location)
-    )
+    location = beginning.location.to(ending.location)
+    arg_star = ArgStar.new(value: part, location: location)
+
+    location = mlhs.location.to(location) unless mlhs.parts.empty?
+    MLHS.new(parts: mlhs.parts << arg_star, location: location)
   end
 
   # :call-seq:

@@ -185,8 +185,6 @@ function getChildNodes(node: AnyNode): ChildNode[] {
       return node.parts;
     case "mlhs_add_post":
       return [node.star, node.mlhs];
-    case "mlhs_add_star":
-      return [node.mlhs, node.star];
     case "mlhs_paren":
       return [node.cnts];
     case "module":
