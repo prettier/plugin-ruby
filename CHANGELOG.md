@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [#1028](https://github.com/prettier/plugin-ruby/issues/1028) - levymetal, kddnewton - Fix up some nested formatting with very complicated RSpec assertions.
 - [#1035](https://github.com/prettier/plugin-ruby/issues/1035) - qcn, kddnewton - Ensure we don't try to print `return` incorrectly when multiple statements are contained within parentheses.
 - [#1048](https://github.com/prettier/plugin-ruby/pull/1048) - kddnewton - Completely refactor the Ruby parser to use classes instead of hashes. Also remove a lot of the `body` keys are replace them with actual names.
+- [#1042](https://github.com/prettier/plugin-ruby/issues/1042) - JoshuaKGoldberg, kddnewton - Ensure blocks are printed correctly when there are trailing comments on the `do` keyword.
 
 ### Removed
 
