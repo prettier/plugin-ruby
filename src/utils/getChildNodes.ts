@@ -53,7 +53,7 @@ function getChildNodes(node: AnyNode): ChildNode[] {
     case "args_forward":
       return [];
     case "arg_star":
-      return [node.value];  
+      return [node.value];
     case "array":
       return [node.cnts];
     case "aryptn":

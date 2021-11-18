@@ -1191,11 +1191,7 @@ class SyntaxTree < Ripper
   # :call-seq:
   #   on_assoc_new: (untyped key, untyped value) -> Assoc
   def on_assoc_new(key, value)
-    Assoc.new(
-      key: key,
-      value: value,
-      location: key.location.to(value.location)
-    )
+    Assoc.new(key: key, value: value, location: key.location.to(value.location))
   end
 
   # AssocSplat represents double-splatting a value into a hash (either a hash
@@ -5270,11 +5266,7 @@ class SyntaxTree < Ripper
   #   ) -> MLHS
   def on_mlhs_add(mlhs, part)
     location =
-      if mlhs.parts.empty?
-        part.location
-      else
-        mlhs.location.to(part.location)
-      end
+      mlhs.parts.empty? ? part.location : mlhs.location.to(part.location)
 
     MLHS.new(parts: mlhs.parts << part, location: location)
   end

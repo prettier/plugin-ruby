@@ -7,12 +7,7 @@ import nodes from "./nodes";
 
 const { trim } = prettier;
 
-const noComments = [
-  "args",
-  "args_add_block",
-  "mlhs",
-  "mlhs_paren"
-];
+const noComments = ["args", "args_add_block", "mlhs", "mlhs_paren"];
 
 const printer: Plugin.PrinterConfig<Ruby.AnyNode> = {
   // Certain nodes are used more for organizational purposed than for actually
