@@ -183,8 +183,6 @@ function getChildNodes(node: AnyNode): ChildNode[] {
       return [node.call, node.block];
     case "mlhs":
       return node.parts;
-    case "mlhs_add_post":
-      return [node.star, node.mlhs];
     case "mlhs_paren":
       return [node.cnts];
     case "module":

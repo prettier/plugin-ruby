@@ -265,7 +265,7 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
       // Determine if we're allowed to change the quote based on whether or not
       // there is an escape sequence in the source string.
-      const quote = node.literal.includes("\\")
+      const quote = value.match(new RegExp(`\\\\[^${originalQuote}]`))
         ? originalQuote
         : preferredQuote;
 

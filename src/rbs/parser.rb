@@ -19,6 +19,17 @@ rescue LoadError
   return
 end
 
+# This was removed at some point, so we need to support both versions.
+RBS::KEYWORD_RAW =
+  if RBS::Parser.const_defined?(:KEYWORDS_RE)
+    RBS::Parser::KEYWORDS_RE
+  else
+    RBS::Parser::KEYWORDS.keys.join('|')
+  end
+
+# This enforces that the full matched string is a keyword.
+RBS::KEYWORD_FULL = /\A#{RBS::KEYWORD_RAW}\z/
+
 # Monkey-patch this so that we can get the character positions.
 class RBS::Location
   def to_json(*args)
@@ -40,7 +51,12 @@ end
 # Monkey-patch this so that we get whether or not it needs to be escaped.
 class RBS::Types::Function::Param
   def to_json(*a)
-    escaped = name && /\A#{RBS::Parser::KEYWORDS_RE}\z/.match?(name)
+    escaped = name && RBS::KEYWORD_FULL.match?(name)
+
+    # More modern versions of RBS just include the ` in the name so there's no
+    # need to escape it further.
+    escaped = false if name.to_s.start_with?('`')
+
     { type: type, name: name, escaped: escaped }.to_json(*a)
   end
 end
@@ -71,7 +87,7 @@ class RBS::Types::Record
     # Explicitly not using Enumerable#to_h here to support Ruby 2.5
     fields.each do |key, type|
       if key.is_a?(Symbol) && key.match?(/\A[A-Za-z_][A-Za-z_]*\z/) &&
-           !key.match?(RBS::Parser::KEYWORDS_RE)
+           !key.match?(RBS::KEYWORD_RAW)
         fields_extra[key] = { type: type, joiner: :label }
       else
         fields_extra[key.inspect] = { type: type, joiner: :rocket }

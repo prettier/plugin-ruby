@@ -6,6 +6,9 @@ require 'json'
 require 'fileutils'
 require 'open3'
 
+# Ensure the parent module is defined before requiring the parsers.
+module Prettier; end
+
 require_relative '../ruby/parser'
 require_relative '../rbs/parser'
 require_relative '../haml/parser'

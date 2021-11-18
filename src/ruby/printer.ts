@@ -11,7 +11,6 @@ const noComments = [
   "args",
   "args_add_block",
   "mlhs",
-  "mlhs_add_post",
   "mlhs_paren"
 ];
 
