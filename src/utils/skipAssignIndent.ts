@@ -12,7 +12,7 @@ const skippable = [
 function skipAssignIndent(node: Ruby.AnyNode): boolean {
   return (
     skippable.includes(node.type) ||
-    (node.type === "call" && skipAssignIndent(node.body[0]))
+    (node.type === "call" && skipAssignIndent(node.receiver))
   );
 }
 

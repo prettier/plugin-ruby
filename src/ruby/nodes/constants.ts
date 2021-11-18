@@ -2,21 +2,20 @@ import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { makeCall } from "../../utils";
 
-const { group, indent, join, softline } = prettier;
+const { group, indent, softline } = prettier;
 
-export const printConstPath: Plugin.Printer<
-  Ruby.ConstPathField | Ruby.ConstPathRef
-> = (path, opts, print) => {
-  return join("::", path.map(print, "body"));
-};
+type ConstPath = Ruby.ConstPathField | Ruby.ConstPathRef;
+export const printConstPath: Plugin.Printer<ConstPath> = (
+  path,
+  opts,
+  print
+) => [path.call(print, "parent"), "::", path.call(print, "constant")];
 
 export const printConstRef: Plugin.Printer<Ruby.ConstRef> = (
   path,
   opts,
   print
-) => {
-  return path.call(print, "body", 0);
-};
+) => path.call(print, "constant");
 
 export const printDefined: Plugin.Printer<Ruby.Defined> = (
   path,
@@ -25,7 +24,7 @@ export const printDefined: Plugin.Printer<Ruby.Defined> = (
 ) => {
   return group([
     "defined?(",
-    indent([softline, path.call(print, "body", 0)]),
+    indent([softline, path.call(print, "value")]),
     softline,
     ")"
   ]);
@@ -33,14 +32,14 @@ export const printDefined: Plugin.Printer<Ruby.Defined> = (
 
 export const printField: Plugin.Printer<Ruby.Field> = (path, opts, print) => {
   return group([
-    path.call(print, "body", 0),
+    path.call(print, "parent"),
     makeCall(path, opts, print),
-    path.call(print, "body", 2)
+    path.call(print, "name")
   ]);
 };
 
-export const printTopConst: Plugin.Printer<
-  Ruby.TopConstField | Ruby.TopConstRef
-> = (path, opts, print) => {
-  return ["::", path.call(print, "body", 0)];
-};
+type TopConst = Ruby.TopConstField | Ruby.TopConstRef;
+export const printTopConst: Plugin.Printer<TopConst> = (path, opts, print) => [
+  "::",
+  path.call(print, "constant")
+];

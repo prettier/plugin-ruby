@@ -1,73 +1,67 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { literal } from "../../utils";
 
 const { group, hardline, join, indent, line, lineSuffix, softline } = prettier;
 
-function printRestParamSymbol(
-  symbol: string
-): Plugin.Printer<Ruby.KeywordRestParam | Ruby.RestParam> {
+type RestParam = Ruby.KeywordRestParam | Ruby.RestParam;
+
+function printRestParamSymbol(symbol: string): Plugin.Printer<RestParam> {
   return function printRestParamWithSymbol(path, opts, print) {
-    return path.getValue().body[0]
-      ? [symbol, path.call(print, "body", 0)]
-      : symbol;
+    const node = path.getValue();
+
+    return node.name ? [symbol, path.call(print, "name")] : symbol;
   };
 }
 
 export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
-  const [reqs, optls, rest, post, kwargs, kwargRest, block] =
-    path.getValue().body;
+  const node = path.getValue();
   let parts: Plugin.Doc[] = [];
 
-  if (reqs) {
-    path.each(
-      (reqPath) => {
-        // For some very strange reason, if you have a comment attached to a
-        // rest_param, it shows up here in the list of required params.
-        if ((reqPath.getValue().type as any) !== "rest_param") {
-          parts.push(print(reqPath));
+  if (node.reqs) {
+    path.each((reqPath) => {
+      // For some very strange reason, if you have a comment attached to a
+      // rest_param, it shows up here in the list of required params.
+      if ((reqPath.getValue().type as any) !== "rest_param") {
+        parts.push(print(reqPath));
+      }
+    }, "reqs");
+  }
+
+  if (node.opts) {
+    parts = parts.concat(
+      path.map((optlPath) => join(" = ", optlPath.map(print)), "opts")
+    );
+  }
+
+  if (node.rest && node.rest.type !== "excessed_comma") {
+    parts.push(path.call(print, "rest"));
+  }
+
+  if (node.posts) {
+    parts = parts.concat(path.map(print, "posts"));
+  }
+
+  if (node.keywords) {
+    parts = parts.concat(
+      path.map((kwargPath) => {
+        const kwarg = kwargPath.getValue();
+        const keyDoc = kwargPath.call(print, 0);
+
+        if (kwarg[1]) {
+          return group([keyDoc, " ", kwargPath.call(print, 1)]);
         }
-      },
-      "body",
-      0
+
+        return keyDoc;
+      }, "keywords")
     );
   }
 
-  if (optls) {
-    parts = parts.concat(
-      path.map((optlPath) => join(" = ", optlPath.map(print)), "body", 1)
-    );
+  if (node.kwrest) {
+    parts.push(node.kwrest === "nil" ? "**nil" : path.call(print, "kwrest"));
   }
 
-  if (rest && rest.type !== "excessed_comma") {
-    parts.push(path.call(print, "body", 2));
-  }
-
-  if (post) {
-    parts = parts.concat(path.map(print, "body", 3));
-  }
-
-  if (kwargs) {
-    parts = parts.concat(
-      path.map(
-        (kwargPath) => {
-          if (!kwargPath.getValue()[1]) {
-            return kwargPath.call(print, 0);
-          }
-          return group(join(" ", kwargPath.map(print)));
-        },
-        "body",
-        4
-      )
-    );
-  }
-
-  if (kwargRest) {
-    parts.push(kwargRest === "nil" ? "**nil" : path.call(print, "body", 5));
-  }
-
-  if (block) {
-    parts.push(path.call(print, "body", 6));
+  if (node.block) {
+    parts.push(path.call(print, "block"));
   }
 
   const contents: Plugin.Doc[] = [join([",", line], parts)];
@@ -81,7 +75,10 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   // In ruby 2.5, the excessed comma is indicated by having a 0 in the rest
   // param position. In ruby 2.6+ it's indicated by having an "excessed_comma"
   // node in the rest position. Seems odd, but it's true.
-  if ((rest as any) === 0 || (rest && rest.type === "excessed_comma")) {
+  if (
+    (node.rest as any) === 0 ||
+    (node.rest && node.rest.type === "excessed_comma")
+  ) {
     contents.push(",");
   }
 
@@ -113,6 +110,15 @@ export const printParams: Plugin.Printer<Ruby.Params> = (path, opts, print) => {
   return group(contents);
 };
 
-export const printArgsForward = literal("...");
+export const printArgsForward: Plugin.Printer<Ruby.ArgsForward> = (path) =>
+  path.getValue().value;
 export const printKeywordRestParam = printRestParamSymbol("**");
 export const printRestParam = printRestParamSymbol("*");
+
+export const printExcessedComma: Plugin.Printer<Ruby.ExcessedComma> = (
+  path,
+  opts,
+  print
+) => {
+  return path.call(print, "value");
+};

@@ -1,13 +1,13 @@
 import type { Plugin, Ruby } from "../types";
 
-function isCall(node: Ruby.CallOperator) {
+function isPeriod(node: Ruby.CallOperator) {
   // Older versions of Ruby didn't have a @period ripper event, so we need to
   // explicitly cast to any here.
   if (node === "::" || (node as any) === ".") {
     return true;
   }
 
-  return node.type === "@period";
+  return node.type === "period";
 }
 
 // If you have a simple block that only calls a method on the single required
@@ -25,62 +25,57 @@ function toProc(
   path: Plugin.Path<Ruby.Args | Ruby.MethodAddBlock>,
   node: Ruby.BraceBlock | Ruby.DoBlock
 ) {
-  const [variables, blockContents] = node.body;
-
   // Ensure that there are variables being passed to this block.
-  const params = variables && variables.body[0];
+  const params = node.block_var && node.block_var.params;
   if (!params) {
     return null;
   }
 
   // Ensure there is one and only one parameter, and that it is required.
-  const reqParams = params.body[0];
-  const otherParams = params.body.slice(1);
   if (
-    !Array.isArray(reqParams) ||
-    reqParams.length !== 1 ||
-    otherParams.some(Boolean)
+    params.reqs.length !== 1 ||
+    params.opts.length !== 0 ||
+    params.rest ||
+    params.posts.length !== 0 ||
+    params.keywords.length !== 0 ||
+    params.kwrest ||
+    params.block
   ) {
     return null;
   }
 
-  let statements: Ruby.Stmts;
-  if (blockContents.type === "bodystmt") {
-    // We’re in a `do` block
-    const blockStatements = blockContents.body[0];
-    const rescueElseEnsure = blockContents.body.slice(1);
+  // Get the list of statements from the block
+  let statements: Ruby.AnyNode[];
 
-    // You can’t use the to_proc shortcut if you’re rescuing
-    if (rescueElseEnsure.some(Boolean)) {
+  if (node.type === "do_block") {
+    // If you have any other clauses on the bodystmt, then we can't transform.
+    if (node.bodystmt.rsc || node.bodystmt.els || node.bodystmt.ens) {
       return null;
     }
 
-    statements = blockStatements;
+    statements = node.bodystmt.stmts.body;
   } else {
-    // We’re in a brace block
-    statements = blockContents;
+    statements = node.stmts.body;
   }
 
   // Ensure the block contains only one statement
-  if (statements.body.length !== 1) {
+  if (statements.length !== 1) {
     return null;
   }
 
   // Ensure that statement is a call and that it has no comments attached
-  const [statement] = statements.body;
-  if (statement.type !== "call" || statement.comments) {
+  const [call] = statements;
+  if (call.type !== "call" || call.comments) {
     return null;
   }
 
   // Ensure the call is a method of the block argument
-  const [varRef, call, method] = statement.body;
-
   if (
-    varRef.type !== "var_ref" ||
-    varRef.body[0].body !== reqParams[0].body ||
-    !isCall(call) ||
-    method === "call" ||
-    method.type !== "@ident"
+    call.receiver.type !== "var_ref" ||
+    call.receiver.value.value !== params.reqs[0].value ||
+    !isPeriod(call.op) ||
+    call.message === "call" ||
+    call.message.type !== "ident"
   ) {
     return null;
   }
@@ -89,30 +84,31 @@ function toProc(
   // corresponds to `:if` or `:unless` to avoid problems with callbacks with
   // Rails. For more context, see:
   // https://github.com/prettier/plugin-ruby/issues/449
-  let assocNode = null;
+  let parentNode = null;
 
   if (path.getValue().type === "method_add_block") {
-    assocNode = path.getParentNode();
+    parentNode = path.getParentNode();
   } else {
-    assocNode = path.getParentNode(2);
+    parentNode = path.getParentNode(2);
   }
 
-  if (assocNode && assocNode.type === "assoc_new") {
-    const [key] = assocNode.body;
+  if (parentNode && parentNode.type === "assoc") {
+    const assocNode = parentNode as Ruby.Assoc;
+    const key = assocNode.key;
 
-    if (key.type === "@label" && ["if:", "unless:"].includes(key.body)) {
+    if (key.type === "label" && ["if:", "unless:"].includes(key.value)) {
       return null;
     }
 
     if (
       key.type === "symbol_literal" &&
-      ["if", "unless"].includes(key.body[0].body)
+      ["if", "unless"].includes(key.value.value)
     ) {
       return null;
     }
   }
 
-  return `&:${method.body}`;
+  return `&:${call.message.value}`;
 }
 
 export default toProc;

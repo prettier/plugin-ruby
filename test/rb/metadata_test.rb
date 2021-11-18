@@ -4,25 +4,25 @@ require 'test_helper'
 
 class MetadataTest < Minitest::Test
   def test_BEGIN
-    assert_metadata :BEGIN, <<~SOURCE
+    assert_metadata SyntaxTree::BEGINBlock, <<~SOURCE
       BEGIN {
       }
     SOURCE
   end
 
   def test_END
-    assert_metadata :END, <<~SOURCE
+    assert_metadata SyntaxTree::ENDBlock, <<~SOURCE
       END {
       }
     SOURCE
   end
 
   def test_alias
-    assert_metadata :alias, 'alias foo bar'
+    assert_metadata SyntaxTree::Alias, 'alias foo bar'
   end
 
   def test_array_args
-    assert_metadata :array, <<~SOURCE
+    assert_metadata SyntaxTree::ArrayLiteral, <<~SOURCE
       [
         foo,
         bar,
@@ -31,34 +31,14 @@ class MetadataTest < Minitest::Test
     SOURCE
   end
 
-  def test_array_args_add_star
-    assert_metadata :array, <<~SOURCE
-      [
-        foo,
-        *bar,
-        baz
-      ]
-    SOURCE
-  end
-
-  def test_array_qwords
-    assert_metadata :array, <<~SOURCE
-      %w[
-        foo
-        bar
-        baz
-      ]
-    SOURCE
-  end
-
   def test_aref
-    assert_metadata :aref, 'foo[bar]'
+    assert_metadata SyntaxTree::ARef, 'foo[bar]'
   end
 
   def test_aref_field
     assert_node_metadata(
-      :aref_field,
-      parse('foo[bar] = baz').dig(:body, 0),
+      SyntaxTree::ARefField,
+      parse('foo[bar] = baz').target,
       start_char: 0,
       end_char: 8
     )
@@ -66,8 +46,8 @@ class MetadataTest < Minitest::Test
 
   def test_args
     assert_node_metadata(
-      :args,
-      parse('foo bar, baz').dig(:body, 1, :body, 0),
+      SyntaxTree::Args,
+      parse('foo bar, baz').arguments.arguments,
       start_char: 4,
       end_char: 12
     )
@@ -75,19 +55,10 @@ class MetadataTest < Minitest::Test
 
   def test_args_add_block
     assert_node_metadata(
-      :args_add_block,
-      parse('foo bar, baz').dig(:body, 1),
+      SyntaxTree::ArgsAddBlock,
+      parse('foo bar, baz').arguments,
       start_char: 4,
       end_char: 12
-    )
-  end
-
-  def test_args_add_star
-    assert_node_metadata(
-      :args_add_star,
-      parse('foo *bar').dig(:body, 1, :body, 0),
-      start_char: 4,
-      end_char: 8
     )
   end
 
@@ -101,8 +72,8 @@ class MetadataTest < Minitest::Test
     SOURCE
 
     assert_node_metadata(
-      :arg_paren,
-      parse(content).dig(:body, 1),
+      SyntaxTree::ArgParen,
+      parse(content).arguments,
       start_char: 3,
       end_char: 20,
       start_line: 1,
@@ -111,13 +82,13 @@ class MetadataTest < Minitest::Test
   end
 
   def test_assign
-    assert_metadata :assign, 'foo = bar'
+    assert_metadata SyntaxTree::Assign, 'foo = bar'
   end
 
-  def test_assoc_new
+  def test_assoc
     assert_node_metadata(
-      :assoc_new,
-      parse('{ foo: bar, bar: baz }').dig(:body, 0, :body, 0),
+      SyntaxTree::Assoc,
+      parse('{ foo: bar, bar: baz }').contents.assocs.first,
       start_char: 2,
       end_char: 10
     )
@@ -125,8 +96,8 @@ class MetadataTest < Minitest::Test
 
   def test_assoc_splat
     assert_node_metadata(
-      :assoc_splat,
-      parse('foo **bar').dig(:body, 1, :body, 0, :body, 0, :body, 0),
+      SyntaxTree::AssocSplat,
+      parse('foo **bar').arguments.arguments.parts.first.assocs.first,
       start_char: 4,
       end_char: 9
     )
@@ -134,8 +105,8 @@ class MetadataTest < Minitest::Test
 
   def test_assoclist_from_args
     assert_node_metadata(
-      :assoclist_from_args,
-      parse('{ foo => bar }').dig(:body, 0),
+      SyntaxTree::AssocListFromArgs,
+      parse('{ foo => bar }').contents,
       start_char: 1,
       end_char: 13
     )
@@ -143,15 +114,15 @@ class MetadataTest < Minitest::Test
 
   def test_bare_assoc_hash
     assert_node_metadata(
-      :bare_assoc_hash,
-      parse('foo(bar: baz)').dig(:body, 1, :body, 0, :body, 0, :body, 0),
+      SyntaxTree::BareAssocHash,
+      parse('foo(bar: baz)').arguments.arguments.arguments.parts.first,
       start_char: 4,
       end_char: 12
     )
   end
 
   def test_begin
-    assert_metadata :begin, <<~SOURCE
+    assert_metadata SyntaxTree::Begin, <<~SOURCE
       begin
         begin; end
       end
@@ -159,13 +130,13 @@ class MetadataTest < Minitest::Test
   end
 
   def test_binary
-    assert_metadata :binary, 'foo + bar'
+    assert_metadata SyntaxTree::Binary, 'foo + bar'
   end
 
   def test_blockarg
     assert_node_metadata(
-      :blockarg,
-      parse('def foo(&bar) end').dig(:body, 1, :body, 0, :body, 6),
+      SyntaxTree::BlockArg,
+      parse('def foo(&bar) end').params.contents.block,
       start_char: 8,
       end_char: 12
     )
@@ -173,8 +144,8 @@ class MetadataTest < Minitest::Test
 
   def test_block_var
     assert_node_metadata(
-      :block_var,
-      parse('foo { |bar| }').dig(:body, 1, :body, 0),
+      SyntaxTree::BlockVar,
+      parse('foo { |bar| }').block.block_var,
       start_char: 6,
       end_char: 11
     )
@@ -182,8 +153,8 @@ class MetadataTest < Minitest::Test
 
   def test_bodystmt
     assert_node_metadata(
-      :bodystmt,
-      parse('class Foo; def foo; end; end').dig(:body, 2),
+      SyntaxTree::BodyStmt,
+      parse('class Foo; def foo; end; end').bodystmt,
       start_char: 9,
       end_char: 25
     )
@@ -191,23 +162,23 @@ class MetadataTest < Minitest::Test
 
   def test_brace_block
     assert_node_metadata(
-      :brace_block,
-      parse('foo { bar }').dig(:body, 1),
+      SyntaxTree::BraceBlock,
+      parse('foo { bar }').block,
       start_char: 4,
       end_char: 11
     )
   end
 
   def test_break
-    assert_metadata :break, 'break foo'
+    assert_metadata SyntaxTree::Break, 'break foo'
   end
 
   def test_call
-    assert_metadata :call, 'foo.bar'
+    assert_metadata SyntaxTree::Call, 'foo.bar'
   end
 
   def test_case
-    assert_metadata :case, <<~SOURCE
+    assert_metadata SyntaxTree::Case, <<~SOURCE
       case foo
       when bar
         case baz
@@ -218,7 +189,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_class
-    assert_metadata :class, <<~SOURCE
+    assert_metadata SyntaxTree::ClassDeclaration, <<~SOURCE
       class Foo
         class Bar; end
       end
@@ -226,17 +197,17 @@ class MetadataTest < Minitest::Test
   end
 
   def test_command
-    assert_metadata :command, 'foo bar'
+    assert_metadata SyntaxTree::Command, 'foo bar'
   end
 
   def test_command_call
-    assert_metadata :command_call, 'foo.bar baz'
+    assert_metadata SyntaxTree::CommandCall, 'foo.bar baz'
   end
 
   def test_const_ref
     assert_node_metadata(
-      :const_ref,
-      parse('class Foo; end').dig(:body, 0),
+      SyntaxTree::ConstRef,
+      parse('class Foo; end').constant,
       start_char: 6,
       end_char: 9
     )
@@ -244,19 +215,19 @@ class MetadataTest < Minitest::Test
 
   def test_const_path_field
     assert_node_metadata(
-      :const_path_field,
-      parse('Foo::Bar = baz').dig(:body, 0),
+      SyntaxTree::ConstPathField,
+      parse('Foo::Bar = baz').target,
       start_char: 0,
       end_char: 8
     )
   end
 
   def test_const_path_ref
-    assert_metadata :const_path_ref, 'Foo::Bar'
+    assert_metadata SyntaxTree::ConstPathRef, 'Foo::Bar'
   end
 
   def test_def
-    assert_metadata :def, <<~SOURCE
+    assert_metadata SyntaxTree::Def, <<~SOURCE
       def foo
         def bar; end
       end
@@ -264,7 +235,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_defined
-    assert_metadata :defined, <<~SOURCE
+    assert_metadata SyntaxTree::Defined, <<~SOURCE
       defined?(
         Foo
       )
@@ -272,7 +243,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_defs
-    assert_metadata :defs, <<~SOURCE
+    assert_metadata SyntaxTree::Defs, <<~SOURCE
       def Object.foo
         def Object.bar; end
       end
@@ -281,23 +252,23 @@ class MetadataTest < Minitest::Test
 
   def test_do_block
     assert_node_metadata(
-      :do_block,
-      parse('foo do; bar; end').dig(:body, 1),
+      SyntaxTree::DoBlock,
+      parse('foo do; bar; end').block,
       start_char: 4,
       end_char: 16
     )
   end
 
   def test_dot2
-    assert_metadata :dot2, 'foo..bar'
+    assert_metadata SyntaxTree::Dot2, 'foo..bar'
   end
 
   def test_dot3
-    assert_metadata :dot3, 'foo...bar'
+    assert_metadata SyntaxTree::Dot3, 'foo...bar'
   end
 
   def test_dyna_symbol
-    assert_metadata :dyna_symbol, ':"foo #{bar} baz"'
+    assert_metadata SyntaxTree::DynaSymbol, ':"foo #{bar} baz"'
   end
 
   def test_else
@@ -310,8 +281,8 @@ class MetadataTest < Minitest::Test
     SOURCE
 
     assert_node_metadata(
-      :else,
-      parse(content).dig(:body, 2),
+      SyntaxTree::Else,
+      parse(content).consequent,
       start_char: 13,
       end_char: 27,
       start_line: 3,
@@ -329,8 +300,8 @@ class MetadataTest < Minitest::Test
     SOURCE
 
     assert_node_metadata(
-      :elsif,
-      parse(content).dig(:body, 2),
+      SyntaxTree::Elsif,
+      parse(content).consequent,
       start_char: 13,
       end_char: 32,
       start_line: 3,
@@ -348,8 +319,8 @@ class MetadataTest < Minitest::Test
     SOURCE
 
     assert_node_metadata(
-      :ensure,
-      parse(content).dig(:body, 0, :body, 3),
+      SyntaxTree::Ensure,
+      parse(content).bodystmt.ensure_clause,
       start_char: 12,
       end_char: 28,
       start_line: 3,
@@ -360,8 +331,8 @@ class MetadataTest < Minitest::Test
   if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.6')
     def test_excessed_comma
       assert_node_metadata(
-        :excessed_comma,
-        parse('foo { |bar,| }').dig(:body, 1, :body, 0, :body, 0, :body, 2),
+        SyntaxTree::ExcessedComma,
+        parse('foo { |bar,| }').block.block_var.params.rest,
         start_char: 10,
         end_char: 11
       )
@@ -370,8 +341,8 @@ class MetadataTest < Minitest::Test
 
   def test_fcall
     assert_node_metadata(
-      :fcall,
-      parse('foo(bar)').dig(:body, 0),
+      SyntaxTree::FCall,
+      parse('foo(bar)').call,
       start_char: 0,
       end_char: 3
     )
@@ -379,15 +350,15 @@ class MetadataTest < Minitest::Test
 
   def test_field
     assert_node_metadata(
-      :field,
-      parse('foo.bar = baz').dig(:body, 0),
+      SyntaxTree::Field,
+      parse('foo.bar = baz').target,
       start_char: 0,
       end_char: 7
     )
   end
 
   def test_for
-    assert_metadata :for, <<~SOURCE
+    assert_metadata SyntaxTree::For, <<~SOURCE
       for foo in bar do
         for baz in qux do
         end
@@ -396,7 +367,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_hash
-    assert_metadata :hash, <<~SOURCE
+    assert_metadata SyntaxTree::HashLiteral, <<~SOURCE
       {
         foo: 'bar'
       }
@@ -404,7 +375,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_if
-    assert_metadata :if, <<~SOURCE
+    assert_metadata SyntaxTree::If, <<~SOURCE
       if foo
         if bar; end
       end
@@ -412,24 +383,24 @@ class MetadataTest < Minitest::Test
   end
 
   def test_ifop
-    assert_metadata :ifop, 'foo ? bar : baz'
+    assert_metadata SyntaxTree::IfOp, 'foo ? bar : baz'
   end
 
   def test_if_mod
-    assert_metadata :if_mod, 'foo if bar'
+    assert_metadata SyntaxTree::IfMod, 'foo if bar'
   end
 
   def test_kwrest_param
     assert_node_metadata(
-      :kwrest_param,
-      parse('def foo(**bar); end').dig(:body, 1, :body, 0, :body, 5),
+      SyntaxTree::KwRestParam,
+      parse('def foo(**bar); end').params.contents.keyword_rest,
       start_char: 8,
       end_char: 13
     )
   end
 
   def test_lambda
-    assert_metadata :lambda, <<~SOURCE
+    assert_metadata SyntaxTree::Lambda, <<~SOURCE
       -> (foo, bar) {
         foo + bar
       }
@@ -437,21 +408,21 @@ class MetadataTest < Minitest::Test
   end
 
   def test_massign
-    assert_metadata :massign, 'foo, bar, baz = 1, 2, 3'
+    assert_metadata SyntaxTree::MAssign, 'foo, bar, baz = 1, 2, 3'
   end
 
   def test_method_add_arg
-    assert_metadata :method_add_arg, 'foo(bar)'
+    assert_metadata SyntaxTree::MethodAddArg, 'foo(bar)'
   end
 
   def test_method_add_block
-    assert_metadata :method_add_block, 'foo { bar }'
+    assert_metadata SyntaxTree::MethodAddBlock, 'foo { bar }'
   end
 
   def test_mlhs
     assert_node_metadata(
-      :mlhs,
-      parse('foo, bar, baz = 1, 2, 3').dig(:body, 0),
+      SyntaxTree::MLHS,
+      parse('foo, bar, baz = 1, 2, 3').target,
       start_char: 0,
       end_char: 13
     )
@@ -459,33 +430,33 @@ class MetadataTest < Minitest::Test
 
   def test_mlhs_add_post
     assert_node_metadata(
-      :mlhs_add_post,
-      parse('foo, *bar, baz = 1, 2, 3').dig(:body, 0),
-      start_char: 5,
+      SyntaxTree::MLHS,
+      parse('foo, *bar, baz = 1, 2, 3').target,
+      start_char: 0,
       end_char: 14
     )
   end
 
   def test_mlhs_add_star
     assert_node_metadata(
-      :mlhs_add_star,
-      parse('foo, *bar = 1, 2, 3').dig(:body, 0),
-      start_char: 5,
+      SyntaxTree::MLHS,
+      parse('foo, *bar = 1, 2, 3').target,
+      start_char: 0,
       end_char: 9
     )
   end
 
   def test_mlhs_paren
     assert_node_metadata(
-      :mlhs_paren,
-      parse('(foo, bar) = baz').dig(:body, 0),
+      SyntaxTree::MLHSParen,
+      parse('(foo, bar) = baz').target,
       start_char: 0,
       end_char: 10
     )
   end
 
   def test_module
-    assert_metadata :module, <<~SOURCE
+    assert_metadata SyntaxTree::ModuleDeclaration, <<~SOURCE
       module Foo
         module Bar; end
       end
@@ -494,28 +465,19 @@ class MetadataTest < Minitest::Test
 
   def test_mrhs_add_star
     assert_node_metadata(
-      :mrhs_add_star,
-      parse('foo, bar = *baz').dig(:body, 1),
+      SyntaxTree::MRHSAddStar,
+      parse('foo, bar = *baz').value,
       start_char: 11,
       end_char: 15
     )
   end
 
-  def test_mrhs_new_from_args
-    assert_node_metadata(
-      :mrhs_new_from_args,
-      parse('foo, bar, baz = 1, 2, 3').dig(:body, 1),
-      start_char: 16,
-      end_char: 23
-    )
-  end
-
   def test_next
-    assert_metadata :next, 'next foo'
+    assert_metadata SyntaxTree::Next, 'next foo'
   end
 
   def test_opassign
-    assert_metadata :opassign, 'foo ||= bar'
+    assert_metadata SyntaxTree::OpAssign, 'foo ||= bar'
   end
 
   def test_params
@@ -527,8 +489,8 @@ class MetadataTest < Minitest::Test
     SOURCE
 
     assert_node_metadata(
-      :params,
-      parse(content).dig(:body, 1, :body, 0),
+      SyntaxTree::Params,
+      parse(content).params.contents,
       start_char: 8,
       end_char: 22,
       start_line: 2,
@@ -537,40 +499,30 @@ class MetadataTest < Minitest::Test
   end
 
   def test_paren
-    assert_metadata :paren, '()'
+    assert_metadata SyntaxTree::Paren, '()'
   end
 
   def test_qsymbols
-    assert_node_metadata(
-      :qsymbols,
-      parse('%i[foo bar baz]').dig(:body, 0),
-      start_char: 0,
-      end_char: 15
-    )
+    assert_metadata SyntaxTree::QSymbols, '%i[foo bar baz]'
   end
 
   def test_qwords
-    assert_node_metadata(
-      :qwords,
-      parse('%w[foo bar baz]').dig(:body, 0),
-      start_char: 0,
-      end_char: 15
-    )
+    assert_metadata SyntaxTree::QWords, '%w[foo bar baz]'
   end
 
   def test_redo
-    assert_metadata :redo, 'redo'
+    assert_metadata SyntaxTree::Redo, 'redo'
   end
 
   def test_regexp_literal
-    assert_metadata :regexp_literal, '/foo/'
-    assert_metadata :regexp_literal, '%r{foo}'
-    assert_metadata :regexp_literal, '%r(foo)'
+    assert_metadata SyntaxTree::RegexpLiteral, '/foo/'
+    assert_metadata SyntaxTree::RegexpLiteral, '%r{foo}'
+    assert_metadata SyntaxTree::RegexpLiteral, '%r(foo)'
 
     assert_node_metadata(
-      :regexp_literal,
+      SyntaxTree::RegexpLiteral,
       parse('%r(foo)'),
-      beging: '%r(',
+      beginning: '%r(',
       ending: ')',
       start_char: 0,
       end_char: 7
@@ -579,40 +531,40 @@ class MetadataTest < Minitest::Test
 
   def test_rescue
     assert_node_metadata(
-      :rescue,
-      parse('begin; foo; rescue => bar; baz; end').dig(:body, 0, :body, 1),
+      SyntaxTree::Rescue,
+      parse('begin; foo; rescue => bar; baz; end').bodystmt.rescue_clause,
       start_char: 12,
       end_char: 35
     )
   end
 
   def test_rescue_mod
-    assert_metadata :rescue_mod, 'foo rescue bar'
+    assert_metadata SyntaxTree::RescueMod, 'foo rescue bar'
   end
 
   def test_rest_param
     assert_node_metadata(
-      :rest_param,
-      parse('def foo(*bar); end').dig(:body, 1, :body, 0, :body, 2),
+      SyntaxTree::RestParam,
+      parse('def foo(*bar); end').params.contents.rest,
       start_char: 8,
       end_char: 12
     )
   end
 
   def test_retry
-    assert_metadata :retry, 'retry'
+    assert_metadata SyntaxTree::Retry, 'retry'
   end
 
   def test_return
-    assert_metadata :return, 'return foo'
+    assert_metadata SyntaxTree::Return, 'return foo'
   end
 
   def test_return0
-    assert_metadata :return0, 'return'
+    assert_metadata SyntaxTree::Return0, 'return'
   end
 
   def test_sclass
-    assert_metadata :sclass, <<~SOURCE
+    assert_metadata SyntaxTree::SClass, <<~SOURCE
       class << Foo
         class << Bar; end
       end
@@ -620,7 +572,7 @@ class MetadataTest < Minitest::Test
   end
 
   def test_string_concat
-    assert_metadata :string_concat, <<~SOURCE
+    assert_metadata SyntaxTree::StringConcat, <<~SOURCE
       'foo' \
         'bar'
     SOURCE
@@ -628,8 +580,8 @@ class MetadataTest < Minitest::Test
 
   def test_string_dvar
     assert_node_metadata(
-      :string_dvar,
-      parse('"#$foo"').dig(:body, 0),
+      SyntaxTree::StringDVar,
+      parse('"#$foo"').parts.first,
       start_char: 1,
       end_char: 6
     )
@@ -637,58 +589,53 @@ class MetadataTest < Minitest::Test
 
   def test_string_embexpr
     assert_node_metadata(
-      :string_embexpr,
-      parse('"foo #{bar} baz"').dig(:body, 1),
+      SyntaxTree::StringEmbExpr,
+      parse('"foo #{bar} baz"').parts[1],
       start_char: 5,
       end_char: 11
     )
   end
 
   def test_string_literal
-    assert_metadata :string_literal, '"foo"'
+    assert_metadata SyntaxTree::StringLiteral, '"foo"'
   end
 
   def test_super
-    assert_metadata :super, 'super foo'
+    assert_metadata SyntaxTree::Super, 'super foo'
   end
 
   def test_symbol_literal
-    assert_metadata :symbol_literal, ':foo'
+    assert_metadata SyntaxTree::SymbolLiteral, ':foo'
   end
 
   def test_symbols
-    assert_node_metadata(
-      :symbols,
-      parse('%I[f#{o}o b#{a}r b#{a}z]').dig(:body, 0),
-      start_char: 0,
-      end_char: 24
-    )
+    assert_metadata SyntaxTree::Symbols, '%I[f#{o}o b#{a}r b#{a}z]'
   end
 
   def test_top_const_field
     assert_node_metadata(
-      :top_const_field,
-      parse('::Foo = bar').dig(:body, 0),
+      SyntaxTree::TopConstField,
+      parse('::Foo = bar').target,
       start_char: 0,
       end_char: 5
     )
   end
 
   def test_top_const_ref
-    assert_metadata :top_const_ref, '::Foo'
+    assert_metadata SyntaxTree::TopConstRef, '::Foo'
   end
 
   def test_unary
-    assert_metadata :unary, '-foo'
-    assert_metadata :unary, 'not foo'
+    assert_metadata SyntaxTree::Unary, '-foo'
+    assert_metadata SyntaxTree::Not, 'not foo'
   end
 
   def test_undef
-    assert_metadata :undef, 'undef foo, bar'
+    assert_metadata SyntaxTree::Undef, 'undef foo, bar'
   end
 
   def test_unless
-    assert_metadata :unless, <<~SOURCE
+    assert_metadata SyntaxTree::Unless, <<~SOURCE
       unless foo
         unless bar; end
       end
@@ -696,11 +643,11 @@ class MetadataTest < Minitest::Test
   end
 
   def test_unless_mod
-    assert_metadata :unless_mod, 'foo unless bar'
+    assert_metadata SyntaxTree::UnlessMod, 'foo unless bar'
   end
 
   def test_until
-    assert_metadata :until, <<~SOURCE
+    assert_metadata SyntaxTree::Until, <<~SOURCE
       until foo
         until bar; end
       end
@@ -708,11 +655,11 @@ class MetadataTest < Minitest::Test
   end
 
   def test_until_mod
-    assert_metadata :until_mod, 'foo until bar'
+    assert_metadata SyntaxTree::UntilMod, 'foo until bar'
   end
 
   def test_while
-    assert_metadata :while, <<~SOURCE
+    assert_metadata SyntaxTree::While, <<~SOURCE
       while foo
         while bar; end
       end
@@ -720,54 +667,54 @@ class MetadataTest < Minitest::Test
   end
 
   def test_var_alias
-    assert_metadata :var_alias, 'alias $foo $bar'
+    assert_metadata SyntaxTree::VarAlias, 'alias $foo $bar'
   end
 
   def test_var_field
     assert_node_metadata(
-      :var_field,
-      parse('foo = 1').dig(:body, 0),
+      SyntaxTree::VarField,
+      parse('foo = 1').target,
       start_char: 0,
       end_char: 3
     )
   end
 
   def test_var_ref
-    assert_metadata :var_ref, 'true'
+    assert_metadata SyntaxTree::VarRef, 'true'
   end
 
   def test_vcall
-    assert_metadata :vcall, 'foo'
+    assert_metadata SyntaxTree::VCall, 'foo'
   end
 
   def test_void_stmt
-    assert_node_metadata(:void_stmt, parse('; ;'), start_char: 0, end_char: 0)
+    assert_node_metadata(
+      SyntaxTree::VoidStmt,
+      parse('; ;'),
+      start_char: 0,
+      end_char: 0
+    )
   end
 
   def test_when
     assert_node_metadata(
-      :when,
-      parse('case foo; when bar; baz; end').dig(:body, 1),
+      SyntaxTree::When,
+      parse('case foo; when bar; baz; end').consequent,
       start_char: 10,
       end_char: 28
     )
   end
 
   def test_while_mod
-    assert_metadata :while_mod, 'foo while bar'
+    assert_metadata SyntaxTree::WhileMod, 'foo while bar'
   end
 
   def test_words
-    assert_node_metadata(
-      :words,
-      parse('%W[f#{o}o b#{a}r b#{a}z]').dig(:body, 0),
-      start_char: 0,
-      end_char: 24
-    )
+    assert_metadata SyntaxTree::Words, '%W[f#{o}o b#{a}r b#{a}z]'
   end
 
   def test_xstring
-    assert_metadata :xstring_literal, <<~SOURCE
+    assert_metadata SyntaxTree::XStringLiteral, <<~SOURCE
       `
         foo
         bar
@@ -776,15 +723,15 @@ class MetadataTest < Minitest::Test
   end
 
   def test_yield
-    assert_metadata :yield, 'yield foo'
+    assert_metadata SyntaxTree::Yield, 'yield foo'
   end
 
   def test_yield0
-    assert_metadata :yield0, 'yield'
+    assert_metadata SyntaxTree::Yield0, 'yield'
   end
 
   def test_zsuper
-    assert_metadata :zsuper, 'super'
+    assert_metadata SyntaxTree::ZSuper, 'super'
   end
 
   if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
@@ -796,8 +743,8 @@ class MetadataTest < Minitest::Test
       SOURCE
 
       assert_node_metadata(
-        :args_forward,
-        parse(content).dig(:body, 1, :body, 0, :body, 2),
+        SyntaxTree::ArgsForward,
+        parse(content).params.contents.rest,
         start_char: 8,
         end_char: 11
       )
@@ -812,8 +759,8 @@ class MetadataTest < Minitest::Test
       SOURCE
 
       assert_node_metadata(
-        :aryptn,
-        parse(content).dig(:body, 1, :body, 0),
+        SyntaxTree::AryPtn,
+        parse(content).consequent.pattern,
         start_char: 12,
         end_char: 20,
         start_line: 2,
@@ -830,8 +777,8 @@ class MetadataTest < Minitest::Test
       SOURCE
 
       assert_node_metadata(
-        :in,
-        parse(content).dig(:body, 1),
+        SyntaxTree::In,
+        parse(content).consequent,
         start_char: 9,
         end_char: 25,
         start_line: 2,
@@ -862,17 +809,17 @@ class MetadataTest < Minitest::Test
     end_line: 1,
     **metadata
   )
-    assert_equal(type, node[:type])
+    assert_kind_of(type, node)
 
-    assert_equal(start_line, node[:loc].start_line)
-    assert_equal(start_char, node[:loc].start_char)
-    assert_equal(end_line, node[:loc].end_line)
-    assert_equal(end_char, node[:loc].end_char)
+    assert_equal(start_line, node.location.start_line)
+    assert_equal(start_char, node.location.start_char)
+    assert_equal(end_line, node.location.end_line)
+    assert_equal(end_char, node.location.end_char)
 
-    metadata.each { |key, value| assert_equal(value, node[key]) }
+    metadata.each { |key, value| assert_equal(value, node.public_send(key)) }
   end
 
   def parse(ruby)
-    Prettier::Parser.parse(ruby).dig(:body, 0, :body, 0)
+    SyntaxTree.parse(ruby).statements.body.first
   end
 end

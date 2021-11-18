@@ -193,7 +193,11 @@ describe("rbs", () => {
     });
 
     test("keeps string the same when there is an escape sequence", () => {
-      expect(rbs(`T: "super \\" duper"`)).toMatchFormat();
+      expect(rbs(`T: "super \\a duper"`)).toMatchFormat();
+    });
+
+    test("unescapes double quotes when using single quotes", () => {
+      expect(rbs(`T: "super \\" duper"`)).toChangeFormat(`T: 'super " duper'`);
     });
 
     test("unescapes single quotes when using double quotes", () => {
@@ -237,13 +241,7 @@ describe("rbs", () => {
     });
   });
 
-  describe("plain", () => {
-    testCases("plain", (source) => `T: ${source}`);
-
-    test("any gets transformed into untyped", () => {
-      expect(rbs("T: any")).toChangeFormat("T: untyped");
-    });
-  });
+  describeCases("plain", (source) => `T: ${source}`);
 
   describe("proc", () => {
     testCases("proc", (source) => `T: ${source}`);

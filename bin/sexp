@@ -1,24 +1,6 @@
 #!/usr/bin/env ruby
 
 require_relative '../src/ruby/parser'
-require 'pp'
-
-PP.prepend(
-  Module.new do
-    def pp_hash(obj)
-      group(1, '{', '}') do
-        text obj[:type]
-        text "<L#{obj[:loc].start_line}-#{obj[:loc].end_line},"
-        text "C#{obj[:loc].start_char}-#{obj[:loc].end_char}>"
-
-        group(1) do
-          breakable ' '
-          pp obj[:body]
-        end
-      end
-    end
-  end
-)
 
 source =
   if !ARGV[0]
@@ -29,13 +11,13 @@ source =
     ARGV[0].gsub('\\n', "\n")
   end
 
-parsed = Prettier::Parser.new(source).parse
+parsed = SyntaxTree.parse(source)
 
 puts '=== SOURCE === '
 puts source
 
 puts "\n=== COMMENTS ==="
-puts parsed[:comments]
+pp parsed.comments
 
 puts "\n=== S-EXPS ==="
 pp parsed

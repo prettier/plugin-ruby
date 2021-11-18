@@ -2,8 +2,8 @@ import type { Plugin, Ruby } from "../../types";
 import { hasAncestor } from "../../utils";
 
 function hasContent(node: Ruby.RegexpLiteral, pattern: RegExp) {
-  return node.body.some(
-    (child) => child.type === "@tstring_content" && pattern.test(child.body)
+  return node.parts.some(
+    (part) => part.type === "tstring_content" && pattern.test(part.value)
   );
 }
 
@@ -13,12 +13,12 @@ function hasContent(node: Ruby.RegexpLiteral, pattern: RegExp) {
 // operator, e.g. foo / bar/ or foo /=bar/
 function forwardSlashIsAmbiguous(path: Plugin.Path<Ruby.RegexpLiteral>) {
   const node = path.getValue();
-  const firstChildNode = node.body[0];
+  const firstPart = node.parts[0];
 
   return (
-    firstChildNode &&
-    firstChildNode.type === "@tstring_content" &&
-    [" ", "="].includes(firstChildNode.body[0]) &&
+    firstPart &&
+    firstPart.type === "tstring_content" &&
+    [" ", "="].includes(firstPart.value[0]) &&
     hasAncestor(path, ["command", "command_call"])
   );
 }
@@ -36,7 +36,7 @@ export const printRegexpLiteral: Plugin.Printer<Ruby.RegexpLiteral> = (
   print
 ) => {
   const node = path.getValue();
-  const docs = path.map(print, "body");
+  const docs = path.map(print, "parts");
 
   // We should use braces if using a forward slash would be ambiguous in the
   // current context or if there's a forward slash in the content of the regexp.

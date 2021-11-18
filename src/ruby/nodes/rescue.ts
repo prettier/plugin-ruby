@@ -1,13 +1,12 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { literal } from "../../utils";
 
 const { align, group, hardline, indent, join, line } = prettier;
 
 export const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
   return [
     "begin",
-    indent([hardline, path.map(print, "body")]),
+    indent([hardline, path.call(print, "bodystmt")]),
     hardline,
     "end"
   ];
@@ -15,16 +14,17 @@ export const printBegin: Plugin.Printer<Ruby.Begin> = (path, opts, print) => {
 
 export const printEnsure: Plugin.Printer<Ruby.Ensure> = (path, opts, print) => {
   return [
-    path.call(print, "body", 0),
-    indent([hardline, path.call(print, "body", 1)])
+    path.call(print, "keyword"),
+    indent([hardline, path.call(print, "stmts")])
   ];
 };
 
 export const printRescue: Plugin.Printer<Ruby.Rescue> = (path, opts, print) => {
+  const node = path.getValue();
   const parts: Plugin.Doc[] = ["rescue"];
 
-  if (path.getValue().body[0]) {
-    parts.push(align("rescue ".length, path.call(print, "body", 0)));
+  if (node.extn) {
+    parts.push(align("rescue ".length, path.call(print, "extn")));
   } else {
     // If you don't specify an error to rescue in a `begin/rescue` block, then
     // implicitly you're rescuing from `StandardError`. In this case, we're
@@ -32,16 +32,16 @@ export const printRescue: Plugin.Printer<Ruby.Rescue> = (path, opts, print) => {
     parts.push(" StandardError");
   }
 
-  const bodystmt = path.call(print, "body", 1) as Plugin.Doc[];
+  const stmtsDoc = path.call(print, "stmts") as Plugin.Doc[];
 
-  if (bodystmt.length > 0) {
-    parts.push(indent([hardline, bodystmt]));
+  if (stmtsDoc.length > 0) {
+    parts.push(indent([hardline, stmtsDoc]));
   }
 
   // This is the next clause on the `begin` statement, either another
   // `rescue`, and `ensure`, or an `else` clause.
-  if (path.getValue().body[2]) {
-    parts.push([hardline, path.call(print, "body", 2)]);
+  if (node.cons) {
+    parts.push([hardline, path.call(print, "cons")]);
   }
 
   return group(parts);
@@ -54,25 +54,27 @@ export const printRescueEx: Plugin.Printer<Ruby.RescueEx> = (
   opts,
   print
 ) => {
-  const [exception, variable] = path.getValue().body;
+  const node = path.getValue();
   const parts: Plugin.Doc[] = [];
 
-  if (exception) {
+  if (node.extns) {
     // If there's just one exception being rescued, then it's just going to be a
     // single doc node.
-    let exceptionDoc = path.call(print, "body", 0);
+    let exceptionDoc = path.call(print, "extns");
 
     // If there are multiple exceptions being rescued, then we're going to have
     // multiple doc nodes returned as an array that we need to join together.
-    if (["mrhs_add_star", "mrhs_new_from_args"].includes(exception.type)) {
+    if (
+      ["mrhs", "mrhs_add_star", "mrhs_new_from_args"].includes(node.extns.type)
+    ) {
       exceptionDoc = group(join([",", line], exceptionDoc));
     }
 
     parts.push(" ", exceptionDoc);
   }
 
-  if (variable) {
-    parts.push(" => ", path.call(print, "body", 1));
+  if (node.var) {
+    parts.push(" => ", path.call(print, "var"));
   }
 
   return group(parts);
@@ -83,18 +85,19 @@ export const printRescueMod: Plugin.Printer<Ruby.RescueModifier> = (
   opts,
   print
 ) => {
-  const [statementDoc, valueDoc] = path.map(print, "body");
-
   return [
     "begin",
-    indent([hardline, statementDoc]),
+    indent([hardline, path.call(print, "stmt")]),
     hardline,
     "rescue StandardError",
-    indent([hardline, valueDoc]),
+    indent([hardline, path.call(print, "value")]),
     hardline,
     "end"
   ];
 };
 
-export const printRedo = literal("redo");
-export const printRetry = literal("retry");
+export const printRedo: Plugin.Printer<Ruby.Redo> = (path) =>
+  path.getValue().value;
+
+export const printRetry: Plugin.Printer<Ruby.Retry> = (path) =>
+  path.getValue().value;

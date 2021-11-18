@@ -16,10 +16,8 @@ const { group, indent, join, line, softline } = prettier;
 //     foo[]
 //
 export const printAref: Plugin.Printer<Ruby.Aref> = (path, opts, print) => {
-  const indexNode = path.getValue().body[1];
-
-  if (!indexNode) {
-    return [path.call(print, "body", 0), "[]"];
+  if (!path.getValue().index) {
+    return [path.call(print, "collection"), "[]"];
   }
 
   return printArefField(path, opts, print);
@@ -44,12 +42,10 @@ export const printArefField: Plugin.Printer<Ruby.Aref | Ruby.ArefField> = (
   opts,
   print
 ) => {
-  const [printedArray, printedIndex] = path.map(print, "body");
-
   return group([
-    printedArray,
+    path.call(print, "collection"),
     "[",
-    indent([softline, join([",", line], printedIndex)]),
+    indent([softline, join([",", line], path.call(print, "index"))]),
     softline,
     "]"
   ]);

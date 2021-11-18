@@ -27,7 +27,8 @@ if (fs.existsSync(process.argv[contentIdx])) {
 const { formatted } = prettier.formatWithCursor(content, {
   parser,
   plugins: [plugin as any as string], // hacky, but it works
-  cursorOffset: 1
-});
+  cursorOffset: 1,
+  rubySingleQuote: false
+} as any);
 
 console.log(formatted);

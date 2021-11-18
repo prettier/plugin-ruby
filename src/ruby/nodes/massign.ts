@@ -8,51 +8,27 @@ export const printMAssign: Plugin.Printer<Ruby.Massign> = (
   opts,
   print
 ) => {
-  let right = path.call(print, "body", 1);
+  const node = path.getValue();
+  let valueDoc = path.call(print, "value");
 
   if (
-    ["mrhs_add_star", "mrhs_new_from_args"].includes(
-      path.getValue().body[1].type
-    )
+    ["mrhs", "mrhs_add_star", "mrhs_new_from_args"].includes(node.value.type)
   ) {
-    right = group(join([",", line], right));
+    valueDoc = group(join([",", line], valueDoc));
   }
 
-  const parts: Plugin.Doc[] = [join([",", line], path.call(print, "body", 0))];
-  if ((path.getValue().body[0] as any).comma) {
-    parts.push(",");
+  const targetDoc: Plugin.Doc[] = [
+    join([",", line], path.call(print, "target"))
+  ];
+  if (node.target.type === "mlhs" && node.target.comma) {
+    targetDoc.push(",");
   }
 
-  return group([group(parts), " =", indent([line, right])]);
+  return group([group(targetDoc), " =", indent([line, valueDoc])]);
 };
 
 export const printMLHS: Plugin.Printer<Ruby.Mlhs> = (path, opts, print) => {
-  return path.map(print, "body");
-};
-
-export const printMLHSAddPost: Plugin.Printer<Ruby.MlhsAddPost> = (
-  path,
-  opts,
-  print
-) => {
-  return [
-    ...(path.call(print, "body", 0) as Plugin.Doc[]),
-    ...(path.call(print, "body", 1) as Plugin.Doc[])
-  ];
-};
-
-export const printMLHSAddStar: Plugin.Printer<Ruby.MlhsAddStar> = (
-  path,
-  opts,
-  print
-) => {
-  const parts: Plugin.Doc[] = ["*"];
-
-  if (path.getValue().body[1]) {
-    parts.push(path.call(print, "body", 1));
-  }
-
-  return [...(path.call(print, "body", 0) as Plugin.Doc[]), parts];
+  return path.map(print, "parts");
 };
 
 export const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (
@@ -64,15 +40,16 @@ export const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (
     // If we're nested in brackets as part of the left hand side of an
     // assignment, i.e., (a, b, c) = 1, 2, 3
     // ignore the current node and just go straight to the content
-    return path.call(print, "body", 0);
+    return path.call(print, "cnts");
   }
 
+  const node = path.getValue();
   const parts: Plugin.Doc[] = [
     softline,
-    join([",", line], path.call(print, "body", 0))
+    join([",", line], path.call(print, "cnts"))
   ];
 
-  if ((path.getValue().body[0] as any).comma) {
+  if ((node.cnts as any).comma) {
     parts.push(",");
   }
 
@@ -80,7 +57,7 @@ export const printMLHSParen: Plugin.Printer<Ruby.MlhsParen> = (
 };
 
 export const printMRHS: Plugin.Printer<Ruby.Mrhs> = (path, opts, print) => {
-  return path.map(print, "body");
+  return path.map(print, "parts");
 };
 
 export const printMRHSAddStar: Plugin.Printer<Ruby.MrhsAddStar> = (
@@ -88,9 +65,10 @@ export const printMRHSAddStar: Plugin.Printer<Ruby.MrhsAddStar> = (
   opts,
   print
 ) => {
-  const [leftDoc, rightDoc] = path.map(print, "body");
-
-  return [...(leftDoc as Plugin.Doc[]), ["*", rightDoc]];
+  return [
+    ...(path.call(print, "mrhs") as Plugin.Doc[]),
+    ["*", path.call(print, "star")]
+  ];
 };
 
 export const printMRHSNewFromArgs: Plugin.Printer<Ruby.MrhsNewFromArgs> = (
@@ -98,11 +76,5 @@ export const printMRHSNewFromArgs: Plugin.Printer<Ruby.MrhsNewFromArgs> = (
   opts,
   print
 ) => {
-  const parts = path.call(print, "body", 0) as Plugin.Doc[];
-
-  if (path.getValue().body[1]) {
-    parts.push(path.call(print, "body", 1));
-  }
-
-  return parts;
+  return path.call(print, "args");
 };

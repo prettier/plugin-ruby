@@ -20,21 +20,21 @@ const printPatternArg: Plugin.Printer<Ruby.AnyNode> = (path, opts, print) => {
 };
 
 export const printAryPtn: Plugin.Printer<Ruby.Aryptn> = (path, opts, print) => {
-  const [constant, preargs, splatarg, postargs] = path.getValue().body;
+  const node = path.getValue();
   let argDocs: Plugin.Doc[] = [];
 
-  if (preargs) {
+  if (node.reqs.length > 0) {
     argDocs = argDocs.concat(
-      path.map((argPath) => printPatternArg(argPath, opts, print), "body", 1)
+      path.map((argPath) => printPatternArg(argPath, opts, print), "reqs")
     );
   }
 
-  if (splatarg) {
-    argDocs.push(["*", path.call(print, "body", 2)]);
+  if (node.rest) {
+    argDocs.push(["*", path.call(print, "rest")]);
   }
 
-  if (postargs) {
-    argDocs = argDocs.concat(path.map(print, "body", 3));
+  if (node.posts.length > 0) {
+    argDocs = argDocs.concat(path.map(print, "posts"));
   }
 
   let argDoc: Plugin.Doc = group(join([",", line], argDocs));
@@ -51,48 +51,48 @@ export const printAryPtn: Plugin.Printer<Ruby.Aryptn> = (path, opts, print) => {
   //   `in key: [first, second]`.
   if (
     argDocs.length === 1 ||
-    constant ||
+    node.constant ||
     patterns.includes(path.getParentNode().type)
   ) {
     argDoc = ["[", argDoc, "]"];
   }
 
-  if (constant) {
-    return [path.call(print, "body", 0), argDoc];
+  if (node.constant) {
+    return [path.call(print, "constant"), argDoc];
   }
 
   return argDoc;
 };
 
 export const printFndPtn: Plugin.Printer<Ruby.FndPtn> = (path, opts, print) => {
-  const [constant] = path.getValue().body;
+  const node = path.getValue();
   const docs = [
     "[",
     group(
       join(
         [",", line],
         [
-          ["*", path.call(print, "body", 1)],
-          ...path.map(print, "body", 2),
-          ["*", path.call(print, "body", 3)]
+          ["*", path.call(print, "left")],
+          ...path.map(print, "values"),
+          ["*", path.call(print, "right")]
         ]
       )
     ),
     "]"
   ];
 
-  if (constant) {
-    return [path.call(print, "body", 0), docs];
+  if (node.constant) {
+    return [path.call(print, "constant"), docs];
   }
 
   return docs;
 };
 
 export const printHshPtn: Plugin.Printer<Ruby.Hshptn> = (path, opts, print) => {
-  const [constant, keyValuePairs, keyValueRest] = path.getValue().body;
+  const node = path.getValue();
   let args: Plugin.Doc | Plugin.Doc[] = [];
 
-  if (keyValuePairs.length > 0) {
+  if (node.keywords.length > 0) {
     const printPair = (pairPath: Plugin.Path<[Ruby.Label, Ruby.AnyNode]>) => {
       const parts = [pairPath.call(print, 0)];
 
@@ -109,23 +109,23 @@ export const printHshPtn: Plugin.Printer<Ruby.Hshptn> = (path, opts, print) => {
       return parts;
     };
 
-    args = args.concat(path.map(printPair, "body", 1));
+    args = args.concat(path.map(printPair, "keywords"));
   }
 
-  if (keyValueRest) {
-    args.push(["**", path.call(print, "body", 2)]);
+  if (node.kwrest) {
+    args.push(["**", path.call(print, "kwrest")]);
   }
 
   args = group(join([",", line], args));
 
-  if (constant) {
+  if (node.constant) {
     args = ["[", args, "]"];
   } else if (patterns.includes(path.getParentNode().type)) {
     args = ["{ ", args, " }"];
   }
 
-  if (constant) {
-    return [path.call(print, "body", 0), args];
+  if (node.constant) {
+    return [path.call(print, "constant"), args];
   }
 
   return args;
@@ -139,31 +139,23 @@ export const printIn: Plugin.Printer<Ruby.In> = (path, opts, print) => {
       keyword.length,
       path.call(
         (valuePath) => printPatternArg(valuePath, opts, print),
-        "body",
-        0
+        "pattern"
       )
     ),
-    indent([hardline, path.call(print, "body", 1)])
+    indent([hardline, path.call(print, "stmts")])
   ];
 
-  if (path.getValue().body[2]) {
-    parts.push(hardline, path.call(print, "body", 2));
+  if (path.getValue().cons) {
+    parts.push(hardline, path.call(print, "cons"));
   }
 
   return group(parts);
 };
 
-export const printRAssign: Plugin.Printer<Ruby.Rassign> = (
-  path,
-  opts,
-  print
-) => {
-  const { keyword } = path.getValue();
-  const [leftDoc, rightDoc] = path.map(print, "body");
-
-  return group([
-    leftDoc,
-    keyword ? " in" : " =>",
-    group(indent([line, rightDoc]))
+export const printRAssign: Plugin.Printer<Ruby.Rassign> = (path, opts, print) =>
+  group([
+    path.call(print, "value"),
+    " ",
+    path.call(print, "op"),
+    group(indent([line, path.call(print, "pattern")]))
   ]);
-};

@@ -6,10 +6,17 @@ import {
   printArgParen,
   printArgs,
   printArgsAddBlock,
-  printArgsAddStar,
+  printArgStar,
   printBlockArg
 } from "./nodes/args";
-import { printArray, printWord } from "./nodes/arrays";
+import {
+  printArray,
+  printQsymbols,
+  printQwords,
+  printSymbols,
+  printWord,
+  printWords
+} from "./nodes/arrays";
 import {
   printAssign,
   printOpAssign,
@@ -44,7 +51,7 @@ import {
 } from "./nodes/constants";
 import { printBreak, printNext, printYield, printYield0 } from "./nodes/flow";
 import {
-  printAssocNew,
+  printAssoc,
   printAssocSplat,
   printHash,
   printHashContents
@@ -53,36 +60,26 @@ import { printHeredoc } from "./nodes/heredocs";
 import { printBEGIN, printEND } from "./nodes/hooks";
 import { printInt } from "./nodes/ints";
 import { printLambda } from "./nodes/lambdas";
-import {
-  printFor,
-  printUntil,
-  printUntilModifer,
-  printWhile,
-  printWhileModifier
-} from "./nodes/loops";
+import { printFor, printUntil, printWhile } from "./nodes/loops";
 import {
   printMAssign,
   printMLHS,
-  printMLHSAddPost,
-  printMLHSAddStar,
   printMLHSParen,
   printMRHS,
   printMRHSAddStar,
   printMRHSNewFromArgs
 } from "./nodes/massign";
-import {
-  printAccessControl,
-  printDef,
-  printSingleLineMethod
-} from "./nodes/methods";
+import { printAccessControl, printDef, printDefEndless } from "./nodes/methods";
 import {
   printBinary,
   printDot2,
   printDot3,
+  printNot,
   printUnary
 } from "./nodes/operators";
 import {
   printArgsForward,
+  printExcessedComma,
   printKeywordRestParam,
   printParams,
   printRestParam
@@ -111,7 +108,7 @@ import {
   printEndContent,
   printParen,
   printProgram,
-  printStmts
+  printStatements
 } from "./nodes/statements";
 import {
   printChar,
@@ -126,13 +123,39 @@ import {
 import { printSuper, printZSuper } from "./nodes/super";
 import { printUndef } from "./nodes/undef";
 
-const nodes: Partial<{
-  [_T in Ruby.AnyNode["type"] | "@comment"]: Plugin.Printer<any>;
-}> = {
-  "@__end__": printEndContent,
-  "@CHAR": printChar,
-  "@comment": printComment,
-  "@int": printInt,
+type Token =
+  | Ruby.EndContent
+  | Ruby.Backref
+  | Ruby.Backtick
+  | Ruby.Const
+  | Ruby.CVar
+  | Ruby.Float
+  | Ruby.GVar
+  | Ruby.HeredocBegin
+  | Ruby.Identifier
+  | Ruby.Imaginary
+  | Ruby.Int
+  | Ruby.IVar
+  | Ruby.Keyword
+  | Ruby.Label
+  | Ruby.Lbrace
+  | Ruby.Lparen
+  | Ruby.Op
+  | Ruby.Period
+  | Ruby.Rational
+  | Ruby.TStringContent;
+
+const printToken: Plugin.Printer<Token> = (path) => path.getValue().value;
+const printVoidStmt: Plugin.Printer<Ruby.VoidStmt> = () => "";
+
+const nodes: Record<
+  Ruby.AnyNode["type"] | "comment" | "embdoc",
+  Plugin.Printer<any>
+> = {
+  BEGIN: printBEGIN,
+  CHAR: printChar,
+  END: printEND,
+  __end__: printEndContent,
   access_ctrl: printAccessControl,
   alias: printAlias,
   aref: printAref,
@@ -140,20 +163,21 @@ const nodes: Partial<{
   arg_paren: printArgParen,
   args: printArgs,
   args_add_block: printArgsAddBlock,
-  args_add_star: printArgsAddStar,
   args_forward: printArgsForward,
+  arg_star: printArgStar,
   array: printArray,
   aryptn: printAryPtn,
   assign: printAssign,
-  assoc_new: printAssocNew,
+  assoc: printAssoc,
   assoc_splat: printAssocSplat,
   assoclist_from_args: printHashContents,
+  backref: printToken,
+  backtick: printToken,
   bare_assoc_hash: printHashContents,
-  BEGIN: printBEGIN,
   begin: printBegin,
   binary: printBinary,
-  blockarg: printBlockArg,
   block_var: printBlockVar,
+  blockarg: printBlockArg,
   bodystmt: printBodyStmt,
   brace_block: printBraceBlock,
   break: printBreak,
@@ -162,51 +186,70 @@ const nodes: Partial<{
   class: printClass,
   command: printCommand,
   command_call: printCommandCall,
+  comment: printComment,
+  const: printToken,
   const_path_field: printConstPath,
   const_path_ref: printConstPath,
   const_ref: printConstRef,
+  cvar: printToken,
   def: printDef,
-  defs: printDef,
-  defsl: printSingleLineMethod,
+  def_endless: printDefEndless,
   defined: printDefined,
+  defs: printDef,
   do_block: printDoBlock,
   dot2: printDot2,
   dot3: printDot3,
   dyna_symbol: printDynaSymbol,
   else: printElse,
   elsif: printElsif,
-  END: printEND,
+  embdoc: printComment,
   ensure: printEnsure,
+  excessed_comma: printExcessedComma,
   fcall: printCallContainer,
-  fndptn: printFndPtn,
   field: printField,
+  float: printToken,
+  fndptn: printFndPtn,
   for: printFor,
+  gvar: printToken,
   hash: printHash,
   heredoc: printHeredoc,
+  heredoc_beg: printToken,
   hshptn: printHshPtn,
+  ident: printToken,
   if: printIf,
-  ifop: printTernary,
   if_mod: printIfModifier,
+  ifop: printTernary,
+  imaginary: printToken,
   in: printIn,
+  int: printInt,
+  ivar: printToken,
+  kw: printToken,
   kwrest_param: printKeywordRestParam,
+  label: printToken,
   lambda: printLambda,
+  lbrace: printToken,
+  lparen: printToken,
   massign: printMAssign,
   method_add_arg: printMethodAddArg,
   method_add_block: printMethodAddBlock,
   mlhs: printMLHS,
-  mlhs_add_post: printMLHSAddPost,
-  mlhs_add_star: printMLHSAddStar,
   mlhs_paren: printMLHSParen,
+  module: printModule,
   mrhs: printMRHS,
   mrhs_add_star: printMRHSAddStar,
   mrhs_new_from_args: printMRHSNewFromArgs,
-  module: printModule,
   next: printNext,
+  not: printNot,
+  op: printToken,
   opassign: printOpAssign,
   params: printParams,
   paren: printParen,
+  period: printToken,
   program: printProgram,
+  qsymbols: printQsymbols,
+  qwords: printQwords,
   rassign: printRAssign,
+  rational: printToken,
   redo: printRedo,
   regexp_literal: printRegexpLiteral,
   rescue: printRescue,
@@ -214,35 +257,39 @@ const nodes: Partial<{
   rescue_mod: printRescueMod,
   rest_param: printRestParam,
   retry: printRetry,
-  return: printReturn,
   return0: printReturn0,
+  return: printReturn,
   sclass: printSClass,
-  stmts: printStmts,
+  statements: printStatements,
   string_concat: printStringConcat,
   string_dvar: printStringDVar,
   string_embexpr: printStringEmbExpr,
   string_literal: printStringLiteral,
   super: printSuper,
   symbol_literal: printSymbolLiteral,
+  symbols: printSymbols,
   top_const_field: printTopConst,
   top_const_ref: printTopConst,
+  tstring_content: printToken,
   unary: printUnary,
   undef: printUndef,
   unless: printUnless,
   unless_mod: printUnlessModifier,
   until: printUntil,
-  until_mod: printUntilModifer,
+  until_mod: printUntil,
   var_alias: printAlias,
   var_field: printVarField,
   var_ref: printVarRef,
   vcall: printCallContainer,
+  void_stmt: printVoidStmt,
   when: printWhen,
   while: printWhile,
-  while_mod: printWhileModifier,
+  while_mod: printWhile,
   word: printWord,
+  words: printWords,
   xstring_literal: printXStringLiteral,
-  yield: printYield,
   yield0: printYield0,
+  yield: printYield,
   zsuper: printZSuper
 };
 

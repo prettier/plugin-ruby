@@ -21,45 +21,45 @@ export const printBodyStmt: Plugin.Printer<Ruby.Bodystmt> = (
   opts,
   print
 ) => {
-  const [stmts, rescue, elseClause, ensure] = path.getValue().body;
+  const node = path.getValue();
   const parts = [];
 
-  if (!isEmptyStmts(stmts)) {
-    parts.push(path.call(print, "body", 0));
+  if (!isEmptyStmts(node.stmts)) {
+    parts.push(path.call(print, "stmts"));
   }
 
-  if (rescue) {
-    parts.push(dedent([hardline, path.call(print, "body", 1)]));
+  if (node.rsc) {
+    parts.push(dedent([hardline, path.call(print, "rsc")]));
   }
 
-  if (elseClause) {
+  if (node.els) {
     // Before Ruby 2.6, this piece of bodystmt was an explicit "else" node
     /* istanbul ignore next */
     const stmts =
-      (elseClause as any).type === "else"
-        ? path.call(print, "body", 2, "body", 0)
-        : path.call(print, "body", 2);
+      (node.els as any).type === "else"
+        ? (path as any).call(print, "els", "body", 0)
+        : path.call(print, "els");
 
     parts.push([dedent([hardline, "else"]), hardline, stmts]);
   }
 
-  if (ensure) {
-    parts.push(dedent([hardline, path.call(print, "body", 3)]));
+  if (node.ens) {
+    parts.push(dedent([hardline, path.call(print, "ens")]));
   }
 
   return group(parts);
 };
 
-const argNodeTypes = ["args", "args_add_star", "args_add_block"];
+const argNodeTypes = ["args", "args_add_block"];
 
 export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
-  const contentNode = path.getValue().body[0];
+  const contentNode = path.getValue().cnts;
 
   if (!contentNode) {
     return [path.call(print, "lparen"), ")"];
   }
 
-  let contentDoc = path.call(print, "body", 0);
+  let contentDoc = path.call(print, "cnts");
 
   // If the content is params, we're going to let it handle its own parentheses
   // so that it breaks nicely.
@@ -82,8 +82,8 @@ export const printParen: Plugin.Printer<Ruby.Paren> = (path, opts, print) => {
 };
 
 export const printEndContent: Plugin.Printer<Ruby.EndContent> = (path) => {
-  const { body } = path.getValue();
-  return [trim, "__END__", literalline, body];
+  const node = path.getValue();
+  return [trim, "__END__", literalline, node.value];
 };
 
 export const printComment: Plugin.Printer<Ruby.Comment> = (path, opts) => {
@@ -94,15 +94,17 @@ export const printProgram: Plugin.Printer<Ruby.Program> = (
   path,
   opts,
   print
-) => {
-  return [join(hardline, path.map(print, "body")), hardline];
-};
+) => [path.call(print, "stmts"), hardline];
 
-type StmtsVoidWithComments = Ruby.Stmts & {
+type StmtsVoidWithComments = Ruby.Statements & {
   body: [{ type: "void_stmt"; comments: Ruby.Comment[] }];
 };
 
-export const printStmts: Plugin.Printer<Ruby.Stmts> = (path, opts, print) => {
+export const printStatements: Plugin.Printer<Ruby.Statements> = (
+  path,
+  opts,
+  print
+) => {
   const stmts = path.getValue().body;
 
   // This is a special case where we have only comments inside a statement

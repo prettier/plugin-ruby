@@ -5,14 +5,18 @@ import { skipAssignIndent } from "../../utils";
 const { group, indent, join, line } = prettier;
 
 export const printAssign: Plugin.Printer<Ruby.Assign> = (path, opts, print) => {
-  const [, valueNode] = path.getValue().body;
-  const [targetDoc, valueDoc] = path.map(print, "body");
+  const valueNode = path.getValue().value;
+
+  const targetDoc = path.call(print, "target");
+  const valueDoc = path.call(print, "value");
 
   let rightSideDoc = valueDoc;
 
   // If the right side of this assignment is a multiple assignment, then we need
   // to join it together with commas.
-  if (["mrhs_add_star", "mrhs_new_from_args"].includes(valueNode.type)) {
+  if (
+    ["mrhs", "mrhs_add_star", "mrhs_new_from_args"].includes(valueNode.type)
+  ) {
     rightSideDoc = group(join([",", line], valueDoc));
   }
 
@@ -27,23 +31,19 @@ export const printOpAssign: Plugin.Printer<Ruby.Opassign> = (
   path,
   opts,
   print
-) => {
-  return group([
-    path.call(print, "body", 0),
+) =>
+  group([
+    path.call(print, "target"),
     " ",
-    path.call(print, "body", 1),
-    indent([line, path.call(print, "body", 2)])
+    path.call(print, "op"),
+    indent([line, path.call(print, "value")])
   ]);
-};
 
 export const printVarField: Plugin.Printer<Ruby.VarField> = (
   path,
   opts,
   print
-) => {
-  return path.getValue().body ? path.call(print, "body", 0) : "";
-};
+) => (path.getValue().value ? path.call(print, "value") : "");
 
-export const printVarRef: Plugin.Printer<Ruby.VarRef> = (path, opts, print) => {
-  return path.call(print, "body", 0);
-};
+export const printVarRef: Plugin.Printer<Ruby.VarRef> = (path, opts, print) =>
+  path.call(print, "value");

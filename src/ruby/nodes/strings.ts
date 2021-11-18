@@ -11,18 +11,18 @@ const { group, hardline, indent, literalline, removeLines, softline, join } =
 // would activate the escape sequence, and if they chose double quotes, then
 // single quotes would deactivate it.)
 function isQuoteLocked(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
-  return node.body.some(
+  return node.parts.some(
     (part) =>
-      part.type === "@tstring_content" &&
-      (part.body.includes("#{") || part.body.includes("\\"))
+      part.type === "tstring_content" &&
+      (part.value.includes("#{") || part.value.includes("\\"))
   );
 }
 
 // A string is considered to be able to use single quotes if it contains only
 // plain string content and that content does not contain a single quote.
 function isSingleQuotable(node: Ruby.DynaSymbol | Ruby.StringLiteral) {
-  return node.body.every(
-    (part) => part.type === "@tstring_content" && !part.body.includes("'")
+  return node.parts.every(
+    (part) => part.type === "tstring_content" && !part.value.includes("'")
   );
 }
 
@@ -71,14 +71,14 @@ function getClosingQuote(quote: string) {
 // are strings of length 1. If they're any longer than we'll try to apply the
 // correct quotes.
 export const printChar: Plugin.Printer<Ruby.Char> = (path, opts) => {
-  const { body } = path.getValue();
+  const { value } = path.getValue();
 
-  if (body.length !== 2) {
-    return body;
+  if (value.length !== 2) {
+    return value;
   }
 
   const quote = opts.rubySingleQuote ? "'" : '"';
-  return [quote, body.slice(1), quote];
+  return [quote, value.slice(1), quote];
 };
 
 const printPercentSDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
@@ -95,14 +95,14 @@ const printPercentSDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
   path.each((childPath) => {
     const childNode = childPath.getValue();
 
-    if (childNode.type !== "@tstring_content") {
+    if (childNode.type !== "tstring_content") {
       // Here we are printing an embedded variable or expression.
       parts.push(print(childPath));
     } else {
       // Here we are printing plain string content.
-      parts.push(join(literalline, childNode.body.split("\n")));
+      parts.push(join(literalline, childNode.value.split("\n")));
     }
-  }, "body");
+  }, "parts");
 
   // Push on the closing character, which is the opposite of the third
   // character from the opening.
@@ -126,13 +126,13 @@ function shouldPrintPercentSDynaSymbol(node: Ruby.DynaSymbol) {
   // get weird, so just bail out and stick to the original bounds in the source.
   const closing = quotePairs[node.quote[2] as Quote];
 
-  return node.body.some(
+  return node.parts.some(
     (child) =>
-      child.type === "@tstring_content" &&
-      (child.body.includes("\n") ||
-        child.body.includes(closing) ||
-        child.body.includes("'") ||
-        child.body.includes('"'))
+      child.type === "tstring_content" &&
+      (child.value.includes("\n") ||
+        child.value.includes(closing) ||
+        child.value.includes("'") ||
+        child.value.includes('"'))
   );
 }
 
@@ -173,21 +173,21 @@ export const printDynaSymbol: Plugin.Printer<Ruby.DynaSymbol> = (
   path.each((childPath) => {
     const child = childPath.getValue() as Ruby.StringContent;
 
-    if (child.type !== "@tstring_content") {
+    if (child.type !== "tstring_content") {
       parts.push(print(childPath));
     } else {
       parts.push(
-        join(literalline, normalizeQuotes(child.body, quote).split("\n"))
+        join(literalline, normalizeQuotes(child.value, quote).split("\n"))
       );
     }
-  }, "body");
+  }, "parts");
 
   parts.push(quote);
 
   // If we're inside of an assoc_new node as the key, then it will handle
   // printing the : on its own since it could change sides.
   const parentNode = path.getParentNode();
-  if (parentNode.type !== "assoc_new" || parentNode.body[0] !== node) {
+  if (parentNode.type !== "assoc" || parentNode.key !== node) {
     parts.unshift(":");
   }
 
@@ -199,9 +199,11 @@ export const printStringConcat: Plugin.Printer<Ruby.StringConcat> = (
   opts,
   print
 ) => {
-  const [leftDoc, rightDoc] = path.map(print, "body");
-
-  return group([leftDoc, " \\", indent([hardline, rightDoc])]);
+  return group([
+    path.call(print, "left"),
+    " \\",
+    indent([hardline, path.call(print, "right")])
+  ]);
 };
 
 // Prints out an interpolated variable in the string by converting it into an
@@ -210,9 +212,7 @@ export const printStringDVar: Plugin.Printer<Ruby.StringDVar> = (
   path,
   opts,
   print
-) => {
-  return ["#{", path.call(print, "body", 0), "}"];
-};
+) => ["#{", path.call(print, "var"), "}"];
 
 export const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (
   path,
@@ -220,16 +220,16 @@ export const printStringEmbExpr: Plugin.Printer<Ruby.StringEmbExpr> = (
   print
 ) => {
   const node = path.getValue();
-  const parts = path.call(print, "body", 0);
+  const doc = path.call(print, "stmts");
 
   // If the contents of this embedded expression were originally on the same
   // line in the source, then we're going to leave them in place and assume
   // that's the way the developer wanted this expression represented.
   if (getStartLine(node.loc) === getEndLine(node.loc)) {
-    return ["#{", removeLines(parts), "}"];
+    return ["#{", removeLines(doc), "}"];
   }
 
-  return group(["#{", indent([softline, parts]), [softline, "}"]]);
+  return group(["#{", indent([softline, doc]), [softline, "}"]]);
 };
 
 // Prints out a literal string. This function does its best to respect the
@@ -245,7 +245,7 @@ export const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (
 
   // If the string is empty, it will not have any parts, so just print out the
   // quotes corresponding to the config
-  if (node.body.length === 0) {
+  if (node.parts.length === 0) {
     return rubySingleQuote ? "''" : '""';
   }
 
@@ -261,13 +261,13 @@ export const printStringLiteral: Plugin.Printer<Ruby.StringLiteral> = (
     const part = partPath.getValue();
 
     // In this case, the part of the string is an embedded expression
-    if (part.type !== "@tstring_content") {
+    if (part.type !== "tstring_content") {
       return print(partPath);
     }
 
     // In this case, the part of the string is just regular string content
-    return join(literalline, normalizeQuotes(part.body, quote).split("\n"));
-  }, "body");
+    return join(literalline, normalizeQuotes(part.value, quote).split("\n"));
+  }, "parts");
 
   return [quote, ...parts, getClosingQuote(quote)];
 };
@@ -279,7 +279,7 @@ export const printSymbolLiteral: Plugin.Printer<Ruby.SymbolLiteral> = (
   opts,
   print
 ) => {
-  return [":", path.call(print, "body", 0)];
+  return [":", path.call(print, "value")];
 };
 
 // Prints out an xstring literal. Its child is an array of string parts,
@@ -289,5 +289,5 @@ export const printXStringLiteral: Plugin.Printer<Ruby.XStringLiteral> = (
   opts,
   print
 ) => {
-  return ["`", ...path.map(print, "body"), "`"];
+  return ["`", ...path.map(print, "parts"), "`"];
 };

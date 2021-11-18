@@ -1,6 +1,6 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
-import { hasAncestor } from "../../utils";
+import { hasAncestor, isEmptyParams } from "../../utils";
 
 const { group, ifBreak, indent, line } = prettier;
 
@@ -12,22 +12,22 @@ function printLambdaParams(
   path: Plugin.Path<Ruby.Lambda>,
   print: Plugin.Print
 ) {
-  let node = path.getValue().body[0];
+  let node = path.getValue().params;
 
   // In this case we had something like -> (foo) { bar } which would mean that
   // we're looking at a paren node, so we'll descend one level deeper to get at
   // the actual params node.
   if (node.type !== "params") {
-    node = node.body[0];
+    node = node.cnts;
   }
 
   // If we don't have any params at all, then we're just going to bail out and
   // print nothing. This is to avoid printing an empty set of parentheses.
-  if (node.body.every((type) => !type)) {
+  if (isEmptyParams(node)) {
     return "";
   }
 
-  return path.call(print, "body", 0);
+  return path.call(print, "params");
 }
 
 // Lambda nodes represent stabby lambda literals, which can come in a couple of
@@ -61,6 +61,8 @@ export const printLambda: Plugin.Printer<Ruby.Lambda> = (path, opts, print) => {
   const params = printLambdaParams(path, print);
   const inCommand = hasAncestor(path, ["command", "command_call"]);
 
+  const stmtsDoc = path.call(print, "stmts");
+
   return group(
     ifBreak(
       [
@@ -68,11 +70,11 @@ export const printLambda: Plugin.Printer<Ruby.Lambda> = (path, opts, print) => {
         params,
         " ",
         inCommand ? "{" : "do",
-        indent([line, path.call(print, "body", 1)]),
+        indent([line, stmtsDoc]),
         line,
         inCommand ? "}" : "end"
       ],
-      ["->", params, " { ", path.call(print, "body", 1), " }"]
+      ["->", params, " { ", stmtsDoc, " }"]
     )
   );
 };

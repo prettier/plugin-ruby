@@ -25,15 +25,14 @@ type ChainedMethodAddBlock = Ruby.MethodAddBlock & Chain;
 
 export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   const node = path.getValue();
-  const [receiverNode, , messageNode] = node.body;
 
-  const receiverDoc = path.call(print, "body", 0);
+  const receiverDoc = path.call(print, "receiver");
   const operatorDoc = makeCall(path, opts, print);
 
   // You can call lambdas with a special syntax that looks like func.(*args).
   // In this case, "call" is returned for the 3rd child node. We don't alter
   // call syntax so if `call` is implicit, we don't print it out.
-  const messageDoc = messageNode === "call" ? "" : path.call(print, "body", 2);
+  const messageDoc = node.message === "call" ? "" : path.call(print, "message");
 
   // Create some arrays that are going to represent each side of our call.
   let leftSideDoc = [receiverDoc];
@@ -50,7 +49,7 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   // In the case we need to group the receiver and the operator together or
   // we'll end up with a syntax error.
   const operatorIsTrailing =
-    messageNode !== "call" && hasLeadingComments(messageNode);
+    node.message !== "call" && hasLeadingComments(node.message);
 
   if (operatorIsTrailing) {
     leftSideDoc = [receiverDoc, operatorDoc];
@@ -59,14 +58,14 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
 
   // For certain left sides of the call nodes, we want to attach directly to
   // the } or end.
-  if (noIndent.includes(receiverNode.type)) {
+  if (noIndent.includes(node.receiver.type)) {
     return [leftSideDoc, rightSideDoc];
   }
 
   if (
-    receiverNode.type === "call" &&
-    receiverNode.body[2] !== "call" &&
-    receiverNode.body[2].body === "where" &&
+    node.receiver.type === "call" &&
+    node.receiver.message !== "call" &&
+    node.receiver.message.value === "where" &&
     messageDoc === "not"
   ) {
     // This is very specialized behavior wherein we group .where.not calls
@@ -74,7 +73,7 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
     // https://github.com/prettier/plugin-ruby/issues/862.
   } else {
     // Otherwise, we're going to put a line node into the right side doc.
-    rightSideDoc.unshift(receiverNode.comments ? hardline : softline);
+    rightSideDoc.unshift(node.receiver.comments ? hardline : softline);
   }
 
   // Get a reference to the parent node so we can check if we're inside a chain
@@ -85,7 +84,7 @@ export const printCall: Plugin.Printer<ChainedCall> = (path, opts, print) => {
   if (chained.includes(parentNode.type) && !node.comments) {
     parentNode.chain = (node.chain || 0) + 1;
     parentNode.callChain = (node.callChain || 0) + 1;
-    parentNode.firstReceiverType = node.firstReceiverType || receiverNode.type;
+    parentNode.firstReceiverType = node.firstReceiverType || node.receiver.type;
 
     // Here we're going to determine what doc nodes to send up to the parent
     // node to represent when we're in the multi-line form.
@@ -135,11 +134,8 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
 ) => {
   const node = path.getValue();
 
-  const [methodNode, argNode] = node.body;
-  const [methodDoc, argsDoc] = path.map(print, "body") as [
-    Plugin.Doc,
-    Plugin.Doc[]
-  ];
+  const methodDoc = path.call(print, "call");
+  const argsDoc = path.call(print, "args") as Plugin.Doc[];
 
   // You can end up here if you have a method with a ? ending, presumably
   // because the parser knows that it cannot be a local variable. You can also
@@ -149,7 +145,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
     // like a constant, then we need to match that in order to maintain valid
     // Ruby. For example, you could do something like Foo(), on which we would
     // need to keep the parentheses to make it look like a method call.
-    if (methodNode.type === "fcall" && methodNode.body[0].type === "@const") {
+    if (node.call.type === "fcall" && node.call.value.type === "const") {
       return [methodDoc, "()"];
     }
 
@@ -158,7 +154,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
     // example, if you call something like Foo.new.() (implicitly calling the
     // #call method on a new instance of the Foo class), then we have to print
     // out those parentheses, otherwise we'll end up with Foo.new.
-    if (methodNode.type === "call" && methodNode.body[2] === "call") {
+    if (node.call.type === "call" && node.call.message === "call") {
       return [methodDoc, "()"];
     }
 
@@ -167,7 +163,7 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
 
   // This case will ONLY be hit if we can successfully turn the block into a
   // to_proc call. In that case, we just explicitly add the parens around it.
-  if (argNode.type === "args" && argsDoc.length > 0) {
+  if (node.args.type === "args" && argsDoc.length > 0) {
     return [methodDoc, "(", ...argsDoc, ")"];
   }
 
@@ -200,14 +196,19 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
       sigBlock = path.getParentNode(3);
     }
 
-    if (
-      sigBlock.type === "method_add_block" &&
-      sigBlock.body[1] &&
-      sigBlock.body[0].type === "method_add_arg" &&
-      sigBlock.body[0].body[0].type === "fcall" &&
-      sigBlock.body[0].body[0].body[0].body === "sig"
-    ) {
-      threshold = 2;
+    if (sigBlock.type === "method_add_block") {
+      // Pulling this out into a separate variable so we can get back some of
+      // our type safety.
+      const sigBlockNode = sigBlock as Ruby.MethodAddBlock;
+
+      if (
+        sigBlockNode.block &&
+        sigBlockNode.call.type === "method_add_arg" &&
+        sigBlockNode.call.call.type === "fcall" &&
+        sigBlockNode.call.call.value.value === "sig"
+      ) {
+        threshold = 2;
+      }
     }
   }
 
@@ -241,8 +242,8 @@ export const printMethodAddArg: Plugin.Printer<ChainedMethodAddArg> = (
 
   // If there are already parentheses, then we can just use the doc that's
   // already printed.
-  if (argNode.type == "arg_paren") {
-    return [methodDoc, argsDoc];
+  if (node.args.type == "arg_paren") {
+    return group([methodDoc, argsDoc]);
   }
 
   return [methodDoc, " ", join(", ", argsDoc), " "];
@@ -255,17 +256,17 @@ export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (
 ) => {
   const node = path.getValue();
 
-  const [callNode, blockNode] = node.body;
-  const [callDoc, blockDoc] = path.map(print, "body");
+  const callDoc = path.call(print, "call");
+  const blockDoc = path.call(print, "block");
 
   // Don't bother trying to do any kind of fancy toProc transform if the option
   // is disabled.
   if (opts.rubyToProc) {
-    const proc = toProc(path, blockNode);
+    const proc = toProc(path, node.block);
 
-    if (proc && callNode.type === "call") {
+    if (proc && node.call.type === "call") {
       return group([
-        path.call(print, "body", 0),
+        path.call(print, "call"),
         "(",
         indent([softline, proc]),
         [softline, ")"]
@@ -273,7 +274,7 @@ export const printMethodAddBlock: Plugin.Printer<ChainedMethodAddBlock> = (
     }
 
     if (proc) {
-      return path.call(print, "body", 0);
+      return path.call(print, "call");
     }
   }
 
@@ -325,5 +326,5 @@ export const printCallContainer: Plugin.Printer<Ruby.Fcall | Ruby.VCall> = (
   opts,
   print
 ) => {
-  return path.call(print, "body", 0);
+  return path.call(print, "value");
 };

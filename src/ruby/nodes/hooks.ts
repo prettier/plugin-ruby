@@ -22,8 +22,8 @@ function printHook(name: string): Plugin.Printer<Ruby.BEGIN | Ruby.END> {
     return group([
       name,
       " ",
-      path.call(print, "body", 0),
-      indent([line, path.call(print, "body", 1)]),
+      path.call(print, "lbrace"),
+      indent([line, path.call(print, "stmts")]),
       [line, "}"]
     ]);
   };

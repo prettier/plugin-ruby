@@ -57,10 +57,10 @@ function docBreakLength(doc: Plugin.Doc): number {
 
 function hasDef(node: Ruby.Command) {
   return (
-    node.body[1].type === "args_add_block" &&
-    node.body[1].body[0].type === "args" &&
-    node.body[1].body[0].body[0] &&
-    ["def", "defs"].includes(node.body[1].body[0].body[0].type)
+    node.args.type === "args_add_block" &&
+    node.args.args.type === "args" &&
+    node.args.args.parts[0] &&
+    ["def", "defs"].includes(node.args.args.parts[0].type)
   );
 }
 
@@ -78,16 +78,19 @@ function hasDef(node: Ruby.Command) {
 // In this case the arguments are aligned to the left side as opposed to being
 // aligned with the `receive` call.
 function skipArgsAlign(node: Ruby.CommandCall) {
-  return ["to", "not_to", "to_not"].includes(node.body[2].body);
+  return ["to", "not_to", "to_not"].includes(node.message.value);
 }
 
 // If there is a ternary argument to a command and it's going to get broken
 // into multiple lines, then we're going to have to use parentheses around the
 // command in order to make sure operator precedence doesn't get messed up.
-function hasTernaryArg(node: Ruby.Args | Ruby.ArgsAddBlock) {
-  return (node.body[0] as any).body.some(
-    (child: Ruby.AnyNode) => child.type === "ifop"
-  );
+function hasTernaryArg(node: Ruby.Args | Ruby.ArgsAddBlock): boolean {
+  switch (node.type) {
+    case "args":
+      return node.parts.some((child) => child.type === "ifop");
+    case "args_add_block":
+      return hasTernaryArg(node.args) || node.block?.type === "ifop";
+  }
 }
 
 export const printCommand: Plugin.Printer<Ruby.Command> = (
@@ -97,10 +100,10 @@ export const printCommand: Plugin.Printer<Ruby.Command> = (
 ) => {
   const node = path.getValue();
 
-  const command = path.call(print, "body", 0);
-  const joinedArgs = join([",", line], path.call(print, "body", 1));
+  const command = path.call(print, "message");
+  const joinedArgs = join([",", line], path.call(print, "args"));
 
-  const hasTernary = hasTernaryArg(node.body[1]);
+  const hasTernary = hasTernaryArg(node.args);
   let breakArgs;
 
   if (hasTernary) {
@@ -131,19 +134,19 @@ export const printCommandCall: Plugin.Printer<Ruby.CommandCall> = (
 ) => {
   const node = path.getValue();
   const parts = [
-    path.call(print, "body", 0),
+    path.call(print, "receiver"),
     makeCall(path, opts, print),
-    path.call(print, "body", 2)
+    path.call(print, "message")
   ];
 
-  if (!node.body[3]) {
+  if (!node.args) {
     return parts;
   }
 
-  const argDocs = join([",", line], path.call(print, "body", 3));
+  const argDocs = join([",", line], path.call(print, "args"));
   let breakDoc;
 
-  if (hasTernaryArg(node.body[3])) {
+  if (hasTernaryArg(node.args)) {
     breakDoc = parts.concat("(", indent([softline, argDocs]), softline, ")");
     parts.push(" ");
   } else if (skipArgsAlign(node)) {

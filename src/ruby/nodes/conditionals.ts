@@ -9,9 +9,11 @@ import {
 const { align, breakParent, hardline, group, ifBreak, indent, softline } =
   prettier;
 
+type Conditional = Ruby.If | Ruby.Unless;
+
 // If the statements are just a single if/unless, in block or modifier form, or
 // a ternary
-function containsSingleConditional(stmts: Ruby.Stmts) {
+function containsSingleConditional(stmts: Ruby.Statements) {
   return (
     stmts.body.length === 1 &&
     ["if", "if_mod", "ifop", "unless", "unless_mod"].includes(
@@ -22,15 +24,15 @@ function containsSingleConditional(stmts: Ruby.Stmts) {
 
 function printWithAddition(
   keyword: string,
-  path: Plugin.Path<Ruby.If | Ruby.Unless>,
+  path: Plugin.Path<Conditional>,
   print: Plugin.Print,
   breaking: boolean
 ) {
   return [
     `${keyword} `,
-    align(keyword.length + 1, path.call(print, "body", 0)),
-    indent([softline, path.call(print, "body", 1)]),
-    [softline, path.call(print, "body", 2)],
+    align(keyword.length + 1, path.call(print, "pred")),
+    indent([softline, path.call(print, "stmts")]),
+    [softline, path.call(print, "cons")],
     [softline, "end"],
     breaking ? breakParent : ""
   ];
@@ -81,37 +83,42 @@ export const printTernary: Plugin.Printer<Ruby.Ternary> = (
   _opts,
   print
 ) => {
-  const [predicate, truthyClause, falsyClause] = path.map(print, "body");
-  const ternaryClauses = printTernaryClauses("if", truthyClause, falsyClause);
+  const predicateDoc = path.call(print, "pred");
+  const truthyDoc = path.call(print, "tthy");
+  const falsyDoc = path.call(print, "flsy");
 
   return group(
     ifBreak(
       [
         "if ",
-        align(3, predicate),
-        indent([softline, truthyClause]),
+        align(3, predicateDoc),
+        indent([softline, truthyDoc]),
         [softline, "else"],
-        indent([softline, falsyClause]),
+        indent([softline, falsyDoc]),
         [softline, "end"]
       ],
-      [predicate, " ? ", ...ternaryClauses]
+      [predicateDoc, " ? ", ...printTernaryClauses("if", truthyDoc, falsyDoc)]
     )
   );
 };
+
+function isModifier(
+  node: Conditional | Ruby.IfModifier | Ruby.UnlessModifier
+): node is Ruby.IfModifier | Ruby.UnlessModifier {
+  return node.type === "if_mod" || node.type === "unless_mod";
+}
 
 // Prints an `if_mod` or `unless_mod` node. Because it was previously in the
 // modifier form, we're guaranteed to not have an additional node, so we can
 // just work with the predicate and the body.
 function printSingle(
-  keyword: string,
-  modifier = false
-): Plugin.Printer<
-  Ruby.If | Ruby.IfModifier | Ruby.Unless | Ruby.UnlessModifier
-> {
+  keyword: string
+): Plugin.Printer<Conditional | Ruby.IfModifier | Ruby.UnlessModifier> {
   return function printSingleWithKeyword(path, { rubyModifier }, print) {
-    const [, statementsNode] = path.getValue().body;
-    const predicateDoc = path.call(print, "body", 0);
-    const statementsDoc = path.call(print, "body", 1);
+    const node = path.getValue();
+
+    const predicateDoc = path.call(print, "pred");
+    const statementsDoc = path.call(print, isModifier(node) ? "stmt" : "stmts");
 
     const multilineParts = [
       `${keyword} `,
@@ -124,26 +131,23 @@ function printSingle(
     // If we do not allow modifier form conditionals or there are comments
     // inside of the body of the conditional, then we must print in the
     // multiline form.
-    if (
-      !rubyModifier ||
-      (!modifier && (statementsNode as Ruby.If | Ruby.Unless).body[0].comments)
-    ) {
+    if (!rubyModifier || (!isModifier(node) && node.stmts.body[0].comments)) {
       return [multilineParts, breakParent];
     }
 
     const inline = inlineEnsureParens(path, [
-      path.call(print, "body", 1),
+      statementsDoc,
       ` ${keyword} `,
-      path.call(print, "body", 0)
+      predicateDoc
     ]);
 
-    // An expression with a conditional modifier (expression if true), the
+    // With an expression with a conditional modifier (expression if true), the
     // conditional body is parsed before the predicate expression, meaning that
     // if the parser encountered a variable declaration, it would initialize
     // that variable first before evaluating the predicate expression. That
     // parse order means the difference between a NameError or not. #591
     // https://docs.ruby-lang.org/en/2.0.0/syntax/control_expressions_rdoc.html#label-Modifier+if+and+unless
-    if (modifier && containsAssignment(statementsNode)) {
+    if (isModifier(node) && containsAssignment(node.stmt)) {
       return inline;
     }
 
@@ -184,7 +188,7 @@ const noTernary = [
 // Certain expressions cannot be reduced to a ternary without adding parens
 // around them. In this case we say they cannot be ternaried and default instead
 // to breaking them into multiple lines.
-function canTernaryStmts(stmts: Ruby.Stmts) {
+function canTernaryStmts(stmts: Ruby.Statements) {
   if (stmts.body.length !== 1) {
     return false;
   }
@@ -193,7 +197,7 @@ function canTernaryStmts(stmts: Ruby.Stmts) {
 
   // If the user is using one of the lower precedence "and" or "or" operators,
   // then we can't use a ternary expression as it would break the flow control.
-  if (stmt.type === "binary" && ["and", "or"].includes(stmt.body[1])) {
+  if (stmt.type === "binary" && ["and", "or"].includes(stmt.op)) {
     return false;
   }
 
@@ -207,32 +211,31 @@ function canTernaryStmts(stmts: Ruby.Stmts) {
 // is of the "else" type. Both the body of the main node and the body of the
 // additional node must have only one statement, and that statement list must
 // pass the `canTernaryStmts` check.
-function canTernary(path: Plugin.Path<Ruby.If | Ruby.Unless>) {
-  const [predicate, stmts, addition] = path.getValue().body;
+function canTernary(path: Plugin.Path<Conditional>) {
+  const node = path.getValue();
 
   return (
     !["assign", "opassign", "command_call", "command"].includes(
-      predicate.type
+      node.pred.type
     ) &&
-    addition &&
-    addition.type === "else" &&
-    [stmts, addition.body[0]].every(canTernaryStmts)
+    node.cons &&
+    node.cons.type === "else" &&
+    canTernaryStmts(node.stmts) &&
+    canTernaryStmts(node.cons.stmts)
   );
 }
 
 // A normalized print function for both `if` and `unless` nodes.
-function printConditional(
-  keyword: string
-): Plugin.Printer<Ruby.If | Ruby.Unless> {
-  return (path, opts, print) => {
+function printConditional(keyword: string): Plugin.Printer<Conditional> {
+  return function printConditionalWithKeyword(path, opts, print) {
     if (canTernary(path)) {
       let ternaryParts = [
-        path.call(print, "body", 0),
+        path.call(print, "pred"),
         " ? ",
         ...printTernaryClauses(
           keyword,
-          path.call(print, "body", 1),
-          path.call(print, "body", 2, "body", 0)
+          path.call(print, "stmts"),
+          path.call(print, "cons", "stmts")
         )
       ];
 
@@ -245,20 +248,20 @@ function printConditional(
       );
     }
 
-    const [predicate, statements, addition] = path.getValue().body;
+    const node = path.getValue();
 
     // If there's an additional clause that wasn't matched earlier, we know we
     // can't go for the inline option.
-    if (addition) {
+    if (node.cons) {
       return group(printWithAddition(keyword, path, print, true));
     }
 
-    // If the body of the conditional is empty, then we explicitly have to use the
-    // block form.
-    if (isEmptyStmts(statements)) {
+    // If the body of the conditional is empty, then we explicitly have to use
+    // the block form.
+    if (isEmptyStmts(node.stmts)) {
       return [
         `${keyword} `,
-        align(keyword.length + 1, path.call(print, "body", 0)),
+        align(keyword.length + 1, path.call(print, "pred")),
         hardline,
         "end"
       ];
@@ -266,19 +269,19 @@ function printConditional(
 
     // Two situations in which we need to use the block form:
     //
-    // 1. If the predicate of the conditional contains an assignment, then we can't
-    // know for sure that it doesn't impact the body of the conditional.
+    // 1. If the predicate of the conditional contains an assignment, then we
+    // can't know for sure that it doesn't impact the body of the conditional.
     //
-    // 2. If the conditional contains just another conditional, then collapsing it
-    // would result in double modifiers on the same line.
+    // 2. If the conditional contains just another conditional, then collapsing
+    // it would result in double modifiers on the same line.
     if (
-      containsAssignment(predicate) ||
-      containsSingleConditional(statements)
+      containsAssignment(node.pred) ||
+      containsSingleConditional(node.stmts)
     ) {
       return [
         `${keyword} `,
-        align(keyword.length + 1, path.call(print, "body", 0)),
-        indent([hardline, path.call(print, "body", 1)]),
+        align(keyword.length + 1, path.call(print, "pred")),
+        indent([hardline, path.call(print, "stmts")]),
         hardline,
         "end"
       ];
@@ -289,32 +292,32 @@ function printConditional(
 }
 
 export const printElse: Plugin.Printer<Ruby.Else> = (path, opts, print) => {
-  const stmts = path.getValue().body[0];
+  const node = path.getValue();
 
   return [
-    stmts.body.length === 1 && stmts.body[0].type === "command"
+    node.stmts.body.length === 1 && node.stmts.body[0].type === "command"
       ? breakParent
       : "",
     "else",
-    indent([softline, path.call(print, "body", 0)])
+    indent([softline, path.call(print, "stmts")])
   ];
 };
 
 export const printElsif: Plugin.Printer<Ruby.Elsif> = (path, opts, print) => {
-  const [, , addition] = path.getValue().body;
+  const node = path.getValue();
   const parts = [
-    group(["elsif ", align("elsif".length - 1, path.call(print, "body", 0))]),
-    indent([hardline, path.call(print, "body", 1)])
+    group(["elsif ", align("elsif".length - 1, path.call(print, "pred"))]),
+    indent([hardline, path.call(print, "stmts")])
   ];
 
-  if (addition) {
-    parts.push(group([hardline, path.call(print, "body", 2)]));
+  if (node.cons) {
+    parts.push(group([hardline, path.call(print, "cons")]));
   }
 
   return group(parts);
 };
 
 export const printIf = printConditional("if");
-export const printIfModifier = printSingle("if", true);
+export const printIfModifier = printSingle("if");
 export const printUnless = printConditional("unless");
-export const printUnlessModifier = printSingle("unless", true);
+export const printUnlessModifier = printSingle("unless");

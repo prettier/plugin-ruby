@@ -12,6 +12,7 @@ type KeyPrinter = (
   path: Plugin.Path<Ruby.AnyNode>,
   print: Plugin.Print
 ) => Plugin.Doc;
+
 type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & {
   keyPrinter: KeyPrinter;
 };
@@ -27,21 +28,21 @@ type HashContents = (Ruby.AssoclistFromArgs | Ruby.BareAssocHash) & {
 // This function represents that check, as it determines if it can convert the
 // symbol node into a hash label.
 function isValidHashLabel(symbolLiteral: Ruby.SymbolLiteral) {
-  const label = symbolLiteral.body[0].body;
+  const label = symbolLiteral.value.value;
   return label.match(/^[_A-Za-z]/) && !label.endsWith("=");
 }
 
 function canUseHashLabels(contentsNode: HashContents) {
-  return contentsNode.body.every((assocNode) => {
+  return contentsNode.assocs.every((assocNode) => {
     if (assocNode.type === "assoc_splat") {
       return true;
     }
 
-    switch (assocNode.body[0].type) {
-      case "@label":
+    switch (assocNode.key.type) {
+      case "label":
         return true;
       case "symbol_literal":
-        return isValidHashLabel(assocNode.body[0]);
+        return isValidHashLabel(assocNode.key);
       case "dyna_symbol":
         return true;
       default:
@@ -54,12 +55,10 @@ const printHashKeyLabel: KeyPrinter = (path, print) => {
   const node = path.getValue();
 
   switch (node.type) {
-    case "@label":
+    case "label":
       return print(path);
-    case "symbol_literal": {
-      const nodePath = path as Plugin.Path<typeof node>;
-      return [nodePath.call(print, "body", 0), ":"];
-    }
+    case "symbol_literal":
+      return [(path as Plugin.Path<typeof node>).call(print, "value"), ":"];
     case "dyna_symbol":
       return [print(path), ":"];
     default:
@@ -73,7 +72,7 @@ const printHashKeyRocket: KeyPrinter = (path, print) => {
   const node = path.getValue();
   let doc = print(path);
 
-  if (node.type === "@label") {
+  if (node.type === "label") {
     const sDoc = doc as string; // since we know this is a label
     doc = [":", sDoc.slice(0, sDoc.length - 1)];
   } else if (node.type === "dyna_symbol") {
@@ -83,25 +82,21 @@ const printHashKeyRocket: KeyPrinter = (path, print) => {
   return [doc, " =>"];
 };
 
-export const printAssocNew: Plugin.Printer<Ruby.AssocNew> = (
-  path,
-  opts,
-  print
-) => {
-  const [keyNode, valueNode] = path.getValue().body;
+export const printAssoc: Plugin.Printer<Ruby.Assoc> = (path, opts, print) => {
+  const node = path.getValue();
   const { keyPrinter } = path.getParentNode() as HashContents;
 
-  const parts = [path.call((keyPath) => keyPrinter(keyPath, print), "body", 0)];
-  const valueDoc = path.call(print, "body", 1);
+  const parts = [path.call((keyPath) => keyPrinter(keyPath, print), "key")];
+  const valueDoc = path.call(print, "value");
 
   // If we're printing a child hash then we want it to break along with its
   // parent hash, so we don't group the parts.
-  if (valueNode.type === "hash") {
+  if (node.value.type === "hash") {
     parts.push(" ", valueDoc);
     return parts;
   }
 
-  if (!skipAssignIndent(valueNode) || keyNode.comments) {
+  if (!skipAssignIndent(node.value) || node.key.comments) {
     parts.push(indent([line, valueDoc]));
   } else {
     parts.push(" ", valueDoc);
@@ -114,9 +109,7 @@ export const printAssocSplat: Plugin.Printer<Ruby.AssocSplat> = (
   path,
   opts,
   print
-) => {
-  return ["**", path.call(print, "body", 0)];
-};
+) => ["**", path.call(print, "value")];
 
 export const printHashContents: Plugin.Printer<HashContents> = (
   path,
@@ -132,24 +125,24 @@ export const printHashContents: Plugin.Printer<HashContents> = (
       ? printHashKeyLabel
       : printHashKeyRocket;
 
-  return join([",", line], path.map(print, "body"));
+  return join([",", line], path.map(print, "assocs"));
 };
 
 export const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
-  const hashNode = path.getValue();
+  const node = path.getValue();
 
   // Hashes normally have a single assoclist_from_args child node. If it's
   // missing, then it means we're dealing with an empty hash, so we can just
   // exit here and print.
-  if (hashNode.body[0] === null) {
+  if (node.cnts === null) {
     return printEmptyCollection(path, opts, "{", "}");
   }
 
-  const hashDoc = [
+  const doc = [
     "{",
     indent([
       line,
-      path.call(print, "body", 0),
+      path.call(print, "cnts"),
       getTrailingComma(opts) ? ifBreak(",", "") : ""
     ]),
     line,
@@ -158,9 +151,9 @@ export const printHash: Plugin.Printer<Ruby.Hash> = (path, opts, print) => {
 
   // If we're inside another hash, then we don't want to group our contents
   // because we want this hash to break along with its parent hash.
-  if (path.getParentNode().type === "assoc_new") {
-    return hashDoc;
+  if (path.getParentNode().type === "assoc") {
+    return doc;
   }
 
-  return group(hashDoc);
+  return group(doc);
 };
