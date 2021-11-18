@@ -191,4 +191,15 @@ describe("blocks", () => {
 
     expect(content).toMatchFormat();
   });
+
+  // https://github.com/prettier/plugin-ruby/issues/1042
+  test("comments on the do block without a command", () => {
+    const content = ruby(`
+      let!(:some_variable) do # comment text
+        nil
+      end
+    `);
+
+    expect(content).toMatchFormat();
+  });
 });

@@ -33,7 +33,7 @@ function printBlockBegin(
   useBraces: boolean
 ) {
   let docs = print(path);
-  const doc = useBraces ? "{" : "do";
+  const doc = useBraces && !path.getValue().comments ? "{" : "do";
 
   if (Array.isArray(docs)) {
     docs[1] = doc;
