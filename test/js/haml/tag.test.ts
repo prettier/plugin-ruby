@@ -103,6 +103,10 @@ describe("tag", () => {
 
       expect(content).toChangeFormat(expected);
     });
+
+    test("attributes prefixed with @", () => {
+      expect(haml("%span{'@click': 'open = true'}")).toMatchFormat();
+    });
   });
 
   test("object reference", () => {
