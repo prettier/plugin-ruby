@@ -84,6 +84,40 @@ describe("assign", () => {
         `)
       );
     });
+
+    describe("assignment operators", () => {
+      // some but not all
+      const operators = ["||", "&&", "+", "*", "%", "**", "<<"];
+
+      test.each(operators)("array %s= [...] is not force-indented", (op) => {
+        expect(`a ${op}= [${long}, ${long}, ${long}]`).toChangeFormat(
+          ruby(`
+            a ${op}= [
+              ${long},
+              ${long},
+              ${long}
+            ]
+          `)
+        );
+      });
+
+      test.each(operators)("hash %s= { ... } is not force-indented", (op) => {
+        expect(
+          `a ${op}= { a: ${long}, b: ${long}, c: ${long} }`
+        ).toChangeFormat(
+          ruby(`
+          a ${op}= {
+            a:
+              ${long},
+            b:
+              ${long},
+            c:
+              ${long}
+          }
+          `)
+        );
+      });
+    });
   });
 
   describe("constants", () => {

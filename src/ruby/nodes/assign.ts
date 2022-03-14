@@ -1,10 +1,29 @@
 import type { Plugin, Ruby } from "../../types";
 import prettier from "../../prettier";
 import { skipAssignIndent } from "../../utils";
+import { Doc, Path } from "../../types/plugin";
 
 const { group, indent, join, line } = prettier;
 
-export const printAssign: Plugin.Printer<Ruby.Assign> = (path, opts, print) => {
+export const printAssign: Plugin.Printer<Ruby.Assign> = (...args) => {
+  return printOpAssignOrAssign("=", ...args);
+};
+
+export const printOpAssign: Plugin.Printer<Ruby.Opassign | Ruby.Assign> = (
+  path,
+  opts,
+  print
+) => {
+  const opDoc = path.call(print, "op");
+  return printOpAssignOrAssign(opDoc, path, opts, print);
+};
+
+function printOpAssignOrAssign(
+  opDoc: Doc,
+  path: Path<Ruby.Assign | Ruby.Opassign>,
+  opts: Plugin.Options,
+  print: Plugin.Print
+): Doc {
   const valueNode = path.getValue().value;
 
   const targetDoc = path.call(print, "target");
@@ -21,23 +40,11 @@ export const printAssign: Plugin.Printer<Ruby.Assign> = (path, opts, print) => {
   }
 
   if (skipAssignIndent(valueNode)) {
-    return group([targetDoc, " = ", rightSideDoc]);
+    return group([targetDoc, " ", opDoc, " ", rightSideDoc]);
   }
 
-  return group([targetDoc, " =", indent([line, rightSideDoc])]);
-};
-
-export const printOpAssign: Plugin.Printer<Ruby.Opassign> = (
-  path,
-  opts,
-  print
-) =>
-  group([
-    path.call(print, "target"),
-    " ",
-    path.call(print, "op"),
-    indent([line, path.call(print, "value")])
-  ]);
+  return group([targetDoc, " ", opDoc, indent([line, rightSideDoc])]);
+}
 
 export const printVarField: Plugin.Printer<Ruby.VarField> = (
   path,
