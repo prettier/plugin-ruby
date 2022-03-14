@@ -64,6 +64,21 @@ describe("assign", () => {
       );
     });
 
+    describe("assignments from quotewords and similar", () => {
+      const cases = ["w", "W", "i", "I"];
+
+      test.each(cases)("x = %s[...] is not force-indented", (literal) => {
+        expect(`a = %${literal}[${long} ${long}]`).toChangeFormat(
+          ruby(`
+            a = %${literal}[
+              ${long}
+              ${long}
+            ]
+          `)
+        );
+      });
+    });
+
     test("chained methods on array literals don't get oddly indented", () => {
       expect(`a = [${long}].freeze`).toChangeFormat(
         ruby(`
