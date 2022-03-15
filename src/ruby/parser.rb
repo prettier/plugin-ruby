@@ -5902,7 +5902,7 @@ class SyntaxTree < Ripper
       *posts,
       *keywords&.flat_map { |(key, value)| [key, value || nil] },
       (keyword_rest if keyword_rest != :nil),
-      block
+      (block if block != :&)
     ].compact
 
     location =
@@ -5919,7 +5919,7 @@ class SyntaxTree < Ripper
       posts: posts || [],
       keywords: keywords || [],
       keyword_rest: keyword_rest,
-      block: block,
+      block: (block if block != :&),
       location: location
     )
   end
