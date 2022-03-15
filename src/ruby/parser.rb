@@ -5911,6 +5911,13 @@ class SyntaxTree < Ripper
       else
         Location.fixed(line: lineno, char: char_pos)
       end
+    
+    # 3.1 puts "..." in keyword_rest rather than rest
+    # https://github.com/ruby/ruby/commit/13a9597c7ca83fced5738e9345660ae6aef87eb7
+    if !rest && keyword_rest.is_a?(ArgsForward)
+      rest = keyword_rest
+      keyword_rest = nil
+    end
 
     Params.new(
       requireds: requireds || [],
