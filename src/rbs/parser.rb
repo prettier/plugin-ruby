@@ -98,6 +98,47 @@ class RBS::Types::Record
   end
 end
 
+if defined?(RBS::AST::Declarations::ModuleTypeParams)
+  # This class was removed in rbs 2.0. Monkeypatch < 2.0 to give the same json
+  # output
+  class RBS::AST::Declarations::ModuleTypeParams
+    def to_json(*a)
+      params.to_json(*a)
+    end
+  end
+
+  # make this look like the new AST::TypeParam json
+  class RBS::AST::Declarations::ModuleTypeParams::TypeParam
+    def to_json(*a)
+      { name: name, variance: variance, unchecked: skip_validation }.to_json(*a)
+    end
+  end
+
+  # https://github.com/ruby/rbs/commit/3ccdcb1f3ac5dcb866280f745866a852658195e6
+  class RBS::MethodType
+    # promote the array of symbols into TypeParam looking-things
+    def to_json(*a)
+      type_param_objects =
+        type_params.map do |name|
+          {
+            name: name,
+            variance: 'invariant',
+            unchecked: 'false',
+            upper_bound: nil
+            # location - harder to get this but not needed
+          }
+        end
+
+      {
+        type_params: type_param_objects,
+        type: type,
+        block: block,
+        location: location
+      }.to_json(*a)
+    end
+  end
+end
+
 # The main parser interface.
 module Prettier
   class RBSParser
