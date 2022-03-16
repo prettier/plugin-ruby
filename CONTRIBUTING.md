@@ -178,8 +178,20 @@ The first are JavaScript tests (run with `jest`) that test the formatting agains
 $ yarn test
 ```
 
+Run an individual test like this:
+
+```
+$ yarn test test/js/ruby/nodes/assign.test.ts -t "assign single assignment basic"
+```
+
 The second are Ruby tests (run with `minitest`) that test the gem the wraps the `prettier` plugin as well as testing the various metadata attached to the AST nodes that `ripper` generates. They live in [test/rb](test/rb). To run them, run:
 
 ```
 $ bundle exec rake
+```
+
+Run an individual test like this:
+
+```
+$ ruby -Itest/rb test/rb/metadata_test.rb --name test_fcall
 ```
