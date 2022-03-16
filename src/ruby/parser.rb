@@ -2730,13 +2730,18 @@ class SyntaxTree < Ripper
     # Find the beginning of the method definition, which works for single-line
     # and normal method definitions.
     beginning = find_token(Kw, 'def')
+    
+    is_endless = 
+      !bodystmt.is_a?(BodyStmt) || # ruby 3.0
+      !bodystmt.statements.is_a?(Statements) # ruby 3.1
 
     # If we don't have a bodystmt node, then we have a single-line method
-    unless bodystmt.is_a?(BodyStmt)
+    if is_endless
       node =
         DefEndless.new(
           name: name,
-          paren: params,
+          # with vs. without parentheses
+          paren: params.is_a?(Paren) ? params : nil,
           statement: bodystmt,
           location: beginning.location.to(bodystmt.location)
         )

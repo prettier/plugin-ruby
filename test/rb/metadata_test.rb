@@ -787,6 +787,21 @@ class MetadataTest < Minitest::Test
     end
   end
 
+  if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.0')
+    def test_def_endless
+      assert_metadata SyntaxTree::DefEndless, "def foo() = bar"
+    end
+
+    def test_def_endless_no_paren
+      content = "def foo = bar"
+      assert_metadata SyntaxTree::DefEndless, content
+      assert_nil parse(content).paren
+    end
+
+    def test_def_endless_params
+      assert_metadata SyntaxTree::DefEndless, "def foo(a) = bar"
+    end
+  end
   private
 
   def assert_metadata(type, ruby)
