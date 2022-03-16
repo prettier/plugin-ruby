@@ -2730,10 +2730,10 @@ class SyntaxTree < Ripper
     # Find the beginning of the method definition, which works for single-line
     # and normal method definitions.
     beginning = find_token(Kw, 'def')
-    
-    is_endless = 
-      !bodystmt.is_a?(BodyStmt) || # ruby 3.0
-      !bodystmt.statements.is_a?(Statements) # ruby 3.1
+
+    # ruby 3.0 check || ruby 3.1 check
+    is_endless =
+      !bodystmt.is_a?(BodyStmt) || !bodystmt.statements.is_a?(Statements)
 
     # If we don't have a bodystmt node, then we have a single-line method
     if is_endless
@@ -5916,7 +5916,7 @@ class SyntaxTree < Ripper
       else
         Location.fixed(line: lineno, char: char_pos)
       end
-    
+
     # 3.1 puts "..." in keyword_rest rather than rest
     # https://github.com/ruby/ruby/commit/13a9597c7ca83fced5738e9345660ae6aef87eb7
     if !rest && keyword_rest.is_a?(ArgsForward)
