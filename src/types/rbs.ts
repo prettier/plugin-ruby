@@ -76,6 +76,7 @@ export type Param = {
   name: string,
   unchecked: boolean,
   variance: "invariant" | "covariant" | "contravariant"
+  upper_bound?: Type, 
 };
 
 export type NameAndTypeParams = {

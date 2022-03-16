@@ -465,7 +465,15 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
           parts.push("in");
         }
 
-        return join(" ", [...parts, node.name]);
+        if (node.upper_bound) {
+          const path = paramPath as Plugin.Path<
+            RequiredKeys<RBS.Param, "upper_bound">
+          >;
+          const upperBound = path.call(printType, "upper_bound");
+          return join(" ", [...parts, node.name, "<", upperBound]);
+        } else {
+          return join(" ", [...parts, node.name]);
+        }
       }, "type_params");
 
       return [node.name, "[", join(", ", docs), "]"];
