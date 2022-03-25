@@ -12,11 +12,8 @@ module Prettier
     quoted = args.map { |arg| arg.start_with?('-') ? arg : "\"#{arg}\"" }
     command = "node #{BINARY} --plugin \"#{PLUGIN}\" #{quoted.join(' ')}"
 
-    stdout, stderr, status = Open3.capture3(
-      { 'RBPRETTIER' => '1' },
-      command,
-      stdin_data: STDIN
-    )
+    stdout, stderr, status =
+      Open3.capture3({ 'RBPRETTIER' => '1' }, command, stdin_data: STDIN)
     STDOUT.puts(stdout)
 
     # If we completed successfully, then just exit out.
