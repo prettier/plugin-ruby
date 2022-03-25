@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
       %w[LICENSE bin/console package.json rubocop.yml] +
         Dir['{{exe,lib,dist}/**/*,*.md}'] +
         Dir[
-          'node_modules/prettier/{package.json,index.js,doc.js,bin-prettier.js,third-party.js,parser-*.js}'
+          'node_modules/prettier/{package.json,index.js,cli.js,doc.js,bin-prettier.js,third-party.js,parser-*.js}'
         ]
     end
 
