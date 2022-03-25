@@ -6,7 +6,11 @@ const skippable = [
   "hash",
   "heredoc",
   "lambda",
-  "regexp_literal"
+  "qsymbols",
+  "qwords",
+  "regexp_literal",
+  "symbols",
+  "words"
 ];
 
 function skipAssignIndent(node: Ruby.AnyNode): boolean {

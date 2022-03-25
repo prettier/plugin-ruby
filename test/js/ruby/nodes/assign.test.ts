@@ -64,6 +64,21 @@ describe("assign", () => {
       );
     });
 
+    describe("assignments from quotewords and similar", () => {
+      const cases = ["w", "W", "i", "I"];
+
+      test.each(cases)("x = %s[...] is not force-indented", (literal) => {
+        expect(`a = %${literal}[${long} ${long}]`).toChangeFormat(
+          ruby(`
+            a = %${literal}[
+              ${long}
+              ${long}
+            ]
+          `)
+        );
+      });
+    });
+
     test("chained methods on array literals don't get oddly indented", () => {
       expect(`a = [${long}].freeze`).toChangeFormat(
         ruby(`
@@ -83,6 +98,40 @@ describe("assign", () => {
           }.freeze
         `)
       );
+    });
+
+    describe("assignment operators", () => {
+      // some but not all
+      const operators = ["||", "&&", "+", "*", "%", "**", "<<"];
+
+      test.each(operators)("array %s= [...] is not force-indented", (op) => {
+        expect(`a ${op}= [${long}, ${long}, ${long}]`).toChangeFormat(
+          ruby(`
+            a ${op}= [
+              ${long},
+              ${long},
+              ${long}
+            ]
+          `)
+        );
+      });
+
+      test.each(operators)("hash %s= { ... } is not force-indented", (op) => {
+        expect(
+          `a ${op}= { a: ${long}, b: ${long}, c: ${long} }`
+        ).toChangeFormat(
+          ruby(`
+          a ${op}= {
+            a:
+              ${long},
+            b:
+              ${long},
+            c:
+              ${long}
+          }
+          `)
+        );
+      });
     });
   });
 
