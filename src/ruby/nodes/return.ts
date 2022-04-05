@@ -42,6 +42,7 @@ function canSkipParens(paren: Ruby.Paren) {
 export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
   const node = path.getValue();
   let parts: Plugin.Doc | Plugin.Doc[] = "";
+  let joining = false;
 
   if (node.args.type === "args_add_block") {
     const args = node.args.args;
@@ -83,20 +84,23 @@ export const printReturn: Plugin.Printer<Ruby.Return> = (path, opts, print) => {
     // possible that you're printing an array nested under some parentheses, in
     // which case we still want to descend down that far. For example,
     // return([1, 2, 3]) should print as return 1, 2, 3.
-    parts = (path as any).call(print, ...steps);
+    parts = (path as any).call((targetPath: Plugin.Path<Ruby.AnyNode>) => {
+      const target = targetPath.getValue();
+      joining = target.type === "args" || target.type === "args_add_block";
+
+      return print(targetPath);
+    }, ...steps);
   }
 
   // If we didn't hit any of our special cases, then just print out the
   // arguments normally here.
   if (parts === "") {
     parts = path.call(print, "args");
+    joining = true;
   }
 
   const useBrackets = Array.isArray(parts) && parts.length > 1;
-
-  // If we got the value straight out of the parens, then `parts` would only
-  // be a singular doc as opposed to an array.
-  const value = Array.isArray(parts) ? join([",", line], parts) : parts;
+  const value = joining ? join([",", line], parts) : parts;
 
   return group([
     "return",

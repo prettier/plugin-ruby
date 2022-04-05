@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - [#1042](https://github.com/prettier/plugin-ruby/issues/1042) - JoshuaKGoldberg, kddnewton - Ensure blocks are printed correctly when there are trailing comments on the `do` keyword.
 - [#1134](https://github.com/prettier/plugin-ruby/pull/1134) - mhssmnn - Fix piping for STDIN to the gem process.
 - [#1167](https://github.com/prettier/plugin-ruby/pull/1167) - dleavitt - More consistent assignment indentation.
+- [#1074](https://github.com/prettier/plugin-ruby/issues/1074) - wagenet, kddnewton - Fix up `return` when nodes return arrays of docs.
 
 ### Removed
 
