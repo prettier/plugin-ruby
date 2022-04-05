@@ -18,7 +18,7 @@ export type MethodParams = {
 };
 
 export type MethodSignature = {
-  type_params: string[],
+  type_params: Param[],
   type: MethodParams & { return_type: Type },
   block: { required: boolean } & MethodSignature
 };
@@ -74,13 +74,14 @@ export type MethodDefinition = Member & { member: "method_definition" };
 
 export type Param = {
   name: string,
-  skip_validation: boolean,
+  unchecked: boolean,
   variance: "invariant" | "covariant" | "contravariant"
+  upper_bound?: Type, 
 };
 
 export type NameAndTypeParams = {
   name: string,
-  type_params: { params: Param[] }
+  type_params: Param[]
 };
 
 export type Class = { declaration: "class", super_class?: NameAndArgs, members: Member[] } & NameAndTypeParams;

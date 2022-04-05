@@ -447,30 +447,32 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
       path: Plugin.Path<RBS.NameAndTypeParams>,
       node: RBS.NameAndTypeParams
     ) {
-      if (node.type_params.params.length === 0) {
+      if (node.type_params.length === 0) {
         return node.name;
       }
 
-      const docs = path.map(
-        (paramPath) => {
-          const node = paramPath.getValue();
-          const parts = [];
+      const docs = path.map((paramPath) => {
+        const node = paramPath.getValue();
+        const parts = [];
 
-          if (node.skip_validation) {
-            parts.push("unchecked");
-          }
+        if (node.unchecked) {
+          parts.push("unchecked");
+        }
 
-          if (node.variance === "covariant") {
-            parts.push("out");
-          } else if (node.variance === "contravariant") {
-            parts.push("in");
-          }
+        if (node.variance === "covariant") {
+          parts.push("out");
+        } else if (node.variance === "contravariant") {
+          parts.push("in");
+        }
 
+        if (node.upper_bound) {
+          const path = paramPath as Plugin.Path<{ upper_bound: RBS.Type }>;
+          const upperBound = path.call(printType, "upper_bound");
+          return join(" ", [...parts, node.name, "<", upperBound]);
+        } else {
           return join(" ", [...parts, node.name]);
-        },
-        "type_params",
-        "params"
-      );
+        }
+      }, "type_params");
 
       return [node.name, "[", join(", ", docs), "]"];
     }
@@ -568,7 +570,9 @@ const printer: Plugin.PrinterConfig<RBS.AnyNode> = {
 
       // We won't have a type_params key if we're printing a block
       if (node.type_params && node.type_params.length > 0) {
-        parts.push("[", join(", ", node.type_params), "] ");
+        const typeParamNames = node.type_params.map((tp) => tp.name);
+
+        parts.push("[", join(", ", typeParamNames), "] ");
       }
 
       const params = path.call(printMethodParams, "type");

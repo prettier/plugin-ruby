@@ -47,6 +47,26 @@ describe("rbs", () => {
       expect(content).toMatchFormat();
     });
 
+    if (atLeastVersion("3.1")) {
+      test("interface with bounded type param", () => {
+        const content = rbs(`
+          interface _Foo[A < B]
+          end
+        `);
+
+        expect(content).toMatchFormat();
+      });
+
+      test("interface with fancy bounded type params", () => {
+        const content = rbs(`
+          interface _Foo[U < singleton(::Hash), V < W[X, Y]]
+          end
+        `);
+
+        expect(content).toMatchFormat();
+      });
+    }
+
     test("class", () => {
       const content = rbs(`
         class Foo
@@ -73,6 +93,26 @@ describe("rbs", () => {
 
       expect(content).toMatchFormat();
     });
+
+    if (atLeastVersion("3.1")) {
+      test("class with bounded type param", () => {
+        const content = rbs(`
+          class Foo[A < B]
+          end
+        `);
+
+        expect(content).toMatchFormat();
+      });
+
+      test("class with fancy bounded type params", () => {
+        const content = rbs(`
+          class Foo[U < singleton(::Hash), V < W[X, Y]]
+          end
+        `);
+
+        expect(content).toMatchFormat();
+      });
+    }
 
     test("class with annotations", () => {
       const content = rbs(`
