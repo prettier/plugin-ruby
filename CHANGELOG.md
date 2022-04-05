@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- kddnewton - The ability to set the `PRETTIER_RUBY_TIMEOUT_MS` environment variable to control how long to wait for the parser server to spin up.
+
 ### Changed
 
 - [#1028](https://github.com/prettier/plugin-ruby/issues/1028) - levymetal, kddnewton - Fix up some nested formatting with very complicated RSpec assertions.
