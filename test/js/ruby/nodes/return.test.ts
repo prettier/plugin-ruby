@@ -92,4 +92,12 @@ describe("return", () => {
 
     expect(content).toMatchFormat();
   });
+
+  test("returning a value with a modifier if", () => {
+    const content = ruby(`
+      return :inactive if given_date.before?(first_event_date)
+    `);
+
+    expect(content).toMatchFormat();
+  });
 });
