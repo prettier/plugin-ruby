@@ -1,6 +1,6 @@
 {
   "name": "@prettier/plugin-ruby",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "prettier plugin for the Ruby programming language",
   "main": "dist/plugin.js",
   "scripts": {

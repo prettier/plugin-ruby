@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [2.1.0] - 2022-04-04
+
 ### Added
 
 - [#1065](https://github.com/prettier/plugin-ruby/issues/1065) - langalex, kddnewton - The ability to set the `PRETTIER_RUBY_TIMEOUT_MS` environment variable to control how long to wait for the parser server to spin up.
@@ -1206,7 +1208,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.0.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/prettier/plugin-ruby/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc4...v2.0.0
 [2.0.0-rc4]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc3...v2.0.0-rc4
 [2.0.0-rc3]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc2...v2.0.0-rc3
