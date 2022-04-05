@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ### Added
 
-- kddnewton - The ability to set the `PRETTIER_RUBY_TIMEOUT_MS` environment variable to control how long to wait for the parser server to spin up.
+- [#1065](https://github.com/prettier/plugin-ruby/issues/1065) - langalex, kddnewton - The ability to set the `PRETTIER_RUBY_TIMEOUT_MS` environment variable to control how long to wait for the parser server to spin up.
+- [#1173](https://github.com/prettier/plugin-ruby/pull/1173) - dleavitt - Support for RBS 2.x on Ruby 3.1.
 
 ### Changed
 
