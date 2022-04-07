@@ -1,3 +1,3 @@
 { foo: Integer }
-{ foo: untyped, 3 => 'hoge' }
+{ foo: untyped, 3 => "hoge" }
 { :+ => 1 }

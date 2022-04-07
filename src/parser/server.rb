@@ -11,10 +11,8 @@ module Prettier
 end
 
 require_relative '../ruby/parser'
-require_relative '../rbs/parser'
-# require_relative '../haml/parser'
-
 require 'syntax_tree/haml'
+require 'syntax_tree/rbs'
 
 # Make sure we trap these signals to be sure we get the quit command coming from
 # the parent node process
@@ -83,7 +81,7 @@ listener =
           when 'ruby'
             PrettierSyntaxTree.parse(source)
           when 'rbs'
-            Prettier::RBSParser.parse(source)
+            SyntaxTree::RBS.format(source)
           when 'haml'
             SyntaxTree::Haml.format(source)
           end

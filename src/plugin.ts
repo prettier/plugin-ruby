@@ -1,11 +1,33 @@
 import rubyPrinter from "./ruby/printer";
 import rubyParser from "./ruby/parser";
 
-import rbsPrinter from "./rbs/printer";
-import rbsParser from "./rbs/parser";
-
 import parseSync from "./parser/parseSync";
 import type { Plugin } from "./types";
+
+const rbsParser: Plugin.Parser<string> = {
+  parse(text) {
+    return parseSync("rbs", text);
+  },
+  astFormat: "rbs",
+  hasPragma(text) {
+    return /^\s*#[^\S\n]*@(format|prettier)\s*(\n|$)/.test(text);
+  },
+  locStart() {
+    return 0;
+  },
+  locEnd() {
+    return 0;
+  }
+};
+
+const rbsPrinter: Plugin.PrinterConfig<string> = {
+  print(path) {
+    return path.getValue();
+  },
+  insertPragma(text) {
+    return `# @format${text[0] === "#" ? "\n" : "\n\n"}${text}`;
+  }
+};
 
 const hamlParser: Plugin.Parser<string> = {
   parse(text) {
