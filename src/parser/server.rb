@@ -12,7 +12,9 @@ end
 
 require_relative '../ruby/parser'
 require_relative '../rbs/parser'
-require_relative '../haml/parser'
+# require_relative '../haml/parser'
+
+require 'syntax_tree/haml'
 
 # Make sure we trap these signals to be sure we get the quit command coming from
 # the parent node process
@@ -79,11 +81,11 @@ listener =
           when 'ping'
             'pong'
           when 'ruby'
-            SyntaxTree.parse(source)
+            PrettierSyntaxTree.parse(source)
           when 'rbs'
             Prettier::RBSParser.parse(source)
           when 'haml'
-            Prettier::HAMLParser.parse(source)
+            SyntaxTree::Haml.format(source)
           end
 
         if response
@@ -91,7 +93,7 @@ listener =
         else
           socket.write('{ "error": true }')
         end
-      rescue SyntaxTree::ParseError => error
+      rescue PrettierSyntaxTree::ParseError => error
         loc = { start: { line: error.lineno, column: error.column } }
         socket.write(JSON.fast_generate(error: error.message, loc: loc))
       rescue StandardError => error
