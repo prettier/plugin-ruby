@@ -44,7 +44,7 @@ describe("tag", () => {
   });
 
   test("dynamic attributes (ruby hash)", () => {
-    const content = haml("%div{data: { controller: 'lesson-evaluation' }}");
+    const content = haml(`%div{data: { controller: "lesson-evaluation" }}`);
 
     expect(content).toMatchFormat();
   });
@@ -62,7 +62,7 @@ describe("tag", () => {
 
     test("hash label, single quote", () => {
       const content = haml(`%section(xml:lang="en" title="title")`);
-      const expected = "%section{'xml:lang': 'en', title: 'title'}";
+      const expected = `%section{"xml:lang": "en", title: "title"}`;
 
       expect(content).toChangeFormat(expected);
     });
@@ -80,23 +80,6 @@ describe("tag", () => {
       expect(content).toMatchFormat();
     });
 
-    test("hash rocket, single quote", () => {
-      const content = haml(`%section(xml:lang="en" title="title")`);
-      const expected = `%section{:'xml:lang' => 'en', :title => 'title'}`;
-
-      expect(content).toChangeFormat(expected, { rubyHashLabel: false });
-    });
-
-    test("hash rocket, double quote", () => {
-      const content = haml(`%section(xml:lang="en" title="title")`);
-      const expected = '%section{:"xml:lang" => "en", :title => "title"}';
-
-      expect(content).toChangeFormat(expected, {
-        rubyHashLabel: false,
-        rubySingleQuote: false
-      });
-    });
-
     test("non-strings", () => {
       const content = haml(`%section(foo=1 bar=2)`);
       const expected = `%section(foo=1 bar=2)`;
@@ -105,7 +88,7 @@ describe("tag", () => {
     });
 
     test("attributes prefixed with @", () => {
-      expect(haml("%span{'@click': 'open = true'}")).toMatchFormat();
+      expect(haml(`%span{"@click": "open = true"}`)).toMatchFormat();
     });
   });
 

@@ -4,8 +4,33 @@ import rubyParser from "./ruby/parser";
 import rbsPrinter from "./rbs/printer";
 import rbsParser from "./rbs/parser";
 
-import hamlPrinter from "./haml/printer";
-import hamlParser from "./haml/parser";
+import parseSync from "./parser/parseSync";
+import type { Plugin } from "./types";
+
+const hamlParser: Plugin.Parser<string> = {
+  parse(text) {
+    return parseSync("haml", text);
+  },
+  astFormat: "haml",
+  hasPragma(text) {
+    return /^\s*-#\s*@(prettier|format)/.test(text);
+  },
+  locStart() {
+    return 0;
+  },
+  locEnd() {
+    return 0;
+  }
+};
+
+const hamlPrinter: Plugin.PrinterConfig<string> = {
+  print(path) {
+    return path.getValue();
+  },
+  insertPragma(text) {
+    return `-# @format${text.startsWith("-#") ? "\n" : "\n\n"}${text}`;
+  }
+};
 
 /*
  * metadata mostly pulled from linguist and rubocop:

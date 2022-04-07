@@ -3,7 +3,7 @@
 require 'ripper'
 # require_relative 'syntax_tree/version'
 
-class SyntaxTree < Ripper
+class PrettierSyntaxTree < Ripper
   # Represents a line in the source. If this class is being used, it means that
   # every character in the string is 1 byte in length, so we can just return the
   # start of the line + the index.
