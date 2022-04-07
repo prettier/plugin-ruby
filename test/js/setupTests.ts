@@ -1,10 +1,17 @@
 import prettier from "prettier";
+import type * as Prettier from "prettier";
 
-import type { Plugin } from "../../src/types";
 import type { Code } from "./types";
 import plugin from "../../src/plugin";
 
-type Config = Partial<Plugin.Options>;
+type Config = Partial<Prettier.ParserOptions<any> & {
+  printer: Omit<Prettier.Printer, "printComment"> & { printComment: () => any },
+  rubyArrayLiteral: boolean,
+  rubyHashLabel: boolean,
+  rubyModifier: boolean,
+  rubySingleQuote: boolean,
+  rubyToProc: boolean
+}>;
 
 function normalize(code: Code) {
   const string = typeof code === "string" ? code : code.code;
