@@ -37,18 +37,10 @@ describe("hash", () => {
     );
   });
 
-  test("breaking with trailing commas", () => {
-    const expected = `{\n  ${long}:\n    ${long},\n}`;
-
-    expect(`{ ${long}: ${long} }`).toChangeFormat(expected, {
-      trailingComma: "all"
-    });
-  });
-
   describe("heredocs as values", () => {
     test("as the first value", () => {
       const content = ruby(`
-        { foo: <<~HERE, bar: 'bar' }
+        { foo: <<~HERE, bar: "bar" }
           this is the heredoc
         HERE
       `);
@@ -58,7 +50,7 @@ describe("hash", () => {
 
     test("as the last value", () => {
       const content = ruby(`
-        { foo: 'foo', bar: <<~HERE }
+        { foo: "foo", bar: <<~HERE }
           this is the heredoc
         HERE
       `);
@@ -66,23 +58,9 @@ describe("hash", () => {
       expect(content).toMatchFormat();
     });
 
-    test("with trailing commas", () => {
-      const content = ruby(`
-        {
-          foo:
-            ${long},
-          bar: <<~HERE,
-            this is the heredoc
-          HERE
-        }
-      `);
-
-      expect(content).toMatchFormat({ trailingComma: "all" });
-    });
-
     test("when exceeding line length", () => {
       const content = ruby(`
-        { foo: '${long}', bar: <<~HERE }
+        { foo: "${long}", bar: <<~HERE }
           this is the heredoc
         HERE
       `);
@@ -90,7 +68,7 @@ describe("hash", () => {
       const expected = ruby(`
         {
           foo:
-            '${long}',
+            "${long}",
           bar: <<~HERE
           this is the heredoc
         HERE
@@ -103,19 +81,11 @@ describe("hash", () => {
 
   describe("dynamic string keys", () => {
     test("basic", () => {
-      expect(`{ 'foo': 'bar' }`).toMatchFormat();
+      expect(`{ "foo": "bar" }`).toMatchFormat();
     });
 
     test("with interpolation", () => {
       expect(`{ "#{1 + 1}": 2 }`).toMatchFormat();
-    });
-
-    test("basic without hash labels", () => {
-      expect(`{ :'foo' => 'bar' }`).toMatchFormat({ rubyHashLabel: false });
-    });
-
-    test("with interpolation without hash labels", () => {
-      expect(`{ :"#{1 + 1}" => 2 }`).toMatchFormat({ rubyHashLabel: false });
     });
   });
 
@@ -130,44 +100,6 @@ describe("hash", () => {
 
     test("calls", () => {
       expect("foobar(alpha: alpha, beta: beta)").toMatchFormat();
-    });
-
-    test("does not add trailing commas on breaking commands", () => {
-      expect(`foobar ${long}: ${long}, a${long}: a${long}`).toChangeFormat(
-        ruby(`
-          foobar ${long}:
-                   ${long},
-                 a${long}:
-                   a${long}
-        `),
-        { trailingComma: "all" }
-      );
-    });
-
-    test("does not add trailing commas on breaking command calls", () => {
-      expect(`foo.bar ${long}: ${long}, a${long}: a${long}`).toChangeFormat(
-        ruby(`
-          foo.bar ${long}:
-                    ${long},
-                  a${long}:
-                    a${long}
-        `),
-        { trailingComma: "all" }
-      );
-    });
-
-    test("does add trailing commas on breaking calls", () => {
-      expect(`foobar(${long}: ${long}, a${long}: a${long})`).toChangeFormat(
-        ruby(`
-          foobar(
-            ${long}:
-              ${long},
-            a${long}:
-              a${long},
-          )
-        `),
-        { trailingComma: "all" }
-      );
     });
 
     test("breaks contents and parens together", () => {
@@ -188,12 +120,12 @@ describe("hash", () => {
 
   describe("when hash labels allowed", () => {
     test("hash labels stay", () => {
-      expect("{ a: 'a', b: 'b', c: 'c' }").toMatchFormat();
+      expect(`{ a: "a", b: "b", c: "c" }`).toMatchFormat();
     });
 
     test("hash rockets get replaced", () => {
-      expect("{ :a => 'a', :b => 'b', :c => 'c' }").toChangeFormat(
-        "{ a: 'a', b: 'b', c: 'c' }"
+      expect(`{ :a => "a", :b => "b", :c => "c" }`).toChangeFormat(
+        `{ a: "a", b: "b", c: "c" }`
       );
     });
 
@@ -202,61 +134,20 @@ describe("hash", () => {
     });
 
     test("ending in equals stays", () => {
-      expect("{ :foo= => 'bar' }").toMatchFormat();
+      expect(`{ :foo= => "bar" }`).toMatchFormat();
     });
 
     test("starting with non-letter/non-underscore stays", () => {
-      expect("{ :@foo => 'bar' }").toMatchFormat();
+      expect(`{ :@foo => "bar" }`).toMatchFormat();
     });
 
     test("starting with underscore converts", () => {
-      expect("{ :_foo => 'bar' }").toChangeFormat("{ _foo: 'bar' }");
-    });
-  });
-
-  describe("when hash labels disallowed", () => {
-    test("hash labels get replaced", () => {
-      expect("{ a: 'a', b: 'b', c: 'c' }").toChangeFormat(
-        "{ :a => 'a', :b => 'b', :c => 'c' }",
-        {
-          rubyHashLabel: false
-        }
-      );
-    });
-
-    test("hash rockets stay", () => {
-      expect("{ :a => 'a', :b => 'b', :c => 'c' }").toMatchFormat({
-        rubyHashLabel: false
-      });
-    });
-
-    test("hash rockets stay when needed", () => {
-      expect("{ Foo => 1, Bar => 2 }").toMatchFormat({
-        rubyHashLabel: false
-      });
-    });
-
-    test("ending in equals stays", () => {
-      expect("{ :foo= => 'bar' }").toMatchFormat({
-        rubyHashLabel: false
-      });
-    });
-
-    test("starting with non-letter/non-underscore stays", () => {
-      expect("{ :@foo => 'bar' }").toMatchFormat({
-        rubyHashLabel: false
-      });
-    });
-
-    test("starting with underscore stays", () => {
-      expect("{ :_foo => 'bar' }").toMatchFormat({
-        rubyHashLabel: false
-      });
+      expect(`{ :_foo => "bar" }`).toChangeFormat(`{ _foo: "bar" }`);
     });
   });
 
   test("prints hashes with consistent keys", () => {
-    expect("{ a: 'a', b => 'b' }").toChangeFormat("{ :a => 'a', b => 'b' }");
+    expect(`{ a: "a", b => "b" }`).toChangeFormat(`{ :a => "a", b => "b" }`);
   });
 
   test("print hashes with correct braces when contents fits", () => {
@@ -306,14 +197,14 @@ describe("hash", () => {
   test("splits if the key has a comment attached", () => {
     const content = ruby(`
       items = {
-        :'foo-bar'=> # Inline comment
+        :"foo-bar"=> # Inline comment
           baz,
       }
     `);
 
     const expected = ruby(`
       items = {
-        'foo-bar': # Inline comment
+        "foo-bar": # Inline comment
           baz
       }
     `);

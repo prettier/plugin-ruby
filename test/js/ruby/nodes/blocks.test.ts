@@ -26,19 +26,19 @@ describe("blocks", () => {
   });
 
   test("multi-line on command, no body", () => {
-    expect("command 'foobar' do\nend").toMatchFormat();
+    expect(`command "foobar" do\nend`).toMatchFormat();
   });
 
   test("multi-line on command call, no body", () => {
-    expect("command.call 'foobar' do\nend").toMatchFormat();
+    expect(`command.call "foobar" do\nend`).toMatchFormat();
   });
 
   test("multi-line on command, with body", () => {
-    expect("command 'foobar' do\n  foo\nend").toMatchFormat();
+    expect(`command "foobar" do\n  foo\nend`).toMatchFormat();
   });
 
   test("multi-line on command call, with body", () => {
-    expect("command.call 'foobar' do\n  foo\nend").toMatchFormat();
+    expect(`command.call "foobar" do\n  foo\nend`).toMatchFormat();
   });
 
   test("blocks nested inside commands use braces", () => {
@@ -124,7 +124,7 @@ describe("blocks", () => {
       ruby(`
         assert_nil(
           (
-            'a'.sub! 'b' do
+            "a".sub! "b" do
             end&.foo do
             end
           )

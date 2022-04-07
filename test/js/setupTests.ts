@@ -5,12 +5,7 @@ import type { Code } from "./types";
 import plugin from "../../src/plugin";
 
 type Config = Partial<Prettier.ParserOptions<any> & {
-  printer: Omit<Prettier.Printer, "printComment"> & { printComment: () => any },
-  rubyArrayLiteral: boolean,
-  rubyHashLabel: boolean,
-  rubyModifier: boolean,
-  rubySingleQuote: boolean,
-  rubyToProc: boolean
+  printer: Omit<Prettier.Printer, "printComment"> & { printComment: () => any }
 }>;
 
 function normalize(code: Code) {

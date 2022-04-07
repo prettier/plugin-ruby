@@ -10,7 +10,7 @@ describe("array", () => {
   });
 
   test("does not transform single string arrays", () => {
-    expect("['a']").toMatchFormat();
+    expect(`["a"]`).toMatchFormat();
   });
 
   test("does not transform single symbol arrays", () => {
@@ -18,43 +18,35 @@ describe("array", () => {
   });
 
   test("transforms basic string arrays", () => {
-    expect("['a', 'b', 'c', 'd', 'e']").toChangeFormat("%w[a b c d e]");
+    expect(`["a", "b", "c", "d", "e"]`).toChangeFormat("%w[a b c d e]");
   });
 
   test("does not transform string arrays with interpolation", () => {
-    expect(`['a', "#{b}", 'c']`).toMatchFormat();
+    expect(`["a", "#{b}", "c"]`).toMatchFormat();
   });
 
   test("does not transform string arrays with spaces", () => {
-    expect("['a', 'b c', 'd', 'e']").toMatchFormat();
+    expect(`["a", "b c", "d", "e"]`).toMatchFormat();
   });
 
   test("does not transform string arrays with tabs", () => {
-    expect(`['a', "b\\tc", 'd', 'e']`).toMatchFormat();
+    expect(`["a", "b\\tc", "d", "e"]`).toMatchFormat();
   });
 
   test("does not transform string arrays with newlines", () => {
-    expect(`['a', "b\\nc", 'd', 'e']`).toMatchFormat();
+    expect(`["a", "b\\nc", "d", "e"]`).toMatchFormat();
   });
 
   test("does not transform string arrays with carriage returns", () => {
-    expect(`['a', "b\\rc", 'd', 'e']`).toMatchFormat();
+    expect(`["a", "b\\rc", "d", "e"]`).toMatchFormat();
   });
 
   test("does not transform string arrays with interpolation", () => {
-    expect(`['a', "b#{c}d", 'e']`).toMatchFormat();
+    expect(`["a", "b#{c}d", "e"]`).toMatchFormat();
   });
 
   test("does not transform string arrays with brackets", () => {
-    expect(`['a [] b', 'c [] d']`).toMatchFormat();
-  });
-
-  test("does not transform string arrays if disabled", () => {
-    expect(`['a', 'b']`).toMatchFormat({ rubyArrayLiteral: false });
-  });
-
-  test("does not transform symbol arrays if disabled", () => {
-    expect("[:a, :b]").toMatchFormat({ rubyArrayLiteral: false });
+    expect(`["a [] b", "c [] d"]`).toMatchFormat();
   });
 
   test("transforms basic symbol arrays", () => {
@@ -62,7 +54,7 @@ describe("array", () => {
   });
 
   test("does not transform symbol arrays with dynamic symbols", () => {
-    expect("[:'a + b']").toMatchFormat();
+    expect(`[:"a + b"]`).toMatchFormat();
   });
 
   test("handles splats", () => {
@@ -83,13 +75,6 @@ describe("array", () => {
     `);
 
     expect(contents).toMatchFormat();
-  });
-
-  test("adds trailing commas when requested", () => {
-    const before = `[${long}, ${long}, ${long}]`;
-    const after = `[\n  ${long},\n  ${long},\n  ${long},\n]`;
-
-    expect(before).toChangeFormat(after, { trailingComma: "all" });
   });
 
   test("breaking maintains calls on the end", () => {
@@ -125,19 +110,6 @@ describe("array", () => {
       `);
 
       expect(content).toMatchFormat();
-    });
-
-    test("with trailing commas", () => {
-      const content = ruby(`
-        [
-          ${long},
-          <<~HERE,
-            this is the heredoc
-          HERE
-        ]
-      `);
-
-      expect(content).toMatchFormat({ trailingComma: "all" });
     });
   });
 

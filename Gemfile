@@ -1,11 +1,8 @@
 # frozen_string_literal: true
 
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
 gemspec
 
-gem 'bundler', '~> 2.1'
-gem 'haml', '~> 5.2'
-gem 'minitest', '~> 5.14'
-gem 'rake', '~> 13.0'
-gem 'rbs', '~> 1.0'
+gem "syntax_tree", path: "../../ruby-syntax-tree/syntax_tree"
+gem "rbs", "~> 2"

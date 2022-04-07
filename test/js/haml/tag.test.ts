@@ -71,7 +71,7 @@ describe("tag", () => {
       const content = haml(`%section(xml:lang="en" title="title")`);
       const expected = `%section{"xml:lang": "en", title: "title"}`;
 
-      expect(content).toChangeFormat(expected, { rubySingleQuote: false });
+      expect(content).toChangeFormat(expected);
     });
 
     test("hash label, single quote, interpolation", () => {

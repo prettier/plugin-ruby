@@ -22,11 +22,11 @@ describe("alias", () => {
   });
 
   test("dynamic symbols do not get transformed (left)", () => {
-    expect("alias :'foo' :bar").toChangeFormat("alias :'foo' bar");
+    expect(`alias :"foo" :bar`).toChangeFormat(`alias :"foo" bar`);
   });
 
   test("dynamic symbols do not get transformed (right)", () => {
-    expect("alias :foo :'bar'").toChangeFormat("alias foo :'bar'");
+    expect(`alias :foo :"bar"`).toChangeFormat(`alias foo :"bar"`);
   });
 
   test("global aliases", () => {

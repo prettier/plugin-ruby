@@ -9,13 +9,7 @@ about: Issues for ugly or incorrect code
 - Ruby version: latest
 - Node version: latest
 - `@prettier/plugin-ruby` or `prettier` gem version: latest
-- Options:
-  - `rubyArrayLiteral` - `true`
-  - `rubyHashLabel` - `true`
-  - `rubyModifier` - `true`
-  - `rubySingleQuote` - `true`
-  - `rubyToProc` - `false`
-  - `trailingComma` - `"none"`
+- `syntax_tree` version: latest
 
 ## Input
 

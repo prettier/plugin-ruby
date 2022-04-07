@@ -2,11 +2,11 @@ import { long, ruby } from "../../utils";
 
 describe.each(["BEGIN", "END"])("%s hook", (hook) => {
   test("shortens to one line", () => {
-    expect(`${hook} {\n  p 'hook'\n}`).toChangeFormat(`${hook} { p 'hook' }`);
+    expect(`${hook} {\n  p "hook"\n}`).toChangeFormat(`${hook} { p "hook" }`);
   });
 
   test("maintains single lines", () => {
-    expect(`${hook} { p 'hook' }`).toMatchFormat();
+    expect(`${hook} { p "hook" }`).toMatchFormat();
   });
 
   test("maintains multi line", () => {
@@ -20,7 +20,7 @@ describe.each(["BEGIN", "END"])("%s hook", (hook) => {
   test("does not move comments on the declaration", () => {
     const content = ruby(`
       ${hook} { # comment
-        p 'hook'
+        p "hook"
       }
     `);
 

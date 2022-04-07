@@ -37,9 +37,9 @@ describe("case", () => {
   test("breaking with multiple predicates, one when", () => {
     const content = ruby(`
       case foo
-      when '${long}',
-           'a${long}',
-           'b${long}'
+      when "${long}",
+           "a${long}",
+           "b${long}"
         bar
       end
     `);
@@ -50,15 +50,15 @@ describe("case", () => {
   test("breaking with multiple predicates, each one not too long", () => {
     const content = ruby(`
       case foo
-      when '${long.slice(0, 40)}', '${long.slice(0, 40)}'
+      when "${long.slice(0, 40)}", "${long.slice(0, 40)}"
         bar
       end
     `);
 
     const expected = ruby(`
       case foo
-      when '${long.slice(0, 40)}',
-           '${long.slice(0, 40)}'
+      when "${long.slice(0, 40)}",
+           "${long.slice(0, 40)}"
         bar
       end
     `);

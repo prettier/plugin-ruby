@@ -21,7 +21,17 @@ Gem::Specification.new do |spec|
         ]
     end
 
+  spec.required_ruby_version = '>= 2.7.3'
+
   spec.bindir = 'exe'
   spec.executables = 'rbprettier'
   spec.require_paths = %w[lib]
+
+  # spec.add_dependency 'syntax_tree'
+  spec.add_dependency 'syntax_tree-haml'
+  spec.add_dependency 'syntax_tree-rbs'
+
+  spec.add_development_dependency 'bundler'
+  spec.add_development_dependency 'minitest'
+  spec.add_development_dependency 'rake'
 end

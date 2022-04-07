@@ -10,7 +10,7 @@ describe("encoding", () => {
   });
 
   test("string literals", () => {
-    expect(`${header}\n'ひらがな'`).toMatchFormat();
+    expect(`${header}\n"ひらがな"`).toMatchFormat();
   });
 
   test("regexp literals", () => {

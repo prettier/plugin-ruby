@@ -13,9 +13,9 @@ jobs:
           - ubuntu-latest
           - windows-latest
         ruby:
-          - "2.6"
-          - "2.7"
+          - "2.7.5"
           - "3.0"
+          - "3.1"
     runs-on: ${{ matrix.platform }}
     env:
       PLUGIN_RUBY_CI: true
@@ -73,7 +73,7 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-          ruby-version: "3.0"
+          ruby-version: "3.1"
       - uses: actions/setup-node@v2
         with:
           node-version: 12.x
@@ -106,7 +106,7 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-          ruby-version: "3.0"
+          ruby-version: "3.1"
       - uses: actions/setup-node@v2
         with:
           node-version: 12.x

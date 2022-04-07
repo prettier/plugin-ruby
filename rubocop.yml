@@ -13,7 +13,7 @@ Layout:
 Layout/LineLength:
   Enabled: true
 
-Style/MultilineIfModifier: # rubyModifier
+Style/MultilineIfModifier:
   Enabled: false
 
 # When method chains with multiple blocks are chained together, rubocop will let
@@ -23,19 +23,19 @@ Style/MultilineIfModifier: # rubyModifier
 Style/MultilineBlockChain:
   Enabled: false
 
-Style/SymbolArray: # rubyArrayLiteral
+Style/SymbolArray:
   Enabled: false
 
-Style/WordArray: # rubyArrayLiteral
+Style/WordArray:
   Enabled: false
 
-Style/TrailingCommaInArguments: # trailingComma
+Style/TrailingCommaInArguments:
   Enabled: false
 
-Style/TrailingCommaInArrayLiteral: # trailingComma
+Style/TrailingCommaInArrayLiteral:
   Enabled: false
 
-Style/TrailingCommaInHashLiteral: # trailingComma
+Style/TrailingCommaInHashLiteral:
   Enabled: false
 
 # lambdas that are constructed with the lambda method call cannot be safely
