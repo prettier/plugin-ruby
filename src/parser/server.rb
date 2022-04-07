@@ -6,11 +6,7 @@ require 'json'
 require 'fileutils'
 require 'open3'
 
-# Ensure the parent module is defined before requiring the parsers.
-module Prettier
-end
-
-require_relative '../ruby/parser'
+require 'syntax_tree'
 require 'syntax_tree/haml'
 require 'syntax_tree/rbs'
 
@@ -79,7 +75,7 @@ listener =
           when 'ping'
             'pong'
           when 'ruby'
-            PrettierSyntaxTree.parse(source)
+            SyntaxTree.format(source)
           when 'rbs'
             SyntaxTree::RBS.format(source)
           when 'haml'
@@ -91,7 +87,7 @@ listener =
         else
           socket.write('{ "error": true }')
         end
-      rescue PrettierSyntaxTree::ParseError => error
+      rescue SyntaxTree::Parser::ParseError => error
         loc = { start: { line: error.lineno, column: error.column } }
         socket.write(JSON.fast_generate(error: error.message, loc: loc))
       rescue StandardError => error

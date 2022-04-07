@@ -1,8 +1,4 @@
-import type { Parser, Plugin, SupportLanguage } from "prettier";
-
-import rubyPrinter from "./ruby/printer";
-import rubyParser from "./ruby/parser";
-
+import type { Plugin, SupportLanguage } from "prettier";
 import parseSync from "./parser/parseSync";
 
 interface ExtendedSupportLanguage extends SupportLanguage {
@@ -93,7 +89,21 @@ const plugin: ExtendedPlugin = {
     }
   ],
   parsers: {
-    ruby: rubyParser as Parser<any>,
+    ruby: {
+      parse(text) {
+        return parseSync("ruby", text);
+      },
+      astFormat: "ruby",
+      hasPragma(text) {
+        return /^\s*#[^\S\n]*@(?:prettier|format)\s*?(?:\n|$)/m.test(text);
+      },
+      locStart() {
+        return 0;
+      },
+      locEnd() {
+        return 0;
+      }
+    },
     rbs: {
       parse(text) {
         return parseSync("rbs", text);
@@ -126,7 +136,14 @@ const plugin: ExtendedPlugin = {
     }
   },
   printers: {
-    ruby: rubyPrinter,
+    ruby: {
+      print(path) {
+        return path.getValue();
+      },
+      insertPragma(text) {
+        return `# @format${text.startsWith("#") ? "\n" : "\n\n"}${text}`;
+      },
+    },
     rbs: {
       print(path) {
         return path.getValue();
