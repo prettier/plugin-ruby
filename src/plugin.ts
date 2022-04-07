@@ -1,65 +1,24 @@
+import type { Parser, Plugin, SupportLanguage } from "prettier";
+
 import rubyPrinter from "./ruby/printer";
 import rubyParser from "./ruby/parser";
 
 import parseSync from "./parser/parseSync";
-import type { Plugin } from "./types";
 
-const rbsParser: Plugin.Parser<string> = {
-  parse(text) {
-    return parseSync("rbs", text);
-  },
-  astFormat: "rbs",
-  hasPragma(text) {
-    return /^\s*#[^\S\n]*@(format|prettier)\s*(\n|$)/.test(text);
-  },
-  locStart() {
-    return 0;
-  },
-  locEnd() {
-    return 0;
-  }
-};
+interface ExtendedSupportLanguage extends SupportLanguage {
+  interpreters?: string[]
+}
 
-const rbsPrinter: Plugin.PrinterConfig<string> = {
-  print(path) {
-    return path.getValue();
-  },
-  insertPragma(text) {
-    return `# @format${text[0] === "#" ? "\n" : "\n\n"}${text}`;
-  }
-};
-
-const hamlParser: Plugin.Parser<string> = {
-  parse(text) {
-    return parseSync("haml", text);
-  },
-  astFormat: "haml",
-  hasPragma(text) {
-    return /^\s*-#\s*@(prettier|format)/.test(text);
-  },
-  locStart() {
-    return 0;
-  },
-  locEnd() {
-    return 0;
-  }
-};
-
-const hamlPrinter: Plugin.PrinterConfig<string> = {
-  print(path) {
-    return path.getValue();
-  },
-  insertPragma(text) {
-    return `-# @format${text.startsWith("-#") ? "\n" : "\n\n"}${text}`;
-  }
-};
+interface ExtendedPlugin extends Omit<Plugin, "languages"> {
+  languages: ExtendedSupportLanguage[]
+}
 
 /*
  * metadata mostly pulled from linguist and rubocop:
  * https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
  * https://github.com/rubocop/rubocop/blob/master/spec/rubocop/target_finder_spec.rb
  */
-const plugin = {
+const plugin: ExtendedPlugin = {
   languages: [
     {
       name: "Ruby",
@@ -134,14 +93,56 @@ const plugin = {
     }
   ],
   parsers: {
-    ruby: rubyParser,
-    rbs: rbsParser,
-    haml: hamlParser
+    ruby: rubyParser as Parser<any>,
+    rbs: {
+      parse(text) {
+        return parseSync("rbs", text);
+      },
+      astFormat: "rbs",
+      hasPragma(text) {
+        return /^\s*#[^\S\n]*@(prettier|format)\s*(\n|$)/.test(text);
+      },
+      locStart() {
+        return 0;
+      },
+      locEnd() {
+        return 0;
+      }
+    },
+    haml: {
+      parse(text) {
+        return parseSync("haml", text);
+      },
+      astFormat: "haml",
+      hasPragma(text) {
+        return /^\s*-#\s*@(prettier|format)/.test(text);
+      },
+      locStart() {
+        return 0;
+      },
+      locEnd() {
+        return 0;
+      }
+    }
   },
   printers: {
     ruby: rubyPrinter,
-    rbs: rbsPrinter,
-    haml: hamlPrinter
+    rbs: {
+      print(path) {
+        return path.getValue();
+      },
+      insertPragma(text) {
+        return `# @format${text.startsWith("#") ? "\n" : "\n\n"}${text}`;
+      }
+    },
+    haml: {
+      print(path) {
+        return path.getValue();
+      },
+      insertPragma(text) {
+        return `-# @format${text.startsWith("-#") ? "\n" : "\n\n"}${text}`;
+      }
+    }
   },
   options: {
     rubyArrayLiteral: {
