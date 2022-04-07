@@ -1,5 +1,5 @@
 import type { Plugin, SupportLanguage } from "prettier";
-import parseSync from "./parser/parseSync";
+import parseSync from "./parseSync";
 
 interface ExtendedSupportLanguage extends SupportLanguage {
   interpreters?: string[]

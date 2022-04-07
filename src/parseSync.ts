@@ -77,16 +77,9 @@ function spawnServer(): ParserArgs {
     // the Ruby server or the getInfo.js script directly.  Instead, we need to copy them and all
     // the files they depend on to a temporary directory.
 
-    const sourceFiles = [
-      "parser/server.rb",
-      "parser/getInfo.js",
-      "parser/netcat.js",
-      "ruby/parser.rb",
-      "rbs/parser.rb",
-      "haml/parser.rb"
-    ];
-    serverRbPath = path.join(tempDir, "parser", "server.rb");
-    getInfoJsPath = path.join(tempDir, "parser", "getInfo.js");
+    const sourceFiles = ["server.rb", "getInfo.js", "netcat.js"];
+    serverRbPath = path.join(tempDir, "server.rb");
+    getInfoJsPath = path.join(tempDir, "getInfo.js");
 
     sourceFiles.forEach((rubyFile) => {
       const destDir = path.join(tempDir, path.dirname(rubyFile));
