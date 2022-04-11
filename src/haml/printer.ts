@@ -31,7 +31,7 @@ function printHashKey(key: string, opts: Plugin.Options) {
   let quoted = key;
   const joiner = opts.rubyHashLabel ? ":" : " =>";
 
-  if (key.includes(":") || key.includes("-") || key.includes('@')) {
+  if (key.includes(":") || key.includes("-") || key.includes("@")) {
     const quote = opts.rubySingleQuote ? "'" : '"';
     quoted = `${quote}${key}${quote}`;
   }
