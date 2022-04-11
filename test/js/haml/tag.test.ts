@@ -106,6 +106,8 @@ describe("tag", () => {
 
     test("attributes prefixed with @", () => {
       expect(haml("%span{'@click': 'open = true'}")).toMatchFormat();
+      expect(haml("%span{'@click.outside': 'open = true'}")).toMatchFormat();
+      expect(haml("%span{'@keydown.arrow-up.prevent': 'open = true'}")).toMatchFormat();
     });
   });
 

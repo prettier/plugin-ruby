@@ -44,12 +44,6 @@ class Haml::Parser::ParseNode
         if hash
           # Explicitly not using Enumerable#to_h here to support Ruby 2.5
           hash.each_with_object({}) do |(key, value), response|
-            # For attributes that starts with @, wrap the attribute in quotes
-            # For other attributes, remove the quotes
-            # AlpineJS uses @-attributes
-            # {'type': 'submit'} => {type: 'submit'}
-            # {'@click': 'open'} => {'@click': 'open'}
-            key = "\'#{key}\'" if key.start_with?('@')
             response[key] = parse_value(value, level + 1)
           end
         else
