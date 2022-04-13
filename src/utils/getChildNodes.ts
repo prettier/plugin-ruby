@@ -8,12 +8,13 @@ function throwBadNode(node: AnyNode) {
   throw new Error(`Unknown node ${node.type}`);
 }
 
-function getChildNodes(node: AnyNode): ChildNode[] {
+function getChildNodes(node: AnyNode | Ruby.Comment): ChildNode[] {
   switch (node.type) {
     case "CHAR":
     case "__end__":
     case "backref":
     case "backtick":
+    case "comment":
     case "const":
     case "cvar":
     case "float":

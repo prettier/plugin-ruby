@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Changed
+
+- [#1198](https://github.com/prettier/plugin-ruby/issues/1198) - pas-f, kddnewton - Fix crashes on JRuby with do blocks.
+
 ## [2.1.0] - 2022-04-04
 
 ### Added

@@ -19,7 +19,10 @@ require_relative '../haml/parser'
 quit = false
 trap(:INT) { quit = true }
 trap(:TERM) { quit = true }
-trap(:QUIT) { quit = true } if Signal.list.key?('QUIT')
+
+if Signal.list.key?('QUIT') && RUBY_ENGINE != 'jruby'
+  trap(:QUIT) { quit = true }
+end
 
 # The information variable stores the actual connection information, which will
 # either be an IP address and port or a path to a unix socket file.

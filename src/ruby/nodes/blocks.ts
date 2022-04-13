@@ -49,8 +49,17 @@ type Block = Ruby.BraceBlock | Ruby.DoBlock;
 function printBlock(braces: boolean): Plugin.Printer<Block> {
   return function printBlockWithBraces(path, opts, print) {
     const node = path.getValue();
-    const stmts: Ruby.AnyNode[] =
-      node.type === "brace_block" ? node.stmts.body : node.bodystmt.stmts.body;
+    let stmts: Ruby.AnyNode[];
+
+    if (node.type === "brace_block") {
+      stmts = node.stmts.body;
+    } else if ((node as any).bodystmt.type === "statements") {
+      // This is here to fix an issue in JRuby where it doesn't correctly
+      // support rescue/else/ensure inside blocks.
+      stmts = (node as any).bodystmt.body;
+    } else {
+      stmts = node.bodystmt.stmts.body;
+    }
 
     let doBlockBody: Plugin.Doc = "";
     if (
