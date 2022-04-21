@@ -59,7 +59,16 @@ describe("blocks", () => {
       end.to_i
     `);
 
-    expect(content).toMatchFormat();
+    const expected = ruby(`
+      method
+        .each do |foo|
+          bar
+          baz
+        end
+        .to_i
+    `);
+
+    expect(content).toChangeFormat(expected);
   });
 
   test("doesn't do weird things with comments", () => {

@@ -218,7 +218,12 @@ describe("comments", () => {
         .baz
     `);
 
-    expect(content).toMatchFormat();
+    const expected = ruby(`
+      foo.bar # comment
+        .baz
+    `);
+
+    expect(content).toChangeFormat(expected);
   });
 
   describe("declaration style comments", () => {

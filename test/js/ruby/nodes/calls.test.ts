@@ -75,8 +75,9 @@ describe("calls", () => {
     test("basic chains", () => {
       const content = ruby(`
         sig do
-          params(contacts: Contact::ActiveRecord_Relation)
-            .returns(Customer::ActiveRecord_Relation)
+          params(contacts: Contact::ActiveRecord_Relation).returns(
+            Customer::ActiveRecord_Relation
+          )
         end
       `);
 
@@ -141,12 +142,11 @@ describe("calls", () => {
     const content = `result = [${item}, ${item}, ${item}].map(&:foo?).bbb.ccc`;
 
     const expected = ruby(`
-      result =
-        [
-          ${item},
-          ${item},
-          ${item}
-        ].map(&:foo?).bbb.ccc
+      result = [
+        ${item},
+        ${item},
+        ${item}
+      ].map(&:foo?).bbb.ccc
     `);
 
     expect(content).toChangeFormat(expected);
