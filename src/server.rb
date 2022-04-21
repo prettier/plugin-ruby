@@ -68,7 +68,27 @@ listener =
 
       # Start up a new thread that will handle each successive connection.
       Thread.new(server.accept_nonblock) do |socket|
-        parser, source = socket.read.force_encoding('UTF-8').split('|', 2)
+        parser, source = socket.read.split('|', 2)
+
+        # First, ensure we get the right encoding for this string.
+        encoding =
+          source.each_line do |line|
+            # Skip past the first line if it contains a shebang so that we get
+            # to the encoding line.
+            next if line.start_with?("#!")
+
+            # If the line isn't an encoding magic comment, we're going to
+            # default to UTF-8.
+            break "UTF-8" unless line.include?("coding")
+
+            # Otherwise, we're going to use Ripper to try to extract out the
+            # encoding from the magic comment.
+            break Ripper.new(line).tap(&:parse).encoding
+          end
+
+        # Now that we have our guessed encoding, we're going to force it into
+        # the string so that it gets parsed correctly.
+        source = source.force_encoding(encoding)
 
         response =
           case parser
