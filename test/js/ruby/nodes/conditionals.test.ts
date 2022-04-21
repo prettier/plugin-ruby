@@ -27,32 +27,32 @@ describe("conditionals", () => {
   describe("modifiers", () => {
     describe.each(["if", "unless"])("%s keyword", (keyword) => {
       test("when modifying an assignment expression", () => {
-        const content = `text = '${long}' ${keyword} text`;
+        const content = `text = "${long}" ${keyword} text`;
         const expected = ruby(`
           text =
-            '${long}' ${keyword} text
+            "${long}" ${keyword} text
         `);
 
         expect(content).toChangeFormat(expected);
       });
 
       test("when modifying an abbreviated assignment expression", () => {
-        const content = `text ||= '${long}' ${keyword} text`;
+        const content = `text ||= "${long}" ${keyword} text`;
         const expected = ruby(`
           text ||=
-            '${long}' ${keyword} text
+            "${long}" ${keyword} text
         `);
 
         expect(content).toChangeFormat(expected);
       });
 
       test("when modifying an expression with an assignment descendant", () => {
-        const content = `true && (text = '${long}') ${keyword} text`;
+        const content = `true && (text = "${long}") ${keyword} text`;
         const expected = ruby(`
           true &&
             (
               text =
-                '${long}'
+                "${long}"
             ) ${keyword} text
         `);
 
@@ -541,7 +541,7 @@ describe("conditionals", () => {
       test("lower precendence operators", () => {
         const content = ruby(`
           if x.nil?
-            puts 'nil' and return
+            puts "nil" and return
           else
             x
           end
@@ -654,8 +654,8 @@ describe("conditionals", () => {
   if (atLeastVersion("3.0")) {
     test.each(["if", "unless"])("%s with pattern matching", (keyword) => {
       const content = ruby(`
-        user = { role: 'admin', login: 'matz' }
-        puts "admin: #{name}" ${keyword} user in { role: 'admin', name: }
+        user = { role: "admin", login: "matz" }
+        puts "admin: #{name}" ${keyword} user in { role: "admin", name: }
       `);
 
       expect(content).toMatchFormat();
