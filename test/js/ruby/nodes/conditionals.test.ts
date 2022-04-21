@@ -129,7 +129,6 @@ describe("conditionals", () => {
       test("empty first body with present second body", () => {
         const content = ruby(`
           ${keyword} a
-
           else
             b
           end
