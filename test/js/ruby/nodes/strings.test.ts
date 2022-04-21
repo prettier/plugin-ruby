@@ -118,7 +118,7 @@ describe("strings", () => {
   });
 
   test("concatenation", () => {
-    expect(`'abc' \\\n  'def' \\\n  'ghi'`).toMatchFormat();
+    expect(`"abc" \\\n  "def" \\\n  "ghi"`).toMatchFormat();
   });
 
   describe("interpolation", () => {
@@ -235,7 +235,7 @@ describe("strings", () => {
     });
 
     test("%s literal with false interpolation", () => {
-      expect("%s[abc#{d}]").toChangeFormat(`:"abc#{d}"`);
+      expect("%s[abc#{d}]").toChangeFormat(`:'abc#{d}'`);
     });
 
     test("%s literal as hash key", () => {
