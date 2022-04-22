@@ -320,7 +320,6 @@ The comment in the above example should stay in place.
 
 ```ruby
 begin
-
 rescue Foo, Bar
   # comment
 end
@@ -476,7 +475,8 @@ return (a or b) if c?
 - kddnewton - Support for the `nokw_param` node for specifying when methods should no accept keywords, as in:
 
 ```ruby
-def foo(**nil); end
+def foo(**nil)
+end
 ```
 
 - kddnewton - Support for the `args_forward` node for forwarding all types of arguments, as in:
@@ -522,9 +522,9 @@ will now be printed as:
 
 ```ruby
 Config::Download.new(
-  'prettier',
-  filename: 'prettier.yml',
-  url: 'https://raw.githubusercontent.com/...'
+  "prettier",
+  filename: "prettier.yml",
+  url: "https://raw.githubusercontent.com/..."
 ).perform
 ```
 

@@ -59,9 +59,9 @@ d = [
   30_643_069_058
 ]
 a, s = [], $*[0]
-s.each_byte { |b| a << ('%036b' % d[b.chr.to_i]).scan(/\d{6}/) }
+s.each_byte { |b| a << ("%036b" % d[b.chr.to_i]).scan(/\d{6}/) }
 a.transpose.each do |a|
-  a.join.each_byte { |i| print i == 49 ? ($*[1] || '#') : 32.chr }
+  a.join.each_byte { |i| printi == 49 ? ($*[1] || "#") : 32.chr }
   puts
 end
 ```
@@ -83,7 +83,7 @@ This plugin currently supports formatting the following kinds of files:
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'prettier'
+gem "prettier"
 ```
 
 And then execute:
@@ -128,11 +128,11 @@ The `prettier` executable is now installed and ready for use:
 
 Below are the options (from [`src/plugin.js`](src/plugin.js)) that `@prettier/plugin-ruby` currently supports:
 
-| API Option         | CLI Option             | Default  | Description                                                                                                                          |
-| ------------------ | ---------------------- | :------: | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `printWidth`       | `--print-width`        |   `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).                                     |
-| `requirePragma`    | `--require-pragma`     | `false`  | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#require-pragma)).                                  |
-| `tabWidth`         | `--tab-width`          |   `2`    | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).                                       |
+| API Option      | CLI Option         | Default | Description                                                                                         |
+| --------------- | ------------------ | :-----: | --------------------------------------------------------------------------------------------------- |
+| `printWidth`    | `--print-width`    |  `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).    |
+| `requirePragma` | `--require-pragma` | `false` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#require-pragma)). |
+| `tabWidth`      | `--tab-width`      |   `2`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).      |
 
 Any of these can be added to your existing [prettier configuration
 file](https://prettier.io/docs/en/configuration.html). For example:

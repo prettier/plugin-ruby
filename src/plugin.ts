@@ -2,11 +2,11 @@ import type { Plugin, SupportLanguage } from "prettier";
 import parseSync from "./parseSync";
 
 interface ExtendedSupportLanguage extends SupportLanguage {
-  interpreters?: string[]
+  interpreters?: string[];
 }
 
 interface ExtendedPlugin extends Omit<Plugin, "languages"> {
-  languages: ExtendedSupportLanguage[]
+  languages: ExtendedSupportLanguage[];
 }
 
 /*
@@ -142,7 +142,7 @@ const plugin: ExtendedPlugin = {
       },
       insertPragma(text) {
         return `# @format${text.startsWith("#") ? "\n" : "\n\n"}${text}`;
-      },
+      }
     },
     rbs: {
       print(path) {

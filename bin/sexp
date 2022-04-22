@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
-require_relative '../src/ruby/parser'
+require_relative "../src/ruby/parser"
 
 source =
   if !ARGV[0]
-    File.read('test.rb')
+    File.read("test.rb")
   elsif File.file?(ARGV[0])
     File.read(ARGV[0])
   else
@@ -13,7 +13,7 @@ source =
 
 parsed = SyntaxTree.parse(source)
 
-puts '=== SOURCE === '
+puts "=== SOURCE === "
 puts source
 
 puts "\n=== COMMENTS ==="

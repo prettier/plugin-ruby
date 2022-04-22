@@ -1,23 +1,23 @@
 #!/usr/bin/env ruby
 
-require 'bundler/inline'
+require "bundler/inline"
 
 gemfile do
-  source 'https://rubygems.org'
-  gem 'sinatra', require: 'sinatra/base'
-  gem 'webrick'
+  source "https://rubygems.org"
+  gem "sinatra", require: "sinatra/base"
+  gem "webrick"
 end
 
-require_relative '../src/ruby/parser'
+require_relative "../src/ruby/parser"
 
 class App < Sinatra::Base
   HTML = DATA.read
 
-  get '/' do
+  get "/" do
     HTML
   end
 
-  post '/ast' do
+  post "/ast" do
     response = Prettier::Parser.parse(request.body.read)
     response ? JSON.fast_generate(response) : halt(422)
   rescue Prettier::Parser::ParserError

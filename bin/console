@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'bundler/setup'
-require 'prettier'
+require "bundler/setup"
+require "prettier"
 
-require 'irb'
+require "irb"
 IRB.start(__FILE__)

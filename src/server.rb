@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require 'bundler/setup'
-require 'socket'
-require 'json'
-require 'fileutils'
-require 'open3'
+require "bundler/setup"
+require "socket"
+require "json"
+require "fileutils"
+require "open3"
 
-require 'syntax_tree'
-require 'syntax_tree/haml'
-require 'syntax_tree/rbs'
+require "syntax_tree"
+require "syntax_tree/haml"
+require "syntax_tree/rbs"
 
 # Make sure we trap these signals to be sure we get the quit command coming from
 # the parent node process
@@ -16,13 +16,13 @@ quit = false
 trap(:INT) { quit = true }
 trap(:TERM) { quit = true }
 
-if Signal.list.key?('QUIT') && RUBY_ENGINE != 'jruby'
+if Signal.list.key?("QUIT") && RUBY_ENGINE != "jruby"
   trap(:QUIT) { quit = true }
 end
 
 # The information variable stores the actual connection information, which will
 # either be an IP address and port or a path to a unix socket file.
-information = ''
+information = ""
 
 # The candidates array is a list of potential programs that could be used to
 # connect to our server. We'll run through them after the server starts to find
@@ -32,7 +32,7 @@ candidates = []
 if Gem.win_platform?
   # If we're on windows, we're going to start up a TCP server. The 0 here means
   # to bind to some available port.
-  server = TCPServer.new('127.0.0.1', 0)
+  server = TCPServer.new("127.0.0.1", 0)
   address = server.local_address
 
   # Ensure that we close the server when this process exits.
@@ -54,7 +54,7 @@ else
   end
 
   information = server.local_address.unix_path
-  candidates = ['nc -w 3 -U', 'ncat -w 3 -U']
+  candidates = ["nc -w 3 -U", "ncat -w 3 -U"]
 end
 
 # This is the actual listening thread that will be acting as our server. We have
@@ -68,23 +68,30 @@ listener =
 
       # Start up a new thread that will handle each successive connection.
       Thread.new(server.accept_nonblock) do |socket|
-        parser, source = socket.read.split('|', 2)
+        parser, source = socket.read.split("|", 2)
 
-        # First, ensure we get the right encoding for this string.
-        encoding =
-          source.each_line do |line|
-            # Skip past the first line if it contains a shebang so that we get
-            # to the encoding line.
-            next if line.start_with?("#!")
+        # First, ensure we get the right encoding for this string. To do this
+        # we're going to find all of the comments at the top of the file first
+        # that contain comments. Then we'll pass them through ripper to find the
+        # encoding.
+        lines = []
 
-            # If the line isn't an encoding magic comment, we're going to
-            # default to UTF-8.
-            break "UTF-8" unless line.include?("coding")
-
-            # Otherwise, we're going to use Ripper to try to extract out the
-            # encoding from the magic comment.
-            break Ripper.new(line).tap(&:parse).encoding
+        source.each_line do |line|
+          if line.start_with?(/\s*#/)
+            lines << line
+          else
+            break
           end
+        end
+
+        # We're going to default to UTF-8 in case we can't find the correct
+        # encoding.
+        encoding = "UTF-8"
+        comments = lines.join
+
+        if comments.include?("coding")
+          encoding = Ripper.new(comments).tap(&:parse).encoding
+        end
 
         # Now that we have our guessed encoding, we're going to force it into
         # the string so that it gets parsed correctly.
@@ -92,20 +99,20 @@ listener =
 
         response =
           case parser
-          when 'ping'
-            'pong'
-          when 'ruby'
+          when "ping"
+            "pong"
+          when "ruby"
             SyntaxTree.format(source)
-          when 'rbs'
+          when "rbs"
             SyntaxTree::RBS.format(source)
-          when 'haml'
+          when "haml"
             SyntaxTree::Haml.format(source)
           end
 
         if response
           socket.write(JSON.fast_generate(response))
         else
-          socket.write('{ "error": true }')
+          socket.write("{ \"error\": true }")
         end
       rescue SyntaxTree::Parser::ParseError => error
         loc = { start: { line: error.lineno, column: error.column } }
@@ -137,9 +144,9 @@ candidates.map! do |candidate|
 
     # We do not care about stderr here, so throw it away
     stdout, _stderr, status =
-      Open3.capture3("#{candidate} #{information}", stdin_data: 'ping')
+      Open3.capture3("#{candidate} #{information}", stdin_data: "ping")
 
-    candidate if JSON.parse(stdout) == 'pong' && status.exitstatus == 0
+    candidate if JSON.parse(stdout) == "pong" && status.exitstatus == 0
   rescue StandardError
     # We don't actually care if this fails, because we'll just skip that
     # connection option.
@@ -155,7 +162,7 @@ prefix =
 
 # Default to running the netcat.js script that we ship with the plugin. It's a
 # good fallback as it will always work, but it is slower than the other options.
-prefix ||= "node #{File.expand_path('netcat.js', __dir__)}"
+prefix ||= "node #{File.expand_path("netcat.js", __dir__)}"
 
 # Write out our connection information to the file given as the first argument
 # to this script.

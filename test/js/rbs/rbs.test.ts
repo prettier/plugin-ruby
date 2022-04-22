@@ -235,11 +235,15 @@ describe("rbs", () => {
     });
 
     test("unescapes double quotes when using single quotes", () => {
-      expect(rbs(`T: "super \\" duper"`)).toChangeFormat(`T: "super \\" duper"`);
+      expect(rbs(`T: "super \\" duper"`)).toChangeFormat(
+        `T: "super \\" duper"`
+      );
     });
 
     test("unescapes single quotes when using double quotes", () => {
-      expect(rbs(`T: 'super \\' duper'`)).toChangeFormat(`T: 'super \\' duper'`);
+      expect(rbs(`T: 'super \\' duper'`)).toChangeFormat(
+        `T: 'super \\' duper'`
+      );
     });
 
     test("maintains escape sequences when using double quotes", () => {
