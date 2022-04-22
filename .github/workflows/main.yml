@@ -59,8 +59,8 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - macos-latest
-          - ubuntu-latest
+          # - macos-latest
+          # - ubuntu-latest
           - windows-latest
         yarn:
           - 2.x
