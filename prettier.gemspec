@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
 
   spec.files =
     Dir.chdir(__dir__) do
-      %w[LICENSE bin/console package.json rubocop.yml] +
+      %w[LICENSE package.json rubocop.yml] +
         Dir["{{exe,lib,src}/**/*,*.md}"] +
         Dir[
           "node_modules/prettier/{package.json,index.js,cli.js,doc.js,bin-prettier.js,third-party.js,parser-*.js}"
