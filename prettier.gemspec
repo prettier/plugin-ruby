@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "syntax_tree"
   spec.add_dependency "syntax_tree-haml"
-  spec.add_dependency "syntax_tree-rbs"
+  spec.add_dependency "syntax_tree-rbs", ">= 0.2.0"
   spec.add_dependency "rbs", "~> 2"
 
   spec.add_development_dependency "bundler"
