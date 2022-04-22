@@ -27,9 +27,10 @@ Gem::Specification.new do |spec|
   spec.executables = 'rbprettier'
   spec.require_paths = %w[lib]
 
-  # spec.add_dependency 'syntax_tree'
+  spec.add_dependency 'syntax_tree'
   spec.add_dependency 'syntax_tree-haml'
   spec.add_dependency 'syntax_tree-rbs'
+  spec.add_dependency 'rbs', '~> 2'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'minitest'
