@@ -7,9 +7,9 @@ function getInferredParser(filename) {
   const filepath = path.join(__dirname, filename);
   const fileInfoOptions = { plugins: [plugin] };
 
-  return prettier.getFileInfo(filepath, fileInfoOptions).then(
-    ({ inferredParser }) => inferredParser
-  );
+  return prettier
+    .getFileInfo(filepath, fileInfoOptions)
+    .then(({ inferredParser }) => inferredParser);
 }
 
 describe("files", () => {
