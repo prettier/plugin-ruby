@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
-require 'json' unless defined?(JSON)
-require 'open3'
+require "json" unless defined?(JSON)
+require "open3"
 
 module Prettier
-  PLUGIN = -File.expand_path('..', __dir__)
-  BINARY = -File.join(PLUGIN, 'node_modules', 'prettier', 'bin-prettier.js')
-  VERSION = -JSON.parse(File.read(File.join(PLUGIN, 'package.json')))['version']
+  PLUGIN = -File.expand_path("..", __dir__)
+  BINARY = -File.join(PLUGIN, "node_modules", "prettier", "bin-prettier.js")
+  VERSION = -JSON.parse(File.read(File.join(PLUGIN, "package.json")))["version"]
 
   def self.run(args)
-    quoted = args.map { |arg| arg.start_with?('-') ? arg : "\"#{arg}\"" }
-    command = "node #{BINARY} --plugin \"#{PLUGIN}\" #{quoted.join(' ')}"
+    quoted = args.map { |arg| arg.start_with?("-") ? arg : "\"#{arg}\"" }
+    command = "node #{BINARY} --plugin \"#{PLUGIN}\" #{quoted.join(" ")}"
 
     stdout, stderr, status =
-      Open3.capture3({ 'RBPRETTIER' => '1' }, command, stdin_data: STDIN)
+      Open3.capture3({ "RBPRETTIER" => "1" }, command, stdin_data: STDIN)
     STDOUT.puts(stdout)
 
     # If we completed successfully, then just exit out.
@@ -30,7 +30,7 @@ module Prettier
         If you installed this dependency through git instead of from rubygems,
         it does not install the necessary files by default. To fix this you can
         either install them yourself by cd-ing into the directory where this gem
-        is located (#{File.expand_path('..', __dir__)}) and running:
+        is located (#{File.expand_path("..", __dir__)}) and running:
           
           `yarn && yarn prepublishOnly`
            or

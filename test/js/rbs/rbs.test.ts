@@ -223,13 +223,11 @@ describe("rbs", () => {
     });
 
     test("uses default quotes", () => {
-      expect(rbs("T: 'foo'")).toMatchFormat();
+      expect(rbs(`T: "foo"`)).toMatchFormat();
     });
 
     test("changes quotes to match", () => {
-      expect(rbs("T: 'foo'")).toChangeFormat(`T: "foo"`, {
-        rubySingleQuote: false
-      });
+      expect(rbs("T: 'foo'")).toChangeFormat(`T: "foo"`);
     });
 
     test("keeps string the same when there is an escape sequence", () => {
@@ -237,13 +235,15 @@ describe("rbs", () => {
     });
 
     test("unescapes double quotes when using single quotes", () => {
-      expect(rbs(`T: "super \\" duper"`)).toChangeFormat(`T: 'super " duper'`);
+      expect(rbs(`T: "super \\" duper"`)).toChangeFormat(
+        `T: "super \\" duper"`
+      );
     });
 
     test("unescapes single quotes when using double quotes", () => {
-      expect(rbs(`T: 'super \\' duper'`)).toChangeFormat(`T: "super ' duper"`, {
-        rubySingleQuote: false
-      });
+      expect(rbs(`T: 'super \\' duper'`)).toChangeFormat(
+        `T: 'super \\' duper'`
+      );
     });
 
     test("maintains escape sequences when using double quotes", () => {

@@ -33,7 +33,7 @@ describe("patterns", () => {
     cases.push("[*, 0, *]", "[*, 0, 1, 2, *]", "FooBar[*, 0, *]");
 
     test("rassign", () => {
-      const content = "{ db: { user: 'John' } } => { db: { user: } }";
+      const content = `{ db: { user: "John" } } => { db: { user: } }`;
 
       expect(content).toMatchFormat();
     });

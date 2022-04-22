@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-$:.unshift(File.expand_path(File.join('..', 'lib'), __dir__))
-require 'prettier'
+$:.unshift(File.expand_path(File.join("..", "lib"), __dir__))
+require "prettier"
 
 exit(Prettier.run(ARGV))

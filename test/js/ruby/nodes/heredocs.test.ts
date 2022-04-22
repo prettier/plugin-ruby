@@ -240,7 +240,7 @@ describe("heredocs", () => {
           foo
         FOO
         ${long}:
-          'bar'
+          "bar"
       )
     `);
 
@@ -256,7 +256,7 @@ describe("heredocs", () => {
     `);
 
     const expected = ruby(`
-      puts(<<~TEXT) { 'sample block' }
+      puts(<<~TEXT) { "sample block" }
         Hello
       TEXT
     `);
@@ -279,7 +279,7 @@ describe("heredocs", () => {
 
     const expected = ruby(`
       scope :late_for_checkin,
-            -> { select(<<~EOS.squish).data_push.having('something') }
+            -> { select(<<~EOS.squish).data_push.having("something") }
             some complicated query here
           EOS
     `);
@@ -308,7 +308,7 @@ describe("heredocs", () => {
 
   test("call w/ short breakable arg after heredoc literal", () => {
     const content = ruby(`
-      p(<<-BAR, ['value', 'value', 125_484, 0o24024103])
+      p(<<-BAR, ["value", "value", 125_484, 0o24024103])
         text
       BAR
     `);
@@ -321,12 +321,12 @@ describe("heredocs", () => {
       call(1, 2, 3, <<-HERE) do
         foo
       HERE
-        puts 'more code'
+        puts "more code"
       end
     `);
 
     const expected = ruby(`
-      call(1, 2, 3, <<-HERE) { puts 'more code' }
+      call(1, 2, 3, <<-HERE) { puts "more code" }
         foo
       HERE
     `);
@@ -346,7 +346,7 @@ describe("heredocs", () => {
 
   test("in parens args with trailing args after", () => {
     const content = ruby(`
-      Foo.new(<<-ARG1, 'test2')
+      Foo.new(<<-ARG1, "test2")
         test1 line 1
         test1 line 2
       ARG1
@@ -357,7 +357,7 @@ describe("heredocs", () => {
 
   test("in paren args with a call", () => {
     const content = ruby(`
-      Foo.new(<<~ARG1.upcase.chomp, 'test2')
+      Foo.new(<<~ARG1.upcase.chomp, "test2")
         test1 line 1
         test1 line 2
       ARG1

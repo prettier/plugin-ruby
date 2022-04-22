@@ -59,9 +59,9 @@ d = [
   30_643_069_058
 ]
 a, s = [], $*[0]
-s.each_byte { |b| a << ('%036b' % d[b.chr.to_i]).scan(/\d{6}/) }
+s.each_byte { |b| a << ("%036b" % d[b.chr.to_i]).scan(/\d{6}/) }
 a.transpose.each do |a|
-  a.join.each_byte { |i| print i == 49 ? ($*[1] || '#') : 32.chr }
+  a.join.each_byte { |i| printi == 49 ? ($*[1] || "#") : 32.chr }
   puts
 end
 ```
@@ -83,7 +83,7 @@ This plugin currently supports formatting the following kinds of files:
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'prettier'
+gem "prettier"
 ```
 
 And then execute:
@@ -128,31 +128,25 @@ The `prettier` executable is now installed and ready for use:
 
 Below are the options (from [`src/plugin.js`](src/plugin.js)) that `@prettier/plugin-ruby` currently supports:
 
-| API Option         | CLI Option             | Default  | Description                                                                                                                          |
-| ------------------ | ---------------------- | :------: | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `printWidth`       | `--print-width`        |   `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).                                     |
-| `requirePragma`    | `--require-pragma`     | `false`  | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#require-pragma)).                                  |
-| `rubyArrayLiteral` | `--ruby-array-literal` |  `true`  | When possible, favor the use of string and symbol array literals.                                                                    |
-| `rubyHashLabel`    | `--ruby-hash-label`    |  `true`  | When possible, uses the shortened hash key syntax, as opposed to hash rockets.                                                       |
-| `rubyModifier`     | `--ruby-modifier`      |  `true`  | When it fits on one line, allows while and until statements to use the modifier form.                                                |
-| `rubySingleQuote`  | `--ruby-single-quote`  |  `true`  | When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals.                        |
-| `rubyToProc`       | `--ruby-to-proc`       | `false`  | When possible, convert blocks to the more concise `Symbol#to_proc` syntax.                                                           |
-| `tabWidth`         | `--tab-width`          |   `2`    | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).                                       |
-| `trailingComma`    | `--trailing-comma`     | `"none"` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#trailing-comma)). `"es5"` is equivalent to `true`. |
+| API Option      | CLI Option         | Default | Description                                                                                         |
+| --------------- | ------------------ | :-----: | --------------------------------------------------------------------------------------------------- |
+| `printWidth`    | `--print-width`    |  `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).    |
+| `requirePragma` | `--require-pragma` | `false` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#require-pragma)). |
+| `tabWidth`      | `--tab-width`      |   `2`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).      |
 
 Any of these can be added to your existing [prettier configuration
 file](https://prettier.io/docs/en/configuration.html). For example:
 
 ```json
 {
-  "rubySingleQuote": false
+  "tabWidth": 4
 }
 ```
 
 Or, they can be passed to `prettier` as arguments:
 
 ```bash
-bundle exec rbprettier --ruby-single-quote false --write '**/*'
+bundle exec rbprettier --tab-width 4 --write '**/*'
 ```
 
 ### Usage with RuboCop

@@ -156,11 +156,11 @@ describe("comments", () => {
     });
 
     test("commands", () => {
-      expect("command 'foo' # this is an inline comment").toMatchFormat();
+      expect(`command "foo" # this is an inline comment`).toMatchFormat();
     });
 
     test("command calls", () => {
-      expect("command.call 'foo' # this is an inline comment").toMatchFormat();
+      expect(`command.call "foo" # this is an inline comment`).toMatchFormat();
     });
   });
 
@@ -186,9 +186,9 @@ describe("comments", () => {
         {
           # these are comments
           # inside of a hash
-          foo: 'bar',
+          foo: "bar",
           # and then some more
-          bar: 'baz'
+          bar: "baz"
         }
       `);
 
@@ -218,7 +218,12 @@ describe("comments", () => {
         .baz
     `);
 
-    expect(content).toMatchFormat();
+    const expected = ruby(`
+      foo.bar # comment
+        .baz
+    `);
+
+    expect(content).toChangeFormat(expected);
   });
 
   describe("declaration style comments", () => {
@@ -244,8 +249,8 @@ describe("comments", () => {
   test("works with multi-byte characters", () => {
     const content = ruby(`
       [
-        ['先生小'], #
-        ['小']
+        ["先生小"], #
+        ["小"]
       ]
     `);
 

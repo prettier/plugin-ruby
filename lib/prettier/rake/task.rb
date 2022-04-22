@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'rake'
-require 'rake/tasklib'
+require "rake"
+require "rake/tasklib"
 
 module Prettier
   module Rake
@@ -35,7 +35,7 @@ module Prettier
       def initialize(name = :prettier)
         @name = name
         @write = true
-        @source_files = 'lib/**/*.rb'
+        @source_files = "lib/**/*.rb"
 
         yield self if block_given?
         define_task
@@ -44,12 +44,12 @@ module Prettier
       private
 
       def define_task
-        desc 'Runs prettier over source files'
+        desc "Runs prettier over source files"
         task(name) { run_task }
       end
 
       def run_task
-        Prettier.run([('--write' if write), source_files].compact)
+        Prettier.run([("--write" if write), source_files].compact)
         exit($?.exitstatus) if $?&.exited?
       end
     end

@@ -1,11 +1,11 @@
 def t: -> void
 def t: -> void | ...
-def t: -> ('a' | 'b' | 'c')
-def t: -> ('a' | 'b' | 'c')?
-def t: -> ('a' & 'b' & 'c')
-def t: -> ('a' & 'b' & 'c')?
-def t: -> ('a' & ('b' | 'c'))
-def t: -> ('a' & ('b' | 'c'))?
+def t: -> ("a" | "b" | "c")
+def t: -> ("a" | "b" | "c")?
+def t: -> ("a" & "b" & "c")
+def t: -> ("a" & "b" & "c")?
+def t: -> ("a" & ("b" | "c"))
+def t: -> ("a" & ("b" | "c"))?
 def self.t: -> void
 def self.t: -> void | ...
 def self?.t: -> void

@@ -98,59 +98,6 @@ describe.each(["while", "until"])("%s", (keyword) => {
     });
   });
 
-  describe("inlines not allowed", () => {
-    test("maintains multiline", () => {
-      expect(`${keyword} a\n  1\nend`).toMatchFormat({ rubyModifier: false });
-    });
-
-    test("transforms to multiline", () => {
-      expect(`1 ${keyword} a`).toChangeFormat(`${keyword} a\n  1\nend`, {
-        rubyModifier: false
-      });
-    });
-
-    test("breaks on large predicates", () => {
-      expect(`${keyword} ${long}\n  1\nend`).toMatchFormat({
-        rubyModifier: false
-      });
-    });
-
-    test("breaks inlines on large predicates", () => {
-      expect(`1 ${keyword} ${long}`).toChangeFormat(
-        `${keyword} ${long}\n  1\nend`,
-        { rubyModifier: false }
-      );
-    });
-
-    test("does not break into block when modifying a begin", () => {
-      const content = ruby(`
-        begin
-          foo
-        end ${keyword} bar
-      `);
-
-      expect(content).toMatchFormat({ rubyModifier: false });
-    });
-
-    test("empty body", () => {
-      const content = ruby(`
-        while foo
-        end
-      `);
-
-      expect(content).toMatchFormat({ rubyModifier: false });
-    });
-
-    test("empty body, long predicate", () => {
-      const content = ruby(`
-        while ${long}
-        end
-      `);
-
-      expect(content).toMatchFormat({ rubyModifier: false });
-    });
-  });
-
   describe.each(["while", "until"])(
     "add parens when necessary %s",
     (keyword) => {

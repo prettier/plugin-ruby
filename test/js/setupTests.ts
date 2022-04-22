@@ -1,23 +1,18 @@
 import prettier from "prettier";
 
-import type { Plugin } from "../../src/types";
 import type { Code } from "./types";
 import plugin from "../../src/plugin";
-
-type Config = Partial<Plugin.Options>;
 
 function normalize(code: Code) {
   const string = typeof code === "string" ? code : code.code;
   return string.replace(/\r?\n/g, "\n").trim();
 }
 
-function checkFormat(before: Code, after: Code, config: Config) {
+function checkFormat(before: Code, after: Code) {
   const originalText = typeof before === "string" ? before : before.code;
   const formatted = prettier.format(originalText, {
     parser: typeof before === "string" ? "ruby" : before.parser,
-    originalText,
-    plugins: [plugin as any as string],
-    ...config
+    plugins: [plugin as any as string]
   });
 
   const expected = normalize(after);
@@ -30,11 +25,11 @@ function checkFormat(before: Code, after: Code, config: Config) {
 }
 
 expect.extend({
-  toChangeFormat(before: Code, after: Code, config: Config = {}) {
-    return checkFormat(before, after, config);
+  toChangeFormat(before: Code, after: Code) {
+    return checkFormat(before, after);
   },
-  toMatchFormat(before: Code, config: Config = {}) {
-    return checkFormat(before, before, config);
+  toMatchFormat(before: Code) {
+    return checkFormat(before, before);
   }
 });
 
@@ -43,8 +38,8 @@ declare global {
   namespace jest {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface Matchers<R> {
-      toChangeFormat(after: Code, config?: Config): CustomMatcherResult;
-      toMatchFormat(config?: Config): CustomMatcherResult;
+      toChangeFormat(after: Code): CustomMatcherResult;
+      toMatchFormat(): CustomMatcherResult;
     }
   }
 }

@@ -1,18 +1,14 @@
 # frozen_string_literal: true
 
-require 'bundler/setup' if ENV['PLUGIN_RUBY_CI']
-require 'socket'
-require 'json'
-require 'fileutils'
-require 'open3'
+require "bundler/setup"
+require "socket"
+require "json"
+require "fileutils"
+require "open3"
 
-# Ensure the parent module is defined before requiring the parsers.
-module Prettier
-end
-
-require_relative '../ruby/parser'
-require_relative '../rbs/parser'
-require_relative '../haml/parser'
+require "syntax_tree"
+require "syntax_tree/haml"
+require "syntax_tree/rbs"
 
 # Make sure we trap these signals to be sure we get the quit command coming from
 # the parent node process
@@ -20,13 +16,13 @@ quit = false
 trap(:INT) { quit = true }
 trap(:TERM) { quit = true }
 
-if Signal.list.key?('QUIT') && RUBY_ENGINE != 'jruby'
+if Signal.list.key?("QUIT") && RUBY_ENGINE != "jruby"
   trap(:QUIT) { quit = true }
 end
 
 # The information variable stores the actual connection information, which will
 # either be an IP address and port or a path to a unix socket file.
-information = ''
+information = ""
 
 # The candidates array is a list of potential programs that could be used to
 # connect to our server. We'll run through them after the server starts to find
@@ -36,7 +32,7 @@ candidates = []
 if Gem.win_platform?
   # If we're on windows, we're going to start up a TCP server. The 0 here means
   # to bind to some available port.
-  server = TCPServer.new('127.0.0.1', 0)
+  server = TCPServer.new("127.0.0.1", 0)
   address = server.local_address
 
   # Ensure that we close the server when this process exits.
@@ -58,7 +54,7 @@ else
   end
 
   information = server.local_address.unix_path
-  candidates = ['nc -w 3 -U', 'ncat -w 3 -U']
+  candidates = ["nc -w 3 -U", "ncat -w 3 -U"]
 end
 
 # This is the actual listening thread that will be acting as our server. We have
@@ -72,26 +68,41 @@ listener =
 
       # Start up a new thread that will handle each successive connection.
       Thread.new(server.accept_nonblock) do |socket|
-        parser, source = socket.read.force_encoding('UTF-8').split('|', 2)
+        parser, source = socket.read.force_encoding("UTF-8").split("|", 2)
+
+        source.each_line do |line|
+          case line
+          when /^\s*#.+?coding/
+            # If we've found an encoding comment, then we're going to take that
+            # into account and reclassify the encoding for the source.
+            encoding = Ripper.new(line).tap(&:parse).encoding
+            source = source.force_encoding(encoding)
+            break
+          when /^\s*#/
+            # continue
+          else
+            break
+          end
+        end
 
         response =
           case parser
-          when 'ping'
-            'pong'
-          when 'ruby'
-            SyntaxTree.parse(source)
-          when 'rbs'
-            Prettier::RBSParser.parse(source)
-          when 'haml'
-            Prettier::HAMLParser.parse(source)
+          when "ping"
+            "pong"
+          when "ruby"
+            SyntaxTree.format(source)
+          when "rbs"
+            SyntaxTree::RBS.format(source)
+          when "haml"
+            SyntaxTree::Haml.format(source)
           end
 
         if response
-          socket.write(JSON.fast_generate(response))
+          socket.write(JSON.fast_generate(response.force_encoding("UTF-8")))
         else
-          socket.write('{ "error": true }')
+          socket.write("{ \"error\": true }")
         end
-      rescue SyntaxTree::ParseError => error
+      rescue SyntaxTree::Parser::ParseError => error
         loc = { start: { line: error.lineno, column: error.column } }
         socket.write(JSON.fast_generate(error: error.message, loc: loc))
       rescue StandardError => error
@@ -121,9 +132,9 @@ candidates.map! do |candidate|
 
     # We do not care about stderr here, so throw it away
     stdout, _stderr, status =
-      Open3.capture3("#{candidate} #{information}", stdin_data: 'ping')
+      Open3.capture3("#{candidate} #{information}", stdin_data: "ping")
 
-    candidate if JSON.parse(stdout) == 'pong' && status.exitstatus == 0
+    candidate if JSON.parse(stdout) == "pong" && status.exitstatus == 0
   rescue StandardError
     # We don't actually care if this fails, because we'll just skip that
     # connection option.
@@ -139,7 +150,7 @@ prefix =
 
 # Default to running the netcat.js script that we ship with the plugin. It's a
 # good fallback as it will always work, but it is slower than the other options.
-prefix ||= "node #{File.expand_path('netcat.js', __dir__)}"
+prefix ||= "node #{File.expand_path("netcat.js", __dir__)}"
 
 # Write out our connection information to the file given as the first argument
 # to this script.

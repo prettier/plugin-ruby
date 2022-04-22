@@ -27,32 +27,32 @@ describe("conditionals", () => {
   describe("modifiers", () => {
     describe.each(["if", "unless"])("%s keyword", (keyword) => {
       test("when modifying an assignment expression", () => {
-        const content = `text = '${long}' ${keyword} text`;
+        const content = `text = "${long}" ${keyword} text`;
         const expected = ruby(`
           text =
-            '${long}' ${keyword} text
+            "${long}" ${keyword} text
         `);
 
         expect(content).toChangeFormat(expected);
       });
 
       test("when modifying an abbreviated assignment expression", () => {
-        const content = `text ||= '${long}' ${keyword} text`;
+        const content = `text ||= "${long}" ${keyword} text`;
         const expected = ruby(`
           text ||=
-            '${long}' ${keyword} text
+            "${long}" ${keyword} text
         `);
 
         expect(content).toChangeFormat(expected);
       });
 
       test("when modifying an expression with an assignment descendant", () => {
-        const content = `true && (text = '${long}') ${keyword} text`;
+        const content = `true && (text = "${long}") ${keyword} text`;
         const expected = ruby(`
           true &&
             (
               text =
-                '${long}'
+                "${long}"
             ) ${keyword} text
         `);
 
@@ -129,7 +129,6 @@ describe("conditionals", () => {
       test("empty first body with present second body", () => {
         const content = ruby(`
           ${keyword} a
-
           else
             b
           end
@@ -227,113 +226,6 @@ describe("conditionals", () => {
         `);
 
         expect(content).toChangeFormat("(bar if foo) || baz");
-      });
-    });
-  });
-
-  describe("when inline not allowed", () => {
-    describe.each(["if", "unless"])("%s keyword", (keyword) => {
-      test("inline changes", () => {
-        expect(`1 ${keyword} a`).toChangeFormat(`${keyword} a\n  1\nend`, {
-          rubyModifier: false
-        });
-      });
-
-      test("multi line stays", () => {
-        expect(`${keyword} a\n  1\nend`).toMatchFormat({
-          rubyModifier: false
-        });
-      });
-
-      test("inline breaking changes", () => {
-        expect(`${long} ${keyword} ${long}`).toChangeFormat(
-          `${keyword} ${long}\n  ${long}\nend`,
-          {
-            rubyModifier: false
-          }
-        );
-      });
-
-      test("multi line breaking stays", () => {
-        expect(`${keyword} ${long}\n  ${long}\nend`).toMatchFormat({
-          rubyModifier: false
-        });
-      });
-
-      test("not operator", () => {
-        expect(`${keyword} not a\n  b\nend`).toMatchFormat({
-          rubyModifier: false
-        });
-      });
-
-      test("not operator parens", () => {
-        expect("not(true)").toMatchFormat();
-      });
-
-      test("empty first body", () => {
-        const content = ruby(`
-          ${keyword} a
-          end
-        `);
-
-        expect(content).toMatchFormat({ rubyModifier: false });
-      });
-
-      test("empty first body with present second body", () => {
-        const content = ruby(`
-          ${keyword} a
-
-          else
-            b
-          end
-        `);
-
-        expect(content).toMatchFormat({ rubyModifier: false });
-      });
-
-      test("comment in body", () => {
-        const content = ruby(`
-          ${keyword} a
-            # comment
-          end
-        `);
-
-        expect(content).toMatchFormat({ rubyModifier: false });
-      });
-
-      test("comment on node in body", () => {
-        const content = ruby(`
-          ${keyword} a
-            break # comment
-          end
-        `);
-
-        expect(content).toMatchFormat({ rubyModifier: false });
-      });
-
-      test("align long predicates", () => {
-        expect(`foo ${keyword} ${long} || ${long}a`).toChangeFormat(
-          ruby(`
-            ${keyword} ${long} ||
-                ${Array(keyword.length).fill("").join(" ")}${long}a
-              foo
-            end
-          `)
-        );
-      });
-
-      test("single line should break up", () => {
-        const content = "foo = if bar? then baz end";
-        const expected = ruby(`
-          foo =
-            if bar?
-              baz
-            end
-        `);
-
-        expect(content).toChangeFormat(expected, {
-          rubyModifier: false
-        });
       });
     });
   });
@@ -649,7 +541,7 @@ describe("conditionals", () => {
       test("lower precendence operators", () => {
         const content = ruby(`
           if x.nil?
-            puts 'nil' and return
+            puts "nil" and return
           else
             x
           end
@@ -762,8 +654,8 @@ describe("conditionals", () => {
   if (atLeastVersion("3.0")) {
     test.each(["if", "unless"])("%s with pattern matching", (keyword) => {
       const content = ruby(`
-        user = { role: 'admin', login: 'matz' }
-        puts "admin: #{name}" ${keyword} user in { role: 'admin', name: }
+        user = { role: "admin", login: "matz" }
+        puts "admin: #{name}" ${keyword} user in { role: "admin", name: }
       `);
 
       expect(content).toMatchFormat();

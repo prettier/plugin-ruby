@@ -3,35 +3,35 @@ import { atLeastVersion, long, ruby } from "../../utils";
 describe("method", () => {
   describe("definitions", () => {
     test("shorthand for empty methods", () => {
-      expect("def foo; end").toMatchFormat();
+      expect("def foo; end").toChangeFormat("def foo\nend");
     });
 
     test("shorthand for empty methods with parens", () => {
-      expect("def foo(); end").toMatchFormat();
+      expect("def foo(); end").toChangeFormat("def foo()\nend");
     });
 
     test("single arg, no parens", () => {
-      expect("def foo bar\nend").toChangeFormat("def foo(bar); end");
+      expect("def foo bar\nend").toChangeFormat("def foo(bar)\nend");
     });
 
     test("single arg, with parens", () => {
-      expect("def foo(bar)\nend").toChangeFormat("def foo(bar); end");
+      expect("def foo(bar)\nend").toMatchFormat();
     });
 
     test("shorthand for empty singleton methods", () => {
-      expect("def self.foo; end").toMatchFormat();
+      expect("def self.foo; end").toChangeFormat("def self.foo\nend");
     });
 
     test("shorthand for empty singleton methods with parens", () => {
-      expect("def self.foo(); end").toMatchFormat();
+      expect("def self.foo(); end").toChangeFormat("def self.foo()\nend");
     });
 
     test("singleton, single arg, no parens", () => {
-      expect("def self.foo bar\nend").toChangeFormat("def self.foo(bar); end");
+      expect("def self.foo bar\nend").toChangeFormat("def self.foo(bar)\nend");
     });
 
     test("singleton, single arg, with parens", () => {
-      expect("def self.foo(bar)\nend").toChangeFormat("def self.foo(bar); end");
+      expect("def self.foo(bar)\nend").toMatchFormat();
     });
 
     test("shorthand with a body", () => {
@@ -41,17 +41,17 @@ describe("method", () => {
     });
 
     test("single splat arg with no name", () => {
-      expect("def foo(*); end").toMatchFormat();
+      expect("def foo(*); end").toChangeFormat("def foo(*)\nend");
     });
 
     test("double splat arg with no name", () => {
-      expect("def foo(**); end").toMatchFormat();
+      expect("def foo(**); end").toChangeFormat("def foo(**)\nend");
     });
 
     test("with helper method", () => {
       const content = ruby(`
         private def foo
-          'bar'
+          "bar"
         end
       `);
 
@@ -61,7 +61,7 @@ describe("method", () => {
     test("with helper method on defs", () => {
       const content = ruby(`
         private def self.foo
-          'bar'
+          "bar"
         end
       `);
 
@@ -71,7 +71,7 @@ describe("method", () => {
     test("every single arg type", () => {
       const content = ruby(`
         def method(req, *rest, post, kwarg:, kwarg_opt: 1, **kwarg_rest, &block)
-          'foo'
+          "foo"
         end
       `);
 
@@ -84,7 +84,8 @@ describe("method", () => {
         def foo(
           ${long}:,
           a${long}:
-        ); end
+        )
+        end
       `);
 
       expect(content).toChangeFormat(expected);
@@ -113,7 +114,7 @@ describe("method", () => {
           **kwarg_rest, # kwarg_rest comment
           &block # block comment
         )
-          'foo'
+          "foo"
         end
       `);
 
@@ -123,9 +124,9 @@ describe("method", () => {
     test("with comments on optional params", () => {
       const content = ruby(`
         def method(
-          optl = 'value' # comment
+          optl = "value" # comment
         )
-          'foo'
+          "foo"
         end
       `);
 
@@ -134,7 +135,7 @@ describe("method", () => {
 
     if (atLeastVersion("2.7")) {
       test("nokw_param", () => {
-        expect("def foo(**nil); end").toMatchFormat();
+        expect("def foo(**nil); end").toChangeFormat("def foo(**nil)\nend");
       });
 
       test("args_forward", () => {
@@ -388,67 +389,6 @@ describe("method", () => {
                            a${long}
             `)
           );
-        });
-      });
-
-      describe("with trailing commas", () => {
-        test("starting with no trailing comma changes", () => {
-          expect(`foo(${long}, a${long})`).toChangeFormat(
-            `foo(\n  ${long},\n  a${long},\n)`,
-            {
-              trailingComma: "all"
-            }
-          );
-        });
-
-        test("starting with trailing comma stays", () => {
-          expect(`foo(${long}, a${long},)`).toChangeFormat(
-            `foo(\n  ${long},\n  a${long},\n)`,
-            {
-              trailingComma: "all"
-            }
-          );
-        });
-
-        test("with block on the end", () => {
-          expect(`foo(${long}, &block)`).toChangeFormat(
-            `foo(\n  ${long},\n  &block\n)`,
-            {
-              trailingComma: "all"
-            }
-          );
-        });
-
-        test("on commands", () => {
-          expect(`command ${long}, a${long}`).toChangeFormat(
-            ruby(`
-              command ${long},
-                      a${long}
-            `),
-            { trailingComma: "all" }
-          );
-        });
-
-        test("on command calls", () => {
-          expect(`command.call ${long}, a${long}`).toChangeFormat(
-            ruby(`
-              command.call ${long},
-                           a${long}
-            `),
-            { trailingComma: "all" }
-          );
-        });
-
-        test("on long commands within an arg_paren", () => {
-          const expected = ruby(`
-            foo(
-              ${long} 'bar'
-            )
-          `);
-
-          expect(`foo(${long} 'bar')`).toChangeFormat(expected, {
-            trailingComma: "all"
-          });
         });
       });
     });

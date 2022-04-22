@@ -15,7 +15,7 @@ describe("script", () => {
     expect(content).toMatchFormat();
   });
 
-  test("escape", () => {
+  test.skip("escape", () => {
     expect(haml(`& I like #{"cheese & crackers"}`)).toMatchFormat();
   });
 

@@ -1,18 +1,20 @@
-import rubyPrinter from "./ruby/printer";
-import rubyParser from "./ruby/parser";
+import type { Plugin, SupportLanguage } from "prettier";
+import parseSync from "./parseSync";
 
-import rbsPrinter from "./rbs/printer";
-import rbsParser from "./rbs/parser";
+interface ExtendedSupportLanguage extends SupportLanguage {
+  interpreters?: string[];
+}
 
-import hamlPrinter from "./haml/printer";
-import hamlParser from "./haml/parser";
+interface ExtendedPlugin extends Omit<Plugin, "languages"> {
+  languages: ExtendedSupportLanguage[];
+}
 
 /*
  * metadata mostly pulled from linguist and rubocop:
  * https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
  * https://github.com/rubocop/rubocop/blob/master/spec/rubocop/target_finder_spec.rb
  */
-const plugin = {
+const plugin: ExtendedPlugin = {
   languages: [
     {
       name: "Ruby",
@@ -87,61 +89,81 @@ const plugin = {
     }
   ],
   parsers: {
-    ruby: rubyParser,
-    rbs: rbsParser,
-    haml: hamlParser
+    ruby: {
+      parse(text) {
+        return parseSync("ruby", text);
+      },
+      astFormat: "ruby",
+      hasPragma(text) {
+        return /^\s*#[^\S\n]*@(?:prettier|format)\s*?(?:\n|$)/m.test(text);
+      },
+      locStart() {
+        return 0;
+      },
+      locEnd() {
+        return 0;
+      }
+    },
+    rbs: {
+      parse(text) {
+        return parseSync("rbs", text);
+      },
+      astFormat: "rbs",
+      hasPragma(text) {
+        return /^\s*#[^\S\n]*@(prettier|format)\s*(\n|$)/.test(text);
+      },
+      locStart() {
+        return 0;
+      },
+      locEnd() {
+        return 0;
+      }
+    },
+    haml: {
+      parse(text) {
+        return parseSync("haml", text);
+      },
+      astFormat: "haml",
+      hasPragma(text) {
+        return /^\s*-#\s*@(prettier|format)/.test(text);
+      },
+      locStart() {
+        return 0;
+      },
+      locEnd() {
+        return 0;
+      }
+    }
   },
   printers: {
-    ruby: rubyPrinter,
-    rbs: rbsPrinter,
-    haml: hamlPrinter
-  },
-  options: {
-    rubyArrayLiteral: {
-      type: "boolean",
-      category: "Ruby",
-      default: true,
-      description:
-        "When possible, favor the use of string and symbol array literals.",
-      since: "1.0.0"
+    ruby: {
+      print(path) {
+        return path.getValue();
+      },
+      insertPragma(text) {
+        return `# @format${text.startsWith("#") ? "\n" : "\n\n"}${text}`;
+      }
     },
-    rubyHashLabel: {
-      type: "boolean",
-      category: "Ruby",
-      default: true,
-      description:
-        "When possible, uses the shortened hash key syntax, as opposed to hash rockets.",
-      since: "1.0.0"
+    rbs: {
+      print(path) {
+        return path.getValue();
+      },
+      insertPragma(text) {
+        return `# @format${text.startsWith("#") ? "\n" : "\n\n"}${text}`;
+      }
     },
-    rubyModifier: {
-      type: "boolean",
-      category: "Ruby",
-      default: true,
-      description:
-        "When it fits on one line, allows if, unless, while, and until statements to use the modifier form.",
-      since: "1.0.0"
-    },
-    rubySingleQuote: {
-      type: "boolean",
-      category: "Ruby",
-      default: true,
-      description:
-        "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals.",
-      since: "1.0.0"
-    },
-    rubyToProc: {
-      type: "boolean",
-      category: "Ruby",
-      default: false,
-      description:
-        "When possible, convert blocks to the more concise Symbol#to_proc syntax.",
-      since: "1.0.0"
+    haml: {
+      print(path) {
+        return path.getValue();
+      },
+      insertPragma(text) {
+        return `-# @format${text.startsWith("-#") ? "\n" : "\n\n"}${text}`;
+      }
     }
   },
   defaultOptions: {
     printWidth: 80,
-    tabWidth: 2,
-    trailingComma: "none"
+    tabWidth: 2
   }
 };
 

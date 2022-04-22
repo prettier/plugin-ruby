@@ -44,7 +44,7 @@ describe("tag", () => {
   });
 
   test("dynamic attributes (ruby hash)", () => {
-    const content = haml("%div{data: { controller: 'lesson-evaluation' }}");
+    const content = haml(`%div{data: { controller: "lesson-evaluation" }}`);
 
     expect(content).toMatchFormat();
   });
@@ -62,7 +62,7 @@ describe("tag", () => {
 
     test("hash label, single quote", () => {
       const content = haml(`%section(xml:lang="en" title="title")`);
-      const expected = "%section{'xml:lang': 'en', title: 'title'}";
+      const expected = `%section{"xml:lang": "en", title: "title"}`;
 
       expect(content).toChangeFormat(expected);
     });
@@ -71,30 +71,13 @@ describe("tag", () => {
       const content = haml(`%section(xml:lang="en" title="title")`);
       const expected = `%section{"xml:lang": "en", title: "title"}`;
 
-      expect(content).toChangeFormat(expected, { rubySingleQuote: false });
+      expect(content).toChangeFormat(expected);
     });
 
     test("hash label, single quote, interpolation", () => {
       const content = haml(`%section{title: "#{title}"}`);
 
       expect(content).toMatchFormat();
-    });
-
-    test("hash rocket, single quote", () => {
-      const content = haml(`%section(xml:lang="en" title="title")`);
-      const expected = `%section{:'xml:lang' => 'en', :title => 'title'}`;
-
-      expect(content).toChangeFormat(expected, { rubyHashLabel: false });
-    });
-
-    test("hash rocket, double quote", () => {
-      const content = haml(`%section(xml:lang="en" title="title")`);
-      const expected = '%section{:"xml:lang" => "en", :title => "title"}';
-
-      expect(content).toChangeFormat(expected, {
-        rubyHashLabel: false,
-        rubySingleQuote: false
-      });
     });
 
     test("non-strings", () => {
@@ -105,10 +88,10 @@ describe("tag", () => {
     });
 
     test("attributes prefixed with @", () => {
-      expect(haml("%span{'@click': 'open = true'}")).toMatchFormat();
-      expect(haml("%span{'@click.outside': 'open = true'}")).toMatchFormat();
+      expect(haml(`%span{"@click": "open = true"}`)).toMatchFormat();
+      expect(haml(`%span{"@click.outside": "open = true"}`)).toMatchFormat();
       expect(
-        haml("%span{'@keydown.arrow-up.prevent': 'open = true'}")
+        haml(`%span{"@keydown.arrow-up.prevent": "open = true"}`)
       ).toMatchFormat();
     });
   });

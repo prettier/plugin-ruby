@@ -2,7 +2,7 @@ import { long, ruby } from "../../utils";
 
 describe("calls", () => {
   test("simple calls", () => {
-    const content = "posts.active.where('created_at > ?', 1.year.ago)";
+    const content = `posts.active.where("created_at > ?", 1.year.ago)`;
 
     expect(content).toMatchFormat();
   });
@@ -33,8 +33,8 @@ describe("calls", () => {
   test("chains of methods with one with arguments right at the top", () => {
     const content = ruby(`
       aaa.bbb.ccc.ddd.eee.merge(
-        ${long.slice(0, 30)}: 'aaa',
-        ${long.slice(0, 31)}: 'bbb'
+        ${long.slice(0, 30)}: "aaa",
+        ${long.slice(0, 31)}: "bbb"
       )
     `);
 
@@ -62,9 +62,9 @@ describe("calls", () => {
     const content = ruby(`
       Customer
         .active
-        .where(foo: 'bar')
+        .where(foo: "bar")
         .where.not(banned_at: nil)
-        .order(created_at: 'desc')
+        .order(created_at: "desc")
         .limit(10)
     `);
 
@@ -75,8 +75,9 @@ describe("calls", () => {
     test("basic chains", () => {
       const content = ruby(`
         sig do
-          params(contacts: Contact::ActiveRecord_Relation)
-            .returns(Customer::ActiveRecord_Relation)
+          params(contacts: Contact::ActiveRecord_Relation).returns(
+            Customer::ActiveRecord_Relation
+          )
         end
       `);
 
@@ -125,7 +126,7 @@ describe("calls", () => {
   });
 
   test("bang with a special operator on a command_call", () => {
-    expect("!domain&.include? '@'").toMatchFormat();
+    expect(`!domain&.include? "@"`).toMatchFormat();
   });
 
   test("#call shorthand does not eliminate empty parentheses", () => {
@@ -141,12 +142,11 @@ describe("calls", () => {
     const content = `result = [${item}, ${item}, ${item}].map(&:foo?).bbb.ccc`;
 
     const expected = ruby(`
-      result =
-        [
-          ${item},
-          ${item},
-          ${item}
-        ].map(&:foo?).bbb.ccc
+      result = [
+        ${item},
+        ${item},
+        ${item}
+      ].map(&:foo?).bbb.ccc
     `);
 
     expect(content).toChangeFormat(expected);
@@ -194,7 +194,7 @@ describe("calls", () => {
         # then remove remaining rows with duplicate emails
         uniq { |contact| contact[:email] }
         .tap do |res|
-          CSV.open(OUTPUT_PATH, 'wb') do |csv|
+          CSV.open(OUTPUT_PATH, "wb") do |csv|
             csv << HEADERS
             res.each { |d| csv << d.values }
           end
