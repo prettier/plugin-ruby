@@ -70,33 +70,6 @@ listener =
       Thread.new(server.accept_nonblock) do |socket|
         parser, source = socket.read.split("|", 2)
 
-        # First, ensure we get the right encoding for this string. To do this
-        # we're going to find all of the comments at the top of the file first
-        # that contain comments. Then we'll pass them through ripper to find the
-        # encoding.
-        lines = []
-
-        source.each_line do |line|
-          if line.start_with?(/\s*#/)
-            lines << line
-          else
-            break
-          end
-        end
-
-        # We're going to default to UTF-8 in case we can't find the correct
-        # encoding.
-        encoding = "UTF-8"
-        comments = lines.join
-
-        if comments.include?("coding")
-          encoding = Ripper.new(comments).tap(&:parse).encoding
-        end
-
-        # Now that we have our guessed encoding, we're going to force it into
-        # the string so that it gets parsed correctly.
-        source = source.force_encoding(encoding)
-
         response =
           case parser
           when "ping"
@@ -110,7 +83,7 @@ listener =
           end
 
         if response
-          socket.write(JSON.fast_generate(response))
+          socket.write(JSON.fast_generate(response.force_encoding("UTF-8")))
         else
           socket.write("{ \"error\": true }")
         end
