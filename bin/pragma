@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+const parser = require("../src/ruby/parser");
+
+console.log(parser.hasPragma(fs.readFileSync(process.argv[2], "utf-8")));

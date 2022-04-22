@@ -49,7 +49,6 @@ jobs:
           node-version: 12.x
           cache: yarn
       - run: yarn install --frozen-lockfile
-      - run: yarn prepublishOnly
       - run: yarn checkFormat
       - run: yarn lint
 
@@ -79,7 +78,6 @@ jobs:
           node-version: 12.x
           cache: yarn
       - run: yarn install --frozen-lockfile
-      - run: yarn run prepublishOnly
       - run: yarn pack
       # Windows runners don't have /tmp, let's make sure it exists
       - run: mkdir -p /tmp
@@ -112,7 +110,6 @@ jobs:
           node-version: 12.x
           cache: yarn
       - run: yarn install --frozen-lockfile
-      - run: yarn prepublishOnly
       - run: gem build -o prettier.gem
       - run: gem unpack prettier.gem
       - run: prettier/exe/rbprettier --help

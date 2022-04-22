@@ -32,9 +32,9 @@ module Prettier
         either install them yourself by cd-ing into the directory where this gem
         is located (#{File.expand_path("..", __dir__)}) and running:
           
-          `yarn && yarn prepublishOnly`
+          `yarn install`
            or
-           `npm install && npm run prepublishOnly`
+           `npm install`
            or
            you can change the source in your Gemfile to point directly to rubygems.
       MSG

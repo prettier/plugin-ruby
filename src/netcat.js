@@ -2,7 +2,6 @@
 // On average, this is 2-3x slower than netcat, but still much faster than
 // spawning a new Ruby process.
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { createConnection } = require("net");
 
 const sock = process.argv[process.argv.length - 1];

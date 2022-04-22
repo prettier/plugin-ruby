@@ -7,7 +7,6 @@
 /test.rbs
 /test.haml
 *.gem
-/dist/
 
 # This is to better support the GitHub actions checking - since bundler changes
 # to being shipped by default with Ruby starting on 2.6.
