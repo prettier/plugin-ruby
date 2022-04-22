@@ -68,7 +68,22 @@ listener =
 
       # Start up a new thread that will handle each successive connection.
       Thread.new(server.accept_nonblock) do |socket|
-        parser, source = socket.read.split("|", 2)
+        parser, source = socket.read.force_encoding("UTF-8").split("|", 2)
+
+        source.each_line do |line|
+          case line
+          when /^\s*#.+?coding/
+            # If we've found an encoding comment, then we're going to take that
+            # into account and reclassify the encoding for the source.
+            encoding = Ripper.new(line).tap(&:parse).encoding
+            source = source.force_encoding(encoding)
+            break
+          when /^\s*#/
+            # continue
+          else
+            break
+          end
+        end
 
         response =
           case parser

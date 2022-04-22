@@ -13,9 +13,9 @@ jobs:
           - ubuntu-latest
           - windows-latest
         ruby:
-          - '2.7'
-          - '3.0'
-          - '3.1'
+          - "2.7"
+          - "3.0"
+          - "3.1"
     runs-on: ${{ matrix.platform }}
     env:
       PLUGIN_RUBY_CI: true
