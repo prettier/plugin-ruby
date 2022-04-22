@@ -61,7 +61,7 @@ d = [
 a, s = [], $*[0]
 s.each_byte { |b| a << ("%036b" % d[b.chr.to_i]).scan(/\d{6}/) }
 a.transpose.each do |a|
-  a.join.each_byte { |i| printi == 49 ? ($*[1] || "#") : 32.chr }
+  a.join.each_byte { |i| print i == 49 ? ($*[1] || "#") : 32.chr }
   puts
 end
 ```
