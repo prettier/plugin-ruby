@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { existsSync, readFileSync } = require("fs");
 
 // This is how long to wait for the parser to spin up. For the most part, 5
