@@ -58,8 +58,8 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          # - macos-latest
-          # - ubuntu-latest
+          - macos-latest
+          - ubuntu-latest
           - windows-latest
         yarn:
           - 2.x
@@ -73,6 +73,7 @@ jobs:
         with:
           bundler-cache: true
           ruby-version: "3.1"
+      - run: gem install syntax_tree syntax_tree-haml syntax_tree-rbs
       - uses: actions/setup-node@v2
         with:
           node-version: 12.x

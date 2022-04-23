@@ -86,7 +86,7 @@ function spawnServer() {
         mkdirSync(destDir);
       }
       copyFileSync(
-        path.join(__dirname, "..", rubyFile),
+        path.join(__dirname, "..", "src", rubyFile),
         path.join(tempDir, rubyFile)
       );
     });
