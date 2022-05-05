@@ -132,7 +132,11 @@ function spawnServer() {
 
     try {
       if (server.pid) {
-        process.kill(-server.pid);
+        // Kill the server process if it's still running. If we're on windows
+        // we're going to use the process ID number. If we're not, we're going
+        // to use the negative process ID to indicate the group.
+        const pid = process.platform === "win32" ? server.pid : -server.pid;
+        process.kill(pid);
       }
     } catch (e) {
       if (process.env.PLUGIN_RUBY_CI) {
