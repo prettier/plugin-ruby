@@ -118,6 +118,12 @@ Or if you're using `yarn`, then add the plugin by:
 yarn add --dev prettier @prettier/plugin-ruby
 ```
 
+You'll also need to add the necessary Ruby dependencies. You can do this by running:
+
+```bash
+gem install syntax_tree syntax_tree-haml syntax_tree-rbs
+```
+
 The `prettier` executable is now installed and ready for use:
 
 ```bash
