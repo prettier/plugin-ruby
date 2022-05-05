@@ -6,9 +6,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+### Added
+
+- [#1190](https://github.com/prettier/plugin-ruby/pull/1190) - kddnewton - Encoding for source files is now guessed in a much better way.
+
 ### Changed
 
 - [#1198](https://github.com/prettier/plugin-ruby/issues/1198) - pas-f, kddnewton - Fix crashes on JRuby with do blocks.
+- [#1131](https://github.com/prettier/plugin-ruby/issues/1131) - hyrious, kddnewton - Ensure zombie processes are not left around when the server exits.
+- [#1206](https://github.com/prettier/plugin-ruby/pull/1206) - kddnewton - Switch back to plain JavaScript for development.
+- [#1190](https://github.com/prettier/plugin-ruby/pull/1190) - kddnewton - Switch over to using Syntax Tree for the backend.
+
+### Removed
+
+- [#1190](https://github.com/prettier/plugin-ruby/pull/1190) - kddnewton - The configuration options have been removed. Instead, configuration is to be done through modifying Syntax Tree.
 
 ## [2.1.0] - 2022-04-04
 
