@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [3.0.0] - 2022-05-04
+
 ### Added
 
 - [#1190](https://github.com/prettier/plugin-ruby/pull/1190) - kddnewton - Encoding for source files is now guessed in a much better way.
@@ -1223,7 +1225,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v2.1.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/prettier/plugin-ruby/compare/v2.1.0...v3.0.0
 [2.1.0]: https://github.com/prettier/plugin-ruby/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc4...v2.0.0
 [2.0.0-rc4]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc3...v2.0.0-rc4
