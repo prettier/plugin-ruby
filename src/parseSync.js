@@ -63,7 +63,7 @@ function getInfoFilepath() {
 // server with that filepath as an argument, then spawn another process that
 // will read that information in order to enable us to connect to it in the
 // spawnSync function.
-function spawnServer() {
+function spawnServer(opts) {
   const tempDir = mkdtempSync(path.join(os.tmpdir(), "prettier-plugin-ruby-"));
   const filepath = getInfoFilepath();
 
@@ -114,11 +114,15 @@ function spawnServer() {
     };
   }
 
-  const server = spawn("ruby", [serverRbPath, filepath], {
-    env: Object.assign({}, process.env, { LANG: getLang() }),
-    detached: true,
-    stdio: "inherit"
-  });
+  const server = spawn(
+    "ruby",
+    [serverRbPath, `--plugins=${opts.rubyPlugins}`, filepath],
+    {
+      env: Object.assign({}, process.env, { LANG: getLang() }),
+      detached: true,
+      stdio: "inherit"
+    }
+  );
 
   server.unref();
   process.on("exit", () => {
@@ -171,9 +175,9 @@ function runningInPnPZip() {
 // like it) here since Prettier requires the results of `parse` to be
 // synchronous and Node.js does not offer a mechanism for synchronous socket
 // requests.
-function parseSync(parser, source) {
+function parseSync(parser, source, opts) {
   if (!parserArgs) {
-    parserArgs = spawnServer();
+    parserArgs = spawnServer(opts);
   }
 
   const response = spawnSync(parserArgs.cmd, parserArgs.args, {

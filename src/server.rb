@@ -10,6 +10,11 @@ require "syntax_tree"
 require "syntax_tree/haml"
 require "syntax_tree/rbs"
 
+# First, require all of the plugins that the user specified.
+ARGV.shift[/^--plugins=(.*)$/, 1]
+  .split(",")
+  .each { |plugin| require "syntax_tree/#{plugin}" }
+
 # Make sure we trap these signals to be sure we get the quit command coming from
 # the parent node process
 quit = false

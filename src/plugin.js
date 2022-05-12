@@ -81,8 +81,8 @@ const plugin = {
   ],
   parsers: {
     ruby: {
-      parse(text) {
-        return parseSync("ruby", text);
+      parse(text, _parsers, opts) {
+        return parseSync("ruby", text, opts);
       },
       astFormat: "ruby",
       hasPragma(text) {
@@ -96,8 +96,8 @@ const plugin = {
       }
     },
     rbs: {
-      parse(text) {
-        return parseSync("rbs", text);
+      parse(text, _parsers, opts) {
+        return parseSync("rbs", text, opts);
       },
       astFormat: "rbs",
       hasPragma(text) {
@@ -111,8 +111,8 @@ const plugin = {
       }
     },
     haml: {
-      parse(text) {
-        return parseSync("haml", text);
+      parse(text, _parsers, opts) {
+        return parseSync("haml", text, opts);
       },
       astFormat: "haml",
       hasPragma(text) {
@@ -150,6 +150,15 @@ const plugin = {
       insertPragma(text) {
         return `-# @format${text.startsWith("-#") ? "\n" : "\n\n"}${text}`;
       }
+    }
+  },
+  options: {
+    rubyPlugins: {
+      type: "string",
+      category: "Ruby",
+      default: "",
+      description: "The comma-separated list of plugins to require",
+      since: "3.1.0"
     }
   },
   defaultOptions: {
