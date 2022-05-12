@@ -17,7 +17,7 @@ function globalSetup() {
   const filepath = getInfoFilepath();
   const server = spawn(
     "ruby",
-    [path.join(__dirname, "../../src/server.rb"), filepath],
+    [path.join(__dirname, "../../src/server.rb"), "--plugins=", filepath],
     {
       env: Object.assign({}, process.env, { LANG: getLang() }),
       detached: true,
