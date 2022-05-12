@@ -1,6 +1,5 @@
 # Disabling all Layout/* rules, as they're unnecessary when the user is using
-# prettier to handle all of the formatting.
-
+# Syntax Tree to handle all of the formatting.
 Layout:
   Enabled: false
 
@@ -16,6 +15,16 @@ Layout/LineLength:
 Style/MultilineIfModifier:
   Enabled: false
 
+# Syntax Tree will expand empty methods to put the end keyword on the subsequent
+# line to reduce git diff noise.
+Style/EmptyMethod:
+  EnforcedStyle: expanded
+
+# lambdas that are constructed with the lambda method call cannot be safely
+# turned into lambda literals without removing a method call.
+Style/Lambda:
+  Enabled: false
+
 # When method chains with multiple blocks are chained together, rubocop will let
 # them pass if they're using braces but not if they're using do and end
 # keywords. Because we will break individual blocks down to using keywords if
@@ -23,12 +32,28 @@ Style/MultilineIfModifier:
 Style/MultilineBlockChain:
   Enabled: false
 
+# Syntax Tree by default uses double quotes, so changing the configuration here
+# to match that.
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Style/QuotedSymbols:
+  EnforcedStyle: double_quotes
+
+# We let users have a little more freedom with symbol and words arrays. If the
+# user only has an individual item like ["value"] then we don't bother
+# converting it because it ends up being just noise.
 Style/SymbolArray:
   Enabled: false
 
 Style/WordArray:
   Enabled: false
 
+# We don't support trailing commas in Syntax Tree by default, so just turning
+# these off for now.
 Style/TrailingCommaInArguments:
   Enabled: false
 
@@ -36,9 +61,4 @@ Style/TrailingCommaInArrayLiteral:
   Enabled: false
 
 Style/TrailingCommaInHashLiteral:
-  Enabled: false
-
-# lambdas that are constructed with the lambda method call cannot be safely
-# turned into lambda literals without removing a method call.
-Style/Lambda:
   Enabled: false

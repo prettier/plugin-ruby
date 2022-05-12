@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [3.1.1] - 2022-05-12
+
+### Changed
+
+- [#1125](https://github.com/prettier/plugin-ruby/pull/1225) - kddnewton - Update the bundled rubocop config to be in sync with Syntax Tree.
+
 ## [3.1.0] - 2022-05-12
 
 ### Added
