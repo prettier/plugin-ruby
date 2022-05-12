@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [3.1.0] - 2022-05-12
+
+### Added
+
+- [#1224](https://github.com/prettier/plugin-ruby/pull/1224) - kddnewton - Support passing the `rubyPlugins` option to configure Syntax Tree.
+
 ## [3.0.0] - 2022-05-04
 
 ### Added
