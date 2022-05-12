@@ -81,7 +81,7 @@ describe("hash", () => {
 
   describe("dynamic string keys", () => {
     test("basic", () => {
-      expect(`{ "foo": "bar" }`).toMatchFormat();
+      expect(`{ "foo": "bar" }`).toChangeFormat(`{ foo: "bar" }`);
     });
 
     test("with interpolation", () => {

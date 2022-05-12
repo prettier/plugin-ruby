@@ -15,10 +15,6 @@ describe("script", () => {
     expect(content).toMatchFormat();
   });
 
-  test.skip("escape", () => {
-    expect(haml(`& I like #{"cheese & crackers"}`)).toMatchFormat();
-  });
-
   test("escape with interpolate", () => {
     expect(haml(`&= "I like cheese & crackers"`)).toMatchFormat();
   });

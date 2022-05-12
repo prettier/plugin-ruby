@@ -23,7 +23,7 @@ describe("patterns", () => {
     "*c, d, e",
     "0, [1, _] => bar",
     "^bar",
-    "x: 0.. => px, **rest",
+    "{ x: 0.. => px, **rest }",
     "**rest",
     "SuperPoint[x: 0.. => px]",
     "a, b if b == a * 2"
@@ -72,18 +72,6 @@ describe("patterns", () => {
       case foo
       in 1, # 1 comment
          2 # 2 comment
-        bar
-      end
-    `);
-
-    expect(content).toMatchFormat();
-  });
-
-  test("with comments in an array pattern", () => {
-    const content = ruby(`
-      case foo
-      in foo:, # foo comment
-         bar: # bar comment
         bar
       end
     `);

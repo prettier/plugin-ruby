@@ -239,7 +239,7 @@ describe("strings", () => {
     });
 
     test("%s literal as hash key", () => {
-      expect("{ %s[abc] => d }").toChangeFormat(`{ "abc": d }`);
+      expect("{ %s[abc] => d }").toChangeFormat(`{ abc: d }`);
     });
 
     test("symbol literal as a hash key", () => {
