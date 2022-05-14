@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [3.1.2] - 2022-05-13
+
+### Changed
+
+- [#1127](https://github.com/prettier/plugin-ruby/issues/1227) - mscrivo, kddnewton - Support passing the `printWidth` option.
+
 ## [3.1.1] - 2022-05-12
 
 ### Changed
@@ -1237,7 +1243,10 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v3.0.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v3.1.2...HEAD
+[3.1.2]: https://github.com/prettier/plugin-ruby/compare/v3.1.1...v3.1.2
+[3.1.1]: https://github.com/prettier/plugin-ruby/compare/v3.1.0...v3.1.1
+[3.1.0]: https://github.com/prettier/plugin-ruby/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/prettier/plugin-ruby/compare/v2.1.0...v3.0.0
 [2.1.0]: https://github.com/prettier/plugin-ruby/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/prettier/plugin-ruby/compare/v2.0.0-rc4...v2.0.0
