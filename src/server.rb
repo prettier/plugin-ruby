@@ -6,6 +6,7 @@ require "json"
 require "fileutils"
 require "open3"
 
+require "prettier_print"
 require "syntax_tree"
 require "syntax_tree/haml"
 require "syntax_tree/rbs"
@@ -73,7 +74,8 @@ listener =
 
       # Start up a new thread that will handle each successive connection.
       Thread.new(server.accept_nonblock) do |socket|
-        parser, source = socket.read.force_encoding("UTF-8").split("|", 2)
+        parser, width, source =
+          socket.read.force_encoding("UTF-8").split("|", 3)
 
         source.each_line do |line|
           case line
@@ -90,16 +92,25 @@ listener =
           end
         end
 
+        maxwidth = width.to_i
         response =
           case parser
           when "ping"
             "pong"
           when "ruby"
-            SyntaxTree.format(source)
+            formatter = SyntaxTree::Formatter.new(source, [], maxwidth)
+            SyntaxTree.parse(source).format(formatter)
+            formatter.flush
+            formatter.output.join
           when "rbs"
-            SyntaxTree::RBS.format(source)
+            formatter = SyntaxTree::RBS::Formatter.new(source, [], maxwidth)
+            SyntaxTree::RBS.parse(source).format(formatter)
+            formatter.flush
+            formatter.output.join
           when "haml"
-            SyntaxTree::Haml.format(source)
+            PrettierPrint.format(+"", maxwidth) do |q|
+              SyntaxTree::Haml.parse(source).format(q)
+            end
           end
 
         if response

@@ -181,7 +181,7 @@ function parseSync(parser, source, opts) {
   }
 
   const response = spawnSync(parserArgs.cmd, parserArgs.args, {
-    input: `${parser}|${source}`,
+    input: `${parser}|${opts.printWidth}|${source}`,
     maxBuffer: 15 * 1024 * 1024
   });
 
