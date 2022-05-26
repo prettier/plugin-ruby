@@ -32,16 +32,16 @@ Style/Lambda:
 Style/MultilineBlockChain:
   Enabled: false
 
-# Syntax Tree by default uses double quotes, so changing the configuration here
-# to match that.
+# Disable the single- vs double-quotes rules as these depend on whether the user
+# has added or not `plugin/single_quotes` for `syntax_tree`
 Style/StringLiterals:
-  EnforcedStyle: double_quotes
+  Enabled: false
 
 Style/StringLiteralsInInterpolation:
-  EnforcedStyle: double_quotes
+  Enabled: false
 
 Style/QuotedSymbols:
-  EnforcedStyle: double_quotes
+  Enabled: false
 
 # We let users have a little more freedom with symbol and words arrays. If the
 # user only has an individual item like ["value"] then we don't bother
@@ -52,8 +52,8 @@ Style/SymbolArray:
 Style/WordArray:
   Enabled: false
 
-# We don't support trailing commas in Syntax Tree by default, so just turning
-# these off for now.
+# Disable the trailing-comma rules as these depend on whether the user has added
+# or not `plugin/trailing_comma` for `syntax_tree`
 Style/TrailingCommaInArguments:
   Enabled: false
 
