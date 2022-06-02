@@ -88,8 +88,8 @@ describe("strings", () => {
       expect(`"abc's"`).toMatchFormat();
     });
 
-    test("double quotes get escaped", () => {
-      expect(`'"foo"'`).toChangeFormat(`"\\"foo\\""`);
+    test("double quotes do not get escaped if it results in more quotes", () => {
+      expect(`'"foo"'`).toMatchFormat();
     });
 
     describe("escape sequences", () => {

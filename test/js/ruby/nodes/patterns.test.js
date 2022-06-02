@@ -15,18 +15,13 @@ describe("patterns", () => {
     "-1..1",
     "Integer",
     "bar",
-    "_, _",
     "0 | 1 | 2",
     "Integer => bar",
     "Object[0, *bar, 1]",
-    "a, b, *c, d, e",
-    "*c, d, e",
-    "0, [1, _] => bar",
     "^bar",
     "{ x: 0.. => px, **rest }",
     "**rest",
-    "SuperPoint[x: 0.. => px]",
-    "a, b if b == a * 2"
+    "SuperPoint[x: 0.. => px]"
   ];
 
   if (atLeastVersion("3.0")) {
@@ -56,6 +51,96 @@ describe("patterns", () => {
     expect(content).toMatchFormat();
   });
 
+  test("a, b, *c, d, e", () => {
+    const content = ruby(`
+      case foo
+      in a, b, *c, d, e
+        baz
+      end
+    `);
+
+    const expectedContent = ruby(`
+      case foo
+      in [a, b, *c, d, e]
+        baz
+      end
+    `);
+
+    expect(content).toChangeFormat(expectedContent);
+  });
+
+  test("0, [1, _] => bar", () => {
+    const content = ruby(`
+      case foo
+      in 0, [1, _] => bar
+        baz
+      end
+    `);
+
+    const expectedContent = ruby(`
+      case foo
+      in [0, [1, _] => bar]
+        baz
+      end
+    `);
+
+    expect(content).toChangeFormat(expectedContent);
+  });
+
+  test("*c, d, e", () => {
+    const content = ruby(`
+      case foo
+      in *c, d, e
+        baz
+      end
+    `);
+
+    const expectedContent = ruby(`
+      case foo
+      in [*c, d, e]
+        baz
+      end
+    `);
+
+    expect(content).toChangeFormat(expectedContent);
+  });
+
+  test("_, _", () => {
+    const content = ruby(`
+      case foo
+      in _, _
+        baz
+      end
+    `);
+
+    const expectedContent = ruby(`
+      case foo
+      in [_, _]
+        baz
+      end
+    `);
+
+    expect(content).toChangeFormat(expectedContent);
+  });
+
+  test("a, b if b == a * 2", () => {
+    const content = ruby(`
+      case foo
+      in a, b if b == a * 2
+        baz
+      end
+    `);
+
+    const expectedContent = ruby(`
+      case foo
+      in [a, b] if b == a * 2
+        baz
+      end
+    `);
+
+    expect(content).toChangeFormat(expectedContent);
+  });
+
   test("with a single array element", () => {
     const content = ruby(`
       case value
@@ -76,7 +161,17 @@ describe("patterns", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    const expectedContent = ruby(`
+      case foo
+      in [
+           1, # 1 comment
+           2
+         ] # 2 comment
+        bar
+      end
+    `);
+
+    expect(content).toChangeFormat(expectedContent);
   });
 
   test("multiple clauses", () => {
