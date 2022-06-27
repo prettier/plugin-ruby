@@ -11,9 +11,10 @@ module Prettier
   def self.run(args)
     quoted = args.map { |arg| arg.start_with?("-") ? arg : "\"#{arg}\"" }
     command = "node #{BINARY} --plugin \"#{PLUGIN}\" #{quoted.join(" ")}"
+    opts = STDIN.tty? ? {} : { stdin_data: STDIN }
 
     stdout, stderr, status =
-      Open3.capture3({ "RBPRETTIER" => "1" }, command, stdin_data: STDIN)
+      Open3.capture3({ "RBPRETTIER" => "1" }, command, opts)
     STDOUT.puts(stdout)
 
     # If we completed successfully, then just exit out.
