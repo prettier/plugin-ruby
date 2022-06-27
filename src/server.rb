@@ -74,8 +74,8 @@ listener =
 
       # Start up a new thread that will handle each successive connection.
       Thread.new(server.accept_nonblock) do |socket|
-        parser, width, source =
-          socket.read.force_encoding("UTF-8").split("|", 3)
+        parser, maxwidth_string, tabwidth_string, source =
+          socket.read.force_encoding("UTF-8").split("|", 4)
 
         source.each_line do |line|
           case line
@@ -92,25 +92,40 @@ listener =
           end
         end
 
-        maxwidth = width.to_i
+        # At the moment, we're not going to support odd tabwidths. It's going to
+        # have to be a multiple of 2, because of the way that the prettyprint
+        # gem functions. So we're going to just use integer division here.
+        scalar = tabwidth_string.to_i / 2
+        genspace = ->(n) { " " * n * scalar }
+
+        maxwidth = maxwidth_string.to_i
         response =
           case parser
           when "ping"
             "pong"
           when "ruby"
-            formatter = SyntaxTree::Formatter.new(source, [], maxwidth)
+            formatter =
+              SyntaxTree::Formatter.new(source, [], maxwidth, "\n", &genspace)
             SyntaxTree.parse(source).format(formatter)
             formatter.flush
             formatter.output.join
           when "rbs"
-            formatter = SyntaxTree::RBS::Formatter.new(source, [], maxwidth)
+            formatter =
+              SyntaxTree::RBS::Formatter.new(
+                source,
+                [],
+                maxwidth,
+                "\n",
+                &genspace
+              )
             SyntaxTree::RBS.parse(source).format(formatter)
             formatter.flush
             formatter.output.join
           when "haml"
-            PrettierPrint.format(+"", maxwidth) do |q|
-              SyntaxTree::Haml.parse(source).format(q)
-            end
+            formatter = PrettierPrint.new(+"", maxwidth, "\n", &genspace)
+            SyntaxTree::Haml.parse(source).format(formatter)
+            formatter.flush
+            formatter.output
           end
 
         if response
