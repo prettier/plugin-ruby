@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [3.2.0] - 2022-07-22
+
+### Added
+
+- [#1250](https://github.com/prettier/plugin-ruby/issues/1250) - alexf101, kddnewton - Respect the `tabWidth` option.
+
+### Changed
+
+- [#1255](https://github.com/prettier/plugin-ruby/pull/1255) - soberstadt - The rake task now runs check if write is false.
+- [#1237](https://github.com/prettier/plugin-ruby/issues/1237) - boris-petrov - Disable the style rules associated with quotes.
+- [#1248](https://github.com/prettier/plugin-ruby/pull/1248) - mhssmnn - Fix process waiting on STDIN.
+
 ## [3.1.2] - 2022-05-13
 
 ### Changed
