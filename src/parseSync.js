@@ -114,9 +114,20 @@ function spawnServer(opts) {
     };
   }
 
+  const plugins = new Set(opts.rubyPlugins.split(","));
+  if (opts.singleQuote) {
+    plugins.add("plugin/single_quotes");
+  }
+
+  if (opts.trailingComma !== "none") {
+    plugins.add("plugin/trailing_comma");
+  }
+
+  const rubyPlugins = Array.from(plugins).join(",");
+
   const server = spawn(
     "ruby",
-    [serverRbPath, `--plugins=${opts.rubyPlugins}`, filepath],
+    [serverRbPath, `--plugins=${rubyPlugins}`, filepath],
     {
       env: Object.assign({}, process.env, { LANG: getLang() }),
       detached: true,
