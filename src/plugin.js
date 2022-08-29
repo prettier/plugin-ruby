@@ -163,7 +163,9 @@ const plugin = {
   },
   defaultOptions: {
     printWidth: 80,
-    tabWidth: 2
+    tabWidth: 2,
+    trailingComma: "none",
+    singleQuote: false
   }
 };
 

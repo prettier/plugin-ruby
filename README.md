@@ -134,12 +134,14 @@ The `prettier` executable is now installed and ready for use:
 
 Below are the options (from [`src/plugin.js`](src/plugin.js)) that `@prettier/plugin-ruby` currently supports:
 
-| API Option      | CLI Option         | Default | Description                                                                                                                 |
-| --------------- | ------------------ | :-----: | --------------------------------------------------------------------------------------------------------------------------- |
-| `printWidth`    | `--print-width`    |  `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).                            |
-| `requirePragma` | `--require-pragma` | `false` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#require-pragma)).                         |
-| `rubyPlugins`   | `--ruby-plugins`   |  `""`   | The comma-separated list of plugins to require. See [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree#plugins). |
-| `tabWidth`      | `--tab-width`      |   `2`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).                              |
+| API Option      | CLI Option         | Default | Description                                                                                                                                         |
+| --------------- | ------------------ | :-----: | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `printWidth`    | `--print-width`    |  `80`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#print-width)).                                                    |
+| `requirePragma` | `--require-pragma` | `false` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#require-pragma)).                                                 |
+| `rubyPlugins`   | `--ruby-plugins`   |  `""`   | The comma-separated list of plugins to require. See [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree#plugins).                         |
+| `tabWidth`      | `--tab-width`      |   `2`   | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#tab-width)).                                                      |
+| `singleQuote`   | `--single-quote`   | `false` | Same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#quotes)).                                                         |
+| `trailingComma` | `--trailing-comma` |  `es5`  | Almost same as in Prettier ([see prettier docs](https://prettier.io/docs/en/options.html#trailing-commas)). Will be on for any value except `none`. |
 
 Any of these can be added to your existing [prettier configuration
 file](https://prettier.io/docs/en/configuration.html). For example:
