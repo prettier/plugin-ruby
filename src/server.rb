@@ -122,7 +122,14 @@ listener =
             formatter.flush
             formatter.output.join
           when "haml"
-            formatter = PrettierPrint.new(+"", maxwidth, "\n", &genspace)
+            formatter_class =
+              if defined?(SyntaxTree::Haml::Format::Formatter)
+                SyntaxTree::Haml::Format::Formatter
+              else
+                PrettierPrint
+              end
+
+            formatter = formatter_class.new(+"", maxwidth, "\n", &genspace)
             SyntaxTree::Haml.parse(source).format(formatter)
             formatter.flush
             formatter.output
