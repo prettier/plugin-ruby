@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [3.2.1] - 2022-09-19
+
+### Changed
+
+- [#1274](https://github.com/prettier/plugin-ruby/pull/1274) - kddnewton - Support the next version of `syntax_tree-haml`.
+
 ## [3.2.0] - 2022-07-22
 
 ### Added
@@ -1255,7 +1261,9 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v3.1.2...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v3.2.1...HEAD
+[3.2.1]: https://github.com/prettier/plugin-ruby/compare/v3.2.0...v3.2.1
+[3.2.0]: https://github.com/prettier/plugin-ruby/compare/v3.1.2...v3.2.0
 [3.1.2]: https://github.com/prettier/plugin-ruby/compare/v3.1.1...v3.1.2
 [3.1.1]: https://github.com/prettier/plugin-ruby/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/prettier/plugin-ruby/compare/v3.0.0...v3.1.0
