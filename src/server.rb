@@ -129,7 +129,9 @@ listener =
                 PrettierPrint
               end
 
-            formatter = formatter_class.new(+"", maxwidth, "\n", &genspace)
+            formatter =
+              formatter_class.new(source, +"", maxwidth, "\n", &genspace)
+
             SyntaxTree::Haml.parse(source).format(formatter)
             formatter.flush
             formatter.output
