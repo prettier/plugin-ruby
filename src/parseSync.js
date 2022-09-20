@@ -59,6 +59,26 @@ function getInfoFilepath() {
   return path.join(os.tmpdir(), `prettier-ruby-parser-${process.pid}.info`);
 }
 
+// Return the list of plugins that should be passed to the server process.
+function getPlugins(opts) {
+  const plugins = new Set();
+
+  const rubyPlugins = opts.rubyPlugins.trim();
+  if (rubyPlugins.length > 0) {
+    rubyPlugins.split(",").forEach((plugin) => plugins.add(plugin.trim()));
+  }
+
+  if (opts.singleQuote) {
+    plugins.add("plugin/single_quotes");
+  }
+
+  if (opts.trailingComma !== "none") {
+    plugins.add("plugin/trailing_comma");
+  }
+
+  return Array.from(plugins);
+}
+
 // Create a file that will act as a communication mechanism, spawn a parser
 // server with that filepath as an argument, then spawn another process that
 // will read that information in order to enable us to connect to it in the
@@ -114,20 +134,9 @@ function spawnServer(opts) {
     };
   }
 
-  const plugins = new Set(opts.rubyPlugins.split(","));
-  if (opts.singleQuote) {
-    plugins.add("plugin/single_quotes");
-  }
-
-  if (opts.trailingComma !== "none") {
-    plugins.add("plugin/trailing_comma");
-  }
-
-  const rubyPlugins = Array.from(plugins).join(",");
-
   const server = spawn(
     "ruby",
-    [serverRbPath, `--plugins=${rubyPlugins}`, filepath],
+    [serverRbPath, `--plugins=${getPlugins(opts).join(",")}`, filepath],
     {
       env: Object.assign({}, process.env, { LANG: getLang() }),
       detached: true,
