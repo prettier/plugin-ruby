@@ -169,7 +169,7 @@ function spawnServer(opts) {
     }
   });
 
-  const info = spawnSync("node", [getInfoJsPath, filepath]);
+  const info = spawnSync(process.execPath, [getInfoJsPath, filepath]);
 
   if (info.status !== 0) {
     throw new Error(`
@@ -200,7 +200,8 @@ function parseSync(parser, source, opts) {
     parserArgs = spawnServer(opts);
   }
 
-  const response = spawnSync(parserArgs.cmd, parserArgs.args, {
+  const command = parserArgs.cmd === "node" ? process.execPath : parserArgs.cmd;
+  const response = spawnSync(command, parserArgs.args, {
     input: `${parser}|${opts.printWidth}|${opts.tabWidth}|${source}`,
     maxBuffer: 15 * 1024 * 1024
   });
