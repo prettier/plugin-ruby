@@ -1,4 +1,4 @@
-const { ruby } = require("../utils");
+import { ruby } from "../utils.js";
 
 describe("layout", () => {
   test("turns multiple blank lines into just one blank line", () => {

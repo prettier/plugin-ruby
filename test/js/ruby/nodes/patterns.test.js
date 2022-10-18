@@ -1,4 +1,4 @@
-const { atLeastVersion, atMostVersion, ruby } = require("../../utils");
+import { atLeastVersion, atMostVersion, ruby } from "../../utils.js";
 
 describe("patterns", () => {
   if (atMostVersion("2.7")) {

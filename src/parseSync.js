@@ -1,15 +1,16 @@
-const { spawn, spawnSync } = require("child_process");
-const {
+import { spawn, spawnSync } from "child_process";
+import {
   existsSync,
   unlinkSync,
   mkdtempSync,
   copyFileSync,
   mkdirSync,
   rmdirSync
-} = require("fs");
-const os = require("os");
-const path = require("path");
-const process = require("process");
+} from "fs";
+import { tmpdir } from "os";
+import path from "path";
+import process from "process";
+import url from "url";
 
 let parserArgs;
 
@@ -22,7 +23,7 @@ if (process.env.PRETTIER_RUBY_HOST) {
 // parse using UTF-8. Unfortunately, the way that you accomplish this looks
 // differently depending on your platform.
 /* istanbul ignore next */
-function getLang() {
+export function getLang() {
   const { env, platform } = process;
   const envValue = env.LC_ALL || env.LC_CTYPE || env.LANG;
 
@@ -55,8 +56,8 @@ function getLang() {
 
 // Generate the filepath that should be used to communicate the connection
 // information between this process and the parser server.
-function getInfoFilepath() {
-  return path.join(os.tmpdir(), `prettier-ruby-parser-${process.pid}.info`);
+export function getInfoFilepath() {
+  return path.join(tmpdir(), `prettier-ruby-parser-${process.pid}.info`);
 }
 
 // Return the list of plugins that should be passed to the server process.
@@ -84,11 +85,11 @@ function getPlugins(opts) {
 // will read that information in order to enable us to connect to it in the
 // spawnSync function.
 function spawnServer(opts) {
-  const tempDir = mkdtempSync(path.join(os.tmpdir(), "prettier-plugin-ruby-"));
+  const tempDir = mkdtempSync(path.join(tmpdir(), "prettier-plugin-ruby-"));
   const filepath = getInfoFilepath();
 
-  let serverRbPath = path.join(__dirname, "./server.rb");
-  let getInfoJsPath = path.join(__dirname, "./getInfo.js");
+  let serverRbPath = url.fileURLToPath(new URL("./server.rb", import.meta.url));
+  let getInfoJsPath = url.fileURLToPath(new URL("./getInfo.js", import.meta.url));
   let cleanupTempFiles;
 
   if (runningInPnPZip()) {
@@ -106,7 +107,7 @@ function spawnServer(opts) {
         mkdirSync(destDir);
       }
       copyFileSync(
-        path.join(__dirname, "..", "src", rubyFile),
+        url.fileURLToPath(new URL(`../src/${rubyFile}`, import.meta.url)),
         path.join(tempDir, rubyFile)
       );
     });
@@ -188,6 +189,7 @@ function spawnServer(opts) {
 // used by the parser server and the various scripts used to communicate
 // therein are not going to work with its virtual file system.
 function runningInPnPZip() {
+  const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
   return process.versions.pnp && __dirname.includes(".zip");
 }
 
@@ -195,7 +197,7 @@ function runningInPnPZip() {
 // like it) here since Prettier requires the results of `parse` to be
 // synchronous and Node.js does not offer a mechanism for synchronous socket
 // requests.
-function parseSync(parser, source, opts) {
+export function parseSync(parser, source, opts) {
   if (!parserArgs) {
     parserArgs = spawnServer(opts);
   }
@@ -229,9 +231,3 @@ function parseSync(parser, source, opts) {
 
   return parsed;
 }
-
-module.exports = {
-  getLang,
-  getInfoFilepath,
-  parseSync
-};

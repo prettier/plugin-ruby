@@ -1,4 +1,4 @@
-const { haml } = require("../utils");
+import { haml } from "../utils";
 
 describe("silent script", () => {
   test("single line", () => {

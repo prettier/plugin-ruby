@@ -2,11 +2,12 @@
   "name": "@prettier/plugin-ruby",
   "version": "3.2.2",
   "description": "prettier plugin for the Ruby programming language",
+  "type": "module",
   "main": "src/plugin.js",
   "scripts": {
     "checkFormat": "prettier --check '**/*'",
     "lint": "eslint --cache .",
-    "test": "jest"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "repository": {
     "type": "git",
@@ -48,7 +49,8 @@
     "setupFilesAfterEnv": [
       "./test/js/setupTests.js"
     ],
-    "testRegex": ".test.js$"
+    "testRegex": ".test.js$",
+    "transform": {}
   },
   "husky": {
     "hooks": {

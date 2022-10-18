@@ -1,4 +1,4 @@
-const { atLeastVersion } = require("../../utils");
+import { atLeastVersion } from "../../utils.js";
 
 describe("ranges", () => {
   test("two dot", () => {

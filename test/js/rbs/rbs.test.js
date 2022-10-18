@@ -1,11 +1,9 @@
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
-
-const { atLeastVersion, rbs } = require("../utils");
+import { readFileSync } from "fs";
+import { platform } from "os";
+import { atLeastVersion, rbs } from "../utils";
 
 function testCases(name, transform) {
-  const buffer = fs.readFileSync(path.resolve(__dirname, `${name}.txt`));
+  const buffer = readFileSync(new URL(`${name}.txt`, import.meta.url));
   const sources = buffer.toString().slice(0, -1).split(/\r?\n/);
 
   sources.forEach((source) => {
@@ -301,7 +299,7 @@ describe("rbs", () => {
 
   // For some reason these tests are failing on windows on Ruby < 3.0. I'm not
   // sure why, but I'm leaving it here for now.
-  if (os.platform() !== "win32" || atLeastVersion("3.0")) {
+  if (platform() !== "win32" || atLeastVersion("3.0")) {
     describe("non-ASCII", () => {
       test("emoji", () => {
         expect(rbs(`T: { "🌼" => Integer }`)).toMatchFormat();

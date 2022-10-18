@@ -1,4 +1,4 @@
-const { ruby } = require("../utils");
+import { ruby } from "../utils.js";
 
 describe("ignore", () => {
   test("you can ignore code blocks", () => {

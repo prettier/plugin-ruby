@@ -1,4 +1,4 @@
-const { atLeastVersion, long, ruby } = require("../../utils");
+import { atLeastVersion, long, ruby } from "../../utils.js";
 
 describe("method", () => {
   describe("definitions", () => {

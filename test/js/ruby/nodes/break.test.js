@@ -1,4 +1,4 @@
-const { ruby } = require("../../utils");
+import { ruby } from "../../utils.js";
 
 describe("break", () => {
   test("empty break", () => {

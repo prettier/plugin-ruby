@@ -1,15 +1,13 @@
-const path = require("path");
-const prettier = require("prettier");
+import prettier from "prettier";
+import url from "url";
+import plugin from "../../src/plugin.js";
 
-const plugin = require("../../src/plugin");
-
-function getInferredParser(filename) {
-  const filepath = path.join(__dirname, filename);
+async function getInferredParser(filename) {
+  const filepath = url.fileURLToPath(new URL(filename, import.meta.url));
   const fileInfoOptions = { plugins: [plugin] };
 
-  return prettier
-    .getFileInfo(filepath, fileInfoOptions)
-    .then(({ inferredParser }) => inferredParser);
+  const { inferredParser } = await prettier.getFileInfo(filepath, fileInfoOptions);
+  return inferredParser;
 }
 
 describe("files", () => {

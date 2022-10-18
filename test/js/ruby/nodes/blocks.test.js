@@ -1,4 +1,4 @@
-const { long, ruby } = require("../../utils");
+import { long, ruby } from "../../utils.js";
 
 describe("blocks", () => {
   test("empty", () => {

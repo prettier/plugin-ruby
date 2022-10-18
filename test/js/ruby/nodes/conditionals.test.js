@@ -1,4 +1,4 @@
-const { long, ruby, atLeastVersion } = require("../../utils");
+import { long, ruby, atLeastVersion } from "../../utils.js";
 
 describe("conditionals", () => {
   describe("not operator", () => {

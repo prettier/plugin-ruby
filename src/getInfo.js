@@ -1,4 +1,4 @@
-const { existsSync, readFileSync } = require("fs");
+import { existsSync, readFileSync } from "fs";
 
 // This is how long to wait for the parser to spin up. For the most part, 5
 // seconds is plenty of time. But in some environments, it may be necessary to

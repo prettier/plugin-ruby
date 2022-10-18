@@ -1,8 +1,7 @@
-const { spawn, spawnSync } = require("child_process");
-const { unlinkSync } = require("fs");
-const path = require("path");
-
-const { getLang, getInfoFilepath } = require("../../src/parseSync");
+import { spawn, spawnSync } from "child_process";
+import { unlinkSync } from "fs";
+import url from "url";
+import { getLang, getInfoFilepath } from "../../src/parseSync.js";
 
 // This is somewhat similar to the spawnServer function in parseSync but
 // slightly different in that it logs its information into environment variables
@@ -17,7 +16,7 @@ function globalSetup() {
   const filepath = getInfoFilepath();
   const server = spawn(
     "ruby",
-    [path.join(__dirname, "../../src/server.rb"), "--plugins=", filepath],
+    [url.fileURLToPath(new URL("../../src/server.rb", import.meta.url)), "--plugins=", filepath],
     {
       env: Object.assign({}, process.env, { LANG: getLang() }),
       detached: true,
@@ -27,7 +26,7 @@ function globalSetup() {
 
   // Get the connection information from the parsing server.
   const information = spawnSync("node", [
-    path.join(__dirname, "../../src/getInfo.js"),
+    url.fileURLToPath(new URL("../../src/getInfo.js", import.meta.url)),
     filepath
   ]);
 
@@ -42,4 +41,4 @@ function globalSetup() {
   server.unref();
 }
 
-module.exports = globalSetup;
+export default globalSetup;

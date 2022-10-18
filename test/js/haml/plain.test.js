@@ -1,4 +1,4 @@
-const { haml } = require("../utils");
+import { haml } from "../utils";
 
 describe("plain", () => {
   const specialChars = ["%", ".", "#", "/", "!", "=", "&", "~", "-", "\\", ":"];

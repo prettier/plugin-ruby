@@ -1,4 +1,4 @@
-const { long } = require("../../utils");
+import { long } from "../../utils.js";
 
 describe("defined", () => {
   test("no parens", () => {

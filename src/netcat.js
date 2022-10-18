@@ -2,7 +2,7 @@
 // On average, this is 2-3x slower than netcat, but still much faster than
 // spawning a new Ruby process.
 
-const { createConnection } = require("net");
+import { createConnection } from "net";
 
 const sock = process.argv[process.argv.length - 1];
 const client = createConnection(sock, () => process.stdin.pipe(client));

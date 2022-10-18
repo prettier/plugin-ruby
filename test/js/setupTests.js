@@ -1,6 +1,5 @@
-const prettier = require("prettier");
-
-const plugin = require("../../src/plugin");
+import { format } from "prettier";
+import plugin from "../../src/plugin.js";
 
 function normalize(code) {
   const string = typeof code === "string" ? code : code.code;
@@ -9,7 +8,7 @@ function normalize(code) {
 
 function checkFormat(before, after) {
   const originalText = typeof before === "string" ? before : before.code;
-  const formatted = prettier.format(originalText, {
+  const formatted = format(originalText, {
     parser: typeof before === "string" ? "ruby" : before.parser,
     plugins: [plugin]
   });

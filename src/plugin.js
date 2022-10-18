@@ -1,4 +1,4 @@
-const { parseSync } = require("./parseSync");
+import { parseSync } from "./parseSync.js";
 
 /*
  * metadata mostly pulled from linguist and rubocop:
@@ -177,4 +177,4 @@ const plugin = {
   }
 };
 
-module.exports = plugin;
+export default plugin;

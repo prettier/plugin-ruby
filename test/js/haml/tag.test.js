@@ -1,4 +1,4 @@
-const { long, haml } = require("../utils");
+import { long, haml } from "../utils";
 
 describe("tag", () => {
   test("class", () => {
