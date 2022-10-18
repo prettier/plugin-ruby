@@ -81,7 +81,7 @@ const plugin = {
   ],
   parsers: {
     ruby: {
-      parse(text, _parsers, opts) {
+      parse(text, opts) {
         return parseSync("ruby", text, opts);
       },
       astFormat: "ruby",
@@ -96,7 +96,7 @@ const plugin = {
       }
     },
     rbs: {
-      parse(text, _parsers, opts) {
+      parse(text, opts) {
         return parseSync("rbs", text, opts);
       },
       astFormat: "rbs",
@@ -111,7 +111,7 @@ const plugin = {
       }
     },
     haml: {
-      parse(text, _parsers, opts) {
+      parse(text, opts) {
         return parseSync("haml", text, opts);
       },
       astFormat: "haml",

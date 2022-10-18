@@ -6,9 +6,9 @@ function normalize(code) {
   return string.replace(/\r?\n/g, "\n").trim();
 }
 
-function checkFormat(before, after) {
+async function checkFormat(before, after) {
   const originalText = typeof before === "string" ? before : before.code;
-  const formatted = format(originalText, {
+  const formatted = await format(originalText, {
     parser: typeof before === "string" ? "ruby" : before.parser,
     plugins: [plugin]
   });

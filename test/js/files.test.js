@@ -1,4 +1,4 @@
-import prettier from "prettier";
+import { getFileInfo } from "prettier";
 import url from "url";
 import plugin from "../../src/plugin.js";
 
@@ -6,7 +6,7 @@ async function getInferredParser(filename) {
   const filepath = url.fileURLToPath(new URL(filename, import.meta.url));
   const fileInfoOptions = { plugins: [plugin] };
 
-  const { inferredParser } = await prettier.getFileInfo(filepath, fileInfoOptions);
+  const { inferredParser } = await getFileInfo(filepath, fileInfoOptions);
   return inferredParser;
 }
 
