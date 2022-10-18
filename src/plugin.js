@@ -159,6 +159,14 @@ const plugin = {
       default: "",
       description: "The comma-separated list of plugins to require",
       since: "3.1.0"
+    },
+    rubySingleQuote: {
+      type: "boolean",
+      category: "Ruby",
+      default: false,
+      description:
+        "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals.",
+      since: "1.0.0"
     }
   },
   defaultOptions: {
