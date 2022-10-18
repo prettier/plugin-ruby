@@ -4,17 +4,19 @@ require "json" unless defined?(JSON)
 require "open3"
 
 module Prettier
-  PLUGIN = -File.expand_path("..", __dir__)
-  BINARY = -File.join(PLUGIN, "node_modules", "prettier", "bin-prettier.js")
-  VERSION = -JSON.parse(File.read(File.join(PLUGIN, "package.json")))["version"]
+  directory = -File.expand_path("..", __dir__)
+  package = File.read(File.join(directory, "package.json"))
+
+  PLUGIN = -File.join(directory, "src/plugin.js")
+  BINARY = -File.join(directory, "node_modules/prettier/bin/prettier.cjs")
+  VERSION = -JSON.parse(package)["version"]
 
   def self.run(args)
     quoted = args.map { |arg| arg.start_with?("-") ? arg : "\"#{arg}\"" }
     command = "node #{BINARY} --plugin \"#{PLUGIN}\" #{quoted.join(" ")}"
     opts = STDIN.tty? ? {} : { stdin_data: STDIN }
 
-    stdout, stderr, status =
-      Open3.capture3({ "RBPRETTIER" => "1" }, command, opts)
+    stdout, stderr, status = Open3.capture3({}, command, opts)
     STDOUT.puts(stdout)
 
     # If we completed successfully, then just exit out.
