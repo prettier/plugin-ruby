@@ -158,6 +158,10 @@ Or, they can be passed to `prettier` as arguments:
 bundle exec rbprettier --tab-width 4 --write '**/*'
 ```
 
+### Ignoring code
+
+Sometimes you want to leave your formatting in place and have `prettier` not format it, but continue to format the rest of the file. `prettier` has the ability to do this with `prettier-ignore` comments, but because the underlying formatter for this plugin is [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree), you instead would use a `stree-ignore` comment.
+
 ### Usage with RuboCop
 
 RuboCop and Prettier for Ruby serve different purposes, but there is overlap
