@@ -20,14 +20,14 @@ Gem::Specification.new do |spec|
         ]
     end
 
-  spec.required_ruby_version = ">= 2.7.3"
+  spec.required_ruby_version = ">= 2.7.0"
 
   spec.bindir = "exe"
   spec.executables = "rbprettier"
   spec.require_paths = %w[lib]
 
-  spec.add_dependency "syntax_tree", ">= 2.7.1"
-  spec.add_dependency "syntax_tree-haml", ">= 1.1.0"
+  spec.add_dependency "syntax_tree", ">= 4.0.1"
+  spec.add_dependency "syntax_tree-haml", ">= 2.0.0"
   spec.add_dependency "syntax_tree-rbs", ">= 0.2.0"
 
   spec.add_development_dependency "bundler"
