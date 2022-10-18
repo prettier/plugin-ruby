@@ -2,43 +2,43 @@ import { long, ruby } from "../../utils.js";
 
 describe("blocks", () => {
   test("empty", () => {
-    expect("loop {}").toMatchFormat();
+    return expect("loop {}").toMatchFormat();
   });
 
   test("single line non-breaking", () => {
-    expect("loop { 1 }").toMatchFormat();
+    return expect("loop { 1 }").toMatchFormat();
   });
 
   test("single line breaking", () => {
-    expect(`loop { ${long} }`).toChangeFormat(`loop do\n  ${long}\nend`);
+    return expect(`loop { ${long} }`).toChangeFormat(`loop do\n  ${long}\nend`);
   });
 
   test("multi line non-breaking", () => {
-    expect("loop do\n  1\nend").toChangeFormat("loop { 1 }");
+    return expect("loop do\n  1\nend").toChangeFormat("loop { 1 }");
   });
 
   test("multi-line breaking", () => {
-    expect(`loop do\n  ${long}\nend`).toMatchFormat();
+    return expect(`loop do\n  ${long}\nend`).toMatchFormat();
   });
 
   test("multi-line with comment", () => {
-    expect("loop do\n  # foobar\nend").toMatchFormat();
+    return expect("loop do\n  # foobar\nend").toMatchFormat();
   });
 
   test("multi-line on command, no body", () => {
-    expect(`command "foobar" do\nend`).toMatchFormat();
+    return expect(`command "foobar" do\nend`).toMatchFormat();
   });
 
   test("multi-line on command call, no body", () => {
-    expect(`command.call "foobar" do\nend`).toMatchFormat();
+    return expect(`command.call "foobar" do\nend`).toMatchFormat();
   });
 
   test("multi-line on command, with body", () => {
-    expect(`command "foobar" do\n  foo\nend`).toMatchFormat();
+    return expect(`command "foobar" do\n  foo\nend`).toMatchFormat();
   });
 
   test("multi-line on command call, with body", () => {
-    expect(`command.call "foobar" do\n  foo\nend`).toMatchFormat();
+    return expect(`command.call "foobar" do\n  foo\nend`).toMatchFormat();
   });
 
   test("blocks nested inside commands use braces", () => {
@@ -48,7 +48,7 @@ describe("blocks", () => {
           }.bar
     `);
 
-    expect(`foo ${long} { ${long} }.bar`).toChangeFormat(expected);
+    return expect(`foo ${long} { ${long} }.bar`).toChangeFormat(expected);
   });
 
   test("breaking maintains calls on the end", () => {
@@ -68,7 +68,7 @@ describe("blocks", () => {
         .to_i
     `);
 
-    expect(content).toChangeFormat(expected);
+    return expect(content).toChangeFormat(expected);
   });
 
   test("doesn't do weird things with comments", () => {
@@ -80,7 +80,7 @@ describe("blocks", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   describe("for loops", () => {
@@ -91,7 +91,7 @@ describe("blocks", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("multiple variables", () => {
@@ -101,7 +101,7 @@ describe("blocks", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("optional do keyword", () => {
@@ -123,13 +123,13 @@ describe("blocks", () => {
         end
       `);
 
-      expect(content).toChangeFormat(expected);
+      return expect(content).toChangeFormat(expected);
     });
   });
 
   // from ruby test/ruby/test_call.rb
   test("inline do end", () => {
-    expect(`assert_nil(("a".sub! "b" do end&.foo {}))`).toChangeFormat(
+    return expect(`assert_nil(("a".sub! "b" do end&.foo {}))`).toChangeFormat(
       ruby(`
         assert_nil(
           (
@@ -143,50 +143,50 @@ describe("blocks", () => {
   });
 
   test("excessed_comma nodes", () => {
-    expect("proc { |x,| }").toMatchFormat();
+    return expect("proc { |x,| }").toMatchFormat();
   });
 
   describe("args", () => {
     test("no body", () => {
-      expect("loop { |i| }").toMatchFormat();
+      return expect("loop { |i| }").toMatchFormat();
     });
 
     test("single line non-breaking", () => {
-      expect("loop { |i| 1 }").toMatchFormat();
+      return expect("loop { |i| 1 }").toMatchFormat();
     });
 
     test("single line breaking", () => {
-      expect(`loop { |i| ${long} }`).toChangeFormat(
+      return expect(`loop { |i| ${long} }`).toChangeFormat(
         `loop do |i|\n  ${long}\nend`
       );
     });
 
     test("multi-line non-breaking", () => {
-      expect("loop do |i|\n  i\nend").toChangeFormat("loop { |i| i }");
+      return expect("loop do |i|\n  i\nend").toChangeFormat("loop { |i| i }");
     });
 
     test("multi-line breaking", () => {
-      expect(`loop do |i|\n  ${long}\nend`).toMatchFormat();
+      return expect(`loop do |i|\n  ${long}\nend`).toMatchFormat();
     });
 
     test("block-local args", () => {
-      expect("loop { |i; j| 1 }").toMatchFormat();
+      return expect("loop { |i; j| 1 }").toMatchFormat();
     });
 
     test("splat", () => {
-      expect("loop { |*| i }").toMatchFormat();
+      return expect("loop { |*| i }").toMatchFormat();
     });
 
     test("destructure", () => {
-      expect("loop { |(a, b)| i }").toMatchFormat();
+      return expect("loop { |(a, b)| i }").toMatchFormat();
     });
 
     test("lots of args types", () => {
-      expect("loop { |a, (b, c), d, *e| i }").toMatchFormat();
+      return expect("loop { |a, (b, c), d, *e| i }").toMatchFormat();
     });
 
     test("does not split up args inside pipes", () => {
-      expect(`loop do |${long} = 1, a${long} = 2|\nend`).toMatchFormat();
+      return expect(`loop do |${long} = 1, a${long} = 2|\nend`).toMatchFormat();
     });
   });
 
@@ -198,7 +198,7 @@ describe("blocks", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   // https://github.com/prettier/plugin-ruby/issues/1042
@@ -209,6 +209,6 @@ describe("blocks", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 });

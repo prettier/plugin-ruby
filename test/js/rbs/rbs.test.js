@@ -8,7 +8,7 @@ function testCases(name, transform) {
 
   sources.forEach((source) => {
     test(source, () => {
-      expect(rbs(transform(source))).toMatchFormat();
+      return expect(rbs(transform(source))).toMatchFormat();
     });
   });
 }
@@ -33,7 +33,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("interface with type params", () => {
@@ -42,7 +42,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     if (atLeastVersion("3.1")) {
@@ -52,7 +52,7 @@ describe("rbs", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("interface with fancy bounded type params", () => {
@@ -61,7 +61,7 @@ describe("rbs", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
     }
 
@@ -71,7 +71,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("class with type params", () => {
@@ -80,7 +80,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("class with complicated type params", () => {
@@ -89,7 +89,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     if (atLeastVersion("3.1")) {
@@ -99,7 +99,7 @@ describe("rbs", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("class with fancy bounded type params", () => {
@@ -108,7 +108,7 @@ describe("rbs", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
     }
 
@@ -119,7 +119,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("class with annotations that cannot be switched to braces", () => {
@@ -129,7 +129,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("class with comments", () => {
@@ -139,7 +139,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("class with superclass", () => {
@@ -148,7 +148,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("module", () => {
@@ -157,7 +157,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("module with type params", () => {
@@ -166,7 +166,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("module with self types", () => {
@@ -175,7 +175,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("multiple empty lines", () => {
@@ -198,7 +198,7 @@ describe("rbs", () => {
         end
       `);
 
-      expect(content).toChangeFormat(expected);
+      return expect(content).toChangeFormat(expected);
     });
   });
 
@@ -217,39 +217,43 @@ describe("rbs", () => {
     testCases("literal", (source) => `T: ${source}`);
 
     test("+1 drops the plus sign", () => {
-      expect(rbs("T: +1")).toChangeFormat("T: 1");
+      return expect(rbs("T: +1")).toChangeFormat("T: 1");
     });
 
     test("uses default quotes", () => {
-      expect(rbs(`T: "foo"`)).toMatchFormat();
+      return expect(rbs(`T: "foo"`)).toMatchFormat();
     });
 
     test("changes quotes to match", () => {
-      expect(rbs("T: 'foo'")).toChangeFormat(`T: "foo"`);
+      return expect(rbs("T: 'foo'")).toChangeFormat(`T: "foo"`);
     });
 
     test("keeps string the same when there is an escape sequence", () => {
-      expect(rbs(`T: "super \\a duper"`)).toMatchFormat();
+      return expect(rbs(`T: "super \\a duper"`)).toMatchFormat();
     });
 
     test("unescapes double quotes when using single quotes", () => {
-      expect(rbs(`T: "super \\" duper"`)).toChangeFormat(
+      return expect(rbs(`T: "super \\" duper"`)).toChangeFormat(
         `T: "super \\" duper"`
       );
     });
 
     test("unescapes single quotes when using double quotes", () => {
-      expect(rbs(`T: 'super \\' duper'`)).toChangeFormat(
+      return expect(rbs(`T: 'super \\' duper'`)).toChangeFormat(
         `T: 'super \\' duper'`
       );
     });
 
     test("maintains escape sequences when using double quotes", () => {
-      expect(rbs(`T: "escape sequences \\a\\b\\e\\f\\n\\r"`)).toMatchFormat();
+      return expect(
+        rbs(`T: "escape sequences \\a\\b\\e\\f\\n\\r"`)
+      ).toMatchFormat();
     });
 
     test("maintains not escape sequences when using single quotes", () => {
-      expect(rbs(`T: 'escape sequences \\a\\b\\e\\f\\n\\r'`)).toMatchFormat();
+      return expect(
+        rbs(`T: 'escape sequences \\a\\b\\e\\f\\n\\r'`)
+      ).toMatchFormat();
     });
   });
 
@@ -275,7 +279,7 @@ describe("rbs", () => {
     testCases("optional", (source) => `T: ${source}`);
 
     test("removes optional space before question mark", () => {
-      expect(rbs("T: :foo ?")).toChangeFormat("T: :foo?");
+      return expect(rbs("T: :foo ?")).toChangeFormat("T: :foo?");
     });
   });
 
@@ -285,11 +289,11 @@ describe("rbs", () => {
     testCases("proc", (source) => `T: ${source}`);
 
     test("drops optional parentheses when there are no params", () => {
-      expect(rbs("T: ^() -> void")).toChangeFormat("T: ^-> void");
+      return expect(rbs("T: ^() -> void")).toChangeFormat("T: ^-> void");
     });
 
     test("drops optional parentheses with block param when there are no params to the block", () => {
-      expect(rbs("T: ^{ () -> void } -> void")).toChangeFormat(
+      return expect(rbs("T: ^{ () -> void } -> void")).toChangeFormat(
         "T: ^{ -> void } -> void"
       );
     });
@@ -302,11 +306,11 @@ describe("rbs", () => {
   if (platform() !== "win32" || atLeastVersion("3.0")) {
     describe("non-ASCII", () => {
       test("emoji", () => {
-        expect(rbs(`T: { "🌼" => Integer }`)).toMatchFormat();
+        return expect(rbs(`T: { "🌼" => Integer }`)).toMatchFormat();
       });
 
       test("kanji", () => {
-        expect(rbs(`T: { "日本語" => Integer }`)).toMatchFormat();
+        return expect(rbs(`T: { "日本語" => Integer }`)).toMatchFormat();
       });
     });
   }

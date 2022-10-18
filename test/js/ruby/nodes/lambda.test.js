@@ -2,38 +2,38 @@ import { long, ruby } from "../../utils.js";
 
 describe("lambda", () => {
   test("plain stabby lambda literal", () => {
-    expect("-> { 1 }").toMatchFormat();
+    return expect("-> { 1 }").toMatchFormat();
   });
 
   test("stabby lambda literal with args", () => {
-    expect("->(a, b, c) { a + b + c }").toMatchFormat();
+    return expect("->(a, b, c) { a + b + c }").toMatchFormat();
   });
 
   test("stabby lambda literal with arg, no parens", () => {
-    expect("-> a { a }").toChangeFormat("->(a) { a }");
+    return expect("-> a { a }").toChangeFormat("->(a) { a }");
   });
 
   test("stabby lambda with parens, no args", () => {
-    expect("-> () { 1 }").toChangeFormat("-> { 1 }");
+    return expect("-> () { 1 }").toChangeFormat("-> { 1 }");
   });
 
   test("breaking stabby lambda literal", () => {
-    expect(`-> { ${long} }`).toChangeFormat(`-> do\n  ${long}\nend`);
+    return expect(`-> { ${long} }`).toChangeFormat(`-> do\n  ${long}\nend`);
   });
 
   test("breaking stabby lambda literal with args", () => {
     const content = `->(a) { a + ${long} }`;
     const expected = `->(a) do\n  a +\n    ${long}\nend`;
 
-    expect(content).toChangeFormat(expected);
+    return expect(content).toChangeFormat(expected);
   });
 
   test("stabby lambda literal within a command node", () => {
-    expect("command :foo, ->(arg) { arg + arg }").toMatchFormat();
+    return expect("command :foo, ->(arg) { arg + arg }").toMatchFormat();
   });
 
   test("stabby lambda literal that breaks within a command node", () => {
-    expect(`command :foo, -> { ${long} }`).toChangeFormat(
+    return expect(`command :foo, -> { ${long} }`).toChangeFormat(
       ruby(`
         command :foo,
                 -> {
@@ -44,11 +44,11 @@ describe("lambda", () => {
   });
 
   test("stabby lambda literal with a command call node", () => {
-    expect("command.call :foo, ->(arg) { arg + arg }").toMatchFormat();
+    return expect("command.call :foo, ->(arg) { arg + arg }").toMatchFormat();
   });
 
   test("stabby lambda literal that breaks with a command call node", () => {
-    expect(`command.call :foo, -> { ${long} }`).toChangeFormat(
+    return expect(`command.call :foo, -> { ${long} }`).toChangeFormat(
       ruby(`
         command.call :foo,
                      -> {
@@ -59,7 +59,7 @@ describe("lambda", () => {
   });
 
   test("stabby lambda literal that breaks deeply within a command node", () => {
-    expect(`command :foo, bar: -> { ${long} }`).toChangeFormat(
+    return expect(`command :foo, bar: -> { ${long} }`).toChangeFormat(
       ruby(`
         command :foo,
                 bar: -> {
@@ -72,7 +72,7 @@ describe("lambda", () => {
   test("very long arguments list doesn't break within pipes", () => {
     const content = `command :foo, ->(${long}, a${long}, aa${long}) { true }`;
 
-    expect(content).toChangeFormat(
+    return expect(content).toChangeFormat(
       ruby(`
         command :foo,
                 ->(
@@ -87,10 +87,10 @@ describe("lambda", () => {
   });
 
   test("empty brackets", () => {
-    expect("a[]").toMatchFormat();
+    return expect("a[]").toMatchFormat();
   });
 
   test("brackets with multiple args", () => {
-    expect("a[1, 2, 3]").toMatchFormat();
+    return expect("a[1, 2, 3]").toMatchFormat();
   });
 });

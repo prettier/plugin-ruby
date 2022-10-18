@@ -10,7 +10,7 @@ describe("rescue", () => {
       end
     `);
 
-    expect("a rescue nil").toChangeFormat(expected);
+    return expect("a rescue nil").toChangeFormat(expected);
   });
 
   test("rescue just variable", () => {
@@ -22,7 +22,7 @@ describe("rescue", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   // from ruby spec/ruby/language/rescue_spec.rb
@@ -35,7 +35,7 @@ describe("rescue", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   // https://github.com/prettier/plugin-ruby/pull/1000
@@ -48,7 +48,7 @@ describe("rescue", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test.each(["begin", "def foo"])("%s with every clause", (declaration) => {
@@ -74,7 +74,7 @@ describe("rescue", () => {
       end
     `);
 
-    expect(content).toChangeFormat(
+    return expect(content).toChangeFormat(
       ruby(`
         ${declaration}
           1
@@ -108,7 +108,7 @@ describe("rescue", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("comment inline", () => {
@@ -120,7 +120,7 @@ describe("rescue", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("comment inline with multiple", () => {
@@ -132,7 +132,7 @@ describe("rescue", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("comment inline with splat", () => {
@@ -144,7 +144,7 @@ describe("rescue", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("one error with a comment", () => {
@@ -156,7 +156,7 @@ describe("rescue", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("two errors with a comment", () => {
@@ -168,6 +168,6 @@ describe("rescue", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 });

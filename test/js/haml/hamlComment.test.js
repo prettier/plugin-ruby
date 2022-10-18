@@ -2,11 +2,11 @@ import { haml } from "../utils";
 
 describe("haml comment", () => {
   test("empty", () => {
-    expect(haml("-#")).toMatchFormat();
+    return expect(haml("-#")).toMatchFormat();
   });
 
   test("same line", () => {
-    expect(haml("-# comment")).toMatchFormat();
+    return expect(haml("-# comment")).toMatchFormat();
   });
 
   test("multi line", () => {
@@ -17,10 +17,10 @@ describe("haml comment", () => {
         comment
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("weird spacing same line", () => {
-    expect(haml("-#     foobar    ")).toChangeFormat("-# foobar");
+    return expect(haml("-#     foobar    ")).toChangeFormat("-# foobar");
   });
 });

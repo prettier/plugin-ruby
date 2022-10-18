@@ -27,7 +27,7 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
       - uses: actions/setup-node@v2
         with:
-          node-version: 16.x
+          node-version: 18.x
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: yarn test

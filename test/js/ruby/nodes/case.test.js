@@ -9,7 +9,7 @@ describe("case", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("single when", () => {
@@ -20,7 +20,7 @@ describe("case", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("multiple predicates, one when", () => {
@@ -31,7 +31,7 @@ describe("case", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("breaking with multiple predicates, one when", () => {
@@ -44,7 +44,7 @@ describe("case", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("breaking with multiple predicates, each one not too long", () => {
@@ -63,7 +63,7 @@ describe("case", () => {
       end
     `);
 
-    expect(content).toChangeFormat(expected);
+    return expect(content).toChangeFormat(expected);
   });
 
   test("multiple consecutive whens", () => {
@@ -75,7 +75,7 @@ describe("case", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("basic multiple branches", () => {
@@ -88,7 +88,7 @@ describe("case", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("else clauses", () => {
@@ -101,6 +101,6 @@ describe("case", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 });

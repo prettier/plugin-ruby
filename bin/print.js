@@ -24,10 +24,8 @@ if (existsSync(process.argv[contentIdx])) {
   content = process.argv.slice(contentIdx).join(" ").replace(/\\n/g, "\n");
 }
 
-const { formatted } = formatWithCursor(content, {
+formatWithCursor(content, {
   parser,
   plugins: [plugin],
   cursorOffset: 1
-});
-
-console.log(formatted);
+}).then(({ formatted }) => console.log(formatted));

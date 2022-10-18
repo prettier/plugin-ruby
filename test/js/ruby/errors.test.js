@@ -1,6 +1,6 @@
 import { format } from "prettier";
 
-describe.skip("errors", () => {
+describe("errors", () => {
   const cases = [
     "alias $a $1",
     "self = 1",
@@ -13,7 +13,12 @@ describe.skip("errors", () => {
     "<>"
   ];
 
-  test.each(cases)("fails for %s", (content) => {
-    expect(() => format(content, { parser: "ruby", plugins: ["."] })).toThrow();
+  test.each(cases)("fails for %s", async (content) => {
+    try {
+      await format(content, { parser: "ruby", plugins: ["."] });
+      expect(true).toBe(false);
+    } catch (error) {
+      expect(error.loc).toBeDefined();
+    }
   });
 });

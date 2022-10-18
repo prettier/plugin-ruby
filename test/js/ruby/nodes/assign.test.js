@@ -3,7 +3,7 @@ import { long, ruby } from "../../utils.js";
 describe("assign", () => {
   describe("single assignment", () => {
     test("basic", () => {
-      expect("a = 1").toMatchFormat();
+      return expect("a = 1").toMatchFormat();
     });
 
     test("multiline", () => {
@@ -14,11 +14,11 @@ describe("assign", () => {
           end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("other operator", () => {
-      expect("a ||= b").toMatchFormat();
+      return expect("a ||= b").toMatchFormat();
     });
   });
 
@@ -29,16 +29,16 @@ describe("assign", () => {
       TEXT
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   describe("breaking", () => {
     test("inline becomes multi line", () => {
-      expect(`${long} = ${long}`).toChangeFormat(`${long} =\n  ${long}`);
+      return expect(`${long} = ${long}`).toChangeFormat(`${long} =\n  ${long}`);
     });
 
     test("arrays don't get force indented", () => {
-      expect(`a = [${long}, ${long}, ${long}]`).toChangeFormat(
+      return expect(`a = [${long}, ${long}, ${long}]`).toChangeFormat(
         ruby(`
           a = [
             ${long},
@@ -50,7 +50,9 @@ describe("assign", () => {
     });
 
     test("hashes don't get force indented", () => {
-      expect(`a = { a: ${long}, b: ${long}, c: ${long} }`).toChangeFormat(
+      return expect(
+        `a = { a: ${long}, b: ${long}, c: ${long} }`
+      ).toChangeFormat(
         ruby(`
           a = {
             a:
@@ -68,7 +70,7 @@ describe("assign", () => {
       const cases = ["w", "W", "i", "I"];
 
       test.each(cases)("x = %s[...] is not force-indented", (literal) => {
-        expect(`a = %${literal}[${long} ${long}]`).toChangeFormat(
+        return expect(`a = %${literal}[${long} ${long}]`).toChangeFormat(
           ruby(`
             a = %${literal}[
               ${long}
@@ -80,7 +82,7 @@ describe("assign", () => {
     });
 
     test("chained methods on array literals don't get oddly indented", () => {
-      expect(`a = [${long}].freeze`).toChangeFormat(
+      return expect(`a = [${long}].freeze`).toChangeFormat(
         ruby(`
           a = [
             ${long}
@@ -90,7 +92,7 @@ describe("assign", () => {
     });
 
     test("chained methods on hash literals don't get oddly indented", () => {
-      expect(`a = { a: ${long} }.freeze`).toChangeFormat(
+      return expect(`a = { a: ${long} }.freeze`).toChangeFormat(
         ruby(`
           a = {
             a:
@@ -105,7 +107,7 @@ describe("assign", () => {
       const operators = ["||", "&&", "+", "*", "%", "**", "<<"];
 
       test.each(operators)("array %s= [...] is not force-indented", (op) => {
-        expect(`a ${op}= [${long}, ${long}, ${long}]`).toChangeFormat(
+        return expect(`a ${op}= [${long}, ${long}, ${long}]`).toChangeFormat(
           ruby(`
             a ${op}= [
               ${long},
@@ -117,7 +119,7 @@ describe("assign", () => {
       });
 
       test.each(operators)("hash %s= { ... } is not force-indented", (op) => {
-        expect(
+        return expect(
           `a ${op}= { a: ${long}, b: ${long}, c: ${long} }`
         ).toChangeFormat(
           ruby(`
@@ -137,11 +139,11 @@ describe("assign", () => {
 
   describe("constants", () => {
     test("assigning to constant", () => {
-      expect(`Pret::TIER = "config"`).toMatchFormat();
+      return expect(`Pret::TIER = "config"`).toMatchFormat();
     });
 
     test("assigning to top level constants", () => {
-      expect(`::PRETTIER = "config"`).toMatchFormat();
+      return expect(`::PRETTIER = "config"`).toMatchFormat();
     });
   });
 });

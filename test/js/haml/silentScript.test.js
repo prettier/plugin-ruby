@@ -2,7 +2,7 @@ import { haml } from "../utils";
 
 describe("silent script", () => {
   test("single line", () => {
-    expect(haml('- foo = "hello"')).toMatchFormat();
+    return expect(haml('- foo = "hello"')).toMatchFormat();
   });
 
   test("multi-line", () => {
@@ -11,7 +11,7 @@ describe("silent script", () => {
         - bar
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("multi line with case", () => {
@@ -26,7 +26,7 @@ describe("silent script", () => {
         = "3"
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("multi line with if/else", () => {
@@ -40,7 +40,7 @@ describe("silent script", () => {
         -# qix
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("multi line with unless/else", () => {
@@ -54,7 +54,7 @@ describe("silent script", () => {
         -# qix
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("multi line with embedded", () => {
@@ -67,6 +67,6 @@ describe("silent script", () => {
         %span baz
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 });

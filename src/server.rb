@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
-require "socket"
 require "json"
-require "fileutils"
-require "open3"
+require "socket"
 
 require "prettier_print"
 require "syntax_tree"
@@ -16,6 +14,9 @@ ARGV.shift[/^--plugins=(.*)$/, 1]
   .split(",")
   .each { |plugin| require "syntax_tree/#{plugin}" }
 
+# Next, get the file where we should write our connection information.
+connection_filepath = ARGV.shift
+
 # Make sure we trap these signals to be sure we get the quit command coming from
 # the parent node process
 quit = false
@@ -26,15 +27,6 @@ if Signal.list.key?("QUIT") && RUBY_ENGINE != "jruby"
   trap(:QUIT) { quit = true }
 end
 
-# The information variable stores the actual connection information, which will
-# either be an IP address and port or a path to a unix socket file.
-information = ""
-
-# The candidates array is a list of potential programs that could be used to
-# connect to our server. We'll run through them after the server starts to find
-# the best one to use.
-candidates = []
-
 if Gem.win_platform?
   # If we're on windows, we're going to start up a TCP server. The 0 here means
   # to bind to some available port.
@@ -44,8 +36,13 @@ if Gem.win_platform?
   # Ensure that we close the server when this process exits.
   at_exit { server.close }
 
-  information = "#{address.ip_address} #{address.ip_port}"
-  candidates = %w[nc telnet]
+  File.write(
+    connection_filepath,
+    JSON.fast_generate(
+      address: server.address.ip_address,
+      port: server.address.ip_port
+    )
+  )
 else
   # If we're not on windows, then we're going to assume we can use unix socket
   # files (since they're faster than a TCP server).
@@ -59,14 +56,15 @@ else
     File.unlink(filepath)
   end
 
-  information = server.local_address.unix_path
-  candidates = ["nc -w 3 -U", "ncat -w 3 -U"]
+  File.write(
+    connection_filepath,
+    JSON.fast_generate(path: server.local_address.unix_path)
+  )
 end
 
 # This is the actual listening thread that will be acting as our server. We have
-# to start it in another thread to begin with so that we can run through our
-# candidate connection programs. Eventually we'll just join into this thread
-# though and it will act as a daemon.
+# to start it in another thread in order to properly trap the signals in this
+# parent thread.
 listener =
   Thread.new do
     loop do
@@ -74,8 +72,8 @@ listener =
 
       # Start up a new thread that will handle each successive connection.
       Thread.new(server.accept_nonblock) do |socket|
-        parser, maxwidth_string, tabwidth_string, source =
-          socket.read.force_encoding("UTF-8").split("|", 4)
+        request = JSON.parse(socket.read.force_encoding("UTF-8"))
+        source = request["source"]
 
         source.each_line do |line|
           case line
@@ -95,14 +93,12 @@ listener =
         # At the moment, we're not going to support odd tabwidths. It's going to
         # have to be a multiple of 2, because of the way that the prettyprint
         # gem functions. So we're going to just use integer division here.
-        scalar = tabwidth_string.to_i / 2
+        scalar = request["tabwidth"].to_i / 2
         genspace = ->(n) { " " * n * scalar }
 
-        maxwidth = maxwidth_string.to_i
+        maxwidth = request["maxwidth"].to_i
         response =
-          case parser
-          when "ping"
-            "pong"
+          case request["parser"]
           when "ruby"
             formatter =
               SyntaxTree::Formatter.new(source, [], maxwidth, "\n", &genspace)
@@ -124,7 +120,13 @@ listener =
           when "haml"
             formatter =
               if defined?(SyntaxTree::Haml::Format::Formatter)
-                SyntaxTree::Haml::Format::Formatter.new(source, +"", maxwidth, "\n", &genspace)
+                SyntaxTree::Haml::Format::Formatter.new(
+                  source,
+                  +"",
+                  maxwidth,
+                  "\n",
+                  &genspace
+                )
               else
                 PrettierPrint.new(+"", maxwidth, "\n", &genspace)
               end
@@ -146,8 +148,8 @@ listener =
         begin
           socket.write(JSON.fast_generate(error: error.message))
         rescue Errno::EPIPE
-          # Do nothing, the pipe has been closed by the parent process so we don't
-          # actually care about writing to it anymore.
+          # Do nothing, the pipe has been closed by the parent process so we
+          # don't actually care about writing to it anymore.
         end
       ensure
         socket.close
@@ -161,36 +163,5 @@ listener =
       retry unless quit
     end
   end
-
-# Map each candidate connection method to a thread that will check if it works.
-candidates.map! do |candidate|
-  Thread.new do
-    Thread.current.report_on_exception = false
-
-    # We do not care about stderr here, so throw it away
-    stdout, _stderr, status =
-      Open3.capture3("#{candidate} #{information}", stdin_data: "ping")
-
-    candidate if JSON.parse(stdout) == "pong" && status.exitstatus == 0
-  rescue StandardError
-    # We don't actually care if this fails, because we'll just skip that
-    # connection option.
-  end
-end
-
-# Find the first one prefix that successfully returned the correct value.
-prefix =
-  candidates.detect do |candidate|
-    value = candidate.value
-    break value if value
-  end
-
-# Default to running the netcat.js script that we ship with the plugin. It's a
-# good fallback as it will always work, but it is slower than the other options.
-prefix ||= "node #{File.expand_path("netcat.js", __dir__)}"
-
-# Write out our connection information to the file given as the first argument
-# to this script.
-File.write(ARGV[0], "#{prefix} #{information}")
 
 listener.join

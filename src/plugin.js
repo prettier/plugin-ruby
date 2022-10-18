@@ -1,4 +1,4 @@
-import { parseSync } from "./parseSync.js";
+import { parse } from "./parse.js";
 
 /*
  * metadata mostly pulled from linguist and rubocop:
@@ -82,7 +82,7 @@ const plugin = {
   parsers: {
     ruby: {
       parse(text, opts) {
-        return parseSync("ruby", text, opts);
+        return parse("ruby", text, opts);
       },
       astFormat: "ruby",
       hasPragma(text) {
@@ -97,7 +97,7 @@ const plugin = {
     },
     rbs: {
       parse(text, opts) {
-        return parseSync("rbs", text, opts);
+        return parse("rbs", text, opts);
       },
       astFormat: "rbs",
       hasPragma(text) {
@@ -112,7 +112,7 @@ const plugin = {
     },
     haml: {
       parse(text, opts) {
-        return parseSync("haml", text, opts);
+        return parse("haml", text, opts);
       },
       astFormat: "haml",
       hasPragma(text) {

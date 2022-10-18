@@ -2,11 +2,11 @@
 // the PRETTIER_RUBY_PID environment variable. At the end of the test suite we
 // should send a kill signal to it.
 function globalTeardown() {
-  const prettierRubyPID = process.env.PRETTIER_RUBY_PID;
+  const serverPID = process.env.PRETTIER_RUBY_PID;
 
-  if (prettierRubyPID) {
+  if (serverPID) {
     try {
-      process.kill(parseInt(prettierRubyPID, 10), "SIGINT");
+      process.kill(parseInt(serverPID, 10), "SIGINT");
     } catch (e) {
       throw new Error("Failed to kill the parser process in globalTeardown.");
     }

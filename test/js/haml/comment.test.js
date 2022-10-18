@@ -2,7 +2,9 @@ import { haml } from "../utils";
 
 describe("comment", () => {
   test("single line", () => {
-    expect(haml("/ This is the peanutbutterjelly element")).toMatchFormat();
+    return expect(
+      haml("/ This is the peanutbutterjelly element")
+    ).toMatchFormat();
   });
 
   test("multi line", () => {
@@ -11,7 +13,7 @@ describe("comment", () => {
         %p This doesn't render, because it's commented out!
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("conditional", () => {
@@ -20,7 +22,7 @@ describe("comment", () => {
         %h1 Get Firefox
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("revealed", () => {
@@ -29,6 +31,6 @@ describe("comment", () => {
         You are not using Internet Explorer, or are using version 10+.
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 });

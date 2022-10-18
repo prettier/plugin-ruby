@@ -3,49 +3,53 @@ import { atLeastVersion, long, ruby } from "../../utils.js";
 describe("method", () => {
   describe("definitions", () => {
     test("shorthand for empty methods", () => {
-      expect("def foo; end").toChangeFormat("def foo\nend");
+      return expect("def foo; end").toChangeFormat("def foo\nend");
     });
 
     test("shorthand for empty methods with parens", () => {
-      expect("def foo(); end").toChangeFormat("def foo()\nend");
+      return expect("def foo(); end").toChangeFormat("def foo()\nend");
     });
 
     test("single arg, no parens", () => {
-      expect("def foo bar\nend").toChangeFormat("def foo(bar)\nend");
+      return expect("def foo bar\nend").toChangeFormat("def foo(bar)\nend");
     });
 
     test("single arg, with parens", () => {
-      expect("def foo(bar)\nend").toMatchFormat();
+      return expect("def foo(bar)\nend").toMatchFormat();
     });
 
     test("shorthand for empty singleton methods", () => {
-      expect("def self.foo; end").toChangeFormat("def self.foo\nend");
+      return expect("def self.foo; end").toChangeFormat("def self.foo\nend");
     });
 
     test("shorthand for empty singleton methods with parens", () => {
-      expect("def self.foo(); end").toChangeFormat("def self.foo()\nend");
+      return expect("def self.foo(); end").toChangeFormat(
+        "def self.foo()\nend"
+      );
     });
 
     test("singleton, single arg, no parens", () => {
-      expect("def self.foo bar\nend").toChangeFormat("def self.foo(bar)\nend");
+      return expect("def self.foo bar\nend").toChangeFormat(
+        "def self.foo(bar)\nend"
+      );
     });
 
     test("singleton, single arg, with parens", () => {
-      expect("def self.foo(bar)\nend").toMatchFormat();
+      return expect("def self.foo(bar)\nend").toMatchFormat();
     });
 
     test("shorthand with a body", () => {
-      expect("def foo(alpha); 1; end").toChangeFormat(
+      return expect("def foo(alpha); 1; end").toChangeFormat(
         "def foo(alpha)\n  1\nend"
       );
     });
 
     test("single splat arg with no name", () => {
-      expect("def foo(*); end").toChangeFormat("def foo(*)\nend");
+      return expect("def foo(*); end").toChangeFormat("def foo(*)\nend");
     });
 
     test("double splat arg with no name", () => {
-      expect("def foo(**); end").toChangeFormat("def foo(**)\nend");
+      return expect("def foo(**); end").toChangeFormat("def foo(**)\nend");
     });
 
     test("with helper method", () => {
@@ -55,7 +59,7 @@ describe("method", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("with helper method on defs", () => {
@@ -65,7 +69,7 @@ describe("method", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("every single arg type", () => {
@@ -75,7 +79,7 @@ describe("method", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("breaking", () => {
@@ -88,7 +92,7 @@ describe("method", () => {
         end
       `);
 
-      expect(content).toChangeFormat(expected);
+      return expect(content).toChangeFormat(expected);
     });
 
     test("with comments on method definition", () => {
@@ -100,7 +104,7 @@ describe("method", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("with comments on params", () => {
@@ -118,7 +122,7 @@ describe("method", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("with comments on optional params", () => {
@@ -130,12 +134,14 @@ describe("method", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     if (atLeastVersion("2.7")) {
       test("nokw_param", () => {
-        expect("def foo(**nil); end").toChangeFormat("def foo(**nil)\nend");
+        return expect("def foo(**nil); end").toChangeFormat(
+          "def foo(**nil)\nend"
+        );
       });
 
       test("args_forward", () => {
@@ -145,7 +151,7 @@ describe("method", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
     }
 
@@ -157,19 +163,19 @@ describe("method", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("single-line methods", () => {
-        expect("def foo = bar").toMatchFormat();
+        return expect("def foo = bar").toMatchFormat();
       });
 
       test("single-line methods with empty params", () => {
-        expect("def foo() = bar").toChangeFormat("def foo = bar");
+        return expect("def foo() = bar").toChangeFormat("def foo = bar");
       });
 
       test("single-line methods with params", () => {
-        expect("def foo(name) = bar").toMatchFormat();
+        return expect("def foo(name) = bar").toMatchFormat();
       });
     }
 
@@ -183,25 +189,25 @@ describe("method", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
   });
 
   describe("method calls", () => {
     test("empty parens", () => {
-      expect("foo()").toChangeFormat("foo");
+      return expect("foo()").toChangeFormat("foo");
     });
 
     test("single args", () => {
-      expect("foo(1)").toMatchFormat();
+      return expect("foo(1)").toMatchFormat();
     });
 
     test("multi arg", () => {
-      expect("foo(1, 2)").toMatchFormat();
+      return expect("foo(1, 2)").toMatchFormat();
     });
 
     test("just block", () => {
-      expect("foo(&block)").toMatchFormat();
+      return expect("foo(&block)").toMatchFormat();
     });
 
     describe("commands", () => {
@@ -212,7 +218,7 @@ describe("method", () => {
                        )
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("alignment for `to`", () => {
@@ -222,7 +228,7 @@ describe("method", () => {
           )
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("alignment for `not_to`", () => {
@@ -232,7 +238,7 @@ describe("method", () => {
           )
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("alignment for `to_not`", () => {
@@ -242,7 +248,7 @@ describe("method", () => {
           )
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("just block", () => {
@@ -252,21 +258,21 @@ describe("method", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
     });
 
     describe("single splat", () => {
       test("plain", () => {
-        expect("foo(*bar)").toMatchFormat();
+        return expect("foo(*bar)").toMatchFormat();
       });
 
       test("with multi args", () => {
-        expect("foo(1, 2, *abc)").toMatchFormat();
+        return expect("foo(1, 2, *abc)").toMatchFormat();
       });
 
       test("between multi args", () => {
-        expect("foo(1, 2, *abc, 3, 4)").toMatchFormat();
+        return expect("foo(1, 2, *abc, 3, 4)").toMatchFormat();
       });
 
       test("with comments", () => {
@@ -279,7 +285,7 @@ describe("method", () => {
           )
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("with trailing comments", () => {
@@ -292,11 +298,11 @@ describe("method", () => {
           )
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("with block", () => {
-        expect("foo(*bar, &block)").toMatchFormat();
+        return expect("foo(*bar, &block)").toMatchFormat();
       });
 
       test("with comments and block", () => {
@@ -307,74 +313,74 @@ describe("method", () => {
           )
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
     });
 
     describe("double splat", () => {
       test("plain", () => {
-        expect("foo(**bar)").toMatchFormat();
+        return expect("foo(**bar)").toMatchFormat();
       });
 
       test("with block", () => {
-        expect("foo(**bar, &block)").toMatchFormat();
+        return expect("foo(**bar, &block)").toMatchFormat();
       });
 
       test("with splat and block", () => {
-        expect("foo(*bar, **baz, &block)").toMatchFormat();
+        return expect("foo(*bar, **baz, &block)").toMatchFormat();
       });
 
       test("after kwarg", () => {
-        expect("foo(kwarg: 1, **splat)").toMatchFormat();
+        return expect("foo(kwarg: 1, **splat)").toMatchFormat();
       });
 
       test("before kwarg", () => {
-        expect("foo(**splat, kwarg: 1)").toMatchFormat();
+        return expect("foo(**splat, kwarg: 1)").toMatchFormat();
       });
 
       test("before kwargs", () => {
-        expect("foo(before: 1, **splat, after: 1)").toMatchFormat();
+        return expect("foo(before: 1, **splat, after: 1)").toMatchFormat();
       });
     });
 
     describe("different operators", () => {
       test("double colon gets changed", () => {
-        expect("Foo::foo").toChangeFormat("Foo.foo");
+        return expect("Foo::foo").toChangeFormat("Foo.foo");
       });
 
       test("lonely operator", () => {
-        expect("foo&.foo").toMatchFormat();
+        return expect("foo&.foo").toMatchFormat();
       });
     });
 
     describe("breaking", () => {
       describe("without trailing commas", () => {
         test("starting with no trailing comma stays", () => {
-          expect(`foo(${long}, a${long})`).toChangeFormat(
+          return expect(`foo(${long}, a${long})`).toChangeFormat(
             `foo(\n  ${long},\n  a${long}\n)`
           );
         });
 
         test("with breaking ternary as first argument", () => {
-          expect(`foo bar ? ${long} : a${long}`).toChangeFormat(
+          return expect(`foo bar ? ${long} : a${long}`).toChangeFormat(
             `foo(\n  if bar\n    ${long}\n  else\n    a${long}\n  end\n)`
           );
         });
 
         test("starting with trailing comma changes", () => {
-          expect(`foo(${long}, a${long},)`).toChangeFormat(
+          return expect(`foo(${long}, a${long},)`).toChangeFormat(
             `foo(\n  ${long},\n  a${long}\n)`
           );
         });
 
         test("with block on the end", () => {
-          expect(`foo(${long}, &block)`).toChangeFormat(
+          return expect(`foo(${long}, &block)`).toChangeFormat(
             `foo(\n  ${long},\n  &block\n)`
           );
         });
 
         test("on commands", () => {
-          expect(`command ${long}, a${long}`).toChangeFormat(
+          return expect(`command ${long}, a${long}`).toChangeFormat(
             ruby(`
               command ${long},
                       a${long}
@@ -383,7 +389,7 @@ describe("method", () => {
         });
 
         test("on command calls", () => {
-          expect(`command.call ${long}, a${long}`).toChangeFormat(
+          return expect(`command.call ${long}, a${long}`).toChangeFormat(
             ruby(`
               command.call ${long},
                            a${long}

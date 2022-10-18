@@ -2,42 +2,42 @@ import { haml } from "../utils";
 
 describe("doctype", () => {
   test("basic", () => {
-    expect(haml("!!! Basic")).toMatchFormat();
+    return expect(haml("!!! Basic")).toMatchFormat();
   });
 
   test("frameset", () => {
-    expect(haml("!!! Frameset")).toMatchFormat();
+    return expect(haml("!!! Frameset")).toMatchFormat();
   });
 
   test("mobile", () => {
-    expect(haml("!!! Mobile")).toMatchFormat();
+    return expect(haml("!!! Mobile")).toMatchFormat();
   });
 
   test("rdfa", () => {
-    expect(haml("!!! RDFa")).toMatchFormat();
+    return expect(haml("!!! RDFa")).toMatchFormat();
   });
 
   test("strict", () => {
-    expect(haml("!!! Strict")).toMatchFormat();
+    return expect(haml("!!! Strict")).toMatchFormat();
   });
 
   test("xml", () => {
-    expect(haml("!!! XML")).toMatchFormat();
+    return expect(haml("!!! XML")).toMatchFormat();
   });
 
   test("encoding", () => {
-    expect(haml("!!! XML iso-8859-1")).toMatchFormat();
+    return expect(haml("!!! XML iso-8859-1")).toMatchFormat();
   });
 
   test("1.1", () => {
-    expect(haml("!!! 1.1")).toMatchFormat();
+    return expect(haml("!!! 1.1")).toMatchFormat();
   });
 
   test("5", () => {
-    expect(haml("!!! 5")).toMatchFormat();
+    return expect(haml("!!! 5")).toMatchFormat();
   });
 
   test("misc", () => {
-    expect(haml("!!! foo")).toMatchFormat();
+    return expect(haml("!!! foo")).toMatchFormat();
   });
 });
