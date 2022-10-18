@@ -68,7 +68,7 @@ function getPlugins(opts) {
     rubyPlugins.split(",").forEach((plugin) => plugins.add(plugin.trim()));
   }
 
-  if (opts.singleQuote) {
+  if (opts.rubySingleQuote) {
     plugins.add("plugin/single_quotes");
   }
 
