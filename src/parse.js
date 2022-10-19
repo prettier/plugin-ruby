@@ -121,11 +121,11 @@ export async function spawnServer(opts, killOnExit = true) {
         clearInterval(interval);
         reject(
           new Error(
-            "Failed to get connection options from parse server in time. If this happens repeatedly, try increasing the PRETTIER_RUBY_TIMEOUT_MS environment variable beyond 5000."
+            "Failed to get connection options from parse server in time. If this happens repeatedly, try increasing the PRETTIER_RUBY_TIMEOUT_MS environment variable beyond 10000."
           )
         );
       },
-      parseInt(process.env.PRETTIER_RUBY_TIMEOUT_MS || "5000", 10)
+      parseInt(process.env.PRETTIER_RUBY_TIMEOUT_MS || "10000", 10)
     );
 
     const interval = setInterval(() => {
