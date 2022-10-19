@@ -38,10 +38,7 @@ if Gem.win_platform?
 
   File.write(
     connection_filepath,
-    JSON.fast_generate(
-      address: server.address.ip_address,
-      port: server.address.ip_port
-    )
+    JSON.fast_generate(address: address.ip_address, port: address.ip_port)
   )
 else
   # If we're not on windows, then we're going to assume we can use unix socket
