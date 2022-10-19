@@ -76,7 +76,7 @@ jobs:
       - run: gem install syntax_tree syntax_tree-haml syntax_tree-rbs
       - uses: actions/setup-node@v2
         with:
-          node-version: 16.x
+          node-version: 18.x
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: yarn pack
@@ -87,15 +87,14 @@ jobs:
       - name: Smoke test
         run: |
           cd /tmp/smoketest
-          echo '{ "name": "smoketest" }' > package.json
+          echo '{ "name": "smoketest", "type": "module", "license": "MIT" }' > package.json
           yarn set version berry # workaround for https://github.com/yarnpkg/berry/issues/3180
           yarn set version ${{ matrix.yarn }}
-          yarn add prettier @prettier/plugin-ruby@file:/tmp/prettier-plugin-ruby.tgz
+          yarn add prettier@next @prettier/plugin-ruby@file:/tmp/prettier-plugin-ruby.tgz
           npx rimraf .yarn/unplugged # Make sure Yarn didn't unplug anything; this will deliberately break if it did
-          echo '{ "plugins": ["@prettier/plugin-ruby"] }' >.prettierrc.json
-          echo 'def add(a, b) ; a + b ; end' >smoketest.rb
-          yarn run prettier -w smoketest.rb
-          ruby -c smoketest.rb
+          echo '{ "plugins": ["@prettier/plugin-ruby"] }' > .prettierrc.json
+          echo 'def add(a, b) ; a + b ; end' > smoketest.rb
+          yarn run prettier -w smoketest.rb && ruby -c smoketest.rb
 
   gem:
     name: Gem
