@@ -1,4 +1,4 @@
-const { ruby } = require("../../utils");
+import { ruby } from "../../utils.js";
 
 describe("embdoc", () => {
   test("basic embdocs", () => {
@@ -14,7 +14,7 @@ describe("embdoc", () => {
       =end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("within a class", () => {
@@ -26,7 +26,7 @@ describe("embdoc", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("within a nested class", () => {
@@ -40,6 +40,6 @@ describe("embdoc", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 });

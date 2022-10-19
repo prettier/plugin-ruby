@@ -1,21 +1,15 @@
-const path = require("path");
-const prettier = require("prettier");
-
-const plugin = require("../../src/plugin");
-
-function getInferredParser(filename) {
-  const filepath = path.join(__dirname, filename);
-  const fileInfoOptions = { plugins: [plugin] };
-
-  return prettier
-    .getFileInfo(filepath, fileInfoOptions)
-    .then(({ inferredParser }) => inferredParser);
-}
+import { getFileInfo } from "prettier";
+import url from "url";
+import plugin from "../../src/plugin.js";
 
 describe("files", () => {
   const cases = ["files/Gemfile", "files/shebang", "files/test.rake"];
 
-  test.each(cases)("infers Ruby parser from %s", (filename) =>
-    expect(getInferredParser(filename)).resolves.toBe("ruby")
-  );
+  test.each(cases)("infers Ruby parser from %s", async (filename) => {
+    const filepath = url.fileURLToPath(new URL(filename, import.meta.url));
+    const fileInfoOptions = { plugins: [plugin] };
+
+    const { inferredParser } = await getFileInfo(filepath, fileInfoOptions);
+    expect(inferredParser).toEqual("ruby");
+  });
 });

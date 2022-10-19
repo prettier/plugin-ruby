@@ -1,4 +1,4 @@
-const { atLeastVersion, atMostVersion, ruby } = require("../../utils");
+import { atLeastVersion, atMostVersion, ruby } from "../../utils.js";
 
 describe("patterns", () => {
   if (atMostVersion("2.7")) {
@@ -30,13 +30,13 @@ describe("patterns", () => {
     test("rassign", () => {
       const content = `{ db: { user: "John" } } => { db: { user: } }`;
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("rassign with fndptn", () => {
       const content = "(1..10).to_a.shuffle => [*bef, 2..4 => thresh, *aft]";
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
   }
 
@@ -48,7 +48,7 @@ describe("patterns", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("a, b, *c, d, e", () => {
@@ -66,7 +66,7 @@ describe("patterns", () => {
       end
     `);
 
-    expect(content).toChangeFormat(expectedContent);
+    return expect(content).toChangeFormat(expectedContent);
   });
 
   test("0, [1, _] => bar", () => {
@@ -84,7 +84,7 @@ describe("patterns", () => {
       end
     `);
 
-    expect(content).toChangeFormat(expectedContent);
+    return expect(content).toChangeFormat(expectedContent);
   });
 
   test("*c, d, e", () => {
@@ -102,7 +102,7 @@ describe("patterns", () => {
       end
     `);
 
-    expect(content).toChangeFormat(expectedContent);
+    return expect(content).toChangeFormat(expectedContent);
   });
 
   test("_, _", () => {
@@ -120,7 +120,7 @@ describe("patterns", () => {
       end
     `);
 
-    expect(content).toChangeFormat(expectedContent);
+    return expect(content).toChangeFormat(expectedContent);
   });
 
   test("a, b if b == a * 2", () => {
@@ -138,7 +138,7 @@ describe("patterns", () => {
       end
     `);
 
-    expect(content).toChangeFormat(expectedContent);
+    return expect(content).toChangeFormat(expectedContent);
   });
 
   test("with a single array element", () => {
@@ -149,7 +149,7 @@ describe("patterns", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("with comments in an array pattern", () => {
@@ -171,7 +171,7 @@ describe("patterns", () => {
       end
     `);
 
-    expect(content).toChangeFormat(expectedContent);
+    return expect(content).toChangeFormat(expectedContent);
   });
 
   test("multiple clauses", () => {
@@ -184,6 +184,6 @@ describe("patterns", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 });

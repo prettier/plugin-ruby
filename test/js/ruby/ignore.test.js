@@ -1,4 +1,4 @@
-const { ruby } = require("../utils");
+import { ruby } from "../utils.js";
 
 describe("ignore", () => {
   test("you can ignore code blocks", () => {
@@ -7,6 +7,6 @@ describe("ignore", () => {
       class Foo; def bar; 1+1+1; end; end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 });

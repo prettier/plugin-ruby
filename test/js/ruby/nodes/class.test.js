@@ -1,4 +1,4 @@
-const { long, ruby } = require("../../utils");
+import { long, ruby } from "../../utils.js";
 
 describe("class", () => {
   test("basic nesting", () => {
@@ -14,7 +14,7 @@ describe("class", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("inheritance", () => {
@@ -25,15 +25,17 @@ describe("class", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("breaking class name", () => {
-    expect(`class P${long}; end`).toChangeFormat(`class P${long}\nend`);
+    return expect(`class P${long}; end`).toChangeFormat(`class P${long}\nend`);
   });
 
   test("breaking module name", () => {
-    expect(`module P${long}; end`).toChangeFormat(`module P${long}\nend`);
+    return expect(`module P${long}; end`).toChangeFormat(
+      `module P${long}\nend`
+    );
   });
 
   test("class push blocks", () => {
@@ -44,7 +46,7 @@ describe("class", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("multiple access controls", () => {
@@ -70,7 +72,7 @@ describe("class", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("method helper", () => {
@@ -82,7 +84,7 @@ describe("class", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   describe.each(["public", "protected", "private"])(
@@ -99,7 +101,7 @@ describe("class", () => {
         end
       `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("inline", () => {
@@ -111,18 +113,18 @@ describe("class", () => {
         end
       `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
     }
   );
 
   describe("constant reference", () => {
     test("regular", () => {
-      expect("Pret::Tier::Ruby").toMatchFormat();
+      return expect("Pret::Tier::Ruby").toMatchFormat();
     });
 
     test("top-level", () => {
-      expect("::Pret::Tier::Ruby").toMatchFormat();
+      return expect("::Pret::Tier::Ruby").toMatchFormat();
     });
   });
 });

@@ -1,14 +1,14 @@
-const { long, ruby } = require("../../utils");
+import { long, ruby } from "../../utils.js";
 
 describe("calls", () => {
   test("simple calls", () => {
     const content = `posts.active.where("created_at > ?", 1.year.ago)`;
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("short chains", () => {
-    expect("foo.bar.baz qux").toMatchFormat();
+    return expect("foo.bar.baz qux").toMatchFormat();
   });
 
   test("chain methods", () => {
@@ -27,7 +27,7 @@ describe("calls", () => {
         .hhhhhhhhhh
     `);
 
-    expect(before).toChangeFormat(after);
+    return expect(before).toChangeFormat(after);
   });
 
   test("chains of methods with one with arguments right at the top", () => {
@@ -38,7 +38,7 @@ describe("calls", () => {
       )
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("chains of methods with a block right at the top", () => {
@@ -49,13 +49,13 @@ describe("calls", () => {
       end
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("tons of calls that fit on one line", () => {
     const content = "a.b.c.d.e.f.g.h.i.j.k.l.m.n.o.p.q.r.s.t.u.v.w.x.y.z";
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("chains which contain a .where.not", () => {
@@ -68,7 +68,7 @@ describe("calls", () => {
         .limit(10)
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   describe("within sig blocks", () => {
@@ -81,7 +81,7 @@ describe("calls", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("chains with other methods", () => {
@@ -93,7 +93,7 @@ describe("calls", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
   });
 
@@ -110,31 +110,31 @@ describe("calls", () => {
         .select_all(:table1)
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("no explicit call doesn't add call", () => {
-    expect("a.(1, 2, 3)").toMatchFormat();
+    return expect("a.(1, 2, 3)").toMatchFormat();
   });
 
   test("explicit call maintains call", () => {
-    expect("a.call(1, 2, 3)").toMatchFormat();
+    return expect("a.call(1, 2, 3)").toMatchFormat();
   });
 
   test("double bang with a special operator on a call", () => {
-    expect("!!object&.topic_list").toMatchFormat();
+    return expect("!!object&.topic_list").toMatchFormat();
   });
 
   test("bang with a special operator on a command_call", () => {
-    expect(`!domain&.include? "@"`).toMatchFormat();
+    return expect(`!domain&.include? "@"`).toMatchFormat();
   });
 
   test("#call shorthand does not eliminate empty parentheses", () => {
-    expect("Foo.new.()").toMatchFormat();
+    return expect("Foo.new.()").toMatchFormat();
   });
 
   test("methods that look like constants do not eliminate empty parens", () => {
-    expect("Foo()").toMatchFormat();
+    return expect("Foo()").toMatchFormat();
   });
 
   test("call chains with no indent on the first receiver", () => {
@@ -149,7 +149,7 @@ describe("calls", () => {
       ].map(&:foo?).bbb.ccc
     `);
 
-    expect(content).toChangeFormat(expected);
+    return expect(content).toChangeFormat(expected);
   });
 
   test("chained method_add_arg after a block", () => {
@@ -158,7 +158,7 @@ describe("calls", () => {
       end.d e, f
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("comments in a method chain get printed correctly", () => {
@@ -201,6 +201,6 @@ describe("calls", () => {
         end
     `);
 
-    expect(content).toChangeFormat(expected);
+    return expect(content).toChangeFormat(expected);
   });
 });

@@ -1,4 +1,4 @@
-const prettier = require("prettier");
+import { format } from "prettier";
 
 describe("errors", () => {
   const cases = [
@@ -13,10 +13,12 @@ describe("errors", () => {
     "<>"
   ];
 
-  test.each(cases)("fails for %s", (content) => {
-    const format = () =>
-      prettier.format(content, { parser: "ruby", plugins: ["."] });
-
-    expect(format).toThrow();
+  test.each(cases)("fails for %s", async (content) => {
+    try {
+      await format(content, { parser: "ruby", plugins: ["."] });
+      expect(true).toBe(false);
+    } catch (error) {
+      expect(error.loc).toBeDefined();
+    }
   });
 });

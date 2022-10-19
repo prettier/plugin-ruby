@@ -1,56 +1,56 @@
-const { ruby } = require("../../utils");
+import { ruby } from "../../utils.js";
 
 describe("regexp", () => {
   test("basic", () => {
-    expect("/abc/").toMatchFormat();
+    return expect("/abc/").toMatchFormat();
   });
 
   test("unnecessary braces", () => {
-    expect("%r{abc}").toChangeFormat("/abc/");
+    return expect("%r{abc}").toChangeFormat("/abc/");
   });
 
   test("unnecessary slashes", () => {
-    expect("%r/abc/").toChangeFormat("/abc/");
+    return expect("%r/abc/").toChangeFormat("/abc/");
   });
 
   test("unnecessary brackets", () => {
-    expect("%r[abc]").toChangeFormat("/abc/");
+    return expect("%r[abc]").toChangeFormat("/abc/");
   });
 
   test("unnecessary parens", () => {
-    expect("%r(abc)").toChangeFormat("/abc/");
+    return expect("%r(abc)").toChangeFormat("/abc/");
   });
 
   test("necessary braces", () => {
-    expect("%r{a/b/c}").toMatchFormat();
+    return expect("%r{a/b/c}").toMatchFormat();
   });
 
   test("interpolation", () => {
-    expect("/a#{inter}c/").toMatchFormat();
+    return expect("/a#{inter}c/").toMatchFormat();
   });
 
   test("modifiers", () => {
-    expect("/abc/i").toMatchFormat();
+    return expect("/abc/i").toMatchFormat();
   });
 
   test("braces and modifiers", () => {
-    expect("%r{a/b/c}mi").toMatchFormat();
+    return expect("%r{a/b/c}mi").toMatchFormat();
   });
 
   test("global interpolation", () => {
-    expect("/#$&/").toChangeFormat("/#{$&}/");
+    return expect("/#$&/").toChangeFormat("/#{$&}/");
   });
 
   test("do not change if { and / in regexp literal", () => {
-    expect("%r(a{b/c)").toMatchFormat();
+    return expect("%r(a{b/c)").toMatchFormat();
   });
 
   test("do not change if } and / in regexp literal", () => {
-    expect("%r[a}b/c]").toMatchFormat();
+    return expect("%r[a}b/c]").toMatchFormat();
   });
 
   test("parens with }", () => {
-    expect("%r(a}bc)").toChangeFormat("/a}bc/");
+    return expect("%r(a}bc)").toChangeFormat("/a}bc/");
   });
 
   test("comments in regex", () => {
@@ -63,18 +63,18 @@ describe("regexp", () => {
       \\Z/x
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("forces braces if could be ambiguous with space in command", () => {
-    expect("foo %r{ bar}").toMatchFormat();
+    return expect("foo %r{ bar}").toMatchFormat();
   });
 
   test("forces braces if could be ambiguous with equals in command", () => {
-    expect("foo %r{= bar}").toMatchFormat();
+    return expect("foo %r{= bar}").toMatchFormat();
   });
 
   test("do not force braces if space is in parens", () => {
-    expect("foo(/ bar/)").toMatchFormat();
+    return expect("foo(/ bar/)").toMatchFormat();
   });
 });

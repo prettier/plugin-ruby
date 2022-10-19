@@ -1,14 +1,14 @@
-const { long, ruby, atLeastVersion } = require("../../utils");
+import { long, ruby, atLeastVersion } from "../../utils.js";
 
 describe("conditionals", () => {
   describe("not operator", () => {
     // from ruby test/ruby/test_not.rb
     test("not operator, empty parens", () => {
-      expect("assert_equal(true, (not ()))").toMatchFormat();
+      return expect("assert_equal(true, (not ()))").toMatchFormat();
     });
 
     test("not operator from within a ternary adds parens", () => {
-      expect("a ? not(b) : c").toMatchFormat();
+      return expect("a ? not(b) : c").toMatchFormat();
     });
 
     test("not operator from within an if/else adds parens", () => {
@@ -20,7 +20,7 @@ describe("conditionals", () => {
         end
       `);
 
-      expect(content).toChangeFormat("a ? not(b) : c");
+      return expect(content).toChangeFormat("a ? not(b) : c");
     });
   });
 
@@ -33,7 +33,7 @@ describe("conditionals", () => {
             "${long}" ${keyword} text
         `);
 
-        expect(content).toChangeFormat(expected);
+        return expect(content).toChangeFormat(expected);
       });
 
       test("when modifying an abbreviated assignment expression", () => {
@@ -43,7 +43,7 @@ describe("conditionals", () => {
             "${long}" ${keyword} text
         `);
 
-        expect(content).toChangeFormat(expected);
+        return expect(content).toChangeFormat(expected);
       });
 
       test("when modifying an expression with an assignment descendant", () => {
@@ -56,7 +56,7 @@ describe("conditionals", () => {
             ) ${keyword} text
         `);
 
-        expect(content).toChangeFormat(expected);
+        return expect(content).toChangeFormat(expected);
       });
     });
 
@@ -72,7 +72,7 @@ describe("conditionals", () => {
         end
       `);
 
-      expect(content).toChangeFormat(expected);
+      return expect(content).toChangeFormat(expected);
     });
 
     test("does not insert double modifiers on a single line for nested conditionals", () => {
@@ -89,32 +89,34 @@ describe("conditionals", () => {
         end
       `);
 
-      expect(content).toChangeFormat(expected);
+      return expect(content).toChangeFormat(expected);
     });
   });
 
   describe("when inline allowed", () => {
     describe.each(["if", "unless"])("%s keyword", (keyword) => {
       test("inline stays", () => {
-        expect(`1 ${keyword} a`).toMatchFormat();
+        return expect(`1 ${keyword} a`).toMatchFormat();
       });
 
       test("multi line changes", () => {
-        expect(`${keyword} a\n  1\nend`).toChangeFormat(`1 ${keyword} a`);
+        return expect(`${keyword} a\n  1\nend`).toChangeFormat(
+          `1 ${keyword} a`
+        );
       });
 
       test("inline breaking changes", () => {
-        expect(`${long} ${keyword} ${long}`).toChangeFormat(
+        return expect(`${long} ${keyword} ${long}`).toChangeFormat(
           `${keyword} ${long}\n  ${long}\nend`
         );
       });
 
       test("multi line breaking stays", () => {
-        expect(`${keyword} ${long}\n  ${long}\nend`).toMatchFormat();
+        return expect(`${keyword} ${long}\n  ${long}\nend`).toMatchFormat();
       });
 
       test("not operator", () => {
-        expect(`b ${keyword} not a`).toMatchFormat();
+        return expect(`b ${keyword} not a`).toMatchFormat();
       });
 
       test("empty first body", () => {
@@ -123,7 +125,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("empty first body with present second body", () => {
@@ -134,7 +136,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("comment in body", () => {
@@ -144,7 +146,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("comment in body with question mark method", () => {
@@ -154,7 +156,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("comment on node in body", () => {
@@ -164,7 +166,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("breaks if the predicate is an assignment", () => {
@@ -176,7 +178,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("breaks if the predicate is an op assignment", () => {
@@ -188,11 +190,11 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("align long predicates", () => {
-        expect(`foo ${keyword} ${long} || ${long}a`).toChangeFormat(
+        return expect(`foo ${keyword} ${long} || ${long}a`).toChangeFormat(
           ruby(`
             ${keyword} ${long} ||
                 ${Array(keyword.length).fill("").join(" ")}${long}a
@@ -203,9 +205,9 @@ describe("conditionals", () => {
       });
 
       test("wraps single lines in parens when assigning", () => {
-        expect(`hash[:key] = ${keyword} false then :value end`).toChangeFormat(
-          `hash[:key] = (:value ${keyword} false)`
-        );
+        return expect(
+          `hash[:key] = ${keyword} false then :value end`
+        ).toChangeFormat(`hash[:key] = (:value ${keyword} false)`);
       });
 
       test("wraps inline version with calls", () => {
@@ -215,7 +217,7 @@ describe("conditionals", () => {
           end.to_s
         `);
 
-        expect(content).toChangeFormat("(false if true).to_s");
+        return expect(content).toChangeFormat("(false if true).to_s");
       });
 
       test("wraps inline version within binary", () => {
@@ -225,18 +227,18 @@ describe("conditionals", () => {
           end || baz
         `);
 
-        expect(content).toChangeFormat("(bar if foo) || baz");
+        return expect(content).toChangeFormat("(bar if foo) || baz");
       });
     });
   });
 
   describe("ternaries", () => {
     test("non-breaking", () => {
-      expect("a ? 1 : 2").toMatchFormat();
+      return expect("a ? 1 : 2").toMatchFormat();
     });
 
     test("breaking", () => {
-      expect(`a ? ${long} : ${long}`).toChangeFormat(
+      return expect(`a ? ${long} : ${long}`).toChangeFormat(
         ruby(`
           if a
             ${long}
@@ -256,7 +258,7 @@ describe("conditionals", () => {
         end
       `);
 
-      expect(content).toChangeFormat("a ? 1 : 2");
+      return expect(content).toChangeFormat("a ? 1 : 2");
     });
 
     test("transform for unless/else", () => {
@@ -268,7 +270,7 @@ describe("conditionals", () => {
         end
       `);
 
-      expect(content).toChangeFormat("a ? 2 : 1");
+      return expect(content).toChangeFormat("a ? 2 : 1");
     });
 
     test("adds parens if inside of a call", () => {
@@ -280,7 +282,7 @@ describe("conditionals", () => {
         end.to_s
       `);
 
-      expect(content).toChangeFormat("(a ? 1 : 2).to_s");
+      return expect(content).toChangeFormat("(a ? 1 : 2).to_s");
     });
 
     test("does not add parens if it breaks", () => {
@@ -292,7 +294,7 @@ describe("conditionals", () => {
         end.to_s
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("adds parens if inside of a binary", () => {
@@ -304,7 +306,7 @@ describe("conditionals", () => {
         end + 1
       `);
 
-      expect(content).toChangeFormat("(a ? 1 : 2) + 1");
+      return expect(content).toChangeFormat("(a ? 1 : 2) + 1");
     });
 
     test("adds parens if within a command", () => {
@@ -319,11 +321,11 @@ describe("conditionals", () => {
         )
       `);
 
-      expect(content).toChangeFormat(expected);
+      return expect(content).toChangeFormat(expected);
     });
 
     test("does not add parens if within a command_call non-breaking", () => {
-      expect("foo.bar baz ? foo : bar").toMatchFormat();
+      return expect("foo.bar baz ? foo : bar").toMatchFormat();
     });
 
     test("adds parens if within a command_call", () => {
@@ -338,7 +340,7 @@ describe("conditionals", () => {
         )
       `);
 
-      expect(content).toChangeFormat(expected);
+      return expect(content).toChangeFormat(expected);
     });
 
     describe("unable to transform", () => {
@@ -351,7 +353,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("command in if body", () => {
@@ -363,7 +365,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("command in else body", () => {
@@ -375,7 +377,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("command call in if body", () => {
@@ -387,7 +389,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("command call in else body", () => {
@@ -399,7 +401,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("heredoc in if body", () => {
@@ -414,7 +416,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("heredoc in else body", () => {
@@ -429,7 +431,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("nested conditional in if body", () => {
@@ -453,7 +455,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toChangeFormat(expected);
+        return expect(content).toChangeFormat(expected);
       });
 
       test("nested conditional in else body", () => {
@@ -476,7 +478,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toChangeFormat(expected);
+        return expect(content).toChangeFormat(expected);
       });
 
       test("nested ternary in if body", () => {
@@ -486,7 +488,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("nested ternary in else body", () => {
@@ -498,7 +500,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("command with argument predicate", () => {
@@ -510,7 +512,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("command call with argument predicate", () => {
@@ -522,11 +524,11 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("align long predicates", () => {
-        expect(`${long} || ${long}a ? foo : bar`).toChangeFormat(
+        return expect(`${long} || ${long}a ? foo : bar`).toChangeFormat(
           ruby(`
             if ${long} ||
                  ${long}a
@@ -547,7 +549,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("assign nodes in predicate", () => {
@@ -559,7 +561,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("opassign nodes in predicate", () => {
@@ -571,7 +573,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
 
       test("cannot transform with multiple statements", () => {
@@ -584,7 +586,7 @@ describe("conditionals", () => {
           end
         `);
 
-        expect(content).toMatchFormat();
+        return expect(content).toMatchFormat();
       });
     });
   });
@@ -599,7 +601,7 @@ describe("conditionals", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
 
     test("multiple clauses", () => {
@@ -615,37 +617,37 @@ describe("conditionals", () => {
         end
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
   });
 
   describe.each(["if", "unless"])("add parens when necessary %s", (keyword) => {
     test("args", () => {
-      expect(`[${keyword} foo? then bar end]`).toChangeFormat(
+      return expect(`[${keyword} foo? then bar end]`).toChangeFormat(
         `[(bar ${keyword} foo?)]`
       );
     });
 
     test("assign", () => {
-      expect(`foo = ${keyword} bar? then baz end`).toChangeFormat(
+      return expect(`foo = ${keyword} bar? then baz end`).toChangeFormat(
         `foo = (baz ${keyword} bar?)`
       );
     });
 
     test("assoc", () => {
-      expect(`{ foo: ${keyword} bar? then baz end }`).toChangeFormat(
+      return expect(`{ foo: ${keyword} bar? then baz end }`).toChangeFormat(
         `{ foo: (baz ${keyword} bar?) }`
       );
     });
 
     test("massign", () => {
-      expect(`f, o, o = ${keyword} bar? then baz end`).toChangeFormat(
+      return expect(`f, o, o = ${keyword} bar? then baz end`).toChangeFormat(
         `f, o, o = (baz ${keyword} bar?)`
       );
     });
 
     test("opassign", () => {
-      expect(`foo ||= ${keyword} bar? then baz end`).toChangeFormat(
+      return expect(`foo ||= ${keyword} bar? then baz end`).toChangeFormat(
         `foo ||= (baz ${keyword} bar?)`
       );
     });
@@ -658,7 +660,7 @@ describe("conditionals", () => {
         puts "admin: #{name}" ${keyword} user in { role: "admin", name: }
       `);
 
-      expect(content).toMatchFormat();
+      return expect(content).toMatchFormat();
     });
   }
 });

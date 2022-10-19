@@ -1,12 +1,12 @@
-const { long, ruby } = require("../../utils");
+import { long, ruby } from "../../utils.js";
 
 describe("binary", () => {
   test("single line", () => {
-    expect("foo && bar && baz").toMatchFormat();
+    return expect("foo && bar && baz").toMatchFormat();
   });
 
   test("multi line", () => {
-    expect(`${long} && ${long} && ${long}`).toChangeFormat(
+    return expect(`${long} && ${long} && ${long}`).toChangeFormat(
       `${long} &&\n  ${long} &&\n  ${long}`
     );
   });
@@ -19,7 +19,7 @@ describe("binary", () => {
       ]
     `);
 
-    expect(content).toChangeFormat(expected);
+    return expect(content).toChangeFormat(expected);
   });
 
   test("with heredoc and comment", () => {
@@ -29,10 +29,10 @@ describe("binary", () => {
       HERE
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("no spaces for **", () => {
-    expect("a**b").toMatchFormat();
+    return expect("a**b").toMatchFormat();
   });
 });

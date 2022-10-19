@@ -1,4 +1,4 @@
-const long = Array(80).fill("a").join("");
+export const long = Array(80).fill("a").join("");
 
 function stripLeadingWhitespace(code) {
   if (!code.includes("\n")) {
@@ -13,15 +13,15 @@ function stripLeadingWhitespace(code) {
   return content.map((line) => line.slice(indent)).join("\n");
 }
 
-function ruby(code) {
+export function ruby(code) {
   return stripLeadingWhitespace(code);
 }
 
-function rbs(code) {
+export function rbs(code) {
   return { code: stripLeadingWhitespace(code), parser: "rbs" };
 }
 
-function haml(code) {
+export function haml(code) {
   return { code: stripLeadingWhitespace(code), parser: "haml" };
 }
 
@@ -30,19 +30,10 @@ function haml(code) {
 // should be always available. TypeScript doesn't know that though, so we
 // explicitly allow it to be undefined by coalescing with the empty string.
 
-function atLeastVersion(version) {
+export function atLeastVersion(version) {
   return (process.env.RUBY_VERSION || "") >= version;
 }
 
-function atMostVersion(version) {
+export function atMostVersion(version) {
   return (process.env.RUBY_VERSION || "") < version;
 }
-
-module.exports = {
-  long,
-  ruby,
-  rbs,
-  haml,
-  atLeastVersion,
-  atMostVersion
-};

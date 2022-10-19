@@ -1,4 +1,4 @@
-const { haml } = require("../utils");
+import { haml } from "../utils";
 
 describe("filter", () => {
   test("self", () => {
@@ -7,7 +7,7 @@ describe("filter", () => {
         -# comment
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("custom", () => {
@@ -17,7 +17,7 @@ describe("filter", () => {
           bar
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("css", () => {
@@ -26,6 +26,6 @@ describe("filter", () => {
         .foo { height: 100px; width: 100px; }
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 });

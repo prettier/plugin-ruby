@@ -1,24 +1,24 @@
-const { ruby } = require("../../utils");
+import { ruby } from "../../utils.js";
 
 describe("aref", () => {
   test("literal reference", () => {
-    expect("array[5]").toMatchFormat();
+    return expect("array[5]").toMatchFormat();
   });
 
   test("dynamic reference", () => {
-    expect("array[idx]").toMatchFormat();
+    return expect("array[idx]").toMatchFormat();
   });
 
   test("reference with comment", () => {
-    expect("array[idx] # foo").toMatchFormat();
+    return expect("array[idx] # foo").toMatchFormat();
   });
 
   test("literal assignment", () => {
-    expect("array[5] = 6").toMatchFormat();
+    return expect("array[5] = 6").toMatchFormat();
   });
 
   test("dynamic assignment", () => {
-    expect("array[idx] = 6").toMatchFormat();
+    return expect("array[idx] = 6").toMatchFormat();
   });
 
   test("comments within assignment", () => {
@@ -30,6 +30,6 @@ describe("aref", () => {
       ]
     `);
 
-    expect(contents).toMatchFormat();
+    return expect(contents).toMatchFormat();
   });
 });

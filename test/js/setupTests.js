@@ -1,15 +1,14 @@
-const prettier = require("prettier");
-
-const plugin = require("../../src/plugin");
+import { format } from "prettier";
+import plugin from "../../src/plugin.js";
 
 function normalize(code) {
   const string = typeof code === "string" ? code : code.code;
   return string.replace(/\r?\n/g, "\n").trim();
 }
 
-function checkFormat(before, after) {
+async function checkFormat(before, after) {
   const originalText = typeof before === "string" ? before : before.code;
-  const formatted = prettier.format(originalText, {
+  const formatted = await format(originalText, {
     parser: typeof before === "string" ? "ruby" : before.parser,
     plugins: [plugin]
   });

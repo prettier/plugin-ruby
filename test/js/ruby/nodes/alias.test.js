@@ -1,36 +1,36 @@
-const { long, ruby } = require("../../utils");
+import { long, ruby } from "../../utils.js";
 
 describe("alias", () => {
   test("bare word aliases", () => {
-    expect("alias foo bar").toMatchFormat();
+    return expect("alias foo bar").toMatchFormat();
   });
 
   test("bare word operator aliases", () => {
-    expect("alias << push").toMatchFormat();
+    return expect("alias << push").toMatchFormat();
   });
 
   test("bare word keyword aliases", () => {
-    expect("alias in within").toMatchFormat();
+    return expect("alias in within").toMatchFormat();
   });
 
   test("bare word constant aliases", () => {
-    expect("alias in IN").toMatchFormat();
+    return expect("alias in IN").toMatchFormat();
   });
 
   test("symbol aliases become bare word aliases", () => {
-    expect("alias :foo :bar").toChangeFormat("alias foo bar");
+    return expect("alias :foo :bar").toChangeFormat("alias foo bar");
   });
 
   test("dynamic symbols do not get transformed (left)", () => {
-    expect(`alias :"foo" :bar`).toChangeFormat(`alias :"foo" bar`);
+    return expect(`alias :"foo" :bar`).toChangeFormat(`alias :"foo" bar`);
   });
 
   test("dynamic symbols do not get transformed (right)", () => {
-    expect(`alias :foo :"bar"`).toChangeFormat(`alias foo :"bar"`);
+    return expect(`alias :foo :"bar"`).toChangeFormat(`alias foo :"bar"`);
   });
 
   test("global aliases", () => {
-    expect("alias $foo $bar").toMatchFormat();
+    return expect("alias $foo $bar").toMatchFormat();
   });
 
   test("handles long symbols", () => {
@@ -39,11 +39,11 @@ describe("alias", () => {
             bar
     `);
 
-    expect(`alias ${long} bar`).toChangeFormat(expected);
+    return expect(`alias ${long} bar`).toChangeFormat(expected);
   });
 
   test("handles comments on the right node", () => {
-    expect("alias foo bar # baz").toMatchFormat();
+    return expect("alias foo bar # baz").toMatchFormat();
   });
 
   test("handles comments on the left node", () => {
@@ -52,7 +52,7 @@ describe("alias", () => {
             bar
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("handles comments on both nodes", () => {
@@ -61,6 +61,6 @@ describe("alias", () => {
             bar # bar
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 });

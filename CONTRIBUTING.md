@@ -78,7 +78,8 @@ Effectively, it walks the AST in the reverse direction from the way `Ripper` bui
 As the nodes are printing themselves and their children, they're additionally building up a second AST. That AST is built using the `builder` commands from prettier core, described [here](https://github.com/prettier/prettier/blob/main/commands.md). As an example, below is how a `binary` node (like the one representing the `1 + 1` above) would handle printing itself:
 
 ```javascript
-const { group, indent, line } = require("prettier").doc.builders;
+import prettier from "prettier";
+const { group, indent, line } = prettier.doc.builders;
 
 const printBinary = (path, opts, print) =>
   group([
@@ -163,10 +164,7 @@ Links relating to `prettier` and its plugins.
 
 While developing, we've built a couple of small utilities for debugging the `prettier` printing process. To use them, first run `yarn` and `bundle` to install dependencies.
 
-- `bin/lex [file|source]` - outputs the tokens as ripper sees them
-- `bin/sexp [file|source]` - outputs the AST that ripper builds before it gets passed back to `prettier`
-- `bin/pragma [file]` - runs the `hasPragma` function against the given input file
-- `bin/print [file|source]` - outputs the printed source of a Ruby file after running it through `prettier`
+- `bin/print.js [file|source]` - outputs the printed source of a Ruby file after running it through `prettier`
 
 ## Testing
 

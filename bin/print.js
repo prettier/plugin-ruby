@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-const fs = require("fs");
-const prettier = require("prettier");
+import { existsSync, readFileSync } from "fs";
+import { formatWithCursor } from "prettier";
 
-const plugin = require("../src/plugin");
+import plugin from "../src/plugin.js";
 
 let parser = "ruby";
 let contentIdx = 2;
@@ -15,19 +15,17 @@ if (["rbs", "haml"].includes(process.argv[contentIdx])) {
 
 let content;
 
-if (fs.existsSync(process.argv[contentIdx])) {
-  content = fs.readFileSync(process.argv[contentIdx], "utf-8");
+if (existsSync(process.argv[contentIdx])) {
+  content = readFileSync(process.argv[contentIdx], "utf-8");
 } else if (process.argv.length === contentIdx) {
   const extension = parser === "ruby" ? "rb" : parser;
-  content = fs.readFileSync(`test.${extension}`, "utf-8");
+  content = readFileSync(`test.${extension}`, "utf-8");
 } else {
   content = process.argv.slice(contentIdx).join(" ").replace(/\\n/g, "\n");
 }
 
-const { formatted } = prettier.formatWithCursor(content, {
+formatWithCursor(content, {
   parser,
   plugins: [plugin],
   cursorOffset: 1
-});
-
-console.log(formatted);
+}).then(({ formatted }) => console.log(formatted));

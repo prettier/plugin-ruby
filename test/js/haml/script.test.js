@@ -1,8 +1,8 @@
-const { haml } = require("../utils");
+import { haml } from "../utils";
 
 describe("script", () => {
   test("single line", () => {
-    expect(haml('%p= "hello"')).toMatchFormat();
+    return expect(haml('%p= "hello"')).toMatchFormat();
   });
 
   test("multi line", () => {
@@ -12,11 +12,11 @@ describe("script", () => {
         = "yo"
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("escape with interpolate", () => {
-    expect(haml(`&= "I like cheese & crackers"`)).toMatchFormat();
+    return expect(haml(`&= "I like cheese & crackers"`)).toMatchFormat();
   });
 
   test("children", () => {
@@ -25,10 +25,10 @@ describe("script", () => {
         = bar
     `);
 
-    expect(content).toMatchFormat();
+    return expect(content).toMatchFormat();
   });
 
   test("preserve", () => {
-    expect(haml('~ "Foo\\n<pre>Bar\\nBaz</pre>"')).toMatchFormat();
+    return expect(haml('~ "Foo\\n<pre>Bar\\nBaz</pre>"')).toMatchFormat();
   });
 });
