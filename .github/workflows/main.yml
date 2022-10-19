@@ -2,6 +2,7 @@ name: Main
 on:
   - push
   - pull_request
+
 jobs:
   ci:
     name: CI
@@ -17,15 +18,13 @@ jobs:
           - "3.0"
           - "3.1"
     runs-on: ${{ matrix.platform }}
-    env:
-      PLUGIN_RUBY_CI: true
     steps:
       - uses: actions/checkout@main
       - uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
           ruby-version: ${{ matrix.ruby }}
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: 18.x
           cache: yarn
@@ -33,34 +32,18 @@ jobs:
       - run: yarn test
       - run: bundle exec rake test
 
-  windows:
-    name: Windows
-    runs-on: windows-latest
-    env:
-      PLUGIN_RUBY_CI: true
-    steps:
-      - uses: actions/checkout@main
-      - uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
-          ruby-version: '3.1'
-      - run: timeout -k 2 2 bundle exec ruby src/server.rb --plugins= file.txt || ls
-      - run: cat file.txt
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    env:
-      PLUGIN_RUBY_CI: true
     steps:
       - uses: actions/checkout@main
       - uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
           ruby-version: "3.0"
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 18.x
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: yarn checkFormat
@@ -79,8 +62,6 @@ jobs:
   #         - 2.x
   #         - 3.x
   #   runs-on: ${{ matrix.platform }}
-  #   env:
-  #     PLUGIN_RUBY_CI: true
   #   steps:
   #     - uses: actions/checkout@main
   #     - uses: ruby/setup-ruby@v1

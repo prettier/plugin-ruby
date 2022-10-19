@@ -64,7 +64,7 @@ function getPlugins(opts) {
 // Create a file that will act as a communication mechanism, spawn a parser
 // server with that filepath as an argument, then wait for the file to be
 // created that will contain the connection information.
-export async function spawnServer(opts) {
+export async function spawnServer(opts, killOnExit = true) {
   const tmpdir = os.tmpdir();
   let serverFilepath = url.fileURLToPath(
     new URL("./server.rb", import.meta.url)
@@ -95,25 +95,25 @@ export async function spawnServer(opts) {
 
   server.unref();
 
-  process.on("exit", () => {
-    if (fs.existsSync(filepath)) {
-      fs.unlinkSync(filepath);
-    }
+  if (killOnExit) {
+    process.on("exit", () => {
+      if (fs.existsSync(filepath)) {
+        fs.unlinkSync(filepath);
+      }
 
-    try {
-      if (server.pid) {
-        // Kill the server process if it's still running. If we're on windows
-        // we're going to use the process ID number. If we're not, we're going
-        // to use the negative process ID to indicate the group.
-        const pid = process.platform === "win32" ? server.pid : -server.pid;
-        process.kill(pid);
+      try {
+        if (server.pid) {
+          // Kill the server process if it's still running. If we're on windows
+          // we're going to use the process ID number. If we're not, we're going
+          // to use the negative process ID to indicate the group.
+          const pid = process.platform === "win32" ? server.pid : -server.pid;
+          process.kill(pid);
+        }
+      } catch (error) {
+        // If there's an error killing the process, we're going to ignore it.
       }
-    } catch (error) {
-      if (process.env.PLUGIN_RUBY_CI) {
-        throw new Error(`Failed to kill the parser server: ${error}`);
-      }
-    }
-  });
+    });
+  }
 
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(
@@ -132,6 +132,7 @@ export async function spawnServer(opts) {
       if (fs.existsSync(filepath)) {
         resolve({
           serverPID: server.pid,
+          connectionFilepath: filepath,
           connectionOptions: JSON.parse(
             fs.readFileSync(filepath).toString("utf-8")
           )

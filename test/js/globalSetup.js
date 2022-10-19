@@ -7,21 +7,23 @@ import { spawnServer } from "../../src/parse.js";
 async function globalSetup() {
   // Set a RUBY_VERSION environment variable because certain tests will only run
   // for certain versions of Ruby.
-  process.env.RUBY_VERSION = spawnSync("ruby", [
-    "--disable-gems",
-    "-e",
-    "puts RUBY_VERSION"
-  ])
+  const args = ["--disable-gems", "-e", "puts RUBY_VERSION"];
+  process.env.RUBY_VERSION = spawnSync("ruby", args)
     .stdout.toString("utf-8")
     .trim();
 
-  const { serverPID, connectionOptions } = await spawnServer({
-    rubyPlugins: "",
-    rubySingleQuote: false,
-    trailingComma: "none"
-  });
+  const { serverPID, connectionFilepath, connectionOptions } =
+    await spawnServer(
+      {
+        rubyPlugins: "",
+        rubySingleQuote: false,
+        trailingComma: "none"
+      },
+      false
+    );
 
   process.env.PRETTIER_RUBY_PID = serverPID;
+  process.env.PRETTIER_RUBY_FILE = connectionFilepath;
   process.env.PRETTIER_RUBY_HOST = JSON.stringify(connectionOptions);
 }
 
