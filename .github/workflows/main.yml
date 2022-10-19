@@ -33,6 +33,20 @@ jobs:
       - run: yarn test
       - run: bundle exec rake test
 
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    env:
+      PLUGIN_RUBY_CI: true
+    steps:
+      - uses: actions/checkout@main
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          ruby-version: '3.1'
+      - run: timeout -k 2 2 bundle exec ruby src/server.rb --plugins= file.txt || ls
+      - run: cat file.txt
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -52,49 +66,49 @@ jobs:
       - run: yarn checkFormat
       - run: yarn lint
 
-  smoketest:
-    name: Yarn PnP smoke test
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - macos-latest
-          - ubuntu-latest
-          - windows-latest
-        yarn:
-          - 2.x
-          - 3.x
-    runs-on: ${{ matrix.platform }}
-    env:
-      PLUGIN_RUBY_CI: true
-    steps:
-      - uses: actions/checkout@main
-      - uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
-          ruby-version: "3.1"
-      - run: gem install syntax_tree syntax_tree-haml syntax_tree-rbs
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 18.x
-          cache: yarn
-      - run: yarn install --frozen-lockfile
-      - run: yarn pack
-      # Windows runners don't have /tmp, let's make sure it exists
-      - run: mkdir -p /tmp
-      - run: mv prettier-plugin-ruby-*.tgz /tmp/prettier-plugin-ruby.tgz
-      - run: mkdir /tmp/smoketest
-      - name: Smoke test
-        run: |
-          cd /tmp/smoketest
-          echo '{ "name": "smoketest", "type": "module", "license": "MIT" }' > package.json
-          yarn set version berry # workaround for https://github.com/yarnpkg/berry/issues/3180
-          yarn set version ${{ matrix.yarn }}
-          yarn add prettier@next @prettier/plugin-ruby@file:/tmp/prettier-plugin-ruby.tgz
-          npx rimraf .yarn/unplugged # Make sure Yarn didn't unplug anything; this will deliberately break if it did
-          echo '{ "plugins": ["@prettier/plugin-ruby"] }' > .prettierrc.json
-          echo 'def add(a, b) ; a + b ; end' > smoketest.rb
-          yarn run prettier -w smoketest.rb && ruby -c smoketest.rb
+  # smoketest:
+  #   name: Yarn PnP smoke test
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       platform:
+  #         - macos-latest
+  #         - ubuntu-latest
+  #         - windows-latest
+  #       yarn:
+  #         - 2.x
+  #         - 3.x
+  #   runs-on: ${{ matrix.platform }}
+  #   env:
+  #     PLUGIN_RUBY_CI: true
+  #   steps:
+  #     - uses: actions/checkout@main
+  #     - uses: ruby/setup-ruby@v1
+  #       with:
+  #         bundler-cache: true
+  #         ruby-version: "3.1"
+  #     - run: gem install syntax_tree syntax_tree-haml syntax_tree-rbs
+  #     - uses: actions/setup-node@v2
+  #       with:
+  #         node-version: 18.x
+  #         cache: yarn
+  #     - run: yarn install --frozen-lockfile
+  #     - run: yarn pack
+  #     # Windows runners don't have /tmp, let's make sure it exists
+  #     - run: mkdir -p /tmp
+  #     - run: mv prettier-plugin-ruby-*.tgz /tmp/prettier-plugin-ruby.tgz
+  #     - run: mkdir /tmp/smoketest
+  #     - name: Smoke test
+  #       run: |
+  #         cd /tmp/smoketest
+  #         echo '{ "name": "smoketest", "type": "module", "license": "MIT" }' > package.json
+  #         yarn set version berry # workaround for https://github.com/yarnpkg/berry/issues/3180
+  #         yarn set version ${{ matrix.yarn }}
+  #         yarn add prettier@next @prettier/plugin-ruby@file:/tmp/prettier-plugin-ruby.tgz
+  #         npx rimraf .yarn/unplugged # Make sure Yarn didn't unplug anything; this will deliberately break if it did
+  #         echo '{ "plugins": ["@prettier/plugin-ruby"] }' > .prettierrc.json
+  #         echo 'def add(a, b) ; a + b ; end' > smoketest.rb
+  #         yarn run prettier -w smoketest.rb && ruby -c smoketest.rb
 
   gem:
     name: Gem

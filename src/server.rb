@@ -27,37 +27,34 @@ if Signal.list.key?("QUIT") && RUBY_ENGINE != "jruby"
   trap(:QUIT) { quit = true }
 end
 
-if Gem.win_platform?
-  # If we're on windows, we're going to start up a TCP server. The 0 here means
-  # to bind to some available port.
-  server = TCPServer.new("127.0.0.1", 0)
-  address = server.local_address
+connection_information =
+  if Gem.win_platform?
+    # If we're on windows, we're going to start up a TCP server. The 0 here means
+    # to bind to some available port.
+    server = TCPServer.new("0.0.0.0", 0)
+    address = server.local_address
 
-  # Ensure that we close the server when this process exits.
-  at_exit { server.close }
+    # Ensure that we close the server when this process exits.
+    at_exit { server.close }
 
-  File.write(
-    connection_filepath,
-    JSON.fast_generate(address: address.ip_address, port: address.ip_port)
-  )
-else
-  # If we're not on windows, then we're going to assume we can use unix socket
-  # files (since they're faster than a TCP server).
-  filepath = "/tmp/prettier-ruby-parser-#{Process.pid}.sock"
-  server = UNIXServer.new(filepath)
+    # Return the connection information.
+    { address: address.ip_address, port: address.ip_port }
+  else
+    # If we're not on windows, then we're going to assume we can use unix socket
+    # files (since they're faster than a TCP server).
+    filepath = "/tmp/prettier-ruby-parser-#{Process.pid}.sock"
+    server = UNIXServer.new(filepath)
 
-  # Ensure that we close the server and delete the socket file when this
-  # process exits.
-  at_exit do
-    server.close
-    File.unlink(filepath)
+    # Ensure that we close the server and delete the socket file when this
+    # process exits.
+    at_exit do
+      server.close
+      File.unlink(filepath)
+    end
+
+    # Return the connection information.
+    { path: server.local_address.unix_path }
   end
-
-  File.write(
-    connection_filepath,
-    JSON.fast_generate(path: server.local_address.unix_path)
-  )
-end
 
 # This is the actual listening thread that will be acting as our server. We have
 # to start it in another thread in order to properly trap the signals in this
@@ -161,4 +158,5 @@ listener =
     end
   end
 
+File.write(connection_filepath, JSON.fast_generate(connection_information))
 listener.join

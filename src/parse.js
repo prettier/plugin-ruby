@@ -75,26 +75,7 @@ export async function spawnServer(opts) {
   // system.
   if (process.versions.pnp) {
     if (url.fileURLToPath(new URL(".", import.meta.url)).includes(".zip")) {
-      //   serverRbPath = path.join(tmpdir, "server.rb");
-      //   const rubyFile = "server.rb";
-      //   const destDir = path.join(tmpdir, path.dirname(rubyFile));
-      //   if (!existsSync(destDir)) {
-      //     mkdirSync(destDir);
-      //   }
-      //   copyFileSync(
-      //     url.fileURLToPath(new URL(`../src/${rubyFile}`, import.meta.url)),
-      //     path.join(tmpdir, rubyFile)
-      //   );
-      //   cleanupTempFiles = () => {
-      //     const tmpFilePath = path.join(tmpdir, "server.rb");
-      //     if (existsSync(tmpFilePath)) {
-      //       unlinkSync(tmpFilePath);
-      //     }
-      //     const tempSubdir = path.join(tmpdir, path.dirname("server.rb"));
-      //     if (existsSync(tempSubdir)) {
-      //       rmdirSync(tempSubdir);
-      //     }
-      //   };
+      // TODO: wait for prettier to get support back for pnp
     }
   }
 
