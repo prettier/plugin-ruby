@@ -205,9 +205,11 @@ Refer to [this issue](https://github.com/prettier/plugin-ruby/issues/113#issueco
 
 ## Contributing
 
-Check out our [contributing guide](CONTRIBUTING.md). Bug reports and pull requests are welcome on GitHub at https://github.com/prettier/plugin-ruby.
+Thanks so much for your interest in contributing! You can contribute in many ways, including:
 
-You can support `prettier/plugin-ruby` [on OpenCollective](https://opencollective.com/prettier-ruby/contribute). Your organization's logo will show up here with a link to your website.
+* Contributing code to fix any bugs on [GitHub](https://github.com/prettier/plugin-ruby).
+* Reporting issues on [GitHub](https://github.com/prettier/plugin-ruby/issues/new).
+* Supporting `prettier/plugin-ruby` on [OpenCollective](https://opencollective.com/prettier-ruby/contribute). Your organization's logo will show up here with a link to your website.
 
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->

@@ -5,12 +5,12 @@ package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
 Gem::Specification.new do |spec|
   spec.name = "prettier"
-  spec.version = package["version"]
-  spec.authors = [package["author"]]
+  spec.version = package.fetch("version")
+  spec.authors = [package.fetch("author")]
 
-  spec.summary = package["description"]
-  spec.homepage = package["homepage"]
-  spec.license = package["license"]
+  spec.summary = package.fetch("description")
+  spec.homepage = package.fetch("homepage")
+  spec.license = package.fetch("license")
 
   spec.files =
     Dir.chdir(__dir__) do
