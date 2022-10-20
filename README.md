@@ -68,43 +68,13 @@ end
 
 ## Getting started
 
-To run `prettier` with the Ruby plugin, you're going to need [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) (version `2.7.3` or newer) and [`node`](https://nodejs.org/en/download/) (version `8.3` or newer). If you're integrating with a project that is not already using `prettier`, you should use the Ruby gem. Otherwise you can use the `npm` package directly.
+The `@prettier/plugin-ruby` plugin for `prettier` is a small wrapper around the [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree) gem that provides a Ruby formatter for `prettier`. It does this by keeping a Ruby server running in that background that `prettier` can communicate with when it needs to format a Ruby file. This means that in order to function, you will need to have both the requisite `node` and `ruby` dependencies installed. Because of this configuration, there are a couple of ways that you can get setup to use this plugin.
 
-Note that currently the editor integrations work best with the `npm` package, as most of the major editor plugins expect a `node_modules` directory. You can get them to work with the Ruby gem, but it requires manually configuring the paths.
+* If you're already using `prettier` in your project to format other files in your project and want to install this as a plugin, you can install it using `npm`.
+* If you're not using `prettier` yet in your project, then we recommend using the [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree) gem directly instead of using this plugin.
+* Note that this plugin also ships a gem named `prettier` which is a wrapper around the `prettier` CLI and includes this plugin by default, but _we no longer recommend its use_. If you're using that gem, you should migrate to using [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree) instead.
 
-This plugin currently supports formatting the following kinds of files:
-
-- All varieties of Ruby source files (e.g., `*.rb`, `*.gemspec`, `Gemfile`, etc.)
-- [RBS type language](https://github.com/ruby/rbs) files - requires having the `rbs` gem in your gem path
-- [HAML template language](https://haml.info/) files - requires having the `haml` gem in your gem path
-
-### Ruby gem
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem "prettier"
-```
-
-And then execute:
-
-```bash
-bundle
-```
-
-Or install it yourself as:
-
-```bash
-gem install prettier
-```
-
-The `rbprettier` executable is now installed and ready for use:
-
-```bash
-bundle exec rbprettier --write '**/*'
-```
-
-### `npm` package
+To run `prettier` with the Ruby plugin as an `npm` package, you're going to need [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) (version `2.7` or newer) and [`node`](https://nodejs.org/en/download/) (version `16` or newer).
 
 If you're using the `npm` CLI, then add the plugin by:
 
@@ -164,20 +134,7 @@ Sometimes you want to leave your formatting in place and have `prettier` not for
 
 ### Usage with RuboCop
 
-RuboCop and Prettier for Ruby serve different purposes, but there is overlap
-with some of RuboCop's functionality.
-
-Prettier provides a RuboCop configuration file to disable the rules which clash.
-To enable, add the following config at the top of your project's `.rubocop.yml`:
-
-#### Ruby gem
-
-```yaml
-inherit_gem:
-  prettier: rubocop.yml
-```
-
-#### `npm` package
+RuboCop and Prettier for Ruby serve different purposes, but there is overlap with some of RuboCop's functionality. Prettier provides a RuboCop configuration file to disable the rules which would clash. To enable this file, add the following configuration at the top of your project's `.rubocop.yml`:
 
 ```yaml
 inherit_from:
