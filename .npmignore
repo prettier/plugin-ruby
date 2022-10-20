@@ -5,9 +5,9 @@
 /node_modules/
 /lib/
 /pkg/
-/playground/
 /test/
 /vendor/
+/*.gem
 
 /.*
 /Gemfile*
