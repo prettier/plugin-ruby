@@ -1,5 +1,5 @@
 import { spawnSync } from "child_process";
-import { spawnServer } from "../../src/parse.js";
+import { spawnServer } from "../../src/plugin.js";
 
 // This is somewhat similar to the spawnServer function in parseSync but
 // slightly different in that it logs its information into environment variables
