@@ -70,9 +70,9 @@ end
 
 The `@prettier/plugin-ruby` plugin for `prettier` is a small wrapper around the [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree) gem that provides a Ruby formatter for `prettier`. It does this by keeping a Ruby server running in that background that `prettier` can communicate with when it needs to format a Ruby file. This means that in order to function, you will need to have both the requisite `node` and `ruby` dependencies installed. Because of this configuration, there are a couple of ways that you can get setup to use this plugin.
 
-* If you're already using `prettier` in your project to format other files in your project and want to install this as a plugin, you can install it using `npm`.
-* If you're not using `prettier` yet in your project, then we recommend using the [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree) gem directly instead of using this plugin.
-* Note that this plugin also ships a gem named `prettier` which is a wrapper around the `prettier` CLI and includes this plugin by default, but _we no longer recommend its use_. If you're using that gem, you should migrate to using [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree) instead.
+- If you're already using `prettier` in your project to format other files in your project and want to install this as a plugin, you can install it using `npm`.
+- If you're not using `prettier` yet in your project, then we recommend using the [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree) gem directly instead of using this plugin.
+- Note that this plugin also ships a gem named `prettier` which is a wrapper around the `prettier` CLI and includes this plugin by default, but _we no longer recommend its use_. If you're using that gem, you should migrate to using [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree) instead.
 
 To run `prettier` with the Ruby plugin as an `npm` package, you're going to need [`ruby`](https://www.ruby-lang.org/en/documentation/installation/) (version `2.7` or newer) and [`node`](https://nodejs.org/en/download/) (version `16` or newer).
 
@@ -164,9 +164,9 @@ Refer to [this issue](https://github.com/prettier/plugin-ruby/issues/113#issueco
 
 Thanks so much for your interest in contributing! You can contribute in many ways, including:
 
-* Contributing code to fix any bugs on [GitHub](https://github.com/prettier/plugin-ruby).
-* Reporting issues on [GitHub](https://github.com/prettier/plugin-ruby/issues/new).
-* Supporting `prettier/plugin-ruby` on [OpenCollective](https://opencollective.com/prettier-ruby/contribute). Your organization's logo will show up here with a link to your website.
+- Contributing code to fix any bugs on [GitHub](https://github.com/prettier/plugin-ruby).
+- Reporting issues on [GitHub](https://github.com/prettier/plugin-ruby/issues/new).
+- Supporting `prettier/plugin-ruby` on [OpenCollective](https://opencollective.com/prettier-ruby/contribute). Your organization's logo will show up here with a link to your website.
 
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
