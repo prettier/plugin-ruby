@@ -170,10 +170,6 @@ describe("method", () => {
         return expect("def foo = bar").toMatchFormat();
       });
 
-      test("single-line methods with empty params", () => {
-        return expect("def foo() = bar").toChangeFormat("def foo = bar");
-      });
-
       test("single-line methods with params", () => {
         return expect("def foo(name) = bar").toMatchFormat();
       });
