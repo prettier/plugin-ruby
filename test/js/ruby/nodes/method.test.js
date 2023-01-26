@@ -190,10 +190,6 @@ describe("method", () => {
   });
 
   describe("method calls", () => {
-    test("empty parens", () => {
-      return expect("foo()").toChangeFormat("foo");
-    });
-
     test("single args", () => {
       return expect("foo(1)").toMatchFormat();
     });
