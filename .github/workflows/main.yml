@@ -69,7 +69,7 @@ jobs:
   #         bundler-cache: true
   #         ruby-version: "3.1"
   #     - run: gem install syntax_tree syntax_tree-haml syntax_tree-rbs
-  #     - uses: actions/setup-node@v2
+  #     - uses: actions/setup-node@v3
   #       with:
   #         node-version: 18.x
   #         cache: yarn
@@ -100,7 +100,7 @@ jobs:
         with:
           bundler-cache: true
           ruby-version: "3.1"
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: 16.x
           cache: yarn
