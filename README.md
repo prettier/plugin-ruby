@@ -160,6 +160,12 @@ For [supported editor integrations](https://github.com/prettier/prettier/blob/ma
 
 Refer to [this issue](https://github.com/prettier/plugin-ruby/issues/113#issuecomment-783426539) if you're having difficulties.
 
+Additional options:
+
+| Options | Default | Description |
+| ----------------- | --------------------- | :-----: |
+|`rubyExecutablePath`|`"ruby"`|Allows you to configure your Ruby executable path.|
+
 ## Contributing
 
 Thanks so much for your interest in contributing! You can contribute in many ways, including:

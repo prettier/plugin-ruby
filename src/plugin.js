@@ -84,7 +84,7 @@ export async function spawnServer(opts, killOnExit = true) {
 
   const filepath = path.join(tmpdir, `prettier-ruby-parser-${process.pid}.txt`);
   const server = spawn(
-    "ruby",
+    opts.rubyExecutablePath,
     [serverFilepath, `--plugins=${getPlugins(opts).join(",")}`, filepath],
     {
       env: Object.assign({}, process.env, { LANG: getLang() }),
@@ -345,7 +345,7 @@ const plugin = {
       type: "string",
       category: "Ruby",
       default: "",
-      description: "The comma-separated list of plugins to require",
+      description: "The comma-separated list of plugins to require.",
       since: "3.1.0"
     },
     rubySingleQuote: {
@@ -355,6 +355,13 @@ const plugin = {
       description:
         "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals.",
       since: "1.0.0"
+    },
+    rubyExecutablePath: {
+      type: "string",
+      category: "Ruby",
+      default: "ruby",
+      description: "The path to the Ruby executable to use to run the formatter.",
+      since: "3.3.0"
     }
   },
   defaultOptions: {
