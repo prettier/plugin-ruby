@@ -2285,9 +2285,9 @@ prelude-ls@^1.2.1:
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
 
 prettier@>=3.0.0-alpha.6:
-  version "3.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.0.0-alpha.6.tgz#c562f9f54966aff792c6920e6a29fbffd1ae07b6"
-  integrity sha512-AdbQSZ6Oo+iy9Ekzmsgno05P1uX2vqPkjOMJqRfP8hTe+m6iDw4Nt7bPFpWZ/HYCU+3f0P5U0o2ghxQwwkLH7A==
+  version "3.0.0-alpha.10"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.0.0-alpha.10.tgz#70f3d4a5cec61c7d7cc3576da020f799d9428b44"
+  integrity sha512-/mlmcS2qsidHpkGef6WZ+N9AtYmT80+pJHvolUNsydJbJCJNj+aXtSJoK77BZ0aLMpLWxs577EN9o6JXvEMfUA==
 
 pretty-format@^29.5.0:
   version "29.5.0"
