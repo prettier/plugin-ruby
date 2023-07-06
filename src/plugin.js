@@ -65,27 +65,15 @@ function getPlugins(opts) {
 // created that will contain the connection information.
 export async function spawnServer(opts, killOnExit = true) {
   const tmpdir = os.tmpdir();
-
-  // First, get a filepath that points to the server script. If we're running
-  // under normal circumstances, we can just use a path relative to the
-  // import.meta.url value.
-  const serverURL = new URL("./server.rb", import.meta.url);
-  let serverFilepath = url.fileURLToPath(serverURL);
-
-  // If we're in a yarn Plug'n'Play environment, then the relative paths being
-  // used by the parser server are not going to work with its virtual file
-  // system. So instead we need to copy the server script to a temporary
-  // directory.
-  if (process.versions.pnp) {
-    if (url.fileURLToPath(new URL(".", import.meta.url)).includes(".zip")) {
-      // TODO: wait for prettier to get support back for pnp
-    }
-  }
-
   const filepath = path.join(tmpdir, `prettier-ruby-parser-${process.pid}.txt`);
+
   const server = spawn(
-    "ruby",
-    [serverFilepath, `--plugins=${getPlugins(opts).join(",")}`, filepath],
+    opts.rubyExecutablePath || "ruby",
+    [
+      url.fileURLToPath(new URL("./server.rb", import.meta.url)),
+      `--plugins=${getPlugins(opts).join(",")}`,
+      filepath
+    ],
     {
       env: Object.assign({}, process.env, { LANG: getLang() }),
       stdio: "ignore",
@@ -345,7 +333,7 @@ const plugin = {
       type: "string",
       category: "Ruby",
       default: "",
-      description: "The comma-separated list of plugins to require",
+      description: "The comma-separated list of plugins to require.",
       since: "3.1.0"
     },
     rubySingleQuote: {
@@ -355,6 +343,14 @@ const plugin = {
       description:
         "When double quotes are not necessary for interpolation, prefers the use of single quotes for string literals.",
       since: "1.0.0"
+    },
+    rubyExecutablePath: {
+      type: "string",
+      category: "Ruby",
+      default: "ruby",
+      description:
+        "The path to the Ruby executable to use to run the formatter.",
+      since: "3.3.0"
     }
   },
   defaultOptions: {
