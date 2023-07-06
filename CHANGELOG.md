@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [4.0.0] - 2023-07-06
+
+### Added
+
+- [#1283](https://github.com/prettier/plugin-ruby/pull/1283) - oriolgual - Use `process.execPath` instead of `"node"`.
+- [#1358](https://github.com/prettier/plugin-ruby/pull/1358) - davidalejandroaguilar - Add the `rubyExecutablePath` option.
+- [#1359](https://github.com/prettier/plugin-ruby/pull/1359) - kddnewton - Inherit stderr from the parser process in order to provide better error messages when failing to spawn parser server. This will put out missing gem errors, for example.
+
+### Changed
+
+- [#1360](https://github.com/prettier/plugin-ruby/pull/1360) - kddnewton - Require prettier v3.0.0+.
+
 ## [3.2.2] - 2022-09-20
 
 ### Changed
@@ -1267,7 +1279,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v3.2.2...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/prettier/plugin-ruby/compare/v3.2.2...v4.0.0
 [3.2.2]: https://github.com/prettier/plugin-ruby/compare/v3.2.1...v3.2.2
 [3.2.1]: https://github.com/prettier/plugin-ruby/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/prettier/plugin-ruby/compare/v3.1.2...v3.2.0
