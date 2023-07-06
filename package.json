@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/prettier/plugin-ruby#readme",
   "dependencies": {
-    "prettier": ">=3.0.0-alpha.6"
+    "prettier": ">=3.0.0"
   },
   "devDependencies": {
     "eslint": "^8.35.0",
