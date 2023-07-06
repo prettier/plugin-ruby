@@ -76,7 +76,7 @@ export async function spawnServer(opts, killOnExit = true) {
     ],
     {
       env: Object.assign({}, process.env, { LANG: getLang() }),
-      stdio: "ignore",
+      stdio: ["ignore", "ignore", "inherit"],
       detached: true
     }
   );
@@ -104,17 +104,6 @@ export async function spawnServer(opts, killOnExit = true) {
   }
 
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(
-      () => {
-        const message =
-          "Failed to get connection options from parse server in time. If this happens repeatedly, try increasing the PRETTIER_RUBY_TIMEOUT_MS environment variable beyond 10000.";
-
-        clearInterval(interval);
-        reject(new Error(message));
-      },
-      parseInt(process.env.PRETTIER_RUBY_TIMEOUT_MS || "10000", 10)
-    );
-
     const interval = setInterval(() => {
       if (fs.existsSync(filepath)) {
         const connectionJSON = fs.readFileSync(filepath).toString("utf-8");
@@ -126,8 +115,23 @@ export async function spawnServer(opts, killOnExit = true) {
 
         clearTimeout(timeout);
         clearInterval(interval);
+      } else if (server.exitCode) {
+        reject(new Error("Failed to start parse server."));
+        clearTimeout(timeout);
+        clearInterval(interval);
       }
     }, 100);
+
+    const timeout = setTimeout(
+      () => {
+        const message =
+          "Failed to get connection options from parse server in time. If this happens repeatedly, try increasing the PRETTIER_RUBY_TIMEOUT_MS environment variable beyond 10000.";
+
+        clearInterval(interval);
+        reject(new Error(message));
+      },
+      parseInt(process.env.PRETTIER_RUBY_TIMEOUT_MS || "10000", 10)
+    );
   });
 }
 
