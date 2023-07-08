@@ -140,10 +140,7 @@ if (process.env.PRETTIER_RUBY_HOST) {
   connectionOptions = JSON.parse(process.env.PRETTIER_RUBY_HOST);
 }
 
-// Formats and sends a request to the parser server. We use netcat (or something
-// like it) here since Prettier requires the results of `parse` to be
-// synchronous and Node.js does not offer a mechanism for synchronous socket
-// requests.
+// Formats and sends an asynchronous request to the parser server.
 async function parse(parser, source, opts) {
   if (!connectionOptions) {
     const spawnedServer = await spawnServer(opts);
@@ -152,10 +149,18 @@ async function parse(parser, source, opts) {
 
   return new Promise((resolve, reject) => {
     const socket = new net.Socket();
+    let chunks = "";
 
-    socket.on("error", reject);
+    socket.on("error", (error) => {
+      reject(error);
+    });
+
     socket.on("data", (data) => {
-      const response = JSON.parse(data.toString("utf-8"));
+      chunks += data.toString("utf-8");
+    });
+
+    socket.on("end", () => {
+      const response = JSON.parse(chunks);
 
       if (response.error) {
         const error = new Error(response.error);
