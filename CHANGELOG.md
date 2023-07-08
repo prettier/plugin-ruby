@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [4.0.1] - 2023-07-08
+
+### Changed
+
+- [#1363](https://github.com/prettier/plugin-ruby/pull/1363) - mscrivo, kddnewton - Ensure all data is read from socket before attempting to parse to JSON.
+
 ## [4.0.0] - 2023-07-06
 
 ### Added
@@ -1279,7 +1285,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v4.0.0...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v4.0.1...HEAD
+[4.0.1]: https://github.com/prettier/plugin-ruby/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/prettier/plugin-ruby/compare/v3.2.2...v4.0.0
 [3.2.2]: https://github.com/prettier/plugin-ruby/compare/v3.2.1...v3.2.2
 [3.2.1]: https://github.com/prettier/plugin-ruby/compare/v3.2.0...v3.2.1
