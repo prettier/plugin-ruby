@@ -97,7 +97,7 @@ gem install bundler prettier_print syntax_tree syntax_tree-haml syntax_tree-rbs
 The `prettier` executable is now installed and ready for use:
 
 ```bash
-./node_modules/.bin/prettier --write '**/*'
+./node_modules/.bin/prettier --plugin=@prettier/plugin-ruby --write '**/*'
 ```
 
 ## Configuration
