@@ -100,6 +100,17 @@ The `prettier` executable is now installed and ready for use:
 ./node_modules/.bin/prettier --plugin=@prettier/plugin-ruby --write '**/*'
 ```
 
+### Using Prettier >= 3.0
+
+You need to tell Prettier to use the plugin, add the following to your existing [prettier configuration
+file](https://prettier.io/docs/en/configuration.html).
+
+```json
+{
+  "plugins": ["@prettier/plugin-ruby"],
+}
+```
+
 ## Configuration
 
 Below are the options (from [`src/plugin.js`](src/plugin.js)) that `@prettier/plugin-ruby` currently supports:
