@@ -4,10 +4,7 @@ require "bundler/setup"
 require "json"
 require "socket"
 
-require "prettier_print"
 require "syntax_tree"
-require "syntax_tree/haml"
-require "syntax_tree/rbs"
 
 # First, require all of the plugins that the user specified.
 ARGV.shift[/^--plugins=(.*)$/, 1]
@@ -100,6 +97,7 @@ listener =
             formatter.flush
             formatter.output.join
           when "rbs"
+            require "syntax_tree/rbs"
             formatter =
               SyntaxTree::RBS::Formatter.new(
                 source,
@@ -112,6 +110,8 @@ listener =
             formatter.flush
             formatter.output.join
           when "haml"
+            require "syntax_tree/haml"
+            require "prettier_print"
             formatter =
               if defined?(SyntaxTree::Haml::Format::Formatter)
                 SyntaxTree::Haml::Format::Formatter.new(
