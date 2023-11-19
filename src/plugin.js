@@ -75,6 +75,7 @@ export async function spawnServer(opts, killOnExit = true) {
       filepath
     ],
     {
+      cwd: path.dirname(opts.filepath),
       env: Object.assign({}, process.env, { LANG: getLang() }),
       stdio: ["ignore", "ignore", "inherit"],
       detached: true
