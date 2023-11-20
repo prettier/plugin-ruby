@@ -6,6 +6,18 @@ require "socket"
 
 require "syntax_tree"
 
+# Optional dependencies
+%W[
+  syntax_tree/rbs
+  syntax_tree/haml
+  prettier_print
+].each do |dep|
+  begin
+    require dep
+  rescue LoadError
+  end
+end
+
 # First, require all of the plugins that the user specified.
 ARGV.shift[/^--plugins=(.*)$/, 1]
   .split(",")
@@ -97,7 +109,6 @@ listener =
             formatter.flush
             formatter.output.join
           when "rbs"
-            require "syntax_tree/rbs"
             formatter =
               SyntaxTree::RBS::Formatter.new(
                 source,
@@ -110,8 +121,6 @@ listener =
             formatter.flush
             formatter.output.join
           when "haml"
-            require "syntax_tree/haml"
-            require "prettier_print"
             formatter =
               if defined?(SyntaxTree::Haml::Format::Formatter)
                 SyntaxTree::Haml::Format::Formatter.new(
