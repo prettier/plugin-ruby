@@ -36,9 +36,9 @@ describe("lambda", () => {
     return expect(`command :foo, -> { ${long} }`).toChangeFormat(
       ruby(`
         command :foo,
-                -> {
+                -> do
                   ${long}
-                }
+                end
       `)
     );
   });
@@ -51,9 +51,9 @@ describe("lambda", () => {
     return expect(`command.call :foo, -> { ${long} }`).toChangeFormat(
       ruby(`
         command.call :foo,
-                     -> {
+                     -> do
                        ${long}
-                     }
+                     end
       `)
     );
   });
@@ -62,9 +62,9 @@ describe("lambda", () => {
     return expect(`command :foo, bar: -> { ${long} }`).toChangeFormat(
       ruby(`
         command :foo,
-                bar: -> {
+                bar: -> do
                   ${long}
-                }
+                end
       `)
     );
   });
@@ -79,9 +79,9 @@ describe("lambda", () => {
                   ${long},
                   a${long},
                   aa${long}
-                ) {
+                ) do
                   true
-                }
+                end
       `)
     );
   });
