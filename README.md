@@ -107,7 +107,7 @@ file](https://prettier.io/docs/en/configuration.html).
 
 ```json
 {
-  "plugins": ["@prettier/plugin-ruby"],
+  "plugins": ["@prettier/plugin-ruby"]
 }
 ```
 
