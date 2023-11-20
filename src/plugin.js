@@ -67,6 +67,8 @@ export async function spawnServer(opts, killOnExit = true) {
   const tmpdir = os.tmpdir();
   const filepath = path.join(tmpdir, `prettier-ruby-parser-${process.pid}.txt`);
 
+  const currentDir = opts.filepath || process.cwd();
+
   const server = spawn(
     opts.rubyExecutablePath || "ruby",
     [
@@ -75,7 +77,7 @@ export async function spawnServer(opts, killOnExit = true) {
       filepath
     ],
     {
-      cwd: path.dirname(opts.filepath),
+      cwd: path.dirname(currentDir),
       env: Object.assign({}, process.env, { LANG: getLang() }),
       stdio: ["ignore", "ignore", "inherit"],
       detached: true
