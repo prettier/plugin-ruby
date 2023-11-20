@@ -24,9 +24,9 @@ jobs:
         with:
           bundler-cache: true
           ruby-version: ${{ matrix.ruby }}
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 20.x
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: yarn test
@@ -41,9 +41,9 @@ jobs:
         with:
           bundler-cache: true
           ruby-version: "3.0"
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 20.x
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: yarn checkFormat
@@ -58,9 +58,9 @@ jobs:
         with:
           bundler-cache: true
           ruby-version: "3.2"
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 20.x
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: gem build -o prettier.gem
