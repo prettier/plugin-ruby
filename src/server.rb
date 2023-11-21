@@ -4,10 +4,15 @@ require "bundler/setup"
 require "json"
 require "socket"
 
-require "prettier_print"
 require "syntax_tree"
-require "syntax_tree/haml"
-require "syntax_tree/rbs"
+
+# Optional dependencies
+%W[syntax_tree/rbs syntax_tree/haml prettier_print].each do |dep|
+  begin
+    require dep
+  rescue LoadError
+  end
+end
 
 # First, require all of the plugins that the user specified.
 ARGV.shift[/^--plugins=(.*)$/, 1]
