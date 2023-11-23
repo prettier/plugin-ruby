@@ -74,7 +74,7 @@ export async function spawnServer(opts, killOnExit = true) {
   };
   const options = opts.filepath
     ? { cwd: path.dirname(opts.filepath), ...default_options }
-    : default_options; 
+    : default_options;
 
   const server = spawn(
     opts.rubyExecutablePath || "ruby",
@@ -83,7 +83,7 @@ export async function spawnServer(opts, killOnExit = true) {
       `--plugins=${getPlugins(opts).join(",")}`,
       filepath
     ],
-    options,
+    options
   );
 
   server.unref();
