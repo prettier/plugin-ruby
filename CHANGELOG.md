@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [4.0.3] - 2023-11-27
+
+### Changed
+
+- [#1406](https://github.com/prettier/plugin-ruby/pull/1406) - mikesea - Support running without the RBS or Haml plugins loaded.
+- [#1407](https://github.com/prettier/plugin-ruby/pull/1407) - hrabe - Support shimmed Ruby versions.
+
 ## [4.0.2] - 2023-07-14
 
 ### Changed
@@ -1291,7 +1298,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v4.0.2...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v4.0.3...HEAD
+[4.0.3]: https://github.com/prettier/plugin-ruby/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/prettier/plugin-ruby/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/prettier/plugin-ruby/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/prettier/plugin-ruby/compare/v3.2.2...v4.0.0
