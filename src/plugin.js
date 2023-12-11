@@ -5,6 +5,7 @@ import os from "os";
 import path from "path";
 import process from "process";
 import url from "url";
+import { resolveConfigFile } from "prettier";
 
 // In order to properly parse ruby code, we need to tell the ruby process to
 // parse using UTF-8. Unfortunately, the way that you accomplish this looks
@@ -67,14 +68,16 @@ export async function spawnServer(opts, killOnExit = true) {
   const tmpdir = os.tmpdir();
   const filepath = path.join(tmpdir, `prettier-ruby-parser-${process.pid}.txt`);
 
-  const default_options = {
+  const options = {
     env: Object.assign({}, process.env, { LANG: getLang() }),
     stdio: ["ignore", "ignore", "inherit"],
     detached: true
   };
-  const options = opts.filepath
-    ? { cwd: path.dirname(opts.filepath), ...default_options }
-    : default_options;
+
+  if (opts.filepath) {
+    const prettierConfig = await resolveConfigFile(opts.filepath);
+    options.cwd = path.dirname(prettierConfig);
+  }
 
   const server = spawn(
     opts.rubyExecutablePath || "ruby",
