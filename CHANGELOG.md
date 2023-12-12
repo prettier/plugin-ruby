@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased]
 
+## [4.0.4] - 2023-12-12
+
+### Changed
+
+- [#1413](https://github.com/prettier/plugin-ruby/pull/1413) - hrabe - Fix the cwd detection for mono-repos.
+
 ## [4.0.3] - 2023-11-27
 
 ### Changed
@@ -1298,7 +1304,8 @@ would previously result in `array[]`, but now prints properly.
 
 - Initial release 🎉
 
-[unreleased]: https://github.com/prettier/plugin-ruby/compare/v4.0.3...HEAD
+[unreleased]: https://github.com/prettier/plugin-ruby/compare/v4.0.4...HEAD
+[4.0.4]: https://github.com/prettier/plugin-ruby/compare/v4.0.3...v4.0.4
 [4.0.3]: https://github.com/prettier/plugin-ruby/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/prettier/plugin-ruby/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/prettier/plugin-ruby/compare/v4.0.0...v4.0.1
