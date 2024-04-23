@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
+  { ignores: ["/coverage/"] },
   js.configs.recommended,
   eslintConfigPrettier,
   {
@@ -15,7 +16,6 @@ export default [
     },
     rules: {
       "no-undef": "off"
-    },
-    ignores: ["/coverage/"]
+    }
   }
 ];
