@@ -91,7 +91,7 @@ yarn add --dev prettier @prettier/plugin-ruby
 You'll also need to add the necessary Ruby dependencies. You can do this by running:
 
 ```bash
-gem install bundler prettier_print syntax_tree syntax_tree-haml syntax_tree-rbs
+gem install prettier_print syntax_tree syntax_tree-haml syntax_tree-rbs
 ```
 
 The `prettier` executable is now installed and ready for use:
